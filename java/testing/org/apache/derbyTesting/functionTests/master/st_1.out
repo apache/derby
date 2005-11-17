@@ -140,6 +140,8 @@ ij> call SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('foo', 'bar');
 0 rows inserted/updated/deleted
+ij> -- backup procedures will work only in new transaction, commit the work so far.
+commit;
 ij> call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup');
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE('extinout/mybackup3', 0);

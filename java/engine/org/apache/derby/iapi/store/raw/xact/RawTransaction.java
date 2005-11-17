@@ -328,6 +328,16 @@ public abstract class RawTransaction extends Observable implements Transaction {
 														 long redoLWM) 
 		throws StandardException;
 
+	
+	/*
+	 * Try setting  the transaction to be in backup blocking state.
+	 *
+	 * @return     <tt>true</tt> if the transaction can be set to a 
+	 *             blocking state. 
+	 *             <tt>false</tt> otherwise.
+	 */
+	public abstract boolean setBackupBlockingState();
+
 }
 
 

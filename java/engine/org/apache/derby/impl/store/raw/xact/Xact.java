@@ -242,6 +242,10 @@ public class Xact extends RawTransaction implements Limit  {
     // The transaction is only allowed read operations, no log writes.
     private boolean         readOnly;
 
+	// true, if the transaction executed some operations(like unlogged
+	// operations) that block the  online backup to prevent inconsistent
+	// backup copy.
+	private boolean inBackupBlockingState;
 
 
 	/*
@@ -280,6 +284,8 @@ public class Xact extends RawTransaction implements Limit  {
 		xactFactory.setNewTransactionId((XactId)null, this);
 
 		setIdleState();
+
+		inBackupBlockingState = false; 
 
         /*
         System.out.println("Xact.constructor: readonly = " + this.readOnly +
@@ -1903,6 +1909,10 @@ public class Xact extends RawTransaction implements Limit  {
 
 		setIdleState();
 
+		// any backup blocking operations (like unlogged ops) in this 
+		// transaction are done with post commit/abort work by this time, 
+		// change the transaction to unblock the backup state.
+		setUnblockBackupState();
 		inComplete = null;
 	}
 
@@ -2308,6 +2318,27 @@ public class Xact extends RawTransaction implements Limit  {
 		postCompleteMode = true;
 	}
 
+	/*
+	 * Try setting the transaction to be in backup blocking state.
+	 */
+	public boolean setBackupBlockingState() {
+		if (!inBackupBlockingState)
+			inBackupBlockingState = 
+                xactFactory.canStartBackupBlockingOperation();
+
+		return inBackupBlockingState;
+	}
+	
+	/*
+	 * Unblock the backup, if it was blocked by some operation in 
+	 * this transaction. Unbloking is done at commit/abort of this 
+	 * transaction.
+	 */
+	private void setUnblockBackupState() {
+		if (inBackupBlockingState)
+			xactFactory.backupBlockingOperationFinished();	
+		inBackupBlockingState = false;
+	}
 
 	/*
 	** Lock escalation related

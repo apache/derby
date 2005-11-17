@@ -294,4 +294,28 @@ public interface TransactionFactory extends Corruptable {
 	  @see org.apache.derby.iapi.store.access.AccessFactory#getTransactionInfo
 	 */
 	public TransactionInfo[] getTransactionInfo();
+
+
+	/**
+	 * Checks if there any backup blocking operations are in progress and 
+	 * stops from new ones from starting until the backup is finished. 
+	 *
+	 * @param wait if <tt>true</tt>, waits for the current backup blocking 
+	 *             operation in progress to finish.
+	 * @return     <tt>true</tt> if there are no backup blocking 
+	 *             operations in progress.
+	 *             <tt>false</tt> otherwise.
+	 * @exception StandardException if interrupted or a runtime exception occurs.
+	 */
+	public boolean stopBackupBlockingOperations(boolean wait) 
+		throws StandardException ;
+
+	/**
+	 * Backup completed. Allow backup blocking operations. 
+	 */
+	public void backupFinished();
+
+													   
+
+													   
 }

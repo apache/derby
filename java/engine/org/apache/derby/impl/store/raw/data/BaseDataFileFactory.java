@@ -642,13 +642,38 @@ public final class BaseDataFileFactory
 				mode |= 
                     (ContainerHandle.MODE_UNLOGGED | 
                      ContainerHandle.MODE_CREATE_UNLOGGED);
-            }
+            } else {
 
-			// make sure everything is logged if logArchived is turn on
-			// clear all UNLOGGED flag
-			if (!inCreateNoLog && logFactory.logArchived())
-				mode &= ~(ContainerHandle.MODE_UNLOGGED |
-						  ContainerHandle.MODE_CREATE_UNLOGGED);
+				// make sure everything is logged if logArchived is turn on
+				// clear all UNLOGGED flag
+				if (logFactory.logArchived()) {
+					mode &= ~(ContainerHandle.MODE_UNLOGGED |
+							  ContainerHandle.MODE_CREATE_UNLOGGED);
+
+				} else {
+
+					// block the online backup if the container is being 
+					// opened in unlogged mode, if the backup is already 
+					// running then convert all unlogged opens to a logged ones,
+					// otherwise onlibe backup copy will be inconsistent.
+
+					if (((mode & ContainerHandle.MODE_UNLOGGED) == 
+						 ContainerHandle.MODE_UNLOGGED) || 
+						((mode & ContainerHandle.MODE_CREATE_UNLOGGED) == 
+						 ContainerHandle.MODE_CREATE_UNLOGGED))									   
+					{
+						if(!t.setBackupBlockingState()) {
+							// when a backup is in progress transaction can not
+                            // be set to backup blocking state, so convert 
+                            // unlogged opens to logged mode.
+							mode &= ~(ContainerHandle.MODE_UNLOGGED |
+									  ContainerHandle.MODE_CREATE_UNLOGGED);
+						}
+					}
+
+				}
+
+			}
 
 			// if mode is UNLOGGED but not CREATE_UNLOGGED, then force the
 			// container from cache when the transaction commits.  For

@@ -54,6 +54,8 @@ call SYSCS_UTIL.SYSCS_FREEZE_DATABASE();
 call SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE();
 call SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE();
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('foo', 'bar');
+-- backup procedures will work only in new transaction, commit the work so far.
+commit;  
 call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup');
 call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE('extinout/mybackup3', 0);
 call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE('extinout/mybackup3', 1);

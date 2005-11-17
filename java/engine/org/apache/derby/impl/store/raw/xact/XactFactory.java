@@ -97,7 +97,11 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	private boolean inCreateNoLog = false;	// creating database, no logging
 
 	private   XAResourceManager xa_resource;
-	
+
+	private Object   backupSemaphore = new Object();
+	private long     backupBlockingOperations = 0;
+	private boolean  inBackup = false;
+
 	/*
 	** Constructor
 	*/
@@ -961,4 +965,125 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
         return(xa_resource);
     }
+
+
+	/**
+	 * Checks if a backup blocking operation can be started.
+	 *
+	 * @return     <tt>true</tt> if backup blocking operations can be started.
+	 *			   <tt>false</tt> otherwise.
+	 */
+	protected boolean canStartBackupBlockingOperation()
+	{
+		synchronized(backupSemaphore) {
+			// do not allow backup blocking operations, if online backup is
+			// is in progress.
+			if (inBackup) {
+				return false;
+			} else {
+				// not in online backup, allow backup blocking operations
+				backupBlockingOperations++;
+				return true;
+			}
+		}
+	}
+
+
+	/**
+	 * Mark that a backup blocking operation finished. 
+	 */
+	protected void backupBlockingOperationFinished()
+	{
+		synchronized(backupSemaphore) {
+			if (SanityManager.DEBUG)
+				SanityManager.ASSERT(backupBlockingOperations > 0, 
+                    "no backup blocking opeations in progress"); 
+			
+			backupBlockingOperations--;
+
+			if (inBackup) {
+				// wake up the online backupthread
+				backupSemaphore.notifyAll(); 
+			}
+		}
+	}
+
+	/**
+	 * Checks if there are any backup blocking operations in progress and 
+	 * stops new ones from starting until the backup is finished. 
+	 * If backup blocking operations are in progress and  <code> wait </code>
+	 * parameter value is <tt>true</tt>, then it will wait for the current 
+	 * backup blocking operations to finish. 
+	 * 
+	 * A Consistent backup can not be made if there are any backup 
+	 * blocking operations (like unlogged operations) are in progress
+	 *
+	 * @param wait if <tt>true</tt>, waits for the current backup blocking 
+	 *             operation in progress to finish.
+	 * @return     <tt>true</tt> if no backup blocking operations are in 
+     *             progress
+	 *             <tt>false</tt> otherwise.
+	 * @exception StandardException if interrupted or a runtime exception occurs
+	 */
+	public boolean stopBackupBlockingOperations(boolean wait) 
+		throws StandardException 
+	{
+		synchronized(backupSemaphore) {
+			if (wait) {
+				// set the inBackup state to true first to stop new backup
+				// blocking operation from starting.
+				inBackup= true;
+				try	{
+					// wait for backup blocking operation in progress to finish
+					while(backupBlockingOperations > 0)
+					{
+						try	{
+							backupSemaphore.wait();
+						}
+						catch (InterruptedException ie) {
+							// make sure we are not stuck in the backup state 
+                            // if we caught an interrupt exception and the 
+                            // calling thread may not have a chance to clear 
+                            // the in backup state.
+
+							inBackup = false;
+							backupSemaphore.notifyAll();
+							throw StandardException.interrupt(ie);
+						}
+					}
+				}
+				catch (RuntimeException rte) {
+					// make sure we are not stuck in backup state if we
+					// caught a run time exception and the calling thread may 
+                    // not have a chance to clear the in backup state.
+					inBackup= false;
+					backupSemaphore.notifyAll();
+					throw rte;		// rethrow run time exception
+				}
+			} else {
+				// check if any backup blocking operations that are in  progress
+				if (backupBlockingOperations == 0)
+					inBackup = true;
+			}
+		}
+
+		if (SanityManager.DEBUG)
+			SanityManager.ASSERT(backupBlockingOperations == 0 && 
+								 inBackup == true,
+								 "store is not in correct state for backup");
+		return inBackup;
+	}
+
+
+	/**
+	 * Backup completed. Allow backup blocking operations. 
+	 */
+	public void backupFinished()
+	{
+		synchronized(backupSemaphore) {
+			inBackup = false;
+			backupSemaphore.notifyAll();
+		}
+	}
+	
 }

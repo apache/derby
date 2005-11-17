@@ -478,11 +478,22 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		if (backupDirURL != null)
 			backupDir = backupDirURL;
 
+
 		// find the user transaction, it is necessary for online backup 
 		// to open the container through page cache
-		Transaction t = findUserTransaction(ContextService.getFactory().getCurrentContextManager(), 
-											AccessFactoryGlobals.USER_TRANS_NAME);
-		backup(t, new File(backupDir));
+		Transaction t = 
+            findUserTransaction(
+                ContextService.getFactory().getCurrentContextManager(), 
+                AccessFactoryGlobals.USER_TRANS_NAME);
+
+		try {
+			canStartOnlineBackup(t, true);
+			backup(t, new File(backupDir));
+		}finally {
+			// let the xactfatory know that backup is done, so that
+			// it can allow backup blocking operations. 
+			xactFactory.backupFinished();
+		}
 	}
 
 
@@ -797,6 +808,36 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		}
 	}
 
+
+	/**
+	 * Checks if the online backup can be started.
+     *
+	 * A Consistent backup can not  be made if there are any backup 
+	 * blocking operations (like unlogged operations) are in progress. 
+	 * Backup is allowed only in brand new transaction to avoid issues
+	 * like users starting a backup in the same transaction that has 
+	 * pending unlogged operations. 
+	 * 
+	 * @param wait if <tt>true</tt>, waits for  all the backup blocking 
+	 *             operation in progress to finish.
+	 * @return     <tt>true</tt> if an online backup can be made.
+	 *			   <tt>false</tt> otherwise.
+	 * @exception StandardException if the transaction that is used  
+	 *                              to start the backup is not idle.
+	 */
+	private boolean canStartOnlineBackup(Transaction t, boolean wait) 
+		throws StandardException {
+		
+		// check if the transaction is in the idle state
+		if(!t.isIdle()) {
+			// online backup can only be started in an IDLE transaction.
+			// TODO : add the exception here. 
+		}
+		
+		// check if there any backup blocking operations are in progress
+		// and stop new ones from starting until the backup is completed.
+		return xactFactory.stopBackupBlockingOperations(wait); 
+	}
 	
 	//copies the files from the backup that does not need
 	//any special handling like jars.
@@ -824,14 +865,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			{
 				if (!privCopyDirectory(fromFile, toFile)){
 					throw StandardException.newException(
-												 SQLState.UNABLE_TO_COPY_FILE_FROM_BACKUP,
-												 fromFile, toFile);
+                         SQLState.UNABLE_TO_COPY_FILE_FROM_BACKUP, 
+                         fromFile, toFile);
 				}
 			}else{
 				if (!privCopyFile(fromFile, toFile)){
 					throw StandardException.newException(
-												 SQLState.UNABLE_TO_COPY_FILE_FROM_BACKUP,
-												 fromFile, toFile);
+                         SQLState.UNABLE_TO_COPY_FILE_FROM_BACKUP,
+                         fromFile, toFile);
 				}
 			}
 		}

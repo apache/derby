@@ -1,0 +1,8 @@
+Begin Online Backup Test1
+A Transaction with Unlogged Operation Started
+BACKUP STARTED
+database shutdown properly
+Restored From the Backup
+Consistency Check is Done
+database shutdown properly
+End Online Backup Test1
