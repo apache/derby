@@ -87,6 +87,7 @@
         <pathelement path="${junit}"/>
       </classpath>
       <!--exclude name=""/-->
+	<exclude name="**/jdbc4/*"/>
       <!--include name=""/-->
     </javac>
   </target>

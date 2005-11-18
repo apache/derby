@@ -1220,7 +1220,7 @@ public class EmbedConnection implements java.sql.Connection
 	 * JDBC 2.0 - java.util.Map requires JDK 1
      *
      */
-    public final java.util.Map getTypeMap() {
+    public java.util.Map getTypeMap() {
 		// just return an immuntable empty map
 		return java.util.Collections.EMPTY_MAP;
     }

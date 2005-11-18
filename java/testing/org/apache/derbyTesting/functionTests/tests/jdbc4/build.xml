@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<project default="compile_jdbc4" basedir="../../../../../../../..">
+
+    <property file="${user.home}/ant.properties"/>
+
+    <!-- Set property lib dir -->
+    <property name="properties.dir" value="tools/ant/properties" />
+
+    <!-- Significant dirs -->
+    <property file="${properties.dir}/dirs.properties"/>
+    <property file="${properties.dir}/derbytesting.properties"/>
+
+    <!-- Compiler settings -->
+    <property file="${properties.dir}/sane${sanity}.properties"/>
+    <property file="${properties.dir}/defaultcompiler.properties"/>
+    <property file="${properties.dir}/${build.compiler}.properties"/>
+
+    <!-- Parser properties -->
+    <!--property file="${properties.dir}/parser.properties"/-->
+
+    <!-- Compile-time classpath properties files -->
+    <property file="${properties.dir}/extrapath.properties"/>
+    <property file="${properties.dir}/compilepath.properties"/>
+
+    <!-- Release and Version info -->
+    <property file="${properties.dir}/release.properties"/>
+
+    <!-- derby testing specific properties files -->
+    <property file="${ant.home}/properties/derbytesting.properties"/>
+    <property file="${user.home}/properties/derbytesting.properties"/>
+    <property name="this.dir" value="${derby.testing.functest.dir}/tests/jdbc4"/>
+
+    <target name="compile_jdbc4" if="jdk16" depends="copyfiles">
+        <javac
+            bootclasspath="${empty}"
+            nowarn="on"
+            debug="${debug}"
+            depend="${depend}"
+            deprecation="${deprecation}"
+            optimize="${optimize}"
+            proceed="${proceed}"
+            verbose="${verbose}" 
+            srcdir="${derby.testing.src.dir}"
+            destdir="${out.dir}">
+            <classpath>
+                <pathelement path="${java16compile.classpath}"/>
+            </classpath>
+            <include name="${this.dir}/*.java"/>
+        </javac>
+    </target>	
+
+    <target name="copyfiles">
+        <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/jdbc4">
+            <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbc4"
+            includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbc4/copyfiles.ant"/>
+        </copy>
+    </target>
+
+</project>

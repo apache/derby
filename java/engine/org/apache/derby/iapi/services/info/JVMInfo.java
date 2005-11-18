@@ -43,6 +43,7 @@ public abstract class JVMInfo
 	public static final int J2SE_14 = 4;
 	public static final int J2SE_142 = 5;
 	public static final int J2SE_15 = 6; // aka J2SE 5.0
+	public static final int J2SE_16 = 7; 
 
 	public static final boolean J2ME;
 
@@ -119,6 +120,10 @@ public abstract class JVMInfo
 			else if (javaVersion.equals("1.5"))
 			{
 				id = J2SE_15;
+			}
+			else if (javaVersion.equals("1.6"))
+			{
+				id = J2SE_16;
 			}
 			else
 			{

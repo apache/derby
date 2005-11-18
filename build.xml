@@ -285,10 +285,24 @@
     <antcall target="build"/>
     <ant dir="${derby.engine.dir}/loc"/>
     <antcall target="class_size_catalog"/>
+    <antcall target="compile_jdbc4_target">
+                         <param name="coj.buildscript" value="${derby.engine.dir}/impl/jdbc/build.xml"/>
+                         <param name="coj.target" value="compile_jdbc4"/>
+                  </antcall>
+
+                  <antcall target="compile_jdbc4_target">
+                         <param name="coj.buildscript" value="${derby.engine.dir}/iapi/jdbc/build.xml"/>
+                         <param name="coj.target" value="compile_jdbc4"/>
+                  </antcall>
+
+                  <antcall target="compile_jdbc4_target">
+                         <param name="coj.buildscript" value="${derby.engine.dir}/jdbc/build.xml"/>
+                         <param name="coj.target" value="compile_jdbc4"/>
+                  </antcall>
   </target>
 	 <target name="engine_169_opt" depends="engine">
-	    <ant dir="${derby.engine.src.dir}" target="engine_169_opt"/>
-	  </target>
+	 	  <ant dir="${derby.engine.src.dir}" target="engine_169_opt"/>
+	 </target>
 	
   <target name="tools" depends="engine">
     <ant dir="${derby.tools.src.dir}"/>
@@ -300,6 +314,10 @@
 
   <target name="client" depends="engine,init">
     <ant dir="${derby.client.src.dir}"/>
+    <antcall target="compile_jdbc4_target">
+    	                 <param name="coj.buildscript" value="${derby.client.src.dir}/build.xml"/>
+                         <param name="coj.target" value="compile_jdbc4"/>
+    </antcall>
   </target>
 
   <target name="build">
@@ -312,6 +330,10 @@
 
   <target name="testing" depends="demo">
     <ant dir="${derby.testing.src.dir}"/>
+    <antcall target="compile_jdbc4_target">
+          <param name="coj.buildscript" value="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbc4/build.xml"/>
+          <param name="coj.target" value="compile_jdbc4"/>
+    </antcall>
   </target>
 
 <!-- ==================================================================== -->
@@ -1314,5 +1336,27 @@
     <echo message=""/>
     <fail message="Exiting snapshot build..."/>
   </target>
+
+  <target name="compile_jdbc4_target" description="Build the JDBC4.0 elements of the derby engine" if="jdk16">
+	<!-- The optional compilation target of the jdbc4 classes begins here -->
+	<!-- Contains the ant-spawing logic -->
+	<property environment="env"/>
+
+	<condition property="antExecutable" value="ant.bat">
+		<os family="windows"/>
+	</condition>
+	<property name="antExecutable" value="ant"/>
+
+	<exec executable="${env.ANT_HOME}/bin/${antExecutable}" outputproperty="jdbc4.output">
+        	<env key="JAVA_HOME" value="${jdk16}"/>
+		<arg value="-quiet"/>
+		<arg value="-f"/>
+		<arg path="${coj.buildscript}"/>
+		<arg value="${coj.target}"/>
+	</exec>
+
+	<echo message="${jdbc4.output}"/>
+  </target>
+
 
 </project>

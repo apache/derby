@@ -41,10 +41,13 @@
       <include name="${derby.dir}/${cur.dir}/*.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredConnection.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredConnection30.java"/>
+	  <exclude name="${derby.dir}/${cur.dir}/BrokeredConnection40.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement30.java"/>
+	  <exclude name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement40.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredCallableStatement.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredCallableStatement30.java"/>
+	  <exclude name="${derby.dir}/${cur.dir}/BrokeredCallableStatement40.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredStatement.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/JDBCBoot.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/ResourceAdapter.java"/>
@@ -112,6 +115,27 @@
 	  <include name="${derby.dir}/${cur.dir}/ResourceAdapter.java"/>
     </javac>
   </target>
+
+  <target name="compile_jdbc4">
+      <javac
+          bootclasspath="${empty}"
+          nowarn="on"
+          debug="${debug}"
+          depend="${depend}"
+          deprecation="${deprecation}"
+          optimize="${optimize}"
+          proceed="${proceed}"
+          verbose="${verbose}"
+          srcdir="${derby.engine.src.dir}"
+          destdir="${out.dir}">
+          <classpath>
+              <pathelement path="${java16compile.classpath}"/>
+          </classpath>
+          <include name="${derby.dir}/${cur.dir}/BrokeredConnection40.java"/>
+          <include name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement40.java"/>
+          <include name="${derby.dir}/${cur.dir}/BrokeredCallableStatement40.java"/>
+      </javac>
+  </target> 
 
 </project>
 

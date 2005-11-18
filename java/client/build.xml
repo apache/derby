@@ -31,10 +31,8 @@
   <property file="${properties.dir}/release.properties"/>
   
 
-<!-- Targets -->
-
 <!-- compile classes  -->
-  <target name="compile">
+<target name="compile">
     <javac
       bootclasspath="${empty}"
       nowarn="on"
@@ -45,7 +43,7 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.client.src.dir}"
-      includes="org/apache/derby/**"
+      excludes="**/*40.java,**/RowId.java" 
       destdir="${out.dir}">
       <classpath>
           <pathelement path="${jce1_2_1}"/>
@@ -53,8 +51,29 @@
       </classpath>
     </javac>
 </target>
-  
 
+<target name="compile_jdbc4">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.client.src.dir}"
+      includes="**/*40.java,**/RowId.java" 
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${jce1_2_1}"/>
+        <pathelement path="${java16compile.classpath}"/>
+      </classpath>
+      <compilerarg value="-Xlint"/>
+   </javac>
+</target> 
+
+  
 <!-- default target  -->
   <target name="client" depends="compile"/>
 </project>

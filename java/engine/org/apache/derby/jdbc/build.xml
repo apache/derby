@@ -143,10 +143,27 @@
       <include name="${derby.dir}/jdbc/XATransactionState.java"/>
       <include name="${derby.dir}/jdbc/XAStatementControl.java"/>
 	  <include name="${derby.dir}/jdbc/ResourceAdapterImpl.java"/>
-
    </javac>  
-  
   </target>
+  
+  <target name="compile_jdbc4">
+    <javac
+        bootclasspath="${empty}"
+        nowarn="on"
+        debug="${debug}"
+        depend="${depend}"
+        deprecation="${deprecation}"
+        optimize="${optimize}"
+        proceed="${proceed}"
+        verbose="${verbose}"
+        srcdir="${derby.engine.src.dir}"
+        destdir="${out.dir}">
+        <classpath>
+            <pathelement path="${java16compile.classpath}"/>
+        </classpath>
+        <include name="${derby.dir}/jdbc/*40.java"/>
+    </javac>
 
+  </target> 
 </project>
 

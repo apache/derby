@@ -334,7 +334,7 @@ public class BrokeredConnection implements Connection
 		}
 	}
 
-    public final java.util.Map getTypeMap() throws SQLException
+    public java.util.Map getTypeMap() throws SQLException
 	{
 		try
 		{

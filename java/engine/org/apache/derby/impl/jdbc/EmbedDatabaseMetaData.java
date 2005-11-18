@@ -83,7 +83,7 @@ import java.io.InputStream;
  *
  * @author ames
  */
-public final class EmbedDatabaseMetaData extends ConnectionChild 
+public class EmbedDatabaseMetaData extends ConnectionChild 
 	implements DatabaseMetaData, java.security.PrivilegedAction {
 
 	/*

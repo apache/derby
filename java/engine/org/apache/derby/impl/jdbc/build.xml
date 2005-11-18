@@ -39,6 +39,8 @@
 	  <exclude name="${derby.dir}/impl/jdbc/*169.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*20.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*30.java"/>
+	  <exclude name="${derby.dir}/impl/jdbc/*40.java"/>
+          <exclude name="${derby.dir}/impl/jdbc/EmbedRowId.java"/>
    </javac>
     <copy file="metadata.properties" tofile="${out.dir}/org/apache/derby/impl/jdbc/metadata.properties"/>
     <javac
@@ -134,5 +136,24 @@
     </javac>
   </target>
 
+<target name="compile_jdbc4">
+    <javac
+        bootclasspath="${empty}"
+        nowarn="on"
+        debug="${debug}"
+        depend="${depend}"
+        deprecation="${deprecation}"
+        optimize="${optimize}"
+        proceed="${proceed}"
+        verbose="${verbose}"
+        srcdir="${derby.engine.src.dir};${derby.engine.src.dir}"
+        destdir="${out.dir}">
+        <classpath>
+            <pathelement path="${java16compile.classpath}"/>
+        </classpath>
+        <include name="${derby.dir}/impl/jdbc/*40.java"/>
+        <include name="${derby.dir}/impl/jdbc/EmbedRowId.java"/>
+    </javac>
+</target> 
 </project>
 
