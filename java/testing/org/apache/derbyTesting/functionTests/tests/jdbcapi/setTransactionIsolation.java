@@ -231,7 +231,7 @@ public class setTransactionIsolation{
 					if (rs != null)
 					{
 						rs.next();
-						ResultSet lockrs = stmt.executeQuery("Select * from new LockTable() l where l.tableType <> 'S'");
+						ResultSet lockrs = stmt.executeQuery("Select * from SYSCS_DIAG.LOCK_TABLE l where l.tableType <> 'S'");
 						JDBCDisplayUtil.DisplayResults(System.out,lockrs,con);
 						lockrs.close();
 						rs.close();

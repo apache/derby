@@ -764,7 +764,7 @@ public class checkDataSource
 	}
 	private static void checkLocks(Connection conn) throws SQLException {
 		Statement s = conn.createStatement();
-		ResultSet rs = s.executeQuery("SELECT XID, sum(cast (LOCKCOUNT AS INT)) FROM new org.apache.derby.diag.LockTable() AS L GROUP BY XID");
+		ResultSet rs = s.executeQuery("SELECT XID, sum(cast (LOCKCOUNT AS INT)) FROM SYSCS_DIAG.LOCK_TABLE AS L GROUP BY XID");
 		System.out.println("LOCK TABLE");
 
         // Don't output actual XID's as they tend for every catalog change

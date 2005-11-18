@@ -309,14 +309,14 @@ public abstract class BaseTest
         //     state,
         //     status
         // from
-        //     new org.apache.derby.diag.LockTable() l  
-        // right outer join new org.apache.derby.diag.TransactionTable() t
+        //     SYSCS_DIAG.LOCK_TABLE l  
+        // right outer join SYSCS_DIAG.TRANSACTION_TABLE t
         //     on l.xid = t.xid where l.tableType <> 'S' and 
         //        t.type='UserTransaction'
         // order by
         //     tabname, type desc, mode, cnt, lockname;
         String lock_query = 
-            "select cast(l.xid as char(8)) as xid, cast(username as char(8)) as username, cast(t.type as char(8)) as trantype, cast(l.type as char(8)) as type, cast(lockcount as char(3)) as cnt, cast(mode as char(4)) as mode, cast(tablename as char(12)) as tabname, cast(lockname as char(10)) as lockname, state, status from new org.apache.derby.diag.LockTable() l right outer join new org.apache.derby.diag.TransactionTable() t on l.xid = t.xid where l.tableType <> 'S' ";
+            "select cast(l.xid as char(8)) as xid, cast(username as char(8)) as username, cast(t.type as char(8)) as trantype, cast(l.type as char(8)) as type, cast(lockcount as char(3)) as cnt, cast(mode as char(4)) as mode, cast(tablename as char(12)) as tabname, cast(lockname as char(10)) as lockname, state, status from SYSCS_DIAG.LOCK_TABLE l right outer join SYSCS_DIAG.LOCK_TABLE t on l.xid = t.xid where l.tableType <> 'S' ";
         if (!include_system_locks)
             lock_query += "and t.type='UserTransaction' ";
         

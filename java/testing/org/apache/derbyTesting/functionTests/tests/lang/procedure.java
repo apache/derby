@@ -641,7 +641,7 @@ public class procedure
 
 		conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 		System.out.println("auto commit is " + conn.getAutoCommit());
-		PreparedStatement psLocks = conn2.prepareStatement("select count(*) from new org.apache.derby.diag.LockTable() AS LT");
+		PreparedStatement psLocks = conn2.prepareStatement("select count(*) from SYSCS_DIAG.LOCK_TABLE AS LT");
 
 		showLocks(psLocks, "lock count before execution ");
 

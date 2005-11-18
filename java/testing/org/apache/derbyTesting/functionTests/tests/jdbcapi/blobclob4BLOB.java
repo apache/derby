@@ -2571,7 +2571,7 @@ public class blobclob4BLOB {
             System.out.println("\nLock table\n----------------------------------------");
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(
-                "select xid,type,lockcount,mode,tablename,lockname,state from new LockTable() t where t.tableType <> 'S'");
+                "select xid,type,lockcount,mode,tablename,lockname,state from SYSCS_DIAG.LOCK_TABLE t where t.tableType <> 'S'");
             while (rs.next())
             {
                 String xid = rs.getString("xid");

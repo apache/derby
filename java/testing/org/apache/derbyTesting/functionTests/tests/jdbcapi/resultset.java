@@ -918,7 +918,7 @@ public class resultset {
 	private static void showLocks() throws Exception {
 		System.out.println("  LOCK TABLE");
 		Connection con2 = ij.startJBMS();
-		PreparedStatement ps2 = con2.prepareStatement("select XID, count(*) from new org.apache.derby.diag.LockTable() as L group by XID");
+		PreparedStatement ps2 = con2.prepareStatement("select XID, count(*) from SYSCS_DIAG.LOCK_TABLE as L group by XID");
 		ResultSet rs2 = ps2.executeQuery();
 
 		while (rs2.next()) {
