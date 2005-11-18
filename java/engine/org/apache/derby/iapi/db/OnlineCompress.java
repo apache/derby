@@ -291,10 +291,16 @@ public class OnlineCompress
                     schemaName + "." + tableName);
             }
 
-            /* Skip views */
-            if (td.getTableType() == TableDescriptor.VIEW_TYPE)
+            switch (td.getTableType())
             {
-                return;
+            /* Skip views and vti tables */
+            case TableDescriptor.VIEW_TYPE:
+            case TableDescriptor.VTI_TYPE:
+            	return;
+            // other types give various errors here
+            // DERBY-719,DERBY-720
+            default:
+            	break;
             }
 
 
@@ -476,9 +482,16 @@ public class OnlineCompress
                 schemaName + "." + tableName);
         }
 
-        /* Skip views */
-        if (td.getTableType() != TableDescriptor.VIEW_TYPE)
+        switch (td.getTableType())
         {
+        /* Skip views and vti tables */
+        case TableDescriptor.VIEW_TYPE:
+        case TableDescriptor.VTI_TYPE:
+        	break;
+        // other types give various errors here
+        // DERBY-719,DERBY-720
+        default:
+          {
 
             ConglomerateDescriptor[] conglom_descriptors = 
                 td.getConglomerateDescriptors();
@@ -489,6 +502,7 @@ public class OnlineCompress
 
                 tc.purgeConglomerate(cd.getConglomerateNumber());
             }
+          }
         }
 
         return;
@@ -527,10 +541,17 @@ public class OnlineCompress
                 schemaName + "." + tableName);
         }
 
-        /* Skip views */
-        if (td.getTableType() != TableDescriptor.VIEW_TYPE)
+        switch (td.getTableType())
         {
-            ConglomerateDescriptor[] conglom_descriptors = 
+        /* Skip views and vti tables */
+        case TableDescriptor.VIEW_TYPE:
+        case TableDescriptor.VTI_TYPE:
+        	break;
+        // other types give various errors here
+        // DERBY-719,DERBY-720
+        default:
+          {
+          ConglomerateDescriptor[] conglom_descriptors = 
                 td.getConglomerateDescriptors();
 
             for (int cd_idx = 0; cd_idx < conglom_descriptors.length; cd_idx++)
@@ -539,6 +560,7 @@ public class OnlineCompress
 
                 tc.compressConglomerate(cd.getConglomerateNumber());
             }
+          }
         }
 
         return;

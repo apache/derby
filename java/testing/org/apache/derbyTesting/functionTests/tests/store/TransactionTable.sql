@@ -144,6 +144,9 @@ update syscs_diag.transaction_table set xid = NULL;
 delete from syscs_diag.transaction_table where 1 = 1;
 insert into syscs_diag.transaction_table(xid) values('bad');
 
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SYSCS_DIAG', 'TRANSACTION_TABLE', 1);
+call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SYSCS_DIAG', 'TRANSACTION_TABLE', 1, 1, 1);
+
 -- ensure the old syntax still works until it is deprecated
 select xid from new org.apache.derby.diag.TransactionTable() AS t where 1 = 0;
 update new org.apache.derby.diag.TransactionTable() set xid = NULL;
