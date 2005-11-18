@@ -53,9 +53,7 @@ import org.apache.derby.vti.VTIEnvironment;
 	the database.
 	
 	This virtual table can be invoked by calling it directly
-	<PRE> select * from new org.apache.derby.diag.LockTable() t; </PRE>
-	or through the system alias LOCKTABLE
-	<PRE> select * from new LOCKTABLE() t; </PRE> 
+	<PRE> select * from SYSCS_DIAG.LOCK_TABLE </PRE>
 	
 	<P>The LockTable virtual table takes a snap shot of the lock table while
 	the system is in flux, so it is possible that some locks may be in

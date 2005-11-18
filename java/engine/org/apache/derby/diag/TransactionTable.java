@@ -50,9 +50,7 @@ import java.sql.Types;
 	
 	This virtual table can be invoked by calling it
 	directly
-	<PRE> select * from new org.apache.derby.diag.TransactionTable() t; </PRE>
-	or through the system alias TransactionTable
-	<PRE> select * from new TRANSACTIONTABLE() t; </PRE> 
+	<PRE> select * from SYSCS_DIAG.TRANSACTION_TABLE </PRE>
 
 	<P>The TransactionTable virtual table takes a snap shot of the 
 	transaction table while the system is in flux, so it is possible that some

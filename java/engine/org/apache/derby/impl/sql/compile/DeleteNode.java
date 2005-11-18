@@ -154,7 +154,7 @@ public class DeleteNode extends DMLModStatementNode
 		CurrentRowLocationNode		rowLocationNode;
 		TableName					cursorTargetTableName = null;
 		CurrentOfNode       		currentOfNode = null;
-
+		
                 DataDictionary dataDictionary = getDataDictionary();
 		super.bindTables(dataDictionary);
 
@@ -211,12 +211,11 @@ public class DeleteNode extends DMLModStatementNode
 				}
 			}
 
-			/* descriptor must exist, tables already bound.
-			 * No need to do this for VTI as VTI was bound in
-			 * super.bindTables() above.
-			 */
-			verifyTargetTable();
+
 		}
+		
+		// descriptor must exist, tables already bound.
+		verifyTargetTable();
 
 		/* Generate a select list for the ResultSetNode - CurrentRowLocation(). */
 		if (SanityManager.DEBUG)

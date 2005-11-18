@@ -231,5 +231,24 @@ order by lockname, mode, cnt, state;
 TYPE |CNT  |MODE|TABLENAME                                                                                                                       |LOCKNAME            |STATE
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij(C1)> commit;
+ij(C1)> -- ensure the system vti can not be modified.
+drop table syscs_diag.transaction_table;
+ERROR X0Y56: 'DROP TABLE' is not allowed on the System table 'SYSCS_DIAG.TRANSACTION_TABLE'.
+ij(C1)> alter table syscs_diag.transaction_table add column x int;
+ERROR 42X62: 'ALTER TABLE' is not allowed in the 'SYSCS_DIAG' schema.
+ij(C1)> update syscs_diag.transaction_table set xid = NULL;
+ERROR 42Y25: 'SYSCS_DIAG.TRANSACTION_TABLE' is a system table.  Users are not allowed to modify the contents of this table.
+ij(C1)> delete from syscs_diag.transaction_table where 1 = 1;
+ERROR 42Y25: 'SYSCS_DIAG.TRANSACTION_TABLE' is a system table.  Users are not allowed to modify the contents of this table.
+ij(C1)> insert into syscs_diag.transaction_table(xid) values('bad');
+ERROR 42Y25: 'SYSCS_DIAG.TRANSACTION_TABLE' is a system table.  Users are not allowed to modify the contents of this table.
+ij(C1)> -- ensure the old syntax still works until it is deprecated
+select xid from new org.apache.derby.diag.TransactionTable() AS t where 1 = 0;
+XID            
+---------------
+ij(C1)> update new org.apache.derby.diag.TransactionTable() set xid = NULL;
+ERROR 42X08: The constructor for class 'org.apache.derby.diag.TransactionTable' cannot be used as an external virtual table because the class does not implement 'java.sql.PreparedStatement'. 
+ij(C1)> delete from new org.apache.derby.diag.TransactionTable() where 1 = 0;
+ERROR 42X08: The constructor for class 'org.apache.derby.diag.TransactionTable' cannot be used as an external virtual table because the class does not implement 'java.sql.PreparedStatement'. 
 ij(C1)> disconnect;
 ij> 

@@ -269,14 +269,13 @@ public final class UpdateNode extends DMLModStatementNode
 						currentOfNode.getCursorName());
 				}
 			}
-
-			// because we verified that the tables match
-			// and we already bound the cursor or the select,
-			// the table descriptor should always be found.
-			verifyTargetTable();
 		}
-
-
+		
+		// because we verified that the tables match
+		// and we already bound the cursor or the select,
+		// the table descriptor should always be found.
+		verifyTargetTable();
+		
 		/* OVERVIEW - We generate a new ResultColumn, CurrentRowLocation(), and
 		 * prepend it to the beginning of the source ResultColumnList.  This
 		 * will tell us which row(s) to update at execution time.  However,

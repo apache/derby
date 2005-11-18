@@ -137,6 +137,18 @@ from   syscs_diag.lock_table l right outer join syscs_diag.transaction_table t
 order by lockname, mode, cnt, state;
 
 commit;
+-- ensure the system vti can not be modified.
+drop table syscs_diag.transaction_table;
+alter table syscs_diag.transaction_table add column x int;
+update syscs_diag.transaction_table set xid = NULL;
+delete from syscs_diag.transaction_table where 1 = 1;
+insert into syscs_diag.transaction_table(xid) values('bad');
+
+-- ensure the old syntax still works until it is deprecated
+select xid from new org.apache.derby.diag.TransactionTable() AS t where 1 = 0;
+update new org.apache.derby.diag.TransactionTable() set xid = NULL;
+delete from new org.apache.derby.diag.TransactionTable() where 1 = 0;
+
 disconnect;
 
 
