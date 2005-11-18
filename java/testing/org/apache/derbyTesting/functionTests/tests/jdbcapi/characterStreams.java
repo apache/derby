@@ -222,6 +222,8 @@ public class characterStreams {
 		checkCharacterStreams(psDel, psi, psq2, 25, 19332, 18733,colType);
 		checkCharacterStreams(psDel, psi, psq2, 1, 32433, 32673,colType);
 		checkCharacterStreams(psDel, psi, psq2, 0, 32532, 32700,colType);
+		
+		rs.close();
 	}
 
 	private static int getMaxId(Connection conn) throws SQLException {
