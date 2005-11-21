@@ -329,6 +329,17 @@ prepare c1 as 'SELECT DISTINCT nb.name AS name, nb.summary AS summary
 execute c1 using 'values(''lusername1'', ''lusername2'', ''lname1'')';
 rollback;
 
+create table td (x int);
+insert into td values (1);
+insert into td values (1);
+insert into td values (2);
+
+-- distinct in subquery where the store does not perform the sort.
+select * from td, (select distinct 1 from td) as sub(x);
+
+-- get the storage system to do the sort.
+select * from td, (select distinct x from td) as sub(x);
+
 -- Tests for DERBY-504 (select distinct from a subquery)
 
 create table names (id int, name varchar(10), age int);

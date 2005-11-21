@@ -2477,6 +2477,31 @@ NAME                                                                            
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 name1                                                                                                                           |sum2                                                                                                                            
 ij> rollback;
+ij> create table td (x int);
+0 rows inserted/updated/deleted
+ij> insert into td values (1);
+1 row inserted/updated/deleted
+ij> insert into td values (1);
+1 row inserted/updated/deleted
+ij> insert into td values (2);
+1 row inserted/updated/deleted
+ij> -- distinct in subquery where the store does not perform the sort.
+select * from td, (select distinct 1 from td) as sub(x);
+X          |X          
+-----------------------
+1          |1          
+1          |1          
+2          |1          
+ij> -- get the storage system to do the sort.
+select * from td, (select distinct x from td) as sub(x);
+X          |X          
+-----------------------
+1          |2          
+1          |1          
+1          |2          
+1          |1          
+2          |2          
+2          |1          
 ij> -- Tests for DERBY-504 (select distinct from a subquery)
 create table names (id int, name varchar(10), age int);
 0 rows inserted/updated/deleted
