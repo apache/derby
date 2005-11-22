@@ -38,6 +38,7 @@ import java.sql.Timestamp;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  * Test of scroll cursors.
@@ -47,6 +48,8 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 
 public class scrollCursors2 { 
 
+        private static boolean isDerbyNetClient = false;
+    
 	public static void main(String[] args) {
 		boolean		passed = true;
 		Connection	conn = null;
@@ -56,6 +59,7 @@ public class scrollCursors2 {
 		try {
 			System.out.println("Test scrollCurors2 starting");
 
+                        isDerbyNetClient = TestUtil.isDerbyNetClientFramework();
 			// use the ij utility to read the property file and
 			// make the initial connection.
 			ij.getPropertyArg(args);
@@ -85,8 +89,16 @@ public class scrollCursors2 {
 
 			// tests for PreparedStatement.getMetaData()
 			passed = passed && getMetaDataTests(conn);
-			
-
+                        
+                        // test scrollable with different maxRows and fetchSize
+                        passed = passed && scrollVerifyMaxRowWithFetchSize(conn, 10, 10);
+                        passed = passed && scrollVerifyMaxRowWithFetchSize(conn, 10, 5);
+                        passed = passed && scrollVerifyMaxRowWithFetchSize(conn, 10, 0);
+                        passed = passed && scrollVerifyMaxRowWithFetchSize(conn, 0, 0);
+                        passed = passed && scrollVerifyMaxRowWithFetchSize(conn, 0, 5);
+                        passed = passed && scrollVerifyMaxRowWithFetchSize(conn, 0, 10);
+                        passed = passed && scrollVerifyMaxRowWithFetchSize(conn, 0, 15);
+                        
 		} 
 		catch (SQLException se) 
 		{
@@ -199,7 +211,11 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ063");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ063");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
 		}
 		// Verify maxRows still 0
 		if (s_f_r.getMaxRows() != 0)
@@ -233,7 +249,12 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ061");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ061");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
+
 		}
 		try
 		{
@@ -245,7 +266,12 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ061");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ061");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
+
 		}
 		try
 		{
@@ -257,7 +283,12 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ061");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ061");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
+
 		}
 		try
 		{
@@ -269,7 +300,12 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ061");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ061");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
+
 		}
 		try
 		{
@@ -281,7 +317,11 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ061");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ061");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
 		}
 		try
 		{
@@ -293,7 +333,11 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ061");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ061");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
 		}
 		try
 		{
@@ -305,7 +349,11 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ061");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ061");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
 		}
 		try
 		{
@@ -317,7 +365,11 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ061");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ061");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
 		}
 
 		// setFetchDirection should fail
@@ -331,16 +383,24 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ061");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ061");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
 		}
 
 		/* Book says that getFetchDirection(), getFetchSize() and
 		 * setFetchSize() are all okay.
 		 */
-		if (rs.getFetchSize() != 1)
+		if ((rs.getFetchSize() != 1 && !isDerbyNetClient) || (rs.getFetchSize() != 0 && isDerbyNetClient))
 	 	{
-			System.out.println("getFetchSize() expected to return 1");
-			passed = false;
+                        if (!isDerbyNetClient) {
+                            System.out.println("getFetchSize() expected to return 1");
+                        } else {
+                            System.out.println("getFetchSize() expected to return 0");
+                        }
+                        passed = false;
 		}
 		rs.setFetchSize(5);
 		if (rs.getFetchSize() != 5)
@@ -398,7 +458,12 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ061");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ061");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
+
 		}
 		rs.close();
 		ps_f_r.close();
@@ -716,10 +781,17 @@ public class scrollCursors2 {
 		}
 
 		// get/setFetchSize()
-		if (rs.getFetchSize() != 1)
+		if (
+                        (rs.getFetchSize() != 1 && !isDerbyNetClient) || 
+                        (rs.getFetchSize() != 64 && isDerbyNetClient))
 		{
-			System.out.println(
-				"getFetchSize() expected to return 1, not " + rs.getFetchSize());
+                        if (!isDerbyNetClient) {
+                            System.out.println(
+                                    "getFetchSize() expected to return 1, not " + rs.getFetchSize());
+                        } else {
+                            System.out.println(
+                                    "getFetchSize() expected to return 64, not " + rs.getFetchSize());
+                        }
 			passed = false;
 		}
 		rs.setFetchSize(5);
@@ -730,14 +802,22 @@ public class scrollCursors2 {
 			passed = false;
 		}
 		// setFetchSize() to 0 should have no effect.
+                // for client server, fetchSize should have to 64
 		rs.setFetchSize(0);
-		if (rs.getFetchSize() != 5)
+		if (
+                        (rs.getFetchSize() != 5 && !isDerbyNetClient) || 
+                        (rs.getFetchSize() != 64 && isDerbyNetClient))
 		{
-			System.out.println(
+                        if (!isDerbyNetClient) {
+                            System.out.println(
 				"getFetchSize() expected to return 5, not " + rs.getFetchSize());
+                        } else {
+                            System.out.println(
+				"getFetchSize() expected to return 64, not " + rs.getFetchSize());
+                        }
+
 			passed = false;
 		}
-
 		// done
 		rs.close();
 
@@ -841,7 +921,7 @@ public class scrollCursors2 {
 		{
 			System.out.println("rs.last() failed.");
 			passed = false;
-		}
+		} 
 		// Iterate backwards thru RS, expect only 4 more (5 total) rows.
 		for (int index = 1; index < 5; index++)
 		{
@@ -851,7 +931,7 @@ public class scrollCursors2 {
 				passed = false;
 				break;
 			}
-		}
+		} 
 		// We should not see another row (only 5, not 6)
 		if (rs.previous())
 		{
@@ -954,7 +1034,12 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ063");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ063");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
+
 		}
 		// Verify maxRows still 0
 		if (s_i_r.getMaxRows() != 0)
@@ -1049,7 +1134,12 @@ public class scrollCursors2 {
 		catch (SQLException sqle)
 		{
 			/* Check to be sure the exception is the one we expect */
-			passed = passed && checkException(sqle, "XJ062");
+                        if (!isDerbyNetClient) {
+                            passed = passed && checkException(sqle, "XJ062");
+                        } else {
+                            System.out.println(sqle.getMessage());
+                        }
+
 		}
 
 		s_i_r.close();
@@ -1269,6 +1359,214 @@ public class scrollCursors2 {
 		return passed;
 	}
 
+        
+	/**
+ 	 * Tests for maxRow and fetchSize with scrollable cursors
+	 *
+	 * @param conn	The connection to use.
+         * @param maxRows The maxRows value to use
+         * @param fetchSize The fetchSize value to use
+	 *
+	 * @return	Whether or not we were successful.
+	 *
+	 * @exception SQLException	Thrown if some unexpected error happens
+	 */
+        private static boolean scrollVerifyMaxRowWithFetchSize(Connection conn, int maxRows, int fetchSize) {
+            ResultSet rs;
+            boolean passed = true;
+            Statement	s_i_r = null;
+
+            try {
+                s_i_r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                        ResultSet.CONCUR_READ_ONLY);
+                s_i_r.setMaxRows(maxRows);
+
+                // Execute query
+                rs = s_i_r.executeQuery("values 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15");
+                rs.setFetchSize(fetchSize);
+
+                // this should not affect the ResultSet because
+                s_i_r.setMaxRows(2);
+                if (maxRows == 0)
+                    maxRows = 15;
+
+                if (rs == null)
+                {
+                        System.out.println("rs expected to be non-null.");
+                        passed = false;
+                }
+                // Start from before first
+                // Iterate straight thru RS, expect only maxRows rows.
+                for (int index = 1; index < maxRows + 1; index++)
+                {
+                        if (! rs.next())
+                        {
+                                System.out.println("rs.next() failed, index = " + index);
+                                passed = false;
+                                break;
+                        } else {
+                                if (index != rs.getInt(1)) {
+                                    System.out.println("Expected: " + index + 
+                                            " not: " + rs.getInt(1));
+                                }
+                        }
+                }
+                // We should not see another row (only maxRows, not total)
+                if (rs.next())
+                {
+                        System.out.println("Error with maxRows = " + maxRows + 
+                                " and fetchSize = " + fetchSize + "\n" + 
+                                "rs.next() failed, should not have seen " + 
+                                (maxRows + 1) + "th row.");
+                        passed = false;
+                }
+
+                // Start from first and verify maxRows
+                if (!rs.first())
+                {
+                        System.out.println("rs.first() failed.");
+                        passed = false;
+                } 
+                // Iterate forward thru RS, expect only (maxRows - 1) more rows.
+                for (int index = 1; index < maxRows; index++)
+                {
+                        if (! rs.next())
+                        {
+                                System.out.println("rs.previous() failed, index = " + 
+                                        index);
+                                passed = false;
+                                break;
+                        } else {
+                                if ((index + 1) != rs.getInt(1))
+                                    System.out.println("Error with maxRows = " + 
+                                            maxRows + " and fetchSize = " + 
+                                            fetchSize + "\n" + "Error with maxRows = " + 
+                                            maxRows + " and fetchSize = " + fetchSize + 
+                                            "\n" + "Expected: " + (index + 1) + 
+                                            " not: " + rs.getInt(1));
+                        }
+                } 
+                // We should not see another row (only maxRows, not total)
+                if (rs.next())
+                {
+                        System.out.println("Error with maxRows = " + maxRows + 
+                                " and fetchSize = " + fetchSize + "\n" + 
+                                "rs.next() failed, should not have seen " + 
+                                (maxRows + 1) + "th row.");
+                        passed = false;
+                }
+
+                // Start from afterLast and verify maxRows
+                rs.afterLast();
+                // Iterate backwards thru RS, expect only (maxRows - 1) rows.
+                for (int index = 1; index < maxRows + 1; index++)
+                {
+                        if (! rs.previous())
+                        {
+                                System.out.println("rs.previous() failed, index = " + 
+                                        index);
+                                passed = false;
+                                break;
+                        } else {
+                                if (((maxRows - index) + 1) != rs.getInt(1)) {
+                                    System.out.println("Error with maxRows = " + maxRows + 
+                                            " and fetchSize = " + fetchSize + "\n" + 
+                                            "Expected: " + ((maxRows - index) + 1) + 
+                                            " not: " + rs.getInt(1));
+                                }
+                        }
+                }
+                // We should not see another row (only maxRows, not total)
+                if (rs.previous())
+                {
+                        System.out.println("Error with maxRows = " + maxRows + 
+                                " and fetchSize = " + fetchSize + "\n" + 
+                                "rs.previous() failed, should not have seen " + 
+                                (maxRows + 1) + "th row.");
+                        passed = false;
+                }
+
+                // Start from last and verify maxRows
+                if (!rs.last())
+                {
+                        System.out.println("rs.last() failed.");
+                        passed = false;
+                } 
+                // Iterate backwards thru RS, expect only (maxRows - 1) more rows.
+                for (int index = 1; index < maxRows; index++)
+                {
+                        if (! rs.previous())
+                        {
+                                System.out.println("rs.previous() failed, index = " + 
+                                        index);
+                                passed = false;
+                                break;
+                        } else {
+                                if ((maxRows - index) != rs.getInt(1)) {
+                                    System.out.println("Error with maxRows = " + maxRows + 
+                                            " and fetchSize = " + fetchSize + "\n" + 
+                                            "Expected: " + (maxRows - index) + " not: " + 
+                                            rs.getInt(1));
+                                }
+                        }
+                } 
+                // We should not see another row (only 5, not 6)
+                if (rs.previous())
+                {
+                        System.out.println("Error with maxRows = " + maxRows + 
+                                " and fetchSize = " + fetchSize + "\n" + 
+                                "rs.previous() failed, should not have seen " + 
+                                (maxRows + 1) + "th row.");
+                        passed = false;
+                }
+
+                rs.last();
+                int rows = rs.getRow();
+                
+                rs.absolute(rows/2);
+                if (rs.relative(-1 * (rows))) {
+                    System.out.println("relative(" + -1 * (rows) + ") should return false, position outside of the resultSet");
+                    
+                }
+                if (!rs.isBeforeFirst()) {
+                    System.out.println("isBeforeFirst should be true");
+                }
+
+                rs.absolute(rows/2);
+                if (rs.relative(rows)) {
+                    System.out.println("relative(" + (rows) + ") should return false, position outside of the resultSet");
+                }
+                if (!rs.isAfterLast()) {
+                    System.out.println("isAfterLast should be true");
+                }
+                rs.absolute(rows/2);
+                if (rs.absolute(rows + 1)) {
+                    System.out.println("absolute(" + (rows + 1) + ") should return false, position outside of the resultSet");
+                    System.out.println("Current row: " + rs.getInt(1));
+                }
+                if (!rs.isAfterLast()) {
+                    System.out.println("isAfterLast should be true");
+                }
+                rs.absolute(rows/2);
+                if (rs.absolute((-1) * (rows + 1))) {
+                    System.out.println("absolute(" + (((-1) * (rows + 1))) + ") should return false, position outside of the resultSet");
+                    System.out.println("Current row: " + rs.getInt(1));
+                }
+                if (!rs.isBeforeFirst()) {
+                    System.out.println("isBeforeFirst should be true");
+                }
+
+                rs.close();        
+            
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+
+            return passed;
+        }
+
+
+        
 	/**
 	 * Check to make sure that the given SQLException is an exception
 	 * with the expected sqlstate.

@@ -7,7 +7,7 @@
 # excluding jdbcapi/checkDataSource30.java - Client behaves differently. Need to look into this
 # excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
 lang/errorStream.java
-lang/scrollCursors2.java
+# lang/scrollCursors2.java
 jdbcapi/batchUpdate.java
 jdbcapi/statementJdbc20.java
 jdbcapi/testRelative.java

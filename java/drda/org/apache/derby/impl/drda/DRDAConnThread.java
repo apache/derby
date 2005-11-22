@@ -6179,12 +6179,23 @@ public class DRDAConnThread extends Thread {
 		{
 			if (stmt.isScrollable())
 			{
+                                //keep isAfterLast and isBeforeFirst to be able 
+                                //to reposition after counting rows
+                                boolean isAfterLast = rs.isAfterLast();
+                                boolean isBeforeFirst = rs.isBeforeFirst();
+                                
 				// for scrollable cursors - calculate the row count
 				// since we may not have gone through each row
 				rs.last();
 				stmt.rowCount  = rs.getRow();
-				//reposition after last
-				rs.afterLast();
+
+                                // reposition after last or before first
+                                if (isAfterLast) {
+                                    rs.afterLast();
+                                }
+                                if (isBeforeFirst) {
+                                    rs.beforeFirst();
+                                } 
 			}
 			else  // non-scrollable cursor
 			{
@@ -6227,15 +6238,13 @@ public class DRDAConnThread extends Thread {
 		switch (stmt.getQryscrorn())
 		{
 			case CodePoint.QRYSCRREL:
-				//we aren't on a row - go to first row
-				//JCC seems to use relative 1 to get to the first row
-				//JDBC doesn't allow you to use relative unless you are on
-				//a valid row so we cheat here.
-				if (rs.isBeforeFirst() || rs.isAfterLast())
-					retval = rs.first();
-				else
-					retval = rs.relative((int)stmt.getQryrownbr());
-				break;
+                                int rows = (int)stmt.getQryrownbr();
+                                if ((rs.isAfterLast() && rows > 0) || (rs.isBeforeFirst() && rows < 0)) {
+                                    retval = false;
+                                } else {
+                                    retval = rs.relative(rows);
+                                }
+                                break;
 			case CodePoint.QRYSCRABS:
 				// JCC uses an absolute value of 0 which is not allowed in JDBC
 				// We translate it into beforeFirst which seems to work.

@@ -184,6 +184,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
     // reposition the cursor before updating/deleting again.  This flag will be set to true
     // whenever a commit happens, and reset to false again after we repositoin the cursor.
     public boolean cursorUnpositionedOnServer_ = false;
+    
+    // Keep maxRows in the ResultSet, so that changes to maxRow in the statement
+    // do not affect the resultSet after it has been created
+    private int maxRows_;
 
     //---------------------constructors/finalizer---------------------------------
 
@@ -206,6 +210,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         fetchDirection_ = statement_.fetchDirection_;
         fetchSize_ = statement_.fetchSize_;
 
+        maxRows_ = statement_.maxRows_;
+        
         // Only set the warning if actual resultSetType returned by the server is less
         // than the application requested resultSetType.
         // TYPE_FORWARD_ONLY = 1003
@@ -289,7 +295,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 //    if (!isValidCursorPosition_ && // We've gone past the end (+100)
 //        cursor_ != null) {
             if ((!isValidCursorPosition_ && cursor_ != null) ||
-                    (statement_.maxRows_ > 0 && cursor_.rowsRead_ > statement_.maxRows_)) {
+                    (maxRows_ > 0 && cursor_.rowsRead_ > maxRows_)) {
                 isValidCursorPosition_ = false;
 
                 // if not on a valid row and the query is closed at the server.
@@ -359,8 +365,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // maxRows_ will be ignored by sensitive dynamic cursors since we don't know the rowCount
         if (!openOnClient_) {
             isValidCursorPosition_ = false;
-        } else if (sensitivity_ != sensitivity_sensitive_dynamic__ && statement_.maxRows_ > 0 &&
-                (firstRowInRowset_ + currentRowInRowset_ > statement_.maxRows_)) {
+        } else if (sensitivity_ != sensitivity_sensitive_dynamic__ && maxRows_ > 0 &&
+                (firstRowInRowset_ + currentRowInRowset_ > maxRows_)) {
             isValidCursorPosition_ = false;
         }
         return isValidCursorPosition_;
@@ -1503,7 +1509,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     (firstRowInRowset_ == currentRowInRowset_ &&
                     currentRowInRowset_ == lastRowInRowset_ &&
                     lastRowInRowset_ == 0 &&
-                    absolutePosition_ == rowCount_ + 1));
+                    absolutePosition_ == (maxRows_ == 0 ? rowCount_ + 1 : maxRows_ + 1)));
         }
     }
 
@@ -1687,9 +1693,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
             getRowCount();
         }
         long row = rowCount_;
-        if (sensitivity_ != sensitivity_sensitive_dynamic__ && statement_.maxRows_ > 0) {
-            if (rowCount_ > statement_.maxRows_) {
-                row = statement_.maxRows_;
+        if (sensitivity_ != sensitivity_sensitive_dynamic__ && maxRows_ > 0) {
+            if (rowCount_ > maxRows_) {
+                row = maxRows_;
             }
         }
 
@@ -1780,14 +1786,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         resetRowsetFlags();
 
-        if (statement_.maxRows_ > 0) {
+        if (maxRows_ > 0) {
             // if "row" is positive and > maxRows, fetch afterLast
             // else if "row" is negative, and abs(row) > maxRows, fetch beforeFirst
-            if (row > 0 && row > statement_.maxRows_) {
+            if (row > 0 && row > maxRows_) {
                 afterLastX();
                 isValidCursorPosition_ = false;
                 return isValidCursorPosition_;
-            } else if (row <= 0 && java.lang.Math.abs(row) > statement_.maxRows_) {
+            } else if (row <= 0 && java.lang.Math.abs(row) > maxRows_) {
                 beforeFirstX();
                 isValidCursorPosition_ = false;
                 return isValidCursorPosition_;
@@ -1907,7 +1913,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // the currentrow number, will fetch beforeFirst anyways.  do not need to check
         // for maxRows.
         if (sensitivity_ != sensitivity_sensitive_dynamic__ &&
-                statement_.maxRows_ > 0 && rows > 0 && currentAbsoluteRowNumber + rows > statement_.maxRows_) {
+                maxRows_ > 0 && rows > 0 && currentAbsoluteRowNumber + rows > maxRows_) {
             afterLastX();
             isValidCursorPosition_ = false;
             return isValidCursorPosition_;
@@ -1921,6 +1927,15 @@ public abstract class ResultSet implements java.sql.ResultSet,
             long rowNumber =
                     (sensitivity_ == sensitivity_sensitive_dynamic__) ? currentRowInRowset_ + rows :
                     currentAbsoluteRowNumber + rows - absolutePosition_;
+            if (maxRows_ < Math.abs(rowNumber) && maxRows_ != 0) {
+                if (rowNumber > 0) {
+                    afterLastX();
+                } else {
+                    beforeFirstX();
+                }
+                isValidCursorPosition_ = false;
+                return isValidCursorPosition_;
+            }
             isValidCursorPosition_ = getRelativeRowset(rowNumber);
         }
 
@@ -1979,8 +1994,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
             return isValidCursorPosition_;
         }
 
-        if (sensitivity_ != sensitivity_sensitive_dynamic__ && statement_.maxRows_ > 0 &&
-                (firstRowInRowset_ + currentRowInRowset_ > statement_.maxRows_)) {
+        if (sensitivity_ != sensitivity_sensitive_dynamic__ && maxRows_ > 0 &&
+                (firstRowInRowset_ + currentRowInRowset_ > maxRows_)) {
             isValidCursorPosition_ = false;
         }
         // auto-close result set if this is the last row from server and return false
@@ -2021,7 +2036,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "setFetchSize", rows);
             }
             checkForClosedResultSet();
-            if (rows < 0 || (statement_.maxRows_ != 0 && rows > statement_.maxRows_)) {
+            if (rows < 0 || (maxRows_ != 0 && rows > maxRows_)) {
                 throw new SqlException(agent_.logWriter_, "Invalid fetch size " + rows);
             }
             setFetchSize_(rows);
@@ -2925,7 +2940,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void setRowsetAfterLastEvent() throws SqlException {
         firstRowInRowset_ = 0;
         lastRowInRowset_ = 0;
-        absolutePosition_ = rowCount_ + 1;
+        absolutePosition_ = (maxRows_ == 0) ? rowCount_ + 1 : maxRows_ + 1;
         currentRowInRowset_ = 0;
         rowsReceivedInCurrentRowset_ = 0;
     }
@@ -3533,14 +3548,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (isRowsetCursor_ && sensitivity_ != sensitivity_sensitive_dynamic__ && firstRowInRowset_ != 0) {
             absolutePosition_ = firstRowInRowset_;
         } else {
-            absolutePosition_ = rowCount_ + 1;
+            absolutePosition_ = (maxRows_ == 0) ? rowCount_ + 1 : maxRows_ + 1;
         }
     }
 
     private void flowGetRowset(int orientation, long rowNumber) throws SqlException {
         cursor_.resetDataBuffer();
         agent_.beginWriteChain(statement_);
-
+        
         writeScrollableFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_,
                 fetchSize_,
                 orientation,
@@ -3667,6 +3682,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 rowNumber = 1;
                 orientation = scrollOrientation_absolute__;
             }
+            
+            // If afterLast and maxRows > 0, go backward from maxRows and not 
+            // from last row in the resultSet
+            if (maxRows_ > 0 && orientation == scrollOrientation_relative__ && isAfterLast) {
+                rowNumber += maxRows_ + 1;
+                orientation = scrollOrientation_absolute__;
+            }
+            
             flowGetRowset(orientation, rowNumber);
         }
 
@@ -3699,7 +3722,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
             lastRowInRowset_ = rowsReceivedInCurrentRowset_;
             absolutePosition_ = (isAfterLastRow) ? lastRowInRowset_ + 1 : lastRowInRowset_;
         } else {
-            lastRowInRowset_ = (isAfterLastRow) ? rowCount_ : firstRowInRowset_ - 1;
+            if (maxRows_ == 0)
+                lastRowInRowset_ = (isAfterLastRow) ? rowCount_ : firstRowInRowset_ - 1;
+            else
+                lastRowInRowset_ = (isAfterLastRow) ? maxRows_ : firstRowInRowset_ - 1;
             firstRowInRowset_ = lastRowInRowset_ - rowsReceivedInCurrentRowset_ + 1;
             absolutePosition_ = lastRowInRowset_;
             currentRowInRowset_ = lastRowInRowset_ - firstRowInRowset_;
@@ -3822,7 +3848,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
             // If fetchSize_ is smaller than the total number of rows in the ResultSet,
             // then fetch one rowset of fetchSize_ number of rows.  Otherwise, we will
             // fetch all rows in the ResultSet, so start fetching from row 1.
-            long rowNumber = (fetchSize_ < row) ? (-1) * fetchSize_ : 1;
+            long rowNumber;
+            if (maxRows_ == 0) {
+                rowNumber = (fetchSize_ < row) ? ((-1) * fetchSize_) : 1;
+            } else {
+                rowNumber = (fetchSize_ < row) ? (maxRows_ - fetchSize_) + 1 : 1;
+            }
             flowGetRowset(scrollOrientation_absolute__, rowNumber);
         }
         parseRowset_();
@@ -3845,6 +3876,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
     private void adjustLastRowset(long row) {
         lastRowInRowset_ = row;
         firstRowInRowset_ = lastRowInRowset_ - rowsReceivedInCurrentRowset_ + 1;
+        if (firstRowInRowset_ <= 0) {
+            firstRowInRowset_ = 1;
+        }
         setAbsolutePositionBasedOnAllRowsReceived();
         currentRowInRowset_ = lastRowInRowset_ - firstRowInRowset_;
     }
