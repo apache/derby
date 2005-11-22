@@ -91,9 +91,9 @@ storesUpperCaseQuotedIdentifiers(): false
 storesLowerCaseQuotedIdentifiers(): false
 storesMixedCaseQuotedIdentifiers(): true
 getIdentifierQuoteString(): "
-getNumericFunctions(): ABS,SQRT
-getStringFunctions(): LENGTH,LOWER,LTRIM,RTRIM,SUBSTR,SUBSTRING,UPPER
-getSystemFunctions(): CURRENT_USER,getCurrentConnection,runTimeStatistics,SESSION_USER,USER,CURRENT SCHEMA
+getNumericFunctions(): ABS,MOD,SQRT
+getStringFunctions(): CONCAT,LENGTH,LCASE,LOCATE,LTRIM,RTRIM,SUBSTRING,UCASE
+getSystemFunctions(): USER
 getTimeDateFunctions(): CURDATE,CURTIME,CURRENT_DATE,CURRENT_TIME,CURRENT_TIMESTAMP,EXTRACT
 getExtraNameCharacters(): 
 supportsAlterTableWithAddColumn(): true

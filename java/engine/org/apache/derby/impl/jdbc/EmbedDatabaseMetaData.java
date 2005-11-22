@@ -421,35 +421,32 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	}
 
     /**
-     * Get a comma separated list of math functions.
-	getNumericFunctions lists "math functions" -- so built-in operators and
-	things like EXTRACT are not included.
-	FIXME: find a way to reference method aliases known to be "numeric"
-    *
+     * Get a comma separated list of JDBC escaped numeric functions.
+     * Must be a complete or sub set of functions in appendix C.1
      * @return the list
      */
 	public String getNumericFunctions() {
-		return "ABS,SQRT";
+		return "ABS,MOD,SQRT";
 	}
 
     /**
-     * Get a comma separated list of string functions.
-		REMIND, when they show up, something like this might appear here:
-		FIXME: find a way to reference method aliases known to be "string"
+     * Get a comma separated list of JDBC escaped string functions.
+     * Must be a complete or sub set of functions in appendix C.2
+     * of JDBC 3.0 specification.
      * @return the list
      */
 	public String getStringFunctions() {
-		return "LENGTH,LOWER,LTRIM,RTRIM,SUBSTR,SUBSTRING,UPPER";
+		return "CONCAT,LENGTH,LCASE,LOCATE,LTRIM,RTRIM,SUBSTRING,UCASE";
 	}
 
     /**
-     * Get a comma separated list of system functions.
-		FIXME: find a way to reference system functions on Database when/if
-		they are registered as aliases or include the Database object too.
+     * Get a comma separated list of JDBC escaped system functions.
+     * Must be a complete or sub set of functions in appendix C.4
+     * of JDBC 3.0 specification.
      * @return the list
      */
 	public String getSystemFunctions()  {
-		return "CURRENT_USER,getCurrentConnection,runTimeStatistics,SESSION_USER,USER,CURRENT SCHEMA";
+		return "USER";
 	}
 
     /**
