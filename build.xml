@@ -603,12 +603,36 @@
     <delete dir="${out.javadoc.dir}/engine"/>
     <mkdir dir="${out.javadoc.dir}/engine"/>
 
+    <delete dir="${out.javadoc.dir}/sourcedir"/>
+    <mkdir dir="${out.javadoc.dir}/sourcedir"/>
+
+    <!-- engine files -->
+    <copy todir="${out.javadoc.dir}/sourcedir">
+      <fileset dir="${derby.engine.src.dir}"
+               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+    </copy>
+    <!-- client files -->
+    <copy todir="${out.javadoc.dir}/sourcedir">
+      <fileset dir="${derby.client.src.dir}"
+               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+    </copy>
+    <!-- drda files -->
+    <copy todir="${out.javadoc.dir}/sourcedir">
+      <fileset dir="${derby.drda.src.dir}"
+               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+    </copy>
+    <!-- tools files -->
+    <copy todir="${out.javadoc.dir}/sourcedir">
+      <fileset dir="${derby.tools.src.dir}"
+               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+    </copy>
+
     <javadoc
         additionalparam="-J-mx320M"
         packagenames="org.*"
         access="private"
         breakiterator="yes"
-        sourcepath="${derby.engine.src.dir};${derby.client.src.dir};${derby.drda.src.dir};${derby.tools.src.dir}"
+        sourcepath="${out.javadoc.dir}/sourcedir"
         classpath="${basedir}/classes;${java14compile.classpath};${jars.extras};${osgi}"
         destdir="${out.javadoc.dir}/engine"
         windowtitle="Apache Derby V${major}.${minor} Engine Documentation"
@@ -627,6 +651,8 @@
         <taglet name="org.apache.derbyBuild.javadoc.EndFormatTaglet" 
                 path="${basedir}/classes"/>
     </javadoc>
+
+    <delete dir="${out.javadoc.dir}/sourcedir"/>
 
   </target>
 
