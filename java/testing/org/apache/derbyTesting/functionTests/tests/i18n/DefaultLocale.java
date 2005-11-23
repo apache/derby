@@ -22,6 +22,8 @@ package org.apache.derbyTesting.functionTests.tests.i18n;
 
 import java.util.Locale;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,14 +34,13 @@ public class DefaultLocale {
 
 	static {
 		savedLocale=java.util.Locale.getDefault().toString();
-		Locale.setDefault(new Locale("rr", "TT"));
+		setDefaultLocale("rr", "TT");
 	}
 
 
 	// used in messageLocale test
 	public static void checkDefaultLocale() throws SQLException
 	{
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 		String defLocale = java.util.Locale.getDefault().toString();
 		//System.out.println(defLocale);
 		if (!defLocale.equals("rr_TT"))
@@ -49,7 +50,6 @@ public class DefaultLocale {
 	// used in urlLocale test
 	public static void checkRDefaultLocale() throws SQLException
 	{
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 		System.out.println(savedLocale);
 		if (!savedLocale.equals("en_US"))
 			throw new SQLException("wrong_locale");
@@ -67,10 +67,19 @@ public class DefaultLocale {
 	}
 
 	// used in messageLocale test
-	public static void setDefaultLocale(String Locale, String Code) throws SQLException
+	public static void setDefaultLocale(final String Locale, final String Code)
 	{
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
-		java.util.Locale.setDefault(new java.util.Locale(Locale.trim(),Code.trim()));
+		// needs to run in a privileged block as it will be
+		// called through a SQL statement and thus a generated
+		// class. The generated class on the stack has no permissions
+		// granted to it. Needs write permission on user.language
+		AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+            	java.util.Locale.setDefault(new java.util.Locale(Locale.trim(),Code.trim()));
+                return null; // nothing to return
+            }
+        });		
+		
 	}
 
 
