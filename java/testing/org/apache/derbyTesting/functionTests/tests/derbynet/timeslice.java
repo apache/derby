@@ -51,6 +51,8 @@ public class timeslice
 		"timeslice", "2147483647"};
 	private static String[] timesliceCmd5 = new String[] {"org.apache.derby.drda.NetworkServerControl",
 		"timeslice", "9000"};
+	private static String[] timesliceCmd6 = new String[] {"org.apache.derby.drda.NetworkServerControl",
+			"timeslice", "a"};
     private static  BufferedOutputStream bos = null;
 	private static  NetworkServerControl server;
 	private static String host = "localhost";
@@ -143,6 +145,8 @@ public class timeslice
 			//test timeslice 9000 - should work
 			execCmdDumpResults(timesliceCmd5);	
 			checkTimeSlice(9000);
+			//test timeslice with invlaid value - NumberFormatException
+			execCmdDumpResults(timesliceCmd6);
 			//test callable interface
 			//test timeslice 0
 			server.setTimeSlice(0);

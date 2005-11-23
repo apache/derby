@@ -916,48 +916,6 @@ public final class NetworkServerControlImpl {
 	}
 
 	/**
-	 * Set connection pool parameters for a database
-	 *
-	 * @param database	database parameters applied to
-	 * @param min		minimum number of connections, if 0, pooled connections not used
-	 *						if -1, use default						
-	 * @param max		maximum number of connections, if 0, pooled connections 
-	 *						created when no free connection available, if -1, 
-	 *						use default
-	 * @param host		machine network server is running on, if null, localhost is used
-	 * @param portNumber	port number server is to use, if <= 0, default port number
-	 *			is used
-	 *
-	 * @exception Exception	throws an exception if an error occurs
-	 */
-	protected void setConnectionPoolParameters(String database, int min, int max,
-		String host, int portNumber)
-		throws Exception
-	{
-		consolePropertyMessage("DRDA_NotImplemented.S", "conpool");
-	}
-
-	/**
-	 * Set default connection pool parameters 
-	 *
-	 * @param min		minimum number of connections, if 0, pooled connections not used
-	 *						if -1, use default
-	 * @param max		maximum number of connections, if 0, pooled connections 
-	 *						created when no free connection available
-	 *						if -1, use default
-	 * @param host		machine network server is running on, if null, localhost is used
-	 * @param portNumber	port number server is to use, if <= 0, default port number
-	 *			is used
-	 *
-	 * @exception Exception	throws an exception if an error occurs
-	 */
-	protected void setConnectionPoolParameters(int min, int max, String host, 
-			int portNumber) throws Exception
-	{
-		consolePropertyMessage("DRDA_NotImplemented.S", "conpool");
-	}
-
-	/**
 	 * Connect to  network server and set connection maxthread parameter
 	 *
 	 * @param max		maximum number of connections, if 0, connections 
@@ -2974,52 +2932,7 @@ public final class NetworkServerControlImpl {
 			maxThreads = value;
 		}
 	}
-	/**
-	 * Get the current value of minimum number of pooled connections to create at start
-	 *
-	 * @return value of minimum number of pooled connections
-	 */
-	private int getMinPoolSize()
-	{
-		synchronized(threadsSync) {
-			return minPoolSize;
-		}
-	}
-
-	/**
-	 * Set the current value of minimum number of pooled connections to create at start
-	 *
-	 * @param value	 value of minimum number of pooled connections
-	 */
-	private void setMinPoolSize(int value)
-	{
-		synchronized(poolSync) {
-			minPoolSize = value;
-		}
-	}
-	
-	/**
-	 * Get the current value of maximum number of pooled connections to create 
-	 *
-	 * @return value of maximum number of pooled connections
-	 */
-	private int getMaxPoolSize()
-	{
-		synchronized(poolSync) {
-			return maxPoolSize;
-		}
-	}
-	/**
-	 * Set the current value of maximum number of pooled connections to create 
-	 *
-	 * @param value	value of maximum number of pooled connections
-	 */
-	private void setMaxPoolSize(int value)
-	{
-		synchronized(poolSync) {
-			maxPoolSize = value;
-		}
-	}
+		
 	/**
 	 * Get the current value of whether to trace all the sessions
 	 *

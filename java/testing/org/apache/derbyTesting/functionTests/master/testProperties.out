@@ -29,7 +29,63 @@ derby.drda.timeSlice=0
 derby.drda.startNetworkServer=false
 derby.drda.host=localhost
 derby.drda.traceAll=false
-Successfully Connected
+org.apache.derby.drda.NetworkServerControl trace on -p 1527 
+Trace turned on for all sessions.
+Trace turned on for all sessions.
+org.apache.derby.drda.NetworkServerControl logconnections on -p 1527 
+Log Connections changed to on.
+-- listing properties --
+derby.drda.maxThreads=0
+derby.drda.keepAlive=true
+derby.drda.minThreads=0
+derby.drda.portNumber=1527
+derby.drda.logConnections=true
+derby.drda.timeSlice=0
+derby.drda.startNetworkServer=false
+derby.drda.host=localhost
+derby.drda.traceAll=true
 org.apache.derby.drda.NetworkServerControl shutdown -p 1527 
 Shutdown successful.
+org.apache.derby.drda.NetworkServerControl 
+No arguments given.
+Usage: NetworkServerControl <commands> 
+Commands:
+start [-h <host>] [-p <portnumber>]
+shutdown [-h <host>][-p <portnumber>]
+ping [-h <host>][-p <portnumber>]
+sysinfo [-h <host>][-p <portnumber>]
+runtimeinfo [-h <host>][-p <portnumber>]
+logconnections {on|off}[-h <host>][-p <portnumber>]
+maxthreads <max>[-h <host>][-p <portnumber>]
+timeslice <milliseconds>[-h <host>][-p <portnumber>]
+trace {on|off} [-s <session id>][-h <host>][-p <portnumber>]
+tracedirectory <traceDirectory>[-h <host>][-p <portnumber>]
+org.apache.derby.drda.NetworkServerControl unknowncmd 
+Command unknowncmd is unknown.
+Usage: NetworkServerControl <commands> 
+Commands:
+start [-h <host>] [-p <portnumber>]
+shutdown [-h <host>][-p <portnumber>]
+ping [-h <host>][-p <portnumber>]
+sysinfo [-h <host>][-p <portnumber>]
+runtimeinfo [-h <host>][-p <portnumber>]
+logconnections {on|off}[-h <host>][-p <portnumber>]
+maxthreads <max>[-h <host>][-p <portnumber>]
+timeslice <milliseconds>[-h <host>][-p <portnumber>]
+trace {on|off} [-s <session id>][-h <host>][-p <portnumber>]
+tracedirectory <traceDirectory>[-h <host>][-p <portnumber>]
+org.apache.derby.drda.NetworkServerControl ping arg1 
+Invalid number of arguments for command ping.
+Usage: NetworkServerControl <commands> 
+Commands:
+start [-h <host>] [-p <portnumber>]
+shutdown [-h <host>][-p <portnumber>]
+ping [-h <host>][-p <portnumber>]
+sysinfo [-h <host>][-p <portnumber>]
+runtimeinfo [-h <host>][-p <portnumber>]
+logconnections {on|off}[-h <host>][-p <portnumber>]
+maxthreads <max>[-h <host>][-p <portnumber>]
+timeslice <milliseconds>[-h <host>][-p <portnumber>]
+trace {on|off} [-s <session id>][-h <host>][-p <portnumber>]
+tracedirectory <traceDirectory>[-h <host>][-p <portnumber>]
 End test

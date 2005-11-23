@@ -25,9 +25,11 @@ import java.util.Properties;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
+import java.net.InetAddress;
 
 import org.apache.derbyTesting.functionTests.harness.jvm;
 import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
+import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.tools.ij;
 
 /**
@@ -110,7 +112,17 @@ public class sysinfo
 			System.out.println("Testing Sysinfo");
 			execCmdDumpResults(SysInfoCmd);	
 			System.out.println("End test");
-
+			
+			/************************************************************
+			 *  Test sysinfo by calling NetworkServerControl.getSysinfo()
+			 ************************************************************/
+			System.out.println("Testing Sysinfo (method)");
+			NetworkServerControl derbyServer = 
+				new NetworkServerControl( InetAddress.getByName("localhost"),
+										NetworkServerControl.DEFAULT_PORTNUMBER);
+			System.out.println(derbyServer.getSysinfo());
+			System.out.println("End test (method)");
+			
 			/************************************************************
 			 *  Test sysinfo w/ foreign (non-English) locale
 			 ************************************************************/

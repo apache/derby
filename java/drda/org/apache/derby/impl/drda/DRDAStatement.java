@@ -802,7 +802,6 @@ class DRDAStatement
 		}
 	}
 	
-
 	/*
 	 * get DRDAResultSet by result set number
 	 *
@@ -1183,7 +1182,7 @@ class DRDAStatement
 
 	protected int getNumRsCols()
 	{
-		int[] rsDrdaTypes = currentDrdaRs.getRsDRDATypes();
+		int[] rsDrdaTypes = getRsDRDATypes();
 		if (rsDrdaTypes != null)
 			return rsDrdaTypes.length;
 		else 
@@ -1224,24 +1223,12 @@ class DRDAStatement
 	}
 
 	/**
-	 * return whether this is a procedure
-	 * 
-	 * @return true if procName is not null 
-	 * RESOLVE: (should we check for isCall or is this good enough)
-	 */ 
-	public  boolean isProcedure()
-	{
-		return (procName != null);
-	}
-
-
-	/**
 	 * @param rsNum  - result set # starting with 0 
 	 */
 	public String getResultSetCursorName(int rsNum) throws SQLException
 	{
-		ResultSet rs = getResultSet(rsNum);
-		return rs.getCursorName();			
+		DRDAResultSet drdaRs = getDrdaResultSet(rsNum);
+		return drdaRs.getResultSetCursorName();			
 
 	}
 

@@ -19,6 +19,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
+import java.net.InetAddress;
 import java.sql.*;
 import java.util.Vector;
 import java.util.Properties;
@@ -28,6 +29,7 @@ import java.io.BufferedOutputStream;
 
 import org.apache.derbyTesting.functionTests.harness.jvm;
 import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
+import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derby.tools.JDBCDisplayUtil;
@@ -115,7 +117,17 @@ public class runtimeinfo
 			System.out.println("Testing Runtimeinfo");
 			execCmdDumpResults(RuntimeinfoCmd);	
 			System.out.println("End test");
-
+			
+			/******************************************************************
+			 *  Test runtimeinfo by calling NetworkServerControl.getRuntimeInfo
+			******************************************************************/
+			System.out.println("Testing Runtimeinfo (method)");
+			NetworkServerControl derbyServer = 
+				new NetworkServerControl( InetAddress.getByName("localhost"),
+										NetworkServerControl.DEFAULT_PORTNUMBER);
+			System.out.println(derbyServer.getRuntimeInfo());	
+			System.out.println("End test (method)");
+			
 			// Now get a couple of connections with some prepared statements
 			Connection conn2 = ij.startJBMS();
 			PreparedStatement ps = prepareAndExecuteQuery(conn1,"SELECT count(*) from sys.systables");

@@ -32,6 +32,8 @@ import java.util.Properties;
 
 public class getCurrentProperties
 {
+	private static final String DERBY_SYSTEM_HOME = System.getProperty("derby.system.home");
+	
 	private static Properties properties = new java.util.Properties();
 	private static Object joinsync = new Object();
 	private static boolean start = false;
@@ -51,12 +53,16 @@ public class getCurrentProperties
 			//server.setLogWriter(System.out);
 			// set tracing on for the waiting connection
 			server.trace(3, true);
+			//test NetworkServerControl.logConnections
+			server.logConnections(true);
 			// get properties
 			System.out.println("Properties with tracing on");
 			p = server.getCurrentProperties();
 			p.list(System.out);
 			// set tracing on for all connections
 			server.trace(true);
+			//test NetworkServerControl.setTraceDirectory
+			server.setTraceDirectory(DERBY_SYSTEM_HOME);
 			// get properties
 			System.out.println("Properties with tracing on");
 			p = server.getCurrentProperties();

@@ -51,6 +51,8 @@ public class maxthreads
 		"maxthreads", "2147483647"};
 	private static String[] maxthreadsCmd5 = new String[] {"org.apache.derby.drda.NetworkServerControl",
 		"maxthreads", "9000"};
+	private static String[] maxthreadsCmd6 = new String[] {"org.apache.derby.drda.NetworkServerControl",
+			"maxthreads", "a"};
     private static  BufferedOutputStream bos = null;
 	private static  NetworkServerControl server;
 	private static String host = "localhost";
@@ -146,6 +148,8 @@ public class maxthreads
 			//test maxthreads 9000 - should work
 			execCmdDumpResults(maxthreadsCmd5);	
 			checkMaxThreads(9000);
+			//test maxthreads with invalid value (NumberFormatException)
+			execCmdDumpResults(maxthreadsCmd6);	
 			// try the same values using the callable interface
 			//test maxthreads 0
 			server.setMaxThreads(0);

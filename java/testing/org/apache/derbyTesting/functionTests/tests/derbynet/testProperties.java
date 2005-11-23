@@ -70,8 +70,38 @@ public class testProperties
 									"-Dderby.drda.debug",
 									"org.apache.derby.drda.NetworkServerControl",
 									"start"};
-
-	/**
+    
+    //No arguments
+    private static String[] cmdWithoutArgs =
+					new String[] {  "org.apache.derby.drda.NetworkServerControl"};
+    
+    //Unknown command
+    private static String[] cmdUnknown =
+					new String[] {  "org.apache.derby.drda.NetworkServerControl",
+    								"unknowncmd"};
+    
+    //wrong no: of arguments
+    private static String[] cmdWithWrongArgNum =
+					new String[] {  "org.apache.derby.drda.NetworkServerControl",
+    								"ping",
+									"arg1"};
+    
+    //trace on
+    private static String[] cmdTraceOn =
+					new String[] {  "org.apache.derby.drda.NetworkServerControl",
+    								"trace",
+									"on",
+									"-p",
+									"1527"};
+    
+    //logconnections on
+    private static String[] cmdLogconnectionsOn =
+					new String[] {  "org.apache.derby.drda.NetworkServerControl",
+    								"logconnections",
+									"on",
+									"-p",
+									"1527"};	
+    /**
 	 * Execute the given command and dump the results to standard out
 	 *
 	 * @param args	command and arguments
@@ -243,9 +273,16 @@ public class testProperties
 			waitForStart("1527",15000);
 			//check that default properties are used
 			listProperties("1527");
-			System.out.println("Successfully Connected");
+			execCmdDumpResults(cmdTraceOn);
+			execCmdDumpResults(cmdLogconnectionsOn);
+			listProperties("1527");
 			derbyServerCmd("shutdown","1527");
-
+			
+			//Test error conditions in command-line
+			execCmdDumpResults(cmdWithoutArgs);
+			execCmdDumpResults(cmdUnknown);
+			execCmdDumpResults(cmdWithWrongArgNum);
+			
 			System.out.println("End test");
 			bos.close();
 		}

@@ -82,14 +82,6 @@ class DRDAResultSet
 
 	protected String pkgcnstknStr;               // Unique consistency token for ResultSet 0
 
-
-
-	protected DRDAResultSet(ResultSet rs) throws SQLException
-	{
-		setResultSet(rs);
-		state = NOT_OPENED;
-	}
-
 	protected DRDAResultSet()
 	{
 		state = NOT_OPENED;
