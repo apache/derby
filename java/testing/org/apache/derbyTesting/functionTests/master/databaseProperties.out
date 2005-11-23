@@ -1,9 +1,9 @@
 ij> run resource '/org/apache/derbyTesting/functionTests/util/testRoutines.sql';
-ij> CREATE PROCEDURE TESTROUTINE.INSTALL_ROUTINES() MODIFIES SQL DATA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.installRoutines' language java parameter style java;
+ij> -- Changed to create individual procedures so that this will work with JSR169. 
+-- Direct call to 'installRoutines' uses nested connection
+CREATE PROCEDURE TESTROUTINE.SET_SYSTEM_PROPERTY(IN PROPERTY_KEY VARCHAR(32000), IN PROPERTY_VALUE VARCHAR(32000)) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.setSystemProperty' language java parameter style java;
 0 rows inserted/updated/deleted
-ij> CALL TESTROUTINE.INSTALL_ROUTINES();
-0 rows inserted/updated/deleted
-ij> DROP PROCEDURE TESTROUTINE.INSTALL_ROUTINES;
+ij> CREATE PROCEDURE TESTROUTINE.SLEEP(IN SLEEP_TIME_MS BIGINT) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.sleep' language java parameter style java;
 0 rows inserted/updated/deleted
 ij> CREATE FUNCTION GET_TABLE_PROPERTY (SCHEMA_NAME VARCHAR(128), TABLE_NAME VARCHAR(128), PROP_KEY VARCHAR(1000)) RETURNS VARCHAR(1000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getTableProperty' LANGUAGE JAVA PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted

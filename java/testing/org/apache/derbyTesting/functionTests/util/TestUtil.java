@@ -28,7 +28,12 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Properties;
+
+import javax.sql.DataSource;
+
 import org.apache.derby.iapi.reference.JDBC30Translation;
+
+
 
 
 /**
@@ -37,6 +42,19 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 
 */
 public class TestUtil {
+	
+	//Used for JSR169
+	public static boolean HAVE_DRIVER_CLASS;
+	static{
+		try{
+			Class.forName("java.sql.Driver");
+			HAVE_DRIVER_CLASS = true;
+		}
+		catch(ClassNotFoundException e){
+			//Used for JSR169
+			HAVE_DRIVER_CLASS = false;
+		}
+	}
 
 	public static final int UNKNOWN_FRAMEWORK = -1;
 
@@ -79,6 +97,7 @@ public class TestUtil {
 	private static String XA_DATASOURCE_STRING = "XA";
 	private static String CONNECTION_POOL_DATASOURCE_STRING = "ConnectionPool";
 	private static String REGULAR_DATASOURCE_STRING = "";
+	private static String JSR169_DATASOURCE_STRING = "Simple";
 	
 	// Methods for making framework dependent decisions in tests.
 
@@ -239,8 +258,12 @@ public class TestUtil {
 	 */
 	public static javax.sql.DataSource getDataSource(Properties attrs)
 	{
+		String classname;
+		if(HAVE_DRIVER_CLASS)
+			classname = getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource";
+		else
+			classname = getDataSourcePrefix() + JSR169_DATASOURCE_STRING + "DataSource";
 		
-		String classname = getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource";
 		return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
 	}
 
@@ -636,9 +659,29 @@ public class TestUtil {
 		}
 
 	}
-
-
+	
+	public static Connection getDataSourceConnection (Properties prop) throws SQLException {
+		DataSource ds = TestUtil.getDataSource(prop);
+		try {
+			Connection conn = ds.getConnection();
+			return conn;
+		}
+		catch (SQLException e) {
+			throw e;
+		}
+	}
+	
+	public static void shutdownUsingDataSource (String dbName) throws SQLException {
+		Properties prop = new Properties();
+		prop.setProperty("databaseName", dbName );
+		prop.setProperty("shutdownDatabase", "shutdown" );
+		DataSource ds = TestUtil.getDataSource(prop);
+		try {
+			Connection conn = ds.getConnection();
+		}
+		catch (SQLException e) {
+			throw e;
+		}
+	}
 }
-
-
 

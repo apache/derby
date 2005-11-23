@@ -7,9 +7,9 @@ insert into t1 values(1) ;
 insert into t1 values(2) ;
 insert into t1 values(3 ) ;
 drop table t1;
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat';
+connect 'wombat';
 --checkpoint to make sure that 
 --the stub is dropped and we use the 
 --the same container id which we dropped earlier
@@ -20,10 +20,10 @@ insert into t1 values(4) ;
 insert into t1 values(5);
 insert into t1 values(6);
 select * from t1;
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
 --performa rollforward recovery
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 select * from t1 ;
 --drop the above tables and create
 --again tables with foreign key references and
@@ -42,9 +42,9 @@ insert into t2 values(2);
 insert into t2 values(3);
 alter table t2 add constraint c1 foreign key (b)
                              references t1(a);
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 insert into t2 values(4);
 insert into t2 values(5);
 select * from t1;
@@ -80,9 +80,9 @@ alter table t3 add column c2 char(20);
 --alter table t4 add column c2 int not null;
 --alter table t3 add column c3 int not null unique;
 
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 select * from t1;
 select * from t2;
 select * from t3;
@@ -97,17 +97,17 @@ alter table t3 add constraint pk1 primary key(c1);
 alter table t4 add constraint fk1 foreign key (c1) references t3(c1);
 --unlogged add unique constraint
 alter table t4 add constraint uk2 unique(c1);
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 --following insert should throw duplicate error.
 insert into t4 values(101);
 insert into t3 (c1) values(101);
 --folowing should throw foreign key violations error.
 insert into t4 values(9999);
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 select * from t1;
 select * from t2;
 select c1 from t3;
@@ -125,9 +125,9 @@ delete from t2;
 delete from t4;
 delete from t3;
 rollback;
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 select * from t1;
 select * from t2;
 select * from t3;
@@ -142,9 +142,9 @@ alter table t5 add column c4 char(100) not null default '0';
 alter table t5 add constraint uconst UNIQUE(c4);
 insert into t5 values ( 1 , 2, 3 , 'one'), 
 (11 , 22, 33, 'eleven'), (111, 222, 333, 'one hundred eleven');
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 select * from t5 ;
 --check if constraits are intact.
 --following insert  should throw error because they violate constraints;
@@ -154,9 +154,9 @@ insert into t5 values ( 1111 , 2222, 3333 , 'one');
 insert into t5 values ( 1111 , 2222, 3333 , 'four ones ..');
 
 select * from t5;
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 select * from t5;
 --- Have to check long varchar/binary  recovery stuff.
 -- create a table with 5 rows, with 4K pageSize,
@@ -175,9 +175,9 @@ insert into testing values (PADSTRING('1000000',2024),  PADSTRING('2000000',1024
 insert into testing values (PADSTRING('10000000',2024), PADSTRING('20000000',1024), PADSTRING('30000000',1024),  PADSTRING('40000000',2048),  PADSTRING('50000000',300));
 insert into testing values (PADSTRING('100000000',2024),PADSTRING('200000000',1024), PADSTRING('300000000',1024), PADSTRING('400000000',2048), PADSTRING('500000000',300));
 
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 
 -- select the whole row, or individual columns.
 -- 9 rows should be returned from each of the following selects
@@ -194,9 +194,9 @@ insert into testing (a, b) values (PADSTRING('a',2024), PADSTRING('b',1024));
 insert into testing (a, b, c) values (PADSTRING('a',2024), PADSTRING('b',1024), PADSTRING('c',1024));
 insert into testing (a, b, c, d) values (PADSTRING('a',2024), PADSTRING('b',1024), PADSTRING('c',1024), PADSTRING('d',2048));
 insert into testing (a, b, c, d, e) values (PADSTRING('a',2024), PADSTRING('b',1024), PADSTRING('c',1024), PADSTRING('d',2048), PADSTRING('e',300));
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 -- select some partial rows.
 -- should select 14 rows
 select * from testing;
@@ -237,9 +237,9 @@ select e from testing where e = PADSTRING('ee',300);
 -- update all columns for 2 rows
 update testing set a = PADSTRING('aaa',2024), b = PADSTRING('bbb',1024), c = PADSTRING('ccc',1024), d = PADSTRING('ddd',2048), e = PADSTRING('eee',300)
 	where d = PADSTRING('d',2048);
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 
 -- following select should return 0 rows
 select * from testing where d = PADSTRING('d',2048);
@@ -277,9 +277,9 @@ insert into testing values (4, PADSTRING('fill1',2500), PADSTRING('fill2',2500),
 insert into testing values (1, PADSTRING('fill1',2500), PADSTRING('fill2',2500), 10, PADSTRING('fill3',2500), PADSTRING('fill4',2500), 100, PADSTRING('fill5',2400), PADSTRING('fill6',2400), 1000);
 insert into testing values (2, PADSTRING('fill1',2500), PADSTRING('fill2',2500), 20, PADSTRING('fill3',2500), PADSTRING('fill4',2500), 200, PADSTRING('fill5',2400), PADSTRING('fill6',2400), 2000);
 
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 
 select * from testing;
 select key2 from testing;
@@ -311,9 +311,9 @@ insert into testing values (PADSTRING('1 2 3 4 5 6 7 8 9 0',8096));
 insert into testing values (PADSTRING('a b c d e f g h i j',8096));
 insert into testing values (PADSTRING('11 22 33 44 55 66 77',8096));
 insert into testing values (PADSTRING('aa bb cc dd ee ff gg',8096));
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 -- should return 4 rows
 select a from testing;
 -- drop the table
@@ -326,9 +326,9 @@ insert into testing values (2, PADSTRING('a b c d e f g h i j',32384));
 insert into testing values (3, PADSTRING('11 22 33 44 55 66 77',32384));
 insert into testing values (4, PADSTRING('aa bb cc dd ee ff gg',32384));
 
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 
 -- should return 4 rows
 select * from testing;
@@ -346,9 +346,9 @@ insert into testing values (PADSTRING('a b c d e f g h i j',32384), 2);
 insert into testing values (PADSTRING('11 22 33 44 55 66 77',32384), 3);
 insert into testing values (PADSTRING('aa bb cc dd ee ff gg',32384), 4);
 
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 -- should return 4 rows
 select * from testing;
 select a from testing;
@@ -364,9 +364,9 @@ insert into testing values (0, PADSTRING('1 2 3 4 5 6 7 8 9 0',32384), 1);
 insert into testing values (1, PADSTRING('a b c d e f g h i j',32384), 2);
 insert into testing values (2, PADSTRING('11 22 33 44 55 66 77',32384), 3);
 insert into testing values (4, PADSTRING('aa bb cc dd ee ff gg',32384), 4);
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 -- should return 4 rows
 select * from testing;
 select a from testing;
@@ -383,9 +383,9 @@ update testing set a = PADSTRING('update three times',32384);
 update testing set a = PADSTRING('update four times',32384);
 update testing set a = PADSTRING('update five times',32384);
 
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 -- select should return 4 rows
 select a from testing;
 -- drop the table
@@ -397,9 +397,9 @@ insert into testing values (PADSTRING('1 2 3 4 5 6 7 8 9 0',32384), 1, PADSTRING
 insert into testing values (PADSTRING('a b c d e f g h i j',32384), 2, PADSTRING('a b c d e f g h i j',32084));
 insert into testing values (PADSTRING('11 22 33 44 55 66 77',32384), 3, PADSTRING('11 22 33 44 55 66 77',32084));
 insert into testing values (PADSTRING('aa bb cc dd ee ff gg',32384), 4, PADSTRING('aa bb cc dd ee ff gg',32084));
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 -- should return 4 rows
 select * from testing;
 select a from testing;
@@ -422,9 +422,9 @@ update testing set c = PADSTRING('update 6',32084);
 update testing set c = PADSTRING('update 7',32084);
 update testing set c = PADSTRING('update 8',32084);
 update testing set c = PADSTRING('update 9',32084);
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 -- select should return 4 rows
 select * from testing;
 -- drop the table
@@ -440,9 +440,9 @@ insert into testing values (4, PADSTRING('1 2 3 4 5 6 7 8 9 0',64768),  5, PADST
 insert into testing values (5, PADSTRING('a b c d e f g h i j',64768),  6, PADSTRING('aa bb cc dd ee ff gg',32384), 7);
 insert into testing values (6, PADSTRING('11 22 33 44 55 66 77',64768), 7, PADSTRING('aa bb cc dd ee ff gg',32384), 8);
 insert into testing values (7, PADSTRING('aa bb cc dd ee ff gg',64768), 8, PADSTRING('aa bb cc dd ee ff gg',32384), 9);
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 -- select shoudl return 8 rows
 select * from testing;
 select a from testing;
@@ -460,9 +460,9 @@ update testing set b = PADSTRING('update 7',64768);
 update testing set b = PADSTRING('update 8',64768);
 update testing set b = PADSTRING('update 9',64768);
 
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 -- select should return 8 rows
 select b from testing;
 select a, b, e from testing;
@@ -482,9 +482,9 @@ insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b
 insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
 insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
 
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 disconnect;
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 
 -- select should return 10 rows
 select * from testing;

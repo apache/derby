@@ -58,7 +58,6 @@ public class DefaultLocale {
 	// used in messageLocale test
 	public static void checkDatabaseLocale(String Locale) throws SQLException
 	{
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 		String dbLocale = org.apache.derby.iapi.db.Factory.getDatabaseOfConnection().getLocale().toString();
 		//System.out.println(dbLocale + "-");
 		//System.out.println(Locale + "-");

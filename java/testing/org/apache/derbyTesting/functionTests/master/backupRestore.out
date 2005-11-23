@@ -18,32 +18,32 @@ ij> select cast (dv(x) as dec(5,2)) from x;
 ij> ----take a backup.
 call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup');
 0 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
 ij> ---restore a databases
-connect 'jdbc:derby:wombat;restoreFrom=extinout/mybackup/wombat';
+connect 'wombat;restoreFrom=extinout/mybackup/wombat';
 ij> select cast (dv(x) as dec(5,2)) from x;
 1       
 --------
 2.00    
 20.00   
 40.00   
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
 ij> ---create a new database from backup.
-connect 'jdbc:derby:wombatnew;createFrom=extinout/mybackup/wombat';
+connect 'wombatnew;createFrom=extinout/mybackup/wombat';
 ij> select cast (dv(x) as dec(5,2)) from x;
 1       
 --------
 2.00    
 20.00   
 40.00   
-ij> connect 'jdbc:derby:wombatnew;shutdown=true';
+ij> connect 'wombatnew;shutdown=true';
 ERROR 08006: Database 'wombatnew' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat';
+ij> connect 'wombat';
 ij> select cast (dv(x) as dec(5,2)) from x;
 1       
 --------
@@ -78,11 +78,11 @@ ij> select cast (dv(x) as dec(5,2)) from x;
 2.00    
 20.00   
 40.00   
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
 ij> ---perform a rollforward recovery
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> select * from x;
 X                     |Y          
 ----------------------------------
@@ -121,7 +121,7 @@ ij> select cast (dv(x) as dec(5,2)) from x;
 40.00   
 ij> insert into x values (1,1),(10,1),(20,1);
 3 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
 ij> 

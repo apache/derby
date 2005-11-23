@@ -302,8 +302,8 @@ ij> insert into parent values (1) , (2) , (3) , (4) ;
 ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from parent where a < 3' , 'extinout/parent.del' , 
                                  null, null, null) ;
 0 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat' as c1;
-ij(C1)> connect 'jdbc:derby:wombat' as c2;
+ij> connect 'wombat' as c1;
+ij(C1)> connect 'wombat' as c2;
 ij(C2)> set connection c1;
 ij(C1)> autocommit off;
 ij(C1)> lock table iep.parent in share mode;

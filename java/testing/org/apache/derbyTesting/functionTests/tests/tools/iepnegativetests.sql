@@ -210,8 +210,8 @@ create table parent(a int not null primary key);
 insert into parent values (1) , (2) , (3) , (4) ;
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from parent where a < 3' , 'extinout/parent.del' , 
                                  null, null, null) ;
-connect 'jdbc:derby:wombat' as c1;
-connect 'jdbc:derby:wombat' as c2;
+connect 'wombat' as c1;
+connect 'wombat' as c2;
 set connection c1;
 autocommit off;
 lock table iep.parent in share mode;

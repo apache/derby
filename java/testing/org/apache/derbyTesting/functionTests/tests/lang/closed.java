@@ -58,8 +58,19 @@ public class closed implements Runnable {
 			// make the initial connection.
 			ij.getPropertyArg(args);
 			conn = ij.startJBMS();
-
-			String url = conn.getMetaData().getURL();
+			
+			boolean jsr169_test = false;
+			String url = new String();
+			try{
+				url = conn.getMetaData().getURL();
+			}
+			catch (NoSuchMethodError msme)
+			{
+				jsr169_test = true;
+				System.out.println("DatabaseMetaData.getURL not present - correct for JSR169");
+			} catch (Throwable err) {
+			    System.out.println("%%getURL() gave the exception: " + err);
+			}
 
 			passed = testDerby62(conn) && passed;
 
@@ -80,12 +91,13 @@ public class closed implements Runnable {
 				conn.close();
 			}
 
-			// shutdown the database
-			passed = shutdownTest(url, url + ";shutdown=true");
+			if(!jsr169_test){
+				// shutdown the database
+				passed = shutdownTest(url, url + ";shutdown=true");
 
-
-			// shutdown the system
-			passed = shutdownTest(url, "jdbc:derby:;shutdown=true");
+				// shutdown the system
+				passed = shutdownTest(url, "jdbc:derby:;shutdown=true");
+			}
 
 
 		} catch (Throwable e) {

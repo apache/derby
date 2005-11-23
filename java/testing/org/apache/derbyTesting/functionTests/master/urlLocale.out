@@ -14,90 +14,90 @@ en_US
 0 rows inserted/updated/deleted
 ij> disconnect;
 ij> -- create a Swiss database
-connect 'jdbc:derby:swissdb;create=true;territory=fr_CH';
+connect 'swissdb;create=true;territory=fr_CH';
 ij> create procedure checkDatabaseLoc(in locale char(12)) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.i18n.DefaultLocale.checkDatabaseLocale';
 0 rows inserted/updated/deleted
 ij> call checkDatabaseLoc('fr_CH');
 0 rows inserted/updated/deleted
 ij> disconnect;
-ij> connect 'jdbc:derby:swissdb;shutdown=true';
+ij> connect 'swissdb;shutdown=true';
 ERROR 08006: Arr EnC:>234< t de la base de donn EnC:>233< es 'swissdb'.
 ij> -- check it is still Swiss when we re-boot
-connect 'jdbc:derby:swissdb';
+connect 'swissdb';
 ij> call checkDatabaseLoc('fr_CH');
 0 rows inserted/updated/deleted
 ij> disconnect;
-ij> connect 'jdbc:derby:swissdb;shutdown=true';
+ij> connect 'swissdb;shutdown=true';
 ERROR 08006: Arr EnC:>234< t de la base de donn EnC:>233< es 'swissdb'.
 ij> -- Locale automatically converts the components to the correct case
 -- create a Hindi in India database (hi_IN)
-connect 'jdbc:derby:hindi;create=true;territory=HI_in';
+connect 'hindi;create=true;territory=HI_in';
 ij> create procedure checkDatabaseLoc(in locale char(12)) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.i18n.DefaultLocale.checkDatabaseLocale';
 0 rows inserted/updated/deleted
 ij> call checkDatabaseLoc('hi_IN');
 0 rows inserted/updated/deleted
 ij> disconnect;
-ij> connect 'jdbc:derby:hindi;shutdown=true';
+ij> connect 'hindi;shutdown=true';
 ERROR 08006: Database 'hindi' shutdown.
 ij> -- now try one with a variant
 -- create a English in Israel database for JavaOS en_IL_JavaOS
-connect 'jdbc:derby:Israel;create=true;territory=en_IL_JavaOS';
+connect 'Israel;create=true;territory=en_IL_JavaOS';
 ij> create procedure checkDatabaseLoc(in locale char(12)) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.i18n.DefaultLocale.checkDatabaseLocale';
 0 rows inserted/updated/deleted
 ij> call checkDatabaseLoc('en_IL_JavaOS');
 0 rows inserted/updated/deleted
 ij> disconnect;
-ij> connect 'jdbc:derby:Israel;shutdown=true';
+ij> connect 'Israel;shutdown=true';
 ERROR 08006: Database 'Israel' shutdown.
 ij> -- now try with just a language - we support this
 -- as some vms do.
-connect 'jdbc:derby:bacon;create=true;territory=da';
+connect 'bacon;create=true;territory=da';
 ij> create procedure checkDatabaseLoc(in locale char(12)) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.i18n.DefaultLocale.checkDatabaseLocale';
 0 rows inserted/updated/deleted
 ij> call checkDatabaseLoc('da');
 0 rows inserted/updated/deleted
 ij> disconnect;
-ij> connect 'jdbc:derby:bacon;shutdown=true';
+ij> connect 'bacon;shutdown=true';
 ERROR 08006: Database 'bacon' shutdown.
-ij> connect 'jdbc:derby:bacon';
+ij> connect 'bacon';
 ij> call checkDatabaseLoc('da');
 0 rows inserted/updated/deleted
 ij> disconnect;
-ij> connect 'jdbc:derby:bacon;shutdown=true';
+ij> connect 'bacon;shutdown=true';
 ERROR 08006: Database 'bacon' shutdown.
 ij> --
 -- some negative tests
 --
-connect 'jdbc:derby:fail1;create=true;territory=';
+connect 'fail1;create=true;territory=';
 ERROR XJ041: Failed to create database 'fail1', see the next exception for details.
 ERROR XBM0X: Supplied territory description '' is invalid, expecting ln[_CO[_variant]]
 ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-3166 country codes, see java.util.Locale.
 ij> -- database will not have been created so this connection will fail
-connect 'jdbc:derby:fail1;shutdown=true';
+connect 'fail1;shutdown=true';
 ERROR XJ004: Database 'fail1' not found.
-ij> connect 'jdbc:derby:fail3;create=true;territory=en_';
+ij> connect 'fail3;create=true;territory=en_';
 ERROR XJ041: Failed to create database 'fail3', see the next exception for details.
 ERROR XBM0X: Supplied territory description 'en_' is invalid, expecting ln[_CO[_variant]]
 ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-3166 country codes, see java.util.Locale.
-ij> connect 'jdbc:derby:fail4;create=true;territory=en_d';
+ij> connect 'fail4;create=true;territory=en_d';
 ERROR XJ041: Failed to create database 'fail4', see the next exception for details.
 ERROR XBM0X: Supplied territory description 'en_d' is invalid, expecting ln[_CO[_variant]]
 ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-3166 country codes, see java.util.Locale.
-ij> connect 'jdbc:derby:fail5;create=true;territory=en_US_';
+ij> connect 'fail5;create=true;territory=en_US_';
 ERROR XJ041: Failed to create database 'fail5', see the next exception for details.
 ERROR XBM0X: Supplied territory description 'en_US_' is invalid, expecting ln[_CO[_variant]]
 ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-3166 country codes, see java.util.Locale.
-ij> connect 'jdbc:derby:fail6;create=true;territory=en-US';
+ij> connect 'fail6;create=true;territory=en-US';
 ERROR XJ041: Failed to create database 'fail6', see the next exception for details.
 ERROR XBM0X: Supplied territory description 'en-US' is invalid, expecting ln[_CO[_variant]]
 ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-3166 country codes, see java.util.Locale.
 ij> -- try using a database name with trailing blanks
 -- beetle 4653
-connect 'jdbc:derby:trailblank;create=true';
-ij> connect 'jdbc:derby:trailblank';
-ij(CONNECTION1)> connect 'jdbc:derby:trailblank     ';
-ij(CONNECTION2)> connect 'jdbc:derby:trailblank      ;shutdown=true';
+connect 'trailblank;create=true';
+ij> connect 'trailblank';
+ij(CONNECTION1)> connect 'trailblank     ';
+ij(CONNECTION2)> connect 'trailblank      ;shutdown=true';
 ERROR 08006: Database 'trailblank' shutdown.
-ij(CONNECTION2)> connect 'jdbc:derby:;shutdown=true';
+ij(CONNECTION2)> connect ';shutdown=true';
 ERROR XJ015: Derby system shutdown.
 ij(CONNECTION2)> 

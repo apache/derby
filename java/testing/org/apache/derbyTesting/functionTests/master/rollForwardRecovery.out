@@ -17,10 +17,10 @@ ij> insert into t1 values(3 ) ;
 1 row inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat';
+ij> connect 'wombat';
 ij> --checkpoint to make sure that 
 --the stub is dropped and we use the 
 --the same container id which we dropped earlier
@@ -40,11 +40,11 @@ A
 4          
 5          
 6          
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
 ij> --performa rollforward recovery
-connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> select * from t1 ;
 A          
 -----------
@@ -81,10 +81,10 @@ ij> insert into t2 values(3);
 ij> alter table t2 add constraint c1 foreign key (b)
                              references t1(a);
 0 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> insert into t2 values(4);
 1 row inserted/updated/deleted
 ij> insert into t2 values(5);
@@ -145,10 +145,10 @@ ij> --add constraint
 --alter table t3 add column c2 int not null primary key;
 --alter table t4 add column c2 int not null;
 --alter table t3 add column c3 int not null unique;
-connect 'jdbc:derby:wombat;shutdown=true';
+connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> select * from t1;
 A          
 -----------
@@ -247,10 +247,10 @@ alter table t4 add constraint fk1 foreign key (c1) references t3(c1);
 ij> --unlogged add unique constraint
 alter table t4 add constraint uk2 unique(c1);
 0 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> --following insert should throw duplicate error.
 insert into t4 values(101);
 ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'UK2' defined on 'T4'.
@@ -259,10 +259,10 @@ ERROR 23505: The statement was aborted because it would have caused a duplicate 
 ij> --folowing should throw foreign key violations error.
 insert into t4 values(9999);
 ERROR 23503: INSERT on table 'T4' caused a violation of foreign key constraint 'FK1' for key (9999).  The statement has been rolled back.
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> select * from t1;
 A          
 -----------
@@ -400,10 +400,10 @@ ij> delete from t4;
 ij> delete from t3;
 67 rows inserted/updated/deleted
 ij> rollback;
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> select * from t1;
 A          
 -----------
@@ -540,10 +540,10 @@ ij> alter table t5 add constraint uconst UNIQUE(c4);
 ij> insert into t5 values ( 1 , 2, 3 , 'one'), 
 (11 , 22, 33, 'eleven'), (111, 222, 333, 'one hundred eleven');
 3 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> select * from t5 ;
 C1         |C2         |C3         |C4                                                                                                  
 ----------------------------------------------------------------------------------------------------------------------------------------
@@ -567,10 +567,10 @@ C1         |C2         |C3         |C4
 11         |22         |33         |eleven                                                                                              
 111        |222        |333        |one hundred eleven                                                                                  
 1111       |2222       |3333       |four ones ..                                                                                        
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> select * from t5;
 C1         |C2         |C3         |C4                                                                                                  
 ----------------------------------------------------------------------------------------------------------------------------------------
@@ -603,10 +603,10 @@ ij> insert into testing values (PADSTRING('10000000',2024), PADSTRING('20000000'
 1 row inserted/updated/deleted
 ij> insert into testing values (PADSTRING('100000000',2024),PADSTRING('200000000',1024), PADSTRING('300000000',1024), PADSTRING('400000000',2048), PADSTRING('500000000',300));
 1 row inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- select the whole row, or individual columns.
 -- 9 rows should be returned from each of the following selects
 select * from testing;
@@ -692,10 +692,10 @@ ij> insert into testing (a, b, c, d) values (PADSTRING('a',2024), PADSTRING('b',
 1 row inserted/updated/deleted
 ij> insert into testing (a, b, c, d, e) values (PADSTRING('a',2024), PADSTRING('b',1024), PADSTRING('c',1024), PADSTRING('d',2048), PADSTRING('e',300));
 1 row inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- select some partial rows.
 -- should select 14 rows
 select * from testing;
@@ -801,10 +801,10 @@ ij> -- update all columns for 2 rows
 update testing set a = PADSTRING('aaa',2024), b = PADSTRING('bbb',1024), c = PADSTRING('ccc',1024), d = PADSTRING('ddd',2048), e = PADSTRING('eee',300)
 	where d = PADSTRING('d',2048);
 2 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- following select should return 0 rows
 select * from testing where d = PADSTRING('d',2048);
 A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               
@@ -869,10 +869,10 @@ ij> insert into testing values (1, PADSTRING('fill1',2500), PADSTRING('fill2',25
 1 row inserted/updated/deleted
 ij> insert into testing values (2, PADSTRING('fill1',2500), PADSTRING('fill2',2500), 20, PADSTRING('fill3',2500), PADSTRING('fill4',2500), 200, PADSTRING('fill5',2400), PADSTRING('fill6',2400), 2000);
 1 row inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> select * from testing;
 KEY1       |FILLER1                                                                                                                         |FILLER2                                                                                                                         |KEY2       |FILLER3                                                                                                                         |FILLER4                                                                                                                         |KEY3       |FILLER5                                                                                                                         |FILLER6                                                                                                                         |KEY4       
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -969,10 +969,10 @@ ij> insert into testing values (PADSTRING('11 22 33 44 55 66 77',8096));
 1 row inserted/updated/deleted
 ij> insert into testing values (PADSTRING('aa bb cc dd ee ff gg',8096));
 1 row inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- should return 4 rows
 select a from testing;
 A                                                                                                                               
@@ -995,10 +995,10 @@ ij> insert into testing values (3, PADSTRING('11 22 33 44 55 66 77',32384));
 1 row inserted/updated/deleted
 ij> insert into testing values (4, PADSTRING('aa bb cc dd ee ff gg',32384));
 1 row inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- should return 4 rows
 select * from testing;
 A          |B                                                                                                                               
@@ -1040,10 +1040,10 @@ ij> insert into testing values (PADSTRING('11 22 33 44 55 66 77',32384), 3);
 1 row inserted/updated/deleted
 ij> insert into testing values (PADSTRING('aa bb cc dd ee ff gg',32384), 4);
 1 row inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- should return 4 rows
 select * from testing;
 A                                                                                                                               |B          
@@ -1085,10 +1085,10 @@ ij> insert into testing values (2, PADSTRING('11 22 33 44 55 66 77',32384), 3);
 1 row inserted/updated/deleted
 ij> insert into testing values (4, PADSTRING('aa bb cc dd ee ff gg',32384), 4);
 1 row inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- should return 4 rows
 select * from testing;
 Z          |A                                                                                                                               |B          
@@ -1137,10 +1137,10 @@ ij> update testing set a = PADSTRING('update four times',32384);
 4 rows inserted/updated/deleted
 ij> update testing set a = PADSTRING('update five times',32384);
 4 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- select should return 4 rows
 select a from testing;
 A                                                                                                                               
@@ -1163,10 +1163,10 @@ ij> insert into testing values (PADSTRING('11 22 33 44 55 66 77',32384), 3, PADS
 1 row inserted/updated/deleted
 ij> insert into testing values (PADSTRING('aa bb cc dd ee ff gg',32384), 4, PADSTRING('aa bb cc dd ee ff gg',32084));
 1 row inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- should return 4 rows
 select * from testing;
 A                                                                                                                               |B          |C                                                                                                                               
@@ -1229,10 +1229,10 @@ ij> update testing set c = PADSTRING('update 8',32084);
 4 rows inserted/updated/deleted
 ij> update testing set c = PADSTRING('update 9',32084);
 4 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- select should return 4 rows
 select * from testing;
 A                                                                                                                               |B          |C                                                                                                                               
@@ -1263,10 +1263,10 @@ ij> insert into testing values (6, PADSTRING('11 22 33 44 55 66 77',64768), 7, P
 1 row inserted/updated/deleted
 ij> insert into testing values (7, PADSTRING('aa bb cc dd ee ff gg',64768), 8, PADSTRING('aa bb cc dd ee ff gg',32384), 9);
 1 row inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- select shoudl return 8 rows
 select * from testing;
 A          |B                                                                                                                               |C          |D                                                                                                                               |E          
@@ -1333,10 +1333,10 @@ ij> update testing set b = PADSTRING('update 8',64768);
 8 rows inserted/updated/deleted
 ij> update testing set b = PADSTRING('update 9',64768);
 8 rows inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- select should return 8 rows
 select b from testing;
 B                                                                                                                               
@@ -1386,10 +1386,10 @@ ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRIN
 1 row inserted/updated/deleted
 ij> insert into testing values (PADSTRING('a a a a a a a a a a',64768), PADSTRING('b b b b b b b b b b',32384), PADSTRING('c c c c c c c c c c',64768), PADSTRING('d d d d d d d d d d',32384), PADSTRING('e e e e e e e e',64768));
 1 row inserted/updated/deleted
-ij> connect 'jdbc:derby:wombat;shutdown=true';
+ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
-ij> connect 'jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
+ij> connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> -- select should return 10 rows
 select * from testing;
 A                                                                                                                               |B                                                                                                                               |C                                                                                                                               |D                                                                                                                               |E                                                                                                                               

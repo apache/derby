@@ -27,13 +27,14 @@ import java.math.BigDecimal;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+import java.util.Properties;
 
 /**
  * Test of backup restore through java program JDBC calls.
@@ -121,7 +122,7 @@ public class backupRestore1
 		//shutdown the database ..
 		try{
 			//shutdown 
-			Connection conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
+			TestUtil.shutdownUsingDataSource("wombat");
 		}catch(SQLException se){
 				if (se.getSQLState() != null && se.getSQLState().equals("08006"))
 					System.out.println("database shutdown properly");
@@ -134,8 +135,10 @@ public class backupRestore1
 		System.out.println("testing rollforward recovery");
 		try{
 			//perform rollforward recovery and do some inserts again
-			Connection conn = DriverManager.getConnection(
-														  "jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat");
+			Properties prop = new Properties();
+			prop.setProperty("databaseName","wombat");
+			prop.setProperty("connectionAttributes", "rollForwardRecoveryFrom=extinout/mybackup/wombat");
+			Connection conn = TestUtil.getDataSourceConnection(prop);
 			//run consistenct checker
 			Statement stmt = conn.createStatement();
 			stmt.execute("VALUES (ConsistencyChecker())");
@@ -149,7 +152,7 @@ public class backupRestore1
 
             conn.commit();
 			conn.close();
-			conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
+			TestUtil.shutdownUsingDataSource("wombat");
 		}
         catch( SQLException se)
         {
@@ -167,8 +170,10 @@ public class backupRestore1
 		RandomAccessFile rfs = null;
 		boolean alreadyShutdown = false;
 		try{
-			Connection conn = DriverManager.getConnection("jdbc:derby:wombat");
-					
+			Properties prop = new Properties();
+			prop.setProperty("databaseName","wombat");
+			Connection conn = TestUtil.getDataSourceConnection(prop);
+								
 			//just open to a file in existing backup, so that rename will fail on
 			//next backup
 			rfs = 
@@ -181,8 +186,7 @@ public class backupRestore1
             backupStmt.execute();
             backupStmt.close();
 			conn.close();
-
-			conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
+			TestUtil.shutdownUsingDataSource("wombat");
 		}catch(SQLException se)
 		{
 			if (se.getSQLState() != null && se.getSQLState().equals("XSRS4"))
@@ -207,7 +211,7 @@ public class backupRestore1
 		{
 			try{
 				//shutdown 
-				Connection conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
+				TestUtil.shutdownUsingDataSource("wombat");
 			}catch(SQLException se){
 				if (se.getSQLState() != null && se.getSQLState().equals("08006"))
 					System.out.println("database shutdown properly");
@@ -223,13 +227,18 @@ public class backupRestore1
 			//close the earlier opened file in backup dir
 			if(rfs != null )
 				rfs.close();
-			Connection conn = DriverManager.getConnection("jdbc:derby:wombat;restoreFrom=extinout/mybackup/wombat");
+			
+			Properties prop = new Properties();
+			prop.setProperty("databaseName","wombat");
+			prop.setProperty("connectionAttributes","restoreFrom=extinout/mybackup/wombat");
+			Connection conn = TestUtil.getDataSourceConnection(prop);
+			
 			//run consistenct checker
 			Statement stmt = conn.createStatement();
 			stmt.execute("VALUES (ConsistencyChecker())");
 			conn.close();
 			//shutdown the backup db;
-			conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
+			TestUtil.shutdownUsingDataSource("wombat");
 		}catch(SQLException se)
 		{
 			if (se.getSQLState() != null && se.getSQLState().equals("08006"))
@@ -242,8 +251,10 @@ public class backupRestore1
 
 		//now take a backup again , just to make all is well in the system.
 		try{
-			Connection conn = DriverManager.getConnection("jdbc:derby:wombat");
-
+			Properties prop = new Properties();
+			prop.setProperty("databaseName","wombat");
+			Connection conn = TestUtil.getDataSourceConnection(prop);
+			
             CallableStatement backupStmt = conn.prepareCall(
                 "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
             backupStmt.setString(1, "extinout/mybackup");
@@ -253,7 +264,7 @@ public class backupRestore1
 			Statement stmt = conn.createStatement();
 			stmt.execute("VALUES (ConsistencyChecker())");
 			conn.close();
-			conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
+			TestUtil.shutdownUsingDataSource("wombat");
 		}catch(SQLException se)
 		{
 			if (se.getSQLState() != null && se.getSQLState().equals("08006"))
