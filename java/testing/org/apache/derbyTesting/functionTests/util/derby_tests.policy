@@ -119,6 +119,9 @@ grant codeBase "${csinfo.codejar}derbyTesting.jar" {
   // Access all files under ${user.dir}to write the test directory structure
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
   
+  // lang/errorStream.java
+  permission java.lang.RuntimePermission "setIO";
+  
 };
 
 //
@@ -157,6 +160,9 @@ grant codeBase "${csinfo.codeclasses}" {
   // These permissions are needed to load the JCE for encryption with Sun JDK131.
   // JDK14 has the JCE  preloaded
   permission java.security.SecurityPermission "insertProvider.SunJCE";
+  
+  // lang/errorStream.java
+  permission java.lang.RuntimePermission "setIO";
   
 };
 

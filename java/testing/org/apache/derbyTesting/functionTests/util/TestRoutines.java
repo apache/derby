@@ -20,6 +20,8 @@
 
 package org.apache.derbyTesting.functionTests.util;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.*;
 import java.io.*;
 import org.apache.derby.iapi.reference.JDBC30Translation;
@@ -70,9 +72,19 @@ public class TestRoutines {
 		TESTROUTINE.SET_SYSTEM_PROPERTY(IN PROPERTY_KEY VARCHAR(32000), IN PROPERTY_VALUE VARCHAR(32000))
 		Set a system property
 	*/
-	public static void setSystemProperty(String key, String value) {
-
-		System.getProperties().put(key, value);
+	public static void setSystemProperty(final String key, final String value) {
+		
+		// needs to run in a privileged block as it will be
+		// called through a SQL statement and thus a generated
+		// class. The generated class on the stack has no permissions
+		// granted to it.
+		AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+            	System.setProperty(key, value);
+                return null; // nothing to return
+            }
+        });
+		
 	}
 	/**
 		TESTROUTINE.SLEEP(IN TIME_MS BIGINT)
