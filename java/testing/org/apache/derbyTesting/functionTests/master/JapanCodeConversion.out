@@ -10,6 +10,25 @@ call SYSCS_UTIL.SYSCS_IMPORT_TABLE(null, 'T1_EUC_JP' ,
  EnC:>9<   EnC:>9<  EnC:>9<           'extin/jap_EUC_JP.dat' , 
  EnC:>9<  EnC:>9<  EnC:>9<  EnC:>9<   null, null, 'EUC_JP', 0) ;
 0 rows inserted/updated/deleted
+ij> SELECT jnum, jtime, { fn length(jstring) } AS JLEN from T1_EUC_JP;
+JNUM       |JTIME   |JLEN       
+--------------------------------
+1          |15:32:06|14         
+2          |15:32:10|20         
+3          |15:32:28|38         
+4          |15:32:29|27         
+5          |15:32:29|29         
+6          |15:32:30|10         
+7          |15:32:31|24         
+8          |15:33:22|14         
+9          |15:33:23|117        
+10         |15:33:40|14         
+11         |15:33:41|117        
+12         |15:33:43|27         
+13         |15:34:29|14         
+14         |15:34:30|117        
+15         |15:35:35|26         
+16         |15:39:10|27         
 ij> -- export to file with EUC_JP encoding 
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE('APP', 'T1_EUC_JP' ,
  EnC:>9<   EnC:>9<  EnC:>9<           'extinout/jap_EUC_JP.dump' , 
@@ -20,6 +39,134 @@ call SYSCS_UTIL.SYSCS_EXPORT_TABLE('APP', 'T1_EUC_JP' ,
  EnC:>9<   EnC:>9<  EnC:>9<           'extinout/jap_SJIS.dump' , 
  EnC:>9<  EnC:>9<  EnC:>9<  EnC:>9<   null, null, 'SJIS') ;
 0 rows inserted/updated/deleted
+ij> -- import as EUC_JP and compare to original
+create table T1_EUC_JP_IMPORT_AS_EUC_JP(jnum int, jtime time, jstring char(200));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1_EUC_JP_IMPORT_AS_EUC_JP',
+   'extinout/jap_EUC_JP.dump',
+   NULL, NULL,
+   'EUC_JP', 0);
+0 rows inserted/updated/deleted
+ij> SELECT jnum, jtime, { fn length(jstring) } AS JLEN from T1_EUC_JP_IMPORT_AS_EUC_JP;
+JNUM       |JTIME   |JLEN       
+--------------------------------
+1          |15:32:06|14         
+2          |15:32:10|20         
+3          |15:32:28|38         
+4          |15:32:29|27         
+5          |15:32:29|29         
+6          |15:32:30|10         
+7          |15:32:31|24         
+8          |15:33:22|14         
+9          |15:33:23|117        
+10         |15:33:40|14         
+11         |15:33:41|117        
+12         |15:33:43|27         
+13         |15:34:29|14         
+14         |15:34:30|117        
+15         |15:35:35|26         
+16         |15:39:10|27         
+ij> SELECT count(*) FROM T1_EUC_JP OG, T1_EUC_JP_IMPORT_AS_EUC_JP IM
+  WHERE OG.jnum = IM.jnum AND OG.jtime = IM.jtime AND OG.jstring = IM.jstring;
+1          
+-----------
+16         
+ij> -- import as SJIS and compare to original
+create table T1_EUC_JP_IMPORT_AS_SJIS(jnum int, jtime time, jstring char(200));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1_EUC_JP_IMPORT_AS_SJIS',
+   'extinout/jap_SJIS.dump',
+   NULL, NULL,
+   'SJIS', 0);
+0 rows inserted/updated/deleted
+ij> SELECT jnum, jtime, { fn length(jstring) } AS JLEN from T1_EUC_JP_IMPORT_AS_SJIS;
+JNUM       |JTIME   |JLEN       
+--------------------------------
+1          |15:32:06|14         
+2          |15:32:10|20         
+3          |15:32:28|38         
+4          |15:32:29|27         
+5          |15:32:29|29         
+6          |15:32:30|10         
+7          |15:32:31|24         
+8          |15:33:22|14         
+9          |15:33:23|117        
+10         |15:33:40|14         
+11         |15:33:41|117        
+12         |15:33:43|27         
+13         |15:34:29|14         
+14         |15:34:30|117        
+15         |15:35:35|26         
+16         |15:39:10|27         
+ij> SELECT count(*) FROM T1_EUC_JP OG, T1_EUC_JP_IMPORT_AS_SJIS IM
+  WHERE OG.jnum = IM.jnum AND OG.jtime = IM.jtime AND OG.jstring = IM.jstring;
+1          
+-----------
+16         
+ij> delete from T1_EUC_JP_IMPORT_AS_EUC_JP;
+16 rows inserted/updated/deleted
+ij> delete from T1_EUC_JP_IMPORT_AS_SJIS;
+16 rows inserted/updated/deleted
+ij> -- now import using the wrong encoding file just to ensure that different
+-- encodings are being used.
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1_EUC_JP_IMPORT_AS_EUC_JP',
+   'extinout/jap_SJIS.dump',
+   NULL, NULL,
+   'EUC_JP', 0);
+0 rows inserted/updated/deleted
+ij> SELECT jnum, jtime, { fn length(jstring) } AS JLEN from T1_EUC_JP_IMPORT_AS_EUC_JP;
+JNUM       |JTIME   |JLEN       
+--------------------------------
+1          |15:32:06|14         
+2          |15:32:10|20         
+3          |15:32:28|38         
+4          |15:32:29|27         
+5          |15:32:29|29         
+6          |15:32:30|10         
+7          |15:32:31|24         
+8          |15:33:22|14         
+9          |15:33:23|116        
+10         |15:33:40|14         
+11         |15:33:41|116        
+12         |15:33:43|27         
+13         |15:34:29|14         
+14         |15:34:30|116        
+15         |15:35:35|26         
+16         |15:39:10|27         
+ij> SELECT count(*) FROM T1_EUC_JP OG, T1_EUC_JP_IMPORT_AS_EUC_JP IM
+  WHERE OG.jnum = IM.jnum AND OG.jtime = IM.jtime AND OG.jstring = IM.jstring;
+1          
+-----------
+0          
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1_EUC_JP_IMPORT_AS_SJIS',
+   'extinout/jap_EUC_JP.dump',
+   NULL, NULL,
+   'SJIS', 0);
+0 rows inserted/updated/deleted
+ij> SELECT jnum, jtime, { fn length(jstring) } AS JLEN from T1_EUC_JP_IMPORT_AS_SJIS;
+JNUM       |JTIME   |JLEN       
+--------------------------------
+1          |15:32:06|26         
+2          |15:32:10|24         
+3          |15:32:28|59         
+4          |15:32:29|51         
+5          |15:32:29|55         
+6          |15:32:30|12         
+7          |15:32:31|35         
+8          |15:33:22|26         
+9          |15:33:23|152        
+10         |15:33:40|26         
+11         |15:33:41|152        
+12         |15:33:43|51         
+13         |15:34:29|26         
+14         |15:34:30|152        
+15         |15:35:35|43         
+16         |15:39:10|51         
+ij> SELECT count(*) FROM T1_EUC_JP OG, T1_EUC_JP_IMPORT_AS_SJIS IM
+  WHERE OG.jnum = IM.jnum AND OG.jtime = IM.jtime AND OG.jstring = IM.jstring;
+1          
+-----------
+0          
 ij> -- convert from EUC_JP to unicode with native2ascii
 ! 'native2ascii -encoding EUC_JP extinout/jap_EUC_JP.dump';
 1,"15:32:06","\u30a4\u30d9\u30f3\u30c8\u30a2\u30e9\u30fc\u30e0\u304c\u6709\u52b9\u3067\u3059\u3002                                                                                                                                                                                          "
