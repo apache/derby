@@ -94,7 +94,7 @@ getIdentifierQuoteString(): "
 getNumericFunctions(): ABS,MOD,SQRT
 getStringFunctions(): CONCAT,LENGTH,LCASE,LOCATE,LTRIM,RTRIM,SUBSTRING,UCASE
 getSystemFunctions(): USER
-getTimeDateFunctions(): CURDATE,CURTIME,CURRENT_DATE,CURRENT_TIME,CURRENT_TIMESTAMP,EXTRACT
+getTimeDateFunctions(): CURDATE,CURTIME,HOUR,MINUTE,MONTH,SECOND,TIMESTAMPADD,TIMESTAMPDIFF,YEAR
 getExtraNameCharacters(): 
 supportsAlterTableWithAddColumn(): true
 supportsAlterTableWithDropColumn(): true

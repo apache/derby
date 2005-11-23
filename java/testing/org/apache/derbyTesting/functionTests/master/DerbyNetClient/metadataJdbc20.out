@@ -102,6 +102,34 @@ Executing VALUES { fn SOUNDEX('Derby') } --
 SQLSTATE(42X01): Syntax error: Encountered "SOUNDEX" at line 1, column 13.
 Executing VALUES { fn SPACE(12) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "SPACE" at line 1, column 13.
+Test escaped date time functions - JDBC 3.0 C.3
+TEST FUNCTIONS DECLARED IN DATABASEMETADATA LIST
+Executing VALUES CASE WHEN { fn CURDATE()} = CURRENT_DATE THEN 'OK' ELSE 'wrong' END --   = >OK<  << 
+Executing VALUES CASE WHEN { fn CURTIME()} = CURRENT_TIME THEN 'OK' ELSE 'wrong' END --   = >OK<  << 
+Executing VALUES { fn HOUR({t '16:13:03'}) } --   = >16<  << 
+Executing VALUES { fn MINUTE({t '16:13:03'}) } --   = >13<  << 
+Executing VALUES { fn MONTH({d '1995-12-19'}) } --   = >12<  << 
+Executing VALUES { fn SECOND({t '16:13:03'}) } --   = >3<  << 
+Executing VALUES { fn TIMESTAMPADD(SQL_TSI_DAY, 7, {ts 'xxxxxxFILTERED-TIMESTAMPxxxxx}) } --   = >xxxxxxFILTERED-TIMESTAMPxxxxx<  << 
+Executing VALUES { fn TIMESTAMPDIFF(SQL_TSI_DAY, {ts 'xxxxxxFILTERED-TIMESTAMPxxxxx}, {ts 'xxxxxxFILTERED-TIMESTAMPxxxxx}) } --   = >683<  << 
+Executing VALUES { fn YEAR({d '1995-12-19'}) } --   = >1995<  << 
+TEST FUNCTIONS NOT DECLARED IN DATABASEMETADATA LIST
+Executing VALUES { fn DAYNAME({d '1995-12-19'h}) } -- 
+SQLSTATE(42X01): Syntax error: Encountered "DAYNAME" at line 1, column 13.
+Executing VALUES { fn DAYOFMONTH({d '1995-12-19'}) } -- 
+SQLSTATE(42X01): Syntax error: Encountered "DAYOFMONTH" at line 1, column 13.
+Executing VALUES { fn DAYOFWEEK({d '1995-12-19'}) } -- 
+SQLSTATE(42X01): Syntax error: Encountered "DAYOFWEEK" at line 1, column 13.
+Executing VALUES { fn DAYOFYEAR({d '1995-12-19'}) } -- 
+SQLSTATE(42X01): Syntax error: Encountered "DAYOFYEAR" at line 1, column 13.
+Executing VALUES { fn MONTHNAME({d '1995-12-19'}) } -- 
+SQLSTATE(42X01): Syntax error: Encountered "MONTHNAME" at line 1, column 13.
+Executing VALUES CASE WHEN { fn NOW()} = CURRENT_TIMESTAMP THEN 'OK' ELSE 'wrong' END -- 
+SQLSTATE(42X01): Syntax error: Encountered "NOW" at line 1, column 23.
+Executing VALUES { fn QUARTER({d '1995-12-19'}) } -- 
+SQLSTATE(42X01): Syntax error: Encountered "QUARTER" at line 1, column 13.
+Executing VALUES { fn WEEK({d '1995-12-19'}) } -- 
+SQLSTATE(42X01): Syntax error: Encountered "WEEK" at line 1, column 13.
 Test escaped system functions - JDBC 3.0 C.4
 TEST FUNCTIONS DECLARED IN DATABASEMETADATA LIST
 Executing VALUES { fn USER() } --   = >APP<  << 

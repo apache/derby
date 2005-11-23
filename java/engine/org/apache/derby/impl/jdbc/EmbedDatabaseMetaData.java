@@ -450,13 +450,13 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	}
 
     /**
-     * Get a comma separated list of time and date functions.
-		not sure if this includes these built-ins or not, but here they are.
-		FIXME: find a way to reference method aliases known to be "date/time"
-     * @return the list
+     * Get a comma separated list of JDBC escaped time date functions.
+     * Must be a complete or sub set of functions in appendix C.3
+     * of JDBC 3.0 specification.
+      * @return the list
      */
 	public String getTimeDateFunctions() {
-		return "CURDATE,CURTIME,CURRENT_DATE,CURRENT_TIME,CURRENT_TIMESTAMP,EXTRACT";
+		return "CURDATE,CURTIME,HOUR,MINUTE,MONTH,SECOND,TIMESTAMPADD,TIMESTAMPDIFF,YEAR";
 	}
 
     /**

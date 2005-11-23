@@ -117,7 +117,10 @@ public class metadataJdbc20 {
 			
 			System.out.println("Test escaped string functions - JDBC 3.0 C.2");
 			testEscapedFunctions(con, STRING_FUNCTIONS, met.getStringFunctions());
-			
+
+			System.out.println("Test escaped date time functions - JDBC 3.0 C.3");
+			testEscapedFunctions(con, TIMEDATE_FUNCTIONS, met.getTimeDateFunctions());
+
 			System.out.println("Test escaped system functions - JDBC 3.0 C.4");
 			testEscapedFunctions(con, SYSTEM_FUNCTIONS, met.getSystemFunctions());
 
@@ -235,6 +238,29 @@ public class metadataJdbc20 {
 		{ "UCASE", "'Fernando Alonso'" }
 		};
 	
+	private static final String[][] TIMEDATE_FUNCTIONS =
+	{	
+		// Section C.3 JDBC 3.0 spec.
+		{ "CURDATE" },
+		{ "CURTIME" },
+		{ "DAYNAME", "{d '1995-12-19'h}" },
+		{ "DAYOFMONTH", "{d '1995-12-19'}" },
+		{ "DAYOFWEEK", "{d '1995-12-19'}" },
+		{ "DAYOFYEAR", "{d '1995-12-19'}" },
+		{ "HOUR", "{t '16:13:03'}" },
+		{ "MINUTE", "{t '16:13:03'}" },
+		{ "MONTH", "{d '1995-12-19'}" },
+		{ "MONTHNAME", "{d '1995-12-19'}" },
+		{ "NOW" },
+		{ "QUARTER", "{d '1995-12-19'}" },
+		{ "SECOND", "{t '16:13:03'}" },
+		{ "TIMESTAMPADD", "SQL_TSI_DAY", "7", "{ts '1995-12-19 12:15:54'}" },
+		{ "TIMESTAMPDIFF", "SQL_TSI_DAY", "{ts '1995-12-19 12:15:54'}", "{ts '1997-11-02 00:15:23'}" },
+		{ "WEEK", "{d '1995-12-19'}" },
+		{ "YEAR", "{d '1995-12-19'}" },
+		
+	};
+
 	private static final String[][] SYSTEM_FUNCTIONS =
 	{	
 		// Section C.4 JDBC 3.0 spec.
@@ -322,6 +348,18 @@ public class metadataJdbc20 {
 		}
 		
 		sql = sql + ") }";
+		
+		// Special processing for functions that return
+		// current date, time or timestamp. This is to
+		// ensure we don't have output that depends on
+		// the time the test is run.
+		if ("CURDATE".equals(specDetails[0]))
+			sql = "VALUES CASE WHEN { fn CURDATE()} = CURRENT_DATE THEN 'OK' ELSE 'wrong' END";
+		else if ("CURTIME".equals(specDetails[0]))
+			sql = "VALUES CASE WHEN { fn CURTIME()} = CURRENT_TIME THEN 'OK' ELSE 'wrong' END";
+		else if ("NOW".equals(specDetails[0]))
+			sql = "VALUES CASE WHEN { fn NOW()} = CURRENT_TIMESTAMP THEN 'OK' ELSE 'wrong' END";
+		
 		
 		System.out.print("Executing " + sql + " -- ");
 			
