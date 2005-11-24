@@ -879,6 +879,11 @@ public class updatableResultSet {
 			}
       System.out.println("Position the ResultSet with next()");
 			rs.next();
+                        //Derby-718 check that column values are not null after next()
+                        if (rs.getInt(1) == 0) {
+                            System.out.println("First column should not be 0");
+                        }
+                        // Derby-718
       System.out.println("Should be able to deletRow() on the current row now");
 			rs.deleteRow();
 			//have to close the resultset because by default, resultsets are held open over commit
@@ -1031,6 +1036,11 @@ public class updatableResultSet {
 			rs.next();
 			rs.deleteRow();
 			rs.next();
+                        //Derby-718 check that column values are not null after next()
+                        if (rs.getInt(1) == 0) {
+                            System.out.println("Column c21 should not be 0");
+                        }
+                        // Derby-718
 			rs.deleteRow();
 			System.out.println("As expected, no rows in temp table after deleteRow");
 			dumpRS(stmt.executeQuery("select * from SESSION.t2"));

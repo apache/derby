@@ -141,6 +141,9 @@ public abstract class Cursor {
 
         // mark the start of a new row.
         makeNextRowPositionCurrent();
+        
+        // Moving out of the hole, set isUpdateDeleteHole to false
+        isUpdateDeleteHole_ = false;
 
         // Drive the CNTQRY outside of calculateColumnOffsetsForRow() if the dataBuffer_
         // contains no data since it has no abilities to handle replies other than
