@@ -40,6 +40,7 @@ import java.io.BufferedInputStream;
 import java.util.zip.CRC32;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.ByteArrayInputStream;
 
 /**
  * Test of JDBC result set Stream calls.
@@ -285,6 +286,7 @@ public class resultsetStream {
 			stmt.close();
 			
 			TestOfGetAsciiStream.executeTestOfGetAsciiStream(con);
+			TestOfRepeatedStream.executeTestOfRepeatedStream(con);
 
 			con.close();
 
@@ -468,5 +470,130 @@ public class resultsetStream {
 		}
 		
 	}
+    
+    static class TestOfRepeatedStream{
+
+	
+	private static void executeTestOfRepeatedStream(Connection conn) 
+	    throws SQLException, IOException {
+	
+	    System.out.println("Test of RepeatedStream");
+
+	    prepareTestRepeatedStream(conn);
+	    readFromRepeatedStream(conn);
+	    cleanTestRepeatedStream(conn);
+	    
+	    
+	}
+    
+    
+	private static void prepareTestRepeatedStream(Connection conn) throws SQLException {
+	
+	    PreparedStatement st = null;
+
+	    try{
+
+		st = conn.prepareStatement("create table testBlobX2 (a integer, b blob(1024K))");
+		st.execute();
+		st.close();
+
+		st = conn.prepareStatement("insert into testBlobX2(a,b) values(1,?)");
+
+		byte[] testData = new byte[1024 * 1024];
+	    
+		for(int i = 0;
+		    i < testData.length;
+		    i ++)
+		    testData[i] = (byte) (i % 256);
+	    
+		st.setBinaryStream(1, 
+				   new ByteArrayInputStream(testData),
+				   testData.length);
+
+		st.executeUpdate();
+
+	    }finally{
+		if(st != null)
+		    st.close();
+	    }
+	
+	}
+
+
+	private static void readFromRepeatedStream(Connection conn) 
+	    throws SQLException ,IOException {
+	
+	    PreparedStatement st = null;
+	    ResultSet rs = null;
+	
+	    InputStream is = null;
+
+	    try{
+		st = conn.prepareStatement("SELECT b FROM testBlobX2 WHERE a = 1");
+		rs = st.executeQuery();
+	    
+		rs.next();
+	    
+		System.out.print("first stream: ");
+		readHeadOfStream(rs);
+	    
+		System.out.print("second stream: ");
+		readHeadOfStream(rs);
+
+	    }finally{
+		if(rs != null)
+		    rs.close();
+	    
+		if(st != null)
+		    st.close();
+	    
+	    }
+
+	}
+
+    
+	private static void readHeadOfStream(ResultSet rs) 
+	    throws SQLException, IOException {
+	
+	    InputStream is = null;
+
+	    try{
+		is = rs.getBinaryStream(1);
+
+		for( int i = 0 ;
+		     i < 8 ;
+		     i ++ ){
+		
+		    System.out.print(is.read());
+		
+		}
+	    
+		System.out.println();
+	    
+	    }finally{
+		if(is != null)
+		    is.close();
+	    }
+	}
+    
+    
+	private static void cleanTestRepeatedStream(Connection conn) 
+	    throws SQLException {
+	
+	    Statement st = null;
+
+	    try{
+		st = conn.createStatement();
+		st.execute("drop table testBlobX2");
+
+	    }finally{
+		if(st != null)
+		    st.close();
+	    }
+	}
+
+
+    }
+    
 
 }
