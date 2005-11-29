@@ -29,3 +29,13 @@ drop table a;
 -- set isolation to repeatable read
 set isolation serializable;
 
+-- see that statements that fail at parse or bind time
+-- are not put in the statment cache;
+values 1;
+select SQL_TEXT from syscs_diag.statement_cache where SQL_TEXT LIKE '%932432%';
+
+VALUES FRED932432;
+SELECT * FROM BILL932432;
+SELECT 932432;
+
+select SQL_TEXT from syscs_diag.statement_cache where SQL_TEXT LIKE '%932432%';

@@ -412,9 +412,6 @@ public class GenericStatement
 				catch (StandardException se)
 				{
 					lcc.commitNestedTransaction();
-					if (foundInCache)
-						((GenericLanguageConnectionContext)lcc).removeStatement(this);
-
 
 					// Statement logging if lcc.getLogStatementText() is true
 					if (istream != null)
@@ -513,8 +510,6 @@ public class GenericStatement
 				catch (StandardException e) 	// hold it, throw it
 				{
 					lcc.commitNestedTransaction();
-					if (foundInCache)
-						((GenericLanguageConnectionContext)lcc).removeStatement(this);
 					throw e;
 				}
 
@@ -535,6 +530,12 @@ public class GenericStatement
 			{
 				lcc.popCompilerContext( cc );
 			}
+		}
+		catch (StandardException se)
+		{
+			if (foundInCache)
+				((GenericLanguageConnectionContext)lcc).removeStatement(this);
+			throw se;
 		}
 		finally
 		{

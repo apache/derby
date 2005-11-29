@@ -28,4 +28,24 @@ ij> drop table a;
 ij> -- set isolation to repeatable read
 set isolation serializable;
 0 rows inserted/updated/deleted
+ij> -- see that statements that fail at parse or bind time
+-- are not put in the statment cache;
+values 1;
+1          
+-----------
+1          
+ij> select SQL_TEXT from syscs_diag.statement_cache where SQL_TEXT LIKE '%932432%';
+SQL_TEXT                                                                                                                        
+--------------------------------------------------------------------------------------------------------------------------------
+select SQL_TEXT from syscs_diag.statement_cache where SQL_TEXT LIKE '%932432%'                                                  
+ij> VALUES FRED932432;
+ERROR 42X04: Column 'FRED932432' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'FRED932432' is not a column in the target table.
+ij> SELECT * FROM BILL932432;
+ERROR 42X05: Table 'BILL932432' does not exist.
+ij> SELECT 932432;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 13.
+ij> select SQL_TEXT from syscs_diag.statement_cache where SQL_TEXT LIKE '%932432%';
+SQL_TEXT                                                                                                                        
+--------------------------------------------------------------------------------------------------------------------------------
+select SQL_TEXT from syscs_diag.statement_cache where SQL_TEXT LIKE '%932432%'                                                  
 ij> 
