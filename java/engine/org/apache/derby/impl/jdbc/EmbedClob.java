@@ -251,8 +251,17 @@ final class EmbedClob extends ConnectionChild implements Clob
 			}
 			finally
 			{
-				if (clobReader != null)
-					clobReader.close();
+			    if (clobReader != null){
+				
+				try{
+				    clobReader.close();
+				    
+				}catch(IOException e){
+				    e.printStackTrace();
+				    throw new SQLException(e.getMessage());
+				    
+				}
+			    }
 				restoreContextStack();
 			}
 		}
