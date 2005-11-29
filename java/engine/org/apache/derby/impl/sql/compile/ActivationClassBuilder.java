@@ -77,7 +77,7 @@ import java.util.Hashtable;
  *
  * @author ames
  */
-public class ActivationClassBuilder	extends	ExpressionClassBuilder
+class ActivationClassBuilder	extends	ExpressionClassBuilder
 {
 	///////////////////////////////////////////////////////////////////////
 	//
@@ -118,7 +118,7 @@ public class ActivationClassBuilder	extends	ExpressionClassBuilder
 	 *
 	 * @exception StandardException thrown on failure
 	 */
-	public ActivationClassBuilder (String superClass, CompilerContext cc) throws StandardException
+	ActivationClassBuilder (String superClass, CompilerContext cc) throws StandardException
 	{
 		super( superClass, (String) null, cc );
 		executeMethod = beginExecuteMethod();
@@ -141,7 +141,7 @@ public class ActivationClassBuilder	extends	ExpressionClassBuilder
 	/**
 		The base class for activations is BaseActivation
 	 */
-	public String getBaseClassName() {
+	String getBaseClassName() {
 	    return ClassName.BaseActivation;
 	}
 
@@ -247,7 +247,7 @@ public class ActivationClassBuilder	extends	ExpressionClassBuilder
 		return	mb;
 	}
 
-	public MethodBuilder startResetMethod() {
+	MethodBuilder startResetMethod() {
 		MethodBuilder mb = cb.newMethodBuilder(Modifier.PUBLIC,
 			"void", "reset");
 
@@ -267,7 +267,7 @@ public class ActivationClassBuilder	extends	ExpressionClassBuilder
 
 	   Upon entry the only word on the stack is the result set expression
 	 */
-	public void finishExecuteMethod(boolean genMarkAsTopNode) {
+	void finishExecuteMethod(boolean genMarkAsTopNode) {
 
 		executeMethod.pushThis();
 		executeMethod.getField(ClassName.BaseActivation, "resultSet", ClassName.ResultSet);
@@ -327,7 +327,7 @@ public class ActivationClassBuilder	extends	ExpressionClassBuilder
 	 * </verbatim></pre>
 	 *
 	 */
-	public void addCursorPositionCode() {
+	void addCursorPositionCode() {
 
 		// the getter
 		// This method is an implementation of the interface method
@@ -368,7 +368,7 @@ public class ActivationClassBuilder	extends	ExpressionClassBuilder
 	 * </verbatim></pre>
 	 *
 	 */
-	public void rememberCursorTarget(MethodBuilder mb) {
+	void rememberCursorTarget(MethodBuilder mb) {
 
 		// the field
 		targetResultSetField = cb.addField(ClassName.CursorResultSet,
@@ -400,7 +400,7 @@ public class ActivationClassBuilder	extends	ExpressionClassBuilder
        The expression must be the top stack word when this method is called.
 	 *
 	 */
-	public void rememberCursor(MethodBuilder mb) {
+	void rememberCursor(MethodBuilder mb) {
 
 		// the field
 		cursorResultSetField = cb.addField(ClassName.CursorResultSet,
@@ -455,36 +455,7 @@ public class ActivationClassBuilder	extends	ExpressionClassBuilder
 		return lf;
 	}
 
-	//////////////////////////////////////////////////////////////////////////
-	//
-	//	NAMED PARAMETER METHODS
-	//
-	//////////////////////////////////////////////////////////////////////////
-
-	/**
-	 *	Generates a parameter reference. Only implemented for Filters right now.
-	 *
-	 *	@param	name		Parameter name.
-	 *	@param	position	Parameter id.
-	 *	@param	dataType	Parameter datatype.
-	 *  @param	mb			The method to put the generated code into
-	 *
-	 *	@return	an expression representing the parameter reference.
-	 *
-	 * 	@exception StandardException thrown on failure
-	 */
-	public	void	getParameterReference( String				name,
-											   int					position,
-											   DataTypeDescriptor		dataType,
-											   MethodBuilder		mb )
-		 throws StandardException
-	{
-		if (SanityManager.DEBUG)
-			SanityManager.NOTREACHED();
-	}
-
-
-	public MethodBuilder getCloseActivationMethod() {
+	MethodBuilder getCloseActivationMethod() {
 
 		if (closeActivationMethod == null) {
 			closeActivationMethod = cb.newMethodBuilder(Modifier.PUBLIC, "void", "closeActivationAction");

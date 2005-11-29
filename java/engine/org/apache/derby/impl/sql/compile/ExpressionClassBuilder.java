@@ -80,7 +80,7 @@ import java.io.Serializable;
  *
  * @author Rick	Extracted out of ActivationClassBuilder
  */
-public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
+abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 {
 	///////////////////////////////////////////////////////////////////////
 	//
@@ -102,8 +102,8 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	protected int nextNonFastExpr;
 	protected int nextFieldNum;
 	protected MethodBuilder constructor;
-	public	  CompilerContext myCompCtx;
-	public MethodBuilder executeMethod; // to find it fast
+	CompilerContext myCompCtx;
+	MethodBuilder executeMethod; // to find it fast
 
 	protected LocalField cdtField;
 
@@ -130,7 +130,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * @exception StandardException thrown on failure
 	 */
-	public	ExpressionClassBuilder (String superClass, String className, CompilerContext cc ) 
+	ExpressionClassBuilder (String superClass, String className, CompilerContext cc ) 
 		throws StandardException
 	{
 		int modifiers = Modifier.PUBLIC | Modifier.FINAL;
@@ -159,7 +159,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 *	@return	name of package that the generated class will live in.
 	 */
-	public	abstract	String	getPackageName();
+	abstract	String	getPackageName();
 
 	/**
 	 * Get the number of ExecRows that must be allocated
@@ -168,7 +168,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * 	@exception StandardException thrown on failure
 	 */
-	public	abstract	int		getRowCount()
+	abstract	int		getRowCount()
 		 throws StandardException;
 
 	/**
@@ -177,25 +177,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * 	@exception StandardException thrown on failure
 	 */
-	public	abstract	void 	setNumSubqueries()
-		 throws StandardException;
-
-	/**
-	 * Generates an expression to refer to a named parameter.
-	 *
-	 *	@param	name		Parameter name
-	 *	@param	position	Parameter number
-	 *	@param	dataType	Parameter datatype
-	 *  @param	mb			The method to put the generated code into
-	 *
-	 *	@return	an expression encoding a reference to the named parameter
-	 *
-	 * 	@exception StandardException thrown on failure
-	 */
-	public	abstract	void	getParameterReference( String				name,
-														   int					position,
-														   DataTypeDescriptor		dataType,
-														   MethodBuilder mb )
+	abstract	void 	setNumSubqueries()
 		 throws StandardException;
 
 	/**
@@ -206,7 +188,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * 	@exception StandardException thrown on failure
 	 */
-	public	abstract	MethodBuilder	beginExecuteMethod()
+	abstract	MethodBuilder	beginExecuteMethod()
 		throws StandardException;
 
 
@@ -216,7 +198,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * 	@exception StandardException thrown on failure
 	 */
-	public abstract		void 			finishExecuteMethod(boolean		genMarkAsTopNode )
+	abstract		void 			finishExecuteMethod(boolean		genMarkAsTopNode )
 		throws StandardException;
 
 
@@ -234,13 +216,13 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		compilation code, such as datatype compilation code,
 		e.g. getDataValueFactory.
 	 */
-	abstract public String getBaseClassName();
+	abstract String getBaseClassName();
 
-	public MethodBuilder getConstructor() {
+	MethodBuilder getConstructor() {
 		return constructor;
 	}
 
-	public ClassBuilder getClassBuilder() {
+	ClassBuilder getClassBuilder() {
 		return cb;
 	}
 
@@ -250,7 +232,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 * REVISIT: do we need to give the caller the ability to touch it
 	 * directly, or could we wrap the alterations to it in this class?
 	 */
-	public MethodBuilder getExecuteMethod() {
+	MethodBuilder getExecuteMethod() {
 		return executeMethod;
 	}
 
@@ -282,7 +264,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 * @return	Nothing
 	 */
 
-	public void finishConstructor()
+	void finishConstructor()
 		 throws StandardException
 	{
 		int				numResultSets;
@@ -341,7 +323,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * @return None.
 	 */
-	public LocalField newFieldDeclaration(int modifiers, String type, String name)
+	LocalField newFieldDeclaration(int modifiers, String type, String name)
 	{
 		return cb.addField(type, name, modifiers);
 	}
@@ -361,7 +343,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 * @return	The name of the new field
 	 */
 
-	public LocalField newFieldDeclaration(int modifiers, String type)
+	LocalField newFieldDeclaration(int modifiers, String type)
 	{
 		return cb.addField(type, newFieldName(), modifiers);
 	}
@@ -394,13 +376,13 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * @see #newExprFun
 	 */
-	public MethodBuilder newGeneratedFun(String returnType, int modifiers) {
+	MethodBuilder newGeneratedFun(String returnType, int modifiers) {
 
 		return newGeneratedFun(returnType, modifiers,
 							   (String[]) null);
 	}
 
-	public MethodBuilder newGeneratedFun(String returnType, 
+	MethodBuilder newGeneratedFun(String returnType, 
 										 int modifiers,
 										 String[] params) {
 
@@ -460,7 +442,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 * return type would get wrapped in an object anyway.
 	 * For example: return java.lang.Boolean, not boolean.
 	 */
-	public MethodBuilder newExprFun()
+	MethodBuilder newExprFun()
 	{
 		// get next generated function 
 		String exprName = "e".concat(Integer.toString(nextExprNum++));
@@ -472,7 +454,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		Push an expression that is a GeneratedMethod reference to the
 		passed in method. aka. a "function pointer".
 	*/
-	public void pushMethodReference(MethodBuilder mb, MethodBuilder exprMethod) {
+	void pushMethodReference(MethodBuilder mb, MethodBuilder exprMethod) {
 
 		mb.pushThis(); // instance
 		mb.push(exprMethod.getName()); // arg
@@ -496,7 +478,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * @return	A new MethodBuilder
 	 */
-	public MethodBuilder newUserExprFun() {
+	MethodBuilder newUserExprFun() {
 
 		MethodBuilder mb = newExprFun();
 		mb.addThrownException("java.lang.Exception");
@@ -515,7 +497,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		generate support information for CURRENT_DATE,
 		that would otherwise be painful to create manually.
 	 */
-	public void getCurrentDateExpression(MethodBuilder mb) {
+	void getCurrentDateExpression(MethodBuilder mb) {
 		// do any needed setup
 		LocalField lf = getCurrentSetup();
 
@@ -531,7 +513,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		generate support information for CURRENT_TIME,
 		that would otherwise be painful to create manually.
 	 */
-	public void getCurrentTimeExpression(MethodBuilder mb) {
+	void getCurrentTimeExpression(MethodBuilder mb) {
 		// do any needed setup
 		LocalField lf = getCurrentSetup();
 
@@ -547,7 +529,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		generate support information for CURRENT_TIMESTAMP,
 		that would otherwise be painful to create manually.
 	 */
-	public void getCurrentTimestampExpression(MethodBuilder mb) {
+	void getCurrentTimestampExpression(MethodBuilder mb) {
 		// do any needed setup
 		LocalField lf = getCurrentSetup();
 
@@ -580,7 +562,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		column in the list is the entire actual result colunm.
 		It is only useful for DISTINCT in select.	
 	 */
-	public FormatableArrayHolder getColumnOrdering(ResultColumnList rclist)
+	FormatableArrayHolder getColumnOrdering(ResultColumnList rclist)
 	{
 		IndexColumnOrder[] ordering;
 		int numCols = (rclist == null) ? 0 : rclist.size();
@@ -614,7 +596,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * @return the ColumnOrdering array
 	 */
-	public FormatableArrayHolder addColumnToOrdering(
+	FormatableArrayHolder addColumnToOrdering(
 						FormatableArrayHolder orderingHolder,
 						int columnNum)
 	{
@@ -643,7 +625,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	}	
 
 
-	public FormatableArrayHolder getColumnOrdering(OrderedColumnList  oclist) {
+	FormatableArrayHolder getColumnOrdering(OrderedColumnList  oclist) {
 		int numCols = (oclist == null) ? 0 : oclist.size();
 
 		if (numCols == 0)
@@ -654,7 +636,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		return new FormatableArrayHolder(oclist.getColumnOrdering());
 	}
 
-	public int addItem(Object o) 
+	int addItem(Object o) 
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -678,7 +660,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 * Get/reuse the Expression for getting the DataValueFactory
 	 */
 	private Object getDVF;
-	public void pushDataValueFactory(MethodBuilder mb)
+	void pushDataValueFactory(MethodBuilder mb)
 	{
 		// generates:
 		//	   getDataValueFactory()
@@ -709,7 +691,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		caches it for faster retrieval.
 	 */
 	private Object getRSF;
-	public void pushGetResultSetFactoryExpression(MethodBuilder mb) {
+	void pushGetResultSetFactoryExpression(MethodBuilder mb) {
 		// generated Java:
 		//	this.getResultSetFactory()
 		//
@@ -732,7 +714,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		caches it for faster retrieval. 
 	 */
 	private Object getEF;
-	public void pushGetExecutionFactoryExpression(MethodBuilder mb) {
+	void pushGetExecutionFactoryExpression(MethodBuilder mb) {
 		if (getEF == null) {
 			getEF = mb.describeMethod(VMOpcode.INVOKEVIRTUAL, getBaseClassName(),
 					"getExecutionFactory",
@@ -757,7 +739,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		Otherwise, we have to do try/catch/THROWASSERT in the close code,
 		which looks unfriendly.
 	 */
-	public void pushResultSetClosedMethodFieldAccess(MethodBuilder mb) {
+	void pushResultSetClosedMethodFieldAccess(MethodBuilder mb) {
 		if (resultSetClosedMethod != null)
 			pushMethodReference(mb, resultSetClosedMethod);
 		else
@@ -788,7 +770,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * @return expression
 	 */
-	public void pushColumnReference(MethodBuilder mb, int rsNumber, int colId)
+	void pushColumnReference(MethodBuilder mb, int rsNumber, int colId)
 	{
 		mb.pushThis();
 		mb.push(rsNumber);
@@ -811,7 +793,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *
 	 * @return expression
 	 */
-	public void pushPVSReference(MethodBuilder mb)
+	void pushPVSReference(MethodBuilder mb)
 	{
 		// PUSHCOMPILER-WASCACHED
 		mb.pushThis();
@@ -906,7 +888,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 *	if null, it is ignored
 	 * @exception StandardException thrown when exception occurs
 	 */
-	public GeneratedClass getGeneratedClass(ByteArray savedBytes) throws StandardException {
+	GeneratedClass getGeneratedClass(ByteArray savedBytes) throws StandardException {
 		if (gc != null) return gc;
 
 		if (savedBytes != null)
@@ -930,7 +912,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 * This is the commonly used type of the this expression.
 	 *
 	 */
-	public void pushThisAsActivation(MethodBuilder mb) {
+	void pushThisAsActivation(MethodBuilder mb) {
 		// PUSHCOMPILER - WASCACHED
 		mb.pushThis();
 		mb.upCast(ClassName.Activation);
@@ -941,7 +923,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		Nothing is required on the stack, a SQL null data value
 		is pushed.
 	*/
-	public void generateNull(MethodBuilder mb, TypeCompiler tc) {
+	void generateNull(MethodBuilder mb, TypeCompiler tc) {
 		pushDataValueFactory(mb);
 		mb.pushNull(tc.interfaceName());
 		tc.generateNull(mb);
@@ -952,7 +934,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		The express value is required on the stack and will be popped, a SQL null data value
 		is pushed.
 	*/
-	public void generateNullWithExpress(MethodBuilder mb, TypeCompiler tc) {
+	void generateNullWithExpress(MethodBuilder mb, TypeCompiler tc) {
 		pushDataValueFactory(mb);
 		mb.swap(); // need the dvf as the instance
 		mb.cast(tc.interfaceName());
@@ -965,7 +947,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		on the stack and will be popped, a SQL data value
 		is pushed.
 	*/
-	public void generateDataValue(MethodBuilder mb, TypeCompiler tc, LocalField field) {
+	void generateDataValue(MethodBuilder mb, TypeCompiler tc, LocalField field) {
 		pushDataValueFactory(mb);
 		mb.swap(); // need the dvf as the instance
 		tc.generateDataValue(mb, field);
@@ -979,14 +961,14 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	 * more than one RowScanResultSets for dependent tables.
 	*/
 
-	public String newRowLocationScanResultSetName()
+	String newRowLocationScanResultSetName()
 	{
 		currentRowScanResultSetName = newFieldName();
 		return currentRowScanResultSetName;
 	}
 
 	// return the Name of ResultSet with the RowLocations to be modified (deleted or updated).
-	public String getRowLocationScanResultSetName()
+	String getRowLocationScanResultSetName()
 	{
 		return currentRowScanResultSetName;
 	}
