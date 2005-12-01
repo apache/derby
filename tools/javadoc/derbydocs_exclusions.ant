@@ -1,0 +1,23 @@
+# This file contains a list of the files that do not go into our
+# javadoc currently. These are files which can only be compiled
+# on jdk 1.6. When we fully support jdk 1.6 we can prune
+# these exclusions.
+#
+# Add new files to the appropriate package section; add new sections
+# for new packages.
+#
+# IMPORTANT: if you are adding a new package, be sure to add it to
+#            the list of packages in the publishedapi target in
+#            the toplevel build.xml file.
+#
+# Please do not add whitespace in front of class names.
+# Blank lines and comments are allowed.
+
+org/apache/derby/jdbc/*40.java
+org/apache/derby/client/net/*40.java
+org/apache/derby/iapi/jdbc/*40.java
+org/apache/derby/impl/jdbc/*40.java
+org/apache/derby/impl/jdbc/EmbedRowId.java
+org/apache/derby/client/*40.java
+org/apache/derby/client/am/*40.java
+org/apache/derby/client/am/RowId.java
