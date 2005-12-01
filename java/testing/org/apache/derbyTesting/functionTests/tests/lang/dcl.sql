@@ -115,11 +115,12 @@ VALUES EMC.GETSIGNERS('org.apache.derbyTesting.databaseclassloader.emc');
 -- Replace with a signed jar
 -- (self signed certificate)
 --
--- Commands used to sign jar
+-- keytool -delete -alias emccto -keystore emcks -storepass ab987c
 -- keytool -genkey -dname "cn=EMC CTO, ou=EMC APP, o=Easy Mail Company, c=US" -alias emccto -keypass kpi135 -keystore emcks -storepass ab987c
--- keytool -selfcert -alias emccto -keypass kpi135 -keystore emcks -storepass ab987c
+-- keytool -selfcert -alias emccto -keypass kpi135 -validity 36500 -keystore emcks -storepass ab987c
+-- keytool -keystore emcks -storepass ab987c -list -v
 -- jarsigner -keystore emcks -storepass ab987c -keypass kpi135 -signedjar dcl_emc2s.jar dcl_emc2.jar emccto
---
+-- keytool -delete -alias emccto -keystore emcks -storepass ab987c
 --
 
 CALL SQLJ.REPLACE_JAR('file:extin/dcl_emc2s.jar', 'EMC.MAIL_APP');
