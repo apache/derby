@@ -591,8 +591,11 @@ public class BTreeCostController extends OpenBTree
             if (ret_fraction < 0)
                 ret_fraction = 0;
 
-            if (SanityManager.DEBUG)
-                SanityManager.ASSERT(ret_fraction >= 0 && ret_fraction <= 1);
+            // Never return estimate of more rows than exist, sometimes 
+            // the recursive estimation through the btree may return a number
+            // like 1.00001.
+            if (ret_fraction > 1)
+                ret_fraction = 1;
 
             float estimated_row_count = input_row_count * ret_fraction;
 
