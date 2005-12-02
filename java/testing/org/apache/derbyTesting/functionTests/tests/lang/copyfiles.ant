@@ -125,6 +125,7 @@ joinDeadlock_app.properties
 joinDeadlock_derby.properties
 joins.sql
 joins_app.properties
+largeCodeGen_app.properties
 langUnitTests.sql
 langUnitTests_derby.properties
 LOBDB2compatibility_app.properties
