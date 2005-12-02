@@ -143,12 +143,12 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 		/*
 		** This generates the following code:
 		**
-		** (<fieldx> = <leftOperand>).equals(shortCircuitValue) ?
+		** (<leftOperand>.equals(shortCircuitValue) ?
 		**	 <fieldy> = <shortCircuitValue, nullability> :
-		**   fieldx.<and/or>(<rightOperand>, nullability)
+		**   <leftOperand>.<and/or>(<rightOperand>, nullability)
 		**
 		** The ?: operator accomplishes the short-circuiting.  We save the
-		** value of the left operand in a field so we don't have to evaluate
+		** value of the left operand on the stack so we don't have to evaluate
 		** it twice.  We save the return value of the getBoolean() call so
 		** we can re-use that object rather than allocate a new one every
 		** time this method is called.
