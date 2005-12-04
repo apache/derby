@@ -45,7 +45,7 @@ public abstract class BaseTest
 {
     private static boolean debug_system_procedures_created = false;
 
-    abstract void testList(Connection conn) throws SQLException;
+    abstract public void testList(Connection conn) throws SQLException;
 
     void runTests(String[] argv)
         throws Throwable

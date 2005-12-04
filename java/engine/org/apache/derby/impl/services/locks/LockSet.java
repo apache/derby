@@ -217,7 +217,7 @@ public final class LockSet extends Hashtable
 		{
 			// always check for deadlocks as there should not be any
 			deadlockWait = true;
-			if ((actualTimeout = deadlockTimeout) == C_LockFactory.WAIT_FOREVER) 
+			if ((actualTimeout = deadlockTimeout) == C_LockFactory.WAIT_FOREVER)
 				actualTimeout = Property.DEADLOCK_TIMEOUT_DEFAULT * 1000;
 		}
 		else
@@ -230,11 +230,18 @@ public final class LockSet extends Hashtable
 
 
 			// five posible cases
-			// i)   timeout -1, deadlock -1 -> just wait forever, no deadlock check
-			// ii)  timeout >= 0, deadlock -1 -> just wait for timeout, no deadlock check
-			// iii) timeout -1, deadlock >= 0 -> wait for deadlock, then deadlock check, then infinite timeout
-			// iv)  timeout >=0, deadlock < timeout -> wait for deadlock, then deadlock check, then wait for (timeout - deadlock)
-			// v)   timeout >=0, deadlock >= timeout -> just wait for timeout, no deadlock check
+			// i)   timeout -1, deadlock -1         -> 
+            //          just wait forever, no deadlock check
+			// ii)  timeout >= 0, deadlock -1       -> 
+            //          just wait for timeout, no deadlock check
+			// iii) timeout -1, deadlock >= 0       -> 
+            //          wait for deadlock, then deadlock check, 
+            //          then infinite timeout
+			// iv)  timeout >=0, deadlock < timeout -> 
+            //          wait for deadlock, then deadlock check, 
+            //          then wait for (timeout - deadlock)
+			// v)   timeout >=0, deadlock >= timeout -> 
+            //          just wait for timeout, no deadlock check
 
 
 			if (deadlockTimeout >= 0) {
@@ -257,212 +264,239 @@ public final class LockSet extends Hashtable
 		}
 
 
-			ActiveLock waitingLock = (ActiveLock) lockItem;
-			lockItem = null;
+        ActiveLock waitingLock = (ActiveLock) lockItem;
+        lockItem = null;
 
-			if (deadlockTrace)
-			{
-				// we want to keep a stack trace of this thread just before it goes
-				// into wait state, no need to synchronized because Hashtable.put
-				// is synchronized and the new throwable is local to this thread.
-				lockTraces.put(waitingLock, new Throwable());
-			}
+        if (deadlockTrace)
+        {
+            // we want to keep a stack trace of this thread just before it goes
+            // into wait state, no need to synchronized because Hashtable.put
+            // is synchronized and the new throwable is local to this thread.
+            lockTraces.put(waitingLock, new Throwable());
+        }
 
-			int earlyWakeupCount = 0;
-			long startWaitTime = 0;
+        int earlyWakeupCount = 0;
+        long startWaitTime = 0;
 
 		try {
 forever:	for (;;) {
 
+                byte wakeupReason = waitingLock.waitForGrant(actualTimeout);
+                
+                ActiveLock nextWaitingLock = null;
+                Object[] deadlockData = null;
 
-			byte wakeupReason = waitingLock.waitForGrant(actualTimeout);
-			
-			ActiveLock nextWaitingLock = null;
-			Object[] deadlockData = null;
+                try {
+                    boolean willQuitWait;
+                    Enumeration timeoutLockTable = null;
+                    long currentTime = 0;
+        
+                    synchronized (this) {
 
-			try {
-				boolean willQuitWait;
-                Enumeration timeoutLockTable = null;
-                long currentTime = 0;
-	
-				synchronized (this) {
+                        if (control.isGrantable(
+                                control.firstWaiter() == waitingLock,
+                                compatabilitySpace, 
+                                qualifier)) {
 
-					if (control.isGrantable(control.firstWaiter() == waitingLock,
-							compatabilitySpace, qualifier)) {
+                            // Yes, we are granted, put us on the granted queue.
+                            control.grant(waitingLock);
 
-						// Yes, we are granted, put us on the granted queue.
-						control.grant(waitingLock);
+                            // Remove from the waiting queue & get next waiter
+                            nextWaitingLock = 
+                                control.getNextWaiter(waitingLock, true, this);
 
-						// Remove from the waiting queue & get next waiter
-						nextWaitingLock = control.getNextWaiter(waitingLock, true, this);
+                            // this is where we need to re-obtain the latch, 
+                            // it's safe to call this lockObject() which will 
+                            // get the synchronization we already hold, because
+                            // java allows nested synchronization and it will 
+                            // be released automatically if we have to wait
 
-						// this is where we need to re-obtain the latch, it's 
-						// safe to call this lockObject() which will get the 
-						// synchronization we already hold, because java allows
-						// nested synchronization and it will be released 
-						// automatically if we have to wait
-						if (latch != null) {
-							lockObject(
-								compatabilitySpace, latch.getLockable(), 
-								latch.getQualifier(), C_LockFactory.WAIT_FOREVER,
-								(Latch) null);
-						}
-						return waitingLock;
-					}
+                            if (latch != null) {
+                                lockObject(
+                                    compatabilitySpace, latch.getLockable(), 
+                                    latch.getQualifier(), 
+                                    C_LockFactory.WAIT_FOREVER,
+                                    (Latch) null);
+                            }
+                            return waitingLock;
+                        }
 
-					waitingLock.clearPotentiallyGranted(); // try again later
+                        // try again later
+                        waitingLock.clearPotentiallyGranted(); 
 
-					willQuitWait = (wakeupReason != Constants.WAITING_LOCK_GRANT);
+                        willQuitWait = 
+                            (wakeupReason != Constants.WAITING_LOCK_GRANT);
 
-					StandardException deadlockException = null;
+                        StandardException deadlockException = null;
 
-					if (((wakeupReason == Constants.WAITING_LOCK_IN_WAIT) && deadlockWait) ||
-						(wakeupReason == Constants.WAITING_LOCK_DEADLOCK))
-					{
-
-						// check for a deadlock, even if we were woken up to because
-						// we were selected as a victim we still check because the situation
-						// may have changed.
-						deadlockData = Deadlock.look(factory, this, control, waitingLock, wakeupReason);
-						if (deadlockData == null) {
-							// we don't have a deadlock
-							deadlockWait = false;
-
-							actualTimeout = timeout;
-							startWaitTime = 0;
-							willQuitWait = false;
-						} else {
-							willQuitWait = true;
-						}
-					}
-
-					nextWaitingLock = control.getNextWaiter(waitingLock, willQuitWait, this);
-
-
-					// If we were not woken by another then we have
-					// timed out. Either deadlock out or timeout
-					if (willQuitWait) {
-
-						// Even if we deadlocked trying to get the lock, still 
-                        // reget the latch so that client's need not know 
-                        // latch was released.
-
-						if (latch != null) {
-							lockObject(
-								compatabilitySpace, latch.getLockable(), 
-								latch.getQualifier(), C_LockFactory.WAIT_FOREVER,
-								(Latch) null);
-						}
-
-                        if (SanityManager.DEBUG) 
+                        if (((wakeupReason == Constants.WAITING_LOCK_IN_WAIT) &&
+                                    deadlockWait) ||
+                            (wakeupReason == Constants.WAITING_LOCK_DEADLOCK))
                         {
-                            if (SanityManager.DEBUG_ON("DeadlockTrace"))
+
+                            // check for a deadlock, even if we were woken up 
+                            // because we were selected as a victim we still 
+                            // check because the situation may have changed.
+                            deadlockData = 
+                                Deadlock.look(
+                                    factory, this, control, waitingLock, 
+                                    wakeupReason);
+
+                            if (deadlockData == null) {
+                                // we don't have a deadlock
+                                deadlockWait = false;
+
+                                actualTimeout = timeout;
+                                startWaitTime = 0;
+                                willQuitWait = false;
+                            } else {
+                                willQuitWait = true;
+                            }
+                        }
+
+                        nextWaitingLock = 
+                            control.getNextWaiter(
+                                waitingLock, willQuitWait, this);
+
+
+                        // If we were not woken by another then we have
+                        // timed out. Either deadlock out or timeout
+                        if (willQuitWait) {
+
+                            // Even if we deadlocked trying to get the lock, 
+                            // still reget the latch so that client's need not
+                            // know latch was released.
+
+                            if (latch != null) {
+                                lockObject(
+                                    compatabilitySpace, latch.getLockable(), 
+                                    latch.getQualifier(), 
+                                    C_LockFactory.WAIT_FOREVER, (Latch) null);
+                            }
+
+                            if (SanityManager.DEBUG) 
                             {
+                                if (SanityManager.DEBUG_ON("DeadlockTrace"))
+                                {
 
-                                SanityManager.showTrace(new Throwable());
+                                    SanityManager.showTrace(new Throwable());
 
-                                // The following dumps the lock table as it 
-                                // exists at the time a timeout is about to 
-                                // cause a deadlock exception to be thrown.
+                                    // The following dumps the lock table as it 
+                                    // exists at the time a timeout is about to 
+                                    // cause a deadlock exception to be thrown.
 
-                                lockDebug = 
+                                    lockDebug = 
                                     DiagnosticUtil.toDiagString(waitingLock)   +
                                     "\nGot deadlock/timeout, here's the table" +
                                     this.toDebugString();
+                                }
                             }
-                        }
-                        
-                        if(!deadlockWait)
-                        {
-                            if( deadlockTrace )
-                            {   // want a copy of the LockTable and the time
+                            
+                            if (deadlockTrace && (deadlockData == null))
+                            {
+                                // if ending lock request due to lock timeout
+                                // want a copy of the LockTable and the time,
+                                // in case of deadlock deadlockData has the
+                                // info we need.
                                 currentTime = System.currentTimeMillis(); 
-                                timeoutLockTable = factory.makeVirtualLockTable();
+                                timeoutLockTable = 
+                                    factory.makeVirtualLockTable();
                             }
                         }
-					}
 
-				} // synchronized block
+                    } // synchronized block
 
-				// need to do this outside of the synchronized block as the
-                // message text building (timeouts and deadlocks) may involve
-                // getting locks to look up table names from identifiers.
-                if (willQuitWait)
-                {
-                    if (SanityManager.DEBUG)
+                    // need to do this outside of the synchronized block as the
+                    // message text building (timeouts and deadlocks) may 
+                    // involve getting locks to look up table names from 
+                    // identifiers.
+
+                    if (willQuitWait)
                     {
-                        if (lockDebug != null)
+                        if (SanityManager.DEBUG)
                         {
-                            String type = 
-                                (deadlockWait ? "deadlock:" : "timeout:"); 
+                            if (lockDebug != null)
+                            {
+                                String type = 
+                                    ((deadlockData != null) ? 
+                                         "deadlock:" : "timeout:"); 
 
-                            SanityManager.DEBUG_PRINT(
-                                type,
-                                "wait on lockitem caused " + type + lockDebug);
+                                SanityManager.DEBUG_PRINT(
+                                    type,
+                                    "wait on lockitem caused " + type + 
+                                    lockDebug);
+                            }
+
                         }
 
-                    }
-
-                    if(!deadlockWait)
-                    {
-                        if( deadlockTrace )
-                        {   //Turn ON derby.locks.deadlockTrace to build the lockTable.
-                            throw Timeout.buildException(waitingLock, timeoutLockTable, currentTime);
-                        }
-                        else
+                        if (deadlockData == null)
                         {
-			                StandardException se = 
-                                StandardException.newException(
-                                    SQLState.LOCK_TIMEOUT);
+                            // ending wait because of lock timeout.
 
-			                throw se;
+                            if (deadlockTrace)
+                            {   
+                                // Turn ON derby.locks.deadlockTrace to build 
+                                // the lockTable.
+                                    
+                                
+                                throw Timeout.buildException(
+                                    waitingLock, timeoutLockTable, currentTime);
+                            }
+                            else
+                            {
+                                StandardException se = 
+                                    StandardException.newException(
+                                        SQLState.LOCK_TIMEOUT);
+
+                                throw se;
+                            }
+                        }
+                        else 
+                        {
+                            // ending wait because of lock deadlock.
+
+                            throw Deadlock.buildException(
+                                    factory, deadlockData);
                         }
                     }
-					if (deadlockData != null) {
-						throw Deadlock.buildException(factory, deadlockData);
-					}
+                } finally {
+                    if (nextWaitingLock != null) {
+                        nextWaitingLock.wakeUp(Constants.WAITING_LOCK_GRANT);
+                        nextWaitingLock = null;
+                    }
                 }
-                    
 
-			} finally {
-				if (nextWaitingLock != null) {
-					nextWaitingLock.wakeUp(Constants.WAITING_LOCK_GRANT);
-					nextWaitingLock = null;
-				}
+                if (actualTimeout != C_LockFactory.WAIT_FOREVER) {
 
-			}
+                    if (wakeupReason != Constants.WAITING_LOCK_IN_WAIT)
+                        earlyWakeupCount++;
 
-			if (actualTimeout != C_LockFactory.WAIT_FOREVER) {
+                    if (earlyWakeupCount > 5) {
 
-				if (wakeupReason != Constants.WAITING_LOCK_IN_WAIT)
-					earlyWakeupCount++;
+                        long now = System.currentTimeMillis();
 
-				if (earlyWakeupCount > 5) {
+                        if (startWaitTime != 0) {
 
-					long now = System.currentTimeMillis();
+                            long sleepTime = now - startWaitTime;
 
-					if (startWaitTime != 0) {
+                            actualTimeout -= sleepTime;
+                        }
 
-						long sleepTime = now - startWaitTime;
-
-						actualTimeout -= sleepTime;
-					}
-
-					startWaitTime = now;
-				}
-			}
+                        startWaitTime = now;
+                    }
+                }
 
 
-		} // for(;;)
-	} finally {
-		if (deadlockTrace)
-		{
-				// I am out of the wait state, either I got my lock or I am the
-				// one who is going to detect the deadlock, don't need the
-				// stack trace anymore.
-				lockTraces.remove(waitingLock);
-		}
-	}
+            } // for(;;)
+        } finally {
+            if (deadlockTrace)
+            {
+                    // I am out of the wait state, either I got my lock or I 
+                    // am the one who is going to detect the deadlock, don't 
+                    // need the stack trace anymore.
+                    lockTraces.remove(waitingLock);
+            }
+        }
 	}
 
 	/**
@@ -565,7 +599,9 @@ forever:	for (;;) {
 		deadlockTrace = val;
 
 		if (val && lockTraces == null)
+        {
 			lockTraces = new Hashtable();
+        }
 		else if (!val && lockTraces != null)
 		{
 			lockTraces = null;
