@@ -20,11 +20,9 @@
 
 package org.apache.derby.iapi.sql;
 
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
@@ -37,6 +35,12 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  */
 public interface ParameterValueSet
 {
+	/**
+	 * Initialize the parameter set by allocating DataValueDescriptor
+	 * corresponding to the passed in type for each parameter.
+	 * @param types expected to match the number of parameters.
+	 */
+	void initialize(DataTypeDescriptor[] types);
 
 
 	/**

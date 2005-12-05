@@ -294,11 +294,6 @@ public class CallStatementNode extends DMLStatementNode
 		acb.pushMethodReference(mb, userExprFun); // first arg
 		acb.pushThisAsActivation(mb); // arg 2
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getCallStatementResultSet", ClassName.ResultSet, 2);
-
-		/*
-		** ensure all parameters have been generated
-		*/
-		generateParameterHolders(acb);
 	}
 
 	public ResultDescription makeResultDescription()

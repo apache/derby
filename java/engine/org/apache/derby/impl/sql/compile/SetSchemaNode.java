@@ -131,9 +131,6 @@ public class SetSchemaNode extends MiscellaneousStatementNode
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getMiscResultSet",
 						ClassName.ResultSet, 1);
-
-		if (type == StatementType.SET_SCHEMA_DYNAMIC)
-			generateParameterHolders(acb);
 	}
 	/**
 	 * Generate the code to create the ParameterValueSet, if necessary,
@@ -157,22 +154,6 @@ public class SetSchemaNode extends MiscellaneousStatementNode
 		ParameterNode.generateParameterValueSet ( acb, 1, parameterList);
 	}
 
-	/*
-	** When all other generation is done for the statement,
-	** we need to ensure all of the parameters have been touched.
-	*
-	*	@param	acb				ActivationClassBuilder
-	*
-	*/
-	void generateParameterHolders(ActivationClassBuilder acb) 
-		throws StandardException
-	{
-		Vector pList = getCompilerContext().getParameterList();
-		// we should have already failed if pList doesn't have at least 1 parameter
-
-		ParameterNode.generateParameterHolders( acb,  pList);
-			
-	}
 	/**
 	 * Returns the type of activation this class
 	 * generates.
