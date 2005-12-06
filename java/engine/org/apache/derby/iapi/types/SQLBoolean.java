@@ -1086,6 +1086,18 @@ public final class SQLBoolean
 		else
 			return value == val;
 	}
+	
+	/**
+	 * Return an immutable BooleanDataValue with the same value as this.
+	 * @return An immutable BooleanDataValue with the same value as this.
+	 */
+	public BooleanDataValue getImmutable()
+	{
+		if (isNull())
+			return SQLBoolean.UNKNOWN;
+		
+		return value ? SQLBoolean.BOOLEAN_TRUE : SQLBoolean.BOOLEAN_FALSE;
+	}
 
 	/*
 	 * String display of value
@@ -1142,7 +1154,7 @@ public final class SQLBoolean
 	/*
 	 * object state
 	 */
-	protected boolean value;
-	protected boolean isnull;
-	protected boolean immutable;
+	private boolean value;
+	private boolean isnull;
+	private boolean immutable;
 }

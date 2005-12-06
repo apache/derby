@@ -20,6 +20,7 @@
 
 package org.apache.derby.impl.services.bytecode;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
 	A code chunk that gets pushed to handle if-else blocks.
@@ -43,19 +44,33 @@ class Conditional {
 
 	private final Conditional parent;
 	private final int   ifOffset;
-	private /*final*/ int	clearTo;
+	private Type[]	stack;
 	private int thenGotoOffset;
 
-	Conditional(Conditional parent, CodeChunk chunk, short ifOpcode, int clearTo) {
+	/**
+	 * Start a conditional block.
+	 * @param parent Current conditional block, null if no nesting is going on.
+	 * @param chunk CodeChunk this conditional lives in
+	 * @param ifOpcode Opcode for the if check.
+	 * @param entryStack Type stack on entering the conditional then block.
+	 */
+	Conditional(Conditional parent, CodeChunk chunk, short ifOpcode, Type[] entryStack) {
 		this.parent = parent;
 		ifOffset = chunk.getRelativePC();
-		this.clearTo = clearTo;
+		this.stack = entryStack;
 
 		// reserve the space for the branch, will overwrite later
+		// with the correct branch offset.
 		chunk.addInstrU2(ifOpcode, 0);
 	}
 
-	int startElse(CodeChunk chunk, int thenSize) {
+	/**
+	 * Complete the 'then' block and start the 'else' block for this conditional
+	 * @param chunk CodeChunk this conditional lives in
+	 * @param thenStack Type stack on completing the conditional then block.
+	 * @return the type stack on entering the then block
+	 */
+	Type[] startElse(CodeChunk chunk, Type[] thenStack) {
 
 		thenGotoOffset = chunk.getRelativePC();
 
@@ -64,14 +79,22 @@ class Conditional {
 
 		// fill in the branch opcode
 		fillIn(chunk, ifOffset);
-
-		int ret = clearTo;
-		clearTo = thenSize;
-		return ret;
+		
+		Type[] entryStack = stack;
+		stack = thenStack;
+		
+		return entryStack;
 	}
 
 
-	Conditional end(CodeChunk chunk, int elseSize) {
+	/**
+	 * Complete the conditional and patch up any jump instructions.
+	 * @param chunk CodeChunk this conditional lives in
+	 * @param elseStack Current stack, which is the stack at the end of the else
+	 * @param stackNumber Current number of valid elements in elseStack
+	 * @return The conditional this conditional was nested in, if any.
+	 */
+	Conditional end(CodeChunk chunk, Type[] elseStack, int stackNumber) {
 
 		if (thenGotoOffset == 0) {
 			// no else condition
@@ -79,10 +102,22 @@ class Conditional {
 		} else {
 			fillIn(chunk, thenGotoOffset);
 		}
-		if (clearTo != elseSize) {
-			throw new RuntimeException("mismatched sizes then " + clearTo + " else " + elseSize);
+		
+		if (SanityManager.DEBUG)
+		{
+			if (stackNumber != stack.length)
+				SanityManager.THROWASSERT("ByteCode Conditional then/else stack depths differ then:"
+						+ stack.length + " else: " + stackNumber);
+			
+			for (int i = 0; i < stackNumber; i++)
+			{
+				if (!stack[i].vmName().equals(elseStack[i].vmName()))
+					SanityManager.THROWASSERT("ByteCode Conditional then/else stack mismatch: then: "
+							+ stack[i].vmName() + 
+							" else: " + elseStack[i].vmName());
+			}
 		}
-
+		
 		return parent;
 	}
 
