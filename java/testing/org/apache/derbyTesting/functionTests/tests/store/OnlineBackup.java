@@ -19,10 +19,11 @@ Derby - Class org.apache.derbyTesting.functionTests.store.OnlineBackup
  */
 
 package org.apache.derbyTesting.functionTests.tests.store;
-import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
+import java.util.Properties;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  * This class provides  functionalty for tests to perform 
@@ -65,7 +66,7 @@ public class OnlineBackup implements Runnable{
 	 * Backup the database
 	 */
 	void performBackup() throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:derby:"+ dbName);
+        Connection conn = getConnection(dbName , "");
 		CallableStatement backupStmt = 	
 			conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
 		backupStmt.setString(1, backupPath);
@@ -126,7 +127,7 @@ public class OnlineBackup implements Runnable{
 	 * @return     <tt>true</tt> if backup is running.
 	 *             <tt>false</tt> otherwise.
 	 */
-	public boolean isRunning() {
+	public synchronized boolean isRunning() {
 		return beginBackup;
 	}
 	
@@ -135,23 +136,45 @@ public class OnlineBackup implements Runnable{
 	 * @param  newDbName   name of the database to be created.
 	 */
 	public void createFromBackup(String newDbName) throws SQLException {
-		Connection conn = 
-			DriverManager.getConnection("jdbc:derby:"+ newDbName + ";" +  
-										"createFrom=" + backupPath + "/" + 
-										dbName);
-		conn.close();
-	}
+		
+        Connection conn = getConnection(newDbName,  
+                                        "createFrom=" +
+                                        backupPath + "/" + 
+                                        dbName);
+        conn.close();
+        
+    }
 
 	
-	/**
-	 * Restore the  database from the backup copy taken earlier.
-	 */
-	public void restoreFromBackup() throws SQLException {
-		Connection conn = 
-			DriverManager.getConnection("jdbc:derby:"+ dbName + ";" +
-										"restoreFrom=" + backupPath + "/" + 
-										dbName);
-		conn.close();
-	}
+    /**
+     * Restore the  database from the backup copy taken earlier.
+     */
+    public void restoreFromBackup() throws SQLException {
+       
+        Connection conn = getConnection(dbName,  
+                                        "restoreFrom=" +
+                                        backupPath + "/" + 
+                                        dbName);
 
+		conn.close();
+    }
+
+    
+    /**
+     * Get connection to the given database.
+     *
+     * @param databaseName the name of the database 
+	 * @param connAttrs  connection Attributes.
+     *
+     */
+    private Connection getConnection(String databaseName, 
+                                     String connAttrs) 
+        throws SQLException 
+    {
+        Properties prop = new Properties();
+        prop.setProperty("databaseName", databaseName);
+        prop.setProperty("connectionAttributes", connAttrs);
+        Connection conn = TestUtil.getDataSourceConnection(prop);
+        return conn;
+    }
 }

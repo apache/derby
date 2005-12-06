@@ -24,8 +24,9 @@ import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.DriverManager;
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+import java.util.Properties;
 
 /*
  * This class tests online backup when dml/ddl actions
@@ -77,13 +78,17 @@ public class OnlineBackupTest1 {
 		backup.waitForBackupToBegin();
 		logMessage("BACKUP STARTED");
 
-		// run some dml actions in another thread
-		DatabaseActions dmlActions = new DatabaseActions(DatabaseActions.DMLACTIONS, conn);
+        // run some dml actions in another thread
+        Connection dmlConn = getConnection();
+        DatabaseActions dmlActions = 
+            new DatabaseActions(DatabaseActions.DMLACTIONS, dmlConn);
 		Thread dmlThread = new Thread(dmlActions, "DML_THREAD");
 		dmlThread.start();
 
-		// run some DDL create/drop tables in another thread
-		DatabaseActions ddlActions = new DatabaseActions(DatabaseActions.CREATEDROPS, conn);
+        // run some DDL create/drop tables in another thread
+        Connection ddlConn = getConnection();
+		DatabaseActions ddlActions = 
+            new DatabaseActions(DatabaseActions.CREATEDROPS, ddlConn);
 		Thread ddlThread = new Thread(ddlActions, "DDL_THREAD");
 		ddlThread.start();
 
@@ -105,6 +110,11 @@ public class OnlineBackupTest1 {
 		ddlActions.stopActivity();
 		dmlThread.join();
 		ddlThread.join();
+        
+        // close the connections.
+        conn.close();
+        dmlConn.close();
+        ddlConn.close() ;
 
 		//shutdown the test db 
 		shutdown(TEST_DATABASE_NAME);
@@ -125,7 +135,7 @@ public class OnlineBackupTest1 {
 	 * @param  dbName  consistency checks are performed on this database.
 	 */
 	void runConsistencyChecker(String dbName) throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:derby:" + dbName);
+        Connection conn = getConnection();
 		Statement stmt = conn.createStatement();
 		stmt.execute("values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP',  'EMP')");
 		//TO DO : Consistency check all the tables including the system tables. 
@@ -143,8 +153,7 @@ public class OnlineBackupTest1 {
 
 		try{
 			// shutdown 
-			Connection conn = 
-				DriverManager.getConnection("jdbc:derby:" + dbName + ";shutdown=true");
+            TestUtil.shutdownUsingDataSource(TEST_DATABASE_NAME);
 		}catch(SQLException se){
 			if (se.getSQLState() != null && se.getSQLState().equals("08006"))
 				System.out.println("database shutdown properly");
@@ -152,6 +161,18 @@ public class OnlineBackupTest1 {
 				dumpSQLException(se);
 		}
 	}
+
+    /*
+     * get connection to the test database
+     */
+    Connection getConnection() throws SQLException 
+    {
+        Properties prop = new Properties();
+        prop.setProperty("databaseName", TEST_DATABASE_NAME);
+        Connection conn = TestUtil.getDataSourceConnection(prop);
+        return conn;
+    }
+
 
 	/**
 	 * Write message to the standard output.
