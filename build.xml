@@ -1320,7 +1320,7 @@
   <target name="gump_split_7" depends="buildsource"/>
   
   <target name="gump_split_8">
-    <ant dir="${derby.testing.src.dir}/${derby.testing.dir}/functionTests/tests/compatibility" target="compilex"/>
+    <ant dir="${derby.testing.src.dir}/${derby.testing.dir}/functionTests/tests/junitTests/compatibility" target="compilex"/>
   </target>
   
   <target name="gump_split_9" depends="all,buildjars,javadoc"/>
