@@ -1,3 +1,5 @@
+
+
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
@@ -22,7 +24,9 @@ public class largeCodeGen
     	ij.getPropertyArg(argv); 
         Connection con = ij.startJBMS();
         con.setAutoCommit(false);
+        createTestTable(con);
         testParamsInWhereClause(con);
+        testInClause(con);
         testUnions(con);
         con.commit();
         con.close();
@@ -53,9 +57,13 @@ public class largeCodeGen
 	 * @param con  
 	 */
 	private static void testParamsInWhereClause(Connection con)  throws SQLException {
-		 createTestTable(con);
-		 testWhereParams(con, 200);
-		 testWhereParams(con, 400);
+		 
+		 for (int count = 200; count <= 10000 ; count += 100)
+		 {
+			 // keep testing until it fails.
+			 if (testWhereParams(con, count))
+				 break;
+		 }
 	}
 
 	
@@ -65,26 +73,58 @@ public class largeCodeGen
 	 * @param con          
 	 * @param  numparams  
 	 */
-	private static void testWhereParams(Connection con, int numParams) throws SQLException {
-		PreparedStatement ps  = null;
+	private static boolean testWhereParams(Connection con, int numParams) throws SQLException {
 		String pred = "(si = ? AND i = ? )";
 		String testName = "WHERE clause with " + numParams + " parameters";
-		StringBuffer sqlBuffer = new StringBuffer("DELETE FROM T0 WHERE " + pred );
+		StringBuffer sqlBuffer = new StringBuffer((numParams * 20) + 512);
+		sqlBuffer.append("DELETE FROM T0 WHERE " + pred );
 		for (int i = 2; i < numParams; i+=2)
 		{
 			sqlBuffer.append(" OR (si = ? AND i = ? ) ");
 		}
 		try {
-			ps = con.prepareStatement(sqlBuffer.toString());
+			PreparedStatement ps = con.prepareStatement(sqlBuffer.toString());
 			System.out.println("PASS: " + testName);
+			ps.close();
+			return false;
 		 
 		}catch (Exception e)
 		{
 			reportFailure(testName, e);
+			return true;
 			
 		}
 	}
-
+	private static void testInClause(Connection con)  throws SQLException {
+		 for (int count = 2500; count <= 10000 ; count += 100)
+		 {
+			 // keep testing until it fails.
+			 if (testInClause(con, count))
+				 break;
+		 }
+	}	
+	private static boolean testInClause(Connection con, int numParams) throws SQLException {
+		String testName = "IN clause with " + numParams + " parameters";
+		StringBuffer sqlBuffer = new StringBuffer((numParams * 20) + 512);
+		sqlBuffer.append("SELECT * FROM T0 WHERE I IN ("  );
+		for (int i = 1; i < numParams; i++)
+		{
+			sqlBuffer.append("?, ");
+		}
+		sqlBuffer.append("?)");
+		try {
+			PreparedStatement ps = con.prepareStatement(sqlBuffer.toString());
+			System.out.println("PASS: " + testName);
+			ps.close();
+			return false;
+		 
+		}catch (Exception e)
+		{
+			reportFailure(testName, e);
+			return true;
+			
+		}
+	}
 	private static void testUnions(Connection con) throws Exception
 	{
 		Statement stmt = null;
@@ -122,25 +162,34 @@ public class largeCodeGen
 		//System.out.println(createViewString);
 		stmt.executeUpdate(createView.toString());
 		
-		
 		// 2000 unions caused method too big error in verifier
-		largeUnionSelect(con, viewName, 2000);
-
 		// 10000 unions overflows the number of constant pool entries
-		largeUnionSelect(con, viewName, 10000);
-
+		
+		for (int count = 800; count <= 10000; count += 100)
+		{
+			// keep testing until it fails
+			if (largeUnionSelect(con, viewName, count))
+				break;
+		}
     }
     
-    private static void largeUnionSelect(Connection con, String viewName,
+    private static boolean largeUnionSelect(Connection con, String viewName,
     		int numUnions) throws Exception
 	{
 
     	// There are 100 unions in each view so round to the nearest 100
     	String testName = "SELECT with " + numUnions/100 * 100 + " unions";
-		StringBuffer selectSQLBuffer  = new StringBuffer("select * from t0 ") ;
+		
+		String unionClause = " UNION ALL (SELECT * FROM " + viewName + ")";
+
+		StringBuffer selectSQLBuffer  =
+			new StringBuffer(((numUnions/100) * unionClause.length()) + 512);
+		
+		selectSQLBuffer.append("select * from t0 ");
+		
 		for (int i = 1; i < numUnions/100;i++)
 		{
-			selectSQLBuffer.append(" UNION ALL (SELECT * FROM " + viewName + ")");
+			selectSQLBuffer.append(unionClause);
 		}	
 		
 		try {
@@ -160,10 +209,12 @@ public class largeCodeGen
 		System.out.println("PASS: " + testName + " Row data check ok");
         con.commit();
         pstmt.close();
+        return false;
      
 		} catch (SQLException sqle)
 		{
 			reportFailure(testName, sqle);
+			return true;
 			
 		}
 
