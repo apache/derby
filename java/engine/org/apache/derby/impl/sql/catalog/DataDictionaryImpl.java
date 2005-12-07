@@ -8880,6 +8880,8 @@ public final class	DataDictionaryImpl
 
         // add 10.1 specific system procedures
         create_10_1_system_procedures(tc, sysUtilUUID);
+        // add 10.2 specific system procedures
+        create_10_2_system_procedures(tc, sysUtilUUID);
     }
 
     /**
@@ -9411,6 +9413,88 @@ public final class	DataDictionaryImpl
                 (TypeDescriptor) null,
                 tc);
         }
+    }
+
+    
+    /**
+     * Create system procedures added in version 10.2.
+     * <p>
+     * Create 10.2 system procedures, called by either code creating new
+     * database, or code doing hard upgrade from previous version.
+     * <p>
+     *
+     * @param sysUtilUUID   uuid of the SYSUTIL schema.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    void create_10_2_system_procedures(
+    TransactionController   tc,
+    UUID                    sysUtilUUID)
+		throws StandardException
+    {
+
+        // void SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE(
+        //     IN BACKUPDIR        VARCHAR(Limits.DB2_VARCHAR_MAXWIDTH),
+        //     IN WAIT             SMALLINT
+        //     )
+        
+        {
+            // procedure argument names
+            String[] arg_names = {"BACKUPDIR", "WAIT"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.SMALLINT)
+            };
+
+            createSystemProcedureOrFunction(
+                "SYSCS_ONLINE_BACKUP_DATABASE",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.MODIFIES_SQL_DATA,
+                (TypeDescriptor) null,
+                tc);
+        }
+
+        // void 
+        // SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
+        //   IN BACKUPDIR                 VARCHAR(Limits.DB2_VARCHAR_MAXWIDTH),
+        //   IN DELETE_ARCHIVED_LOG_FILES SMALLINT,
+        //   IN WAIT                      SMALLINT
+        //   )
+        {
+            // procedure argument names
+            String[] arg_names = 
+                {"BACKUPDIR", "DELETE_ARCHIVED_LOG_FILES", "WAIT"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.SMALLINT),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.SMALLINT)
+            };
+
+            createSystemProcedureOrFunction(
+                "SYSCS_ONLINE_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.MODIFIES_SQL_DATA,
+                (TypeDescriptor) null,
+                tc);
+        }
+
     }
 
 

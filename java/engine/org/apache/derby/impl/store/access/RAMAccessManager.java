@@ -926,9 +926,12 @@ public abstract class RAMAccessManager
 		rawstore.unfreeze();
 	}
 
-	public void backup(String backupDir) throws StandardException
+    public void backup(
+    String  backupDir, 
+    boolean wait) 
+        throws StandardException
 	{
-		rawstore.backup(backupDir);
+		rawstore.backup(backupDir, wait);
 	}
 
 	public void backup(File backupDir) throws StandardException
@@ -937,18 +940,24 @@ public abstract class RAMAccessManager
 	}
 
 
-	public void backupAndEnableLogArchiveMode(String backupDir, 
-											  boolean deleteOnlineArchivedLogFiles)
+    public void backupAndEnableLogArchiveMode(
+    String  backupDir, 
+    boolean deleteOnlineArchivedLogFiles,
+    boolean wait)
 		throws StandardException 
 	{
-		rawstore.backupAndEnableLogArchiveMode(backupDir, deleteOnlineArchivedLogFiles);
+		rawstore.backupAndEnableLogArchiveMode(backupDir, 
+                                               deleteOnlineArchivedLogFiles, 
+                                               wait);
 	}
 
-	public void backupAndEnableLogArchiveMode(File backupDir, 
-											  boolean deleteOnlineArchivedLogFiles) 
+	public void backupAndEnableLogArchiveMode(
+    File    backupDir, 
+    boolean deleteOnlineArchivedLogFiles) 
 		throws StandardException
 	{
-		rawstore.backupAndEnableLogArchiveMode(backupDir, deleteOnlineArchivedLogFiles);
+		rawstore.backupAndEnableLogArchiveMode(
+            backupDir, deleteOnlineArchivedLogFiles);
 	}	
 
 	public void disableLogArchiveMode(boolean deleteOnlineArchivedLogFiles)

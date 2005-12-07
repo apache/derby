@@ -460,8 +460,19 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		dataFactory.unfreezePersistentStore();
 	}
 
-	public void backup(String backupDir) throws StandardException
-	{
+    /**
+     * Backup the database to a backup directory.
+     * 
+     * @param backupDir the name of the directory where the backup should be
+     *                  stored. This directory will be created if it 
+     *                  does not exist.
+     * @param wait if <tt>true</tt>, waits for  all the backup blocking 
+     *             operations in progress to finish.
+     * @exception StandardException thrown on error
+     */
+    public void backup(String backupDir, boolean wait) 
+        throws StandardException 
+    {
 		if (backupDir == null || backupDir.equals(""))
         {
 			throw StandardException.newException(
@@ -487,13 +498,21 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 AccessFactoryGlobals.USER_TRANS_NAME);
 
 		try {
-			canStartOnlineBackup(t, true);
-			backup(t, new File(backupDir));
-		}finally {
-			// let the xactfatory know that backup is done, so that
-			// it can allow backup blocking operations. 
-			xactFactory.backupFinished();
-		}
+            // check if there any backup blocking operations are in progress
+            // and stop new ones from starting until the backup is completed.
+            if (!xactFactory.stopBackupBlockingOperations(wait))
+            {
+                throw StandardException.newException(
+                      SQLState.BACKUP_BLOCKING_OPERATIONS_IN_PROGRESS);  
+            }
+
+            // perform backup
+            backup(t, new File(backupDir));
+        }finally {
+            // let the xactfatory know that backup is done, so that
+            // it can allow backup blocking operations. 
+            xactFactory.backupFinished();
+        }
 	}
 
 
@@ -505,15 +524,18 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	/*
 	 * Backup the database.
 	 * Online backup copies all the database files (log, seg0  ...Etc) to the
-	 * specified backup location  without blocking any user operation for the 
-	 * whole duration of the backup. Stable copy is made using  using page level
-	 * latches 	and in some cases with the help monitors.  Transaction 
-	 * log is also backed up, this will help in bringing the databse to the
-	 * consistent state on restore.
+	 * specified backup location without blocking any user operation for the 
+	 * duration of the backup. Stable copy is made of each page using using 
+     * page level latches and in some cases with the help of monitors.  
+     * Transaction log is also backed up, this is used to bring the database to 
+     * the consistent state on restore.
 	 * 
 	 * TODO : make sure no parallel backup/disabling log archive mode occurs.
 	 */
-	public synchronized void backup(Transaction t, File backupDir) throws StandardException
+	public synchronized void backup(
+    Transaction t, 
+    File        backupDir) 
+        throws StandardException
 	{
         if (!privExists(backupDir))
 		{
@@ -523,7 +545,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                     SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY,
                     (File) backupDir);
             }
-
 		}
 		else
 		{
@@ -765,20 +786,58 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 	}
 
-
-	public void backupAndEnableLogArchiveMode(String backupDir,boolean
-											  deleteOnlineArchivedLogFiles) 
+    /**
+     * Backup the database to a backup directory and enable the log archive
+	 * mode that will keep the archived log files required for roll-forward
+	 * from this version backup.
+     *
+     * @param backupDir the name of the directory where the backup should be
+     *                  stored. This directory will be created if it 
+     *                  does not exist.   
+     *
+     * @param deleteOnlineArchivedLogFiles  
+     *                  If true deletes online archived 
+     *                  log files that exist before this backup, delete 
+     *                  will occur  only after the backup is  complete.
+     *
+     * @param wait      if <tt>true</tt>, waits for  all the backup blocking 
+     *                  operations in progress to finish.
+     *
+     * @exception StandardException thrown on error.
+     */
+    public void backupAndEnableLogArchiveMode(
+    String backupDir,
+    boolean deleteOnlineArchivedLogFiles,
+    boolean wait) 
 		throws StandardException
 	{
-		logFactory.enableLogArchiveMode();
-		backup(backupDir);
-		//After successful backup delete the archived log files
-		//that are not necessary to do a roll-forward recovery
-		//from this backup if requested.
-		if(deleteOnlineArchivedLogFiles)
-		{
-			logFactory.deleteOnlineArchivedLogFiles();
-		}
+        boolean enabledLogArchive = false;
+        boolean error = true;
+        try {
+            // Enable the log archive mode, if it is not already enabled.
+            if(!logFactory.logArchived()) {
+                logFactory.enableLogArchiveMode();
+                enabledLogArchive = true ;
+            }
+
+            backup(backupDir, wait);
+            
+            // After successful backup delete the archived log files
+            // that are not necessary to do a roll-forward recovery
+            // from this backup if requested.
+            if (deleteOnlineArchivedLogFiles)
+            {
+                logFactory.deleteOnlineArchivedLogFiles();
+            }
+            error = false;
+        } finally {
+            // On any errors , disable the log archive, if it 
+            // is enabled on this call. 
+            if(error) {
+                if (enabledLogArchive)
+                logFactory.disableLogArchiveMode();
+            }
+        }
 	}
 
 
@@ -808,36 +867,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		}
 	}
 
-
-	/**
-	 * Checks if the online backup can be started.
-     *
-	 * A Consistent backup can not  be made if there are any backup 
-	 * blocking operations (like unlogged operations) are in progress. 
-	 * Backup is allowed only in brand new transaction to avoid issues
-	 * like users starting a backup in the same transaction that has 
-	 * pending unlogged operations. 
-	 * 
-	 * @param wait if <tt>true</tt>, waits for  all the backup blocking 
-	 *             operation in progress to finish.
-	 * @return     <tt>true</tt> if an online backup can be made.
-	 *			   <tt>false</tt> otherwise.
-	 * @exception StandardException if the transaction that is used  
-	 *                              to start the backup is not idle.
-	 */
-	private boolean canStartOnlineBackup(Transaction t, boolean wait) 
-		throws StandardException {
-		
-		// check if the transaction is in the idle state
-		if(!t.isIdle()) {
-			// online backup can only be started in an IDLE transaction.
-			// TODO : add the exception here. 
-		}
-		
-		// check if there any backup blocking operations are in progress
-		// and stop new ones from starting until the backup is completed.
-		return xactFactory.stopBackupBlockingOperations(wait); 
-	}
 	
 	//copies the files from the backup that does not need
 	//any special handling like jars.

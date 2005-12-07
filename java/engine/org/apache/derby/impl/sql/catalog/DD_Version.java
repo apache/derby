@@ -337,6 +337,16 @@ public	class DD_Version implements	Formatable
                 tc, 
                 bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
         }
+
+        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_1)
+        {
+            // On ugrade from versions before 10.2, create system procedures
+            // added in 10.2.
+            bootingDictionary.create_10_2_system_procedures(
+                tc, 
+                bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
+        }
+        
 	}
 
 	/**

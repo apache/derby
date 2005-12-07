@@ -142,3 +142,5 @@ MaxLogNumber_derby.properties
 MaxLogNumberRecovery_app.properties
 MaxLogNumberRecovery_derby.properties
 OnlineBackupTest1_app.properties
+onlineBackupTest2.sql
+onlineBackupTest2_app.properties

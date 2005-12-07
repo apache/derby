@@ -30,3 +30,4 @@ store/holdCursorExternalSortJDBC30.sql
 store/TestDurabilityProperty.java
 store/OnlineCompressTest.java
 store/OnlineBackupTest1.java
+store/onlineBackupTest2.sql

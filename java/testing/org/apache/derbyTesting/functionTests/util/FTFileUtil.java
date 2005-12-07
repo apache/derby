@@ -66,6 +66,81 @@ public class FTFileUtil
 							    " To: " + dst.getAbsolutePath());
 		}
 	}
+
+
+    /**
+     * Check if a file exists ?
+     *
+     * @param name the file's name.
+     * @return     <tt>"true"</tt> if the given file exists 
+     *             <tt>"false"</tt> otherwise.
+     * @exception Exception if any exception occurs 
+     */
+    public static String fileExists(String fileName) throws Exception
+    {
+        File fl = new File(fileName);
+        if(fl.exists()) {
+            return "true";
+        }else {
+            return "false";
+        }
+    }
+
+
+    /**
+     *	Remove a directory and all of its contents.
+     *   
+     *  @param name the file's name.
+     * @return     <tt>true</tt> if the omplete directory was removed
+     *             <tt>false</tt> otherwise.f false is returned then some of 
+     *              the files in the directory may have been removed.
+     */
+
+	private static boolean removeDirectory(File directory) {
+
+		if (directory == null)
+			return false;
+		if (!directory.exists())
+			return true;
+		if (!directory.isDirectory())
+			return false;
+
+		String[] list = directory.list();
+
+		if (list != null) {
+			for (int i = 0; i < list.length; i++) {
+				File entry = new File(directory, list[i]);
+
+				if (entry.isDirectory())
+				{
+					if (!removeDirectory(entry))
+						return false;
+				}
+				else
+				{
+					if (!entry.delete())
+						return false;
+				}
+			}
+		}
+
+		return directory.delete();
+	}
+
+    /**
+     *	Remove a directory and all of its contents.
+     *   
+     *  @param name the file's name.
+     * @return     <tt>"true"</tt> if the omplete directory was removed
+     *             <tt>"false"</tt> otherwise.f false is returned then some of 
+     *              the files in the directory may have been removed.
+     */
+
+	public static String removeDirectory(String directory)
+	{
+	    return (removeDirectory(new File(directory)) ? "true" : "false");
+	}
+    
 }
 
 

@@ -46,7 +46,6 @@ import org.apache.derby.impl.sql.execute.JarDDL;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
 
@@ -684,30 +683,234 @@ public class SystemProcedures  {
         Factory.getDatabaseOfConnection().checkpoint();
     }
 
-    public static void SYSCS_BACKUP_DATABASE(
-    String  backupDir)
+    /**
+     * Backup the database to a backup directory. By default this 
+     * procedure will wait for the backup blocking unlogged operations to
+     * complete before starting the backup.  
+     *
+     * Examples of unlogged operations include: create index and bulk insert.
+     * Note that once the backup begins these operations will not block, 
+     * instead they will automatically procede and be logged.
+     * 
+     * @param backupDir the name of the directory where the backup should be
+     *                  stored. This directory will be created if it 
+     *                  does not exist.
+     * @exception StandardException thrown on error
+     */
+    public static void SYSCS_BACKUP_DATABASE(String  backupDir)
 		throws SQLException
     {
-        Factory.getDatabaseOfConnection().backup(backupDir);
+		backupDatabase(backupDir , true);
     }
 
+    /**
+     * Backup the database to a backup directory.
+     *
+     * Backup the database to a backup directory. Use the "wait" parameter
+     * to determine if the operation should block waiting for the backup 
+     * blocking unlogged operations to complete before starting the backup.  
+     *
+     * Examples of unlogged operations include: create index and bulk insert.
+     * Note that once the backup begins these operations will not block, 
+     * instead they will automatically procede and be logged.
+     * 
+     * @param backupDir the name of the directory where the backup should be
+     *                  stored. This directory will be created if it 
+     *                  does not exist.
+     * @param wait if <tt>non-zero</tt>, waits for  all the backup blocking 
+     *             operation in progress to finish.
+     * @exception StandardException thrown on error
+     */
+    public static void SYSCS_ONLINE_BACKUP_DATABASE(
+    String  backupDir, 
+    int     wait)
+        throws SQLException
+    {
+        backupDatabase(backupDir, (wait != 0));
+    }
+
+
+    /**
+     * Backup the database to a backup directory.
+     *
+     * Backup the database to a backup directory. Use the "wait" parameter
+     * to determine if the operation should block waiting for the backup 
+     * blocking unlogged operations to complete before starting the backup.  
+     *
+     * Examples of unlogged operations include: create index and bulk insert.
+     * Note that once the backup begins these operations will not block, 
+     * instead they will automatically procede and be logged.
+     * 
+     * @param backupDir the name of the directory where the backup should be
+     *                  stored. This directory will be created if it 
+     *                  does not exist.
+     * @param wait if <tt>true</tt>, waits for  all the backup blocking 
+     *             operation in progress to finish.
+     * @exception StandardException thrown on error
+     */
+    private static void backupDatabase(
+    String  backupDir, 
+    boolean wait)
+        throws SQLException
+    {
+        checkBackupTransactionIsIdle();
+        Connection conn = getDefaultConn();
+        try {
+            Factory.getDatabaseOfConnection().backup(backupDir, wait);
+        }catch(SQLException se)
+        {
+            // issue a rollback on any errors
+            conn.rollback();
+            throw  se;
+        }
+        // finished successfully, commit it.
+        conn.commit();	
+    }
+
+    /**
+     * Backup the database to a backup directory and enable the log archive
+     * mode that will keep the archived log files required for roll-forward
+     * from this version of the backup. By default this procedure will wait 
+     * for the backup blocking unlogged operations to complete before starting 
+     * the backup.  
+     *
+     * Examples of unlogged operations include: create index and bulk insert.
+     * Note that once the backup begins these operations will not block, 
+     * instead they will automatically procede and be logged.
+     *
+     * @param backupDir the name of the directory where the backup should be
+     *                  stored. This directory will be created if not it 
+     *                  does not exist.   
+     * @param deleteOnlineArchivedLogFiles  If <tt>non-zero</tt> deletes online 
+     *                 archived log files that exist before this backup, delete 
+     *                 will occur  only after the backup is  complete.
+     * @exception StandardException thrown on error.
+     */
     public static void SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
     String  backupDir,
     int     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
-        Factory.getDatabaseOfConnection().backupAndEnableLogArchiveMode(
+        backupDatabaseAndEnableLogArchiveMode(
             backupDir, 
-            (deleteOnlineArchivedLogFiles != 0));
+            (deleteOnlineArchivedLogFiles != 0),
+            true);
+	}
+
+    /**
+     * Backup the database to a backup directory and enable the log archive
+	 * mode that will keep the archived log files required for roll-forward
+	 * from this version backup.
+     *
+     * Examples of unlogged operations include: create index and bulk insert.
+     * Note that once the backup begins these operations will not block, 
+     * instead they will automatically procede and be logged.
+     *
+     * @param backupDir the name of the directory where the backup should be
+     *                  stored. This directory will be created if not it 
+     *                  does not exist.   
+     *
+     * @param deleteOnlineArchivedLogFiles  If <tt>non-zero</tt> deletes online 
+     *                  archived log files that exist before this backup, delete     *                  will occur  only after the backup is  complete.
+     *
+     * @param wait      if <tt>non-zero</tt>, waits for  all the backup blocking     *                  operations in progress to finish.
+     * @exception StandardException thrown on error.
+     */
+    public static void SYSCS_ONLINE_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
+    String  backupDir,
+    int     deleteOnlineArchivedLogFiles,
+	int     wait)
+		throws SQLException
+    {
+        backupDatabaseAndEnableLogArchiveMode(
+            backupDir,
+            (deleteOnlineArchivedLogFiles != 0),
+            (wait != 0));
+	}
+
+
+    /**
+     * Backup the database to a backup directory and enable the log archive
+	 * mode that will keep the archived log files required for roll-forward
+	 * from this version of the backup.
+     *
+     * @param backupDir the name of the directory where the backup should be
+     *                  stored. This directory will be created if not it 
+     *                  does not exist.   
+     * @param deleteOnlineArchivedLogFiles  If <tt>true</tt> deletes online 
+     *                  archived log files that exist before this backup, delete     *                  will occur  only after the backup is  complete.
+	 * @param wait      if <tt>true</tt>, waits for  all the backup blocking 
+	 *                  operations in progress to finish.
+     * @exception StandardException thrown on error.
+     */
+    private static void backupDatabaseAndEnableLogArchiveMode(
+    String  backupDir,
+    boolean deleteOnlineArchivedLogFiles,
+	boolean wait)
+		throws SQLException
+    {
+		checkBackupTransactionIsIdle();
+		Connection conn = getDefaultConn();
+		try {
+            Factory.getDatabaseOfConnection().backupAndEnableLogArchiveMode(
+                backupDir, 
+                deleteOnlineArchivedLogFiles,
+                wait);
+		}catch(SQLException se)
+		{
+            // issue a rollback on any errors
+            conn.rollback();
+            throw  se;
+        }
+        // finished successfully, commit it.
+        conn.commit();
     }
+
+
+    /**
+	 * Disables the log archival process, i.e No old log files
+	 * will be kept around for a roll-forward recovery.
+     *
+	 * @param deleteOnlineArchivedLogFiles  If <tt>non-zero</tt> deletes all the
+	 *        online archived log files that exist before this call immediately.
+     *
+	 * @exception StandardException Thrown on error
+	 */
 
     public static void SYSCS_DISABLE_LOG_ARCHIVE_MODE(
     int     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
-        Factory.getDatabaseOfConnection().disableLogArchiveMode(
-            (deleteOnlineArchivedLogFiles != 0));
+		checkBackupTransactionIsIdle();
+		Connection conn = getDefaultConn();
+		try { 
+			Factory.getDatabaseOfConnection().disableLogArchiveMode(
+                (deleteOnlineArchivedLogFiles != 0));
+		}catch(SQLException se)
+		{
+			// issue a rollback on any errors
+			conn.rollback();
+			throw  se;
+		}
+		// finished successfully, commit it.
+		conn.commit();
     }
+
+
+    /**
+     * Check if the transnaction is idle ? , Backup related operation are 
+     * allowed only in a new transaction.
+     */
+    private static void checkBackupTransactionIsIdle() throws SQLException 
+    {
+        if (!(ConnectionUtil.getCurrentLCC().getTransactionExecute().isIdle())) 
+        {
+            throw PublicAPI.wrapStandardException(
+                    StandardException.newException(
+                    SQLState.BACKUP_OPERATIONS_NOT_ALLOWED_IN_ACTIVE_XACT));								  
+		}
+	}
+
 
     public static void SYSCS_SET_RUNTIMESTATISTICS(
     int     enable)

@@ -18,6 +18,7 @@ ij> call SYSCS_CHECKPOINT_DATABASE();
 0 rows inserted/updated/deleted
 ij> call SYSCS_SET_DATABASE_PROPERTY('foo', 'bar');
 0 rows inserted/updated/deleted
+ij> commit;
 ij> call SYSCS_BACKUP_DATABASE('extinout/mybackup');
 0 rows inserted/updated/deleted
 ij> call SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE('extinout/mybackup2', 0);

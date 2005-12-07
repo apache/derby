@@ -328,15 +328,15 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	}
 
 
-	public void backup(String backupDir) throws SQLException
-	{
+    public void backup(String backupDir, boolean wait) 
+        throws SQLException
+    {
 		try {
-			af.backup(backupDir);
+			af.backup(backupDir, wait);
 		} catch (StandardException se) {
 			throw PublicAPI.wrapStandardException(se);
 		}
 	}
-
 
 	public void backup(File backupDir) throws SQLException
 	{
@@ -349,13 +349,16 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 
 
-	public void backupAndEnableLogArchiveMode(String backupDir, 
-											  boolean
-											  deleteOnlineArchivedLogFiles)
-		throws SQLException
+    public void backupAndEnableLogArchiveMode(
+    String  backupDir, 
+    boolean deleteOnlineArchivedLogFiles,
+    boolean wait)
+        throws SQLException
 	{
 		try {
-			af.backupAndEnableLogArchiveMode(backupDir, deleteOnlineArchivedLogFiles);
+			af.backupAndEnableLogArchiveMode(backupDir, 
+                                             deleteOnlineArchivedLogFiles,
+                                             wait); 
 		} catch (StandardException se) {
 			throw PublicAPI.wrapStandardException(se);
 		}

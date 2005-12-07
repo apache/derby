@@ -1065,12 +1065,16 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 				if (backupBlockingOperations == 0)
 					inBackup = true;
 			}
+            
 		}
 
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(backupBlockingOperations == 0 && 
-								 inBackup == true,
-								 "store is not in correct state for backup");
+        if (SanityManager.DEBUG) {
+            if (inBackup) {
+                SanityManager.ASSERT(backupBlockingOperations == 0 ,
+                                 "store is not in correct state for backup");
+            }
+        }
+
 		return inBackup;
 	}
 
