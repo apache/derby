@@ -40,7 +40,15 @@
  
   <target name="FTOtestsubdir" depends="compilex"/>
 
-  <target name="compilex">
+  <target name="compilex" depends="checkjikessource,compilex_gump,compilex_nosource"/>
+
+  <target name="checkjikessource">
+    <condition property="jikes.source.set">
+      <isset property="jikes.source"/>
+    </condition>
+  </target>
+
+  <target name="compilex_nosource">
     <javac
       bootclasspath="${empty}"
       nowarn="on"
@@ -54,11 +62,34 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${java13compile.classpath}"/>
-		<pathelement path="${junit}"/>
+	<pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
     </javac>
   </target>
+
+  <!-- add source argument to get around a problem compiling with -->
+  <!-- Jikes 1.22 in the gump nightly build.                      -->
+  <target name="compilex_gump" if="jikes.source.set">
+    <javac
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}" 
+      source="${jikes.source}"
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java13compile.classpath}"/>
+	<pathelement path="${junit}"/>
+      </classpath>
+      <include name="${this.dir}/*.java"/>
+    </javac>
+  </target> 
 
 <!--             ============= End Targets ==============                -->
 
