@@ -21,8 +21,6 @@
 package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.types.Resetable;
-import org.apache.derby.iapi.error.StandardException;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -32,11 +30,6 @@ import java.io.EOFException;
 	Converts a stream containing the Cloudscape stored binary form
 	to one that just contains the application's data.
 	Simply remove the length information.
-
-	If source stream implements Resetable interface , 
-	the source can be shared among other objects and 
-	not closed when close method of this class was called.
-
 */
 final class BinaryToRawStream
 extends java.io.FilterInputStream
@@ -103,26 +96,4 @@ extends java.io.FilterInputStream
 			//	len++;
 		}
 	}
-    
-    
-    public void close() throws IOException{
-	
-	//Escape from closing source InputStream ,
-	//because source InputStream can be shared between other stream.
-	
-	if(in instanceof Resetable){
-	    try{
-		((Resetable) in).resetStream();
-		
-	    }catch(StandardException e){
-		e.printStackTrace();
-		throw new IOException(e.getMessage());
-	    }
-	    
-	}else{
-	    super.close();
-	    
-	}
-    }
-    
 }

@@ -26,16 +26,9 @@ import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.io.EOFException;
 import java.sql.SQLException;
-import org.apache.derby.iapi.types.Resetable;
-import org.apache.derby.iapi.error.StandardException;
-    
 
 /**
- *
- * If source InputStream of this class is Resetable, close method of this class reset the source instead of close it,
- * because the source InputStream can be shared.
- *
- */
+*/
 public final class UTF8Reader extends Reader
 {
 
@@ -147,7 +140,7 @@ public final class UTF8Reader extends Reader
 
 	}
 
-	public void close() throws IOException
+	public void close()
 	{
 		synchronized (lock) {
 			closeIn();
@@ -219,33 +212,23 @@ public final class UTF8Reader extends Reader
 	*/
 
 
-	private void closeIn() throws IOException {
+	private void closeIn() {
 		if (in != null) {
 			try {
-			    
-			    if(in instanceof Resetable){
-				((Resetable) in).resetStream();
-				
-			    }else{
 				in.close();
-			    }
-			    
-			} catch (StandardException e) {
-			    e.printStackTrace();
-			    throw new IOException(e.getMessage());
-			    
+			} catch (IOException ioe) {
 			} finally {
 				in = null;
 			}
 		}
 	}
-	private IOException utfFormatException(String s) throws IOException {
+	private IOException utfFormatException(String s) {
 		noMoreReads = true;
 		closeIn();
 		return new UTFDataFormatException(s);
 	}
 
-	private IOException utfFormatException() throws IOException {
+	private IOException utfFormatException() {
 		noMoreReads = true;
 		closeIn();
 		return new UTFDataFormatException();

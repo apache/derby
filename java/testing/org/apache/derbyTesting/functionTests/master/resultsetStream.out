@@ -16,9 +16,4 @@ EXPECTED SQLSTATE(XJ001): Java exception: 'Input stream did not have exact amoun
 Test of getAsciiStream
 U+0041U+0042U+0043U+0044U+0045U+0046U+0047U+00c0U+00c1U+00c2U+00c3U+00c4U+00c5U+00ffU+003fU+003fU+003fU+003fU+003fU+003f
 U+0041U+0042U+0043U+0044U+0045U+0046U+0047U+00c0U+00c1U+00c2U+00c3U+00c4U+00c5U+00ffU+0100U+3042U+3044U+3046U+3048U+304a
-Test of RepeatedStream
-first stream: 01234567
-second stream: 01234567
-first reader: 01234567
-second reader: 01234567
 Test resultsetStream finished
