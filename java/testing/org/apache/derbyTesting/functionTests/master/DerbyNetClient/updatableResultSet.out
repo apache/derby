@@ -588,9 +588,7 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : ResultSet is not updatable.
   Test updateClob on a readonly resultset
   Using column position as first parameter to updateClob
-  Got expected exception : JDBC 3 method called - not yet supported
   Using column name as first parameter to updateClob
-  Got expected exception : JDBC 3 method called - not yet supported
   Test updateDate on a readonly resultset
   Using column position as first parameter to updateDate
   Got expected exception : ResultSet is not updatable.
@@ -608,9 +606,7 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : ResultSet is not updatable.
   Test updateBlob on a readonly resultset
   Using column position as first parameter to updateBlob
-  Got expected exception : JDBC 3 method called - not yet supported
   Using column name as first parameter to updateBlob
-  Got expected exception : JDBC 3 method called - not yet supported
   Test updateBoolean on a readonly resultset
   Using column position as first parameter to updateBoolean
   Got expected exception : ResultSet is not updatable.
@@ -623,14 +619,10 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : ResultSet is not updatable.
   Test updateArray on a readonly resultset
   Using column position as first parameter to updateArray
-  Got expected exception : JDBC 3 method called - not yet supported
   Using column name as first parameter to updateArray
-  Got expected exception : JDBC 3 method called - not yet supported
   Test updateRef on a readonly resultset
   Using column position as first parameter to updateRef
-  Got expected exception : JDBC 3 method called - not yet supported
   Using column name as first parameter to updateRef
-  Got expected exception : JDBC 3 method called - not yet supported
 Positive Test21 - Test all updateXXX(excluding updateObject) methods on all the supported sql datatypes
 Next datatype to test is SMALLINT
   Testing updateShort on SQL type SMALLINT
@@ -681,9 +673,7 @@ Next datatype to test is SMALLINT
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type SMALLINT
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type SMALLINT
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -701,9 +691,7 @@ Next datatype to test is SMALLINT
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type SMALLINT
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type SMALLINT
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -712,14 +700,10 @@ Next datatype to test is SMALLINT
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type SMALLINT
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type SMALLINT
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is INTEGER
   Testing updateShort on SQL type INTEGER
     Using column position as first parameter to updateShort
@@ -769,9 +753,7 @@ Next datatype to test is INTEGER
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type INTEGER
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type INTEGER
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -789,9 +771,7 @@ Next datatype to test is INTEGER
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type INTEGER
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type INTEGER
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -800,14 +780,10 @@ Next datatype to test is INTEGER
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type INTEGER
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type INTEGER
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is BIGINT
   Testing updateShort on SQL type BIGINT
     Using column position as first parameter to updateShort
@@ -857,9 +833,7 @@ Next datatype to test is BIGINT
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type BIGINT
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type BIGINT
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -877,9 +851,7 @@ Next datatype to test is BIGINT
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type BIGINT
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type BIGINT
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -888,14 +860,10 @@ Next datatype to test is BIGINT
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type BIGINT
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type BIGINT
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is DECIMAL(10,5)
   Testing updateShort on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateShort
@@ -945,9 +913,7 @@ Next datatype to test is DECIMAL(10,5)
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -965,9 +931,7 @@ Next datatype to test is DECIMAL(10,5)
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -976,14 +940,10 @@ Next datatype to test is DECIMAL(10,5)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is REAL
   Testing updateShort on SQL type REAL
     Using column position as first parameter to updateShort
@@ -1031,9 +991,7 @@ Next datatype to test is REAL
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type REAL
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type REAL
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -1051,9 +1009,7 @@ Next datatype to test is REAL
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type REAL
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type REAL
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1062,14 +1018,10 @@ Next datatype to test is REAL
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type REAL
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type REAL
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is DOUBLE
   Testing updateShort on SQL type DOUBLE
     Using column position as first parameter to updateShort
@@ -1117,9 +1069,7 @@ Next datatype to test is DOUBLE
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type DOUBLE
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type DOUBLE
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -1137,9 +1087,7 @@ Next datatype to test is DOUBLE
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type DOUBLE
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type DOUBLE
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1148,14 +1096,10 @@ Next datatype to test is DOUBLE
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DOUBLE
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type DOUBLE
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is CHAR(60)
   Testing updateShort on SQL type CHAR(60)
     Using column position as first parameter to updateShort
@@ -1199,9 +1143,7 @@ Next datatype to test is CHAR(60)
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type CHAR(60)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type CHAR(60)
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1213,9 +1155,7 @@ Next datatype to test is CHAR(60)
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type CHAR(60)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type CHAR(60)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1224,14 +1164,10 @@ Next datatype to test is CHAR(60)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CHAR(60)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type CHAR(60)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is VARCHAR(60)
   Testing updateShort on SQL type VARCHAR(60)
     Using column position as first parameter to updateShort
@@ -1275,9 +1211,7 @@ Next datatype to test is VARCHAR(60)
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type VARCHAR(60)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type VARCHAR(60)
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1289,9 +1223,7 @@ Next datatype to test is VARCHAR(60)
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type VARCHAR(60)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type VARCHAR(60)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1300,14 +1232,10 @@ Next datatype to test is VARCHAR(60)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type VARCHAR(60)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type VARCHAR(60)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is LONG VARCHAR
   Testing updateShort on SQL type LONG VARCHAR
     Using column position as first parameter to updateShort
@@ -1351,9 +1279,7 @@ Next datatype to test is LONG VARCHAR
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type LONG VARCHAR
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type LONG VARCHAR
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1365,9 +1291,7 @@ Next datatype to test is LONG VARCHAR
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type LONG VARCHAR
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type LONG VARCHAR
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1376,14 +1300,10 @@ Next datatype to test is LONG VARCHAR
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type LONG VARCHAR
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type LONG VARCHAR
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is CHAR(2) FOR BIT DATA
   Testing updateShort on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -1443,9 +1363,7 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -1463,9 +1381,7 @@ Next datatype to test is CHAR(2) FOR BIT DATA
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : Illegal Conversion
@@ -1476,14 +1392,10 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is VARCHAR(2) FOR BIT DATA
   Testing updateShort on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -1543,9 +1455,7 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -1563,9 +1473,7 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : Illegal Conversion
@@ -1576,14 +1484,10 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is LONG VARCHAR FOR BIT DATA
   Testing updateShort on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -1643,9 +1547,7 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -1663,9 +1565,7 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : Illegal Conversion
@@ -1676,14 +1576,10 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is CLOB(1k)
   Testing updateShort on SQL type CLOB(1k)
     Using column position as first parameter to updateShort
@@ -1741,9 +1637,7 @@ Next datatype to test is CLOB(1k)
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type CLOB(1k)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type CLOB(1k)
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -1761,9 +1655,7 @@ Next datatype to test is CLOB(1k)
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type CLOB(1k)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type CLOB(1k)
     Using column position as first parameter to updateBoolean
       Got expected exception : Illegal Conversion
@@ -1774,14 +1666,10 @@ Next datatype to test is CLOB(1k)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CLOB(1k)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type CLOB(1k)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is DATE
   Testing updateShort on SQL type DATE
     Using column position as first parameter to updateShort
@@ -1845,9 +1733,7 @@ Next datatype to test is DATE
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type DATE
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type DATE
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1861,9 +1747,7 @@ Next datatype to test is DATE
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type DATE
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type DATE
     Using column position as first parameter to updateBoolean
       Got expected exception : Illegal Conversion
@@ -1874,14 +1758,10 @@ Next datatype to test is DATE
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DATE
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type DATE
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is TIME
   Testing updateShort on SQL type TIME
     Using column position as first parameter to updateShort
@@ -1945,9 +1825,7 @@ Next datatype to test is TIME
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type TIME
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type TIME
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -1961,9 +1839,7 @@ Next datatype to test is TIME
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type TIME
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type TIME
     Using column position as first parameter to updateBoolean
       Got expected exception : Illegal Conversion
@@ -1974,14 +1850,10 @@ Next datatype to test is TIME
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type TIME
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type TIME
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is TIMESTAMP
   Testing updateShort on SQL type TIMESTAMP
     Using column position as first parameter to updateShort
@@ -2045,9 +1917,7 @@ Next datatype to test is TIMESTAMP
       Got expected exception : Illegal Conversion
   Testing updateClob on SQL type TIMESTAMP
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type TIMESTAMP
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -2061,9 +1931,7 @@ Next datatype to test is TIMESTAMP
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type TIMESTAMP
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type TIMESTAMP
     Using column position as first parameter to updateBoolean
       Got expected exception : Illegal Conversion
@@ -2074,14 +1942,10 @@ Next datatype to test is TIMESTAMP
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type TIMESTAMP
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type TIMESTAMP
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Next datatype to test is BLOB(1k)
   Testing updateShort on SQL type BLOB(1k)
     Using column position as first parameter to updateShort
@@ -2141,9 +2005,7 @@ Next datatype to test is BLOB(1k)
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type BLOB(1k)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateDate on SQL type BLOB(1k)
     Using column position as first parameter to updateDate
       Got expected exception : Illegal Conversion
@@ -2161,9 +2023,7 @@ Next datatype to test is BLOB(1k)
       Got expected exception : Illegal Conversion
   Testing updateBlob on SQL type BLOB(1k)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateBoolean on SQL type BLOB(1k)
     Using column position as first parameter to updateBoolean
       Got expected exception : Illegal Conversion
@@ -2174,14 +2034,10 @@ Next datatype to test is BLOB(1k)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type BLOB(1k)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
   Testing updateRef on SQL type BLOB(1k)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
 Positive Test22 - Test updateObject method
 Next datatype to test is SMALLINT
   updateObject with column position & Short object as parameters
@@ -2204,10 +2060,6 @@ Next datatype to test is SMALLINT
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2219,10 +2071,6 @@ Next datatype to test is SMALLINT
   updateObject with column position & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
@@ -2251,10 +2099,6 @@ Next datatype to test is INTEGER
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2266,10 +2110,6 @@ Next datatype to test is INTEGER
   updateObject with column position & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
@@ -2298,10 +2138,6 @@ Next datatype to test is BIGINT
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2313,10 +2149,6 @@ Next datatype to test is BIGINT
   updateObject with column position & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
@@ -2345,10 +2177,6 @@ Next datatype to test is DECIMAL(10,5)
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2360,10 +2188,6 @@ Next datatype to test is DECIMAL(10,5)
   updateObject with column position & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
@@ -2390,10 +2214,6 @@ Next datatype to test is REAL
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2405,10 +2225,6 @@ Next datatype to test is REAL
   updateObject with column position & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
@@ -2435,10 +2251,6 @@ Next datatype to test is DOUBLE
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2450,10 +2262,6 @@ Next datatype to test is DOUBLE
   updateObject with column position & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
@@ -2480,18 +2288,12 @@ Next datatype to test is CHAR(60)
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-  updateObject with column name & Clob object as parameters
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
   updateObject with column name & Time object as parameters
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2517,18 +2319,12 @@ Next datatype to test is VARCHAR(60)
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-  updateObject with column name & Clob object as parameters
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
   updateObject with column name & Time object as parameters
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2554,18 +2350,12 @@ Next datatype to test is LONG VARCHAR
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-  updateObject with column name & Clob object as parameters
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
   updateObject with column name & Time object as parameters
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
@@ -2603,10 +2393,6 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Got expected exception : Illegal Conversion
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2619,10 +2405,6 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-    Got expected exception : A truncation error was encountered trying to shrink CHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2.
-  updateObject with column name & Blob object as parameters
-    Got expected exception : A truncation error was encountered trying to shrink CHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2.
   updateObject with column position & Boolean object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Boolean object as parameters
@@ -2662,10 +2444,6 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Got expected exception : Illegal Conversion
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2678,10 +2456,6 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-    Got expected exception : A truncation error was encountered trying to shrink VARCHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2.
-  updateObject with column name & Blob object as parameters
-    Got expected exception : A truncation error was encountered trying to shrink VARCHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2.
   updateObject with column position & Boolean object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Boolean object as parameters
@@ -2721,10 +2495,6 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Got expected exception : Illegal Conversion
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2737,8 +2507,6 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-  updateObject with column name & Blob object as parameters
   updateObject with column position & Boolean object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Boolean object as parameters
@@ -2778,8 +2546,6 @@ Next datatype to test is CLOB(1k)
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-  updateObject with column name & Clob object as parameters
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2791,10 +2557,6 @@ Next datatype to test is CLOB(1k)
   updateObject with column position & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
     Got expected exception : Illegal Conversion
@@ -2837,10 +2599,6 @@ Next datatype to test is DATE
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
@@ -2849,10 +2607,6 @@ Next datatype to test is DATE
     Got expected exception : Illegal Conversion
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Boolean object as parameters
@@ -2894,10 +2648,6 @@ Next datatype to test is TIME
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -2906,10 +2656,6 @@ Next datatype to test is TIME
   updateObject with column name & Time object as parameters
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Boolean object as parameters
@@ -2951,10 +2697,6 @@ Next datatype to test is TIMESTAMP
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
@@ -2963,10 +2705,6 @@ Next datatype to test is TIMESTAMP
     Got expected exception : Illegal Conversion
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
-  updateObject with column position & Blob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Blob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Boolean object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Boolean object as parameters
@@ -3006,10 +2744,6 @@ Next datatype to test is BLOB(1k)
     Got expected exception : Illegal Conversion
   updateObject with column position & bytes[] array as parameters
   updateObject with column name & bytes[] array as parameters
-  updateObject with column position & Clob object as parameters
-    Got expected exception : Illegal Conversion
-  updateObject with column name & Clob object as parameters
-    Got expected exception : Illegal Conversion
   updateObject with column position & Date object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Date object as parameters
@@ -3022,8 +2756,6 @@ Next datatype to test is BLOB(1k)
     Got expected exception : Illegal Conversion
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : Illegal Conversion
-  updateObject with column position & Blob object as parameters
-  updateObject with column name & Blob object as parameters
   updateObject with column position & Boolean object as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & Boolean object as parameters

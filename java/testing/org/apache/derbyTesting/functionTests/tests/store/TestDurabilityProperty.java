@@ -23,11 +23,11 @@ package org.apache.derbyTesting.functionTests.tests.store;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.io.*;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import java.util.Properties;
-
 
 /**
  * This program tests the system when the derby.system.durability property is
@@ -124,7 +124,11 @@ public class TestDurabilityProperty {
 
         try {
             conn.close();
-			TestUtil.shutdownUsingDataSource("");
+            if(TestUtil.HAVE_DRIVER_CLASS) {
+                DriverManager.getConnection("jdbc:derby:;shutdown=true");
+            } else {
+            	TestUtil.shutdownUsingDataSource("");
+            }
         } catch (SQLException sqle) {
             if ("XJ015".equals(sqle.getSQLState())) {
             }// ok database shutdown

@@ -47,9 +47,10 @@ grant codeBase "${csinfo.codejar}derby.jar" {
   // sane=true, jdbcapi/secureUsers1.sql
   permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
   
-  // These permissions are needed to load the JCE for encryption with Sun JDK131.
+  // These permissions are needed to load the JCE for encryption with Sun and IBM JDK131.
   // JDK14 has the JCE  preloaded
   permission java.security.SecurityPermission "insertProvider.SunJCE";
+  permission java.security.SecurityPermission "insertProvider.IBMJCE";
  
 };
 
@@ -157,9 +158,10 @@ grant codeBase "${csinfo.codeclasses}" {
   // sane=true, jdbcapi/secureUsers1.sql
   permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
   
-  // These permissions are needed to load the JCE for encryption with Sun JDK131.
+  // These permissions are needed to load the JCE for encryption with Sun and IBM JDK131.
   // JDK14 has the JCE  preloaded
   permission java.security.SecurityPermission "insertProvider.SunJCE";
+  permission java.security.SecurityPermission "insertProvider.IBMJCE";
   
   // lang/errorStream.java
   permission java.lang.RuntimePermission "setIO";
