@@ -222,6 +222,15 @@ class DRDAStatement
 	{
 		currentDrdaRs.setExtDtaObjects(a);
 	}
+
+	public void setSplitQRYDTA(byte []data)
+	{
+		currentDrdaRs.setSplitQRYDTA(data);
+	}
+	public byte[]getSplitQRYDTA()
+	{
+		return currentDrdaRs.getSplitQRYDTA();
+	}
 	
    	/**
 	 * Add extDtaObject

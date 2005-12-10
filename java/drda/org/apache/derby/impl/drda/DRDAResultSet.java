@@ -82,6 +82,13 @@ class DRDAResultSet
 
 	protected String pkgcnstknStr;               // Unique consistency token for ResultSet 0
 
+	// splitQRYDTA is normally null. If it is non-null, it means that
+	// the last QRYDTA response which was sent for this statement was
+	// split according to the LMTBLKPRC protocol, and this array contains
+	// the bytes that didn't fit. These bytes should be the first bytes
+	// emitted in the next QRYDTA response to a CNTQRY request.
+	private byte []splitQRYDTA;
+
 	protected DRDAResultSet()
 	{
 		state = NOT_OPENED;
@@ -125,6 +132,15 @@ class DRDAResultSet
 	protected ResultSet getResultSet()
 	{
 		return rs;
+	}
+
+	public void setSplitQRYDTA(byte []data)
+	{
+		splitQRYDTA = data;
+	}
+	public byte[]getSplitQRYDTA()
+	{
+		return splitQRYDTA;
 	}
 
 	/** 

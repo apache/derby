@@ -5851,7 +5851,43 @@ public class DRDAConnThread extends Thread {
 	/**
 	 * Write QRYDTA - Query Answer Set Data
 	 *  Contains some or all of the answer set data resulting from a query
-	 *  returns true if there is more data, false if we reached the end
+	 *  If the client is not using rowset processing, this routine attempts
+	 *  to pack as much data into the QRYDTA as it can. This may result in
+	 *  splitting the last row across the block, in which case when the
+	 *  client calls CNTQRY we will return the remainder of the row.
+	 *
+	 *  Splitting a QRYDTA block is expensive, for several reasons:
+	 *  - extra logic must be run, on both client and server side
+	 *  - more network round-trips are involved
+	 *  - the QRYDTA block which contains the continuation of the split
+	 *    row is generally wasteful, since it contains the remainder of
+	 *    the split row but no additional rows.
+	 *  Since splitting is expensive, the server makes some attempt to
+	 *  avoid it. Currently, the server's algorithm for this is to
+	 *  compute the length of the current row, and to stop trying to pack
+	 *  more rows into this buffer if another row of that length would
+	 *  not fit. However, since rows can vary substantially in length,
+	 *  this algorithm is often ineffective at preventing splits. For
+	 *  example, if a short row near the end of the buffer is then
+	 *  followed by a long row, that long row will be split. It is possible
+	 *  to improve this algorithm substantially:
+	 *  - instead of just using the length of the previous row as a guide
+	 *    for whether to attempt packing another row in, use some sort of
+	 *    overall average row size computed over multiple rows (e.g., all
+	 *    the rows we've placed into this QRYDTA block, or all the rows
+	 *    we've process for this result set)
+	 *  - when we discover that the next row will not fit, rather than
+	 *    splitting the row across QRYDTA blocks, if it is relatively
+	 *    small, we could just hold the entire row in a buffer to place
+	 *    it entirely into the next QRYDTA block, or reset the result
+	 *    set cursor back one row to "unread" this row.
+	 *  - when splitting a row across QRYDTA blocks, we tend to copy
+	 *    data around multiple times. Careful coding could remove some
+	 *    of these copies.
+	 *  However, it is important not to over-complicate this code: it is
+	 *  better to be correct than to be efficient, and there have been
+	 *  several bugs in the split logic already.
+	 *
 	 * Instance Variables
 	 *   Byte string
 	 *
@@ -5870,13 +5906,29 @@ public class DRDAConnThread extends Thread {
 		if (SanityManager.DEBUG) 
 			trace("Write QRYDTA");
 		writer.startDdm(CodePoint.QRYDTA);
+		// Check to see if there was leftover data from splitting
+		// the previous QRYDTA for this result set. If there was, and
+		// if we have now sent all of it, send any EXTDTA for that row
+		// and increment the rowCount which we failed to increment in
+		// writeFDODTA when we realized the row needed to be split.
+		if (processLeftoverQRYDTA(stmt))
+		{
+			if (stmt.getSplitQRYDTA() == null)
+			{
+				stmt.rowCount += 1;
+				if (stmt.getExtDtaObjects() != null)
+					writeEXTDTA(stmt);
+			}
+			return;
+		}
 		
 		while(getMoreData)
 		{			
 			sentExtData = false;
 			getMoreData = writeFDODTA(stmt);
 
-			if (stmt.getExtDtaObjects() != null)
+			if (stmt.getExtDtaObjects() != null &&
+					stmt.getSplitQRYDTA() == null)
 			{
 				writer.endDdmAndDss();
 				writeEXTDTA(stmt);
@@ -5910,6 +5962,48 @@ public class DRDAConnThread extends Thread {
 		}
 	}
 
+	/**
+	 * This routine places some data into the current QRYDTA block using
+	 * FDODTA (Formatted Data Object DaTA rules).
+	 *
+	 * There are 3 basic types of processing flow for this routine:
+	 * - In normal non-rowset, non-scrollable cursor flow, this routine
+	 *   places a single row into the QRYDTA block and returns TRUE,
+	 *   indicating that the caller can call us back to place another
+	 *   row into the result set if he wishes. (The caller may need to
+	 *   send Externalized Data, which would be a reason for him NOT to
+	 *   place any more rows into the QRYDTA).
+	 * - In ROWSET processing, this routine places an entire ROWSET of
+	 *   rows into the QRYDTA block and returns FALSE, indicating that
+	 *   the QRYDTA block is full and should now be sent.
+	 * - In callable statement processing, this routine places the
+	 *   results from the output parameters of the called procedure into
+	 *   the QRYDTA block. This code path is really dramatically
+	 *   different from the other two paths and shares only a very small
+	 *   amount of common code in this routine.
+	 *
+	 * In all cases, it is possible that the data we wish to return may
+	 * not fit into the QRYDTA block, in which case we call splitQRYDTA
+	 * to split the data and remember the remainder data in the result set.
+	 * Splitting the data is relatively rare in the normal cursor case,
+	 * because our caller (writeQRYDTA) uses a coarse estimation
+	 * technique to avoid calling us if he thinks a split is likely.
+	 *
+	 * The overall structure of this routine is implemented as two
+	 * loops:
+	 * - the outer "do ... while ... " loop processes a ROWSET, one row
+	 *   at a time. For non-ROWSET cursors, and for callable statements,
+	 *   this loop executes only once.
+	 * - the inner "for ... i < numCols ..." loop processes each column
+	 *   in the current row, or each output parmeter in the procedure.
+	 *
+	 * Most column data is written directly inline in the QRYDTA block.
+	 * Some data, however, is written as Externalized Data. This is
+	 * commonly used for Large Objects. In that case, an Externalized
+	 * Data Pointer is written into the QRYDTA block, and the actual
+	 * data flows in separate EXTDTA blocks which are returned
+	 * after this QRYDTA block.
+	 */
 	private boolean writeFDODTA (DRDAStatement stmt) 
 		throws DRDAProtocolException, SQLException
 	{
@@ -6079,7 +6173,7 @@ public class DRDAConnThread extends Thread {
 			if (writer.getOffset() >= blksize)
 			{
 				splitQRYDTA(stmt, blksize);
-				moreData = false;
+				return false;
 			}
 
 			if (rs == null)
@@ -6116,6 +6210,11 @@ public class DRDAConnThread extends Thread {
 	/**
 	 * Split QRYDTA into blksize chunks
 	 *
+	 * This routine is called if the QRYDTA data will not fit. It writes
+	 * as much data as it can, then stores the remainder in the result
+	 * set. At some later point, when the client returns with a CNTQRY,
+	 * we will call processLeftoverQRYDTA to handle that data.
+	 *
 	 * @param stmt DRDA statment
 	 * @param blksize size of query block
 	 * 
@@ -6129,36 +6228,54 @@ public class DRDAConnThread extends Thread {
 		byte [] temp = writer.copyDataToEnd(blksize);
 		// truncate to end of blocksize
 		writer.setOffset(blksize);
-		int remain = temp.length;
-		int start = 0;
-		int dataLen = blksize - 10; //DSS header + QRYDTA and length
-		while (remain > 0)
+		if (temp.length == 0)
+			agentError("LMTBLKPRC violation: splitQRYDTA was " +
+				"called to split a QRYDTA block, but the " +
+				"entire row fit successfully into the " +
+				"current block. Server rowsize computation " +
+				"was probably incorrect (perhaps an off-by-" +
+				"one bug?). QRYDTA blocksize: " + blksize);
+		stmt.setSplitQRYDTA(temp);
+	}
+	/*
+	 * Process remainder data resulting from a split.
+	 *
+	 * This routine is called at the start of building each QRYDTA block.
+	 * Normally, it observes that there is no remainder data from the
+	 * previous QRYDTA block, and returns FALSE, indicating that there
+	 * was nothing to do.
+	 *
+	 * However, if it discovers that the previous QRYDTA block was split,
+	 * then it retrieves the remainder data from the result set, writes
+	 * as much of it as will fit into the QRYDTA block (hopefully all of
+	 * it will fit, but the row may be very long), and returns TRUE,
+	 * indicating that this QRYDTA block has been filled with remainder
+	 * data and should now be sent immediately.
+	 */
+	private boolean processLeftoverQRYDTA(DRDAStatement stmt)
+		throws SQLException,DRDAProtocolException
+	{
+		byte []leftovers = stmt.getSplitQRYDTA();
+		if (leftovers == null)
+			return false;
+		int blksize = stmt.getBlksize() > 0 ? stmt.getBlksize() : CodePoint.QRYBLKSZ_MAX;
+		blksize = blksize - 10; //DSS header + QRYDTA and length
+		if (leftovers.length < blksize)
 		{
-			// finish off query block and send
-			writer.endDdmAndDss();
-			finalizeChain();
-			// read CNTQRY - not sure why JCC sends this
-			correlationID = reader.readDssHeader();
-			int codePoint = reader.readLengthAndCodePoint();
-			DRDAStatement contstmt = parseCNTQRY();
-			if (stmt != contstmt)
-				agentError("continued query stmt not the same");
-			// start a new query block for the next row
-			writer.createDssObject();
-			writer.startDdm(CodePoint.QRYDTA);
-			// write out remaining data
-			if (remain > blksize)
-			{
-				writer.writeBytes(temp, start, dataLen);
-				remain -= dataLen; //DSS header + QRYDTA and length
-				start += dataLen;
-			}
-			else
-			{
-				writer.writeBytes(temp, start, remain);
-				remain = 0;
-			}
+			writer.writeBytes(leftovers, 0, leftovers.length);
+			stmt.setSplitQRYDTA(null);
 		}
+		else
+		{
+			writer.writeBytes(leftovers, 0, blksize);
+			byte []newLeftovers = new byte[leftovers.length-blksize];
+			for (int i = 0; i < newLeftovers.length; i++)
+				newLeftovers[i] = leftovers[blksize+i];
+			stmt.setSplitQRYDTA(newLeftovers);
+		}
+		// finish off query block and send
+		writer.endDdmAndDss();
+		return true;
 	}
 	/**
 	 * Done data

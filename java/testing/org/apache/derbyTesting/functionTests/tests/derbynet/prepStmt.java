@@ -300,6 +300,7 @@ class prepStmt
 			test4975(conn);
 			test5130(conn);
 			test5172(conn);
+			jira614Test(conn);
 			conn.close();
 			System.out.println("prepStmt Test Ends");
         }
@@ -684,5 +685,50 @@ class prepStmt
 	}
 
 	
+	// Derby bug 614 has to do with how the server responds when the
+	// client closes the statement in between split QRYDTA blocks. We
+	// have to cause a split QRYDTA block, which we can do by having a
+	// bunch of moderately-sized rows which mostly fill a 32K block
+	// followed by a single giant row which overflows the block. Then,
+	// we fetch some of the rows, then close the result set.
+    private static void jira614Test(Connection conn)
+	    throws Exception
+    {
+	    Statement stmt = conn.createStatement();
+            PreparedStatement ps ;
+	    try {
+		    stmt.execute("drop table jira614");
+	    } catch (Throwable t) { }
+	    ps = conn.prepareStatement(
+			    "create table jira614 (c1 varchar(10000))");
+	    ps.executeUpdate();
+	    String workString = genString("a", 150);
+	    ps = conn.prepareStatement("insert into jira614 values (?)");
+	    ps.setString(1, workString);
+	    for (int row = 0; row < 210; row++)
+		    ps.executeUpdate();
+	    workString = genString("b", 10000);
+	    ps.setString(1, workString);
+	    ps.executeUpdate();
+	    ps = conn.prepareStatement("select * from jira614");
+            ResultSet rs = ps.executeQuery();
+
+            int rowNum = 0;
+            while (rs.next())
+            {
+                rowNum++;
+                if (rowNum == 26)
+                    break;
+            }
+            rs.close(); // This statement actually triggers the bug.
+	    System.out.println("Test jira614 completed successfully -- no Distributed Protocol Exception occurred");
+    }
+    private static String genString(String c, int howMany)
+    {
+	    StringBuffer buf = new StringBuffer();
+	    for (int i = 0; i < howMany; i++)
+		    buf.append(c);
+	    return buf.toString();
+    }
 }
 

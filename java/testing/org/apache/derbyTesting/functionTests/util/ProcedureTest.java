@@ -214,6 +214,13 @@ public abstract class ProcedureTest implements ResultSet {
 				ps.executeUpdate();
 				ps.close();
 				break;
+			case 9:
+				String lStringA32672 = new String(Formatters.repeatChar("a",32672));
+				String lStringB32672 = new String(Formatters.repeatChar("b",32672));
+				String lStringC32672 = new String(Formatters.repeatChar("c",32672));
+				String lStringD32672 = new String(Formatters.repeatChar("d",32672));
+				insertInBig(conn, lStringA32672, lStringB32672, lStringC32672, lStringD32672);
+				break;
 		}
 		conn.close();
 	}
