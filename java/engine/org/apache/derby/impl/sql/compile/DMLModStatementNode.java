@@ -419,7 +419,7 @@ public abstract class DMLModStatementNode extends DMLStatementNode
 													fromBaseTable.getTableNameField());
 
 			resultColumnList.bindResultColumnsByName(targetTableDescriptor,
-													this);
+													(DMLStatementNode) this);
 		}
 	}
 

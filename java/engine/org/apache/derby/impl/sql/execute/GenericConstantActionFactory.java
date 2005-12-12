@@ -52,6 +52,7 @@ import org.apache.derby.catalog.AliasInfo;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
+import java.util.List;
 import java.util.Properties;
 
 import java.sql.Timestamp;
@@ -1014,5 +1015,31 @@ public class GenericConstantActionFactory
 		(SchemaDescriptor sd, String fullTableName, String objectName, boolean forTable)
 	{
 		return new DropStatisticsConstantAction(sd, fullTableName, objectName, forTable);
+	}
+
+	/**
+	 * Make the constant action for a Grant statement
+	 *
+	 * @param privileges The list of privileges to be granted
+	 * @param grantees The list of grantees
+	 * @param withGrantOption true if WITH GRANT OPTION, false if not.
+	 */
+	public ConstantAction getGrantConstantAction( PrivilegeInfo privileges,
+								List grantees)
+	{
+		return new GrantRevokeConstantAction( true, privileges, grantees);
+	}
+
+	/**
+	 * Make the constant action for a Revoke statement
+	 * 
+	 * @param privileges The list of privileges to be revokeed
+	 * @param grantees The list of grantees
+	 * @param withGrantOption true if WITH GRANT OPTION, false if not.
+	 */
+	public ConstantAction getRevokeConstantAction( PrivilegeInfo privileges,
+								List grantees)
+	{
+		return new GrantRevokeConstantAction( false, privileges, grantees);
 	}
 }

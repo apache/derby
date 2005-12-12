@@ -265,7 +265,7 @@ public final class InsertNode extends DMLModStatementNode
 			if (targetTableDescriptor != null)
 			{
 				targetColumnList.bindResultColumnsByName(targetTableDescriptor,
-														this);
+														(DMLStatementNode) this);
 			}
 			else
 			{

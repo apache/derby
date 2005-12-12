@@ -32,6 +32,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.DefaultInfo;
@@ -431,4 +432,70 @@ public class DataDescriptorGenerator
 		return new FileInfoDescriptor(dataDictionary, id,sd,SQLName,generationId);
 	}
 	 	
+    public TablePermsDescriptor newTablePermsDescriptor( TableDescriptor td,
+                                                         String selectPerm,
+                                                         String deletePerm,
+                                                         String insertPerm,
+                                                         String updatePerm,
+                                                         String referencesPerm,
+                                                         String triggerPerm,
+                                                         String grantor)
+    {
+        if( "N".equals( selectPerm) && "N".equals( deletePerm) && "N".equals( insertPerm)
+            && "N".equals( updatePerm) && "N".equals( referencesPerm) && "N".equals( triggerPerm))
+            return null;
+        
+        return new TablePermsDescriptor( dataDictionary,
+                                         (String) null,
+                                         grantor,
+                                         td.getUUID(),
+                                         selectPerm,
+                                         deletePerm,
+                                         insertPerm,
+                                         updatePerm,
+                                         referencesPerm,
+                                         triggerPerm);
+    }
+
+    /**
+     * Manufacture a new ColPermsDescriptor.
+     *
+     * @param td The descriptor of the table.
+     * @param type The action type:
+     *<ol>
+     *<li>"s" - select without grant
+     *<li>"S" - select with grant
+     *<li>"u" - update without grant
+     *<li>"U" - update with grant
+     *<li>"r" - references without grant
+     *<li>"R" - references with grant
+     *</ol>
+     * @param columns the set of columns
+     */
+    public ColPermsDescriptor newColPermsDescriptor( TableDescriptor td,
+                                                     String type,
+                                                     FormatableBitSet columns,
+                                                     String grantor)
+    {
+        return new ColPermsDescriptor( dataDictionary,
+                                       (String) null,
+                                       grantor,
+                                       td.getUUID(),
+                                       type,
+                                       columns);
+    }
+
+    /**
+     * Create a new routine permissions descriptor
+     *
+     * @param ad The routine's alias descriptor
+     * @param grantor
+     */
+    public RoutinePermsDescriptor newRoutinePermsDescriptor( AliasDescriptor ad, String grantor)
+    {
+        return new RoutinePermsDescriptor( dataDictionary,
+                                           (String) null,
+                                           grantor,
+                                           ad.getUUID());
+    }
 }

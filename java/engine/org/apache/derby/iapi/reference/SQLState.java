@@ -765,8 +765,8 @@ public interface SQLState {
 	String LANG_NULL_RESULT_SET_META_DATA                              = "42X43";
 	String LANG_INVALID_COLUMN_LENGTH                                  = "42X44";
 	String LANG_INVALID_FUNCTION_ARG_TYPE                              = "42X45";
-	// = "42X46";
-	// = "42X47";
+	String LANG_AMBIGUOUS_FUNCTION_NAME                                = "42X46";
+	String LANG_AMBIGUOUS_PROCEDURE_NAME                               = "42X47";
 	String LANG_INVALID_PRECISION                                      = "42X48";
 	String LANG_INVALID_INTEGER_LITERAL                                = "42X49";
 	String LANG_NO_METHOD_FOUND                                        = "42X50";
@@ -956,6 +956,8 @@ public interface SQLState {
 	String LANG_NEGATE_COMPARISON_RESULT							   = "42Z46.U";
 	String LANG_GQPT_NOT_SUPPORTED									   = "42Z47.U";
 	String LANG_COLUMN_ID_ARRAY										   = "42Z48.U";
+
+	String LANG_GRANT_REVOKE_WITH_LEGACY_ACCESS                        = "42Z60";
 
 	String LANG_SERIALIZABLE										   = "42Z80.U";
 	String LANG_READ_COMMITTED										   = "42Z81.U";
@@ -1336,6 +1338,14 @@ public interface SQLState {
 	String AUTH_INVALID_USER_NAME                                      = "28502.C";
 	String AUTH_USER_IN_READ_AND_WRITE_LISTS                           = "28503";
 	String AUTH_DUPLICATE_USERS                                        = "28504";
+	String AUTH_INTERNAL_BAD_UUID                                      = "28505";
+	String AUTH_NO_TABLE_PERMISSION                                    = "28506";
+	String AUTH_NO_TABLE_PERMISSION_FOR_GRANT                          = "28507";
+	String AUTH_NO_COLUMN_PERMISSION                                   = "28508";
+	String AUTH_NO_COLUMN_PERMISSION_FOR_GRANT                         = "28509";
+	String AUTH_NO_EXECUTE_PERMISSION                                  = "2850A";
+	String AUTH_NO_EXECUTE_PERMISSION_FOR_GRANT                        = "2850B";
+	String AUTH_NOT_OWNER                                              = "2850C";
 
 	/*
 	** Dependency manager

@@ -42,7 +42,6 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 
 import java.util.List;
-
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
@@ -131,6 +130,10 @@ public interface DataDictionary
 	public static final int SYSTRIGGERS_CATALOG_NUM = 13;
 	public static final int SYSSTATISTICS_CATALOG_NUM = 14;    
 	public static final int SYSDUMMY1_CATALOG_NUM = 15;
+	public static final int SYSTABLEPERMS_CATALOG_NUM = 16;
+	public static final int SYSCOLPERMS_CATALOG_NUM = 17;
+	public static final int SYSROUTINEPERMS_CATALOG_NUM = 18;
+	public static final int SYSREQUIREDPERM_CATALOG_NUM = 19;
 
 	/* static finals for constraints 
 	 * (Here because they are needed by parser, compilation and execution.)
@@ -679,7 +682,7 @@ public interface DataDictionary
 	/**
 	 * Return a table descriptor corresponding to the TABLEID
 	 * field in SYSCONSTRAINTS where CONSTRAINTID matches
-	 * the constraintId passsed in.
+	 * the constraintId passed in.
 	 *
 	 * @param constraintId	The id of the constraint
 	 *
@@ -1539,6 +1542,69 @@ public interface DataDictionary
 	*/
 	public boolean checkVersion(int majorVersion, String feature) throws StandardException;
 	
+    /**
+     * Add or remove a permission to the permission database.
+     *
+     * @param add if true then add the permission, if false remove it.
+     * @param perm
+     * @param grantee
+     * @param tc
+     *
+     */
+    public void addRemovePermissionsDescriptor( boolean add,
+                                                 PermissionsDescriptor perm,
+                                                 String grantee,
+                                                 TransactionController tc)
+        throws StandardException;
+
+    /**
+     * Get one user's privileges on a table
+     *
+     * @param tableUUID
+     * @param authorizationId The user name
+     *
+     * @return a TablePermsDescriptor or null if the user has no permissions on the table.
+     *
+     * @exception StandardException
+     */
+    public TablePermsDescriptor getTablePermissions( UUID tableUUID, String authorizationId)
+        throws StandardException;
+
+    /**
+     * Get one user's column privileges for a table.
+     *
+     * @param tableUUID
+     * @param privType Authorizer.SELECT_PRIV, Authorizer.UPDATE_PRIV, or Authorizer.REFERENCES_PRIV
+     * @param forGrant
+     * @param authorizationId The user name
+     *
+     * @return a ColPermsDescriptor or null if the user has no separate column
+     *         permissions of the specified type on the table. Note that the user may have been granted
+     *         permission on all the columns of the table (no column list), in which case this routine
+     *         will return null. You must also call getTablePermissions to see if the user has permission
+     *         on a set of columns.
+     *
+     * @exception StandardException
+     */
+    public ColPermsDescriptor getColumnPermissions( UUID tableUUID,
+                                                    int privType,
+                                                    boolean forGrant,
+                                                    String authorizationId)
+        throws StandardException;
+
+    /**
+     * Get one user's permissions for a routine (function or procedure).
+     *
+     * @param routineUUID
+     * @param authorizationId The user's name
+     *
+     * @return The descriptor of the users permissions for the routine.
+     *
+     * @exception StandardException
+     */
+    public RoutinePermsDescriptor getRoutinePermissions( UUID routineUUID, String authorizationId)
+        throws StandardException;
+
 	/**
 	 * Return the Java class to use for the VTI for
 	 * the virtual table. Assumes the descriptor is

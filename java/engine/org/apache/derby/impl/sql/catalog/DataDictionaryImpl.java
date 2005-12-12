@@ -24,9 +24,11 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
+import org.apache.derby.iapi.sql.dictionary.PermissionsCatalogRowFactory;
 
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -45,6 +47,10 @@ import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -250,8 +256,6 @@ public final class	DataDictionaryImpl
     protected boolean convertIdToLower;
     // Convert identifiers to lower case (as in Foundation) or not.
     
-	private	static final int		NUM_NONCORE = 12;
-
 	// This array of non-core table names *MUST* be in the same order
 	// as the non-core table numbers, above.
 	private static final String[] nonCoreNames = {
@@ -266,8 +270,14 @@ public final class	DataDictionaryImpl
 									"SYSFILES",
 									"SYSTRIGGERS",
 									"SYSSTATISTICS",
-									"SYSDUMMY1"
+									"SYSDUMMY1",
+                                    "SYSTABLEPERMS",
+                                    "SYSCOLPERMS",
+                                    "SYSROUTINEPERMS",
+                                    "SYSREQUIREDPERM"
 									};
+
+	private	static final int		NUM_NONCORE = nonCoreNames.length;
 
     /**
      * List of all "system" schemas
@@ -332,6 +342,10 @@ public final class	DataDictionaryImpl
 	// private Hashtable       spsTextHash;
 	int				tdCacheSize;
 	int				stmtCacheSize;	
+
+    /* Cache of permissions data */
+    CacheManager permissionsCache;
+    int permissionsCacheSize;
 
 	/*
 	** Lockable object for synchronizing transition from caching to non-caching
@@ -524,6 +538,10 @@ public final class	DataDictionaryImpl
 		stmtCacheSize = PropertyUtil.intPropertyValue(Property.LANG_SPS_CACHE_SIZE, value,
 									   0, Integer.MAX_VALUE, Property.LANG_SPS_CACHE_SIZE_DEFAULT);
 
+		value = startParams.getProperty(Property.LANG_PERMISSIONS_CACHE_SIZE);
+		permissionsCacheSize = PropertyUtil.intPropertyValue(Property.LANG_PERMISSIONS_CACHE_SIZE, value,
+									   0, Integer.MAX_VALUE, Property.LANG_PERMISSIONS_CACHE_SIZE_DEFAULT);
+
 
 		/*
 		 * data dictionary contexts are only associated with connections.
@@ -643,6 +661,27 @@ public final class	DataDictionaryImpl
 		booting = false;
 	}
 
+    private CacheManager getPermissionsCache() throws StandardException
+    {
+        if( permissionsCache == null)
+        {
+            CacheFactory cf =
+              (CacheFactory) Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
+            LanguageConnectionContext lcc = getLCC();
+            TransactionController tc = lcc.getTransactionExecute();
+            permissionsCacheSize = PropertyUtil.getServiceInt( tc,
+                                                               Property.LANG_PERMISSIONS_CACHE_SIZE,
+                                                               40, /* min value */
+                                                               Integer.MAX_VALUE,
+                                                               permissionsCacheSize /* value from boot time. */);
+            permissionsCache = cf.newCacheManager( this,
+                                                   "PermissionsCache",
+                                                   permissionsCacheSize,
+                                                   permissionsCacheSize);
+        }
+        return permissionsCache;
+    } // end of getPermissionsCache
+
 	/** 
 	 * sets the dependencymanager associated with this dd. subclasses can
 	 * override this to install their own funky dependency manager.
@@ -680,6 +719,8 @@ public final class	DataDictionaryImpl
 			return new OIDTDCacheable(this);
 		else if (cm == nameTdCache)
 			return new NameTDCacheable(this);
+        else if( cm == permissionsCache)
+            return new PermissionsCacheable(this);
 		else {
 			return new SPSNameCacheable(this);
 		}
@@ -7551,6 +7592,26 @@ public final class	DataDictionaryImpl
 				retval = new TabInfoImpl(new SYSDUMMY1RowFactory(
 												 luuidFactory, exFactory, dvf, convertIdToLower));					 
 				break;
+
+			  case SYSTABLEPERMS_CATALOG_NUM:
+				retval = new TabInfoImpl(new SYSTABLEPERMSRowFactory(
+												 luuidFactory, exFactory, dvf, convertIdToLower));					 
+				break;
+
+			  case SYSCOLPERMS_CATALOG_NUM:
+				retval = new TabInfoImpl(new SYSCOLPERMSRowFactory(
+												 luuidFactory, exFactory, dvf, convertIdToLower));					 
+				break;
+
+			  case SYSROUTINEPERMS_CATALOG_NUM:
+				retval = new TabInfoImpl(new SYSROUTINEPERMSRowFactory(
+												 luuidFactory, exFactory, dvf, convertIdToLower));					 
+				break;
+
+			  case SYSREQUIREDPERM_CATALOG_NUM:
+				retval = new TabInfoImpl(new SYSREQUIREDPERMRowFactory(
+												 luuidFactory, exFactory, dvf, convertIdToLower));					 
+				break;
 			}
 
 			initSystemIndexVariables(retval);
@@ -9526,6 +9587,273 @@ public final class	DataDictionaryImpl
 		return java.util.Collections.synchronizedList(new java.util.LinkedList());
 	}
 
+    /**
+     * Get one user's privileges on a table
+     *
+     * @param tableUUID
+     * @param authorizationId The user name
+     *
+     * @return a TablePermsDescriptor or null if the user has no permissions on the table.
+     *
+     * @exception StandardException
+     */
+    public TablePermsDescriptor getTablePermissions( UUID tableUUID, String authorizationId)
+        throws StandardException
+    {
+        TablePermsDescriptor key = new TablePermsDescriptor( this, authorizationId, (String) null, tableUUID);
+        return (TablePermsDescriptor) getPermissions( key);
+    } // end of getTablePermissions
+
+    private Object getPermissions( PermissionsDescriptor key) throws StandardException
+    {
+        // RESOLVE get a READ COMMITTED (shared) lock on the permission row
+        Cacheable entry = getPermissionsCache().find( key);
+        if( entry == null)
+            return null;
+        Object perms = entry.getIdentity();
+        getPermissionsCache().release( entry);
+        return perms;
+    }
+
+    /**
+     * Get one user's column privileges for a table.
+     *
+     * @param tableUUID
+     * @param privType Authorizer.SELECT_PRIV, Authorizer.UPDATE_PRIV, or Authorizer.REFERENCES_PRIV
+     * @param forGrant
+     * @param authorizationId The user name
+     *
+     * @return a ColPermsDescriptor or null if the user has no separate column
+     *         permissions of the specified type on the table. Note that the user may have been granted
+     *         permission on all the columns of the table (no column list), in which case this routine
+     *         will return null. You must also call getTablePermissions to see if the user has permission
+     *         on a set of columns.
+     *
+     * @exception StandardException
+     */
+    public ColPermsDescriptor getColumnPermissions( UUID tableUUID,
+                                                    int privType,
+                                                    boolean forGrant,
+                                                    String authorizationId)
+        throws StandardException
+    {
+        String privTypeStr = forGrant ? colPrivTypeMapForGrant[privType] : colPrivTypeMap[privType];
+        if( SanityManager.DEBUG)
+            SanityManager.ASSERT( privTypeStr != null,
+                                  "Invalid column privilege type: " + privType);
+        ColPermsDescriptor key = new ColPermsDescriptor( this,
+                                                         authorizationId,
+                                                         (String) null,
+                                                         tableUUID,
+                                                         privTypeStr);
+        return (ColPermsDescriptor) getPermissions( key);
+    } // end of getColumnPermissions
+
+    private static final String[] colPrivTypeMap;
+    private static final String[] colPrivTypeMapForGrant;
+    static {
+        colPrivTypeMap = new String[ Authorizer.PRIV_TYPE_COUNT];
+        colPrivTypeMapForGrant = new String[ Authorizer.PRIV_TYPE_COUNT];
+        colPrivTypeMap[ Authorizer.SELECT_PRIV] = "s";
+        colPrivTypeMapForGrant[ Authorizer.SELECT_PRIV] = "S";
+        colPrivTypeMap[ Authorizer.UPDATE_PRIV] = "u";
+        colPrivTypeMapForGrant[ Authorizer.UPDATE_PRIV] = "U";
+        colPrivTypeMap[ Authorizer.REFERENCES_PRIV] = "r";
+        colPrivTypeMapForGrant[ Authorizer.REFERENCES_PRIV] = "R";
+    }
+    
+    /**
+     * Get one user's permissions for a routine (function or procedure).
+     *
+     * @param routineUUID
+     * @param authorizationId The user's name
+     *
+     * @return The descriptor of the users permissions for the routine.
+     *
+     * @exception StandardException
+     */
+    public RoutinePermsDescriptor getRoutinePermissions( UUID routineUUID, String authorizationId)
+        throws StandardException
+    {
+        RoutinePermsDescriptor key = new RoutinePermsDescriptor( this, authorizationId, (String) null);
+
+        return (RoutinePermsDescriptor) getPermissions( key);
+    } // end of getRoutinePermissions
+
+    /**
+     * Add or remove a permission to/from the permission database.
+     *
+     * @param add if true then the permission is added, if false the permission is removed
+     * @param perm
+     * @param grantee
+     * @param tc
+     *
+     */
+    public void addRemovePermissionsDescriptor( boolean add,
+                                                PermissionsDescriptor perm,
+                                                String grantee,
+                                                TransactionController tc)
+        throws StandardException
+    {
+        int catalogNumber = perm.getCatalogNumber();
+
+        perm.setGrantee( grantee);
+        TabInfo ti = getNonCoreTI( catalogNumber);
+        PermissionsCatalogRowFactory rf = (PermissionsCatalogRowFactory) ti.getCatalogRowFactory();
+        int primaryIndexNumber = rf.getPrimaryIndexNumber();
+        ConglomerateController heapCC = tc.openConglomerate( ti.getHeapConglomerate(),
+                                                             false,  // do not keep open across commits
+                                                             0,
+                                                             TransactionController.MODE_RECORD,
+                                                             TransactionController.ISOLATION_REPEATABLE_READ);
+        RowLocation rl = null;
+        try
+        {
+            rl = heapCC.newRowLocationTemplate();
+        }
+        finally
+        {
+            heapCC.close();
+            heapCC = null;
+        }
+        ExecIndexRow key = rf.buildIndexKeyRow( primaryIndexNumber, perm);
+        ExecRow existingRow = ti.getRow( tc, key, primaryIndexNumber);
+        if( existingRow == null)
+        {
+            if( ! add)
+                return;
+            ExecRow row = ti.getCatalogRowFactory().makeRow( perm, (TupleDescriptor) null);
+            int insertRetCode = ti.insertRow(row, tc, true /* wait */);
+            if( SanityManager.DEBUG)
+                SanityManager.ASSERT( insertRetCode == TabInfo.ROWNOTDUPLICATE,
+                                      "Race condition in inserting table privilege.");
+        }
+        else
+        {
+            // add/remove these permissions to/from the existing permissions
+            boolean[] colsChanged = new boolean[ existingRow.nColumns()];
+            boolean[] indicesToUpdate = new boolean[ rf.getNumIndexes()];
+            int changedColCount = 0;
+            if( add)
+                changedColCount = rf.orPermissions( existingRow, perm, colsChanged);
+            else
+                changedColCount = rf.removePermissions( existingRow, perm, colsChanged);
+            if( changedColCount == 0)
+                return;
+            if( changedColCount < 0)
+            {
+                // No permissions left in the current row
+                ti.deleteRow( tc, key, primaryIndexNumber);
+            }
+            else if( changedColCount > 0)
+            {
+                int[] colsToUpdate = new int[changedColCount];
+                changedColCount = 0;
+                for( int i = 0; i < colsChanged.length; i++)
+                {
+                    if( colsChanged[i])
+                        colsToUpdate[ changedColCount++] = i + 1;
+                }
+                if( SanityManager.DEBUG)
+                    SanityManager.ASSERT(
+                        changedColCount == colsToUpdate.length,
+                        "return value of " + rf.getClass().getName() +
+                        ".orPermissions does not match the number of booleans it set in colsChanged.");
+                ti.updateRow( key, existingRow, primaryIndexNumber, indicesToUpdate, colsToUpdate, tc, true /* wait */);
+            }
+        }
+        // Remove cached permissions data. The cache may hold permissions data for this key even if
+        // the row in the permissions table is new. In that case the cache may have an entry indicating no
+        // permissions
+        Cacheable cacheEntry = getPermissionsCache().findCached( perm);
+        if( cacheEntry != null)
+            getPermissionsCache().remove( cacheEntry);
+    } // end of addPermissionsDescriptor
+
+    /**
+     * Get a table permissions descriptor from the system tables, without going through the cache.
+     * This method is called to fill the permissions cache.
+     *
+     * @param grantee
+     * @param tableUUID
+     *
+     * @returns a TablePermsDescriptor that describes the table permissions granted to the grantee, null
+     *          if no table-level permissions have been granted to him on the table.
+     *
+     * @exception StandardException
+     */
+    TablePermsDescriptor getUncachedTablePermsDescriptor( TablePermsDescriptor key)
+        throws StandardException
+    {
+        return (TablePermsDescriptor)
+          getUncachedPermissionsDescriptor( SYSTABLEPERMS_CATALOG_NUM,
+                                            SYSTABLEPERMSRowFactory.GRANTEE_TABLE_GRANTOR_INDEX_NUM,
+                                            key);
+    } // end of getUncachedTablePermsDescriptor
+
+
+    /**
+     * Get a column permissions descriptor from the system tables, without going through the cache.
+     * This method is called to fill the permissions cache.
+     *
+     * @param grantee
+     * @param tableUUID
+     * @param privType "s", "u", "r", "S", "U", or "R"
+     *
+     * @returns a ColPermsDescriptor that describes the column permissions granted to the grantee, null
+     *          if no column permissions have been granted to him on the table.
+     *
+     * @exception StandardException
+     */
+    ColPermsDescriptor getUncachedColPermsDescriptor( ColPermsDescriptor key)
+        throws StandardException
+    {
+        return (ColPermsDescriptor)
+          getUncachedPermissionsDescriptor( SYSCOLPERMS_CATALOG_NUM,
+                                            SYSCOLPERMSRowFactory.GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM,
+                                            key);
+                                                                        
+    } // end of getUncachedColPermsDescriptor
+
+    private TupleDescriptor getUncachedPermissionsDescriptor( int catalogNumber,
+                                                              int indexNumber,
+                                                              PermissionsDescriptor key)
+        throws StandardException
+    {
+		TabInfo ti = getNonCoreTI( catalogNumber);
+        PermissionsCatalogRowFactory rowFactory = (PermissionsCatalogRowFactory) ti.getCatalogRowFactory();
+        ExecIndexRow keyRow = rowFactory.buildIndexKeyRow( indexNumber, key);
+        return
+          getDescriptorViaIndex( indexNumber,
+                                 keyRow,
+                                 (ScanQualifier [][]) null,
+                                 ti,
+                                 (TupleDescriptor) null,
+                                 (List) null,
+                                 false);
+    } // end of getUncachedPermissionsDescriptor
+
+    /**
+     * Get a routine permissions descriptor from the system tables, without going through the cache.
+     * This method is called to fill the permissions cache.
+     *
+     * @param grantee
+     * @param routineUUID
+     *
+     * @returns a RoutinePermsDescriptor that describes the table permissions granted to the grantee, null
+     *          if no table-level permissions have been granted to him on the table.
+     *
+     * @exception StandardException
+     */
+    RoutinePermsDescriptor getUncachedRoutinePermsDescriptor( RoutinePermsDescriptor key)
+        throws StandardException
+    {
+        return (RoutinePermsDescriptor)
+          getUncachedPermissionsDescriptor( SYSROUTINEPERMS_CATALOG_NUM,
+                                            SYSROUTINEPERMSRowFactory.GRANTEE_ALIAS_GRANTOR_INDEX_NUM,
+                                            key);
+    } // end of getUncachedRoutinePermsDescriptor
+ 
 	private String[][] DIAG_VTI_CLASSES =
 	{
 			{"LOCK_TABLE", "org.apache.derby.diag.LockTable"},

@@ -76,12 +76,15 @@ import org.apache.derby.impl.sql.compile.SubqueryNode;
 import org.apache.derby.impl.sql.compile.TableName;
 import org.apache.derby.impl.sql.compile.TernaryOperatorNode;
 import org.apache.derby.impl.sql.compile.ParameterNode;
+import org.apache.derby.impl.sql.compile.PrivilegeNode;
 import org.apache.derby.impl.sql.compile.ConstraintDefinitionNode;
 import org.apache.derby.impl.sql.compile.DMLModStatementNode;
+import org.apache.derby.impl.sql.compile.RoutineDesignator;
 import org.apache.derby.impl.sql.compile.StatementNode;
 import org.apache.derby.impl.sql.compile.TableElementList;
 import org.apache.derby.impl.sql.compile.TableElementNode;
 import org.apache.derby.impl.sql.compile.TableOperatorNode;
+import org.apache.derby.impl.sql.compile.TablePrivilegesNode;
 import org.apache.derby.impl.sql.compile.TransactionStatementNode;
 import org.apache.derby.impl.sql.compile.TriggerReferencingStruct;
 import org.apache.derby.impl.sql.compile.UnionNode;
@@ -103,11 +106,13 @@ import org.apache.derby.impl.sql.compile.Token;
 import org.apache.derby.impl.sql.compile.TokenMgrError;
 import org.apache.derby.impl.sql.compile.SQLParserConstants;
 import org.apache.derby.impl.sql.compile.CharStream;
+import org.apache.derby.impl.sql.execute.TablePrivilegeInfo;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
@@ -124,6 +129,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.Limits;
@@ -148,6 +154,8 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.util.StringUtil;
 
 import java.sql.Types;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
@@ -309,6 +317,23 @@ public class SQLParser
 	{
 		getLanguageConnectionContext().getDataDictionary().checkVersion(
 				version, feature);
+	}
+
+    /**
+		Utility method for checking that the underlying database uses SQL standard
+		permission checking (GRANT/REVOKE).
+
+		@param command "GRANT" or "REVOKE"
+    */
+	private void checkSqlStandardAccess( String command) throws StandardException
+	{
+		if( getLanguageConnectionContext().getAuthorizer().usesSqlStandardPermissions())
+			return;
+
+		throw StandardException.newException(SQLState.LANG_GRANT_REVOKE_WITH_LEGACY_ACCESS,
+											command,
+											Property.DEFAULT_CONNECTION_MODE_PROPERTY,
+											Property.SQL_STANDARD_ACCESS);
 	}
 
 	/*
@@ -1653,6 +1678,12 @@ public class SQLParser
                                                 getContextManager());
     }
     
+	private void checkAuthorizationLength( String authorization)
+		throws StandardException
+	{
+		checkIdentifierLengthLimit( authorization, Limits.DB2_MAX_USERID_LENGTH);
+	}
+
     /**
         Check to see if the required claues have been added
         to a procedure or function defintion.
@@ -1941,6 +1972,7 @@ TOKEN [IGNORE_CASE] :
 |	<DATA: "data">
 |	<DATE: "date">
 |	<DAY: "day">
+|	<DEFINER: "definer">
 |   <DYNAMIC: "dynamic">
 |	<FORTRAN: "fortran">
 |   <GENERATED: "generated">
@@ -1949,6 +1981,7 @@ TOKEN [IGNORE_CASE] :
 |	<INITIAL: "initial">
 |   <INOUT: "inout">
 |	<INTERVAL: "interval">
+|	<INVOKER: "invoker">
 |	<LANGUAGE: "language">
 |	<LARGE: "large">
 |	<LENGTH: "length">
@@ -1976,6 +2009,7 @@ TOKEN [IGNORE_CASE] :
 |	<ROW: "row">
 |	<SAVEPOINT: "savepoint">
 |	<SCALE: "scale">
+|	<SECURITY: "security">
 |	<SERIALIZABLE: "serializable">
 |	<SQL_TSI_FRAC_SECOND: "sql_tsi_frac_second">
 |	<SQL_TSI_SECOND: "sql_tsi_second">
@@ -2528,8 +2562,10 @@ StatementPart(Token[] tokenHolder) throws StandardException :
         statementNode = globalTemporaryTableDeclaration() |
         statementNode = preparableSQLDataStatement() |
         statementNode = spsSetStatement() |
-	statementNode = truncateTableStatement() |
-	statementNode = execStatement()
+		statementNode = truncateTableStatement() |
+		statementNode = grantStatement() |
+		statementNode = revokeStatement() |
+		statementNode = execStatement()
         // statementNode = SQLTransactionStatement()
     )
     {
@@ -9118,13 +9154,14 @@ unique() throws StandardException :
 	6 - Short - SQL allowed.
 	7 - Boolean - CALLED ON NULL INPUT (always TRUE for procedures)
 	8 - TypeDescriptor - return type (always NULL for procedures)
+	9 - External security - invoker/definer
 */
 
 QueryTreeNode
 procedureDefinition() throws StandardException :
 {
 	TableName procedureName;
-	Object[] procedureElements = new Object[9];
+	Object[] procedureElements = new Object[10];
 }
 {
 		<PROCEDURE> procedureName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
@@ -9162,6 +9199,7 @@ void routineElement(boolean isProcedure, Object[] routineElements) throws Standa
 	|
 		<LANGUAGE>  <JAVA> { clauseValue = "JAVA"; clausePosition = 3; }
 	|
+		LOOKAHEAD({(getToken(1).kind == EXTERNAL && getToken(2).kind == NAME)})
 		<EXTERNAL> <NAME> clauseValue = string() { clausePosition = 4; }
 	|
 		<PARAMETER> <STYLE> clauseValue = parameterStyle() { clausePosition = 5; }
@@ -9177,6 +9215,9 @@ void routineElement(boolean isProcedure, Object[] routineElements) throws Standa
 		}
 
 	|   clauseValue = calledOnNullInput(isProcedure) { clausePosition = 7; }
+	|
+		LOOKAHEAD({(getToken(1).kind == EXTERNAL && getToken(2).kind == SECURITY)})	
+		clauseValue = externalSecurity() { clausePosition = 9; }
 	)
 
 	{
@@ -9294,7 +9335,7 @@ QueryTreeNode
 functionDefinition() throws StandardException :
 {
 	TableName functionName;
-	Object[] functionElements = new Object[9];
+	Object[] functionElements = new Object[10];
 }
 {
 		<FUNCTION> functionName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
@@ -11561,6 +11602,354 @@ truncateTableStatement() throws StandardException :
 }
 
 /*
+ * <A NAME="external-security clause">externalSecurity</A>
+ */
+Boolean
+externalSecurity() throws StandardException :
+{
+	Boolean invocationType;
+}
+{
+	<EXTERNAL> <SECURITY>
+	{
+		// GrantRevoke TODO: This needs to check for 10.2 version
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_1, "EXTERNAL SECURITY");
+		checkSqlStandardAccess( "EXTERNAL SECURITY");
+	}
+	( invocationType = securityDefinerInvoker())
+	{
+		return invocationType;
+	}
+}
+
+Boolean
+securityDefinerInvoker() :
+{}
+{
+	<DEFINER>
+	{
+		return Boolean.FALSE;
+	}
+	| <INVOKER>
+	{
+		return Boolean.TRUE;
+	}
+}
+
+/*
+ * <A NAME="grantStatement">grantStatement</A>
+ */
+QueryTreeNode
+grantStatement() throws StandardException :
+{
+    QueryTreeNode node;
+}
+{
+	<GRANT>
+	{
+		// GrantRevoke TODO: This needs to check for 10.2 version
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_1, "GRANT");
+		checkSqlStandardAccess( "GRANT");
+	}
+	( node = tableGrantStatement() | node = routineGrantStatement() )
+	{
+		return node;
+	}
+}
+
+/*
+ * <A NAME="tableGrantStatement">tableGrantStatement</A>
+ */
+QueryTreeNode
+tableGrantStatement() throws StandardException :
+{
+    PrivilegeNode privileges = null;
+    List grantees;
+}
+{
+       privileges = tablePrivileges()
+       <TO> grantees = granteeList()
+    {
+        return nodeFactory.getNode( C_NodeTypes.GRANT_NODE,
+                                    privileges, grantees,
+                                    getContextManager());
+    }
+}// end of tableGrantStatement
+
+/*
+ * <A NAME="tablePrivileges">tablePrivileges</A>
+ */
+PrivilegeNode tablePrivileges() throws StandardException :
+{
+    TablePrivilegesNode tablePrivilegesNode = null;
+    TableName objectName = null;
+}
+{
+    tablePrivilegesNode = tableActions()
+      <ON> [ <TABLE> ] objectName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+    {
+        return (PrivilegeNode) nodeFactory.getNode( C_NodeTypes.PRIVILEGE_NODE,
+                                                    ReuseFactory.getInteger( PrivilegeNode.TABLE_PRIVILEGES),
+                                                    objectName, tablePrivilegesNode,
+                                                    getContextManager());
+    }
+} // end of   tablePrivilege                               
+
+/*
+ * <A NAME="tableActions">tableActions</A>
+ */
+TablePrivilegesNode tableActions() throws StandardException :
+{
+    TablePrivilegesNode tableActionsNode = (TablePrivilegesNode)
+      nodeFactory.getNode( C_NodeTypes.TABLE_PRIVILEGES_NODE, getContextManager());
+}
+{
+    <ALL> <PRIVILEGES>
+    {
+        tableActionsNode.addAll();
+        return tableActionsNode;
+    }
+|
+    tableAction( tableActionsNode) ( <COMMA> tableAction( tableActionsNode) )*
+    {
+        return tableActionsNode;
+    }
+} // end of tableActions
+
+/*
+ * <A NAME="routineGrantStatement">routineGrantStatement</A>
+ */
+QueryTreeNode
+routineGrantStatement() throws StandardException :
+{
+    List grantees;
+    RoutineDesignator routine = null;
+}
+{
+    <EXECUTE> <ON> routine = routineDesignator()
+    <TO> grantees = granteeList()
+    {
+        PrivilegeNode routinePrivilege = (PrivilegeNode)
+          nodeFactory.getNode( C_NodeTypes.PRIVILEGE_NODE,
+                               ReuseFactory.getInteger( PrivilegeNode.ROUTINE_PRIVILEGES),
+                               routine, null,
+                               getContextManager());
+        return nodeFactory.getNode( C_NodeTypes.GRANT_NODE,
+                                    routinePrivilege, grantees,
+                                    getContextManager());
+    }
+}// end of routineGrantStatement
+
+/*
+ * <A NAME="routineAlias">routineAlias</A>
+ */
+RoutineDesignator routineDesignator() throws StandardException :
+{
+    Token procOrFunction;
+    RoutineDesignator routine = null;
+    TableName name = null;
+    List paramTypeList = null;
+}
+{
+    ( procOrFunction = <FUNCTION> | procOrFunction = <PROCEDURE> )
+      name = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+      [ <LEFT_PAREN> paramTypeList = parameterTypeList() <RIGHT_PAREN> ]
+    {
+        return new RoutineDesignator( false,
+                                      name,
+                                      (procOrFunction.kind == FUNCTION),
+                                      paramTypeList);
+    }
+} // end of routineDesignator
+
+
+/*
+ * <A NAME="parameterTypeList">parameterTypeList</A>
+ */
+List parameterTypeList( ) throws StandardException :
+{
+    ArrayList list = new ArrayList();
+    DataTypeDescriptor dtd;
+}
+{
+    [ dtd = dataTypeCommon()
+        {
+            list.add( dtd);
+        }
+      ( <COMMA> dtd = dataTypeCommon()
+        {
+            list.add( dtd);
+        }
+      ) * ]
+    {
+        return list;
+    }
+} // end of parameterTypeList
+
+
+/*
+ * <A NAME="tableAction">tableAction</A>
+ */
+void tableAction( TablePrivilegesNode tablePrivilegesNode)  throws StandardException :
+{
+    ResultColumnList columnList = null;
+}
+{
+    <SELECT> [ columnList = privilegeColumnList() ]
+    {
+        tablePrivilegesNode.addAction( TablePrivilegeInfo.SELECT_ACTION, columnList);
+    }
+|
+    <DELETE>
+    {
+        tablePrivilegesNode.addAction( TablePrivilegeInfo.DELETE_ACTION, (ResultColumnList) null);
+    }
+|
+    <INSERT>
+    {
+        tablePrivilegesNode.addAction( TablePrivilegeInfo.INSERT_ACTION, (ResultColumnList) null);
+    }
+|
+    <UPDATE> [ columnList = privilegeColumnList() ]
+    {
+        tablePrivilegesNode.addAction( TablePrivilegeInfo.UPDATE_ACTION, columnList);
+    }
+|
+    <REFERENCES> [ columnList = privilegeColumnList() ]
+    {
+        tablePrivilegesNode.addAction( TablePrivilegeInfo.REFERENCES_ACTION, columnList);
+    }
+|
+    <TRIGGER>
+    {
+        tablePrivilegesNode.addAction( TablePrivilegeInfo.TRIGGER_ACTION, (ResultColumnList) null);
+    }
+} // end of tableAction
+
+/*
+ * <A NAME="privilegeColumnList">privilegeColumnList</A>
+ */
+ResultColumnList privilegeColumnList() throws StandardException :
+{
+    ResultColumnList cl = (ResultColumnList) nodeFactory.getNode( C_NodeTypes.RESULT_COLUMN_LIST,
+                                                                  getContextManager());
+}
+{
+    <LEFT_PAREN> columnNameList( cl) <RIGHT_PAREN>
+    {
+        return cl;
+    }
+} // end of privilegeColumnList
+
+/*
+ * <A NAME="granteeList">granteeList</A>
+ */
+List granteeList() throws StandardException :
+{
+    ArrayList list = new ArrayList();
+}
+{
+    grantee( list) ( <COMMA> grantee( list) ) *
+    {
+        return list;
+    }
+}
+
+void
+grantee( List list)  throws StandardException :
+{
+	Token tok;
+    String str;
+}
+{
+    tok = <IDENTIFIER>
+    {
+        checkAuthorizationLength( tok.image);
+        list.add( tok.image);
+    }
+|
+    tok = <PUBLIC>
+    {
+        list.add( Authorizer.PUBLIC_AUTHORIZATION_ID);
+    }
+|
+    str = delimitedIdentifier()
+    {
+        checkAuthorizationLength( str);
+        list.add( str);
+    }
+|
+    str = nonReservedKeyword()
+    {
+        checkAuthorizationLength( str);
+        list.add( str);
+    }
+}
+
+/*
+ * <A NAME="revokeStatement">revokeStatement</A>
+ */
+QueryTreeNode
+revokeStatement() throws StandardException :
+{
+    QueryTreeNode node;
+}
+{
+    <REVOKE>
+      {
+          checkVersion( DataDictionary.DD_VERSION_DERBY_10_1, "REVOKE");
+          checkSqlStandardAccess( "REVOKE");
+      }
+    ( node = tableRevokeStatement() | node = routineRevokeStatement() )
+    {
+        return node;
+    }
+}
+
+/*
+ * <A NAME="tableRevokeStatement">tableRevokeStatement</A>
+ */
+QueryTreeNode
+tableRevokeStatement() throws StandardException :
+{
+    PrivilegeNode privileges = null;
+    List grantees;
+}
+{
+       privileges = tablePrivileges()
+       <FROM> grantees = granteeList()
+    {
+        return nodeFactory.getNode( C_NodeTypes.REVOKE_NODE,
+                                    privileges, grantees,
+                                    getContextManager());
+    }
+}// end of tableRevokeStatement
+
+/*
+ * <A NAME="routineRevokeStatement">routineRevokeStatement</A>
+ */
+QueryTreeNode
+routineRevokeStatement() throws StandardException :
+{
+    List grantees;
+    RoutineDesignator routine = null;
+}
+{
+    <EXECUTE> <ON> routine = routineDesignator()
+    <FROM> grantees = granteeList() <RESTRICT>
+    {
+        PrivilegeNode routinePrivilege = (PrivilegeNode)
+          nodeFactory.getNode( C_NodeTypes.PRIVILEGE_NODE,
+                               ReuseFactory.getInteger( PrivilegeNode.ROUTINE_PRIVILEGES),
+                               routine, null,
+                               getContextManager());
+        return nodeFactory.getNode( C_NodeTypes.REVOKE_NODE,
+                                    routinePrivilege, grantees,
+                                    getContextManager());
+    }
+}// end of routineRevokeStatement
+
+/*
  * <A NAME="identifier">identifier</A>
  */
 String
@@ -11926,6 +12315,7 @@ nonReservedKeyword()  :
 	|	tok = <DYNAMIC>
     |   tok = <DATABASE>
 	|	tok = <DB2SQL>
+	|	tok = <DEFINER>
 	|	tok = <DOCUMENT>
 	|	tok = <EACH>
 	|	tok = <EXCLUSIVE>
@@ -11938,6 +12328,7 @@ nonReservedKeyword()  :
 	|	tok = <INITIAL>
 // SQL92 says it is reserved, but we want it to be non-reserved.
 	|	tok = <INTERVAL>
+	|	tok = <INVOKER>
 	|   tok = <JAVA>
 	|	tok = <LANGUAGE>
 	|	tok = <LARGE>
@@ -11995,6 +12386,7 @@ nonReservedKeyword()  :
 	|	tok = <SCALE>
 	|	tok = <SAVEPOINT>
 	|	tok = <SEQUENTIAL>
+	|	tok = <SECURITY>
 	|	tok = <SERIALIZABLE>
 	|	tok = <SETS>
 	|	tok = <SHARE>

@@ -20,6 +20,7 @@
 
 package org.apache.derby.iapi.sql.conn;
 
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.error.StandardException;
 /**
   The Authorizer verifies a connected user has the authorization 
@@ -46,15 +47,54 @@ public interface Authorizer
 	/**  database jar write operation */	
 	public static final int JAR_WRITE_OP = 6;
 	
+	/* Privilege types for SQL standard (grant/revoke) permissions checking. */
+	public static final int NULL_PRIV = -1;
+	public static final int SELECT_PRIV = 0;
+	public static final int UPDATE_PRIV = 1;
+	public static final int REFERENCES_PRIV = 2;
+	public static final int INSERT_PRIV = 3;
+	public static final int DELETE_PRIV = 4;
+	public static final int TRIGGER_PRIV = 5;
+	public static final int EXECUTE_PRIV = 6;
+	public static final int PRIV_TYPE_COUNT = 7;
+
+	/**
+	 * The system authorization ID is defined by the SQL2003 spec as the grantor
+	 * of privileges to object owners.
+	 */
+	public static final String SYSTEM_AUTHORIZATION_ID = "_SYSTEM";
+
+	/**
+	 * The public authorization ID is defined by the SQL2003 spec as implying all users.
+	 */
+	public static final String PUBLIC_AUTHORIZATION_ID = "PUBLIC";
+
 	/**
 	  Verify the connected user is authorized to perform the requested
 	  operation.
+
+	  This variation should only be used with operations that do not use tables
+	  or routines. If the operation involves tables or routines then use the
+	  variation of the authorize method that takes an Activation parameter. The
+	  activation holds the table, column, and routine lists.
 
 	  @param operation the enumeration code for the requsted operation.
 
 	  @exception StandardException Thrown if the operation is not allowed
 	 */
-	public void authorize(int operation) throws StandardException;
+	public void authorize( int operation) throws StandardException;
+    
+	/**
+	  Verify the connected user is authorized to perform the requested
+	  operation.
+
+	  @param activation holds the list of tables, columns, and routines used.
+	  @param operation the enumeration code for the requsted operation.
+
+	  @exception StandardException Thrown if the operation is not allowed
+	*/
+	public void authorize(Activation activation, int operation)
+				throws StandardException;
 
     /**
 	  Get the Authorization ID for this Authorizer.
@@ -85,4 +125,12 @@ public interface Authorizer
 	 @exception StandardException Oops.
 	 */
    public void refresh() throws StandardException;  
+
+	/**
+ 	  * @return true if the authorizer uses the SQL standard permissions (grant/revoke),
+	  *         false if the legacy Derby permissions system is used.
+	  *
+	  * @exception StandardException standard error policy.
+	 */
+	public boolean usesSqlStandardPermissions() throws StandardException;
 }

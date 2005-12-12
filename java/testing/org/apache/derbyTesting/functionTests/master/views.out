@@ -252,6 +252,10 @@ SYSSTATEMENTS                                                                   
 SYSFILES                                                                                                                        |1          
 SYSTRIGGERS                                                                                                                     |1          
 SYSSTATISTICS                                                                                                                   |1          
+SYSTABLEPERMS                                                                                                                   |1          
+SYSCOLPERMS                                                                                                                     |1          
+SYSROUTINEPERMS                                                                                                                 |1          
+SYSREQUIREDPERM                                                                                                                 |1          
 ij> -- test inserts from a view
 insert into insert_test select * from sv5;
 3 rows inserted/updated/deleted
@@ -315,6 +319,10 @@ SYSSTATEMENTS                                                                   
 SYSFILES                                                                                                                        |1          
 SYSTRIGGERS                                                                                                                     |1          
 SYSSTATISTICS                                                                                                                   |1          
+SYSTABLEPERMS                                                                                                                   |1          
+SYSCOLPERMS                                                                                                                     |1          
+SYSROUTINEPERMS                                                                                                                 |1          
+SYSREQUIREDPERM                                                                                                                 |1          
 ij> -- bug 2745
 CREATE TABLE orgtable (
 	name VARCHAR(255),

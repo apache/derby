@@ -30,6 +30,9 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.ParameterValueSet;
 
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.sql.depend.Dependent;
@@ -43,6 +46,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.SortCostController;
 
+import java.util.List;
 import java.util.Vector;
 import java.sql.SQLWarning;
 
@@ -511,4 +515,43 @@ public interface CompilerContext extends Context
 		Get the chain of compile time warnings.
 	*/
 	public SQLWarning getWarnings();
+
+	/**
+	 * Sets the current privilege type context and pushes the previous on onto a stack.
+	 * Column and table nodes do not know how they are
+	 * being used. Higher level nodes in the query tree do not know what is being
+	 * referenced. Keeping the context allows the two to come together.
+	 *
+	 * @param privType One of the privilege types in 
+	 *						org.apache.derby.iapi.sql.conn.Authorizer.
+	 */
+	public void pushCurrentPrivType( int privType);
+	
+	public void popCurrentPrivType();
+    
+	/**
+	 * Add a column privilege to the list of used column privileges.
+	 *
+	 * @param column
+	 */
+	public void addRequiredColumnPriv( ColumnDescriptor column);
+
+	/**
+	 * Add a table or view privilege to the list of used table privileges.
+	 *
+	 * @param table
+	 */
+	public void addRequiredTablePriv( TableDescriptor table);
+
+	/**
+	 * Add a routine execute privilege to the list of used routine privileges.
+	 *
+	 * @param routine
+	 */
+	public void addRequiredRoutinePriv( AliasDescriptor routine);
+
+	/**
+	 * @return The list of required privileges.
+	 */
+	public List getRequiredPermissionsList();
 }

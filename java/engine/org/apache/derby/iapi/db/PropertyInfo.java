@@ -23,6 +23,7 @@ package org.apache.derby.iapi.db;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.PublicAPI;
 
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;

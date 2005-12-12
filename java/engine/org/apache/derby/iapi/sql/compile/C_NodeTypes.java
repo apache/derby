@@ -115,10 +115,10 @@ public interface C_NodeTypes
 	static final int SIMPLE_STRING_OPERATOR_NODE = 83;
 	static final int STATIC_CLASS_FIELD_REFERENCE_NODE = 84;
 	static final int STATIC_METHOD_CALL_NODE = 85;
-	// 86 available
+	static final int REVOKE_NODE = 86;
 	static final int EXTRACT_OPERATOR_NODE = 87;
 	static final int PARAMETER_NODE = 88;
-	// 89 available
+	static final int GRANT_NODE = 89;
 	static final int DROP_SCHEMA_NODE = 90;
 	static final int DROP_TABLE_NODE = 91;
 	static final int DROP_VIEW_NODE = 92;
@@ -131,10 +131,10 @@ public interface C_NodeTypes
 	static final int DEFAULT_NODE = 100;
 	static final int DELETE_NODE = 101;
 	static final int UPDATE_NODE = 102;
-	// 103 is available
+	static final int PRIVILEGE_NODE = 103;
 	static final int ORDER_BY_COLUMN = 104;
 	static final int ROW_RESULT_SET_NODE = 105;
-	// 106 is available
+	static final int TABLE_PRIVILEGES_NODE = 106;
 	static final int VIRTUAL_COLUMN_NODE = 107;
 	static final int CURRENT_DATETIME_OPERATOR_NODE = 108;
 	static final int CURRENT_USER_NODE = 109; // special function CURRENT_USER

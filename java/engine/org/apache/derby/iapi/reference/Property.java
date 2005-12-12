@@ -524,6 +524,14 @@ public interface Property {
 	String	LANG_TD_CACHE_SIZE = "derby.language.tableDescriptorCacheSize";
 	int		LANG_TD_CACHE_SIZE_DEFAULT = 64;
 
+    /**
+     * The size of the permissions cache used by the data dictionary.
+     * Database.  Static.
+	 * <p>
+	 * Undocumented.
+	 */
+	String	LANG_PERMISSIONS_CACHE_SIZE = "derby.language.permissionsCacheSize";
+	int		LANG_PERMISSIONS_CACHE_SIZE_DEFAULT = 64;
 	/**
 	 * The size of the stored prepared statment descriptor cache 
 	 * used by the data dictionary.  Database.  Static.
@@ -572,6 +580,7 @@ public interface Property {
 	public static final String READ_ONLY_ACCESS = "readOnlyAccess";
 	public static final String FULL_ACCESS = "fullAccess";
 	public static final String DEFAULT_ACCESS = FULL_ACCESS;
+	public static final String SQL_STANDARD_ACCESS = "sqlStandard";
 
 	public static final String
 	READ_ONLY_ACCESS_USERS_PROPERTY = "derby.database.readOnlyAccessUsers";

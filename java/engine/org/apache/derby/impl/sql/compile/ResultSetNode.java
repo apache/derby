@@ -682,7 +682,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 			if (targetTableDescriptor != null)
 			{
 				resultColumns.bindResultColumnsByName(
-						targetTableDescriptor, statement);
+						targetTableDescriptor, (DMLStatementNode)statement);
 			}
 			else
 			{

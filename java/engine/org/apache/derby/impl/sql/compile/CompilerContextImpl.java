@@ -20,6 +20,8 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.catalog.UUID;
+
 import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 
 import org.apache.derby.iapi.sql.depend.ProviderList;
@@ -27,9 +29,16 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
 
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.StatementTablePermission;
+import org.apache.derby.iapi.sql.dictionary.StatementColumnPermission;
+import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
@@ -52,6 +61,7 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.compiler.JavaFactory;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -60,10 +70,18 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.context.ContextImpl;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.sql.SQLWarning;
 import java.util.Vector;
 import java.util.Properties;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.BitSet;
+import java.util.List;
+import java.util.Stack;
+import java.util.ArrayList;
 
 /**
  *
@@ -130,6 +148,7 @@ public class CompilerContextImpl extends ContextImpl
 		savedObjects = null;
 		reliability = CompilerContext.SQL_LEGAL;
 		returnParameterFlag = false;
+		initRequiredPriv();
 	}
 
 	//
@@ -663,7 +682,147 @@ public class CompilerContextImpl extends ContextImpl
 
 		// the prefix for classes in this connection
 		classPrefix = "ac"+lcf.getUUIDFactory().createUUID().toString().replace('-','x');
+
+		initRequiredPriv();
 	}
+
+	private void initRequiredPriv()
+	{
+		currPrivType = Authorizer.NULL_PRIV;
+		privTypeStack.clear();
+		requiredColumnPrivileges = null;
+		requiredTablePrivileges = null;
+		requiredRoutinePrivileges = null;
+		try
+		{
+			LanguageConnectionContext lcc = (LanguageConnectionContext)
+			getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
+			if( lcc.getAuthorizer().usesSqlStandardPermissions())
+			{
+				requiredColumnPrivileges = new HashMap();
+				requiredTablePrivileges = new HashMap();
+				requiredRoutinePrivileges = new HashMap();
+			}
+		}
+		catch( StandardException se){}
+	} // end of initRequiredPriv
+
+	/**
+	 * Sets the current privilege type context. Column and table nodes do not know
+	 * how they are being used. Higher level nodes in the query tree do not know what
+	 * is being referenced.
+	 * Keeping the context allows the two to come together.
+	 *
+	 * @param privType One of the privilege types in org.apache.derby.iapi.sql.conn.Authorizer.
+	 */
+	public void pushCurrentPrivType( int privType)
+	{
+		privTypeStack.push( ReuseFactory.getInteger( currPrivType));
+		currPrivType = privType;
+	}
+
+	public void popCurrentPrivType( )
+	{
+		currPrivType = ((Integer) privTypeStack.pop()).intValue();
+	}
+	
+	/**
+	 * Add a column privilege to the list of used column privileges.
+	 *
+	 * @param column
+	 */
+	public void addRequiredColumnPriv( ColumnDescriptor column)
+	{
+		if( requiredColumnPrivileges == null // Using old style authorization
+			|| currPrivType == Authorizer.NULL_PRIV
+			|| currPrivType == Authorizer.DELETE_PRIV // Table privilege only
+			|| currPrivType == Authorizer.INSERT_PRIV // Table privilege only
+			|| currPrivType == Authorizer.TRIGGER_PRIV // Table privilege only
+			|| currPrivType == Authorizer.EXECUTE_PRIV
+			|| column == null)
+			return;
+		TableDescriptor td = column.getTableDescriptor();
+		UUID tableUUID = td.getUUID();
+		StatementTablePermission key = new StatementTablePermission( tableUUID, currPrivType);
+		StatementColumnPermission tableColumnPrivileges
+		  = (StatementColumnPermission) requiredColumnPrivileges.get( key);
+		if( tableColumnPrivileges == null)
+		{
+			tableColumnPrivileges = new StatementColumnPermission( tableUUID,
+																   currPrivType,
+																   new FormatableBitSet( td.getNumberOfColumns()));
+			requiredColumnPrivileges.put( key, tableColumnPrivileges);
+		}
+		tableColumnPrivileges.getColumns().set( column.getPosition() - 1);
+	} // end of addRequiredColumnPriv
+
+	/**
+	 * Add a table or view privilege to the list of used table privileges.
+	 *
+	 * @param table
+	 */
+	public void addRequiredTablePriv( TableDescriptor table)
+	{
+		if( requiredTablePrivileges == null || table == null)
+			return;
+
+		StatementTablePermission key = new StatementTablePermission( table.getUUID(), currPrivType);
+		requiredTablePrivileges.put( key, key);
+	}
+
+	/**
+	 * Add a routine execute privilege to the list of used routine privileges.
+	 *
+	 * @param routine
+	 */
+	public void addRequiredRoutinePriv( AliasDescriptor routine)
+	{
+		// routine == null for built in routines
+		if( requiredRoutinePrivileges == null || routine == null)
+			return;
+		if( requiredRoutinePrivileges.get( routine.getUUID()) == null)
+			requiredRoutinePrivileges.put( routine.getUUID(), ReuseFactory.getInteger(1));
+	}
+
+	/**
+	 * @return The list of required privileges.
+	 */
+	public List getRequiredPermissionsList()
+	{
+		int size = 0;
+		if( requiredRoutinePrivileges != null)
+			size += requiredRoutinePrivileges.size();
+		if( requiredTablePrivileges != null)
+			size += requiredTablePrivileges.size();
+		if( requiredColumnPrivileges != null)
+			size += requiredColumnPrivileges.size();
+		
+		ArrayList list = new ArrayList( size);
+		if( requiredRoutinePrivileges != null)
+		{
+			for( Iterator itr = requiredRoutinePrivileges.keySet().iterator(); itr.hasNext();)
+			{
+				UUID routineUUID = (UUID) itr.next();
+				
+				list.add( new StatementRoutinePermission( routineUUID));
+			}
+		}
+		if( requiredTablePrivileges != null)
+		{
+			for( Iterator itr = requiredTablePrivileges.values().iterator(); itr.hasNext();)
+			{
+				list.add( itr.next());
+			}
+		}
+		if( requiredColumnPrivileges != null)
+		{
+			for( Iterator itr = requiredColumnPrivileges.values().iterator(); itr.hasNext();)
+			{
+				list.add( itr.next());
+			}
+		}
+		return list;
+	} // end of getRequiredPermissionsList
 
 	/*
 	** Context state must be reset in restContext()
@@ -705,4 +864,10 @@ public class CompilerContextImpl extends ContextImpl
 	private Object				cursorInfo;
 
 	private SQLWarning warnings;
-}
+
+	private Stack privTypeStack = new Stack();
+	private int currPrivType = Authorizer.NULL_PRIV;
+	private HashMap requiredColumnPrivileges;
+	private HashMap requiredTablePrivileges;
+	private HashMap requiredRoutinePrivileges;
+} // end of class CompilerContextImpl

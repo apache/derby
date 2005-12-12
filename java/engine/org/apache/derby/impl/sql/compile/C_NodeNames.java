@@ -142,6 +142,8 @@ public interface C_NodeNames
 
 	static final String GET_CURRENT_CONNECTION_NODE_NAME = "org.apache.derby.impl.sql.compile.GetCurrentConnectionNode";
 
+	static final String GRANT_NODE_NAME = "org.apache.derby.impl.sql.compile.GrantNode";
+    
 	static final String GROUP_BY_COLUMN_NAME = "org.apache.derby.impl.sql.compile.GroupByColumn";
 
 	static final String GROUP_BY_LIST_NAME = "org.apache.derby.impl.sql.compile.GroupByList";
@@ -202,6 +204,8 @@ public interface C_NodeNames
 
 	static final String PREDICATE_LIST_NAME = "org.apache.derby.impl.sql.compile.PredicateList";
 
+	static final String PRIVILEGE_NAME = "org.apache.derby.impl.sql.compile.PrivilegeNode";
+
 	static final String PROJECT_RESTRICT_NODE_NAME = "org.apache.derby.impl.sql.compile.ProjectRestrictNode";
 
 	static final String READ_CURSOR_NODE_NAME = "org.apache.derby.impl.sql.compile.ReadCursorNode";
@@ -212,6 +216,8 @@ public interface C_NodeNames
 
 	static final String RESULT_COLUMN_LIST_NAME = "org.apache.derby.impl.sql.compile.ResultColumnList";
 
+	static final String REVOKE_NODE_NAME = "org.apache.derby.impl.sql.compile.RevokeNode";
+    
 	static final String ROW_RESULT_SET_NODE_NAME = "org.apache.derby.impl.sql.compile.RowResultSetNode";
 
 	static final String SQL_BOOLEAN_CONSTANT_NODE_NAME = "org.apache.derby.impl.sql.compile.SQLBooleanConstantNode";
@@ -243,6 +249,8 @@ public interface C_NodeNames
 	static final String TABLE_ELEMENT_NODE_NAME = "org.apache.derby.impl.sql.compile.TableElementNode";
 
 	static final String TABLE_NAME_NAME = "org.apache.derby.impl.sql.compile.TableName";
+
+	static final String TABLE_PRIVILEGES_NAME = "org.apache.derby.impl.sql.compile.TablePrivilegesNode";
 
 	static final String TERNARY_OPERATOR_NODE_NAME = "org.apache.derby.impl.sql.compile.TernaryOperatorNode";
 

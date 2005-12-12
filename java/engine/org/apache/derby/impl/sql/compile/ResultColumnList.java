@@ -595,46 +595,72 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * Bind the result columns by their names.  This is useful for update
-	 * statements, and for INSERT statements like "insert into t (a, b, c)
-	 * values (1, 2, 3)" where the user specified a column list.
-	 * Also, verify that the result column list does not contain any duplicates.
-	 * NOTE: We pass the ResultColumns position in the ResultColumnList so
-	 * that the VirtualColumnId gets set.
+	 * Bind the result columns by their names.  This is useful for GRANT and REVOKE statements
+     * like "GRANT SELECT ON t(c1,c1,c3) TO george", where the user specified a column list.
+	 * This method does not check for duplicate column names.
 	 *
-	 * @param tableDescriptor	The descriptor for the table being
-	 *				updated or inserted into
-	 * @param statement			DMLStatementNode containing this list
+	 * @param tableDescriptor	The descriptor for the table
 	 *
 	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindResultColumnsByName(TableDescriptor targetTableDescriptor,
-						DMLStatementNode statement)
+	public void bindResultColumnsByName(TableDescriptor targetTableDescriptor)
 					throws StandardException
 	{
 		int			size = size();
-		Hashtable	ht = new Hashtable(size + 2, (float) .999);
 
 		for (int index = 0; index < size; index++)
 		{
 			ResultColumn rc = (ResultColumn) elementAt(index);
 
-			/* Verify that this column's name is unique within the list */
-			String colName = rc.getName();
+			rc.bindResultColumnByName(
+						targetTableDescriptor,
+						index + 1
+					);
+		}
+	} // end of bindResultColumnsByName( TableDescriptor)
 
-			Object object = ht.put(colName, colName);
+	/**
+	 * Bind the result columns by their names.  This is useful for update, grant, and revoke
+	 * statements, and for INSERT statements like "insert into t (a, b, c)
+	 * values (1, 2, 3)" where the user specified a column list.
+	 * If the statment is an insert or update verify that the result column list does not contain any duplicates.
+	 * NOTE: We pass the ResultColumns position in the ResultColumnList so
+	 * that the VirtualColumnId gets set.
+	 *
+	 * @param tableDescriptor	The descriptor for the table being
+	 *				updated or inserted into
+	 * @param statement			DMLStatementNode containing this list, null if no duplicate checking is to be done
+	 *
+	 * @return A FormatableBitSet representing the set of columns with respect to the table
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public FormatableBitSet bindResultColumnsByName(TableDescriptor targetTableDescriptor,
+                                                    DMLStatementNode statement)
+					throws StandardException
+	{
+		int			size = size();
+		FormatableBitSet columnBitSet = new FormatableBitSet( targetTableDescriptor.getNumberOfColumns());
 
-			if (object != null &&
-				((String) object).equals(colName))
-			{
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.ASSERT((statement instanceof UpdateNode) ||
-										 (statement instanceof InsertNode),
-						"statement is expected to be instanceof UpdateNode or InsertNode");
-				}
+		for (int index = 0; index < size; index++)
+		{
+			ResultColumn rc = (ResultColumn) elementAt(index);
+
+			rc.bindResultColumnByName(
+						targetTableDescriptor,
+						index + 1
+					);
+            int colIdx = rc.getColumnPosition() - 1;
+            if( SanityManager.DEBUG)
+                SanityManager.ASSERT( colIdx >= 0 && colIdx < targetTableDescriptor.getNumberOfColumns(),
+                                      "Invalid column position found for " + rc.getName());
+			/* Verify that this column's name is unique within the list if requested */
+            if( statement != null && columnBitSet.isSet( colIdx))
+            {
+                String colName = rc.getName();
+
 				if (statement instanceof UpdateNode)
 				{
 					throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_NAME_UPDATE, colName);
@@ -644,12 +670,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 					throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_NAME_INSERT, colName);
 				}
 			}
-
-			rc.bindResultColumnByName(
-						targetTableDescriptor,
-						index + 1
-					);
+            columnBitSet.set( colIdx);
 		}
+		return columnBitSet;
 	}
 
 	/**

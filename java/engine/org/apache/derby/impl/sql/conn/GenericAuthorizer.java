@@ -20,6 +20,7 @@
 
 package org.apache.derby.impl.sql.conn;
 
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.StringUtil;
@@ -31,7 +32,13 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.StatementPermission;
+import org.apache.derby.iapi.store.access.TransactionController;
+
 import java.util.Properties;
+import java.util.List;
+import java.util.Iterator;
 
 class GenericAuthorizer
 implements Authorizer
@@ -41,6 +48,7 @@ implements Authorizer
 	private static final int NO_ACCESS = 0;
 	private static final int READ_ACCESS = 1;
 	private static final int FULL_ACCESS = 2;
+	private static final int SQL_STANDARD_ACCESS = 3;
 	
 	//
 	//Configurable userAccessLevel - derived from Database level
@@ -82,10 +90,21 @@ implements Authorizer
 	}
 
 	/**
+	  Used for operations that do not involve tables or routines.
+     
+	  @see Authorizer#authorize
+	  @exception StandardException Thrown if the operation is not allowed
+	*/
+	public void authorize( int operation) throws StandardException
+	{
+		authorize( (Activation) null, operation);
+	}
+
+	/**
 	  @see Authorizer#authorize
 	  @exception StandardException Thrown if the operation is not allowed
 	 */
-	public void authorize(int operation) throws StandardException
+	public void authorize( Activation activation, int operation) throws StandardException
 	{
 		int sqlAllowed = lcc.getStatementContext().getSQLAllowed();
 
@@ -123,6 +142,23 @@ implements Authorizer
 		default:
 			if (SanityManager.DEBUG)
 				SanityManager.THROWASSERT("Bad operation code "+operation);
+		}
+
+        if( activation != null)
+        {
+            List requiredPermissionsList = null;
+			// GrantRevoke TODO: Need this logic for enforcing permissions later.
+			// List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
+            if( requiredPermissionsList != null && ! requiredPermissionsList.isEmpty())
+            {
+                DataDictionary dd = lcc.getDataDictionary();
+                TransactionController tc = activation.getTransactionController();
+                for( Iterator iter = requiredPermissionsList.iterator();
+                     iter.hasNext();)
+                {
+                    ((StatementPermission) iter.next()).check( tc, dd, authorizationId, false);
+                }                    
+            }
 		}
 	}
 
@@ -178,6 +214,7 @@ implements Authorizer
 	private int getDefaultAccessLevel() throws StandardException
 	{
 		PersistentSet tc = lcc.getTransactionExecute();
+
 		String modeS = (String)
 			PropertyUtil.getServiceProperty(
 									tc,
@@ -190,6 +227,8 @@ implements Authorizer
 			return READ_ACCESS;
 		else if(StringUtil.SQLEqualsIgnoreCase(modeS, Property.FULL_ACCESS))
 			return FULL_ACCESS;
+		else if(StringUtil.SQLEqualsIgnoreCase(modeS, Property.SQL_STANDARD_ACCESS))
+            return FULL_ACCESS; 
 		else
 		{
 			if (SanityManager.DEBUG)
@@ -245,4 +284,17 @@ implements Authorizer
 		if (userAccessLevel == NO_ACCESS)
 			throw StandardException.newException(SQLState.AUTH_DATABASE_CONNECTION_REFUSED);
 	}
+
+    public boolean usesSqlStandardPermissions() throws StandardException
+    {
+		// RESOLVE use getDefaultAccessLevel() when SQL standard permissions are fully implemented
+		// GrantRevoke TODO: May need to make database property value override system value
+		PersistentSet tc = lcc.getTransactionExecute();
+		String modeS = (String)
+		PropertyUtil.getServiceProperty(tc,
+									Property.DEFAULT_CONNECTION_MODE_PROPERTY);
+		if( modeS == null)
+            return false;
+		return StringUtil.SQLEqualsIgnoreCase(modeS, Property.SQL_STANDARD_ACCESS);
+    } // end of usesSqlStandardPermissions
 }

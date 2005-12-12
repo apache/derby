@@ -579,6 +579,17 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
           case C_NodeTypes.XML_EXISTS_OPERATOR_NODE:
             return C_NodeNames.BINARY_OPERATOR_NODE_NAME;
 
+          case C_NodeTypes.GRANT_NODE:
+            return C_NodeNames.GRANT_NODE_NAME;
+          case C_NodeTypes.REVOKE_NODE:
+            return C_NodeNames.REVOKE_NODE_NAME;
+
+          case C_NodeTypes.PRIVILEGE_NODE:
+            return C_NodeNames.PRIVILEGE_NAME;
+
+          case C_NodeTypes.TABLE_PRIVILEGES_NODE:
+            return C_NodeNames.TABLE_PRIVILEGES_NAME;
+
 		  // WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD
 		  // THEM TO tools/jar/DBMSnodes.properties
 
