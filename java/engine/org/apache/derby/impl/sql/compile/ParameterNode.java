@@ -20,43 +20,22 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
-import org.apache.derby.iapi.types.JSQLType;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.sql.LanguageFactory;
-import org.apache.derby.iapi.sql.ParameterValueSet;
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.store.access.Qualifier;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.execute.BaseActivation;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 import java.sql.Types;
-
 import java.util.Enumeration;
 import java.util.Vector;
+
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.JSQLType;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node type represents a ? parameter.
@@ -384,12 +363,10 @@ public class ParameterNode extends ValueNode
 
         /* Generate the return value */
 
-        /* First, get the field that holds the ParameterValueSet */
-        acb.pushPVSReference(mb);
-
+        mb.pushThis();
         mb.push(parameterNumber); // arg
 
-        mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getParameter",
+        mb.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null, "getParameter",
                       ClassName.DataValueDescriptor, 1);
 
 		// For some types perform host variable checking
