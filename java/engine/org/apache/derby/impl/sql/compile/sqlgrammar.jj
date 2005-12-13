@@ -158,6 +158,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.lang.Character;
 
@@ -1296,25 +1297,18 @@ public class SQLParser
 	}
 
 	/**
-	 * Determine whether the next sequence of tokens can be the beginning
-	 * of a propertyList(). A properties list is the word "properties"
-	 * followed by a dot-separated list, followed by an =,
-	 * followed by a value. This means that the first token must be the word
-	 * "properties", and the third must be a period (from the dot-separated
-	 * list) or an =.
+	 * Determine whether the next token is the beginning of a propertyList(). 
+	 * A properties list is the comment "--derby-properties" followed by a 
+	 * dot-separated list, followed by an =, followed by a value all on that 
+	 * comment line. This means that the comment should start with the word
+	 * "derby-properties".
 	 *
-	 * @return	TRUE iff the next set of tokens is the beginning of a
-	 *			propertyList().
+	 * @return	TRUE iff the next token is derby-properties 
 	 */
-	private boolean propertyListFollows()
+	private boolean derbyPropertiesListFollows()
 	{
-		int tokKind;
-
 		return 
-			getToken(1).kind == PROPERTIES &&
-				((tokKind = getToken(3).kind) == PERIOD ||
-					tokKind == EQUALS_OPERATOR
-				);
+			getToken(1).kind == DERBYDASHPROPERTIES;
 	}
 
 	/**
@@ -1727,7 +1721,200 @@ SKIP :
 
 SKIP :
 {	/* comments */
-  <SINGLE_LINE_SQLCOMMENT: "--" (~["\n","\r"])* ("\n"|"\r"|"\r\n")?>
+	"--" : IN_COMMENT
+}
+
+<IN_COMMENT> SKIP :
+{	/* white space */
+	  " "
+	| "\t"
+}
+
+/*
+	Check if the comment characters -- are followed by DERBY-PROPERTIES
+	token. 
+
+	If yes, then this comment is providing user-supplied optimizer 
+	overrides. There should be keyname=value [,keyname=value] pairs
+	after -- DERBY-PROPERTIES otherwise throw an exception. These
+	optimier overrides should be used in correct context only, 
+	otherwise, the parser will throw an exception.
+
+	If this comment does not start with DERBY-PROPERTOIES, then it is 
+	just a regular comment. Skip the comment and move on to the next line.
+ */
+<IN_COMMENT> MORE [IGNORE_CASE]:
+{
+"D" : LOOKFOR_DE
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_D : (~["D"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DE> MORE [IGNORE_CASE]:
+{
+"E" : LOOKFOR_DER
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DE : (~["E"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DER> MORE [IGNORE_CASE]:
+{
+"R" : LOOKFOR_DERB
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DER : (~["R"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERB> MORE [IGNORE_CASE]:
+{
+"B" : LOOKFOR_DERBY
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERB : (~["B"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBY> MORE [IGNORE_CASE]:
+{
+"Y" : LOOKFOR_DERBYDASH
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBY : (~["Y"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASH> MORE [IGNORE_CASE]:
+{
+"-" : LOOKFOR_DERBYDASHP
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBYDASH : (~["-"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASHP> MORE [IGNORE_CASE]:
+{
+"P" : LOOKFOR_DERBYDASHPR
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBYDASHP : (~["P"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASHPR> MORE [IGNORE_CASE]:
+{
+"R" : LOOKFOR_DERBYDASHPRO
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBYDASHPR : (~["R"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASHPRO> MORE [IGNORE_CASE]:
+{
+"O" : LOOKFOR_DERBYDASHPROP
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBYDASHPRO : (~["O"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASHPROP> MORE [IGNORE_CASE]:
+{
+"P" : LOOKFOR_DERBYDASHPROPE
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBYDASHPROP : (~["P"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASHPROPE> MORE [IGNORE_CASE]:
+{
+"E" : LOOKFOR_DERBYDASHPROPER
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBYDASHPROPE : (~["E"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASHPROPER> MORE [IGNORE_CASE]:
+{
+"R" : LOOKFOR_DERBYDASHPROPERT
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBYDASHPROPER : (~["R"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASHPROPERT> MORE [IGNORE_CASE]:
+{
+"T" : LOOKFOR_DERBYDASHPROPERTI
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBYDASHPROPERT : (~["T"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASHPROPERTI> MORE [IGNORE_CASE]:
+{
+"I" : LOOKFOR_DERBYDASHPROPERTIE
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBYDASHPROPERTI : (~["I"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASHPROPERTIE> MORE [IGNORE_CASE]:
+{
+"E" : LOOKFOR_DERBYDASHPROPERTIES
+|
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_DERBYDASHPROPERTIE : (~["E"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<LOOKFOR_DERBYDASHPROPERTIES> TOKEN [IGNORE_CASE] :
+{	
+	<DERBYDASHPROPERTIES : "DERBYDASHPROPERTIES"> 
+}
+
+//once we find comment starting with -- DERBY-PROPERTIES, we want to switch 
+//from SKIP mode to the TOKEN mode in the parser so the rest of the characters 
+//on the comment line can be treated as part of one big token so we can get 
+//keyname=value pairs from that token. The reason for treating them as one big
+//token is that the existing code in parser allows newline characters between
+//individual token but with optimizer overrides, all the properties have to
+//be specified on the -- DERBY-PROPERTIES comment line. 
+<LOOKFOR_DERBYDASHPROPERTIES> TOKEN [IGNORE_CASE]:
+{
+"S" { matchedToken.kind = DERBYDASHPROPERTIES; } : PROPERTIES_LIST
+}
+
+//We found -- DERBY-PROPERTIE? where ? is a character other than S
+//and hence we should the rest of the characters on this line as 
+//a regular comment
+<LOOKFOR_DERBYDASHPROPERTIES> SKIP :
+{
+<("\n"|"\r"|"\r\n")?> : DEFAULT
+|
+<NOT_PROPERTIES : (~["S","s"])> : IT_IS_NOT_DERBYPROPERTIES_COMMENT
+}
+
+<IT_IS_NOT_DERBYPROPERTIES_COMMENT> SKIP :
+{
+	<SINGLE_LINE_SQLCOMMENT: (~["\n","\r"])* ("\n"|"\r"|"\r\n")?> : DEFAULT
+}
+
+//found -- DERBY-PROPERTIES. Treat rest of the characters on the line
+//as one big token and then fetch keyname=value pairs from that token.
+<PROPERTIES_LIST> TOKEN :
+{	
+	<CHECK_PROPERTIES: (~["\n","\r"])* ("\n"|"\r"|"\r\n")?> : DEFAULT
 }
 
 /*
@@ -2779,10 +2966,10 @@ deleteBody() throws StandardException :
 	<FROM> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 		[ 
 			LOOKAHEAD
-			( { (getToken(1).kind != EOF) && (getToken(1).kind != WHERE) && !propertyListFollows() } )
+			( { (getToken(1).kind != EOF) && (getToken(1).kind != WHERE) && !derbyPropertiesListFollows() } )
 			[ <AS> ] correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
 		]
-	    [targetProperties = propertyList() ] 
+		[targetProperties = propertyList(false) <CHECK_PROPERTIES>] 
 		[ 
 			whereToken = <WHERE>
 		    (
@@ -2974,9 +3161,7 @@ preparableUpdateStatement() throws StandardException :
 }
 {
 	// NOTE: It only makes sense to have a property list if there is a
-	// table name, so I moved it into the [] for qualifiedName(). This removes
-	// a grammar ambiguity, because PROPERTIES is a non-reserved keyword,
-	// so there can be a table named PROPERTIES
+	// table name, so I moved it into the [] for qualifiedName(). 
 
 	<UPDATE> qtn = updateBody()
 	{
@@ -3032,11 +3217,11 @@ updateBody() throws StandardException :
 |
 		tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		[
-			LOOKAHEAD( { (getToken(1).kind != SET) && !propertyListFollows() } )
+			LOOKAHEAD( { (getToken(1).kind != SET) && !derbyPropertiesListFollows() } )
 			[ <AS> ] correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
 		]
 		[
-			targetProperties = propertyList()
+			targetProperties = propertyList(false) <CHECK_PROPERTIES>
 		] 
 		<SET> columnList = setClauseList()
 		[ 
@@ -7380,7 +7565,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 		LOOKAHEAD( { getToken(1).kind == LEFT_PAREN && ! subqueryFollows() } )
 		<LEFT_PAREN> columnList = insertColumnList() <RIGHT_PAREN>
 	]
-	[ targetProperties = propertyList() ]
+	[ targetProperties = propertyList(false) <CHECK_PROPERTIES>]
 	queryExpression = queryExpression(null, NO_SET_OP)
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
@@ -7393,7 +7578,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 	}
 	/* RESOLVE: Ignoring default values for now
 |
-	[ targetProperties = propertyList() ]
+	[ targetProperties = propertyList(false) <CHECK_PROPERTIES>]
 	<_DEFAULT> <VALUES>
 	{
 		return null;
@@ -7970,14 +8155,6 @@ fromClause() throws StandardException :
 {
 	<FROM> {beginToken = getToken(1);}
 	[
-		// This LOOKAHEAD is required because PROPERTIES is not a reserved
-		// word, so we have to look ahead to see if it looks like a real
-		// properties clause. A properties clause is the word "properties"
-		// followed by a dot-separated list, followed by an =, followed by
-		// a value. This means that the first token must be the word
-		// "properties", and the third must be a period (from the dot-separated
-		// list) or an =.
-		LOOKAHEAD( { propertyListFollows() } )
 		fromListProperties(fromList)
 	]
 	dummyTableReferenceRule(fromList)
@@ -7999,7 +8176,7 @@ fromListProperties(FromList fromList) throws StandardException :
 	Properties properties;
 }
 {
-	properties = propertyList()
+	properties = propertyList(true) <CHECK_PROPERTIES>
 	{
 		fromList.setProperties(properties);
 	}
@@ -8059,14 +8236,6 @@ optionalTableClauses() throws StandardException :
 	String				correlationName = null;
 }
 {
-	// This LOOKAHEAD is required because PROPERTIES is not a reserved
-	// word, so we have to look ahead to see if it looks like a real
-	// properties clause. A properties clause is the word "properties"
-	// followed by a dot-separated list, followed by an =, followed by
-	// a value. This means that the first token must be the word
-	// "properties", and the third must be a period (from the dot-separated
-	// list) or an =.
-	LOOKAHEAD( { propertyListFollows() } )
 	otc = optionalTableProperties() 
 	{
 		otc[OPTIONAL_TABLE_CLAUSES_DERIVED_RCL] = derivedRCL;
@@ -8077,7 +8246,7 @@ optionalTableClauses() throws StandardException :
 	[ [ <AS> ] 
 		correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 		[ <LEFT_PAREN> derivedRCL = derivedColumnList() <RIGHT_PAREN> ] 
-	    [tableProperties = propertyList() ] ]
+	    [tableProperties = propertyList(true) <CHECK_PROPERTIES>] ]
 	{
 		otc = new Object[OPTIONAL_TABLE_CLAUSES_SIZE];
 		otc[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES] = tableProperties;
@@ -8094,7 +8263,7 @@ optionalTableProperties() throws StandardException :
 	Properties			tableProperties = null;
 }
 {
-	tableProperties = propertyList() 
+	tableProperties = propertyList(true) <CHECK_PROPERTIES> 
 	{
 		otc = new Object[OPTIONAL_TABLE_CLAUSES_SIZE];
 		otc[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES] = tableProperties;
@@ -8960,7 +9129,7 @@ tableDefinition() throws StandardException :
 {
 	<TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	tableElementList = tableElementList()
-	[ properties = propertyList()]
+	[ properties = propertyList(false)<CHECK_PROPERTIES>]
 	{
 		return (QueryTreeNode) nodeFactory.getNode(
 								C_NodeTypes.CREATE_TABLE_NODE,
@@ -8973,60 +9142,61 @@ tableDefinition() throws StandardException :
 	}
 }
 
+/*
+ * This method is called when a comment starting with --derby-properties is found.
+ * Such a comment is a special directive to Derby and allows a sql to pass optimizer
+ * overrides. Derby looks for propertyName=value [,propertyName=value]* after
+ * --derby-properties and returns these properties in a Properties object as a return 
+ * value of this method.
+ * The param propertiesUseAllowed true indicates that users are allowed to 
+ * specify optimizer overrides in the given context. 
+ * False means optimizer overrides in the given context are allowed internally 
+ * only eg impl/load/import.java specifies property insertMode=replace/bulkInsert
+ * in the insert statement. This same property will not be acceptable from an 
+ * insert statement from a user sql.
+ */
 Properties
-propertyList() throws StandardException :
+propertyList(boolean propertiesUseAllowed) throws StandardException :
 {
 	Properties properties = new FormatableProperties();
+	StringTokenizer commaSeparatedProperties;
+	StringTokenizer equalOperatorSeparatedProperty;
 }
 {
-	<PROPERTIES> property(properties)
-	// This LOOKAHEAD is required because a property() and a tableReference()
-	// can both start with ", dot.separated.list". We need to look ahead
-	// to the EQUALS_OPERATOR to ensure we really have another property.
-	( LOOKAHEAD({ anotherPropertyFollows() }) <COMMA> property(properties) )*
-	{
-		checkInternalFeature("PROPERTIES");
-		return properties;
-	}
-}
-
-void
-property(Properties properties) throws StandardException :
-{
-	String key;
-	String value;
-}
-{
-	key = javaDSL() <EQUALS_OPERATOR> value = propertyValue()
-	{
-		// Do not allow user to specify multiple values for the same key
-		if (properties.put(key, value) != null)
-		{
-			throw StandardException.newException(SQLState.LANG_DUPLICATE_PROPERTY, key);
+	<DERBYDASHPROPERTIES> {
+		//first use StringTokenizer to get tokens which are delimited by ,s
+		commaSeparatedProperties = new StringTokenizer(getToken(1).image,",");
+		while (commaSeparatedProperties.hasMoreTokens()) {
+			//Now verify that tokens delimited by ,s follow propertyName=value pattern
+			String currentProperty = commaSeparatedProperties.nextToken();
+			equalOperatorSeparatedProperty = new StringTokenizer(currentProperty,"=", true);
+			if (equalOperatorSeparatedProperty.countTokens() != 3)
+				throw StandardException.newException(SQLState.PROPERTY_SYNTAX_INVALID);
+			else {
+				String key = equalOperatorSeparatedProperty.nextToken().trim();
+				if (!equalOperatorSeparatedProperty.nextToken().equals("="))
+					throw StandardException.newException(SQLState.PROPERTY_SYNTAX_INVALID);
+				String value = equalOperatorSeparatedProperty.nextToken().trim();
+				verifyImageLength(value);
+				/* Trim off the leading and trailing ', and compress all '' to ' */
+				if (value.startsWith("'") && value.endsWith("'"))
+					value = compressQuotes(value.substring(1, value.length() - 1), SINGLEQUOTES);
+				/* Trim off the leading and trailing ", and compress all "" to " */
+				else if (value.startsWith("\"") && value.endsWith("\""))
+					value = compressQuotes(value.substring(1, value.length() - 1), DOUBLEQUOTES);
+				else 
+					value = value.toUpperCase();
+				// Do not allow user to specify multiple values for the same key
+				if (properties.put(key, value) != null)
+				{
+					throw StandardException.newException(SQLState.LANG_DUPLICATE_PROPERTY, key);
+				}
 		}
 	}
-}
-
-String
-propertyValue() throws StandardException :
-{
-	int	   intValue;
-	String value;
-}
-{
-	value = caseInsensitiveIdentifierPlusReservedWords()
-	{
-		return value;
-	}
-| 
-	intValue = uint_value()
-	{
-		return String.valueOf(intValue);
-	}
-|
-	value = string()
-	{
-		return value;
+	//if this property override is supported in internal mode only, then do that verification here.
+	if (!propertiesUseAllowed) 
+		checkInternalFeature("DERBY-PROPERTIES");
+	return properties;
 	}
 }
 
@@ -9084,7 +9254,7 @@ indexDefinition() throws StandardException :
 	[ unique = unique() ] <INDEX>
 		indexName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <ON> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 				<LEFT_PAREN> indexColumnList(indexColumnList) <RIGHT_PAREN>
-		[ properties = propertyList()]
+		[ properties = propertyList(false) <CHECK_PROPERTIES>]
 	{
 		/* User allowed to specify schema name on table and index.
 		 * If no schema name specified for index, then it "inherits" 
@@ -10745,7 +10915,7 @@ tableConstraintDefinition() throws StandardException :
 {
 	[ constraintName = constraintNameDefinition() ] 
 		tcdn = tableConstraint(constraintName) 
-		[ properties = propertyList()]
+		[ properties = propertyList(false) <CHECK_PROPERTIES>]
 	{
 		if (properties != null)
 		{
@@ -11038,7 +11208,7 @@ columnConstraint(TableName constraintName,
 	//exception if null constraint is defined for this column-level primary 
 	//key constraint
 	constraintType = uniqueSpecification(dataTypeDescriptor,columnName)
-		[ properties = propertyList()]
+		[ properties = propertyList(false) <CHECK_PROPERTIES>]
 	{
 		ResultColumnList uniqueColumnList =
 										(ResultColumnList) nodeFactory.getNode(
@@ -11064,7 +11234,7 @@ columnConstraint(TableName constraintName,
 	}
 |	
 	referencedTable = referencesSpecification(refRcl, refActions)
-		[ properties = propertyList()] 
+		[ properties = propertyList(false)<CHECK_PROPERTIES>] 
 	{
 		ResultColumnList fkRcl = (ResultColumnList) nodeFactory.getNode(
 											C_NodeTypes.RESULT_COLUMN_LIST,

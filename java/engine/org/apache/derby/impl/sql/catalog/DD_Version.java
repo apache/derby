@@ -145,6 +145,8 @@ public	class DD_Version implements	Formatable
 			return "10.0";
 		case DataDictionary.DD_VERSION_DERBY_10_1:
 			return "10.1";
+		case DataDictionary.DD_VERSION_DERBY_10_2:
+			return "10.2";
 		default:
 			return null;
 		}
@@ -285,11 +287,17 @@ public	class DD_Version implements	Formatable
 		Do full upgrade.  Apply changes that can NOT be safely made in soft upgrade.
 		
 		<BR>
+		<B>Upgrade items for every new release</B>
+		<UL>
+		<LI> Drop and recreate the stored versions of the JDBC database metadata queries
+		</UL>
+		
+		<BR>
 		<B>Upgrade items for 10.1</B>
 		<UL>
 		<LI> None.
 		</UL>
-
+		
 	  *
 	  * @param	tc	transaction controller
 	  * @param	fromMajorVersionNumber	version of the on-disk database
@@ -305,6 +313,12 @@ public	class DD_Version implements	Formatable
 			throw StandardException.newException(SQLState.UPGRADE_UNSUPPORTED,
 					DD_Version.majorToString(fromMajorVersionNumber), this);			
 		}
+
+		//Drop and recreate the stored versions of the JDBC database metadata queries
+		//This is to make sure that we have the stored versions of JDBC database
+		//metadata queries matching with this release of the engine.
+		dropJDBCMetadataSPSes(tc, false);
+		bootingDictionary.createSPSSet(tc, false, bootingDictionary.getSystemSchemaDescriptor().getUUID());
 
 		/*
 		 * OLD Cloudscape 5.1 upgrade code, Derby does not support

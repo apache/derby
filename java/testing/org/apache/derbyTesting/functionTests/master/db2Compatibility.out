@@ -186,15 +186,9 @@ DROP TABLE tb1;
 0 rows inserted/updated/deleted
 ij> DROP TABLE testCS;
 0 rows inserted/updated/deleted
-ij> -- PROPERTIES in DB2 mode
-create table maps (country_ISO_code char(2)) PROPERTIES derby.storage.pageSize=262144;
-ERROR 42X01: Syntax error: PROPERTIES.
-ij> -- PROPERTIES in DB2 mode
--- beetle 5177
+ij> -- beetle 5177
 create table maps2 (country_ISO_code char(2));
 0 rows inserted/updated/deleted
-ij> create index map_idx1 on maps2(country_ISO_code) properties derby.storage.pageSize = 2048;
-ERROR 42X01: Syntax error: PROPERTIES.
 ij> -- BTREE not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error in DB2 mode
 create btree index map_idx2 on maps2(country_ISO_code);
 ERROR 42X01: Syntax error: Encountered "btree" at line 2, column 8.

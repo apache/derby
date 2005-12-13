@@ -698,21 +698,20 @@ public class GenericLanguageConnectionContext
         /**
 	 * @see LanguageConnectionContext#prepareInternalStatement
 	 */
-        public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, String sqlText, boolean isForReadOnly) 
+        public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, String sqlText, boolean isForReadOnly, boolean forMetaData) 
 	    throws StandardException 
         {
-	    return connFactory.getStatement(compilationSchema, sqlText, isForReadOnly).prepare(this);
-	}
-        
+	    return connFactory.getStatement(compilationSchema, sqlText, isForReadOnly).prepare(this, forMetaData);
+    	}
+
         /**
-	 * @see LanguageConnectionContext#prepareInternalStatement
-	 */
+    	 * @see LanguageConnectionContext#prepareInternalStatement
+    	 */
         public PreparedStatement prepareInternalStatement(String sqlText) 
 	    throws StandardException 
         {
-	    return connFactory.getStatement(sd, sqlText, true).prepare(this);
-	}
-        
+    	    return connFactory.getStatement(sd, sqlText, true).prepare(this);
+    	}      
 
 	/**
 	 * Remove the activation to those known about by this connection.

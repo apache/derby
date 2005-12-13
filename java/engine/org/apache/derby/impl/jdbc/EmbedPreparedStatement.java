@@ -116,7 +116,7 @@ public abstract class EmbedPreparedStatement
 
 			try {
 			    preparedStatement = lcc.prepareInternalStatement
-				(lcc.getDefaultSchema(), sql, resultSetConcurrency==JDBC20Translation.CONCUR_READ_ONLY);
+				(lcc.getDefaultSchema(), sql, resultSetConcurrency==JDBC20Translation.CONCUR_READ_ONLY, forMetaData);
 			    
 			    getWarnings(preparedStatement.getCompileTimeWarnings());
 

@@ -233,6 +233,7 @@ public interface SQLState {
 	String PROPERTY_INVALID_VALUE		= "XCY00.S";
 	String PROPERTY_UNSUPPORTED_CHANGE  = "XCY02.S";
 	String PROPERTY_MISSING				= "XCY03.S";
+	String PROPERTY_SYNTAX_INVALID		= "XCY04.S";
 
 	/*
 	** LockManager

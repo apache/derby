@@ -422,7 +422,7 @@ public final class	DataDictionaryImpl
 	public void boot(boolean create, Properties startParams) 
 			throws StandardException
 	{
-		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_1);
+		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_2);
 
 		/* There is a bootstrapping problem here. We would like to use
          * a language connection context to find the name of the system and default
@@ -8186,7 +8186,7 @@ public final class	DataDictionaryImpl
 		Create a set of stored prepared statements from a properties file.
 		Key is the statement name, value is the SQL statement.
 	*/
-	private void createSPSSet(TransactionController tc, boolean net, UUID schemaID)
+	protected void createSPSSet(TransactionController tc, boolean net, UUID schemaID)
 		throws StandardException
 	{
 		Properties p = getQueryDescriptions(net);

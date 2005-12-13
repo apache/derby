@@ -1,0 +1,979 @@
+ij> -- test the optimizer overrides
+autocommit off;
+ij> -- create the tables
+create table t1 (c1 int, c2 int, c3 int, constraint cons1 primary key(c1, c2));
+0 rows inserted/updated/deleted
+ij> create table t2 (c1 int not null, c2 int not null, c3 int, constraint cons2 unique(c1, c2));
+0 rows inserted/updated/deleted
+ij> -- populate the tables
+insert into t1 values (1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4);
+4 rows inserted/updated/deleted
+ij> insert into t2 values (1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4);
+4 rows inserted/updated/deleted
+ij> -- create some indexes
+create index t1_c1c2c3 on t1(c1, c2, c3);
+0 rows inserted/updated/deleted
+ij> create index t1_c3c2c1 on t1(c3, c2, c1);
+0 rows inserted/updated/deleted
+ij> create index t1_c1 on t1(c1);
+0 rows inserted/updated/deleted
+ij> create index t1_c2 on t1(c2);
+0 rows inserted/updated/deleted
+ij> create index t1_c3 on t1(c3);
+0 rows inserted/updated/deleted
+ij> create index "t1_c2c1" on t1(c2, c1);
+0 rows inserted/updated/deleted
+ij> create index t2_c1c2c3 on t2(c1, c2, c3);
+0 rows inserted/updated/deleted
+ij> create index t2_c3c2c1 on t2(c3, c2, c1);
+0 rows inserted/updated/deleted
+ij> create index t2_c1 on t2(c1);
+0 rows inserted/updated/deleted
+ij> create index t2_c2 on t2(c2);
+0 rows inserted/updated/deleted
+ij> create index t2_c3 on t2(c3);
+0 rows inserted/updated/deleted
+ij> -- create some views
+create view v1 as select * from t1 --derby-properties index = t1_c1
+;
+0 rows inserted/updated/deleted
+ij> create view v2 as select t1.* from t1, t2;
+0 rows inserted/updated/deleted
+ij> create view v3 as select * from v1;
+0 rows inserted/updated/deleted
+ij> create view neg_v1 as select * from t1 --derby-properties asdf = fdsa
+;
+0 rows inserted/updated/deleted
+ij> -- negative tests
+select 
+----- derby-properties index = t1_c1
+* from t1;
+ERROR 42X01: Syntax error: Encountered "derby-properties" at line 3, column 4.
+ij> select * -- derby-properties index = t1_c1
+from t1;
+ERROR 42X01: Syntax error: Encountered "derby-properties" at line 1, column 13.
+ij> select 
+----- derby-properties
+* from t1;
+ERROR 42X01: Syntax error: Encountered "derby-properties" at line 2, column 4.
+ij> -- optimizer override did not specify propertyname=value pairs
+select * from t1 --derby-properties
+;
+ERROR XCY04: Invalid syntax for optimizer overrides. The syntax should be -- DERBY-PROPERTIES propertyName = value [, propertyName = value]*
+ij> -- invalid property
+select * from t1 --derby-properties asdf = i1
+;
+ERROR 42Y44: Invalid key 'asdf' specified in the Properties list of a FROM list. The case-sensitive keys that are currently supported are 'index, constraint, joinStrategy'. 
+ij> select * from t1 exposedname --derby-properties asdf = i1
+;
+ERROR 42Y44: Invalid key 'asdf' specified in the Properties list of a FROM list. The case-sensitive keys that are currently supported are 'index, constraint, joinStrategy'. 
+ij> -- non-existent index
+select * from t1 --derby-properties index = t1_notexists
+;
+ERROR 42Y46: Invalid Properties list in FROM list.  There is no index 'T1_NOTEXISTS' on table 'T1'.
+ij> select * from t1 exposedname --derby-properties index = t1_notexists
+;
+ERROR 42Y46: Invalid Properties list in FROM list.  There is no index 'T1_NOTEXISTS' on table 'T1'.
+ij> -- non-existent constraint
+select * from t1 --derby-properties constraint = t1_notexists
+;
+ERROR 42Y48: Invalid Properties list in FROM list.  Either there is no named constraint 'T1_NOTEXISTS' on table 'T1' or the constraint does not have a backing index.
+ij> select * from t1 exposedname --derby-properties constraint = t1_notexists
+;
+ERROR 42Y48: Invalid Properties list in FROM list.  Either there is no named constraint 'T1_NOTEXISTS' on table 'T1' or the constraint does not have a backing index.
+ij> -- make sure following get treated as comments
+-----d 
+----- de
+----- der
+-----derb
+-----derby comment
+----- derby another comment
+-----derby-
+-----derby-p
+-----derby-pr
+-----derby-pro
+-----derby-prop
+-----derby-prope
+-----derby-proper
+----- derby-propert
+----- derby-properti
+----- derby-propertie
+----- derby-propertiex
+----- both index and constraint
+select * from t1 --derby-properties index = t1_c1, constraint = cons1
+;
+ERROR 42Y50: Properties list for table 'T1' may contain values for index or for constraint but not both.
+ij> select * from t1 exposedname --derby-properties index = t1_c1, constraint = cons1
+;
+ERROR 42Y50: Properties list for table 'T1' may contain values for index or for constraint but not both.
+ij> -- index which includes columns in for update of list
+select * from t1 --derby-properties index = t1_c1 
+for update;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> select * from t1 exposedname --derby-properties index = t1_c1 
+for update;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> select * from t1 --derby-properties index = t1_c1 
+for update of c2, c1;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> select * from t1 exposedname --derby-properties index = t1_c1 
+for update of c2, c1;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> -- constraint which includes columns in for update of list
+select * from t1 --derby-properties constraint = cons1 
+for update;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> select * from t1 exposedname --derby-properties constraint = cons1 
+for update;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> select * from t1 --derby-properties constraint = cons1 
+for update of c2, c1;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> select * from t1 exposedname --derby-properties constraint = cons1 
+for update of c2, c1;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> -- select from view with bad derby-properties list
+select * from neg_v1;
+ERROR 42Y44: Invalid key 'asdf' specified in the Properties list of a FROM list. The case-sensitive keys that are currently supported are 'index, constraint, joinStrategy'. 
+ij> -- bad derby-properties tests on outer joins
+select * from t1 --derby-properties i = a 
+left outer join t2 on 1=1;
+ERROR 42Y44: Invalid key 'i' specified in the Properties list of a FROM list. The case-sensitive keys that are currently supported are 'index, constraint, joinStrategy'. 
+ij> select * from t1 left outer join t2 --derby-properties i = t1_c1 
+on 1=1;
+ERROR 42Y44: Invalid key 'i' specified in the Properties list of a FROM list. The case-sensitive keys that are currently supported are 'index, constraint, joinStrategy'. 
+ij> select * from t1 left outer join t2 --derby-properties index = t1_c1 
+on 1=1;
+ERROR 42Y46: Invalid Properties list in FROM list.  There is no index 'T1_C1' on table 'T2'.
+ij> select * from t1 right outer join t2 --derby-properties index = t1_c1 
+on 1=1;
+ERROR 42Y46: Invalid Properties list in FROM list.  There is no index 'T1_C1' on table 'T2'.
+ij> -- invalid joinStrategy
+select * from t1 a, t1 b --derby-properties joinStrategy = asdf
+;
+ERROR 42Y56: Invalid join strategy 'ASDF' specified in Properties list on table 'T1'. The currently supported values for a join strategy are: 'hash' and 'nestedloop'.
+ij> -- positive tests
+----- verify that statements are dependent on specified index or constraint
+commit;
+ij> -- dependent on index
+prepare p1 as 'select * from t1 --derby-properties index = t1_c1
+';
+ij> execute p1;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> drop index t1_c1;
+0 rows inserted/updated/deleted
+ij> execute p1;
+ERROR 42Y46: Invalid Properties list in FROM list.  There is no index 'T1_C1' on table 'T1'.
+ij> remove p1;
+ij> rollback;
+ij> -- dependent on constraint
+prepare p2 as 'select * from t1 --derby-properties constraint = cons1
+';
+ij> execute p2;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> alter table t1 drop constraint cons1;
+0 rows inserted/updated/deleted
+ij> execute p2;
+ERROR 42Y48: Invalid Properties list in FROM list.  Either there is no named constraint 'CONS1' on table 'T1' or the constraint does not have a backing index.
+ij> remove p2;
+ij> rollback;
+ij> -- change display width in anticipation of runtimestatistics
+maximumdisplaywidth 5000;
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+Statement executed.
+ij> -- the token derby-properties is case insensitive. Few tests for that
+select * from t1 --DeRbY-pRoPeRtIeS index = t1_c1 
+;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURLH000C1
+Statement Text: 
+	-- the token derby-properties is case insensitive. Few tests for that
+select * from t1 --DeRbY-pRoPeRtIeS index = t1_c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched={1}
+		Number of columns fetched=1
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
+ij> -- misspell derby-properties and make sure that it gets treated as a regular comment rather than optimizer override
+select * from t1 --DeRbY-pRoPeRtIeAAA index = t1_c1 
+;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURLH000C1
+Statement Text: 
+	-- misspell derby-properties and make sure that it gets treated as a regular comment rather than optimizer override
+select * from t1 --DeRbY-pRoPeRtIeAAA index = t1_c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Scan ResultSet for T1 using index T1_C1C2C3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 4
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0, 1, 2}
+	Number of columns fetched=3
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=4
+	Number of rows visited=4
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
+ij> -- force index, delimited identifier
+select * from t1 --derby-properties index = "t1_c2c1"
+;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURLH000C1
+Statement Text: 
+	-- force index, delimited identifier
+select * from t1 --derby-properties index = "t1_c2c1"
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	Index Scan ResultSet for T1 using index t1_c2c1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched={2}
+		Number of columns fetched=1
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
+ij> -- force table scan
+select * from t1 --derby-properties index = null
+;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURLH000C1
+Statement Text: 
+	-- force table scan
+select * from t1 --derby-properties index = null
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Table Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 4
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched=All
+	Number of columns fetched=3
+	Number of pages visited=1
+	Number of rows qualified=4
+	Number of rows visited=4
+	Scan type=heap
+	start position: 
+null	stop position: 
+null	qualifiers:
+None
+ij> -- force index in create view
+select * from v1;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURLH000C1
+Statement Text: 
+	-- force index in create view
+select * from v1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=2
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
+ij> -- cursor updateability test
+select * from t1 --derby-properties index = t1_c1 
+for update of c2, c3;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURLH000C1
+Statement Text: 
+	-- cursor updateability test
+select * from t1 --derby-properties index = t1_c1 
+for update of c2, c3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=2
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
+ij> -- joins
+select 1 from t1 a --derby-properties index = t1_c1
+, t2 b --derby-properties index = t2_c2
+;
+1          
+-----
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURLH000C1
+Statement Text: 
+	-- joins
+select 1 from t1 a --derby-properties index = t1_c1
+, t2 b --derby-properties index = t2_c2
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 16
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Nested Loop Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 4
+	Rows seen from the right = 16
+	Rows filtered = 0
+	Rows returned = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 4
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={}
+			Number of columns fetched=0
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=4
+			Number of rows visited=4
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			qualifiers:
+None
+	Right result set:
+		Index Scan ResultSet for T2 using index T2_C2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 4
+		Rows seen = 16
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={}
+			Number of columns fetched=0
+			Number of deleted rows visited=0
+			Number of pages visited=4
+			Number of rows qualified=16
+			Number of rows visited=16
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			qualifiers:
+None
+ij> -- comparisons that can't get pushed down
+select * from t1 --derby-properties index = t1_c1 
+where c1 = c1;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> select * from t1 --derby-properties index = t1_c1 
+where c1 = c2;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> select * from t1 --derby-properties index = t1_c1 
+where c1 + 1 = 1 + c1;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> -- outer joins
+select * from t1 --derby-properties index = t1_c1 
+left outer join t2 --derby-properties index = t2_c2 
+on t1.c1 = t2.c1;
+C1 |C2 |C3 |C1 |C2 |C3         
+-----
+1 |1 |1 |1 |1 |1          
+2 |2 |2 |2 |2 |2          
+3 |3 |3 |3 |3 |3          
+4 |4 |4 |4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURLH000C1
+Statement Text: 
+	-- outer joins
+select * from t1 --derby-properties index = t1_c1 
+left outer join t2 --derby-properties index = t2_c2 
+on t1.c1 = t2.c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Nested Loop Left Outer Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 4
+Rows seen from the right = 4
+Empty right rows returned = 0
+Rows filtered = 0
+Rows returned = 4
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Index Row to Base Row ResultSet for T1:
+	Number of opens = 1
+	Rows seen = 4
+	Columns accessed from heap = {0, 1, 2}
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 4
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={1}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=4
+			Number of rows visited=4
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			qualifiers:
+None
+Right result set:
+	Project-Restrict ResultSet (6):
+	Number of opens = 4
+	Rows seen = 16
+	Rows filtered = 12
+	restriction = true
+	projection = true
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Index Row to Base Row ResultSet for T2:
+		Number of opens = 4
+		Rows seen = 16
+		Columns accessed from heap = {0, 1, 2}
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			Index Scan ResultSet for T2 using index T2_C2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 4
+			Rows seen = 16
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={1}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=4
+				Number of rows qualified=16
+				Number of rows visited=16
+				Scan type=btree
+				Tree height=1
+				start position: 
+	None
+				stop position: 
+	None
+				qualifiers:
+None
+ij> -- verify nestedloop joinStrategy
+select * from t1 a, t1 b --derby-properties joinStrategy = nestedloop
+where a.c1 = b.c1;
+C1 |C2 |C3 |C1 |C2 |C3         
+-----
+1 |1 |1 |1 |1 |1          
+2 |2 |2 |2 |2 |2          
+3 |3 |3 |3 |3 |3          
+4 |4 |4 |4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURLH000C1
+Statement Text: 
+	-- verify nestedloop joinStrategy
+select * from t1 a, t1 b --derby-properties joinStrategy = nestedloop
+where a.c1 = b.c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 4
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Hash Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 4
+	Rows seen from the right = 4
+	Rows filtered = 0
+	Rows returned = 4
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Index Scan ResultSet for T1 using index T1_C1C2C3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 4
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0, 1, 2}
+			Number of columns fetched=3
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=4
+			Number of rows visited=4
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			qualifiers:
+None
+	Right result set:
+		Hash Scan ResultSet for T1 using index T1_C1C2C3 at read committed isolation level using instantaneous share row locking: 
+		Number of opens = 4
+		Hash table size = 4
+		Hash key is column number 0
+		Rows seen = 4
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0, 1, 2}
+			Number of columns fetched=3
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=4
+			Number of rows visited=4
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			scan qualifiers:
+None
+			next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> --negative test. insertModeValue is not avaible to a user and hence will
+-----give a syntax error. There are some undocumented properties which are
+-----allowed within Derby engine only and insertModeValue is one of them.
+create table temp1 (c1 int, c2 int, c3 int, constraint temp1cons1 primary key(c1, c2));
+0 rows inserted/updated/deleted
+ij> insert into temp1 (c1,c2,c3) -- derby-properties insertModeValue=replace
+select * from t1;
+ERROR 42X01: Syntax error: DERBY-PROPERTIES.
+ij> -- clean up
+drop view neg_v1;
+0 rows inserted/updated/deleted
+ij> drop view v3;
+0 rows inserted/updated/deleted
+ij> drop view v2;
+0 rows inserted/updated/deleted
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table temp1;
+0 rows inserted/updated/deleted
+ij> 

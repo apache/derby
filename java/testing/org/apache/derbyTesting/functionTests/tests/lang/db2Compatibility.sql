@@ -139,13 +139,8 @@ CREATE TRIGGER testtrig3 AFTER DELETE ON tb1 FOR EACH ROW MODE DB2SQL SELECT * F
 DROP TABLE tb1;
 DROP TABLE testCS;
 
--- PROPERTIES in DB2 mode
-create table maps (country_ISO_code char(2)) PROPERTIES derby.storage.pageSize=262144;
-
--- PROPERTIES in DB2 mode
 -- beetle 5177
 create table maps2 (country_ISO_code char(2));
-create index map_idx1 on maps2(country_ISO_code) properties derby.storage.pageSize = 2048;
 -- BTREE not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error in DB2 mode
 create btree index map_idx2 on maps2(country_ISO_code);
 create unique btree index map_idx2 on maps2(country_ISO_code);

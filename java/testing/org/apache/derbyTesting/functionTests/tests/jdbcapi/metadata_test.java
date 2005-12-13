@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.CallableStatement;
@@ -35,6 +36,7 @@ import java.sql.Date;
 import java.math.BigDecimal;
 
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import org.apache.derby.tools.ij;
 
@@ -82,11 +84,96 @@ public abstract class metadata_test {
 	}
 
 	// We leave it up to the classes which extend this one to
-	// initialize the following fields at contruct time.
-	protected Connection con;
-	protected static Statement s;
+	// initialize the following fields at construct time.
+	public Connection con;
+	public static Statement s;
+	
+	/*
+	** Escaped function testing
+	*/
+	private static final String[][] NUMERIC_FUNCTIONS =
+	{
+		// Section C.1 JDBC 3.0 spec.
+		{ "ABS", "-25.67" },
+		{ "ACOS", "1.34" },
+		{ "ASIN", "1.21" },
+		{ "ATAN", "0.34" },
+		{ "ATAN2", "0.56", "1.2" },
+		{ "CEILING", "3.45" },
+		{ "COS", "1.2" },
+		{ "COT", "3.4" },
+		{ "DEGREES", "2.1" },
+		{ "EXP", "2.3" },
+		{ "FLOOR", "3.22" },
+		{ "LOG", "34.1" },
+		{ "LOG10", "18.7" },
+		{ "MOD", "124", "7" },
+		{ "PI" },
+		{ "POWER", "2", "3" },
+		{ "RADIANS", "54" },
+		{ "RAND", "17" }, 
+		{ "ROUND", "345.345", "1" }, 
+		{ "SIGN", "-34" },
+		{ "SIN", "0.32" },
+		{ "SQRT", "6.22" },
+		{ "TAN", "0.57", },
+		{ "TRUNCATE", "345.395", "1" }
+	};
+	
+	private static final String[][] TIMEDATE_FUNCTIONS =
+	{	
+		// Section C.3 JDBC 3.0 spec.
+		{ "CURDATE" },
+		{ "CURTIME" },
+		{ "DAYNAME", "{d '1995-12-19'h}" },
+		{ "DAYOFMONTH", "{d '1995-12-19'}" },
+		{ "DAYOFWEEK", "{d '1995-12-19'}" },
+		{ "DAYOFYEAR", "{d '1995-12-19'}" },
+		{ "HOUR", "{t '16:13:03'}" },
+		{ "MINUTE", "{t '16:13:03'}" },
+		{ "MONTH", "{d '1995-12-19'}" },
+		{ "MONTHNAME", "{d '1995-12-19'}" },
+		{ "NOW" },
+		{ "QUARTER", "{d '1995-12-19'}" },
+		{ "SECOND", "{t '16:13:03'}" },
+		{ "TIMESTAMPADD", "SQL_TSI_DAY", "7", "{ts '1995-12-19 12:15:54'}" },
+		{ "TIMESTAMPDIFF", "SQL_TSI_DAY", "{ts '1995-12-19 12:15:54'}", "{ts '1997-11-02 00:15:23'}" },
+		{ "WEEK", "{d '1995-12-19'}" },
+		{ "YEAR", "{d '1995-12-19'}" },
+		
+	};
 
-	protected void runTest() {
+	private static final String[][] SYSTEM_FUNCTIONS =
+	{	
+		// Section C.4 JDBC 3.0 spec.
+		{ "DATABASE" },
+		{ "IFNULL", "'this'", "'that'" },
+		{ "USER"},
+		};	
+	
+	private static final String[][] STRING_FUNCTIONS =
+	{	
+		// Section C.2 JDBC 3.0 spec.
+		{ "ASCII" , "'Yellow'" },
+		{ "CHAR", "65" },
+		{ "CONCAT", "'hello'", "'there'" },
+		{ "DIFFERENCE", "'Pires'", "'Piers'" },
+		{ "INSERT", "'Bill Clinton'", "4", "'William'" },
+		{ "LCASE", "'Fernando Alonso'" },
+		{ "LEFT", "'Bonjour'", "3" },
+		{ "LENGTH", "'four    '" } ,
+		{ "LOCATE", "'jour'", "'Bonjour'" },
+		{ "LTRIM", "'   left trim   '"},
+		{ "REPEAT", "'echo'", "3" },
+		{ "REPLACE", "'to be or not to be'", "'be'", "'England'" },
+		{ "RTRIM", "'  right trim   '"},
+		{ "SOUNDEX", "'Derby'" },
+		{ "SPACE", "12"},
+		{ "SUBSTRING", "'Ruby the Rubicon Jeep'", "10", "7", },
+		{ "UCASE", "'Fernando Alonso'" }
+		};
+
+	public void runTest() {
 
 		DatabaseMetaData met;
 		ResultSet rs;
@@ -288,6 +375,27 @@ public abstract class metadata_test {
 				new String [] {null, "%", "GETPCTEST%"},
 				null, null, null));
 
+			System.out.println("getUDTs() with user-named types null :");
+ 			dumpRS(met.getUDTs(null, null, null, null));
+
+			System.out.println("getUDTs() with user-named types in ('JAVA_OBJECT') :");
+ 			int[] userNamedTypes = new int[1];
+ 			userNamedTypes[0] = java.sql.Types.JAVA_OBJECT;
+ 			dumpRS(met.getUDTs("a", null, null, userNamedTypes));      
+
+ 			System.out.println("getUDTs() with user-named types in ('STRUCT') :");
+ 			userNamedTypes[0] = java.sql.Types.STRUCT;
+ 			dumpRS(met.getUDTs("b", null, null, userNamedTypes));
+
+ 			System.out.println("getUDTs() with user-named types in ('DISTINCT') :");
+ 			userNamedTypes[0] = java.sql.Types.DISTINCT;
+ 			dumpRS(met.getUDTs("c", null, null, userNamedTypes));
+
+			System.out.println("getUDTs() with user-named types in ('JAVA_OBJECT', 'STRUCT') :");
+ 			userNamedTypes = new int[2];
+ 			userNamedTypes[0] = java.sql.Types.JAVA_OBJECT;
+ 			userNamedTypes[1] = java.sql.Types.STRUCT;
+ 			dumpRS(met.getUDTs("a", null, null, userNamedTypes));
 
 			/*
 			 * any methods that were not tested above using code written
@@ -523,6 +631,21 @@ public abstract class metadata_test {
 			System.out.println("dataDefinitionIgnoredInTransactions(): " +
 							   met.dataDefinitionIgnoredInTransactions());
 
+			System.out.println("Test the metadata calls related to visibility of changes made by others for different resultset types");
+			System.out.println("Since Derby materializes a forward only ResultSet incrementally, it is possible to see changes");
+			System.out.println("made by others and hence following 3 metadata calls will return true for forward only ResultSets.");
+			System.out.println("othersUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? " + met.othersUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+			System.out.println("othersDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? " + met.othersDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+			System.out.println("othersInsertsAreVisible(ResultSet.TYPE_FORWARD_ONLY)? " + met.othersInsertsAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+			System.out.println("Scroll insensitive ResultSet by their definition do not see changes made by others and hence following metadata calls return false");
+			System.out.println("othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + met.othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+			System.out.println("othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + met.othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+			System.out.println("othersInsertsAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + met.othersInsertsAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+			System.out.println("Derby does not yet implement scroll sensitive resultsets and hence following metadata calls return false");
+			System.out.println("othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+			System.out.println("othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+			System.out.println("othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+
 			System.out.println("getConnection(): "+
 					   ((met.getConnection()==con)?"same connection":"different connection") );
 			System.out.println("getProcedureColumns():");
@@ -711,6 +834,19 @@ public abstract class metadata_test {
 				}
 			}
 			rs.close();
+			
+			System.out.println("Test escaped numeric functions - JDBC 3.0 C.1");
+			testEscapedFunctions(con, NUMERIC_FUNCTIONS, met.getNumericFunctions());
+			
+			System.out.println("Test escaped string functions - JDBC 3.0 C.2");
+			testEscapedFunctions(con, STRING_FUNCTIONS, met.getStringFunctions());
+
+			System.out.println("Test escaped date time functions - JDBC 3.0 C.3");
+			testEscapedFunctions(con, TIMEDATE_FUNCTIONS, met.getTimeDateFunctions());
+
+			System.out.println("Test escaped system functions - JDBC 3.0 C.4");
+			testEscapedFunctions(con, SYSTEM_FUNCTIONS, met.getSystemFunctions());
+
 			//
 			// Test referential actions on delete
 			//
@@ -880,6 +1016,7 @@ public abstract class metadata_test {
 			s.execute("drop table refactnoaction");
 			s.execute("drop table refactcascade");
 			s.execute("drop table refactsetnull");
+			s.execute("drop table inflight");
 			s.execute("drop table refaction1");
 
 			// test beetle 5195
@@ -925,7 +1062,20 @@ public abstract class metadata_test {
 				" parameter style java"); 
             	s.execute("call isReadO()");
             }
-			
+			s.execute("drop procedure isReadO");
+			s.execute("drop procedure GETPCTEST4Bx");
+			s.execute("drop procedure GETPCTEST4B");
+			s.execute("drop procedure GETPCTEST4A");
+			s.execute("drop procedure GETPCTEST3B");
+			s.execute("drop procedure GETPCTEST3A");
+			s.execute("drop procedure GETPCTEST2");
+			s.execute("drop procedure GETPCTEST1");
+			s.execute("drop table t");
+			s.execute("drop table reftab");
+			s.execute("drop table reftab2");
+			s.execute("drop view SCREWIE");
+			s.execute("drop table louie");
+			s.execute("drop table alltypes");
 			s.close();
 			if (con.getAutoCommit() == false)
 				con.commit();
@@ -944,6 +1094,141 @@ public abstract class metadata_test {
 		System.out.println("Test metadata finished");
     }
 
+	/**
+	 * Test escaped functions. Working from the list of escaped functions defined
+	 * by JDBC, compared to the list returned by the driver.
+	 * <OL>
+	 * <LI> See that all functions defined by the driver are in the spec list
+	 * and that they work.
+	 * <LI> See that only functions defined by the spec are in the driver's list.
+	 * <LI> See that any functions defined by the spec that work are in the driver's list.
+	 * </OL>
+	 * FAIL will be printed for any issues.
+	 * @param conn
+	 * @param specList
+	 * @param metaDataList
+	 * @throws SQLException
+	 */
+	private static void testEscapedFunctions(Connection conn, String[][] specList, String metaDataList)
+	throws SQLException
+	{
+		boolean[] seenFunction = new boolean[specList.length];
+		
+		System.out.println("TEST FUNCTIONS DECLARED IN DATABASEMETADATA LIST");
+		StringTokenizer st = new StringTokenizer(metaDataList, ",");
+		while (st.hasMoreTokens())
+		{
+			String function = st.nextToken();
+			
+			// find this function in the list
+			boolean isSpecFunction = false;
+			for (int f = 0; f < specList.length; f++)
+			{
+				String[] specDetails = specList[f];
+				if (function.equals(specDetails[0]))
+				{
+					// Matched spec.
+					if (seenFunction[f])
+						System.out.println("FAIL Function in list twice: " + function);
+					seenFunction[f] = true;
+					isSpecFunction = true;
+					
+					if (!executeEscaped(conn, specDetails))
+						System.out.println("FAIL Function failed to execute "+ function);
+					break;
+				}
+			}
+			
+			if (!isSpecFunction)
+			{
+				System.out.println("FAIL Non-JDBC spec function in list: " + function);
+			}
+		}
+		
+		// Now see if any speced functions are not in the metadata list
+		System.out.println("TEST FUNCTIONS NOT DECLARED IN DATABASEMETADATA LIST");
+		for (int f = 0; f < specList.length; f++)
+		{
+			if (seenFunction[f])
+				continue;
+			String[] specDetails = specList[f];
+			if (executeEscaped(conn, specDetails))
+				System.out.println("FAIL function works but not declared in list: " + specDetails[0]);
+			
+		}
+	}
+	
+	private static boolean executeEscaped(Connection conn, String[] specDetails)
+	{
+		
+		String sql = "VALUES { fn " + specDetails[0] + "(";
+		
+		for (int p = 0; p < specDetails.length - 1; p++)
+		{
+			if (p != 0)
+				sql = sql + ", ";
+			
+			sql = sql + specDetails[p + 1];
+		}
+		
+		sql = sql + ") }";
+		
+		// Special processing for functions that return
+		// current date, time or timestamp. This is to
+		// ensure we don't have output that depends on
+		// the time the test is run.
+		if ("CURDATE".equals(specDetails[0]))
+			sql = "VALUES CASE WHEN { fn CURDATE()} = CURRENT_DATE THEN 'OK' ELSE 'wrong' END";
+		else if ("CURTIME".equals(specDetails[0]))
+			sql = "VALUES CASE WHEN { fn CURTIME()} = CURRENT_TIME THEN 'OK' ELSE 'wrong' END";
+		else if ("NOW".equals(specDetails[0]))
+			sql = "VALUES CASE WHEN { fn NOW()} = CURRENT_TIMESTAMP THEN 'OK' ELSE 'wrong' END";
+		
+		
+		System.out.print("Executing " + sql + " -- ");
+			
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+			
+			while (rs.next())
+			{
+				// truncate numbers to avoid multiple master files
+				// with double values.
+				String res = rs.getString(1);
+				
+				switch (rs.getMetaData().getColumnType(1))
+				{
+				case Types.DOUBLE:
+				case Types.REAL:
+				case Types.FLOAT:
+					if (res.length() > 4)
+						res = res.substring(0, 4);
+					break;
+				default:
+					break;
+				}
+				System.out.print("  = >" + res + "< ");
+			}
+			rs.close();
+			ps.close();
+			System.out.println(" << ");
+			return true;
+		} catch (SQLException e) {
+			System.out.println("");
+			showSQLExceptions(e);
+			return false;
+		}
+		
+	}
+
+	static private void showSQLExceptions (SQLException se) {
+		while (se != null) {
+			System.out.println("SQLSTATE("+se.getSQLState()+"): " + se.getMessage());
+			se = se.getNextException();
+		}
+	}
+	
 	static protected void dumpSQLExceptions (SQLException se) {
 		System.out.println("FAIL -- unexpected exception");
 		while (se != null) {

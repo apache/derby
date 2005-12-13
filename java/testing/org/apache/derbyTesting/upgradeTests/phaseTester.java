@@ -13,6 +13,7 @@ package org.apache.derbyTesting.upgradeTests;
 
 import java.sql.*;
 
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata;
 
 /**
 	Tests upgrades including soft upgrade.
@@ -107,6 +108,7 @@ public class phaseTester {
 		}
 
 		System.out.println("\n\nSTART - phase " + PHASES[phase] + " db version " + dbMajor + "." + dbMinor);
+		System.out.println("jdbc url is " + url);
 
 		Connection conn;
 		
@@ -167,6 +169,12 @@ public class phaseTester {
 
 			setPhaseComplete(conn, phase, passed);
 
+			//test the metadata calls at this stages of the db. This is to make
+			//sure that they don't break between these forms of upgrades of a db
+			metadata metadataTest = new metadata();
+			metadataTest.con = conn;
+			metadata.s = conn.createStatement();
+			metadataTest.runTest();
 		}
 
 		System.out.println("END - " + (passed ? "PASS" : "FAIL") + " - phase " + PHASES[phase] + " db version " + dbMajor + "." + dbMinor);
@@ -267,7 +275,7 @@ public class phaseTester {
 		switch (phase) {
 		case PH_CREATE:
 			conn.createStatement().executeUpdate("CREATE TABLE PHASE(id INT NOT NULL, ok INT)");
-			conn.createStatement().executeUpdate("CREATE TABLE T1(id INT NOT NULL PRIMARY KEY, name varchar(200))");
+			conn.createStatement().executeUpdate("CREATE TABLE TABLE1(id INT NOT NULL PRIMARY KEY, name varchar(200))");
 			break;
 		case PH_SOFT_UPGRADE:
 			break;
@@ -286,7 +294,7 @@ public class phaseTester {
 		ps.close();
 		
 		// perform some transactions
-		ps = conn.prepareStatement("INSERT INTO T1 VALUES (?, ?)");
+		ps = conn.prepareStatement("INSERT INTO TABLE1 VALUES (?, ?)");
 		for (int i = 1; i < 20; i++)
 		{
 			ps.setInt(1, i + (phase * 100));
@@ -294,14 +302,14 @@ public class phaseTester {
 			ps.executeUpdate();
 		}
 		ps.close();
-		ps = conn.prepareStatement("UPDATE T1 set name = name || 'U' where id = ?");
+		ps = conn.prepareStatement("UPDATE TABLE1 set name = name || 'U' where id = ?");
 		for (int i = 1; i < 20; i+=3)
 		{
 			ps.setInt(1, i + (phase * 100));
 			ps.executeUpdate();
 		}
 		ps.close();
-		ps = conn.prepareStatement("DELETE FROM T1 where id = ?");
+		ps = conn.prepareStatement("DELETE FROM TABLE1 where id = ?");
 		for (int i = 1; i < 20; i+=4)
 		{
 			ps.setInt(1, i + (phase * 100));

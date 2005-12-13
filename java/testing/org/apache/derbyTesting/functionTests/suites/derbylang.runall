@@ -89,6 +89,7 @@ lang/nestedCommit.sql
 lang/nonreserved.sql
 lang/nulls.sql
 lang/openScans.sql
+lang/optimizerOverrides.sql
 lang/orderby.sql
 lang/orderbyElimination.sql
 lang/outerjoin.sql

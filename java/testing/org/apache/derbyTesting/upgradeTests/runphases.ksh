@@ -1,6 +1,12 @@
 
 #
 #
+# Added a master for the current run of this script into 
+# java\testing\org\apache\derbyTesting\functionTests\master\phaseTester.out
+# Until this script becomes part of the derby test harness, the output of the manual run
+# of this test can be manually checked against the checked master. This also means that
+# if this test is modified, the master should be updated. 
+#
 # runphases old_major old_minor old_engine new_engine
 #
 # e.g.

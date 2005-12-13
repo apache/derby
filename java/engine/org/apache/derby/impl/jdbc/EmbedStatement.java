@@ -531,7 +531,7 @@ public class EmbedStatement extends ConnectionChild
 			Activation activation;
 			try {
 				PreparedStatement preparedStatement = lcc.prepareInternalStatement
-				    (lcc.getDefaultSchema(), sql, resultSetConcurrency==JDBC20Translation.CONCUR_READ_ONLY);
+				    (lcc.getDefaultSchema(), sql, resultSetConcurrency==JDBC20Translation.CONCUR_READ_ONLY, false);
 				activation =
 					preparedStatement.getActivation(lcc, resultSetType == JDBC20Translation.TYPE_SCROLL_INSENSITIVE);
 				checkRequiresCallableStatement(activation);

@@ -22,7 +22,8 @@ create table neg1(c1 int check((c2 = 1)));
 
 -- verify that a check constraint can't be used as an optimizer override
 create table t1(c1 int constraint asdf check(c1 = 1));
-select * from t1 properties constraint = asdf;
+select * from t1 --derby-properties constraint = asdf
+;
 -- alter table t1 drop constraint asdf;
 rollback;
 -- alter table t1 drop constraint asdf;

@@ -26,8 +26,9 @@ ERROR 42X04: Column 'C2' is either not in any table in the FROM list or appears 
 ij> -- verify that a check constraint can't be used as an optimizer override
 create table t1(c1 int constraint asdf check(c1 = 1));
 0 rows inserted/updated/deleted
-ij> select * from t1 properties constraint = asdf;
-ERROR 42X01: Syntax error: PROPERTIES.
+ij> select * from t1 --derby-properties constraint = asdf
+;
+ERROR 42Y48: Invalid Properties list in FROM list.  Either there is no named constraint 'ASDF' on table 'T1' or the constraint does not have a backing index.
 ij> -- alter table t1 drop constraint asdf;
 rollback;
 ij> -- alter table t1 drop constraint asdf;

@@ -809,7 +809,7 @@ select col16, col17, col18 from t2778;
 
 commit;
 
-update t2778 properties index = a_idx 
+update t2778 --derby-properties index = a_idx 
     set col10 = 
         '0_col10llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll012340_col10lllllllllllxxxxxx'
     where col00 = '0_';

@@ -63,7 +63,28 @@ public interface DataDictionary
 {
 	String MODULE = "org.apache.derby.iapi.sql.dictionary.DataDictionary";
 
-	/** Special version indicating the database must be upgraded to or created at the current engine level */
+	/** Special version indicating the database must be upgraded to or created at the current engine level 
+	 * 
+	 * DatabaseMetaData will use this to determine if the data dictionary 
+	 * is at the latest System Catalog version number. A data dictionary version
+	 * will not be at latest System Catalog version when the database is getting
+	 * booted in soft upgrade mode. In soft upgrade mode, engine should goto 
+	 * metadata.properties to get the sql for the metadata calls rather
+	 * than going to the system tables (and using stored versions of these queries). 
+	 * This is required because if the metadata sql has changed between the 
+	 * releases, we want to use the latest metadata sql rather than what is 
+	 * stored in the system catalogs. Had to introduce this behavior for
+	 * EmbeddedDatabaseMetaData in 10.2 release where optimizer overrides 
+	 * syntax was changed. If 10.2 engine in soft upgrade mode for a pre-10.2 
+	 * database went to system tables for stored metadata queires, the metadata 
+	 * calls would fail because 10.2 release doesn't recognize the pre-10.2 
+	 * optimizer overrides syntax. To get around this, the 10.2 engine in 
+	 * soft upgrade mode should get the sql from metata.properties which has 
+	 * been changed to 10.2 syntax for optimizer overrides. To make this 
+	 * approach more generic for all soft upgrades, from 10.2 release onwards, 
+	 * DatabaseMetaData calls will always look at metadata.properties so it 
+	 * will get the compatible syntax for that release.
+	 */
 	public static final int DD_VERSION_CURRENT			= -1;
 	/** Cloudscape 5.0 System Catalog version */
 	public static final int DD_VERSION_CS_5_0			= 80;
@@ -78,6 +99,9 @@ public interface DataDictionary
 
 	/** Derby 10.1 System Catalog version */
 	public static final int DD_VERSION_DERBY_10_1		= 130;
+
+	/** Derby 10.2 System Catalog version */
+	public static final int DD_VERSION_DERBY_10_2		= 140;
 
 	// general info
 	public	static	final	String	DATABASE_ID = "derby.databaseID";

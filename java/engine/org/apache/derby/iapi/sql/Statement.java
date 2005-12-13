@@ -55,7 +55,22 @@ public interface Statement
 	 *	   relies on compilation).
 	 */
 	PreparedStatement	prepare(LanguageConnectionContext lcc) throws StandardException;
-
+	/**
+	 * Generates an execution plan without executing it.
+	 *
+	 * @param 	lcc			the language connection context
+	 * @param 	allowInternalSyntax	If this statement is for a metadata call then 
+	 *	   we will allow internal sql syntax on such statement. This internal
+	 *	   sql syntax is not available to a user sql statement.
+	 *
+	 * @return A PreparedStatement that allows execution of the execution
+	 *	   plan.
+	 * @exception StandardException	Thrown if this is an
+	 *	   execution-only version of the module (the prepare() method
+	 *	   relies on compilation).
+	 */
+	PreparedStatement	prepare(LanguageConnectionContext lcc, boolean allowInternalSyntax) throws StandardException;
+	
 	/**
 	 * Generates an execution plan given a set of named parameters.
 	 * For generating a storable prepared statement (which

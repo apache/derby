@@ -863,7 +863,7 @@ public interface LanguageConnectionContext extends Context {
 	/** Get the AccessFactory cached in this LanguageConnectionContext */
 	AccessFactory getAccessFactory();
 
-        /**
+    /**
 	 * Return a PreparedStatement object for the query.
 	 * This method first tries to locate the PreparedStatement object from a statement
 	 * cache.  If the statement is not found in the cache, the query will be compiled and
@@ -872,8 +872,12 @@ public interface LanguageConnectionContext extends Context {
 	 * @param sqlText sql query string
 	 * @param isForReadOnly read only status for resultset. Set to true if the concurrency mode for the resultset 
 	 *                      is CONCUR_READ_ONLY
+	 * @param allowInternalSyntax If true, then this query is allowed to use internal 
+	 *                      sql syntax. One instance where this will be true is if a
+	 *                      metadata query is getting executed.
 	 */
-         public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, String sqlText, boolean isForReadOnly) 
+         public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, 
+         		String sqlText, boolean isForReadOnly, boolean allowInternalSyntax) 
 	    throws StandardException;
 
         /**

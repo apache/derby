@@ -49,6 +49,9 @@ import org.apache.derby.tools.ij;
 
 public class metadata extends metadata_test {
 
+	public metadata() {
+	}
+
 	/**
 	 * Constructor:
 	 * Just intializes the Connection and Statement fields
@@ -77,7 +80,7 @@ public class metadata extends metadata_test {
 	 * which will in turn call back here for implementations of
 	 * the abstract methods.
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 
 		new metadata(args).runTest();
 

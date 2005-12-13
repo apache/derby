@@ -24,6 +24,7 @@ jdbcapi/dbMetaDataJdbc30.java
 jdbcapi/metadata.java
 jdbcapi/metadataMultiConn.java
 jdbcapi/odbc_metadata.java
+lang/optimizerOverrides.sql
 jdbcapi/parameterMetaDataJdbc30.java
 jdbcapi/savepointJdbc30.java
 lang/big.sql

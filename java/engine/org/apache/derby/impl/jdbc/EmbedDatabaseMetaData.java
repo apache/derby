@@ -2109,6 +2109,35 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	}
 
     /**
+     * check if the dictionary is at the same version as the engine. If not, 
+     * then that means stored versions of the JDBC database metadata queries
+     * may not be compatible with this version of the software.
+     * This can happen if we are in soft upgrade mode. Since in soft upgrade 
+     * mode, we can't change these stored metadata queries in a backward 
+     * incompatible way, engine needs to read the metadata sql from 
+     * metadata.properties file rather than rely on system tables.
+     * 
+     * @return true if we are not in soft upgrade mode
+     * @throws SQLException
+     */
+	private boolean notInSoftUpgradeMode() 
+		throws SQLException {
+		if ( getEmbedConnection().isClosed())
+			throw Util.noCurrentConnection();
+
+		boolean notInSoftUpgradeMode;
+		try {
+			notInSoftUpgradeMode =
+				getLanguageConnectionContext().getDataDictionary().checkVersion(
+						DataDictionary.DD_VERSION_CURRENT,null);
+		} catch (Throwable t) {
+			throw handleException(t);
+		}
+		return notInSoftUpgradeMode;
+	}
+	
+	
+    /**
      * Get a description of a table's primary key columns.  They
      * are ordered by COLUMN_NAME.
      *
@@ -2131,7 +2160,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
 	public ResultSet getPrimaryKeys(String catalog, String schema,
-				String table) throws SQLException {
+			String table) throws SQLException {
 		return doGetPrimaryKeys(catalog, schema, table, "getPrimaryKeys");
 	}
 
@@ -2161,9 +2190,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		s.setString(2, swapNull(schema));
 		s.setString(3, swapNull(table));
 		return s.executeQuery();
-	}
+	}	
 
-    /**
+	/**
      * Get a description of the primary key columns that are
      * referenced by a table's foreign key columns (the primary keys
      * imported by a table).  They are ordered by PKTABLE_CAT,
@@ -3083,7 +3112,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		return ps.executeQuery();
 	}
 
-	private PreparedStatement getPreparedQuery(String nameKey) throws SQLException 
+	private PreparedStatement getPreparedQueryUsingSystemTables(String nameKey) throws SQLException 
 	{
 		synchronized (getConnectionSynchronization())
 		{
@@ -3114,6 +3143,40 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			return ps;
 		}
 	}
+
+	/**
+	 * Either get the prepared query for the metadata call from the
+	 * system tables or from the metadata.properties file.
+	 * In soft upgrade mode, the queries stored in the system tables
+	 * might not be upto date with the Derby engine release because
+	 * system tables can't be modified in backward incompatible way in
+	 * soft upgrade mode. Because of this, if the database is in 
+	 * soft upgrade mode, get the queries from metadata.properties
+	 * file rather than from the system tables.
+	 * @param queryName Name of the metadata query for which we need
+	 * a prepared statement
+	 * @return PreparedStatement
+	 */
+	private PreparedStatement getPreparedQuery(String queryName)
+			throws SQLException {
+		PreparedStatement s;
+		//We can safely goto system table since we are not in soft upgrade
+		//mode and hence metadata sql in system tables are uptodate
+		//with this Derby release.
+		if (notInSoftUpgradeMode())
+			s = getPreparedQueryUsingSystemTables(queryName);
+		else {
+			try {
+				//Can't use stored prepared statements because we are in soft upgrade
+				//mode and hence need to get metadata sql from metadata.properties file 
+				String queryText = getQueryDescriptions().getProperty(queryName);
+				s = getEmbedConnection().prepareMetaDataStatement(queryText);
+			} catch (Throwable t) {
+				throw handleException(t);
+			} 
+		}
+		return s;
+	}	
 
 	/*
 	** Given a SPS name and a query text it returns a 

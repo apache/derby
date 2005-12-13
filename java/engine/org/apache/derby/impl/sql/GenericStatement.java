@@ -99,7 +99,7 @@ public class GenericStatement
 	 * Statement interface
 	 */
 
-
+	
 	/* RESOLVE: may need error checking, debugging code here */
 	public PreparedStatement prepare(LanguageConnectionContext lcc) throws StandardException
 	{
@@ -108,6 +108,14 @@ public class GenericStatement
 		** a recompilation of an already prepared statement.
 		*/ 
 		return prepMinion(lcc, true, (Object[]) null, (SchemaDescriptor) null, false); 
+	}
+	public PreparedStatement prepare(LanguageConnectionContext lcc, boolean forMetaData) throws StandardException
+	{
+		/*
+		** Note: don't reset state since this might be
+		** a recompilation of an already prepared statement.
+		*/ 
+		return prepMinion(lcc, true, (Object[]) null, (SchemaDescriptor) null, forMetaData); 
 	}
 
 	private PreparedStatement prepMinion(LanguageConnectionContext lcc, boolean cacheMe, Object[] paramDefaults,

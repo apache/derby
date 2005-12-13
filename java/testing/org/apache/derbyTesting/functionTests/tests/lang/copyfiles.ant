@@ -147,6 +147,7 @@ nonreserved.sql
 nulls.sql
 openScans.sql
 openScans_derby.properties
+optimizerOverrides.sql
 orderby.sql
 orderbyElimination.sql
 orderbyElimination_derby.properties

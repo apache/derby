@@ -223,7 +223,7 @@ public class Import extends ImportAbstract{
 		else
 			insertColumnNames = "";
 		String insertSql = "INSERT INTO " + entityName +  insertColumnNames + 
-			" PROPERTIES insertMode=" + insertModeValue + 
+			" --DERBY-PROPERTIES insertMode=" + insertModeValue + "\n" +
 			" SELECT " + cNamesWithCasts + " from " + 
 			importvti + " AS importvti" ;
 
