@@ -20,7 +20,6 @@
 
 package org.apache.derby.client;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.jdbc.ClientDataSource;
 import javax.sql.StatementEventListener;
 
