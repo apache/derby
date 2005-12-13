@@ -137,6 +137,7 @@ PASSED
 Test that we only send one RDBUPRM per transaction
 PASSED
 Test for missing PKGNAMCSN on OPNQRY
+Also test QRYCLSRLS and MONITOR codepoints which are ignored currently
 PASSED
 Test for missing QRYBLKSZ on OPNQRY
 PASSED
@@ -159,6 +160,8 @@ PASSED
 Test too large value for QRYROWSET codepoint on CNTQRY
 PASSED
 Test invalid value for QRYROWSET on OPNQRY
+PASSED
+Test to see OPNQRY returns PRCCNVRM if non-existent RDBNAM specified
 PASSED
 Test too large value for QRYRFRTBL codepoint on CNTQRY
 PASSED
@@ -280,4 +283,8 @@ PASSED
 Test for invalid codepoint in DSCSQLSTT
 PASSED
 Test for non-existant prepared statement in DSCSQLSTT
+PASSED
+Test exception is thrown when specifying non-null indicator for both MBCS and SBCS in SQLSTT
+PASSED
+Test for missing SQLSTT in EXCSQLSET - PKGNAMCT is ignored
 PASSED

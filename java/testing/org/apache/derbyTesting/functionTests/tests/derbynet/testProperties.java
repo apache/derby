@@ -94,6 +94,14 @@ public class testProperties
 									"-p",
 									"1527"};
     
+    //trace off
+    private static String[] cmdTraceOff =
+		new String[] {  "org.apache.derby.drda.NetworkServerControl",
+						"trace",
+						"off",
+						"-p",
+						"1527"};
+    
     //logconnections on
     private static String[] cmdLogconnectionsOn =
 					new String[] {  "org.apache.derby.drda.NetworkServerControl",
@@ -273,8 +281,12 @@ public class testProperties
 			waitForStart("1527",15000);
 			//check that default properties are used
 			listProperties("1527");
+			
+			//Test trace and logconnections commands
 			execCmdDumpResults(cmdTraceOn);
 			execCmdDumpResults(cmdLogconnectionsOn);
+			listProperties("1527");
+			execCmdDumpResults(cmdTraceOff);
 			listProperties("1527");
 			derbyServerCmd("shutdown","1527");
 			

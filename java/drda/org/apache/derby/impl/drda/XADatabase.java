@@ -80,7 +80,7 @@ class XADatabase extends Database {
 		if (conn == null)
 		{
 			xaConnection = xaDataSource.getXAConnection(userId,password);
-			xaResource = xaConnection.getXAResource();
+			setXAResource(xaConnection.getXAResource());
 		}
 		else // this is just a connection reset. Close the logical connection.
 		{

@@ -20,7 +20,9 @@ testconnection_app.properties
 testij_app.properties
 testij_sed.properties
 testProperties_app.properties
+testProperties_derby.properties
 testProtocol_app.properties
+testProtocol_derby.properties
 testSecMec_app.properties
 timeslice_app.properties
 protocol.tests

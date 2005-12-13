@@ -164,21 +164,6 @@ class Database
 	}
 
 	/**
-	 * Get prepared statement based on pkgnamcsn
-	 *
-	 * @param pkgnamcsn - key to access statement
-	 * @return prepared statement
-	 */
-	protected PreparedStatement getPreparedStatement(String pkgnamcsn) 
-		throws SQLException
-	{
-		currentStatement = getDRDAStatement(pkgnamcsn);
-		if (currentStatement == null)
-			return null;
-		return currentStatement.getPreparedStatement();
-	}
-	
-	/**
 	 * Get a new DRDA statement and store it in the stmtTable if stortStmt is true
 	 * If possible recycle an existing statement
 	 * If we are asking for one with the same name it means it
@@ -271,25 +256,6 @@ class Database
 		return attrString;
 	}
 
-	/**
-	 * Get result set
-	 *
-	 * @param pkgnamcsn - key to access prepared statement
-	 * @return result set
-	 */
-	protected ResultSet getResultSet(String pkgnamcsn) throws SQLException
-	{
-		return getDRDAStatement(pkgnamcsn).getResultSet();
-	}
-	/**
- 	 * Set result set
-	 *
-	 * @param value
-	 */
-	protected void setResultSet(ResultSet value) throws SQLException
-	{
-		currentStatement.setResultSet(value);
-	}
 	/**
 	 * Store DRDA prepared statement
 	 * @param  stmt	DRDA prepared statement

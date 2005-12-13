@@ -1720,12 +1720,6 @@ class DDMWriter
     }
   }
 
-
-	private static int min (int i, int j)
-	{
-		return (i < j) ? i : j;
-	}
-
 	protected String toDebugString(String indent)
 	{
 		String s = indent + "***** DDMWriter toDebugString ******\n";
@@ -1815,7 +1809,7 @@ class DDMWriter
 			agent.trace("Sending data");
 
 		resetChainState();
-		if (offset != 0) {
+		if (doesRequestContainData()) {
 			try {
 				flush(socketOutputStream);
 			} catch (java.io.IOException e) {

@@ -1714,10 +1714,6 @@ public class DRDAConnThread extends Thread {
 					// Ignore release of read locks.  Nothing we can do here
 					parseQRYCLSRLS();
 					break;
-				case CodePoint.QRYOPTVAL:
-					// optimize for n rows. Not supported by cloudscape(ignore)
-					parseQRYOPTVAL();
-					break;
 				// optional
 				case CodePoint.MONITOR:
 					parseMONITOR();
@@ -1891,12 +1887,6 @@ public class DRDAConnThread extends Thread {
 
 
 	private int parseQRYCLSRLS() throws DRDAProtocolException
-	{
-		reader.skipBytes();
-		return 0;
-	}
-
-	private int parseQRYOPTVAL() throws DRDAProtocolException
 	{
 		reader.skipBytes();
 		return 0;
@@ -4820,7 +4810,17 @@ public class DRDAConnThread extends Thread {
 	private String parseCcsidSBC(int length) throws DRDAProtocolException
 	{
 		String strVal = null;
-		String ccsidSBCEncoding = database.getCurrentStatement().ccsidSBCEncoding;
+		DRDAStatement  currentStatement;
+		
+		currentStatement = database.getCurrentStatement();
+		if (currentStatement == null)
+		{
+			currentStatement = database.getDefaultStatement();
+			currentStatement.initialize();
+		}
+		String ccsidSBCEncoding = currentStatement.ccsidSBCEncoding;
+		System.out.println("ccsidSBCEncoding - " + ccsidSBCEncoding);
+		
 		if (length == 0)
 			return null;
 		byte [] byteStr = reader.readBytes(length);

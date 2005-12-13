@@ -16,23 +16,6 @@ Session # :3
 # Waiting  Sessions : 0
 Total Memory : #####	Free Memory : #####
 End test
-Testing Runtimeinfo (method)
------ Derby Network Server Runtime Information ---
------ Session Information ---------------
-Session # :2
-Database :wombat;create=true
-User :APP
-# Statements:0
-Prepared Statement Information: 
-	Stmt ID		SQLText
-	-------------	-----------
-Session # :4
------
-# Connection Threads : 2
-# Active Sessions : 2
-# Waiting  Sessions : 0
-Total Memory : #####	Free Memory : #####
-End test (method)
 Testing Runtimeinfo (locale)
 -----Duser.language=err -Duser.country=DE org.apache.derby.drda.NetworkServerControl runtimeinfo 
 ----- Derby Network Server Runtime Information ---
@@ -46,7 +29,7 @@ Prepared Statement Information:
 	-------------	-----------
 	SYSSH2001	SELECT count(*) from sys.systables
 	SYSSH2002	VALUES(1)
-Session # :5
+Session # :4
 Database :wombat;create=true
 User :APP
 # Statements:2
@@ -55,14 +38,14 @@ Prepared Statement Information:
 	-------------	-----------
 	SYSSH2001	SELECT count(*) from sys.systables
 	SYSSH2002	VALUES(2)
-Session # :6
+Session # :5
 Database :wombat;create=true
 User :APP
 # Statements:0
 Prepared Statement Information: 
 	Stmt ID		SQLText
 	-------------	-----------
-Session # :7
+Session # :6
 -----
 # Connection Threads : 4
 # Active Sessions : 4
@@ -70,10 +53,9 @@ Session # :7
 Total Memory : #####	Free Memory : #####
 End test (locale)
 Testing Runtimeinfo after closing connectiosn
-org.apache.derby.drda.NetworkServerControl runtimeinfo 
 ----- Derby Network Server Runtime Information ---
 ----- Session Information ---------------
-Session # :8
+Session # :7
 -----
 # Connection Threads : 4
 # Active Sessions : 1

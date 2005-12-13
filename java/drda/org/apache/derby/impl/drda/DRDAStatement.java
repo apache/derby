@@ -196,14 +196,6 @@ class DRDAStatement
 	}
 
 	/**
-	 * Set result set options to default for statement
-	 */
-	protected void setRsDefaultOptions()
-	{
-		setRsDefaultOptions(currentDrdaRs);
-	}
-
-	/**
 	 * Get the extData Objects
 	 *
 	 *  @return ArrayList with extdta

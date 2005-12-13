@@ -268,34 +268,4 @@ class Session
 		s += "\n";
 		return s;
 	}
-
-	private String getStateString(int s)
-	{
-		switch (s)
-		{
-			case INIT: 
-				return "INIT";
-			case ATTEXC:
-				return "ATTEXC";
-			case CLOSED:
-				return "CLOSED";
-			default:
-				return "UNKNOWN_STATE";
-
-		}
-	}
-
-	private String getTypeString(int t)
-	{
-		switch (t)
-		{
-			case DRDA_SESSION:
-				return "DRDA_SESSION";
-			case CMD_SESSION:
-				return "CMD_SESSION";
-			default:
-				return "UNKNOWN_TYPE";
-		}
-					
-	}
 }

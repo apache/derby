@@ -865,8 +865,8 @@ public class TestProto {
 	 */
 	private void cpError(int cp, int reqCP) throws IOException
 	{
-		String cpName = (String)codePointNameTable.get(new Integer(cp));
-		String reqCPName = (String)codePointNameTable.get(new Integer(reqCP));
+		String cpName = codePointNameTable.lookup(cp);
+		String reqCPName = codePointNameTable.lookup(reqCP);
 		fail("wrong codepoint val = " + Integer.toHexString(cp) + 
 			 "("+cpName+")" +
 			 ", required codepoint = " + Integer.toHexString(reqCP) +

@@ -323,37 +323,6 @@ public class DRDAProtocolException extends Exception
 										oa);
 	}
 	
-	protected final byte[] getCrrtkn()
-	{
-		return crrtkn;
-	}
-	
-	protected final int getCodpntArg()
-	{
-		return codpntArg;
-	}
-	
-	protected final int getErrorCodePoint()
-	{
-		return errorCodePoint;
-	}
-	
-	protected final int getSvrcod()
-	{
-		return  svrcod;
-	}
-	
-	protected final int getErrcd()
-	{
-		return  errcd;
-	}
-	
-	protected final String getMessageid()
-	{
-		return  messageid;
-	}
-	
-	
 	protected final boolean isDisconnectException()
 	{
 		return (errorCodePoint == 0);

@@ -118,16 +118,6 @@ public class runtimeinfo
 			execCmdDumpResults(RuntimeinfoCmd);	
 			System.out.println("End test");
 			
-			/******************************************************************
-			 *  Test runtimeinfo by calling NetworkServerControl.getRuntimeInfo
-			******************************************************************/
-			System.out.println("Testing Runtimeinfo (method)");
-			NetworkServerControl derbyServer = 
-				new NetworkServerControl( InetAddress.getByName("localhost"),
-										NetworkServerControl.DEFAULT_PORTNUMBER);
-			System.out.println(derbyServer.getRuntimeInfo());	
-			System.out.println("End test (method)");
-			
 			// Now get a couple of connections with some prepared statements
 			Connection conn2 = ij.startJBMS();
 			PreparedStatement ps = prepareAndExecuteQuery(conn1,"SELECT count(*) from sys.systables");
@@ -152,9 +142,13 @@ public class runtimeinfo
 			conn2.close();
 			conn3.close();
 			/** once more after closing the connections 
+			 * - by calling NetworkServerControl.getRuntimeInfo 
 			 */
 			System.out.println("Testing Runtimeinfo after closing connectiosn");
-			execCmdDumpResults(RuntimeinfoCmd);	
+			NetworkServerControl derbyServer = 
+				new NetworkServerControl( InetAddress.getByName("localhost"),
+										NetworkServerControl.DEFAULT_PORTNUMBER);
+			System.out.println(derbyServer.getRuntimeInfo());	
 			System.out.println("End test");
 
 			bos.close();

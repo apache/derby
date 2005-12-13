@@ -44,6 +44,19 @@ derby.drda.timeSlice=0
 derby.drda.startNetworkServer=false
 derby.drda.host=localhost
 derby.drda.traceAll=true
+org.apache.derby.drda.NetworkServerControl trace off -p 1527 
+Trace turned off for all sessions.
+Trace turned off for all sessions.
+----- listing properties --
+derby.drda.maxThreads=0
+derby.drda.keepAlive=true
+derby.drda.minThreads=0
+derby.drda.portNumber=1527
+derby.drda.logConnections=true
+derby.drda.timeSlice=0
+derby.drda.startNetworkServer=false
+derby.drda.host=localhost
+derby.drda.traceAll=false
 org.apache.derby.drda.NetworkServerControl shutdown -p 1527 
 Shutdown successful.
 org.apache.derby.drda.NetworkServerControl 

@@ -1359,6 +1359,7 @@ moreData false
 endTest
 //
 DISPLAY "Test for missing PKGNAMCSN on OPNQRY"
+DISPLAY "Also test QRYCLSRLS and MONITOR codepoints which are ignored currently"
 include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
@@ -1382,6 +1383,12 @@ flush
 checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
+startDdm QRYCLSRLS
+writeBytes "0x00" 
+endDdm
+startDdm MONITOR
+writeBytes "00000000" 
+endDdm
 endDdm
 endDss
 flush
@@ -1792,6 +1799,52 @@ endDdm
 endDss
 flush
 checkerror SYNTAXRM 8 20 QRYROWSET
+endTest
+//
+DISPLAY "Test to see OPNQRY returns PRCCNVRM if non-existent RDBNAM specified"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+startDdm QRYROWSET 
+writeInt 1	
+endDdm
+startDdm RDBNAM 	//this is optional
+writeScalarString RDBNAM "non-existent-db   " 
+endDdm
+endDdm
+endDss
+flush
+checkerror PRCCNVRM 8 18
 endTest
 //
 DISPLAY "Test too large value for QRYRFRTBL codepoint on CNTQRY"
@@ -2469,6 +2522,7 @@ endDss
 flush
 checkError SYNTAXRM 8 20 PKGNAMCSN
 endTest
+//
 // Remove this test for now until JCC issue with JCC sending close twice 
 // resolved
 DISPLAY "Test closing an already closed statement"
@@ -2990,5 +3044,60 @@ endDdm
 endDss
 flush
 checkError SYNTAXRM	8 20 PKGNAMCSN
+endTest
+//
+DISPLAY "Test exception is thrown when specifying non-null indicator for both MBCS and SBCS in SQLSTT"
+//This covers DRDAConnThread.agentError method
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// non-null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 0 // non-null indicator
+endDdm
+endDss
+flush
+//Network server throws a DRDAProtocolException
+//It does not send back anything
+endTest
+//
+DISPLAY "Test for missing SQLSTT in EXCSQLSET - PKGNAMCT is ignored"
+include connect.inc
+createDssRequest
+startDdm EXCSQLSET
+startDdm PKGNAMCT
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalarString TYPDEFNAM  QTDSQLASC
+startDdm TYPDEFOVR
+writeScalar2Bytes CCSIDSBC	1208
+writeScalar2Bytes CCSIDMBC	1208
+endDdm
+endDdm
+endDss
+flush
+checkError SYNTAXRM	8 29 TYPDEFNAM
 endTest
 //

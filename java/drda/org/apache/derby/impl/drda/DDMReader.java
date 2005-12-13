@@ -286,17 +286,6 @@ class DDMReader
 	}
 
 	/**
-	 * Return buffer 
-	 *
-	 *
-	 * @return buffer
-	 */
-	protected byte [] getBuffer()
-	{
-		return buffer;
-	}
-
-	/**
 	 * Read DSS header
 	 * DSS Header format is 
 	 * 	2 bytes	- length
@@ -513,13 +502,9 @@ class DDMReader
 	{
 		ensureBLayerDataInBuffer (4, NO_ADJUST_LENGTHS);
 
-		ddmScalarLen =
-			((buffer[pos++] & 0xff) << 8) +
-			((buffer[pos++] & 0xff) << 0);
-
-		int codePoint =
-			((buffer[pos++] & 0xff) << 8) +
-			((buffer[pos++] & 0xff) << 0);
+		ddmScalarLen = readCodePoint();
+		int codePoint = readCodePoint();
+		
 		if (SanityManager.DEBUG)
 			trace("length = "+ ddmScalarLen + " codepoint = " + java.lang.Integer.toHexString(codePoint));
 		// SYNERRCD 0x0D - Object code point index not supported.
