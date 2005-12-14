@@ -54,6 +54,8 @@ import java.io.RandomAccessFile;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 
 /**
 	RAFContainer (short for RandomAccessFileContainer) is a concrete subclass of FileContainer
@@ -93,6 +95,43 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 	private boolean inBackup = false;
 	private boolean inRemove = false;
 
+	/* Fields with references to classes and methods in ReentrantLock
+	 * introduced in Java 1.5. Reflection is used to only use these
+     * interfaces if they exist.
+     * 
+     */
+	private static Class fairLockClass;
+	private static Constructor fairLockConstructor;
+	private static Method lock;
+	private static Method unlock;
+	private static boolean hasJava5FairLocks = false;
+
+	// Use reflection to find the constructor, lock() and unlock() in
+	// java.util.concurrent.locks.ReentrantLock. If the class and its
+	// methods are found, hasJava5FairLocks will be true and fair
+	// locking can be used.
+	static {
+		try {
+			fairLockClass = 
+                Class.forName("java.util.concurrent.locks.ReentrantLock");
+
+			fairLockConstructor = 
+                fairLockClass.getConstructor(new Class[] { Boolean.TYPE });
+
+			lock   = fairLockClass.getMethod("lock",   new Class[0]);
+			unlock = fairLockClass.getMethod("unlock", new Class[0]);
+			hasJava5FairLocks = true;
+		}
+		catch (NoSuchMethodException nsme) {}
+		catch (ClassNotFoundException cnfe) {}
+	}
+
+	/**
+	 * Object of type java.util.concurrent.locks.ReentrantLock. It is
+	 * used to prevent starvation when many threads are reading from
+	 * the same file.
+	 */
+	private Object fairLock;
 
 	/*
 	 * Constructors
@@ -100,6 +139,21 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 	RAFContainer(BaseDataFileFactory factory) {
 		super(factory);
+
+		// If Java 1.5 fair locks are available, construct one.
+		if (hasJava5FairLocks) {
+			try {
+				// construct a lock with fairness set to true
+				fairLock = 
+                    fairLockConstructor.newInstance(
+                        new Object[] { Boolean.TRUE });
+			} catch (Exception e) {
+				if (SanityManager.DEBUG) {
+					SanityManager.THROWASSERT(
+                        "failed constructing ReentrantLock", e);
+				}
+			}
+		}
 	}
 
 	/*
@@ -227,11 +281,39 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 		long pageOffset = pageNumber * pageSize;
 
-		synchronized (this) {
+		// Use Java 1.5 fair locks if they are available.
+		if (hasJava5FairLocks) {
+			try {
+				lock.invoke(fairLock, null);
+			} catch (Exception e) {
+				if (SanityManager.DEBUG) {
+					SanityManager.THROWASSERT(
+                        "failed invoking ReentrantLock.lock()", e);
+				}
+			}
+		}
 
-			fileData.seek(pageOffset);
-
-			fileData.readFully(pageData, 0, pageSize);
+		try {
+			// Starvation might occur at this point if many threads
+			// are waiting for the monitor. This section is therefore
+			// surrounded by calls to ReentrantLock.lock()/unlock() if
+			// we are running Java 1.5 or higher.
+			synchronized (this) {
+				fileData.seek(pageOffset);
+				fileData.readFully(pageData, 0, pageSize);
+			}
+		} finally {
+			// Unlock this section.
+			if (hasJava5FairLocks) {
+				try {
+					unlock.invoke(fairLock, null);
+				} catch (Exception e) {
+					if (SanityManager.DEBUG) {
+						SanityManager.THROWASSERT(
+                            "failed invoking ReentrantLock.unlock()", e);
+					}
+				}
+			}
 		}
 
 		if (dataFactory.databaseEncrypted() &&
