@@ -366,7 +366,7 @@ public class ParameterNode extends ValueNode
         mb.pushThis();
         mb.push(parameterNumber); // arg
 
-        mb.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null, "getParameter",
+        mb.callMethod(VMOpcode.INVOKEVIRTUAL, ClassName.BaseActivation, "getParameter",
                       ClassName.DataValueDescriptor, 1);
 
 		// For some types perform host variable checking
