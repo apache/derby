@@ -1347,15 +1347,17 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
      * every ColumnReference in the predicate is itself a ColumnReference.
 	 *
 	 * This is useful when attempting to push predicates into non-flattenable
-	 * views or derived tables.
+	 * views or derived tables or into unions.
 	 *
-	 * @param select	The underlying SelectNode.
+	 * @param select			The underlying SelectNode.
+	 * @param copyPredicate		Whether to make a copy of the predicate
+	 *							before pushing
 	 *
 	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	void pushExpressionsIntoSelect(SelectNode select)
+	void pushExpressionsIntoSelect(SelectNode select, boolean copyPredicate)
 		throws StandardException
 	{
 		/* Walk list backwards since we can delete while
@@ -1390,7 +1392,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				}
 			}
 
-			if (state)
+			if (state && !copyPredicate)
 			{
 				// keep the counters up to date when removing a predicate
 				if (predicate.isStartKey())
@@ -1406,9 +1408,60 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				predicate.clearScanFlags();
 				// Remove this predicate from the list
 				removeElementAt(index);
-				// Push it into the select
-				select.pushExpressionsIntoSelect(predicate);
 			}
+
+			if (copyPredicate)
+			{
+				// Copy this predicate and push this instead
+				AndNode andNode = predicate.getAndNode();
+
+				// Make sure we are only pushing simple binary relations for now
+				// It should be benificial to push expressions that can be pushed, so they can be applied
+				// closer to the data.
+				if (! (andNode.getLeftOperand() instanceof BinaryRelationalOperatorNode))
+					continue;
+
+				BinaryRelationalOperatorNode opNode = (BinaryRelationalOperatorNode) andNode.getLeftOperand();
+				if(! (opNode.getLeftOperand() instanceof ColumnReference))
+					continue;
+
+				ColumnReference crNode = (ColumnReference) opNode.getLeftOperand();
+				// Remap this crNode to underlying column reference in the select, if possible.
+				ColumnReference newCRNode = select.findColumnReferenceInResult(crNode.columnName);
+				if (newCRNode == null)
+					continue;
+
+				BinaryRelationalOperatorNode newEquals = (BinaryRelationalOperatorNode)
+							getNodeFactory().getNode(
+										C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
+										newCRNode,
+										opNode.getRightOperand(),
+										getContextManager());
+
+				newEquals.bindComparisonOperator();
+
+				ValueNode trueNode = (ValueNode) getNodeFactory().getNode(
+										C_NodeTypes.BOOLEAN_CONSTANT_NODE,
+										Boolean.TRUE,
+										getContextManager());
+				AndNode newAnd = (AndNode) getNodeFactory().getNode(
+													C_NodeTypes.AND_NODE,
+													newEquals,
+													trueNode,
+													getContextManager());
+				newAnd.postBindFixup();
+				JBitSet tableMap = new JBitSet(select.referencedTableMap.size());
+				Predicate newPred = (Predicate) getNodeFactory().getNode(
+												C_NodeTypes.PREDICATE,
+												newAnd,
+												tableMap,
+												getContextManager());
+				predicate = newPred;
+			}
+
+			// Push it into the select
+			if (state)
+ 				select.pushExpressionsIntoSelect(predicate);
 		}		
 	}
 
