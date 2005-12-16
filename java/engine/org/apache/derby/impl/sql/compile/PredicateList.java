@@ -1422,7 +1422,9 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					continue;
 
 				BinaryRelationalOperatorNode opNode = (BinaryRelationalOperatorNode) andNode.getLeftOperand();
-				if(! (opNode.getLeftOperand() instanceof ColumnReference))
+				if (! (opNode.getLeftOperand() instanceof ColumnReference) ||
+				    ! (opNode.getRightOperand() instanceof ConstantNode ||
+					 opNode.getRightOperand() instanceof ParameterNode))
 					continue;
 
 				ColumnReference crNode = (ColumnReference) opNode.getLeftOperand();
