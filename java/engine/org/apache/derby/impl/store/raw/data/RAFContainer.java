@@ -148,6 +148,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                     fairLockConstructor.newInstance(
                         new Object[] { Boolean.TRUE });
 			} catch (Exception e) {
+				// couldn't construct the lock, fall back to old behaviour
+
+				hasJava5FairLocks = false;
 				if (SanityManager.DEBUG) {
 					SanityManager.THROWASSERT(
                         "failed constructing ReentrantLock", e);
@@ -286,6 +289,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 			try {
 				lock.invoke(fairLock, null);
 			} catch (Exception e) {
+				// Something bad happened while trying to lock the
+				// region. Since the locking is not required for
+				// anything other than ensuring fairness, it is ok to
+				// fall back to pre-1.5 behaviour.
+				hasJava5FairLocks = false;
 				if (SanityManager.DEBUG) {
 					SanityManager.THROWASSERT(
                         "failed invoking ReentrantLock.lock()", e);
@@ -308,6 +316,13 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 				try {
 					unlock.invoke(fairLock, null);
 				} catch (Exception e) {
+					// An error occurred while unlocking the
+					// region. The region might still be locked, so
+					// we'd better stop using this kind of
+					// locking. There will be no loss of
+					// functionality, only a possible loss of
+					// fairness.
+					hasJava5FairLocks = false;
 					if (SanityManager.DEBUG) {
 						SanityManager.THROWASSERT(
                             "failed invoking ReentrantLock.unlock()", e);
