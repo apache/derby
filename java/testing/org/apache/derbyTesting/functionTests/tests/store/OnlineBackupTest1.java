@@ -86,11 +86,19 @@ public class OnlineBackupTest1 {
 		dmlThread.start();
 
         // run some DDL create/drop tables in another thread
-        Connection ddlConn = getConnection();
-		DatabaseActions ddlActions = 
+
+
+         Connection ddlConn = getConnection();
+
+         /* Disabling create table operation running parallel to 
+          * backup because of DERBY-750 bug. This block of code
+          * should be uncommented when DERBY-750 is fixed.
+
+         DatabaseActions ddlActions = 
             new DatabaseActions(DatabaseActions.CREATEDROPS, ddlConn);
-		Thread ddlThread = new Thread(ddlActions, "DDL_THREAD");
-		ddlThread.start();
+            Thread ddlThread = new Thread(ddlActions, "DDL_THREAD");
+            ddlThread.start();
+         */
 
 		// sleep for few seconds just to make sure backup thread is actually
 		// gone to a wait state for unlogged actions to commit.
@@ -107,9 +115,9 @@ public class OnlineBackupTest1 {
 		backup.waitForBackupToEnd();
 		backupThread.join();
 		dmlActions.stopActivity();
-		ddlActions.stopActivity();
+		// ddlActions.stopActivity(); -- uncomment this when derby-750 is fixed
 		dmlThread.join();
-		ddlThread.join();
+		// ddlThread.join(); -- uncomment this when derby-750 is fixed
         
         // close the connections.
         conn.close();
