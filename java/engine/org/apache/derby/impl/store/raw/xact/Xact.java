@@ -2318,13 +2318,24 @@ public class Xact extends RawTransaction implements Limit  {
 		postCompleteMode = true;
 	}
 
-	/*
-	 * Try setting the transaction to be in backup blocking state.
-	 */
-	public boolean setBackupBlockingState() {
+    /*
+     * Try setting the transaction to be in backup blocking state.
+     *
+     * @param wait if <tt>true</tt>, waits until the transaction
+     *             can be set into backup blocking state.
+     *
+     * @exception StandardException if interrupted while waiting 
+     *            for backup to complete to set the transaction into
+     *            backup blocking state.
+     */
+    public boolean setBackupBlockingState(boolean wait) 
+        throws StandardException
+    {
 		if (!inBackupBlockingState)
+        {
 			inBackupBlockingState = 
-                xactFactory.canStartBackupBlockingOperation();
+                xactFactory.canStartBackupBlockingOperation(wait);
+        }
 
 		return inBackupBlockingState;
 	}

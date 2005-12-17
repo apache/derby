@@ -329,14 +329,20 @@ public abstract class RawTransaction extends Observable implements Transaction {
 		throws StandardException;
 
 	
-	/*
-	 * Try setting  the transaction to be in backup blocking state.
-	 *
-	 * @return     <tt>true</tt> if the transaction can be set to a 
-	 *             blocking state. 
-	 *             <tt>false</tt> otherwise.
-	 */
-	public abstract boolean setBackupBlockingState();
+    /*
+     * Try setting the transaction to be in backup blocking state.
+     *
+     * @param wait if <tt>true</tt>, waits until the transaction
+     *             can be set into backup blocking state.
+     * @return     <tt>true</tt> if the transaction can be set to a 
+     *             blocking state. 
+     *             <tt>false</tt> otherwise.
+     * @exception StandardException if interrupted while waiting 
+     *            for backup to complete to set the transaction into
+     *            backup blocking state.
+     */
+    public abstract boolean setBackupBlockingState(boolean wait)
+        throws StandardException;
 
 }
 

@@ -31,6 +31,7 @@ import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.access.DatabaseInstant;
+import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 
 import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.WritableStorageFactory;
@@ -74,6 +75,19 @@ class RFResource implements FileResource {
 				throw StandardException.newException(
                         SQLState.FILE_EXISTS, file);
             }
+
+            ContextManager cm = 
+                ContextService.getFactory().getCurrentContextManager();
+
+            Transaction tran = 
+                factory.getRawStoreFactory().findUserTransaction(
+                        cm, AccessFactoryGlobals.USER_TRANS_NAME);
+            
+            // Prevent backup operation when a jar file is being added
+            // by setting the transaction into a backup blocking state.
+            // If backup is already in progress this call will wait 
+            // for the backup to finish .
+            ((RawTransaction)tran).setBackupBlockingState(true);
 
 			StorageFile directory = file.getParentDir();
             if (!directory.exists())
@@ -141,6 +155,12 @@ class RFResource implements FileResource {
 		Transaction tran = 
             factory.getRawStoreFactory().findUserTransaction(
                 cm, AccessFactoryGlobals.USER_TRANS_NAME);
+
+        // Prevent backup operation when a jar file is being removed
+        // by setting the transaction into a backup blocking state.
+        // If backup is already in progress this call will wait 
+        // for the backup to finish.
+        ((RawTransaction)tran).setBackupBlockingState(true);
 
 		tran.logAndDo(new RemoveFileOperation(name, currentGenerationId, purgeOnCommit));
 
@@ -234,10 +254,14 @@ class RemoveFile implements Serviceable
 		return false;
 	}
 
-
-	// @return true, if this work needs to be done on a user thread immediately
+    /**
+     * File deletion is a quick operation and typically releases substantial
+     * amount of space very quickly, this work should be done on the
+     * user thread. 
+     * @return true, this work needs to done on user thread. 
+     */
 	public boolean serviceImmediately()
 	{
-		return false;
+		return true;
 	}	
 }

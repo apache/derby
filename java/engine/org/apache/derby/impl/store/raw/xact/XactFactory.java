@@ -967,24 +967,41 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
     }
 
 
-	/**
-	 * Checks if a backup blocking operation can be started.
-	 *
-	 * @return     <tt>true</tt> if backup blocking operations can be started.
-	 *			   <tt>false</tt> otherwise.
-	 */
-	protected boolean canStartBackupBlockingOperation()
+    /**
+     * Checks if a backup blocking operation can be started.
+     *
+     * @param wait if <tt>true</tt>, waits until a backup blocking 
+     *             operation can be started. 
+     *
+     * @return     <tt>true</tt> if backup blocking operations can be started.
+     *			   <tt>false</tt> otherwise.
+     * @exception StandardException if interrupted while waiting for backup 
+     *             to complete.
+     */
+	protected boolean canStartBackupBlockingOperation(boolean wait)
+        throws StandardException 
 	{
 		synchronized(backupSemaphore) {
-			// do not allow backup blocking operations, if online backup is
-			// is in progress.
-			if (inBackup) {
-				return false;
-			} else {
-				// not in online backup, allow backup blocking operations
-				backupBlockingOperations++;
-				return true;
+            // do not allow backup blocking operations, if online backup is
+            // is in progress.
+			if (inBackup) 
+            {
+                if(wait) {
+                    while(inBackup) {
+                        try {
+                            backupSemaphore.wait();
+                        } catch (InterruptedException ie) {
+                            throw StandardException.interrupt(ie);
+                        }
+                    }
+                }else {
+                    return false;
+                }
 			}
+
+            // not in online backup, allow backup blocking operations
+            backupBlockingOperations++;
+            return true;
 		}
 	}
 

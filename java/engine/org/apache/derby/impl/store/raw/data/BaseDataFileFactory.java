@@ -654,15 +654,15 @@ public final class BaseDataFileFactory
 
 					// block the online backup if the container is being 
 					// opened in unlogged mode, if the backup is already 
-					// running then convert all unlogged opens to a logged ones,
-					// otherwise onlibe backup copy will be inconsistent.
+					// running then convert all unlogged opens to logged ones,
+					// otherwise online backup copy will be inconsistent.
 
 					if (((mode & ContainerHandle.MODE_UNLOGGED) == 
 						 ContainerHandle.MODE_UNLOGGED) || 
 						((mode & ContainerHandle.MODE_CREATE_UNLOGGED) == 
 						 ContainerHandle.MODE_CREATE_UNLOGGED))									   
 					{
-						if(!t.setBackupBlockingState()) {
+						if (!t.setBackupBlockingState(false)) {
 							// when a backup is in progress transaction can not
                             // be set to backup blocking state, so convert 
                             // unlogged opens to logged mode.

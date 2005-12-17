@@ -1,0 +1,40 @@
+Begin Online Backup Test3
+Initial Setup Complete
+Begin Install Jar Test
+ERROR XSRSA: Cannot backup the database when backup blocking unlogged operations are pending. Please commit the transactions with backup blocking operations or use the backup procedure with option to wait for them to complete. 
+Backup-1 Started
+The transaction that was blocking the backup has ended
+Backup-1 Completed
+Backup-2 Started
+Started obtest_customer.jar addition in seperate thread
+The transaction that was blocking the backup has ended
+Backup-2 Completed
+obtest_customer.jar addition is complete
+No of rows in table t1: 5
+No of rows in table customer: 3
+database shutdown properly
+Restored From the Backup
+No of rows in table t1: 5
+No of rows in table customer: 2
+database shutdown properly
+End Of Install Jar Test.
+Begin Remove Jar Test
+ERROR XSRSA: Cannot backup the database when backup blocking unlogged operations are pending. Please commit the transactions with backup blocking operations or use the backup procedure with option to wait for them to complete. 
+Backup-3 Started
+The transaction that was blocking the backup has ended
+Backup-3 Completed
+Backup-4 Started
+Started obtest_customer.jar remove in seperate thread
+The transaction that was blocking the backup has ended
+Backup-4 Completed
+obtest_customer.jar remove is complete
+No of rows in table t1: 8
+No of rows in table customer: 2
+database shutdown properly
+Restored From the Backup
+No of rows in table t1: 7
+No of rows in table customer: 2
+ERROR 42X96: The database class path contains an unknown jar file '"APP"."MATH_ROUTINES"'.
+database shutdown properly
+End Of Remove Jar Test.
+End Online Backup Test3
