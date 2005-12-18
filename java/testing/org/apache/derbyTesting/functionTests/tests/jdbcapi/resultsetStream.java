@@ -379,7 +379,11 @@ public class resultsetStream {
 			ResultSet rs = null;
 			
 			try{
-				st = conn.prepareStatement("select text_data from t3");
+				st = conn.prepareStatement("select " + 
+							   "text_data as text_data_col1," + 
+							   "text_data as text_data_col2 " + 
+							   "from " + 
+							   "t3");
 				rs = st.executeQuery();
 				
 				while(rs.next()){
@@ -435,7 +439,7 @@ public class resultsetStream {
 			Reader reader = null;
 			
 			try{
-				reader = rs.getCharacterStream(1);
+				reader = rs.getCharacterStream(2);
 
 				for(int c = reader.read();
 				    c > -1;

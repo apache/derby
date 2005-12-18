@@ -18,4 +18,4 @@ jdbcapi/SetQueryTimeoutTest.java
 jdbcapi/prepStmtNull.java
 jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java
-
+jdbcapi/Stream.java

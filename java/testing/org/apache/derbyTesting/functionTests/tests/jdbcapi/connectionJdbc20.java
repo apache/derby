@@ -77,7 +77,17 @@ public class connectionJdbc20{
             load_data(connreturn);
             
 			// read the data   of each type with all the possible functions
-			ResultSet rs = stmt.executeQuery("select * from tab1");
+			ResultSet rs = stmt.executeQuery("select " + 
+							 "c1," + 
+							 "c2," + 
+							 "c3," + 
+							 "c4," + 
+							 "c5," + 
+							 "c6," + 
+							 "c1 as c1_spare," + 
+							 "c2 as c2_spare,"  +
+							 "c3 as c3_spare "  +
+							 "from tab1");
             int loop = 0;
             while(loop < 2 )
             {
@@ -87,11 +97,13 @@ public class connectionJdbc20{
                     {
                         get_using_object(rs, i);
                         get_using_string(rs, i);
-						get_using_ascii_stream(rs, i);
+			
+			get_using_ascii_stream(rs, i);
+
                         if(i < 4 ) // only c1 , c2, c3
                         {
-                            get_using_binary_stream(rs, i);
-                            get_using_bytes(rs, i);
+                            get_using_binary_stream(rs, i + 6);
+                            get_using_bytes(rs, i + 6);
                         }
                     } 
                 }
@@ -103,11 +115,21 @@ public class connectionJdbc20{
                     System.out.println("Got Different Statement Object");
                 
                 rs.close();
-			    rs = stmt.executeQuery("select * from tab1");
-                loop++;
+		rs = stmt.executeQuery("select " + 
+				       "c1," + 
+				       "c2," + 
+				       "c3," + 
+				       "c4," + 
+				       "c5," + 
+				       "c6," + 
+				       "c1 as c1_spare," + 
+				       "c2 as c2_spare,"  +
+				       "c3 as c3_spare "  +
+				       "from tab1");
+		loop++;
             }
 
-			stmt.close();
+	    stmt.close();
 
             // Try to get the connection object thro database meta data
             DatabaseMetaData dbmeta = conn.getMetaData();

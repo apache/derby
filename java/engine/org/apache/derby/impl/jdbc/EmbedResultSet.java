@@ -156,6 +156,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 
     private int fetchDirection;
     private int fetchSize;
+    
+    private boolean[] streamUsedFlags;
 
 	/**
 	 * This class provides the glue between the Cloudscape
@@ -205,6 +207,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 		//initialize arrays related to updateRow implementation
 		columnGotUpdated = new boolean[getMetaData().getColumnCount()];
 		copyOfDatabaseRow = new DataValueDescriptor[columnGotUpdated.length];
+		
+		initStreamUseFlags(getMetaData().getColumnCount());
 
         // assign the max rows and maxfiled size limit for this result set
         if (stmt != null)
@@ -441,7 +445,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 		    }
 
 			rowData = onRow ? currentRow.getRowArray() : null;
-
+			
+			unuseStreams();
+			
 			return onRow;
 			} finally {
 			    restoreContextStack();
@@ -1043,6 +1049,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 		boolean pushStack = false;
 		try {
 
+		    useStream(columnIndex);
+
 			DataValueDescriptor dvd = getColumn(columnIndex);
 
 			if (wasNull = dvd.isNull()) { return null; }
@@ -1150,6 +1158,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		boolean pushStack = false;
 		try {
+		    
+		    useStream(columnIndex);
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
 
@@ -3965,5 +3975,42 @@ public abstract class EmbedResultSet extends ConnectionChild
 		return newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH,
 			resultDescription.getColumnDescriptor(column).getType().getTypeId().getSQLTypeName(), targetType);
 	}
+    
+    
+    private void initStreamUseFlags(int numOfCol){
+	
+	streamUsedFlags = new boolean[numOfCol];
+	
+	// Next code is not neccesary because initial value is false, which is default initial value for boolean.
+	/*
+	  clearStreamUsedFlags();
+	*/
+    }
+    
+    
+    void useStream(int columnIndex) throws SQLException {
+	
+	if(streamUsedFlags[columnIndex - 1]){
+	    throw newSQLException(SQLState.LANG_STREAM_RETRIEVED_ALREADY);
+	}
+
+	streamUsedFlags[columnIndex - 1] = true;
+
+    }
+
+
+    private void unuseStreams(){
+	
+	for(int i = 0;
+	    i < streamUsedFlags.length;
+	    i ++){
+	    
+	    streamUsedFlags[i] = false;
+	    
+	}
+	
+    }
+    
+    
 }
 

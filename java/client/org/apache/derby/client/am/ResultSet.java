@@ -188,7 +188,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
     // Keep maxRows in the ResultSet, so that changes to maxRow in the statement
     // do not affect the resultSet after it has been created
     private int maxRows_;
-
+    
+    private boolean[] streamUsedFlags_;
+    
     //---------------------constructors/finalizer---------------------------------
 
     protected ResultSet(Agent agent,
@@ -262,6 +264,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // discard all previous updates when moving the cursor
         resetUpdatedColumns();
+	
+	unuseStreams();
 
         // for TYPE_FORWARD_ONLY ResultSet, just call cursor.next()
         if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) {
@@ -919,7 +923,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBinaryStream", column);
         }
+	
         checkGetterPreconditions(column);
+	useStream(column);
+
         java.io.InputStream result = null;
         if (wasNonNullSensitiveUpdate(column)) {
             result = new java.io.ByteArrayInputStream((byte[]) agent_.crossConverters_.setObject(java.sql.Types.BINARY, updatedColumns_[column - 1]));
@@ -941,7 +948,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getAsciiStream", column);
         }
+	
         checkGetterPreconditions(column);
+	useStream(column);
+
         java.io.InputStream result = null;
         if (wasNonNullSensitiveUpdate(column)) {
 		
@@ -965,7 +975,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceDeprecatedEntry(this, "getUnicodeStream", column);
         }
+	
         checkGetterPreconditions(column);
+	useStream(column);
+	
         java.io.InputStream result = null;
         if (wasNonNullSensitiveUpdate(column)) {
             try {
@@ -993,7 +1006,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getCharacterStream", column);
         }
+	
         checkGetterPreconditions(column);
+	useStream(column);
+	
         java.io.Reader result = null;
         if (wasNonNullSensitiveUpdate(column)) {
             result = new java.io.StringReader
@@ -1571,7 +1587,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private void beforeFirstX() throws SqlException {
-        resetRowsetFlags();
+        
+	resetRowsetFlags();
+	unuseStreams();
 
         // this method has no effect if the result set has no rows.
         // only send cntqry to position the cursor before first if
@@ -1602,7 +1620,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private void afterLastX() throws SqlException {
         resetRowsetFlags();
-
+	unuseStreams();
+	
         // this method has no effect if the result set has no rows.
         // only send cntqry to position the cursor after last if
         // resultset contains rows and it is not already after last, or
@@ -1642,6 +1661,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         resetUpdatedColumns();
 
         resetRowsetFlags();
+	unuseStreams();
 
         // if first row is not in the current rowset, fetch the first rowset from the server.
         // rowIsInCurrentRowset with orientation first will always return false for dynamic cursors.
@@ -1687,6 +1707,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         resetUpdatedColumns();
 
         resetRowsetFlags();
+	unuseStreams();
 
         // only get the rowCount for static cursors.
         if (rowCountIsUnknown()) {
@@ -1785,6 +1806,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         resetUpdatedColumns();
 
         resetRowsetFlags();
+	unuseStreams();
 
         if (maxRows_ > 0) {
             // if "row" is positive and > maxRows, fetch afterLast
@@ -1857,6 +1879,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
+	
+	unuseStreams();
 
         // this method may not be called when the cursor on the insert row
         if (isOnInsertRow_) {
@@ -1970,6 +1994,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
+	
+	unuseStreams();
 
         isBeforeFirst_ = false;
         isFirst_ = false;
@@ -2617,10 +2643,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     "object has a concurrency of CONCUR_READ_ONLY.");
         }
 
+	
         // this method does nothing if ResultSet is TYPE_SCROLL_INSENSITIVE
         if (resultSetType_ == java.sql.ResultSet.TYPE_SCROLL_SENSITIVE) {
             isValidCursorPosition_ = getRefreshRowset();
             cancelRowUpdates();
+	    
+	    unuseStreams();
+	    
         }
     }
 
@@ -4034,6 +4064,36 @@ public abstract class ResultSet implements java.sql.ResultSet,
 			
 		}
 	}
+    
+    
+    void useStream(int columnIndex) throws SqlException {
 	
+	if(streamUsedFlags_[columnIndex - 1]){
+	    throw new SqlException(agent_.logWriter_,
+				   "Stream of column value in result cannot be retrieved twice");
+	}
+
+	streamUsedFlags_[columnIndex - 1] = true;
+
+    }
+
+
+    private void unuseStreams(){
 	
+	if(streamUsedFlags_ == null){
+	    streamUsedFlags_ = new boolean[ resultSetMetaData_.columns_ ];
+	    return;
+	}
+
+	for(int i = 0;
+	    i < streamUsedFlags_.length;
+	    i ++){
+	    
+	    streamUsedFlags_[i] = false;
+	    
+	}
+	
+    }
+    
+    
 }

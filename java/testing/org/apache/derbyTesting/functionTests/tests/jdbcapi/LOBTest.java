@@ -354,12 +354,38 @@ class LOBTester {
     public void testGetters() throws SQLException {
         for(int i=0; i<columns; i++) {
             System.out.println("\n\n=== Columntype "+colTypes[i]);
-            String s = "select "+colNames[i]+" from "+table;
+	    
+            String s = 
+		"select "+
+		colNames[i] + " as " + colNames[i] + "_1, " +
+		colNames[i] + " as " + colNames[i] + "_2, " +
+		colNames[i] + " as " + colNames[i] + "_3, " +
+		colNames[i] + " as " + colNames[i] + "_4, " +
+		colNames[i] + " as " + colNames[i] + "_5, " +
+		colNames[i] + " as " + colNames[i] + "_6, " +
+		colNames[i] + " as " + colNames[i] + "_7, " +
+		colNames[i] + " as " + colNames[i] + "_8, " +
+		colNames[i] + " as " + colNames[i] + "_9, " +
+		colNames[i] + " as " + colNames[i] + "_10, " +
+		colNames[i] + " as " + colNames[i] + "_11, " +
+		colNames[i] + " as " + colNames[i] + "_12, " +
+		colNames[i] + " as " + colNames[i] + "_13, " +
+		colNames[i] + " as " + colNames[i] + "_14, " +
+		colNames[i] + " as " + colNames[i] + "_15, " +
+		colNames[i] + " as " + colNames[i] + "_16, " +
+		colNames[i] + " as " + colNames[i] + "_17, " +
+		colNames[i] + " as " + colNames[i] + "_18, " +
+		colNames[i] + " as " + colNames[i] + "_19, " +
+		colNames[i] + " as " + colNames[i] + "_20, " +
+		colNames[i] + " as " + colNames[i] + "_21 " +
+		"from "+
+		table;
+	    
             ResultSet rs = X(s);
             rs.next(); // goto first
             int getno = 0;
             String r;
-            while(null!=(r = getter(rs, getno, 1))) {
+            while(null!=(r = getter(rs, getno, getno + 1 ))) {
                 System.out.println("\t"+i+" "+r);
                 getno++;
             }
