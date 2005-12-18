@@ -98,6 +98,8 @@ create view test.view0 as select all a,b from test.table1 union all select a,b f
 create view test.view1(a,b) as select all a,b from test.table1 union all select a,b from test.table2
 			union all select 1,1 from test.table1;
  
+create view test.view2(c,d) as select all a+1,b+1 from test.table1 union all select a,b from test.table2; 
+
 -- Following Selects using the tables directly would use index
 CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1); 
 select a from test.table1 where b=25; 
@@ -109,8 +111,15 @@ VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 select a from test.view0 where b=25; 
 VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS(); 
 
+-- Can't use index for the following
+select a from test.view0 where b=25+a;
+VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS(); 
+
 -- This select should use index for first two selects, table scan for the third
 select a from test.view1 where b=25; 
+VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS(); 
+
+select d from test.view2 where d=25; 
 VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS(); 
 
 CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0); 
