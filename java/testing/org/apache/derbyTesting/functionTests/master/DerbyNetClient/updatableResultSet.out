@@ -127,8 +127,8 @@ Since after deleteRow(), in embedded mode and Network Server mode using Derby Ne
 SQL State : null
 Got expected exception Invalid operation to read at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
-SQL State : 24000
-Got expected exception Invalid cursor state - no current row.
+SQL State : XCL08
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
 Positive Test1b - request updatable resultset for forward only type resultset
@@ -192,8 +192,8 @@ Since after deleteRow(), ResultSet is positioned before the next row, getXXX wil
 SQL State : null
 Got expected exception Invalid operation to read at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
-SQL State : 24000
-Got expected exception Invalid cursor state - no current row.
+SQL State : XCL08
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
 Positive Test3b - use prepared statement with concur updatable status to test updateXXX
@@ -223,8 +223,8 @@ Since after deleteRow(), ResultSet is positioned before the next row, getXXX wil
 SQL State : null
 Got expected exception Invalid operation to read at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
-SQL State : 24000
-Got expected exception Invalid cursor state - no current row.
+SQL State : XCL08
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
 Positive Test5 - donot have to select primary key to get an updatable resultset
@@ -2896,4 +2896,41 @@ Positive Test33 - try to update a table from another schema
 	 ------ ------ ------
 	{1,1,2.2}
 	{1,1,3.3}
+Positive Test34 - in autocommit mode, check that updateRow and deleteRow does not commit
+  Contents before changes to first row in RS:
+	 C1,C2
+	 -- --
+	{1,aa                  }
+	{2,bb                  }
+	{3,cc                  }
+  Make sure the contents of table are unchanged:
+	 C1,C2
+	 -- --
+	{1,aa                  }
+	{2,bb                  }
+	{3,cc                  }
+  Make sure the contents of table are unchanged:
+	 C1,C2
+	 -- --
+	{1,aa                  }
+	{2,bb                  }
+	{3,cc                  }
+  Contents before changes to last row in RS:
+	 C1,C2
+	 -- --
+	{1,aa                  }
+	{2,bb                  }
+	{3,cc                  }
+  Make sure the contents of table are unchanged:
+	 C1,C2
+	 -- --
+	{1,aa                  }
+	{2,bb                  }
+	{3,cc                  }
+  Make sure the contents of table are unchanged:
+	 C1,C2
+	 -- --
+	{1,aa                  }
+	{2,bb                  }
+	{3,cc                  }
 Finished testing updateable resultsets

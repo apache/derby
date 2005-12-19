@@ -2377,6 +2377,70 @@ public class updatableResultSet {
 			System.out.println("  contents of table t1 from schema s2 should have changed");
 			dumpRS(stmt.executeQuery("select * from s2.t1"));
 
+			System.out.println("Positive Test34 - in autocommit mode, check that updateRow and deleteRow does not commit");
+			conn.setAutoCommit(true);
+
+			// First try deleteRow and updateRow on *first* row of result set
+			reloadData();
+			System.out.println("  Contents before changes to first row in RS:");
+			dumpRS(stmt.executeQuery("select * from t1"));
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
+			rs.next();
+			rs.deleteRow(); 
+			conn.rollback();
+			rs.close();
+			System.out.println("  Make sure the contents of table are unchanged:");
+			dumpRS(stmt.executeQuery("select * from t1"));			
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
+			rs.next();
+			rs.updateInt(1,-rs.getInt(1));
+			rs.updateRow();
+			conn.rollback();
+			rs.close();
+			System.out.println("  Make sure the contents of table are unchanged:");
+			dumpRS(stmt.executeQuery("select * from t1"));			
+
+			// Now try the same on the *last* row in the result set
+			reloadData();
+			stmt = conn.createStatement();
+		        rs = stmt.executeQuery("SELECT COUNT(*) FROM t1");
+			rs.next();
+			int count = rs.getInt(1);
+			rs.close();
+			
+			System.out.println("  Contents before changes to last row in RS:");
+			dumpRS(stmt.executeQuery("select * from t1"));
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
+			for (int j = 0; j < count; j++) {
+			   rs.next();
+			}
+			rs.deleteRow(); 
+			conn.rollback();
+			rs.close();
+			System.out.println("  Make sure the contents of table are unchanged:");
+			dumpRS(stmt.executeQuery("select * from t1"));			
+			
+			stmt = conn.createStatement();
+		        rs = stmt.executeQuery("SELECT COUNT(*) FROM t1");
+			rs.next();
+			count = rs.getInt(1);
+			rs.close();
+
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
+			for (int j = 0; j < count; j++) {
+			   rs.next();
+			}
+			rs.updateInt(1,-rs.getInt(1));
+			rs.updateRow();
+			conn.rollback();
+			rs.close();
+			System.out.println("  Make sure the contents of table are unchanged:");
+			dumpRS(stmt.executeQuery("select * from t1"));	
+
 			teardown();
 
 			conn.close();

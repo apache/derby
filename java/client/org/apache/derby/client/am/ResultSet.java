@@ -2817,11 +2817,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     preparedStatementForUpdate_.section_);
         }
 
-        boolean chainAutoCommit = connection_.willAutoCommitGenerateFlow();
-        writeUpdateRow(chainAutoCommit);
-        if (chainAutoCommit) {
-            connection_.writeCommit();
-        }
+        writeUpdateRow(false);
 
         agent_.flow(statement_);
 
@@ -2842,9 +2838,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
         readUpdateRow();
 
-        if (chainAutoCommit) {
-            connection_.readCommit();
-        }
         agent_.endReadChain();
     }
 
@@ -2905,9 +2898,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
 
         writeDeleteRow();
-        if (connection_.autoCommit_) {
-            connection_.writeAutoCommit();
-        }
 
         agent_.flow(statement_);
 
@@ -2927,9 +2917,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             preparedStatementForDelete_.materialPreparedStatement_.readPrepare_();
         }
         readDeleteRow();
-        if (connection_.autoCommit_) {
-            connection_.readAutoCommit();
-        }
+
         agent_.endReadChain();
     }
 
