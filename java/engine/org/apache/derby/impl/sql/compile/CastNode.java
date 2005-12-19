@@ -388,7 +388,7 @@ public class CastNode extends ValueNode
 		** If it is a java cast, do some work to make sure
 		** the classes are ok and that they are compatible
 		*/
-		if (! destCTI.systemBuiltIn())
+		if (destCTI.userType())
 		{
 			String className = ((TypeId) dataTypeServices.getTypeId()).getCorrespondingJavaTypeName();
 
@@ -1041,7 +1041,6 @@ public class CastNode extends ValueNode
 		*/
 		if (sourceCTI.userType())
 		{
-
 			String destinationType = getTypeId().getCorrespondingJavaTypeName();
 
 			// at this point method instance and cast result are on the stack

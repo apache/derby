@@ -996,7 +996,7 @@ public abstract class QueryTreeNode implements Visitable
 										typeId,
 										cm);
 			}
-			else if ( ! typeId.builtIn())
+			else if (typeId.userType())
 			{
 				constantNode = nf.getNode(
 										C_NodeTypes.USERTYPE_CONSTANT_NODE,

@@ -355,7 +355,7 @@ public class UnaryOperatorNode extends ValueNode
 		 * tree to a built-in type.
 		 */
 		if (! (operand instanceof UntypedNullConstantNode) &&
-			! operand.getTypeId().systemBuiltIn() &&
+			operand.getTypeId().userType() &&
 			! (this instanceof IsNullNode))
 		{
 			operand = operand.genSQLJavaSQLTree();

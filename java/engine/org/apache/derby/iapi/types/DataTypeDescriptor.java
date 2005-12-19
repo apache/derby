@@ -483,7 +483,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		 * types are system built-in types and the other if at least 1 is
 		 * a user type. (typePrecedence is meaningless for user types.)
 		 */
-		if (thisType.systemBuiltIn() && otherType.systemBuiltIn())
+		if (!thisType.userType() && !otherType.userType())
 		{
 			TypeId  higherTypeId;
 			TypeId  lowerTypeId;

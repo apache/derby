@@ -161,7 +161,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 		{
 			ValueNode valueNode = (ValueNode) elementAt(index);
 			
-			if (! valueNode.getTypeId().systemBuiltIn())
+			if (valueNode.getTypeId().userType())
 			{
 				setElementAt(valueNode.genSQLJavaSQLTree(), index);
 			}

@@ -912,7 +912,7 @@ public abstract class ValueNode extends QueryTreeNode
 		/* If the where clause is not a built-in type, then generate a bound 
 		 * conversion tree to a built-in type.
 		 */
-		if (! whereTypeId.systemBuiltIn())
+		if (whereTypeId.userType())
 		{
 			whereClause = whereClause.genSQLJavaSQLTree();
 			whereTypeId = whereClause.getTypeId();

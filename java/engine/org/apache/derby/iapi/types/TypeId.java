@@ -639,7 +639,6 @@ public final class TypeId implements Formatable
 
         /* Set in setTypeIdSpecificInstanceVariables() as needed */
         private boolean                 classNameWasDelimitedIdentifier;
-        private boolean                 isBuiltIn = true;
         private boolean                 isBitTypeId;
         private boolean                 isLOBTypeId;
         private boolean                 isBooleanTypeId;
@@ -898,7 +897,6 @@ public final class TypeId implements Formatable
                                         typePrecedence = USER_PRECEDENCE;
                                 }
                                 maxMaxWidth = -1;
-                                isBuiltIn = false;
                                 isUserDefinedTypeId = true;
                                 break;
 
@@ -986,23 +984,6 @@ public final class TypeId implements Formatable
         public String   getSQLTypeName()
         {
                 return baseTypeId.getSQLTypeName();
-        }
-
-        /**
-         * Tell whether this is a built-in type.
-         * NOTE: There are 3 "classes" of types:
-         *                      built-in                - system provided types which are implemented internally
-         *                                                        (int, smallint, etc.)
-         *                      system built-in - system provided types, independent of implementation
-         *                                                        (date, time, etc.)
-         *                      user types              - types implemented outside of the system
-         *                                                        (java.lang.Integer, asdf.asdf.asdf, etc.)
-         *
-         * @return      true for built-in types, false for user-defined types.
-         */
-        public final boolean systemBuiltIn()
-        {
-                return baseTypeId.systemBuiltIn();
         }
 
         /**
@@ -1206,23 +1187,6 @@ public final class TypeId implements Formatable
         public boolean isXMLTypeId()
         {
                return (formatId == StoredFormatIds.XML_TYPE_ID);
-        }
-
-        /**
-         * Tell whether this is a built-in type.
-         * NOTE: There are 3 "classes" of types:
-         *                      built-in                - system provided types which are implemented internally
-         *                                                        (int, smallint, etc.)
-         *                      system built-in - system provided types, independent of implementation
-         *                                                        (date, time, etc.)
-         *                      user types              - types implemented outside of the system
-         *                                                        (java.lang.Integer, asdf.asdf.asdf, etc.)
-         *
-         * @return      true for built-in types, false for user-defined types.
-         */
-        public boolean builtIn()
-        {
-                return isBuiltIn;
         }
 
         /**

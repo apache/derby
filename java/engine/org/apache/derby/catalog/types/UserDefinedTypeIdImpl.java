@@ -72,12 +72,6 @@ public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
 		return className;
 	}
 
-	/** Does this type id represent a system built-in type? */
-	public boolean systemBuiltIn()
-	{
-		return false;
-	}
-
 	/** Does this type id represent a user type? */
 	public boolean userType()
 	{

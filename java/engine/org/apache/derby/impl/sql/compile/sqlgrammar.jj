@@ -8944,7 +8944,7 @@ castSpecification() throws StandardException :
 		/* We need to generate a SQL->Java conversion tree above us if
 		 * the dataTypeCast is a user type.
 		 */
-		if (! dts.getTypeId().builtIn())
+		if (dts.getTypeId().userType())
 		{
 			treeTop = (ValueNode) nodeFactory.getNode(
 							C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,

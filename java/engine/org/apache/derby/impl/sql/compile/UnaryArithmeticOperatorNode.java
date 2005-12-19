@@ -220,7 +220,7 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	 	 * If the operand is not a build-in type, generate a bound conversion
 		 * tree to build-in types.
 		 */
-		if( ! operandType.systemBuiltIn() )
+		if (operandType.userType() )
 		{
 			operand = operand.genSQLJavaSQLTree();
 		}

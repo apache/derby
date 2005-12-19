@@ -175,7 +175,7 @@ abstract class BaseTypeCompiler implements TypeCompiler
 		** If the other type is user-defined, use the java types to determine
 		** assignability.
 		*/
-		if ( ! otherType.builtIn())
+		if (otherType.userType())
 		{
 			return cf.getClassInspector().assignableTo(
 					thisType.getCorrespondingJavaTypeName(),

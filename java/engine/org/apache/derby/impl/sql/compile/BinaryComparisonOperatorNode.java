@@ -438,7 +438,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		/* If I have Java types, I need only add java->sql->java if the types
 		 * are not comparable 
 		 */
-		if (!leftTypeId.systemBuiltIn())
+		if (leftTypeId.userType())
 		{
 			if (leftOperand.getTypeCompiler().comparable(leftTypeId, false,
 														   getClassFactory()))
@@ -449,7 +449,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 
 		TypeId rightTypeId = rightOperand.getTypeId();
 
-		if (!rightTypeId.systemBuiltIn())
+		if (rightTypeId.userType())
 		{
 			if (rightOperand.getTypeCompiler().comparable(rightTypeId, false,
 															getClassFactory()))

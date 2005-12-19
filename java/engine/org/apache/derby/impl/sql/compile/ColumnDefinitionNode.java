@@ -285,7 +285,7 @@ public class ColumnDefinitionNode extends TableElementNode
 		String			columnTypeName;
 
 		/* Built-in types need no checking */
-		if (dataTypeServices.getTypeId().builtIn())
+		if (!dataTypeServices.getTypeId().userType())
 			return;
 
 		ClassInspector classInspector = getClassFactory().getClassInspector();

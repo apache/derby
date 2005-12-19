@@ -894,7 +894,7 @@ public class TernaryOperatorNode extends ValueNode
 		/* If the receiver is not a built-in type, then generate a bound conversion
 		 * tree to a built-in type.
 		 */
-		if (! receiver.getTypeId().systemBuiltIn())
+		if (receiver.getTypeId().userType())
 		{
 			receiver = receiver.genSQLJavaSQLTree();
 		}
@@ -902,7 +902,7 @@ public class TernaryOperatorNode extends ValueNode
 		/* If the left operand is not a built-in type, then generate a bound conversion
 		 * tree to a built-in type.
 		 */
-		if (! leftOperand.getTypeId().systemBuiltIn())
+		if (leftOperand.getTypeId().userType())
 		{
 			leftOperand = leftOperand.genSQLJavaSQLTree();
 		}
@@ -912,7 +912,7 @@ public class TernaryOperatorNode extends ValueNode
 		 */
 		if (rightOperand != null)
 		{
-			if (! rightOperand.getTypeId().systemBuiltIn())
+			if (rightOperand.getTypeId().userType())
 			{
 				rightOperand = rightOperand.genSQLJavaSQLTree();
 			}

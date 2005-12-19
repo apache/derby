@@ -415,11 +415,11 @@ public class BinaryOperatorNode extends ValueNode
 	{
 		TypeId leftTypeId = leftOperand.getTypeId();
 		
-		if (!(leftTypeId.systemBuiltIn()))
+		if (leftTypeId.userType())
 			leftOperand = leftOperand.genSQLJavaSQLTree();
 
 		TypeId rightTypeId = rightOperand.getTypeId();
-		if (!(rightTypeId.systemBuiltIn()))
+		if (rightTypeId.userType())
 			rightOperand = rightOperand.genSQLJavaSQLTree();
 
 		return this;

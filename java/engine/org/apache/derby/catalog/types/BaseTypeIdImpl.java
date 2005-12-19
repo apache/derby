@@ -69,10 +69,10 @@ public class BaseTypeIdImpl implements Formatable
     **
     ********************************************************/
 
-    protected String        SQLTypeName;
-    protected int           JDBCTypeId;
-    protected int           formatId;
-    protected int           wrapperTypeFormatId;
+    String        SQLTypeName;
+    int           JDBCTypeId;
+    int           formatId;
+    int           wrapperTypeFormatId;
 
     /**
      * niladic constructor. Needed for Formatable interface to work.
@@ -126,12 +126,6 @@ public class BaseTypeIdImpl implements Formatable
     public int getJDBCTypeId()
     {
         return JDBCTypeId;
-    }
-
-    /** Does this type id represent a system built-in type? */
-    public boolean systemBuiltIn()
-    {
-        return true;
     }
 
     /**

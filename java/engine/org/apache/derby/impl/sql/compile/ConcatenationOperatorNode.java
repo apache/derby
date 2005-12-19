@@ -189,7 +189,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 		/* If the left operand is not a built-in type, then generate a bound conversion
 		 * tree to a built-in type.
 		 */
-		if (! leftOperand.getTypeId().systemBuiltIn())
+		if (leftOperand.getTypeId().userType())
 		{
 			leftOperand = leftOperand.genSQLJavaSQLTree();
 		}
@@ -197,7 +197,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 		/* If the right operand is not a built-in type, then generate a bound conversion
 		 * tree to a built-in type.
 		 */
-		if (! rightOperand.getTypeId().systemBuiltIn())
+		if (rightOperand.getTypeId().userType())
 		{
 			rightOperand = rightOperand.genSQLJavaSQLTree();
 		}

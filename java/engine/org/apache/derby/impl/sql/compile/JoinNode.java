@@ -926,7 +926,7 @@ public class JoinNode extends TableOperatorNode
 			/* If the where clause is not a built-in type, then generate a bound 
 			 * conversion tree to a built-in type.
 			 */
-			if (! joinTypeId.systemBuiltIn())
+			if (joinTypeId.userType())
 			{
 				joinClause = joinClause.genSQLJavaSQLTree();
 			}

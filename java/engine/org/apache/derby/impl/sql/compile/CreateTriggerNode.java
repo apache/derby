@@ -483,7 +483,7 @@ public class CreateTriggerNode extends CreateStatementNode
 				newText.append(originalActionText.substring(start));
 			}
 			actionText = newText.toString();
-			actionNode = (StatementNode)reparseTriggerText(actionText);
+			actionNode = (StatementNode)reparseTriggerText();
 		}
 
 		return regenNode;
@@ -537,7 +537,7 @@ public class CreateTriggerNode extends CreateStatementNode
 	/*
 	** Parse the text and return the tree.
 	*/
-	private QueryTreeNode reparseTriggerText(String text) throws StandardException
+	private QueryTreeNode reparseTriggerText() throws StandardException
 	{
 		/*
 		** Get a new compiler context, so the parsing of the text
@@ -549,7 +549,7 @@ public class CreateTriggerNode extends CreateStatementNode
 
 		try
 		{
-			return QueryTreeNode.parseQueryText(newCC, text, (Object[])null, lcc);
+			return QueryTreeNode.parseQueryText(newCC, actionText, (Object[])null, lcc);
 		}
 
 		finally
@@ -609,9 +609,9 @@ public class CreateTriggerNode extends CreateStatementNode
 		** for user types, so call getSQLTypeName in that
 		** case.
 		*/
-		methodCall.append((typeId.systemBuiltIn() ? 
-					dts.getSQLstring() :
-					typeId.getSQLTypeName()) + ") ");
+		methodCall.append(
+		  (typeId.userType() ? typeId.getSQLTypeName() : dts.getSQLstring())
+				 + ") ");
 
 		return methodCall.toString();
 	}

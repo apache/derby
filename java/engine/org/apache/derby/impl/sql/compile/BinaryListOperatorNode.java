@@ -191,7 +191,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 		/* If the left operand is not a built-in type, then generate a conversion
 		 * tree to a built-in type.
 		 */
-		if (! leftOperand.getTypeId().systemBuiltIn())
+		if (leftOperand.getTypeId().userType())
 		{
 			leftOperand = leftOperand.genSQLJavaSQLTree();
 		}
