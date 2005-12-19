@@ -877,15 +877,12 @@ public abstract class GenericScanController
         scan_position.current_rh = startRecordHandle;
     }
 
-    protected void setRowLocationArray(
+    protected abstract void setRowLocationArray(
     RowLocation[]   rowloc_array,
     int             index,
     RowPosition     pos)
         throws StandardException
-    {
-        throw(StandardException.newException(
-                SQLState.HEAP_UNIMPLEMENTED_FEATURE));
-    }
+        ;
 
     /**************************************************************************
      * abstract protected Methods of This class:

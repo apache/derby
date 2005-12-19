@@ -51,7 +51,7 @@ import java.util.Properties;
 /**
 **/
 
-public abstract class GenericController 
+abstract class GenericController 
 {
     /**************************************************************************
      * Fields of the class
