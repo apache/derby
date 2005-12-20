@@ -215,6 +215,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
 
   //open the input data file for reading
   private void realOpenFile() throws Exception {
+	  InputStream inputStream;
     try {
       try {
         URL url = new URL(inputFileName);
@@ -222,11 +223,10 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
            inputFileName = url.getFile(); //seems like you can't do openstream on file
            throw new MalformedURLException(); //so, get the filename from url and do it ususal way
         }
-        InputStream inputStream =  url.openStream();
-        bufferedReader = new BufferedReader(new InputStreamReader(inputStream, dataCodeset));
+        inputStream =  url.openStream();
       } catch (MalformedURLException ex) {
-        InputStreamReader inputFileStreamReader = new InputStreamReader(new FileInputStream(inputFileName), dataCodeset);
-        bufferedReader = new BufferedReader(inputFileStreamReader, 32*1024);
+        inputStream = new FileInputStream(inputFileName);
+        
       }
     } catch (FileNotFoundException ex) {
       throw LoadError.dataFileNotFound(inputFileName);
@@ -237,6 +237,9 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
 
 		throw sqle;
 	}
+    java.io.Reader rd = dataCodeset == null ?
+    		new InputStreamReader(inputStream) : new InputStreamReader(inputStream, dataCodeset);    
+    bufferedReader = new BufferedReader(rd, 32*1024);
     streamOpenForReading = true;
   }
 

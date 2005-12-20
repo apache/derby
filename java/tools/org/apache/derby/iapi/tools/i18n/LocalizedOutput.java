@@ -30,7 +30,7 @@ public class LocalizedOutput extends PrintWriter {
 		super(new OutputStreamWriter(o), true);
 		out = o;
 	}
-	public LocalizedOutput(OutputStream o, String enc) throws UnsupportedEncodingException {
+	LocalizedOutput(OutputStream o, String enc) throws UnsupportedEncodingException {
 		super(new OutputStreamWriter(o, enc), true);
 		out = o;
 	}
