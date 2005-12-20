@@ -294,47 +294,6 @@ public class SelectNode extends ResultSetNode
 	}
 
 	/**
-	 * Find colName in the result columns and return underlying columnReference.
-	 * Note that this function returns null if there are more than one FromTable
-	 * for this SelectNode and the columnReference needs to be directly under
-	 * the resultColumn. So having an expression under the resultSet would cause
-	 * returning null.
-	 *
-	 * @param	colName		Name of the column
-	 *
-	 * @return	ColumnReference	ColumnReference to the column, if found
-	 */
-	public ColumnReference findColumnReferenceInResult(String colName)
-					throws StandardException
-	{
-		if (fromList.size() != 1)
-			return null;
-
-		// This logic is similar to SubQueryNode.singleFromBaseTable(). Refactor
-		FromTable ft = (FromTable) fromList.elementAt(0);
-		if (! ((ft instanceof ProjectRestrictNode) &&
-		 		((ProjectRestrictNode) ft).getChildResult() instanceof FromBaseTable) &&
-				!(ft instanceof FromBaseTable))
-			return null;
-
-		// Loop through the result columns looking for a match
-		int rclSize = resultColumns.size();
-		for (int index = 0; index < rclSize; index++)
-		{
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);
-			if (! (rc.getExpression() instanceof ColumnReference))
-				return null;
-
-			ColumnReference crNode = (ColumnReference) rc.getExpression();
-
-			if (crNode.columnName.equals(colName))
-				return (ColumnReference) crNode.getClone();
-		}
-
-		return null;
-	}
-
-	/**
 	 * Return the whereClause for this SelectNode.
 	 *
 	 * @return ValueNode	The whereClause for this SelectNode.

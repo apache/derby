@@ -1347,17 +1347,15 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
      * every ColumnReference in the predicate is itself a ColumnReference.
 	 *
 	 * This is useful when attempting to push predicates into non-flattenable
-	 * views or derived tables or into unions.
+	 * views or derived tables.
 	 *
-	 * @param select			The underlying SelectNode.
-	 * @param copyPredicate		Whether to make a copy of the predicate
-	 *							before pushing
+	 * @param select	The underlying SelectNode.
 	 *
 	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	void pushExpressionsIntoSelect(SelectNode select, boolean copyPredicate)
+	void pushExpressionsIntoSelect(SelectNode select)
 		throws StandardException
 	{
 		/* Walk list backwards since we can delete while
@@ -1392,92 +1390,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				}
 			}
 
-			if (!state)
-				continue;
-
-			if (copyPredicate)
-			{
-				// Copy this predicate and push this instead
-				AndNode andNode = predicate.getAndNode();
-				ValueNode leftOperand;
-				ColumnReference crNode;
-				BinaryRelationalOperatorNode opNode=null;
-				InListOperatorNode inNode=null;
-
-				// Make sure we are only pushing binary relations and InList for
-				// copyPredicate case. It should be benificial to push expressions that
-				// can be pushed, so they can be applied closer to the data.
-
-				if (andNode.getLeftOperand() instanceof BinaryRelationalOperatorNode)
-				{
-					opNode = (BinaryRelationalOperatorNode) andNode.getLeftOperand();
-					// Investigate using invariant interface to check rightOperand
-					if (! (opNode.getLeftOperand() instanceof ColumnReference) ||
-					    ! (opNode.getRightOperand() instanceof ConstantNode ||
-							 opNode.getRightOperand() instanceof ParameterNode))
-						continue;
-
-					crNode = (ColumnReference) opNode.getLeftOperand();
-				}
-				else if (andNode.getLeftOperand() instanceof InListOperatorNode)
-				{
-					inNode = (InListOperatorNode) andNode.getLeftOperand();
-					if (! (inNode.getRightOperandList().isConstantExpression()))
-						continue;
-
-					crNode = (ColumnReference) inNode.getLeftOperand();
-				}
-				else
-					continue;
-
-				// Remap this crNode to underlying column reference in the select, if possible.
-				ColumnReference newCRNode = select.findColumnReferenceInResult(crNode.columnName);
-				if (newCRNode == null)
-					continue;
-
-				if (andNode.getLeftOperand() instanceof BinaryRelationalOperatorNode)
-				{
-					BinaryRelationalOperatorNode newEquals = (BinaryRelationalOperatorNode)
-							getNodeFactory().getNode(
-										C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
-										newCRNode,
-										opNode.getRightOperand(),
-										getContextManager());
-					newEquals.bindComparisonOperator();
-					leftOperand = newEquals;
-				}
-				else
-				{
-					InListOperatorNode newInNode = (InListOperatorNode)
-							getNodeFactory().getNode(
-								C_NodeTypes.IN_LIST_OPERATOR_NODE,
-								newCRNode,
-								inNode.getRightOperandList(),
-								getContextManager());
-					newInNode.setType(inNode.getTypeServices());
-					leftOperand = newInNode;
-				}
-
-				ValueNode trueNode = (ValueNode) getNodeFactory().getNode(
-										C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-										Boolean.TRUE,
-										getContextManager());
-				AndNode newAnd = (AndNode) getNodeFactory().getNode(
-													C_NodeTypes.AND_NODE,
-													leftOperand,
-													trueNode,
-													getContextManager());
-				newAnd.postBindFixup();
-				JBitSet tableMap = new JBitSet(select.referencedTableMap.size());
-
-				// Use newly constructed predicate
-				predicate = (Predicate) getNodeFactory().getNode(
-												C_NodeTypes.PREDICATE,
-												newAnd,
-												tableMap,
-												getContextManager());
-			}
-			else
+			if (state)
 			{
 				// keep the counters up to date when removing a predicate
 				if (predicate.isStartKey())
@@ -1493,10 +1406,9 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				predicate.clearScanFlags();
 				// Remove this predicate from the list
 				removeElementAt(index);
+				// Push it into the select
+				select.pushExpressionsIntoSelect(predicate);
 			}
-
-			// Push it into the select
- 			select.pushExpressionsIntoSelect(predicate);
 		}		
 	}
 

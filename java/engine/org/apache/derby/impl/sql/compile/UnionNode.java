@@ -258,46 +258,6 @@ public class UnionNode extends SetOperatorNode
 	}
 
 	/**
-	 * DERBY-649: Handle pushing predicates into UnionNodes. It is possible to push
-	 * single table predicates that are binaryOperations or inListOperations. 
-	 *
-	 * Predicates of the form <columnReference> <RELOP> <constant> or <columnReference>
-	 * IN <constantList> are currently handled. Since these predicates would allow
-	 * optimizer to pick available indices, pushing them provides maximum benifit.
-	 *
-	 * It should be possible to expand this logic to cover more cases. Even pushing
-	 * expressions (like a+b = 10) into SELECTs would improve performance, even if
-	 * they don't allow use of index. It would mean evaluating expressions closer to
-	 * data and hence could avoid sorting or other overheads that UNION may require.
-	 *
-	 * Note that the predicates are not removed after pushing. This is to ensure if
-	 * pushing is not possible or only partially feasible.
-	 *
-	 * @param 	predicateList		List of single table predicates to push
-	 *
-	 * @return	Nothing
-	 *
-	 * @exception	StandardException		Thrown on error
-	 */
-	public void pushExpressions(PredicateList predicateList)
-					throws StandardException
-	{
-		// If left or right side is a UnionNode, further push the predicate list
-		// Note, it is OK not to push these predicates since they are also evaluated
-		// in the ProjectRestrictNode. There are other types of operations possible
-		// here in addition to UnionNode or SelectNode, like RowResultSetNode.
-		if (leftResultSet instanceof UnionNode)
-			((UnionNode)leftResultSet).pushExpressions(predicateList);
-		else if (leftResultSet instanceof SelectNode)
-			predicateList.pushExpressionsIntoSelect((SelectNode)leftResultSet, true);
-
-		if (rightResultSet instanceof UnionNode)
-			((UnionNode)rightResultSet).pushExpressions(predicateList);
-		else if (rightResultSet instanceof SelectNode)
-			predicateList.pushExpressionsIntoSelect((SelectNode)rightResultSet, true);
-	}
-
-	/**
 	 * @see Optimizable#modifyAccessPath
 	 *
 	 * @exception StandardException		Thrown on error

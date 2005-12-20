@@ -953,19 +953,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		 */
 		if (pushPList != null && (childResult instanceof SelectNode))
 		{
-			pushPList.pushExpressionsIntoSelect((SelectNode) childResult, false);
+			pushPList.pushExpressionsIntoSelect((SelectNode) childResult);
 		}
-
-		/* DERBY-649: Push simple predicates into Unions. It would be up to UnionNode
-		 * to decide if these predicates can be pushed further into underlying SelectNodes
-		 * or UnionNodes.  Note, we also keep the predicateList at this
-		 * ProjectRestrictNode in case the predicates are not pushable or only
-		 * partially pushable.
-		 *
-		 * It is possible to expand this optimization in UnionNode later.
-		 */
-		if (pushPList != null && (childResult instanceof UnionNode))
-			((UnionNode)childResult).pushExpressions(pushPList);
 
 		if (restrictionList == null)
 		{
