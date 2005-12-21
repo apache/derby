@@ -50,6 +50,7 @@ import java.util.Vector;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.iapi.jdbc.DRDAServerStarter;
 import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -332,7 +333,7 @@ public final class NetworkServerControlImpl {
 		// mm = minor version
 		// x = drda MaintenanceVersion
 
-		prdId = "CSS";
+		prdId = DRDAConstants.DERBY_DRDA_SERVER_ID;
 		if (majorStr.length() == 1)
 			prdId += "0";
 		prdId += majorStr;

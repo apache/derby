@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.impl.jdbc.Util;
 
@@ -74,10 +75,10 @@ public class EXTDTAInputStream extends InputStream {
 	 *            column number
 	 * @param drdaType
 	 *            FD:OCA type of object one of
-	 * 			   FdocaConstants.DRDA_TYPE_NLOBBYTES
-	 * 			   FdocaConstants.DRDA_TYPE_LOBBYTES
-	 * 			   FdocaConstants.DRDA_TYPE_NLOBCMIXED
-	 *  		   FdocaConstants.DRDA_TYPE_LOBCMIXED
+	 * 			   DRDAConstants.DRDA_TYPE_NLOBBYTES
+	 * 			   DRDAConstants.DRDA_TYPE_LOBBYTES
+	 * 			   DRDAConstants.DRDA_TYPE_NLOBCMIXED
+	 *  		   DRDAConstants.DRDA_TYPE_LOBCMIXED
 	 * 
 	 * @returns null if the value is null or a new EXTDTAInputStream corresponding to 
 	 *  		rs.getBinaryStream(column) value and associated length
@@ -93,7 +94,7 @@ public class EXTDTAInputStream extends InputStream {
 		
 		int ndrdaType = drdaType | 1; //nullable drdaType
 		// BLOBS
-		if (ndrdaType == FdocaConstants.DRDA_TYPE_NLOBBYTES) 
+		if (ndrdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) 
 		{
 			//TODO: Change to just use rs.getBinaryStream() by 
 			// eliminating the need for a length parameter in
@@ -102,7 +103,7 @@ public class EXTDTAInputStream extends InputStream {
 			
 		}
 		// CLOBS
-		else if (ndrdaType ==  FdocaConstants.DRDA_TYPE_NLOBCMIXED)
+		else if (ndrdaType ==  DRDAConstants.DRDA_TYPE_NLOBCMIXED)
 		{	
 			//TODO: Change to use getCharacterStream and change the read method
 			// to stream the data after length is no longer needed in DDMWRiter.writeScalarStream

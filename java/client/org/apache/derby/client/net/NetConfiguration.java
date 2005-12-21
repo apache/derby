@@ -19,6 +19,7 @@
 */
 package org.apache.derby.client.net;
 
+import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.client.am.Version;
 
 public class NetConfiguration {
@@ -197,7 +198,7 @@ public class NetConfiguration {
         // mm = minor version
         // x = protocol MaintenanceVersion
 
-        String prdId = "DNC";
+        String prdId = DRDAConstants.DERBY_DRDA_CLIENT_ID;
         if (majorVersion < 10) {
             prdId += "0";
         }

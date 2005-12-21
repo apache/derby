@@ -34,6 +34,15 @@ public class SignedBinary {
      */
     public final static int LITTLE_ENDIAN = 2;
 
+     /**
+     * Build a Java boolean from a byte.
+     *
+     */
+    public static final boolean getBoolean(byte[] buffer, int offset) {
+		if ( buffer[ offset ] == 0 ) { return false; }
+		else { return true; }
+    }
+	
     /**
      * Build a Java short from a 2-byte signed binary representation.
      *

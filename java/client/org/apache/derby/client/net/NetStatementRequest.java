@@ -19,6 +19,7 @@
 */
 package org.apache.derby.client.net;
 
+import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.client.am.Blob;
 import org.apache.derby.client.am.Clob;
 import org.apache.derby.client.am.ColumnMetaData;
@@ -653,8 +654,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                 }
 
                 switch (protocolTypesAndLengths[i][0] | 0x01) {  // mask out null indicator
-                case FdocaConstants.PROTOCOL_TYPE_NVARMIX:
-                case FdocaConstants.PROTOCOL_TYPE_NLONGMIX:
+                case DRDAConstants.DRDA_TYPE_NVARMIX:
+                case DRDAConstants.DRDA_TYPE_NLONGMIX:
                     // What to do for server that don't understand 1208 (UTF-8)
                     // check for a promototed type, and use that instead if it exists
                     o = retrievePromotedParameterIfExists(i);
@@ -667,8 +668,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     }
                     break;
 
-                case FdocaConstants.PROTOCOL_TYPE_NVARCHAR:
-                case FdocaConstants.PROTOCOL_TYPE_NLONG:
+                case DRDAConstants.DRDA_TYPE_NVARCHAR:
+                case DRDAConstants.DRDA_TYPE_NLONG:
                     o = retrievePromotedParameterIfExists(i);
                     if (o == null) {
 
@@ -678,37 +679,37 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     }
                     break;
 
-                case FdocaConstants.PROTOCOL_TYPE_NINTEGER:
+                case DRDAConstants.DRDA_TYPE_NINTEGER:
                     writeIntFdocaData(((Integer) inputs[i]).intValue());
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NSMALL:
+                case DRDAConstants.DRDA_TYPE_NSMALL:
                     writeShortFdocaData(((Short) inputs[i]).shortValue());
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NFLOAT4:
+                case DRDAConstants.DRDA_TYPE_NFLOAT4:
                     writeFloat(((Float) inputs[i]).floatValue());
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NFLOAT8:
+                case DRDAConstants.DRDA_TYPE_NFLOAT8:
                     writeDouble(((Double) inputs[i]).doubleValue());
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NDECIMAL:
+                case DRDAConstants.DRDA_TYPE_NDECIMAL:
                     writeBigDecimal((java.math.BigDecimal) inputs[i],
                             (protocolTypesAndLengths[i][1] >> 8) & 0xff, // described precision not actual
                             protocolTypesAndLengths[i][1] & 0xff); // described scale, not actual
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NDATE:
+                case DRDAConstants.DRDA_TYPE_NDATE:
                     writeDate((java.sql.Date) inputs[i]);
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NTIME:
+                case DRDAConstants.DRDA_TYPE_NTIME:
                     writeTime((java.sql.Time) inputs[i]);
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NTIMESTAMP:
+                case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
                     writeTimestamp((java.sql.Timestamp) inputs[i]);
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NINTEGER8:
+                case DRDAConstants.DRDA_TYPE_NINTEGER8:
                     writeLongFdocaData(((Long) inputs[i]).longValue());
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NVARBYTE:
-                case FdocaConstants.PROTOCOL_TYPE_NLONGVARBYTE:
+                case DRDAConstants.DRDA_TYPE_NVARBYTE:
+                case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
                     o = retrievePromotedParameterIfExists(i);
                     if (o == null) {
                         writeLDBytes((byte[]) inputs[i]);
@@ -718,8 +719,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
                     }
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NLOBCSBCS:
-                case FdocaConstants.PROTOCOL_TYPE_NLOBCDBCS:
+                case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
+                case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
                     // check for a promoted Clob
                     o = retrievePromotedParameterIfExists(i);
                     if (o == null) {
@@ -740,7 +741,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     }
                     setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NLOBBYTES:
+                case DRDAConstants.DRDA_TYPE_NLOBBYTES:
                     // check for a promoted Clob
                     o = retrievePromotedParameterIfExists(i);
                     if (o == null) {
@@ -761,7 +762,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     }
                     setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
                     break;
-                case FdocaConstants.PROTOCOL_TYPE_NLOBCMIXED:
+                case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
                     // check for a promoted Clob
                     o = retrievePromotedParameterIfExists(i);
                     if (o == null) {
@@ -1003,7 +1004,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                 // assumes UTF-8 characters at most 3 bytes long
                 // Flow the String as a VARCHAR
                 if (s == null || s.length() <= 32767 / 3) {
-                    lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NVARMIX;
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARMIX;
                     lidAndLengths[i][1] = 32767;
                 } else {
                     // Flow the data as CLOB data if the data too large to for LONGVARCHAR
@@ -1018,7 +1019,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         // NetStatementRequest use
                         promototedParameters_.put(new Integer(i), c);
 
-                        lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBCMIXED;
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                         lidAndLengths[i][1] = buildPlaceholderLength(c.length());
                     } catch (java.io.UnsupportedEncodingException e) {
                         throw new SqlException(netAgent_.logWriter_, e, "Error in building String parameter: throwable attached");
@@ -1028,29 +1029,32 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
             case java.sql.Types.INTEGER:
                 // lid: PROTOCOL_TYPE_NINTEGER, length override: 4
                 // dataFormat: Integer
-                lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NINTEGER;
+                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NINTEGER;
                 lidAndLengths[i][1] = 4;
+                break;
+            case java.sql.Types.BOOLEAN:
+                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NBOOLEAN;
+                lidAndLengths[i][1] = 1;
                 break;
             case java.sql.Types.SMALLINT:
             case java.sql.Types.TINYINT:
-            case java.sql.Types.BOOLEAN:
             case java.sql.Types.BIT:
                 // lid: PROTOCOL_TYPE_NSMALL,  length override: 2
                 // dataFormat: Short
-                lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NSMALL;
+                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NSMALL;
                 lidAndLengths[i][1] = 2;
                 break;
             case java.sql.Types.REAL:
                 // lid: PROTOCOL_TYPE_NFLOAT4, length override: 4
                 // dataFormat: Float
-                lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NFLOAT4;
+                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NFLOAT4;
                 lidAndLengths[i][1] = 4;
                 break;
             case java.sql.Types.DOUBLE:
             case java.sql.Types.FLOAT:
                 // lid: PROTOCOL_TYPE_NFLOAT8, length override: 8
                 // dataFormat: Double
-                lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NFLOAT8;
+                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NFLOAT8;
                 lidAndLengths[i][1] = 8;
                 break;
             case java.sql.Types.NUMERIC:
@@ -1081,42 +1085,42 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                 // for decimal and blob columns only
                 int precision = parameterMetaData.sqlPrecision_[i];
                 int scale = parameterMetaData.sqlScale_[i];
-                lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NDECIMAL;
+                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NDECIMAL;
                 lidAndLengths[i][1] = (precision << 8) + (scale << 0);
                 break;
             case java.sql.Types.DATE:
                 // for input, output, and inout parameters
                 // lid: PROTOCOL_TYPE_NDATE, length override: 8
                 // dataFormat: java.sql.Date
-                lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NDATE;
+                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NDATE;
                 lidAndLengths[i][1] = 10;
                 break;
             case java.sql.Types.TIME:
                 // for input, output, and inout parameters
                 // lid: PROTOCOL_TYPE_NTIME, length override: 8
                 // dataFormat: java.sql.Time
-                lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NTIME;
+                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NTIME;
                 lidAndLengths[i][1] = 8;
                 break;
             case java.sql.Types.TIMESTAMP:
                 // for input, output, and inout parameters
                 // lid: PROTOCOL_TYPE_NTIME, length overrid: 26
                 // dataFormat: java.sql.Timestamp
-                lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NTIMESTAMP;
+                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NTIMESTAMP;
                 lidAndLengths[i][1] = 26;
                 break;
             case java.sql.Types.BIGINT:
                 // if SQLAM < 6 this should be mapped to decimal (19,0) in common layer
                 // if SQLAM >=6, lid: PROTOCOL_TYPE_NINTEGER8, length override: 8
                 // dataFormat: Long
-                lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NINTEGER8;
+                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NINTEGER8;
                 lidAndLengths[i][1] = 8;
                 break;
             case java.sql.Types.LONGVARCHAR:
                 // Is this the right thing to do  // should this be 32700
                 s = (String) inputRow[i];
                 if (s == null || s.length() <= 32767 / 3) {
-                    lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLONGMIX;
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLONGMIX;
                     lidAndLengths[i][1] = 32767;
                 } else {
                     // Flow the data as CLOB data if the data too large to for LONGVARCHAR
@@ -1132,7 +1136,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         // NetStatementRequest use
                         promototedParameters_.put(new Integer(i), c);
 
-                        lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBCMIXED;
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                         lidAndLengths[i][1] = buildPlaceholderLength(c.length());
                     } catch (java.io.UnsupportedEncodingException e) {
                         throw new SqlException(netAgent_.logWriter_, e, "Error in building String parameter: throwable attached");
@@ -1143,10 +1147,10 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
             case java.sql.Types.VARBINARY:
                 byte[] ba = (byte[]) inputRow[i];
                 if (ba == null) {
-                    lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NVARBYTE;
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARBYTE;
                     lidAndLengths[i][1] = 32767;
                 } else if (ba.length <= 32767) {
-                    lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NVARBYTE;
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARBYTE;
                     lidAndLengths[i][1] = 32767;
                 } else {
                     // Promote to a BLOB. Only reach this path in the absence of describe information.
@@ -1157,17 +1161,17 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     // NetStatementRequest use
                     promototedParameters_.put(new Integer(i), b);
 
-                    lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBBYTES;
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                     lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
                 }
                 break;
             case java.sql.Types.LONGVARBINARY:
                 ba = (byte[]) inputRow[i];
                 if (ba == null) {
-                    lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLONGVARBYTE;
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLONGVARBYTE;
                     lidAndLengths[i][1] = 32767;
                 } else if (ba.length <= 32767) {
-                    lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLONGVARBYTE;
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLONGVARBYTE;
                     lidAndLengths[i][1] = 32767;
                 } else {
                     // Promote to a BLOB. Only reach this path in the absensce of describe information.
@@ -1178,18 +1182,18 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     // NetStatementRequest use
                     promototedParameters_.put(new Integer(i), b);
 
-                    lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBBYTES;
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                     lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
                 }
                 break;
             case java.sql.Types.BLOB:
                 java.sql.Blob b = (java.sql.Blob) inputRow[i];
                 if (b == null) {
-                    lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBBYTES;
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                     lidAndLengths[i][1] =
                             buildPlaceholderLength(parameterMetaData.sqlLength_[i]);
                 } else {
-                    lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBBYTES;
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                     try {
                         lidAndLengths[i][1] = buildPlaceholderLength(b.length());
                     } catch (java.sql.SQLException e) {
@@ -1229,22 +1233,22 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lobLength = ((Clob) c).length();
                     }
                     if (c == null) {
-                        lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBCMIXED;
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                         lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                     } else if (isExternalClob) {
-                        lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBCDBCS;
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
                         lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                     } else if (((Clob) c).isCharacterStream()) {
-                        lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBCDBCS;
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
                         lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                     } else if (((Clob) c).isUnicodeStream()) {
-                        lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBCMIXED;
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                         lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                     } else if (((Clob) c).isAsciiStream()) {
-                        lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBCSBCS;
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCSBCS;
                         lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                     } else if (((Clob) c).isString()) {
-                        lidAndLengths[i][0] = FdocaConstants.PROTOCOL_TYPE_NLOBCMIXED;
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                         lidAndLengths[i][1] = buildPlaceholderLength(((Clob) c).getUTF8Length());
                     }
                 }

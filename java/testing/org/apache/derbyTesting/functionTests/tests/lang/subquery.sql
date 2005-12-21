@@ -218,9 +218,9 @@ select * from s where i in (select i from t where 1 = 0);
 select * from s where (i in (select i from t where i = 0)) is null;
 
 -- select list
-select i in (select i from t) from s;
-select i in (select i from t where 1 = 0) from s;
-select (i in (select i from t where 1 = 0)) is null from s;
+select ( i in (select i from t) ) a from s order by a;
+select ( i in (select i from t where 1 = 0) ) a from s order by a;
+select ( (i in (select i from t where 1 = 0)) is null ) a from s order by a;
 
 -- subquery under an or
 select i from s where i = -1 or i in (select i from t);

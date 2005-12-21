@@ -20,6 +20,7 @@
 
 package org.apache.derby.impl.drda;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.Limits;
 
 /**
@@ -52,6 +53,7 @@ class AppRequester
 											5, // SYNCPTMGR
 											0  // XAMGR
 											};
+	
 	// Application requester information
 	protected String	extnam;			// External Name - EXCSAT
 	protected String	srvnam;			// Server Name - EXCSAT
@@ -105,13 +107,29 @@ class AppRequester
 		releaseLevel = Integer.parseInt(prdid.substring (5, 7));
 		modifyLevel = Integer.parseInt(prdid.substring (7, 8));
 		if (srvrlslv == null)
-			clientType = UNKNOWN_CLIENT;
+		{ clientType = UNKNOWN_CLIENT; }
 		else if (srvrlslv.indexOf("JCC") != -1)
-			clientType = JCC_CLIENT;
-		else if (srvrlslv.indexOf("DNC") != -1)
-			clientType = DNC_CLIENT;
+		{ clientType = JCC_CLIENT; }
+		else if
+			(
+			    (srvrlslv.indexOf(DRDAConstants.DERBY_DRDA_CLIENT_ID) != -1)
+			)
+		{ clientType = DNC_CLIENT; }
 		else
-			clientType = UNKNOWN_CLIENT;
+		{ clientType = UNKNOWN_CLIENT; }
+	}
+
+	/**
+	 * Returns true if the client supports Derby's protocol for
+	 * transmitting BOOLEAN values.
+	 */
+	protected	boolean	supportsBoolean()
+	{
+		return
+			(
+			    ( clientType == DNC_CLIENT ) &&
+			    ( greaterThanOrEqualTo( 10, 2, 0 ) )
+			);
 	}
 
 	/**

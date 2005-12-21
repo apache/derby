@@ -430,11 +430,13 @@ select * from test.s  t1
 where i = (select i from test.t t2 where s = (select i from test.t t3 where s = 2));
 -- correlated subqueries
 
--- negative tests
-
--- exists disallowed in select clause
 select (exists (select * from test.ttt 
-				where iii = (select 11 from test.tt where ii = i and ii <> 1)) ) from test.s;
+				where iii = (select 11 from test.tt where ii = i and ii <> 1)) )
+a
+from test.s
+order by a;
+
+-- negative tests
 
 -- multiple matches at parent level
 select * from test.s, test.t where exists (select i from test.tt);

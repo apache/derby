@@ -1,6 +1,7 @@
 jdbcapi/metadata.java
 jdbcapi/metadataMultiConn.java
 jdbcapi/odbc_metadata.java
+junitTests/lang/LangSuite.java
 lang/AIjdbc.java
 lang/CharUTF8.java
 lang/ConcurrentImplicitCreateSchema.java

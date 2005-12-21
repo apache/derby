@@ -156,14 +156,13 @@ select x from s where not ( (1 = 1) or (2 = 2) ) and (3 = 4);
 select x from s where not ( ( (1 = 1) or (2 = 2) ) and (3 = 4) );
 select x from s where (1 = 2) and not ( (3 = 3) or (4 = 4) );
 select x from s where not ( (1 = 2) and ( (3 = 3) or (4 = 4) ) );
--- following NOTs in select clause won't work because it results in a transient boolean datatype
-select not ( (1 = 1) or (2 = 2) ) and (3 = 4) from s;
+select ( not ( (1 = 1) or (2 = 2) ) and (3 = 4) ) from s;
 --
-select not ( ( (1 = 1) or (2 = 2) ) and (3 = 4) ) from s;
+select ( not ( ( (1 = 1) or (2 = 2) ) and (3 = 4) ) ) from s;
 --
-select (1 = 2) and not ( (3 = 3) or (4 = 4) ) from s;
+select ( (1 = 2) and not ( (3 = 3) or (4 = 4) ) ) from s;
 --
-select not ( (1 = 2) and ( (3 = 3) or (4 = 4) ) ) from s;
+select ( not ( (1 = 2) and ( (3 = 3) or (4 = 4) ) ) ) from s;
 
 -- Ands under ands under ands ...
 select * from s where not (	( ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) and

@@ -466,12 +466,24 @@ ij> select * from s where (i in (select i from t where i = 0)) is null;
 I          |S     |C                             |VC                            |B                   
 -----------------------------------------------------------------------------------------------------
 ij> -- select list
-select i in (select i from t) from s;
-ERROR 42X01: Syntax error: Encountered "in" at line 2, column 10.
-ij> select i in (select i from t where 1 = 0) from s;
-ERROR 42X01: Syntax error: Encountered "in" at line 1, column 10.
-ij> select (i in (select i from t where 1 = 0)) is null from s;
-ERROR 42X01: Syntax error: Encountered "in" at line 1, column 11.
+select ( i in (select i from t) ) a from s order by a;
+A    
+-----
+false
+true 
+true 
+ij> select ( i in (select i from t where 1 = 0) ) a from s order by a;
+A    
+-----
+false
+false
+false
+ij> select ( (i in (select i from t where 1 = 0)) is null ) a from s order by a;
+A    
+-----
+false
+false
+false
 ij> -- subquery under an or
 select i from s where i = -1 or i in (select i from t);
 I          

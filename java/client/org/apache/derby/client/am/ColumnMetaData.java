@@ -20,6 +20,9 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.iapi.reference.JDBC30Translation;
+
 // Under JDBC 2, we must new up our parameter meta data as column meta data instances
 // Once we move to JDK 1.4 pre-req, create a ResultSetMetaData class and make this class abstract
 
@@ -219,6 +222,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         checkForValidColumnIndex(column);
         int jdbcType = types_[column - 1];
         switch (jdbcType) {
+        case Types.BOOLEAN:
+            return 5;
         case Types.INTEGER:
             return 11;
         case Types.SMALLINT:
@@ -402,67 +407,70 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         int sqlType = sqlType_[column - 1];
 
         switch (sqlType) {
-        case Types.DERBY_SQLTYPE_DATE:
-        case Types.DERBY_SQLTYPE_NDATE:
+        case DRDAConstants.DB2_SQLTYPE_BOOLEAN:
+        case DRDAConstants.DB2_SQLTYPE_NBOOLEAN:
+            return "BOOLEAN";
+        case DRDAConstants.DB2_SQLTYPE_DATE:
+        case DRDAConstants.DB2_SQLTYPE_NDATE:
             return "DATE";
-        case Types.DERBY_SQLTYPE_TIME:
-        case Types.DERBY_SQLTYPE_NTIME:
+        case DRDAConstants.DB2_SQLTYPE_TIME:
+        case DRDAConstants.DB2_SQLTYPE_NTIME:
             return "TIME";
-        case Types.DERBY_SQLTYPE_TIMESTAMP:
-        case Types.DERBY_SQLTYPE_NTIMESTAMP:
+        case DRDAConstants.DB2_SQLTYPE_TIMESTAMP:
+        case DRDAConstants.DB2_SQLTYPE_NTIMESTAMP:
             return "TIMESTAMP";
-        case Types.DERBY_SQLTYPE_BLOB:
-        case Types.DERBY_SQLTYPE_NBLOB:
+        case DRDAConstants.DB2_SQLTYPE_BLOB:
+        case DRDAConstants.DB2_SQLTYPE_NBLOB:
             return "BLOB";
-        case Types.DERBY_SQLTYPE_CLOB:
-        case Types.DERBY_SQLTYPE_NCLOB:
+        case DRDAConstants.DB2_SQLTYPE_CLOB:
+        case DRDAConstants.DB2_SQLTYPE_NCLOB:
             return "CLOB";
-        case Types.DERBY_SQLTYPE_VARCHAR:
-        case Types.DERBY_SQLTYPE_NVARCHAR:
+        case DRDAConstants.DB2_SQLTYPE_VARCHAR:
+        case DRDAConstants.DB2_SQLTYPE_NVARCHAR:
             if (jdbcType == Types.VARBINARY) {
                 return "VARCHAR FOR BIT DATA";
             } else {
                 return "VARCHAR";
             }
-        case Types.DERBY_SQLTYPE_CHAR:
-        case Types.DERBY_SQLTYPE_NCHAR:
+        case DRDAConstants.DB2_SQLTYPE_CHAR:
+        case DRDAConstants.DB2_SQLTYPE_NCHAR:
             if (jdbcType == Types.BINARY) {
                 return "CHAR FOR BIT DATA";
             } else {
                 return "CHAR";
             }
-        case Types.DERBY_SQLTYPE_LONG:
-        case Types.DERBY_SQLTYPE_NLONG:
+        case DRDAConstants.DB2_SQLTYPE_LONG:
+        case DRDAConstants.DB2_SQLTYPE_NLONG:
             if (jdbcType == Types.LONGVARBINARY) {
                 return "LONG VARCHAR FOR BIT DATA";
             } else {
                 return "LONG VARCHAR";
             }
-        case Types.DERBY_SQLTYPE_CSTR:
-        case Types.DERBY_SQLTYPE_NCSTR:
+        case DRDAConstants.DB2_SQLTYPE_CSTR:
+        case DRDAConstants.DB2_SQLTYPE_NCSTR:
             return "SBCS";
-        case Types.DERBY_SQLTYPE_FLOAT:
-        case Types.DERBY_SQLTYPE_NFLOAT:
+        case DRDAConstants.DB2_SQLTYPE_FLOAT:
+        case DRDAConstants.DB2_SQLTYPE_NFLOAT:
             if (jdbcType == Types.DOUBLE) {
                 return "DOUBLE";
             }
             if (jdbcType == Types.REAL) {
                 return "REAL";
             }
-        case Types.DERBY_SQLTYPE_DECIMAL:
-        case Types.DERBY_SQLTYPE_NDECIMAL:
+        case DRDAConstants.DB2_SQLTYPE_DECIMAL:
+        case DRDAConstants.DB2_SQLTYPE_NDECIMAL:
             return "DECIMAL";
-        case Types.DERBY_SQLTYPE_BIGINT:
-        case Types.DERBY_SQLTYPE_NBIGINT:
+        case DRDAConstants.DB2_SQLTYPE_BIGINT:
+        case DRDAConstants.DB2_SQLTYPE_NBIGINT:
             return "BIGINT";
-        case Types.DERBY_SQLTYPE_INTEGER:
-        case Types.DERBY_SQLTYPE_NINTEGER:
+        case DRDAConstants.DB2_SQLTYPE_INTEGER:
+        case DRDAConstants.DB2_SQLTYPE_NINTEGER:
             return "INTEGER";
-        case Types.DERBY_SQLTYPE_SMALL:
-        case Types.DERBY_SQLTYPE_NSMALL:
+        case DRDAConstants.DB2_SQLTYPE_SMALL:
+        case DRDAConstants.DB2_SQLTYPE_NSMALL:
             return "SMALLINT";
-        case Types.DERBY_SQLTYPE_NUMERIC:
-        case Types.DERBY_SQLTYPE_NNUMERIC:
+        case DRDAConstants.DB2_SQLTYPE_NUMERIC:
+        case DRDAConstants.DB2_SQLTYPE_NNUMERIC:
             return "NUMERIC";
         default:
             throw new SqlException(logWriter_, "Not supported");
@@ -780,52 +788,55 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
     int mapDriverToSqlType(int type, boolean nullable) {
         int sqlType = 0;
         switch (type) {
+        case JDBC30Translation.BOOLEAN:
+            sqlType = DRDAConstants.DB2_SQLTYPE_NBOOLEAN;
+            break;
         case java.sql.Types.SMALLINT:
-            sqlType = Types.DERBY_SQLTYPE_NSMALL;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NSMALL;
             break;
         case java.sql.Types.INTEGER:
-            sqlType = Types.DERBY_SQLTYPE_NINTEGER;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NINTEGER;
             break;
         case java.sql.Types.BIGINT:
-            sqlType = Types.DERBY_SQLTYPE_NBIGINT;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NBIGINT;
             break;
         case java.sql.Types.REAL:
         case java.sql.Types.DOUBLE:
         case java.sql.Types.FLOAT:
-            sqlType = Types.DERBY_SQLTYPE_NFLOAT;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NFLOAT;
             break;
         case java.sql.Types.DATE:
-            sqlType = Types.DERBY_SQLTYPE_NDATE;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NDATE;
             break;
         case java.sql.Types.TIME:
-            sqlType = Types.DERBY_SQLTYPE_NTIME;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NTIME;
             break;
         case java.sql.Types.TIMESTAMP:
-            sqlType = Types.DERBY_SQLTYPE_NTIMESTAMP;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NTIMESTAMP;
             break;
         case java.sql.Types.CHAR:
         case java.sql.Types.VARCHAR:
-            sqlType = Types.DERBY_SQLTYPE_NVARCHAR;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NVARCHAR;
             break;
         case java.sql.Types.LONGVARCHAR:
-            sqlType = Types.DERBY_SQLTYPE_NLONG;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NLONG;
             break;
         case java.sql.Types.BINARY:
         case java.sql.Types.VARBINARY:
-            sqlType = Types.DERBY_SQLTYPE_NVARCHAR;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NVARCHAR;
             break;
         case java.sql.Types.LONGVARBINARY:
-            sqlType = Types.DERBY_SQLTYPE_NLONG;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NLONG;
             break;
         case java.sql.Types.NUMERIC:
         case java.sql.Types.DECIMAL:
-            sqlType = Types.DERBY_SQLTYPE_NDECIMAL;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NDECIMAL;
             break;
         case java.sql.Types.BLOB:
-            sqlType = Types.DERBY_SQLTYPE_NBLOB;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NBLOB;
             break;
         case java.sql.Types.CLOB:
-            sqlType = Types.DERBY_SQLTYPE_NCLOB;
+            sqlType = DRDAConstants.DB2_SQLTYPE_NCLOB;
             break;
         default:
             break; // bug check
@@ -873,8 +884,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
     public boolean hasLobColumns() {
         for (int i = 0; i < columns_; i++) {
             switch (org.apache.derby.client.am.Utils.getNonNullableSqlType(sqlType_[i])) {
-            case org.apache.derby.client.am.Types.DERBY_SQLTYPE_BLOB:
-            case org.apache.derby.client.am.Types.DERBY_SQLTYPE_CLOB:
+            case DRDAConstants.DB2_SQLTYPE_BLOB:
+            case DRDAConstants.DB2_SQLTYPE_CLOB:
                 return true;
             default:
                 break;

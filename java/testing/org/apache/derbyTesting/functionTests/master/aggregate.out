@@ -213,9 +213,15 @@ WARNING 01003: Null values were eliminated from the argument of a column functio
 0          
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> -- binary list operator
--- beetle 5571 - transient boolean type not allowed in DB2
 select (1 in (1,2)), count(c1) from t1 group by c1;
-ERROR 42X01: Syntax error: Encountered "in" at line 3, column 11.
+1    |2          
+-----------------
+true |1          
+true |1          
+true |1          
+true |1          
+true |0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select count((1 in (1,2))) from t1 group by c1;
 1          
 -----------

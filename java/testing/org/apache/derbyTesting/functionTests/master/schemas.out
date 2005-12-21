@@ -717,12 +717,18 @@ where i = (select i from test.t t2 where s = (select i from test.t t3 where s = 
 I          |S     |C                             |VC                            
 --------------------------------------------------------------------------------
 ij> -- correlated subqueries
--- negative tests
--- exists disallowed in select clause
 select (exists (select * from test.ttt 
-				where iii = (select 11 from test.tt where ii = i and ii <> 1)) ) from test.s;
-ERROR 42X01: Syntax error: Encountered "exists" at line 6, column 9.
-ij> -- multiple matches at parent level
+				where iii = (select 11 from test.tt where ii = i and ii <> 1)) )
+a
+from test.s
+order by a;
+A    
+-----
+NULL 
+NULL 
+true 
+ij> -- negative tests
+-- multiple matches at parent level
 select * from test.s, test.t where exists (select i from test.tt);
 ERROR 42X03: Column name 'I' is in more than one table in the FROM list.
 ij> -- match is against base table, but not derived column list

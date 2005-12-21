@@ -99,7 +99,6 @@ drop schema "sys" restrict;
 drop schema "sysok" restrict;
 
 -- data types not supported
-create table NOTYPE(i int, b BOOLEAN);
 create table NOTYPE(i int, b TINYINT);
 create table NOTYPE(i int, b java.lang.String);
 create table NOTYPE(i int, b com.acme.Address);
@@ -307,7 +306,6 @@ DROP TABLE tb2;
 
 -- INSTANCEOF in where clause of select, delete, update,
 -- beetle 5224
-create table t1 (i int, s smallint, c10 char(10), vc30 varchar(30), b boolean);
 create table mm (x org.apache.derbyTesting.functionTests.util.ManyMethods);
 create table sc (x org.apache.derbyTesting.functionTests.util.SubClass);
 select i from t1 where i instanceof java.lang.Integer;
@@ -336,8 +334,6 @@ drop table sc;
 -- beetle 5233
 create table testtype1(col1 bit);
 create table testtype2(col1 bit varying(10));
--- boolean datatype already disabled
-create table testtype3(col1 boolean);
 create table testtype4(col1 LONG NVARCHAR);
 create table testtype5(col1 LONG VARBINARY);
 create table testtype6(col1 LONG BIT VARYING);
@@ -616,18 +612,6 @@ SELECT * FROM t1 LEFT OUTER JOIN t2 USING (col1);
 
 -- (4) USING should be disabled in INNER JOIN of SELECT statement
 SELECT * FROM t1 RIGHT OUTER JOIN t2 USING (col1);
-
--- (5) TRUE and FALSE constants should be disabled in WHERE clause of SELECT statement
-SELECT * FROM t1 INNER JOIN t2 ON t1.col1 = t2.col1 WHERE true;
-SELECT * FROM t1 INNER JOIN t2 ON t1.col1 = t2.col1 WHERE false;
-
--- (5) TRUE and FALSE constants should be disabled in WHERE clause of DELETE statement
-DELETE FROM t1 where true;
-DELETE FROM t1 where false;
-
--- (5) TRUE and FALSE constants should be disabled in WHERE clause of DELETE statement
-UPDATE t2 SET col1 = NULL WHERE true;
-UPDATE t2 SET col1 = NULL WHERE false;
 
 -- (6) AT ISOLATION clause should be disabled in SELECT statement
 -- AT ISOLATION not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error

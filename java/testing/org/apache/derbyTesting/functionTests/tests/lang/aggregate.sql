@@ -86,7 +86,6 @@ select cast (null as int), count(c1) from t1 group by c1;
 select count(cast (null as int)) from t1 group by c1;
 
 -- binary list operator
--- beetle 5571 - transient boolean type not allowed in DB2
 select (1 in (1,2)), count(c1) from t1 group by c1;
 select count((1 in (1,2))) from t1 group by c1;
 

@@ -46,7 +46,7 @@
 
 	The basic loop runs as follows:
 
-		run compatibility tests against current embedded server in default VM
+		run compatibility tests against current embedded server in all VMs.
 
 		for each server VM
 		{
@@ -84,16 +84,18 @@
   <property name="summaryFile" value="${outDir}/SUMMARY_COMPAT.txt"/>
   <property name="databaseName" value="compatDB"/>
 
+  <property name="TEST_JARS" value="${trunk_lib}/derbyTesting.jar;${junit}"/>
+
   <!-- legal values of serverVM and clientVM -->
   <property name="VM_1.3" value="${j13lib}/../bin/java"/>
   <property name="VM_1.4" value="${j14lib}/../bin/java"/>
   <property name="VM_1.5" value="${jdk15}/bin/java"/>
 
   <!-- legal values of serverClasspath -->
-  <property name="SERVER_10.0.2.1" value="${10.0.2.1_lib}/derby.jar;${10.0.2.1_lib}/derbynet.jar"/>
-  <property name="SERVER_10.1.1.0" value="${10.1.1.0_lib}/derby.jar;${10.1.1.0_lib}/derbynet.jar"/>
-  <property name="SERVER_10.1.2.0" value="${10.1.2.0_lib}/derby.jar;${10.1.2.0_lib}/derbynet.jar"/>
-  <property name="SERVER_TRUNK" value="${trunk_lib}/derby.jar;${trunk_lib}/derbynet.jar"/>
+  <property name="SERVER_10.0.2.1" value="${10.0.2.1_lib}/derby.jar;${10.0.2.1_lib}/derbynet.jar;${TEST_JARS}"/>
+  <property name="SERVER_10.1.1.0" value="${10.1.1.0_lib}/derby.jar;${10.1.1.0_lib}/derbynet.jar;${TEST_JARS}"/>
+  <property name="SERVER_10.1.2.0" value="${10.1.2.0_lib}/derby.jar;${10.1.2.0_lib}/derbynet.jar;${TEST_JARS}"/>
+  <property name="SERVER_TRUNK" value="${trunk_lib}/derby.jar;${trunk_lib}/derbynet.jar;${TEST_JARS}"/>
 
   <!-- legal values of clientClasspath -->
   <property name="CLIENT_DB2JCC" value="${db2jcc_lib}/db2jcc.jar;${db2jcc_lib}/db2jcc_license_c.jar"/>
@@ -101,8 +103,7 @@
   <property name="CLIENT_10.1.2.0" value="${10.1.2.0_lib}/derbyclient.jar"/>
   <property name="CLIENT_TRUNK" value="${trunk_lib}/derbyclient.jar"/>
 
-  <property name="TEST_JARS" value="${trunk_lib}/derbyTesting.jar;${junit}"/>
-  <property name="FULL_TRUNK" value="${SERVER_TRUNK};${CLIENT_TRUNK};${TEST_JARS}"/>
+  <property name="FULL_TRUNK" value="${SERVER_TRUNK};${CLIENT_TRUNK}"/>
 
   <property name="CLASSPATH_TRUNK" value="${basedir}/classes;${compile.classpath}"/>
 
@@ -225,13 +226,19 @@
 	  <param name="codeline" value="${SERVER_TRUNK}"/>
     </antcall>
 
-    <antcall target="_oneTest">
-	  <param name="otTestName" value="${JDBC_SUITE}"/>
+    <antcall target="_forEmbeddedVM">
+	  <param name="eVM" value="${VM_1.3}"/>
+	  <param name="eName" value="VM-1.3"/>
+    </antcall>
 
-	  <param name="otClasspath" value="${SERVER_TRUNK}"/>
-	  <param name="otOutfile" value="embedded"/>
-	  <param name="otVM" value="${VM_DEFAULT}"/>
-	  <param name="otClientName" value="${EMBEDDED_CLIENT}"/>
+    <antcall target="_forEmbeddedVM">
+	  <param name="eVM" value="${VM_1.4}"/>
+	  <param name="eName" value="VM-1.4"/>
+    </antcall>
+
+    <antcall target="_forEmbeddedVM">
+	  <param name="eVM" value="${VM_1.5}"/>
+	  <param name="eName" value="VM-1.5"/>
     </antcall>
 
   </target>
@@ -243,6 +250,25 @@
 !!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -->
+
+  <!--
+       Run embedded tests for a given server VM.
+
+       eVM             VM to run server in
+       eName           Human-readable name for VM.
+  -->
+  <target name="_forEmbeddedVM">
+
+    <antcall target="_oneTest">
+	  <param name="otTestName" value="${JDBC_SUITE}"/>
+
+	  <param name="otClasspath" value="${SERVER_TRUNK}"/>
+	  <param name="otOutfile" value="embedded_${eName}"/>
+	  <param name="otVM" value="${eVM}"/>
+	  <param name="otClientName" value="${EMBEDDED_CLIENT}"/>
+    </antcall>
+
+  </target>
 
   <!--
        Run tests for a given server VM.

@@ -1948,14 +1948,16 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
 
     private boolean getMetaDataInfoBoolean(int infoCallIndex) throws SqlException {
-        if (metaDataInfoIsCached_) {
-            return ((Integer) metaDataInfoCache_[infoCallIndex]).intValue() != 0;
-        }
-        metaDataInfoCall();
-        return ((Integer) metaDataInfoCache_[infoCallIndex]).intValue() != 0;
+        if ( !metaDataInfoIsCached_) { metaDataInfoCall(); }
+
+        // account for fact that after 10.2 booleans are really booleans, not ints.
+        Object	metadataScrap = metaDataInfoCache_[infoCallIndex];
+
+        if ( metadataScrap instanceof Boolean ) { return ((Boolean) metadataScrap).booleanValue(); }
+        else { return ((Integer) metadataScrap).intValue() != 0; }
     }
 
-    private int getMetaDataInfoInt(int infoCallIndex) throws SqlException {
+	private int getMetaDataInfoInt(int infoCallIndex) throws SqlException {
         if (metaDataInfoIsCached_) {
             return ((Integer) metaDataInfoCache_[infoCallIndex]).intValue();
         }

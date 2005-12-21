@@ -134,10 +134,8 @@ ij> drop schema "sys" restrict;
 ij> drop schema "sysok" restrict;
 0 rows inserted/updated/deleted
 ij> -- data types not supported
-create table NOTYPE(i int, b BOOLEAN);
-ERROR 42X01: Syntax error: BOOLEAN.
-ij> create table NOTYPE(i int, b TINYINT);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 30.
+create table NOTYPE(i int, b TINYINT);
+ERROR 42X01: Syntax error: Encountered "" at line 2, column 30.
 ij> create table NOTYPE(i int, b java.lang.String);
 ERROR 42X01: Syntax error: Encountered "" at line 1, column 30.
 ij> create table NOTYPE(i int, b com.acme.Address);
@@ -406,10 +404,8 @@ ij> DROP TABLE tb2;
 0 rows inserted/updated/deleted
 ij> -- INSTANCEOF in where clause of select, delete, update,
 -- beetle 5224
-create table t1 (i int, s smallint, c10 char(10), vc30 varchar(30), b boolean);
-ERROR 42X01: Syntax error: BOOLEAN.
-ij> create table mm (x org.apache.derbyTesting.functionTests.util.ManyMethods);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 20.
+create table mm (x org.apache.derbyTesting.functionTests.util.ManyMethods);
+ERROR 42X01: Syntax error: Encountered "" at line 3, column 20.
 ij> create table sc (x org.apache.derbyTesting.functionTests.util.SubClass);
 ERROR 42X01: Syntax error: Encountered "" at line 1, column 20.
 ij> select i from t1 where i instanceof java.lang.Integer;
@@ -456,9 +452,6 @@ create table testtype1(col1 bit);
 ERROR 42X01: Syntax error: Encountered "bit" at line 3, column 29.
 ij> create table testtype2(col1 bit varying(10));
 ERROR 42X01: Syntax error: Encountered "bit" at line 1, column 29.
-ij> -- boolean datatype already disabled
-create table testtype3(col1 boolean);
-ERROR 42X01: Syntax error: BOOLEAN.
 ij> create table testtype4(col1 LONG NVARCHAR);
 ERROR 0A000: Feature not implemented: LONG NVARCHAR.
 ij> create table testtype5(col1 LONG VARBINARY);
@@ -913,21 +906,6 @@ ERROR 42X01: Syntax error: Encountered "USING" at line 2, column 37.
 ij> -- (4) USING should be disabled in INNER JOIN of SELECT statement
 SELECT * FROM t1 RIGHT OUTER JOIN t2 USING (col1);
 ERROR 42X01: Syntax error: Encountered "USING" at line 2, column 38.
-ij> -- (5) TRUE and FALSE constants should be disabled in WHERE clause of SELECT statement
-SELECT * FROM t1 INNER JOIN t2 ON t1.col1 = t2.col1 WHERE true;
-ERROR 42X01: Syntax error: true.
-ij> SELECT * FROM t1 INNER JOIN t2 ON t1.col1 = t2.col1 WHERE false;
-ERROR 42X01: Syntax error: false.
-ij> -- (5) TRUE and FALSE constants should be disabled in WHERE clause of DELETE statement
-DELETE FROM t1 where true;
-ERROR 42X01: Syntax error: true.
-ij> DELETE FROM t1 where false;
-ERROR 42X01: Syntax error: false.
-ij> -- (5) TRUE and FALSE constants should be disabled in WHERE clause of DELETE statement
-UPDATE t2 SET col1 = NULL WHERE true;
-ERROR 42X01: Syntax error: true.
-ij> UPDATE t2 SET col1 = NULL WHERE false;
-ERROR 42X01: Syntax error: false.
 ij> -- (6) AT ISOLATION clause should be disabled in SELECT statement
 -- AT ISOLATION not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error
 SELECT * FROM t1 AT ISOLATION READ UNCOMMITTED;

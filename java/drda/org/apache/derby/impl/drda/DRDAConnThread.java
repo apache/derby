@@ -46,6 +46,7 @@ import java.util.Vector;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.info.JVMInfo;
@@ -3996,7 +3997,7 @@ public class DRDAConnThread extends Thread {
 
 		switch (drdaType)
 		{
-			case FdocaConstants.DRDA_TYPE_NSMALL:
+			case DRDAConstants.DRDA_TYPE_NSMALL:
 			{
 				short paramVal = (short) reader.readShort(getByteOrder());
 				if (SanityManager.DEBUG)
@@ -4008,7 +4009,7 @@ public class DRDAConnThread extends Thread {
 					ps.setShort(i+1, paramVal);
 				break;
 			}
-			case  FdocaConstants.DRDA_TYPE_NINTEGER:
+			case  DRDAConstants.DRDA_TYPE_NINTEGER:
 			{
 				int paramVal = reader.readInt(getByteOrder());
 				if (SanityManager.DEBUG)
@@ -4016,7 +4017,7 @@ public class DRDAConnThread extends Thread {
 				ps.setInt(i+1, paramVal);
 				break;
 			}
-			case FdocaConstants.DRDA_TYPE_NINTEGER8:
+			case DRDAConstants.DRDA_TYPE_NINTEGER8:
 			{
 				long paramVal = reader.readLong(getByteOrder());
 				if (SanityManager.DEBUG)
@@ -4024,7 +4025,7 @@ public class DRDAConnThread extends Thread {
 				ps.setLong(i+1, paramVal);
 				break;
 			}
-			case FdocaConstants.DRDA_TYPE_NFLOAT4:
+			case DRDAConstants.DRDA_TYPE_NFLOAT4:
 			{
 				float paramVal = reader.readFloat(getByteOrder());
 				if (SanityManager.DEBUG) 
@@ -4032,7 +4033,7 @@ public class DRDAConnThread extends Thread {
 				ps.setFloat(i+1, paramVal);
 				break;
 			}
-			case FdocaConstants.DRDA_TYPE_NFLOAT8:
+			case DRDAConstants.DRDA_TYPE_NFLOAT8:
 			{
 				double paramVal = reader.readDouble(getByteOrder());
 				if (SanityManager.DEBUG) 
@@ -4040,7 +4041,7 @@ public class DRDAConnThread extends Thread {
 				ps.setDouble(i+1, paramVal);
 				break;
 			}
-			case FdocaConstants.DRDA_TYPE_NDECIMAL:
+			case DRDAConstants.DRDA_TYPE_NDECIMAL:
 			{
 				int precision = (paramLenNumBytes >> 8) & 0xff;
 				int scale = paramLenNumBytes & 0xff;
@@ -4050,7 +4051,7 @@ public class DRDAConnThread extends Thread {
 				ps.setBigDecimal(i+1, paramVal);
 				break;
 			}
-			case FdocaConstants.DRDA_TYPE_NDATE:
+			case DRDAConstants.DRDA_TYPE_NDATE:
 			{
 				String paramVal = reader.readStringData(10).trim();  //parameter may be char value
 				if (SanityManager.DEBUG) 
@@ -4068,7 +4069,7 @@ public class DRDAConnThread extends Thread {
 				}
 				break;
 			}
-			case FdocaConstants.DRDA_TYPE_NTIME:
+			case DRDAConstants.DRDA_TYPE_NTIME:
 			{
 				String paramVal = reader.readStringData(8).trim();  //parameter may be char value
 				if (SanityManager.DEBUG) 
@@ -4081,7 +4082,7 @@ public class DRDAConnThread extends Thread {
 				}
 				break;
 			}
-			case FdocaConstants.DRDA_TYPE_NTIMESTAMP:
+			case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
 			{
 				// JCC represents ts in a slightly different format than Java standard, so
 				// we do the conversion to Java standard here.
@@ -4106,11 +4107,11 @@ public class DRDAConnThread extends Thread {
 				}
 				break;
 			}
-			case FdocaConstants.DRDA_TYPE_NCHAR:
-			case FdocaConstants.DRDA_TYPE_NVARCHAR:
-			case FdocaConstants.DRDA_TYPE_NLONG:
-			case FdocaConstants.DRDA_TYPE_NVARMIX:
-			case FdocaConstants.DRDA_TYPE_NLONGMIX:
+			case DRDAConstants.DRDA_TYPE_NCHAR:
+			case DRDAConstants.DRDA_TYPE_NVARCHAR:
+			case DRDAConstants.DRDA_TYPE_NLONG:
+			case DRDAConstants.DRDA_TYPE_NVARMIX:
+			case DRDAConstants.DRDA_TYPE_NLONGMIX:
 			{
 				String paramVal = reader.readLDStringData(stmt.ccsidMBCEncoding);
 				if (SanityManager.DEBUG)
@@ -4118,7 +4119,7 @@ public class DRDAConnThread extends Thread {
 				ps.setString(i+1, paramVal);
 				break;
 			}
-			case  FdocaConstants.DRDA_TYPE_NFIXBYTE:
+			case  DRDAConstants.DRDA_TYPE_NFIXBYTE:
 			{
 				byte[] paramVal = reader.readBytes();
 				if (SanityManager.DEBUG) 
@@ -4126,8 +4127,8 @@ public class DRDAConnThread extends Thread {
 				ps.setBytes(i+1, paramVal);
 				break;
 			}
-			case FdocaConstants.DRDA_TYPE_NVARBYTE:
-			case FdocaConstants.DRDA_TYPE_NLONGVARBYTE:
+			case DRDAConstants.DRDA_TYPE_NVARBYTE:
+			case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
 			{
 				int length = reader.readNetworkShort();	//protocol control data always follows big endian
 				if (SanityManager.DEBUG)
@@ -4136,10 +4137,10 @@ public class DRDAConnThread extends Thread {
 				ps.setBytes(i+1, paramVal);
 				break;
 			}
-			case FdocaConstants.DRDA_TYPE_NLOBBYTES:
-			case FdocaConstants.DRDA_TYPE_NLOBCMIXED:
-			case FdocaConstants.DRDA_TYPE_NLOBCSBCS:
-			case FdocaConstants.DRDA_TYPE_NLOBCDBCS:
+			case DRDAConstants.DRDA_TYPE_NLOBBYTES:
+			case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
+			case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
+			case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
 			 {
 				 long length = readLobLength(paramLenNumBytes);
 				 if (length != 0) //can be -1 for CLI if "data at exec" mode, see clifp/exec test
@@ -4150,7 +4151,7 @@ public class DRDAConnThread extends Thread {
 				 }
 				 else   /* empty */
 				 {
-					if (drdaType == FdocaConstants.DRDA_TYPE_NLOBBYTES)
+					if (drdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES)
 						ps.setBytes(i+1, new byte[0]);
 					else
 						ps.setString(i+1, "");
@@ -4237,28 +4238,28 @@ public class DRDAConnThread extends Thread {
 				String paramString = null;
 				switch (drdaType)
 				{
-					case  FdocaConstants.DRDA_TYPE_LOBBYTES:
-					case  FdocaConstants.DRDA_TYPE_NLOBBYTES:
+					case  DRDAConstants.DRDA_TYPE_LOBBYTES:
+					case  DRDAConstants.DRDA_TYPE_NLOBBYTES:
 						if (SanityManager.DEBUG)
 							trace("parameter value is: "+paramBytes);
 						ps.setBytes(i+1, paramBytes);
 						break;
-					case FdocaConstants.DRDA_TYPE_LOBCSBCS:
-					case FdocaConstants.DRDA_TYPE_NLOBCSBCS:
+					case DRDAConstants.DRDA_TYPE_LOBCSBCS:
+					case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
 						paramString = new String(paramBytes, stmt.ccsidSBCEncoding);
 						if (SanityManager.DEBUG)
 							trace("parameter value is: "+ paramString);
 						ps.setString(i+1,paramString);
 						break;
-					case FdocaConstants.DRDA_TYPE_LOBCDBCS:
-					case FdocaConstants.DRDA_TYPE_NLOBCDBCS:
+					case DRDAConstants.DRDA_TYPE_LOBCDBCS:
+					case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
 						paramString = new String(paramBytes, stmt.ccsidDBCEncoding );
 						if (SanityManager.DEBUG)
 							trace("parameter value is: "+ paramString);
 						ps.setString(i+1,paramString);
 						break;
-					case FdocaConstants.DRDA_TYPE_LOBCMIXED:
-					case FdocaConstants.DRDA_TYPE_NLOBCMIXED:
+					case DRDAConstants.DRDA_TYPE_LOBCMIXED:
+					case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
 						paramString = new String(paramBytes, stmt.ccsidMBCEncoding);
 						if (SanityManager.DEBUG)
 							trace("parameter value is: "+ paramString);
@@ -5766,10 +5767,11 @@ public class DRDAConnThread extends Thread {
 												 (pmeta.isNullable(i) == JDBC30Translation.PARAMETER_NULLABLE));
 			int colType = (hasRs ? rsmeta.getColumnType(i) : pmeta.getParameterType(i));
 			int[] outlen = {-1};
-			int drdaType = (hasRs ?FdocaConstants.mapJdbcTypeToDrdaType(colType,nullable,outlen): 
-								stmt.getParamDRDAType(i));
+			int drdaType =
+				(hasRs ?FdocaConstants.mapJdbcTypeToDrdaType(appRequester,colType,nullable,outlen): 
+				 stmt.getParamDRDAType(i));
 
-			boolean isDecimal = ((drdaType | 1) == FdocaConstants.DRDA_TYPE_NDECIMAL);
+			boolean isDecimal = ((drdaType | 1) == DRDAConstants.DRDA_TYPE_NDECIMAL);
 			int precision = 0, scale = 0;
 			if (hasRs)
 			{
@@ -6082,14 +6084,14 @@ public class DRDAConnThread extends Thread {
 					 			 "precision = " + precision +" scale = " + scale);
 					switch (ndrdaType)
 					{
-						case FdocaConstants.DRDA_TYPE_NLOBBYTES:
-						case  FdocaConstants.DRDA_TYPE_NLOBCMIXED:
+						case DRDAConstants.DRDA_TYPE_NLOBBYTES:
+						case  DRDAConstants.DRDA_TYPE_NLOBCMIXED:
 							EXTDTAInputStream extdtaStream=  
 								EXTDTAInputStream.getEXTDTAStream(rs, i, drdaType);
 							writeFdocaVal(i,extdtaStream, drdaType,
 										  precision,scale,rs.wasNull(),stmt);
 							break;
-						case FdocaConstants.DRDA_TYPE_NINTEGER:
+						case DRDAConstants.DRDA_TYPE_NINTEGER:
 							int ival = rs.getInt(i);
 							valNull = rs.wasNull();
 							if (SanityManager.DEBUG)
@@ -6098,7 +6100,7 @@ public class DRDAConnThread extends Thread {
 							if (! valNull)
 								writer.writeInt(ival);
 							break;
-						case FdocaConstants.DRDA_TYPE_NSMALL:
+						case DRDAConstants.DRDA_TYPE_NSMALL:
 							short sval = rs.getShort(i);
 							valNull = rs.wasNull();
 							if (SanityManager.DEBUG)
@@ -6107,7 +6109,7 @@ public class DRDAConnThread extends Thread {
 							if (! valNull)
 								writer.writeShort(sval);
 							break;
-						case FdocaConstants.DRDA_TYPE_NINTEGER8:
+						case DRDAConstants.DRDA_TYPE_NINTEGER8:
 							long lval = rs.getLong(i);
 							valNull = rs.wasNull();
 							if (SanityManager.DEBUG)
@@ -6116,7 +6118,7 @@ public class DRDAConnThread extends Thread {
 							if (! valNull)
 								writer.writeLong(lval);
 							break;
-						case FdocaConstants.DRDA_TYPE_NFLOAT4:
+						case DRDAConstants.DRDA_TYPE_NFLOAT4:
 							float fval = rs.getFloat(i);
 							valNull = rs.wasNull();
 							if (SanityManager.DEBUG)
@@ -6125,7 +6127,7 @@ public class DRDAConnThread extends Thread {
 							if (! valNull)
 								writer.writeFloat(fval);
 							break;
-						case FdocaConstants.DRDA_TYPE_NFLOAT8:
+						case DRDAConstants.DRDA_TYPE_NFLOAT8:
 							double dval = rs.getDouble(i);
 							valNull = rs.wasNull();
 							if (SanityManager.DEBUG)
@@ -6134,11 +6136,11 @@ public class DRDAConnThread extends Thread {
 							if (! valNull)
 								writer.writeDouble(dval);
 							break;
-						case FdocaConstants.DRDA_TYPE_NCHAR:
-						case FdocaConstants.DRDA_TYPE_NVARCHAR:
-						case FdocaConstants.DRDA_TYPE_NVARMIX:
-						case FdocaConstants.DRDA_TYPE_NLONG:
-						case FdocaConstants.DRDA_TYPE_NLONGMIX:
+						case DRDAConstants.DRDA_TYPE_NCHAR:
+						case DRDAConstants.DRDA_TYPE_NVARCHAR:
+						case DRDAConstants.DRDA_TYPE_NVARMIX:
+						case DRDAConstants.DRDA_TYPE_NLONG:
+						case DRDAConstants.DRDA_TYPE_NLONGMIX:
 							String valStr = rs.getString(i);
 							if (SanityManager.DEBUG)
 								trace("====== writing char/varchar/mix :"+ valStr + ":");
@@ -6462,7 +6464,8 @@ public class DRDAConnThread extends Thread {
 										ResultSetMetaData.columnNullable) : 
 			(pmeta.isNullable(jdbcElemNum) == JDBC30Translation.PARAMETER_NULLABLE);
 		
-		int sqlType = SQLTypes.mapJdbcTypeToDB2SqlType(elemType,
+		int sqlType = SQLTypes.mapJdbcTypeToDB2SqlType(appRequester,
+													   elemType,
 													   nullable,
 													   outlen);
 		
@@ -6686,7 +6689,10 @@ public class DRDAConnThread extends Thread {
 			long valLength = 0;
 			switch (ndrdaType)
 			{
-			case FdocaConstants.DRDA_TYPE_NSMALL:
+			    case DRDAConstants.DRDA_TYPE_NBOOLEAN:
+					writer.writeByte( makeInt( (Boolean) val ) );
+					break;
+			    case DRDAConstants.DRDA_TYPE_NSMALL:
  					// DB2 does not have a BOOLEAN java.sql.bit type,
 					// so we need to send it as a small
  					if (val instanceof Boolean)
@@ -6700,31 +6706,31 @@ public class DRDAConnThread extends Thread {
 					else
  						writer.writeShort(((Integer) val).shortValue());
 					break;
-				case  FdocaConstants.DRDA_TYPE_NINTEGER:
+				case  DRDAConstants.DRDA_TYPE_NINTEGER:
 					writer.writeInt(((Integer) val).intValue());
 					break;
-				case FdocaConstants.DRDA_TYPE_NINTEGER8:
+				case DRDAConstants.DRDA_TYPE_NINTEGER8:
 					writer.writeLong(((Long) val).longValue());
 					break;
-				case FdocaConstants.DRDA_TYPE_NFLOAT4:
+				case DRDAConstants.DRDA_TYPE_NFLOAT4:
 					writer.writeFloat(((Float) val).floatValue());
 					break;
-				case FdocaConstants.DRDA_TYPE_NFLOAT8:
+				case DRDAConstants.DRDA_TYPE_NFLOAT8:
 					writer.writeDouble(((Double) val).doubleValue());
 					break;
-				case FdocaConstants.DRDA_TYPE_NDECIMAL:
+				case DRDAConstants.DRDA_TYPE_NDECIMAL:
 					if (precision == 0)
 						precision = FdocaConstants.NUMERIC_DEFAULT_PRECISION;
 					BigDecimal bd = (java.math.BigDecimal) val;
 					writer.writeBigDecimal(bd,precision,scale);
 					break;
-				case FdocaConstants.DRDA_TYPE_NDATE:
+				case DRDAConstants.DRDA_TYPE_NDATE:
 					writer.writeString(((java.sql.Date) val).toString());
 					break;
-				case FdocaConstants.DRDA_TYPE_NTIME:
+				case DRDAConstants.DRDA_TYPE_NTIME:
 					writer.writeString(((java.sql.Time) val).toString());
 					break;
-				case FdocaConstants.DRDA_TYPE_NTIMESTAMP:
+				case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
 					// we need to send it in a slightly different format, and pad it
 					// up to or truncate it into 26 chars
 					String ts1 = ((java.sql.Timestamp) val).toString();
@@ -6739,30 +6745,30 @@ public class DRDAConnThread extends Thread {
 						ts2 = ts2.substring(0,26);
 					writer.writeString(ts2);
 					break;
-				case FdocaConstants.DRDA_TYPE_NCHAR:
+				case DRDAConstants.DRDA_TYPE_NCHAR:
 					writer.writeString(((String) val).toString());
 					break;
-				case FdocaConstants.DRDA_TYPE_NVARCHAR:
-				case FdocaConstants.DRDA_TYPE_NVARMIX:
-				case FdocaConstants.DRDA_TYPE_NLONG:
-				case FdocaConstants.DRDA_TYPE_NLONGMIX:
+				case DRDAConstants.DRDA_TYPE_NVARCHAR:
+				case DRDAConstants.DRDA_TYPE_NVARMIX:
+				case DRDAConstants.DRDA_TYPE_NLONG:
+				case DRDAConstants.DRDA_TYPE_NLONGMIX:
 					//WriteLDString and generate warning if truncated
 					// which will be picked up by checkWarning()
 					writer.writeLDString(val.toString(), index);
 					break;
-				case FdocaConstants.DRDA_TYPE_NLOBBYTES:
-				case FdocaConstants.DRDA_TYPE_NLOBCMIXED:
+				case DRDAConstants.DRDA_TYPE_NLOBBYTES:
+				case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
 					// do not send EXTDTA for lob of length 0, beetle 5967
 					valLength = ((EXTDTAInputStream) val).length();
 					if (valLength > 0)
 						stmt.addExtDtaObject(val, index);
 					writer.writeExtendedLength (valLength);
 					break;
-				case  FdocaConstants.DRDA_TYPE_NFIXBYTE:
+				case  DRDAConstants.DRDA_TYPE_NFIXBYTE:
 					writer.writeBytes((byte[]) val);
 					break;
-				case FdocaConstants.DRDA_TYPE_NVARBYTE:
-				case FdocaConstants.DRDA_TYPE_NLONGVARBYTE:
+				case DRDAConstants.DRDA_TYPE_NVARBYTE:
+				case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
 						writer.writeLDBytes((byte[]) val, index);
 					break;
 				default:
@@ -6771,6 +6777,17 @@ public class DRDAConnThread extends Thread {
 					writer.writeLDString(val.toString(), index);
 			}
 		}
+	}
+
+ 	/**
+	 * turn a boolean into an int
+	 * @param val	boolean value
+	 * 
+	 **/
+	private	int	makeInt( Boolean val )
+	{
+		if ( val.booleanValue() ) { return 1; }
+		else { return 0; }
 	}
 
 	/**

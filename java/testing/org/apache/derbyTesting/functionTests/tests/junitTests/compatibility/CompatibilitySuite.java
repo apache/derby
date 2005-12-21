@@ -59,59 +59,21 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 	public	static	final	Version	VM_1_4 = new Version( 1, 4 );
 	public	static	final	Version	VM_1_5 = new Version( 1, 5 );
 
-	public	static	final	String	DEFAULT_USER_NAME = "APP";
-	public	static	final	String	DEFAULT_PASSWORD = "APP";
-
-	//
-	// These are properties for the Derby connection URL.
-	//
+	public	static	final	String	SERVER_VERSION_FUNCTION = "getVMVersion";
+	
 	private	static	final			String	VERSION_PROPERTY = "java.version";
-	private	static	final			String	SERVER_URL = "jdbc:derby://localhost:1527/";
-	private	static	final			String	CREATE_PROPERTY = "create=true";
 
 	private	static	final			int		EXPECTED_CLIENT_COUNT = 1;
 
-	//
-	// Indexes into the array of client-specific strings. E.g., DB2JCC_CLIENT,
-	// DERBY_CLIENT, and EMBEDDED_CLIENT.
-	//
-	private	static	final			int		DATABASE_URL = 0;
-	private	static	final			int		DRIVER_NAME = DATABASE_URL + 1;
-
-	// indexed by DATABASE_URL and DRIVER_NAME
-	private	static	final	String[]	DB2JCC_CLIENT =
-	{
-		"jdbc:derby:net://localhost:1527/",
-		"com.ibm.db2.jcc.DB2Driver"
-	};
-	private	static	final	String[]	DERBY_CLIENT =
-	{
-		"jdbc:derby://localhost:1527/",
-		"org.apache.derby.jdbc.ClientDriver"
-	};
-	private	static	final	String[]	EMBEDDED_CLIENT =
-	{
-		"jdbc:derby:",
-		"org.apache.derby.jdbc.EmbeddedDriver"
-	};
-
-	private	static	final	String[][]	LEGAL_CLIENTS =
-	{
-		DB2JCC_CLIENT,
-		DERBY_CLIENT,
-		EMBEDDED_CLIENT
-	};
-	
 	/////////////////////////////////////////////////////////////
 	//
 	//	STATE
 	//
 	/////////////////////////////////////////////////////////////
 
-	private	static	String[]	_defaultClientSettings;	// one of the clients in LEGAL_CLIENTS
 	private	static	Driver		_driver;				// the corresponding jdbc driver
-	private	static	String		_databaseName;			// sandbox for tests
 	private	static	Version		_clientVMLevel;			// level of client-side vm
+	private	static	Version		_serverVMLevel;			// level of server vm
 	private	static	Version		_driverLevel;			// client rev level
 	private	static	Version		_serverLevel;			// server rev level
 
@@ -202,17 +164,33 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 
 	/**
 	 * <p>
+	 * Get the vm level of the server.
+	 * </p>
+	 */
+	public	static	Version	getServerVMVersion()	{ return _serverVMLevel; }
+
+	/**
+	 * <p>
 	 * Get the vm level of the client.
 	 * </p>
 	 */
 	public	Version	getClientVMVersion() { return _clientVMLevel; }
 
+	/////////////////////////////////////////////////////////////
+	//
+	//	DATABASE-SIDE FUNCTIONS
+	//
+	/////////////////////////////////////////////////////////////
+	
 	/**
 	 * <p>
-	 * Return true if we're using the embedded driver.
+	 * Get the vm level of the server.
 	 * </p>
 	 */
-	public	boolean	usingEmbeddedClient() { return ( _defaultClientSettings == EMBEDDED_CLIENT ); }
+	public	static	String	getVMVersion()
+	{
+		return System.getProperty( VERSION_PROPERTY );
+	}
 
 	/////////////////////////////////////////////////////////////
 	//
@@ -246,7 +224,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 		// In that case, we don't bother looking for a client on
 		// the classpath.
 		//
-		if ( _defaultClientSettings != null ) { faultInDriver( _defaultClientSettings ); }
+		if ( getClientSettings() != null ) { faultInDriver( getClientSettings() ); }
 		else
 		{
 			String	currentClientName = null;
@@ -259,7 +237,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 
 				if ( faultInDriver( candidate ) )
 				{
-					_defaultClientSettings = candidate;
+					setClient( candidate );
 					foundCount++;
 				}
 			}
@@ -273,7 +251,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 		// Now make sure that the JDBC driver is what we expect
 
 		try {
-			_driver = DriverManager.getDriver( _defaultClientSettings[ DATABASE_URL ] );
+			_driver = DriverManager.getDriver( getClientSettings()[ DATABASE_URL ] );
 			_driverLevel = new Version( _driver.getMajorVersion(), _driver.getMinorVersion() );
 		}
 		catch (SQLException e)
@@ -281,7 +259,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 			printStackTrace( e );
 			
 			throw new Exception
-				( "Driver doesn't understand expected URL: " + _defaultClientSettings[ DATABASE_URL ] );
+				( "Driver doesn't understand expected URL: " + getClientSettings()[ DATABASE_URL ] );
 		}
 
 		println
@@ -306,6 +284,8 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 			String				dbProductVersion = dmd.getDatabaseProductVersion();
 
 			_serverLevel = new Version( dbProductVersion );
+			
+			parseServerVMVersion( conn );
 		}
 		catch (Exception e)
 		{
@@ -319,26 +299,10 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 		return true;
 	}
 
-	protected	static	boolean	faultInDriver( String[] clientSettings )
-	{
-		String	currentClientName = clientSettings[ DRIVER_NAME ];
-		
-		try {
-			Class.forName( currentClientName );
-
-			return true;
-		}
-		catch (Exception e)
-		{
-			println( "Could not find " + currentClientName );
-			return false;
-		}
-	}
-
 	private	static	boolean	parseVMLevel()
 		throws Exception
 	{
-		String				vmVersion = System.getProperty( VERSION_PROPERTY );
+		String				vmVersion = getVMVersion();
 
 		try {
 			_clientVMLevel = new Version( vmVersion );
@@ -359,7 +323,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 		if ( ( args == null ) || (args.length == 0 ) )
 		{ throw new Exception( "Missing database name." ); }
 		
-		_databaseName = args[ 0 ];
+		setDatabaseName( args[ 0 ] );
 
 		if ( (args.length > 1) && !"".equals( args[ 1 ] ) )
 		{
@@ -372,12 +336,12 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 
 				if ( desiredClientName.equals( candidate[ DRIVER_NAME ] ) )
 				{
-					_defaultClientSettings = candidate;
+					setClient( candidate );
 					break;
 				}
 			}
 
-			if ( _defaultClientSettings == null )
+			if ( getClientSettings() == null )
 			{
 				throw new Exception
 					( "Could not find client " + desiredClientName + " on the classpath." );
@@ -387,88 +351,48 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 		return true;
 	}
 
-	//////////////////////////
-	//
-	//	CONNECTION MINIONS
-	//
-	//////////////////////////
-	
-	// Get a connection to the server.
-	protected	static	Connection	getConnection()
-		throws Exception
+	/**
+	 * <p>
+	 * Get the vm level of the server.
+	 * </p>
+	 */
+	private	static	void	parseServerVMVersion( Connection conn )
+		throws SQLException
 	{
-		return getConnection( _defaultClientSettings, _databaseName, new Properties() );
-	}
-	protected	static	Connection	getConnection
-	(
-	    String[]	clientSettings,
-		String		databaseName,
-		Properties	properties
-	)
-		throws Exception
-	{
-		faultInDriver( clientSettings );
+		dropFunction( conn, SERVER_VERSION_FUNCTION );
 
-		properties.put( "user", DEFAULT_USER_NAME );
-		properties.put( "password", DEFAULT_PASSWORD );
-		properties.put( "retreiveMessagesFromServerOnGetMessage", "true" );
+		PreparedStatement	ps = prepare
+			(
+			    conn,
+				"create function " + SERVER_VERSION_FUNCTION + "() returns varchar(50)\n" +
+				"parameter style java no sql language java\n" +
+				"external name 'org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.CompatibilitySuite.getVMVersion'"
+			);
+		ps.execute();
+		close( ps );
 
-		Connection		conn = DriverManager.getConnection
-			( makeDatabaseURL( clientSettings, databaseName ), properties );
+		ps = prepare
+			(
+			    conn,
+				"values " + SERVER_VERSION_FUNCTION + "()"
+			);
 
-		println( "Connection is a " + conn.getClass().getName() );
-		
-		return conn;
-	}
+		ResultSet	rs = ps.executeQuery();
+		rs.next();
+		String		rawVersion = rs.getString( 1 );
+		close( rs );
+		close( ps );
 
-	// Build the connection URL.
-	private	static	String	makeDatabaseURL( String[] clientSettings, String databaseName )
-	{
-		return clientSettings[ DATABASE_URL ] + databaseName;
+		_serverVMLevel = new Version( rawVersion );
+			
+		println( "Server VM Version = " + _serverVMLevel );
 	}
 
-   
 	///////////////
 	//
 	//	SQL MINIONS
 	//
 	///////////////
-
-	/**
-	 * <p>
-	 * Create an empty database.
-	 * </p>
-	 */
-	protected	void	createDB( String databaseName )
-		throws Exception
-	{
-		String[]	clientSettings = _defaultClientSettings;
-		String		dbURL = makeDatabaseURL( clientSettings, databaseName );
-
-		dbURL = dbURL + ';' + CREATE_PROPERTY;
-
-		Properties	properties = new Properties();
-
-		properties.put( "user", DEFAULT_USER_NAME );
-		properties.put( "password", DEFAULT_PASSWORD );
-
-		faultInDriver( clientSettings );
-
-		Connection		conn = DriverManager.getConnection( dbURL, properties );
-
-		conn.close();
-	}
-
-	//
-	// Thin wrapper around jdbc layer to support debugging.
-	//
-	protected	PreparedStatement	prepare( Connection conn, String text )
-		throws SQLException
-	{
-		println( "Preparing: " + text );
-
-		return conn.prepareStatement( text );
-	}
 
 	/////////////////////////////////////////////////////////////
 	//

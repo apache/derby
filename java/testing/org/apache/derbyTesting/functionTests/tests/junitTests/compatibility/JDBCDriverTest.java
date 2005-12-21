@@ -46,8 +46,10 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	/////////////////////////////////////////////////////////////
 
 	private	static	final			String	ALL_TYPES_TABLE = "allTypesTable";
+	private	static	final			String	BOOLEAN_TABLE = "booleanTable";
 	private	static	final			String	KEY_COLUMN = "keyCol";
-	
+	private	static	final			String	RICOCHET_BOOLEAN_PROC = "ricochetBooleanProc";
+
 	//
 	// Data values to be stuffed into columns of ALL_TYPES_TABLE.
 	//
@@ -117,6 +119,11 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		( Types.VARCHAR,		"varchar(5)",					IBM_2_4,	DRB_10_0,	VM_1_3 ),
 		new TypeDescriptor
 		( Types.VARBINARY,		"varchar(5) for bit data",		IBM_2_4,	DRB_10_0,	VM_1_3 ),
+
+		// 10.2 types
+		
+		new TypeDescriptor
+		( JDBC_BOOLEAN,			"boolean",						null,		DRB_10_2,	VM_1_3 ),
 	};
 
 	//
@@ -125,6 +132,8 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	//
 	private	static	final	Object[]	ROW_1 =
 	{
+		// 10.0 columns
+		
 		new Long( 1L ),
 		new MyBlob( SAMPLE_BYTES ),
 		SAMPLE_STRING,
@@ -146,8 +155,43 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		new Timestamp( 1L ),
 		SAMPLE_STRING,
 		SAMPLE_BYTES,
+
+		// 10.2 columns
+
+		new Boolean( true ),
 	};
 
+	//
+	// Describes columns for the boolean table test.
+	//
+	private	static	final	TypeDescriptor[]	BOOLEAN_TABLE_TYPES =
+	{
+		new TypeDescriptor
+		( JDBC_BOOLEAN,			"boolean",						null,		DRB_10_2,	VM_1_3 ),
+	};
+	
+	//
+	// This table needs to have the same number of entries as BOOLEAN_TABLE_TYPES.
+	//
+	private	static	final	Object[][]	BOOLEAN_ROWS =
+	{
+		new Object[] { new Boolean( true ) },
+		new Object[] { new Boolean( false ) },
+	};
+
+	//
+	// Describe signature of the RICOCHET_BOOLEAN_PROC procedure
+	//
+	private	static	final	int					INVALUE = 0;
+	private	static	final	int					OUTVALUE = INVALUE + 1;
+	private	static	final	TypeDescriptor[]	RICOCHET_BOOLEAN_PROC_TYPES =
+	{
+		new TypeDescriptor
+		( JDBC_BOOLEAN,			"INVALUE",						null,		DRB_10_2,	VM_1_3 ),
+		new TypeDescriptor
+		( JDBC_BOOLEAN,			"OUTVALUE",						null,		DRB_10_2,	VM_1_3 ),
+	};
+	
 	//
 	// This table needs to have the same number of rows as ALL_TYPES.
 	// Each row in this table needs to have the same number of columns as
@@ -163,38 +207,39 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	//
 	private	static	final	T_CN[]	COERCIONS =
 	{
-		//												  B|B|C|B|C|D|D|D|R|I|L|L|N|R|S|T|T|V|V
-		//												  I|L|H|I|L|A|E|O|E|N|O|O|U|E|M|I|I|A|A
-		//												  G|O|A|N|O|T|C|U|A|T|N|N|M|A|A|M|M|R|R
-		//												  I|B|R|A|B|E|I|B|L|E|G|G|E|L|L|E|E|C|B
-		//												  N|-|-|R|-|-|M|L|-|G|V|V|R|-|L|-|S|H|I
-		//												  T|-|-|Y|-|-|A|E|-|E|A|A|I|-|I|-|T|A|N
-		//												  -|-|-|-|-|-|L|-|-|R|R|R|C|-|N|-|A|R|A
-		//												  -|-|-|-|-|-|-|-|-|-|C|B|-|-|T|-|M|-|R
-		//												  -|-|-|-|-|-|-|-|-|-|H|I|-|-|-|-|P|-|Y
-		//												  -|-|-|-|-|-|-|-|-|-|A|N|-|-|-|-|-|-|-
-		//												  -|-|-|-|-|-|-|-|-|-|R|A|-|-|-|-|-|-|-
-		//												  -|-|-|-|-|-|-|-|-|-|-|R|-|-|-|-|-|-|-
-		//												  -|-|-|-|-|-|-|-|-|-|-|Y|-|-|-|-|-|-|-
-		new T_CN( Types.BIGINT, new boolean[]			{ Y,_,Y,_,_,_,_,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_, } ),
-		new T_CN( Types.BLOB, new boolean[] 			{ _,Y,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_, } ),
-		new T_CN( Types.CHAR, new boolean[]				{ _,_,Y,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y,_, } ),
-		new T_CN( Types.BINARY, new boolean[]			{ _,_,_,Y,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y, } ),
-		new T_CN( Types.CLOB, new boolean[]				{ _,_,_,_,Y,_,_,_,_,_,_,_,_,_,_,_,_,_,_, } ),
-		new T_CN( Types.DATE, new boolean[]				{ _,_,_,_,_,Y,_,_,_,_,_,_,_,_,_,_,_,_,_, } ),
-		new T_CN( Types.DECIMAL, new boolean[]			{ Y,_,_,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_, } ),
-		new T_CN( Types.DOUBLE, new boolean[]			{ Y,_,_,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_, } ),
-		new T_CN( Types.REAL, new boolean[]				{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_, } ),
-		new T_CN( Types.INTEGER, new boolean[]			{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_, } ),
-		new T_CN( Types.LONGVARCHAR, new boolean[]		{ _,_,Y,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y,_, } ),
-		new T_CN( Types.LONGVARBINARY, new boolean[]	{ _,_,_,_,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y, } ),
-		new T_CN( Types.NUMERIC, new boolean[]			{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_, } ),
-		new T_CN( Types.REAL, new boolean[]				{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_, } ),
-		new T_CN( Types.SMALLINT, new boolean[]			{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_, } ),
-		new T_CN( Types.TIME, new boolean[]				{ _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,Y,_,_,_, } ),
-		new T_CN( Types.TIMESTAMP, new boolean[]		{ _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,Y,_,_, } ),
-		new T_CN( Types.VARCHAR, new boolean[]			{ _,_,Y,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y,_, } ),
-		new T_CN( Types.VARBINARY, new boolean[]		{ _,_,_,_,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y, } ),
+		//												  B|B|C|B|C|D|D|D|R|I|L|L|N|R|S|T|T|V|V|B
+		//												  I|L|H|I|L|A|E|O|E|N|O|O|U|E|M|I|I|A|A|O
+		//												  G|O|A|N|O|T|C|U|A|T|N|N|M|A|A|M|M|R|R|O
+		//												  I|B|R|A|B|E|I|B|L|E|G|G|E|L|L|E|E|C|B|L
+		//												  N|-|-|R|-|-|M|L|-|G|V|V|R|-|L|-|S|H|I|E
+		//												  T|-|-|Y|-|-|A|E|-|E|A|A|I|-|I|-|T|A|N|A
+		//												  -|-|-|-|-|-|L|-|-|R|R|R|C|-|N|-|A|R|A|N
+		//												  -|-|-|-|-|-|-|-|-|-|C|B|-|-|T|-|M|-|R|-
+		//												  -|-|-|-|-|-|-|-|-|-|H|I|-|-|-|-|P|-|Y|-
+		//												  -|-|-|-|-|-|-|-|-|-|A|N|-|-|-|-|-|-|-|-
+		//												  -|-|-|-|-|-|-|-|-|-|R|A|-|-|-|-|-|-|-|-
+		//												  -|-|-|-|-|-|-|-|-|-|-|R|-|-|-|-|-|-|-|-
+		//												  -|-|-|-|-|-|-|-|-|-|-|Y|-|-|-|-|-|-|-|-
+		new T_CN( Types.BIGINT, new boolean[]			{ Y,_,Y,_,_,_,_,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_,Y } ),
+		new T_CN( Types.BLOB, new boolean[] 			{ _,Y,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_ } ),
+		new T_CN( Types.CHAR, new boolean[]				{ _,_,Y,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y,_,_ } ),
+		new T_CN( Types.BINARY, new boolean[]			{ _,_,_,Y,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y,_ } ),
+		new T_CN( Types.CLOB, new boolean[]				{ _,_,_,_,Y,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_ } ),
+		new T_CN( Types.DATE, new boolean[]				{ _,_,_,_,_,Y,_,_,_,_,_,_,_,_,_,_,_,_,_,_ } ),
+		new T_CN( Types.DECIMAL, new boolean[]			{ Y,_,_,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_,Y } ),
+		new T_CN( Types.DOUBLE, new boolean[]			{ Y,_,_,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_,Y } ),
+		new T_CN( Types.REAL, new boolean[]				{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_,Y } ),
+		new T_CN( Types.INTEGER, new boolean[]			{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_,Y } ),
+		new T_CN( Types.LONGVARCHAR, new boolean[]		{ _,_,Y,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y,_,_ } ),
+		new T_CN( Types.LONGVARBINARY, new boolean[]	{ _,_,_,_,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y,_ } ),
+		new T_CN( Types.NUMERIC, new boolean[]			{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_,Y } ),
+		new T_CN( Types.REAL, new boolean[]				{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_,Y } ),
+		new T_CN( Types.SMALLINT, new boolean[]			{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_,Y } ),
+		new T_CN( Types.TIME, new boolean[]				{ _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,Y,_,_,_,_ } ),
+		new T_CN( Types.TIMESTAMP, new boolean[]		{ _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,Y,_,_,_ } ),
+		new T_CN( Types.VARCHAR, new boolean[]			{ _,_,Y,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y,_,_ } ),
+		new T_CN( Types.VARBINARY, new boolean[]		{ _,_,_,_,_,_,_,_,_,_,_,Y,_,_,_,_,_,_,Y,_ } ),
+		new T_CN( JDBC_BOOLEAN, new boolean[]			{ Y,_,Y,_,_,_,Y,Y,Y,Y,Y,_,Y,Y,Y,_,_,Y,_,Y } ),
 	};
 
 	/////////////////////////////////////////////////////////////
@@ -219,6 +264,18 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
 	/////////////////////////////////////////////////////////////
 	//
+	//	DATABASE-SIDE FUNCTIONS
+	//
+	/////////////////////////////////////////////////////////////
+	
+	public	static	void	ricochetBooleanProc( Boolean inValue, Boolean[] outValue )
+		throws Exception
+	{
+		outValue[ 0 ] = inValue;
+	}
+
+	/////////////////////////////////////////////////////////////
+	//
 	//	TEST ENTRY POINTS
 	//
 	/////////////////////////////////////////////////////////////
@@ -230,7 +287,8 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	 */
 	public	void	testSanity()
 	{
-		assertEquals( "ALL_TYPES.length == ROW_1.length", ALL_TYPES.length, ROW_1.length );
+		assertEquals
+			( "ALL_TYPES.length == ROW_1.length", ALL_TYPES.length, ROW_1.length );
 
 		// make sure there we completely describe the coercibility of every jdbc type
 		int		coercionCount = COERCIONS.length;
@@ -256,6 +314,54 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		close( conn );
 	}
 	
+	/**
+	 * <p>
+	 * Test the boolean datatype added in release 10.2.
+	 * </p>
+	 */
+	public	void	testBoolean()
+		throws Exception
+	{
+		Connection			conn = getConnection();
+
+		// make sure we can read a legacy BOOLEAN column, regardless
+		// of the client/server/vm combination
+		readLegacyBooleanColumn( conn );
+		readLegacyBooleanMetadata( conn );
+		
+		if ( getServerVersion().atLeast( DRB_10_2 ) )
+		{		
+			TypeDescriptor[]	types = BOOLEAN_TABLE_TYPES;
+			String				tableName = BOOLEAN_TABLE;
+			Object[][]			rows = makeRows( BOOLEAN_ROWS );
+			ArrayList			casts = new ArrayList();
+		
+			dropTable( conn, tableName );
+			createTable( conn, tableName, types );
+			checkDBMetadata( conn, tableName );
+			stuffTable( conn, tableName, types, rows );
+			readTable( conn, tableName, types, rows, casts );
+
+			truncateTable( conn, tableName );
+			insertCasts( conn, tableName, types, casts );
+			verifyInsertedCasts( conn, tableName, types, casts );
+
+			dropProcedure( conn, RICOCHET_BOOLEAN_PROC );
+			executeDDL
+				(
+				 conn,
+				 "create procedure " + RICOCHET_BOOLEAN_PROC +
+				 "( in inValue boolean, out outValue boolean )\n" +
+				 "parameter style java no sql language java external name\n" +
+				 "'" + getClass().getName() + "." + RICOCHET_BOOLEAN_PROC + "'"
+				 );
+			checkProcMetadata( conn, RICOCHET_BOOLEAN_PROC, RICOCHET_BOOLEAN_PROC_TYPES );
+			callBooleanProc( conn );
+		}
+		
+		close( conn );
+	}
+
 	/////////////////////////////////////////////////////////////
 	//
 	//	TEST DATATYPES
@@ -269,29 +375,30 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	private	void	datatypesTest( Connection conn )
 		throws Exception
 	{
-		Object[][]	rows = new Object[][] { makeNullRow(), ROW_1 };
+		TypeDescriptor[]	types = ALL_TYPES;
+		String				tableName = ALL_TYPES_TABLE;
+		Object[][]			rows = new Object[][] { makeNullRow( types.length ), ROW_1 };
 		
-		checkTypeDBMetadata( conn );
-		stuffAllTypesTable( conn, rows );
-		readAllTypesTable( conn, rows );
+		checkDBMetadata( conn, tableName );
+		stuffTable( conn, tableName, types, rows );
+		readTable( conn, tableName, types, rows, null );
 	}
 	
 	//
-	// Verify that we get the correct DatabaseMetaData for all datatypes
-	// that are legal on the server.
+	// Verify that we get the correct DatabaseMetaData for a table.
 	//
-	private	void	checkTypeDBMetadata( Connection conn )
+	private	void	checkDBMetadata( Connection conn, String tableName )
 		throws Exception
 	{
 		String				normalizedSchema = DEFAULT_USER_NAME.toUpperCase();
-		String				normalizedTable = ALL_TYPES_TABLE.toUpperCase();
+		String				normalizedTable = tableName.toUpperCase();
 		DatabaseMetaData	dbmd = conn.getMetaData();
 
 		ResultSet			rs = dbmd.getColumns
 			( null, normalizedSchema, normalizedTable, "%" );
 
-		println( "Pawing through metadata for " + normalizedSchema + '.' + normalizedTable );
-		
+		println( "Pawing through database metadata for " + normalizedSchema + '.' + normalizedTable );
+
 		while( rs.next() )
 		{
 			String			columnName = rs.getString( "COLUMN_NAME" );
@@ -311,17 +418,72 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
 			println( buffer.toString() );
 			
-			assertEquals( columnName, typeDesc.getJdbcType(), actualJdbcType );
+			assertEquals( columnName, ddmdTypeKludge( typeDesc.getJdbcType() ), actualJdbcType );
 		}
 
 		close( rs );
 	}
 
 	//
-	// Verify that we can insert all datatypes that are legal on the
-	// server.
+	// Verify that we get the correct DatabaseMetaData for a procedure
 	//
-	private	void	stuffAllTypesTable( Connection conn, Object[][] rows )
+	private	void	checkProcMetadata( Connection conn, String procName, TypeDescriptor[] signature )
+		throws Exception
+	{
+		String				normalizedSchema = DEFAULT_USER_NAME.toUpperCase();
+		String				normalizedProc = procName.toUpperCase();
+		DatabaseMetaData	dbmd = conn.getMetaData();
+
+		ResultSet			rs = dbmd.getProcedureColumns
+			( null, normalizedSchema, normalizedProc, "%" );
+
+		println( "Pawing through database metadata for " + normalizedSchema + '.' + normalizedProc );
+
+		while( rs.next() )
+		{
+			String			columnName = rs.getString( "COLUMN_NAME" );
+			int				actualJdbcType = rs.getInt( "DATA_TYPE" );
+			TypeDescriptor	typeDesc = getType( signature, columnName );
+
+			if ( columnName.equals( KEY_COLUMN ) ) { continue; }
+
+			StringBuffer	buffer = new StringBuffer();
+
+			buffer.append( "[ " );
+			buffer.append( rs.getString( "COLUMN_NAME" ) );
+			buffer.append( ",\t" );
+			buffer.append( "type( " + rs.getInt( "DATA_TYPE" ) + " ),\t" );
+			buffer.append( rs.getString( "TYPE_NAME" ) );
+			buffer.append( " ]" );
+
+			println( buffer.toString() );
+			
+			assertEquals( columnName, ddmdTypeKludge( typeDesc.getJdbcType() ), actualJdbcType );
+		}
+
+		close( rs );
+	}
+
+	//
+	// Stuff a table with rows
+	//
+	private	void	stuffTable
+		( Connection conn, String tableName, TypeDescriptor[] types, Object[][] rows )
+		throws Exception
+	{
+		PreparedStatement	ps = makeInsert( conn, tableName, types );
+		int					rowCount = rows.length;
+
+		for ( int i = 0; i < rowCount; i++ )
+		{
+			setRow( ps, i + 1, types, rows[ i ] );
+		}
+		
+		close( ps );
+	}
+
+	private	PreparedStatement	makeInsert
+		( Connection conn, String tableName, TypeDescriptor[] types )
 		throws Exception
 	{
 		StringBuffer	masterBuffer = new StringBuffer();
@@ -329,7 +491,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		StringBuffer	valuesBuffer = new StringBuffer();
 		int				columnNumber = 0;
 		int				valuesNumber = 0;
-		int				typeCount = ALL_TYPES.length;
+		int				typeCount = types.length;
 
 		beginColumnList( columnBuffer );
 		beginColumnList( valuesBuffer );
@@ -339,7 +501,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		
 		for ( int i = 0; i < typeCount; i++ )
 		{
-			TypeDescriptor	type = ALL_TYPES[ i ];
+			TypeDescriptor	type = types[ i ];
 			
 			if ( getServerVersion().atLeast( type.getDerbyVersion() ) )
 			{
@@ -354,31 +516,43 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		endColumnList( columnBuffer );
 		endColumnList( valuesBuffer );
 
-		masterBuffer.append( "insert into " + ALL_TYPES_TABLE + "\n" );
+		masterBuffer.append( "insert into " + tableName + "\n" );
 		masterBuffer.append( columnBuffer.toString() );
 		masterBuffer.append( "values\n" );
 		masterBuffer.append( valuesBuffer.toString() );
 
 		PreparedStatement	ps = prepare( conn, masterBuffer.toString() );
-		int					rowCount = rows.length;
 
-		for ( int i = 0; i < rowCount; i++ )
-		{
-			setRow( ps, i + 1, rows[ i ] );
-		}
+		return ps;
+	}
+
+	//
+	// Verify that we can select all legal datatypes in a table.
+	//
+	private	void	readTable
+		( Connection conn, String tableName, TypeDescriptor[] types, Object[][] rows, List casts )
+		throws Exception
+	{
+		PreparedStatement	ps = readTableQuery( conn, tableName, types );
+		ResultSet			rs = ps.executeQuery();
+
+		checkRSMD( rs );
+		checkRows( rs, types, rows, casts );
 		
+		close( rs );
 		close( ps );
 	}
 
 	//
-	// Verify that we can select all datatypes that are legal on the server.
+	// Make the select query
 	//
-	private	void	readAllTypesTable( Connection conn, Object[][] rows )
+	private	PreparedStatement	readTableQuery
+		( Connection conn, String tableName, TypeDescriptor[] types )
 		throws Exception
 	{
 		StringBuffer	buffer = new StringBuffer();
 		int				columnNumber = 0;
-		int				typeCount = ALL_TYPES.length;
+		int				typeCount = types.length;
 
 		buffer.append( "select \n" );
 
@@ -386,7 +560,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		
 		for ( int i = 0; i < typeCount; i++ )
 		{
-			TypeDescriptor	type = ALL_TYPES[ i ];
+			TypeDescriptor	type = types[ i ];
 			
 			if ( getServerVersion().atLeast( type.getDerbyVersion() ) )
 			{
@@ -397,19 +571,14 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 			}
 		}
 
-		buffer.append( "\nfrom " + ALL_TYPES_TABLE + "\n" );
+		buffer.append( "\nfrom " + tableName + "\n" );
 		buffer.append( "order by " + doubleQuote( KEY_COLUMN ) );
 
 		PreparedStatement	ps = prepare( conn, buffer.toString() );
-		ResultSet			rs = ps.executeQuery();
 
-		checkRSMD( rs );
-		checkRows( rs, rows );
-		
-		close( rs );
-		close( ps );
+		return ps;
 	}
-
+	
 	//
 	// Verify that we get the correct ResultSetMetaData for all datatypes
 	// which are legal on the server.
@@ -421,29 +590,39 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		int					columnCount = rsmd.getColumnCount();
 		int					firstTastyColumn = 0;
 
-		println( "Column count = " + columnCount );
+		println( "ResultSetMetaData:\n" );
 		
 		firstTastyColumn++;				// skip uninteresting key column
 
 		for ( int i = firstTastyColumn; i < columnCount; i++ )
 		{
+			StringBuffer		buffer = new StringBuffer();
 			int				columnID = i + 1;
 			String			columnName = rsmd.getColumnName( columnID );
 			TypeDescriptor	typeDesc = getType( columnName );
 			int				expectedType = rsmdTypeKludge( typeDesc.getJdbcType() );
 			int				actualType = rsmd.getColumnType( columnID );
+
+			buffer.append( "[ " );
+			buffer.append( columnName );
+			buffer.append( ", type( " );
+			buffer.append( actualType );
+			buffer.append( " ), " );
+			buffer.append( rsmd.getColumnTypeName( columnID ) );
+			buffer.append( " ]\n" );
 			
-			println( "Checking type of " + columnName );
+			println( buffer.toString() );
 
 			assertEquals( columnName, expectedType, actualType );
 		}
+
 	}
 
 	//
 	// Verify that we select the values we
 	// originally inserted into a table.
 	//
-	private	void	checkRows( ResultSet rs, Object[][] rows )
+	private	void	checkRows( ResultSet rs, TypeDescriptor[] types, Object[][] rows, List casts )
 		throws Exception
 	{
 		int					rowCount = rows.length;
@@ -451,7 +630,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		for ( int i = 0; i < rowCount; i++ )
 		{
 			rs.next();
-			checkRow( rs, rows[ i ] );
+			checkRow( rs, types, rows[ i ], casts );
 		}
 	}
 
@@ -459,14 +638,14 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	// Verify that we select the values we
 	// originally inserted into a row.
 	//
-	private	void	checkRow( ResultSet rs, Object[] row )
+	private	void	checkRow( ResultSet rs, TypeDescriptor[] types, Object[] row, List casts )
 		throws Exception
 	{
-		int				typeCount = ALL_TYPES.length;
+		int				typeCount = types.length;
 
 		for ( int i = 0; i < typeCount; i++ )
 		{
-			TypeDescriptor	type = ALL_TYPES[ i ];
+			TypeDescriptor	type = types[ i ];
 			
 			if ( getServerVersion().atLeast( type.getDerbyVersion() ) )
 			{
@@ -477,7 +656,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 				println( "Comparing column " + columnName + ": " + expectedValue + " to " + actualValue );
 				compareObjects( columnName, expectedValue, actualValue );
 
-				checkCoercions( rs, columnName, type );
+				checkCoercions( rs, columnName, type, casts );
 			}
 		}
 	}
@@ -485,7 +664,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	//
 	// Verify all legal jdbc coercions of a data value.
 	//
-	private	void	checkCoercions( ResultSet rs, String columnName, TypeDescriptor type )
+	private	void	checkCoercions( ResultSet rs, String columnName, TypeDescriptor type, List casts )
 		throws Exception
 	{
 		T_CN		coercionDesc = COERCIONS[ getCoercionIndex( type.getJdbcType() ) ];
@@ -500,26 +679,81 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 			if ( coercions[ i ] )
 			{
 				legalCoercions++;
-				
-				Object	retval = getColumn( rs, columnName, COERCIONS[ i ].getJdbcType() );
-			}
-		}
 
-		println( "   Checked " + legalCoercions + " coercions for " + columnName );
+				int		jdbcType = COERCIONS[ i ].getJdbcType();
+				Object	retval = getColumn( rs, columnName, jdbcType );
+
+				if ( casts != null ) { casts.add( retval ); }
+
+				println( "\t" + jdbcType + ":\t" + retval );
+			}
+
+		}
+		// finally, try getObject()
+
+		Object	objval = rs.getObject( columnName );
+		if ( objval == null ) { println( "\tgetObject() = null" ); }
+		else
+		{
+			StringBuffer	buffer = new StringBuffer();
+			buffer.append( "\tgetObject() = " );
+			buffer.append( objval.getClass().getName() );
+			buffer.append( "( " );
+			buffer.append( objval );
+			buffer.append( " )" );
+			println( buffer.toString() );
+		}
 	}
 	
 	//
 	// This kludge compensates for the fact that the DRDA clients report
 	// that NUMERIC columns are DECIMAL. See bug 584.
 	//
+	// In addition, booleans are handled oddly by down-rev clients.
+	//
 	private	int	rsmdTypeKludge( int originalJDbcType )
 	{
 		// The embedded client does the right thing.
-		if ( usingEmbeddedClient() ) { return originalJDbcType; }
+		if ( usingEmbeddedClient() && getServerVMVersion().atLeast( VM_1_4 ) ) { return originalJDbcType; }
 		
 		switch( originalJDbcType )
 		{
-			case Types.NUMERIC:	return Types.DECIMAL;
+			case JDBC_BOOLEAN:
+				if ( usingEmbeddedClient() )	{ return Types.BIT; }
+				else if ( doesNotSupportBoolean() )	{ return Types.SMALLINT; }
+				else { return originalJDbcType; }
+
+			//This kludge compensates for the fact that the DRDA clients report
+			// that NUMERIC columns are DECIMAL. See bug 584.
+			case Types.NUMERIC:
+				if ( usingEmbeddedClient() )	{ return originalJDbcType; }
+				else { return Types.DECIMAL; }
+
+		    default:			return originalJDbcType;
+		}
+	}
+
+	private	boolean	supportsBoolean() { return !doesNotSupportBoolean(); }
+	
+	private	boolean	doesNotSupportBoolean()
+	{
+		return
+			( getServerVMVersion().equals( VM_1_3 ) ) ||
+			( usingDerbyClient() && !getDriverVersion().atLeast( DRB_10_2 ) ) ||
+			( usingDB2Client() );
+	}
+	
+	//
+	// This kludge compensates for the fact that servers return
+	// different jdbc types depending on their vm.
+	//
+	private	int	ddmdTypeKludge( int originalJDbcType )
+	{
+		switch( originalJDbcType )
+		{
+			case JDBC_BOOLEAN:
+				if ( getServerVMVersion().atLeast( VM_1_4 ) ) { return originalJDbcType; }
+				else { return Types.BIT; }
 
 		    default:			return originalJDbcType;
 		}
@@ -529,17 +763,17 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	// Insert a row into the ALL_TYPES table. The row contains all datatypes
 	// that are legal on the server.
 	//
-	private	void	setRow( PreparedStatement ps, int keyValue, Object[] row )
+	private	void	setRow( PreparedStatement ps, int keyValue, TypeDescriptor[] types, Object[] row )
 		throws Exception
 	{
 		int				param = 1;
-		int				typeCount = ALL_TYPES.length;
+		int				typeCount = types.length;
 
 		ps.setInt( param++, keyValue );
 
 		for ( int i = 0; i < typeCount; i++ )
 		{
-			TypeDescriptor	type = ALL_TYPES[ i ];
+			TypeDescriptor	type = types[ i ];
 			Object			value = row[ i ];
 			
 			if ( getServerVersion().atLeast( type.getDerbyVersion() ) )
@@ -551,9 +785,29 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		ps.execute();
 	}
 
-	private	Object[]	makeNullRow()
+	//
+	// Add a row of null columns.
+	//
+	private	Object[][]	makeRows( Object[][] rows )
 	{
-		return new Object[ ALL_TYPES.length ];
+		int			count = rows.length;
+		int			columns = rows[0].length;
+		Object[][]	result = new Object[ count + 1 ][];
+		int			idx = 0;
+
+		result[ idx++ ] = makeNullRow( columns );
+		
+		for ( int i = 0; i < count; i++ )
+		{
+			result[ idx++ ] = rows[ i ];
+		}
+
+		return result;
+	}
+
+	private	Object[]	makeNullRow( int rowLength )
+	{
+		return new Object[ rowLength ];
 	}
 
 	//
@@ -571,13 +825,47 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	}
 
 	//
-	// Lookup TypeDescriptors by Derby tgype name.
+	// Lookup TypeDescriptors by Derby type name.
 	//
 	private	TypeDescriptor	getType( String typeName )
 	{
 		if ( _types.size() == 0 ) { buildTypeMap(); }
 		
 		return (TypeDescriptor) _types.get( typeName );
+	}
+
+	//
+	// Lookup TypeDescriptors by jdbc type
+	//
+	private	TypeDescriptor	getType( int jdbcType )
+	{
+		int			count = ALL_TYPES.length;
+
+		for ( int i = 0; i < count; i++ )
+		{
+			TypeDescriptor	type = ALL_TYPES[ i ];
+
+			if ( type.getJdbcType() == jdbcType ) { return type; }
+		}
+
+		return null;
+	}
+
+	//
+	// Lookup TypeDescriptors by column name in an array of types
+	//
+	private	TypeDescriptor	getType( TypeDescriptor[] types, String typeName )
+	{
+		int		count = types.length;
+
+		for ( int i = 0; i < count; i++ )
+		{
+			TypeDescriptor	type = types[ i ];
+
+			if ( type.getDerbyTypeName().equals( typeName ) ) { return type; }
+		}
+		
+		return null;
 	}
 
 	//
@@ -606,9 +894,274 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	
 	/////////////////////////////////////////////////////////////
 	//
+	//	TEST BOOLEAN
+	//
+	/////////////////////////////////////////////////////////////
+
+	//
+	// Read a system column that is BOOLEAN
+	//
+	private	void	readLegacyBooleanColumn( Connection conn )
+		throws Exception
+	{
+		PreparedStatement	ps = prepare( conn, "select systemalias from sys.sysaliases" );
+		ResultSet			rs = ps.executeQuery();
+		int					count = 0;
+
+		while ( rs.next() )
+		{
+			boolean		result = rs.getBoolean( 1 );
+
+			count++;
+		}
+		println( "Read " + count + " booleans from sys.sysaliases" );
+
+		close( rs );
+		close( ps );
+	}
+
+	//
+	// Read a metadata scrap that is BOOLEAN. Just make sure this succeeds.
+	//
+	private	void	readLegacyBooleanMetadata( Connection conn )
+		throws Exception
+	{
+		DatabaseMetaData	dbmd = conn.getMetaData();
+
+		boolean				allTablesAreSelectable = dbmd.allTablesAreSelectable();
+		boolean				allProceduresAreCallable = dbmd.allProceduresAreCallable();
+	}
+	
+	private	void	insertCasts( Connection conn, String tableName, TypeDescriptor[] types, List casts )
+		throws Exception
+	{
+		PreparedStatement	ps = makeInsert( conn, tableName, types );
+		int					count = casts.size();
+		int					key = 1;
+
+		for ( int i = 0; i < count; i++ )
+		{
+			Object				value = casts.get( i );
+
+			value = castTheCast( types[ 0 ], value );
+
+			if ( value != null )
+			{
+				int					param = 1;
+				ps.setInt( param++, key++ );
+				setParameter( ps, param++, value );
+				ps.execute();
+			}
+		}
+	}
+
+	/////////////////////////////////////////////////////////////
+	//
 	//	MINIONS
 	//
 	/////////////////////////////////////////////////////////////
+	
+	//
+	// Check insert casting.
+	//
+	//
+	// This method accounts for the following irregularities in our network
+	// layer:
+	//
+	// o ResultSet.getString() on a boolean column, in old clients, return
+	//   "1" rather than "true".
+	// o PreparedStatement.setBigDecimal() doesn't work on BOOLEAN columns
+	//   masquerading as SMALLINTs.
+	//
+	// Returns null if we should ignore the cast because of some deficiency
+	// in the client.
+	//
+	private	Object	castTheCast( TypeDescriptor type, Object value )
+	{
+		int			jdbctype = type.getJdbcType();
+
+		if ( value == null ) { return null; }
+		
+		switch ( jdbctype )
+		{
+		    case JDBC_BOOLEAN:
+				if ( supportsBoolean() ) { return value; }
+				//
+				// Old clients return "1" instead of "true" from
+				// ResultSet.getString(). This will fail in the server because
+				// 1 cannot be cast to a boolean. Note that for db2jcc, we
+				// can't return "true" because db2jcc refused to coerce
+				// that to a SMALLINT.
+				//
+				else if ( value instanceof String )
+				{
+					if ( usingDerbyClient() ) { return value.equals( "1" ) ? "true" : "false"; }
+					else { return null; }
+				}
+				//
+				// Old clients can't stuff BigDecimal into a short apparently
+				//
+				else if ( value instanceof BigDecimal )	{ return null; }
+				else { return value; }
+				
+		    default: return value;
+		}
+	}
+	
+	//
+	// Verify inserted casts.
+	//
+	private	void	verifyInsertedCasts
+		( Connection conn, String tableName, TypeDescriptor[] types, List casts )
+		throws Exception
+	{
+		PreparedStatement	ps = readTableQuery( conn, tableName, types );
+		ResultSet			rs = ps.executeQuery();
+		int					count = casts.size();
+		int					tastyColumn = 2;
+
+		for ( int i = 0; i < count; i++ )
+		{
+			Object	value = casts.get( i );
+
+			if ( castTheCast( types[ 0 ], value ) != null )
+			{
+				rs.next();
+				checkParameter( rs, tastyColumn, value );
+			}
+		}
+	}
+
+	//
+	// Test the calling of a procedure with boolean args.
+	//
+	private	void	callBooleanProc( Connection conn )
+		throws Exception
+	{
+		// the db2 driver can't handle the jdbc boolean type
+		int			outParamType = ( usingDB2Client() ? Types.SMALLINT : JDBC_BOOLEAN );
+		
+		CallableStatement	cs = prepareCall
+			(
+			 conn,
+			 "call " + RICOCHET_BOOLEAN_PROC + "( ?, ? )"
+			);
+		cs.registerOutParameter( 2, outParamType );
+
+		callBooleanProc( cs, new Boolean( false ) );
+		callBooleanProc( cs, new Boolean( true ) );
+		callBooleanProc( cs, null );
+	}
+	private	void	callBooleanProc( CallableStatement cs, Boolean value )
+		throws Exception
+	{
+		TypeDescriptor	inType = RICOCHET_BOOLEAN_PROC_TYPES[ INVALUE ];
+		TypeDescriptor	outType = RICOCHET_BOOLEAN_PROC_TYPES[ OUTVALUE ];
+		ArrayList		coercedTypes = new ArrayList();
+		ArrayList		casts = new ArrayList();
+		
+		setParameter( cs, INVALUE + 1, inType, value );
+		cs.execute();
+
+		Object	retval = getOutArg( cs, OUTVALUE + 1, outType );
+
+		compareObjects( "Result should be " + value + " but is " + retval, value, retval );
+
+		// make sure getObject() works
+		retval = squeezeReturnArg( cs.getObject( OUTVALUE + 1 ) );
+		compareObjects( "Result should be " + value + " but is " + retval, value, retval );
+
+		// try all legal getXXX() methods on the output arg
+		println( "Checking coercions for " + value );
+		checkBooleanProcCoercions( cs, coercedTypes, casts );
+
+		// now try setting the input parameter using all of the legal types
+		doublecheckBooleanProcCoercions( cs, coercedTypes, casts );
+	}
+	private	Object	squeezeReturnArg( Object original )
+	{
+		if ( original == null ) { return null; }
+
+		if ( supportsBoolean() ) { return original; }
+		// Special case for embedded configuration on 1.3
+		else if ( original instanceof Boolean ) { return original; }
+		//
+		// Account for the fact that old configurations can't
+		// handle boolean values and coerce them to Integers
+		// when you call CallableStatement.getObject().
+		//
+		else
+		{
+			int		value = ((Integer) original).intValue();
+			boolean	boolValue = ( value == 0 ? false : true );
+
+			return new Boolean( boolValue );
+		}
+	}
+	private	void	checkBooleanProcCoercions
+		( CallableStatement cs, ArrayList coercedTypes, ArrayList casts )
+		throws Exception
+	{
+		TypeDescriptor	outType = RICOCHET_BOOLEAN_PROC_TYPES[ OUTVALUE ];
+		T_CN			coercionDesc = COERCIONS[ getCoercionIndex( outType.getJdbcType() ) ];
+		boolean[]		coercions = coercionDesc.getCoercions();
+		int				count = coercions.length;
+		int				legalCoercions = 0;
+
+		// make sure we can call all the appropriate getXXX() methods on
+		// the output parameter
+		for ( int i = 0; i < count; i++ )
+		{
+			if ( coercions[ i ] )
+			{
+				legalCoercions++;
+
+				int				jdbcType = COERCIONS[ i ].getJdbcType();
+				Object			retval = getOutArg( cs, OUTVALUE + 1, jdbcType );
+
+				if ( retval != null )
+				{
+					coercedTypes.add( new Integer( jdbcType ) );
+					casts.add( retval );
+				}
+
+				println( "\t" + jdbcType + ":\t" + retval );
+			}
+		}
+	}
+	private	void	doublecheckBooleanProcCoercions
+		( CallableStatement cs, ArrayList coercedTypes, ArrayList casts )
+		throws Exception
+	{
+		TypeDescriptor	inType = RICOCHET_BOOLEAN_PROC_TYPES[ INVALUE ];
+		int				castCount = casts.size();
+
+		println( "Performing " + castCount + " coercions..." );
+		for ( int i = 0; i < castCount; i++ )
+		{
+			int				jdbcType = ((Integer) coercedTypes.get( i )).intValue();
+			TypeDescriptor	type = getType( jdbcType );
+			Object			insertValue = casts.get( i );
+			Object			transmogrifiedValue = castTheCast( inType, insertValue );
+
+			if ( transmogrifiedValue != null )
+			{
+				setParameter( cs, INVALUE + 1, type, transmogrifiedValue );
+				cs.execute();
+
+				// make sure we get what we set
+				Object	outval = getOutArg( cs, OUTVALUE + 1, type );
+
+				compareObjects
+				(
+				 "Result for " + insertValue.getClass().getName() +
+				 " should be " + insertValue + " but is " + outval,
+				 insertValue,
+				 outval
+				 );
+			}
+		}
+	}
 	
 	///////////////////
 	//
@@ -628,27 +1181,27 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	private	void	createSchema( Connection conn )
 		throws Exception
 	{
-		createAllTypesTable( conn );
+		createTable( conn, ALL_TYPES_TABLE, ALL_TYPES );
 	}
 
 	//
-	// Create the table for testing legal datatypes.
+	// Create a table modelling an array of datatypes.
 	//
-	private	void	createAllTypesTable( Connection conn )
+	private	void	createTable( Connection conn, String tableName, TypeDescriptor[] types )
 		throws Exception
 	{
 		StringBuffer	buffer = new StringBuffer();
 		int				columnNumber = 0;
-		int				typeCount = ALL_TYPES.length;
+		int				typeCount = types.length;
 
-		buffer.append( "create table " + ALL_TYPES_TABLE + "\n" );
+		buffer.append( "create table " + tableName + "\n" );
 		beginColumnList( buffer );
 
 		addColumn( buffer, columnNumber++, doubleQuote( KEY_COLUMN ) + "\tint" );
 		
 		for ( int i = 0; i < typeCount; i++ )
 		{
-			TypeDescriptor	type = ALL_TYPES[ i ];
+			TypeDescriptor	type = types[ i ];
 			
 			if ( getServerVersion().atLeast( type.getDerbyVersion() ) )
 			{
@@ -667,6 +1220,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
 		close( ps );
 	}
+
 
 	//
 	// Helper methods for declaring a table.
@@ -694,19 +1248,6 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	{
 		dropTable( conn, ALL_TYPES_TABLE );
 	}
-	private	void	dropTable( Connection conn, String tableName )
-	{
-		PreparedStatement	ps = null;
-		
-		try {
-			ps = prepare( conn, "drop table " + tableName );
-
-			ps.execute();
-		}
-		catch (SQLException e) {}
-
-		close( ps );
-	}
 
 	//
 	// Logic for stuffing a data value into a column, given its type.
@@ -716,76 +1257,75 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	{
 		int		jdbcType = type.getJdbcType();
 
-		if ( value == null )
+		if ( value != null )
+		{
+			setParameter( ps, param, jdbcType, value );
+			return;
+		}
+		else if ( clientSupports( type ) )
 		{
 			ps.setNull( param, jdbcType );
 
 			return;
 		}
 
+		// client does not support nulls of this type.
+
 		switch( jdbcType )
 		{
-		    case Types.BIGINT:
-				ps.setLong( param, ((Long) value ).longValue() );
-				break;
-				
-		    case Types.BLOB:
-				ps.setBlob( param, ((Blob) value ) );
-				break;
-				
-		    case Types.CHAR:
-		    case Types.LONGVARCHAR:
-		    case Types.VARCHAR:
-				ps.setString( param, ((String) value ) );
-				break;
-				
-		    case Types.BINARY:
-		    case Types.LONGVARBINARY:
-		    case Types.VARBINARY:
-				ps.setBytes( param, (byte[]) value );
-				break;
-				
-		    case Types.CLOB:
-				ps.setClob( param, ((Clob) value ) );
-				break;
-				
-		    case Types.DATE:
-				ps.setDate( param, ((java.sql.Date) value ) );
-				break;
-				
-		    case Types.DECIMAL:
-		    case Types.NUMERIC:
-				ps.setBigDecimal( param, ((BigDecimal) value ) );
-				break;
-				
-		    case Types.DOUBLE:
-				ps.setDouble( param, ((Double) value ).doubleValue() );
-				break;
-				
-		    case Types.REAL:
-				ps.setFloat( param, ((Float) value ).floatValue() );
-				break;
-				
-		    case Types.INTEGER:
-				ps.setInt( param, ((Integer) value ).intValue() );
-				break;
-				
-		    case Types.SMALLINT:
-				ps.setShort( param, ((Short) value ).shortValue() );
-				break;
-				
-		    case Types.TIME:
-				ps.setTime( param, (Time) value );
-				break;
-				
-		    case Types.TIMESTAMP:
-				ps.setTimestamp( param, (Timestamp) value );
+		    case JDBC_BOOLEAN:
+				ps.setNull( param, Types.SMALLINT );
 				break;
 				
 		    default:
-				fail( "Unknown jdbc type for Derby type: " + type.getDerbyTypeName() );
+				fail( "Unsupported Derby type: " + type.getDerbyTypeName() );
 				break;
+		}		
+	}
+
+	//
+	// Logic for verifying that a value was stuffed correctly.
+	//
+	private	void	checkParameter( ResultSet rs, int param, Object value )
+		throws Exception
+	{
+		Object	   	actualValue;
+
+		if ( value == null )
+		{
+			return;
 		}
+
+		println( "Checking " + value.getClass().getName() );
+
+		if ( value instanceof Boolean ) {  actualValue = new Boolean( rs.getBoolean( param ) ); }
+		else if ( value instanceof Byte ) { actualValue = new Byte( rs.getByte( param ) ); }
+		else if ( value instanceof Short ) { actualValue = new Short( rs.getShort( param ) ); }
+		else if ( value instanceof Integer ) { actualValue = new Integer( rs.getInt( param ) ); }
+		else if ( value instanceof Long ) { actualValue = new Long( rs.getLong( param ) ); }
+		else if ( value instanceof Float ) { actualValue = new Float( rs.getFloat( param ) ); }
+		else if ( value instanceof Double ) { actualValue = new Double( rs.getDouble( param ) ); }
+		else if ( value instanceof String ) { actualValue = rs.getString( param ); }
+		else if ( value instanceof BigDecimal ) { actualValue = rs.getBigDecimal( param ); }
+		else
+		{
+			actualValue = rs.getObject( param );
+		}
+
+		assertTrue( value.equals( actualValue ) );
+	}
+
+
+	// return true if the client supports this datatype
+	private	boolean	clientSupports( TypeDescriptor type )
+	{
+		Version		firstSupportedVersion;
+
+		if ( usingDB2Client() ) { firstSupportedVersion = type.getDb2jccVersion(); }
+		else { firstSupportedVersion = type.getDerbyVersion(); }
+
+		if ( firstSupportedVersion == null ) { return false; }
+		else { return getDriverVersion().atLeast( firstSupportedVersion ); }
 	}
 	
 	//
@@ -798,111 +1338,22 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
 		return getColumn( rs, columnName, jdbcType );
 	}
-	private	Object	getColumn( ResultSet rs, String columnName, int jdbcType )
+	//
+	// Get a data value from a procedure's output arg, given its type.
+	//
+	private	Object	getOutArg( CallableStatement cs, int arg, TypeDescriptor type )
 		throws Exception
 	{
-		Object		retval = null;
+		int			jdbcType = type.getJdbcType();
 
-		switch( jdbcType )
-		{
-		    case Types.BIGINT:
-				retval = new Long( rs.getLong( columnName ) );
-				break;
-				
-		    case Types.BLOB:
-				retval = rs.getBlob( columnName );
-				break;
-				
-		    case Types.CHAR:
-		    case Types.LONGVARCHAR:
-		    case Types.VARCHAR:
-				retval = rs.getString( columnName );
-				break;
-				
-		    case Types.BINARY:
-		    case Types.LONGVARBINARY:
-		    case Types.VARBINARY:
-				retval = rs.getBytes( columnName );
-				break;
-				
-		    case Types.CLOB:
-				retval = rs.getClob( columnName );
-				break;
-				
-		    case Types.DATE:
-				retval = rs.getDate( columnName );
-				break;
-				
-		    case Types.DECIMAL:
-		    case Types.NUMERIC:
-				retval = rs.getBigDecimal( columnName );
-				break;
-				
-		    case Types.DOUBLE:
-				retval = new Double( rs.getDouble( columnName ) );
-				break;
-				
-		    case Types.REAL:
-				retval = new Float( rs.getFloat( columnName ) );
-				break;
-				
-		    case Types.INTEGER:
-				retval = new Integer( rs.getInt( columnName ) );
-				break;
-				
-		    case Types.SMALLINT:
-				retval = new Short( rs.getShort( columnName ) );
-				break;
-				
-		    case Types.TIME:
-				retval = rs.getTime( columnName );
-				break;
-				
-		    case Types.TIMESTAMP:
-				retval = rs.getTimestamp( columnName );
-				break;
-				
-		    default:
-				fail( "Unknown jdbc type " + jdbcType + " used to retrieve column: " + columnName );
-				break;
-		}
-
-		if ( rs.wasNull() ) { retval = null; }
-
-		return retval;
+		return getOutArg( cs, arg, jdbcType );
 	}
-
 	//
 	// SQL code generation minions 
 	//
 	private	String	doubleQuote( String text )
 	{
 		return '"' + text + '"';
-	}
-
-	//
-	// Swallow uninteresting exceptions when disposing of jdbc objects.
-	//
-	private	void	close( ResultSet rs )
-	{
-		try {
-			if ( rs != null ) { rs.close(); }
-		}
-		catch (SQLException e) {}
-	}	
-	private	void	close( Statement statement )
-	{
-		try {
-			if ( statement != null ) { statement.close(); }
-		}
-		catch (SQLException e) {}
-	}
-	private	void	close( Connection conn )
-	{
-		try {
-			if ( conn != null ) { conn.close(); }
-		}
-		catch (SQLException e) {}
 	}
 
 	/////////////////////////////////////////////////////////////

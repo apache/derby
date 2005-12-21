@@ -160,22 +160,34 @@ NULL                  |0          |def
 ij> remove v2;
 ij> -- type precedence tests. tinyint not supported by DB2 Cloudscape
 values (1 = 1.2);
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 11.
+1    
+-----
+false
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (1.2 = 1);
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 13.
+1    
+-----
+false
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (1 = cast(1 as bigint));
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 11.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (1 = cast(1 as smallint));
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 11.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (cast(1 as bigint) = 1);
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 27.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (cast(1 as smallint) = 1);
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 29.
+1    
+-----
+true 
 ij> -- inserts
 create table insert_test1 (c1 int);
 0 rows inserted/updated/deleted
@@ -421,10 +433,14 @@ select 1 = 1 from t1;
 ERROR 42X01: Syntax error: Encountered "=" at line 2, column 10.
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (nullif('abc','a') = 'abc');
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 27.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select (nullif('abc','a') = 'abc') from t1;
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 27.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select c11 = any (select c11 from t1) from t1;
 ERROR 42X01: Syntax error: Encountered "=" at line 2, column 12.
@@ -454,16 +470,24 @@ select 1 <= 2 from t1;
 ERROR 42X01: Syntax error: Encountered "<=" at line 2, column 10.
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (1>1);
-ERROR 42X01: Syntax error: Encountered ">" at line 2, column 10.
+1    
+-----
+false
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select (c1 < 2) from t1;
-ERROR 42X01: Syntax error: Encountered "<" at line 2, column 12.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (1 between 2 and 5);
-ERROR 42X01: Syntax error: Encountered "between" at line 2, column 11.
+1    
+-----
+false
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select (c1 between 1 and 3) from t1;
-ERROR 42X01: Syntax error: Encountered "between" at line 2, column 12.
+1    
+-----
+true 
 ij> -- boolean expression LIKE disallowed in values and select clause
 prepare ll1 as 'values ''asdf'' like ?';
 ERROR 42X01: Syntax error: Encountered "like" at line 1, column 15.
@@ -512,7 +536,7 @@ select new java.lang.Integer(c1 is null ? 0 : c1) from t1;
 ERROR 42X01: Syntax error: Encountered "is" at line 2, column 33.
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select c1, (c1=1? cast(null as int) : c1) is null from t1;
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 15.
+ERROR 42X01: Syntax error: Encountered "?" at line 2, column 17.
 ij> -- try few tests in cloudscape mode for boolean expressions in values or select clause
 -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values new java.lang.String() = '';
