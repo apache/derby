@@ -6279,6 +6279,19 @@ public class DRDAConnThread extends Thread {
 		writer.endDdmAndDss();
 		return true;
 	}
+    
+    // The use of static exception objects is normally a bad idea,
+    // but qryscraft_ and notQryscraft_ are not true exceptions and
+    // will not be thrown. They are being used as containers for
+    // passing data to the writeSQLCAGRP() method, and since this
+    // happens frequently we would like to avoid creating a new
+    // SQLException each time, (which is expensive because the
+    // Throwable ctor will fill in the stack trace).
+    private static final SQLException qryscraft_ = 
+        new SQLException("End of Data", "00000");
+    private static final SQLException notQryscraft_ =
+        new SQLException("End of Data", "02000");
+
 	/**
 	 * Done data
 	 * Send SQLCARD for the end of the data
@@ -6333,9 +6346,8 @@ public class DRDAConnThread extends Thread {
 		boolean isQRYSCRAFT = (stmt.getQryscrorn() == CodePoint.QRYSCRAFT);
 
 		// sqlstate 02000 for end of data.
-		// RESOLVE: Need statics for sqlcodes.
-		writeSQLCAGRP(new SQLException("End of Data", (isQRYSCRAFT ? "00000" : "02000")),
-							(isQRYSCRAFT ? 0 : 100), 0, stmt.rowCount);
+        writeSQLCAGRP((isQRYSCRAFT ? qryscraft_ : notQryscraft_),
+                      (isQRYSCRAFT ? 0 : 100), 0, stmt.rowCount);
 
 		writer.writeByte(CodePoint.NULLDATA);
 		// does all this fit in one QRYDTA
