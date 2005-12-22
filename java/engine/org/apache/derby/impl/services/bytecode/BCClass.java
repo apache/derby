@@ -80,6 +80,13 @@ import java.io.IOException;
  *
  */
 class BCClass extends GClass {
+	
+	/**
+	 * Simple text indicating any limits execeeded while generating
+	 * the class file.
+	 */
+	private String limitMsg;
+	
 	//
 	// ClassBuilder interface
 	//
@@ -153,6 +160,10 @@ class BCClass extends GClass {
 				"GEN complete for class "+name);
 		  }
 		}
+		
+		if (limitMsg != null)
+			throw StandardException.newException(
+					SQLState.GENERATED_CLASS_LIMIT_EXCEEDED, getFullName(), limitMsg);
 		return bytecode;
 	}
 
@@ -376,7 +387,7 @@ class BCClass extends GClass {
 		chunk.addInstr(CodeChunk.RETURN_OPCODE[vmTypeId]);
 
 		int typeWidth = Type.width(vmTypeId);
-		chunk.complete(classHold, method, typeWidth, 1);
+		chunk.complete(null, classHold, method, typeWidth, 1);
 
 		/*
 		** add the set method
@@ -398,7 +409,38 @@ class BCClass extends GClass {
 
 		chunk.addInstr(VMOpcode.RETURN);
 
-		chunk.complete(classHold, method, typeWidth + (staticField ? 0 : 1), 1 + typeWidth);
+		chunk.complete(null, classHold, method, typeWidth + (staticField ? 0 : 1), 1 + typeWidth);
+	}
+	
+	/**
+	 * Add the fact that some class limit was exceeded while generating
+	 * the class. We create a set ofg them and report at the end, this
+	 * allows the generated class file to still be dumped.
+	 * @param mb
+	 * @param limitName
+	 * @param limit
+	 * @param value
+	 */
+	void addLimitExceeded(BCMethod mb, String limitName, int limit, int value)
+	{
+		StringBuffer sb = new StringBuffer();
+		if (limitMsg != null)
+		{
+			sb.append(limitMsg);
+			sb.append(", ");
+		}
+		
+		sb.append("method:");
+		sb.append(mb.getName());
+		sb.append(" ");
+		sb.append(limitName);
+		sb.append(" (");
+		sb.append(value);
+		sb.append(" > ");
+		sb.append(limit);
+		sb.append(")");
+		
+		limitMsg = sb.toString();
 	}
 
 }

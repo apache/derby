@@ -43,6 +43,9 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 class Conditional {
 
 	private final Conditional parent;
+	/**
+	 * Offset in the code stream of the 'if' opcode.
+	 */
 	private final int   ifOffset;
 	private Type[]	stack;
 	private int thenGotoOffset;
@@ -70,7 +73,7 @@ class Conditional {
 	 * @param thenStack Type stack on completing the conditional then block.
 	 * @return the type stack on entering the then block
 	 */
-	Type[] startElse(CodeChunk chunk, Type[] thenStack) {
+	Type[] startElse(BCMethod mb, CodeChunk chunk, Type[] thenStack) {
 
 		thenGotoOffset = chunk.getRelativePC();
 
@@ -78,7 +81,7 @@ class Conditional {
 		chunk.addInstrU2(VMOpcode.GOTO, 0);
 
 		// fill in the branch opcode
-		fillIn(chunk, ifOffset);
+		fillIn(mb, chunk, ifOffset);
 		
 		Type[] entryStack = stack;
 		stack = thenStack;
@@ -94,13 +97,13 @@ class Conditional {
 	 * @param stackNumber Current number of valid elements in elseStack
 	 * @return The conditional this conditional was nested in, if any.
 	 */
-	Conditional end(CodeChunk chunk, Type[] elseStack, int stackNumber) {
+	Conditional end(BCMethod mb, CodeChunk chunk, Type[] elseStack, int stackNumber) {
 
 		if (thenGotoOffset == 0) {
 			// no else condition
-			fillIn(chunk, ifOffset);
+			fillIn(mb, chunk, ifOffset);
 		} else {
-			fillIn(chunk, thenGotoOffset);
+			fillIn(mb, chunk, thenGotoOffset);
 		}
 		
 		if (SanityManager.DEBUG)
@@ -121,16 +124,28 @@ class Conditional {
 		return parent;
 	}
 
-	private void fillIn(CodeChunk chunk, int where) {
+	/**
+	 * 
+	 * @param chunk Our code chunk
+	 * @param whereFrom Offset of the branch opcode in the code stream
+	 */
+	private void fillIn(BCMethod mb, CodeChunk chunk, int whereFrom) {
 
 		byte[] codeBytes = chunk.getCout().getData();
 
-		int offset = chunk.getRelativePC() - where;
+		int offset = chunk.getRelativePC() - whereFrom;
+		
+		// branch offsets are a 16bit signed value, this implementation
+		// currently only generates forward branches
+		if (offset > 32767)
+			mb.cb.addLimitExceeded(mb, "branch_offset", 32767, offset);
 
-		where += 8;
-
-		codeBytes[where + 1] = (byte)(offset >> 8 );
-		codeBytes[where + 2] = (byte)(offset);
+		// Skip the eight byte header at the start of the
+		// byte array, the eight bytes are the CodeAttribute header.
+		whereFrom += 8;
+				
+		codeBytes[whereFrom + 1] = (byte)(offset >> 8 );
+		codeBytes[whereFrom + 2] = (byte)(offset);
 	}
 
 
