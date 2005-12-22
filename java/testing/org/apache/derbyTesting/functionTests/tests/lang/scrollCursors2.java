@@ -64,6 +64,7 @@ public class scrollCursors2 {
 			// make the initial connection.
 			ij.getPropertyArg(args);
 			conn = ij.startJBMS();
+			cleanUp(conn);	
 			conn.setAutoCommit(false);
 
 			/* Create the table and do any other set-up */
@@ -1611,17 +1612,15 @@ public class scrollCursors2 {
 	static boolean cleanUp(Connection conn, Statement s) {
 		try {
 			/* Drop the table we created */
-			if (s != null)
+			if (s == null)
 			{
-				s.execute("drop table t");
+				// well, then, we'll have to restart
+				s = conn.createStatement();
 			}
-
+			s.execute("drop table t");
 			/* Close the connection */
-			if (conn != null)
-			{
-				conn.commit();
-				conn.close();
-			}
+			conn.commit();
+			conn.close();
 		} catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception caught in cleanup()");
 			JDBCDisplayUtil.ShowException(System.out, e);
@@ -1630,4 +1629,17 @@ public class scrollCursors2 {
 
 		return true;
 	}
+
+	/* 
+	 * cleanup also before test start, just in case
+	 * @param conn	The Connection
+	 */
+	static void cleanUp(Connection conn) throws SQLException {
+		Statement cleanupStmt = conn.createStatement();
+		String[] testObjects = {"table t"};
+		TestUtil.cleanUpTest(cleanupStmt, testObjects);
+		cleanupStmt.close();
+	}
+
+
 }

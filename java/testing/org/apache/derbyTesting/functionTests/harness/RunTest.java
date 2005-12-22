@@ -121,6 +121,7 @@ public class RunTest
 	static boolean dbIsNew = true;
 	static String runwithjvm="true";
 	static boolean startServer=true; // should test harness start the server
+	static String hostName; // needs to be settable for ipv testing, localhost otherwise.)
 
 	// Other test variables for directories, files, output
 	static String scriptName = ""; // testname as passed in
@@ -276,13 +277,13 @@ public class RunTest
                     // default to the latest one we know 
                     jvmnetjvm = "j9_22";
                 }
-			
+
                 ns = new NetServer(baseDir, jvmnetjvm, classpathServer, null,
-								   jvmflags,framework, startServer);
+                                     jvmflags,framework, startServer);
             }
             else
-			    ns = new NetServer(baseDir, jvmName, classpathServer, 
-								   javaCmd, jvmflags,framework, startServer);
+                ns = new NetServer(baseDir, jvmName, classpathServer, 
+                                     javaCmd, jvmflags,framework, startServer);
 		    ns.start();
 		    frameworkInitialized = true;
 	    }
@@ -324,7 +325,7 @@ public class RunTest
         {
             isI18N=true;
         }
-
+        
         if (skipsed)
         {
             tmpOutFile.renameTo(finalOutFile);
@@ -418,10 +419,6 @@ public class RunTest
         if (testType.startsWith("sql"))
             scriptPath = script.getPath();
                 
-        // Build the test command
-        String[] testCmd = 
-    		buildTestCommand(propString, systemHome, scriptPath);
-        
 	    // cleanup for all tests that re-use standard testCSHome/wombat database
 	    if (useCommonDB == true 
 	    	&& (usesystem == null || usesystem == "")
@@ -434,7 +431,11 @@ public class RunTest
         // Create a process to execute the command unless useprocess is false
         if ( useprocess )
 		{
+            // Build the test command
+            String[] testCmd = 
+        		buildTestCommand(propString, systemHome, scriptPath);
             execTestProcess(testCmd);
+        
 		}
         else
 		{
@@ -838,24 +839,33 @@ public class RunTest
 			framework = "";
 		else
 			driverName = NetServer.getDriverName(framework);
-		String skipFile;
-		// Some tests will not work with some frameworks,
-		// so check property files for tests to be skipped
-		skipFile = framework + ".exclude";
 
-		if (!framework.equals(""))
-		{
-			if (SkipTest.skipIt(skipFile, scriptName)) {
-				skiptest = true;
-				addSkiptestReason("Test skipped: listed in " + 
-								  skipFile + 
-						  " file, skipping test: " 
-								  + scriptName);
-			}
-		}
-		else
-			framework = "";
-	
+        hostName = sp.getProperty("hostName");
+        // force hostName to localhost if it is not set
+        if (hostName == null)
+           hostName="localhost";
+		
+        // Some tests will not work with some frameworks,
+        // so check suite exclude files for tests to be skipped
+        String skipFile = framework + ".exclude";
+        if (!framework.equals(""))
+        {
+            skiptest = (SkipTest.skipIt(skipFile, scriptName));
+            // in addition, check to see if the test should get skipped 
+            // because it's not suitable for a remotely started server
+            if (!skiptest) 
+            {
+                if (!hostName.equals("localhost")) 
+                {
+                    skipFile = framework + "Remote.exclude";
+                    skiptest = (SkipTest.skipIt(skipFile, scriptName));
+                }
+            }
+            if (skiptest) // if we're skipping...
+                addSkiptestReason("Test skipped: listed in " + skipFile + 
+                     " file, skipping test: " + scriptName);
+        }
+		
 		jvmName = sp.getProperty("jvm");
 
 		//System.out.println("jvmName is: " + jvmName);
@@ -921,7 +931,6 @@ public class RunTest
 		
         javaCmd = sp.getProperty("javaCmd");
         bootcp = sp.getProperty("bootcp");
-
         jvmflags = sp.getProperty("jvmflags");
 		testJavaFlags = sp.getProperty("testJavaFlags");
 		classpath = sp.getProperty("classpath");
@@ -1025,7 +1034,7 @@ public class RunTest
 		outputdir = sp.getProperty("outputdir");
 		if (outputdir == null)
 		    outputdir = "";
-		bootcp = sp.getProperty("bootcp");
+		
 		canondir = sp.getProperty("canondir");
 		canonpath = sp.getProperty("canonpath");
 
@@ -1047,6 +1056,16 @@ public class RunTest
 		}
 		else
 		    useprocess = true;
+		
+        // if the hostName is something other than localhost, we must
+        // be trying to connect to a remote server, and so, we should not
+        // try to create a new database.
+        // also, startServer should be false.
+		if (!hostName.equals("localhost"))
+		{
+        	useprocess=false;
+        	startServer=false;
+		}
 		
 		String nosed = sp.getProperty("skipsed");
 		if (nosed != null)
@@ -1519,7 +1538,6 @@ clp.list(System.out);
     		String suppFiles = ap.getProperty("supportfiles");
 			boolean copySupportFiles = ((suppFiles != null) && (suppFiles.length()>0));
 			boolean createExtDirs= new Boolean(ap.getProperty("useextdirs","false")).booleanValue();
-			
     		if (copySupportFiles || createExtDirs)
     		{
 				File copyOutDir = null;
@@ -2048,7 +2066,11 @@ clp.list(System.out);
                 defaultPackageName);
         
         if ( (framework != null) )
+        {
             jvmProps.addElement("framework=" + framework);
+            if ((hostName != null) && (!hostName.equals("localhost")))
+            		jvmProps.addElement("hostName=" + hostName);
+        }
             
         if ( (jvmflags != null) && (jvmflags.length()>0) )
         {
@@ -2237,6 +2259,10 @@ clp.list(System.out);
         Properties ptmp = System.getProperties();
         ptmp.put("derby.system.home", systemHome);
         ptmp.put("derby.infolog.append", "true");
+        // for framework tests, we may need to pick up the hostName 
+        // passed on on command line to individual tests...
+        if (framework.startsWith("DerbyNet"))
+        	ptmp.put("hostName=", hostName);
         System.setProperties(ptmp);
     	PrintStream stdout = System.out;
     	PrintStream stderr = System.err;
@@ -2255,6 +2281,7 @@ clp.list(System.out);
 	        fw.close();
 	        pathStr = tmpOutFile.getCanonicalPath().replace(File.separatorChar,fileSep);
 	    }
+	    
 
     	PrintStream ps = new PrintStream(new FileOutputStream(pathStr), true);
     	System.setOut(ps);
@@ -2301,7 +2328,9 @@ clp.list(System.out);
         else if (testType.equals("java"))
         {
             sysProp.put("user.dir", outDir.getCanonicalPath());
-            javaPath = "org.apache.derbyTesting.functionTests.tests." + testDirName;
+	    if (javaPath == null)
+	            javaPath = "org.apache.derbyTesting.functionTests.tests." + testDirName;
+	    
             String[] args = new String[2];
             args[0] = "-p";
             args[1] = propString;
@@ -2313,7 +2342,7 @@ clp.list(System.out);
             Method testMain = JavaTest.getMethod("main", classArray);
             Object[] argObj = new Object[1];
             argObj[0] = args;
-			RunClass testObject = new RunClass(JavaTest, testMain, argObj);
+			RunClass testObject = new RunClass(testMain, argObj);
 			Thread testThread = new Thread(testObject);
 			try
 			{
@@ -2324,7 +2353,7 @@ clp.list(System.out);
 				}
 				else
 				{
-					testThread.join(timeout * 1000);
+					testThread.join(timeout * 60 * 1000);
 				}
 			}
 			catch(Exception e)
@@ -2377,6 +2406,7 @@ clp.list(System.out);
             org.apache.derbyTesting.unitTests.harness.UnitTestMain.main(args);
             */
         }
+        
         ps.close();
         // Reset System.out and System.err
         System.setOut(stdout);

@@ -3569,3 +3569,10 @@ get cursor c as
 close c;
 -- 27, join on onePercent--1 row
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+-- cleanup
+drop table TENKTUP1;
+drop table TENKTUP2;
+drop table ONEKTUP;
+drop table BPRIME;
+drop procedure WISCINSERT;

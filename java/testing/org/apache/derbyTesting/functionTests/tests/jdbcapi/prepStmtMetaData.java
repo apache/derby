@@ -140,6 +140,7 @@ public class prepStmtMetaData {
 
 			// clean up
 			executeStmt(con,"drop table ab");
+			executeStmt(con,"drop table bug4579");
 
 			con.close();
 		}

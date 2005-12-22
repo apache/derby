@@ -1576,4 +1576,15 @@ ij> next test12;
 No current row
 ij> commit;
 ij> close test12;
+ij> drop table foo;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop function padstring;
+0 rows inserted/updated/deleted
+ij> drop procedure wait_for_post_commit;
+0 rows inserted/updated/deleted
+ij> commit;
 ij> exit;

@@ -45,6 +45,7 @@ public class bug5054 {
       	createTables(conn);
       	doUpdates(conn);
       	dumpResult(conn);
+        cleanUp(conn);
 		conn.close();
     } catch (Exception e) {
 		System.out.println("FAIL -- unexpected exception "+e);
@@ -65,6 +66,14 @@ public class bug5054 {
     stmt.executeUpdate( "INSERT INTO T1 VALUES(2, 2)" );
     System.out.println("done.");
 
+    stmt.close();
+  }
+
+  private static void cleanUp(Connection conn) throws SQLException {
+    Statement stmt = conn.createStatement();
+	try {
+    	stmt.executeUpdate( "DROP TABLE T1" );
+	}catch (Exception e) {}
     stmt.close();
   }
 
@@ -98,6 +107,7 @@ public class bug5054 {
     while (rs.next()) {
       System.out.println(rs.getInt(1)+ " " + rs.getInt(2));
     }
+    rs.close();
   }
 
 }

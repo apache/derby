@@ -33,7 +33,7 @@ import org.apache.derby.tools.ij;
 	is minimally covered.
 */
 
-class executeUpdate
+public class executeUpdate
 {
 
 	public static void main (String args[])

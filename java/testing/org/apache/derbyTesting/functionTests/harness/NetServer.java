@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
 import java.net.ConnectException;
 import java.net.Socket;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class NetServer
 {
@@ -41,6 +42,7 @@ public class NetServer
     String javaCmd;
     String jvmflags;
     String framework;
+    static String hostName;
     
     Object[] frameworkInfo;
     int port;
@@ -67,13 +69,15 @@ public class NetServer
 
     
     static {
+    	hostName=TestUtil.getHostName();
 	m =  new Hashtable();
 	// Hashtable is keyed on framework name and has 
 	// an array of the framework prefix, suffix, driver, port  and 
 	// String[] command arguments to start the server
 	// String[] Command arguments to stop the server
+	String url = "jdbc:derby:net://" + hostName + ":1527/";
 	m.put("DerbyNet", new Object[]
-	    {"jdbc:derby:net://localhost:1527/",                 //prefix
+	    {url,                 //prefix
 	     "",                                            // suffix
 	     "com.ibm.db2.jcc.DB2Driver",                   //driver
 	     "1527",                                        // port
@@ -83,8 +87,9 @@ public class NetServer
 			   "shutdown"},
 	     null});                                        //shutdown2
 
+	url = "jdbc:derby://" + hostName + ":1527/";  
 	m.put("DerbyNetClient", new Object[]
-	    {"jdbc:derby://localhost:1527/",                 //prefix
+	    {url,                 //prefix
 	     "",                                            // suffix
 	     "org.apache.derby.jdbc.ClientDriver",           //driver
 	     "1527",                                        // port
@@ -94,8 +99,9 @@ public class NetServer
 			   "shutdown"},
 	     null});                                        //shutdown2
 
+	url = "jdbc:db2://" + hostName + ":50000/";
 	m.put("DB2jcc", new Object[]
-	    {"jdbc:db2://localhost:50000/",                //prefix
+	    {url,                //prefix
 	     "",                                            //suffix
 	     "com.ibm.db2.jcc.DB2Driver",                   //driver
 	     "50000",                                       //port
@@ -113,8 +119,8 @@ public class NetServer
 	     null});
     }
 
-    public NetServer(File homeDir, String jvmName, String clPath, String
-		     javaCmd, String jvmflags, String framework, boolean startServer) 
+    public NetServer(File homeDir, String jvmName, String clPath, String 
+   	     javaCmd, String jvmflags, String framework, boolean startServer)
 	throws Exception
     {
 	this.homeDir = homeDir;
@@ -132,7 +138,7 @@ public class NetServer
     }
     public void start() throws Exception
     {
-	  if (! startServer)
+      if (! startServer)
 	  {
 		System.out.println("startServer = false. Bypass server startup");
 		return;
@@ -221,7 +227,7 @@ public class NetServer
  			}
  			else	
  			{
- 				Socket s = new Socket("localhost", this.port);
+ 				Socket s = new Socket(hostName, this.port);
  				s.close();
 				break;
  			}

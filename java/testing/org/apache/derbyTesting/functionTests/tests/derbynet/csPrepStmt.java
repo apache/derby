@@ -39,9 +39,13 @@ import org.apache.derby.tools.ij;
 	This test tests the JDBC PreparedStatement.
 */
 
-class csPrepStmt
+public class csPrepStmt
 {
 	private static Connection conn = null;
+
+    private static String[] testObjects =  // string array for cleaning up
+        {"table t1", "table tab1", "table t2", "table bigtab", "table tstab",
+         "table Numeric_Tab", "table lobCheckOne", "table lobCheckTwo"};
 
 	public static void main (String args[])
 	{
@@ -52,11 +56,16 @@ class csPrepStmt
 			// Initialize JavaCommonClient Driver.
 			ij.getPropertyArg(args); 
 			conn = ij.startJBMS();
+
 			if (conn == null)
 			{
 				System.out.println("conn didn't work");
 				return;
 			}
+
+			Statement cleanstmt = conn.createStatement();
+			TestUtil.cleanUpTest(cleanstmt, testObjects);
+
 			PreparedStatement ps;
 			ResultSet rs;
 			boolean hasResultSet;
@@ -293,8 +302,23 @@ class csPrepStmt
 				System.out.println("SQLState: " + e.getSQLState() + 
 								   " message: " + e.getMessage());
 			}
-			rs.close();
-			ps.close();
+			finally
+			{
+				try
+				{
+					if(rs != null)
+					{
+						 rs.close();
+						 rs = null;
+					}
+					if(ps != null)
+					{
+						 ps.close();
+						 ps = null;
+					}
+				}
+				catch(Exception e){ }
+			}
 
 			test4975(conn);
 			test5130(conn);
@@ -302,6 +326,11 @@ class csPrepStmt
 			testLobInRS(conn);
 
 			conn.close();
+			// cleanup, first refresh conn
+			conn = ij.startJBMS();
+			cleanstmt = conn.createStatement();
+			TestUtil.cleanUpTest(cleanstmt, testObjects);
+			cleanstmt.close();
 			System.out.println("csPrepStmt Test Ends");
         }
 		catch (Exception e)
@@ -364,6 +393,8 @@ class csPrepStmt
 		ps.setString(2, timestamp );
 		try {
 			ResultSet rs = ps.executeQuery();
+            rs.close();
+			ps.close( );
 		}
 		catch (SQLException e) {
 			System.out.println("SQLState: " + e.getSQLState() + " message: " + e.getMessage());
@@ -503,6 +534,7 @@ class csPrepStmt
 			for (i = 1; i <= numCols; i++)
 				ps.setInt(i,i);
 			ps.executeUpdate();
+			ps.close();
 		} catch (SQLException e)
 		{
 			System.out.println("SQLState: " + e.getSQLState() + 
@@ -588,7 +620,8 @@ class csPrepStmt
 			else
 				System.out.println("FAIL: Statement executed, but returned " +
 					"an empty result set.");
-
+			rs.close();
+			st.close();
 		} catch (Exception e) {
 			System.out.println("FAIL: Encountered exception:");
 			e.printStackTrace();

@@ -35,6 +35,7 @@ import java.io.*;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 
 public class setTransactionIsolation{
@@ -54,6 +55,7 @@ public class setTransactionIsolation{
 		createAndPopulateTable(conn);
 		runTests(conn);
 		conn.rollback();
+		cleanUp(conn);
 		conn.close();
     } catch (Throwable  e) {
 		e.printStackTrace();
@@ -342,6 +344,16 @@ public class setTransactionIsolation{
 			JDBCDisplayUtil.ShowSQLException(System.out,se);
 		}			
 	}
+
+	static void cleanUp(Connection conn) throws SQLException
+	{
+		String[] testObjects = {"table t1"};
+		Statement stmt = conn.createStatement();
+		TestUtil.cleanUpTest(stmt, testObjects);
+		conn.commit();
+		stmt.close();
+	}
+	
 
 }
 

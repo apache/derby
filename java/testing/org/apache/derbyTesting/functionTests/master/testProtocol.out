@@ -288,3 +288,4 @@ Test exception is thrown when specifying non-null indicator for both MBCS and SB
 PASSED
 Test for missing SQLSTT in EXCSQLSET - PKGNAMCT is ignored
 PASSED
+PASSED

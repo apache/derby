@@ -44,6 +44,8 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class parameterMetaDataJdbc30 {
 	private static boolean isDerbyNet;
+	private static String[] testObjects = { "TABLE  T", "FUNCTION RDB",
+					 "PROCEDURE DUMMYINT", "PROCEDURE DUMMY_NUMERIC_PROC"};
 	public static void main(String[] args) {
 		Connection con = null;
 		Statement  s;
@@ -65,6 +67,7 @@ public class parameterMetaDataJdbc30 {
 			s = con.createStatement();
 
 			/* Create the table and do any other set-up */
+			TestUtil.cleanUpTest(s, testObjects);
 			setUpTest(s);
 
       s.executeUpdate("create function RDB(P1 INT) RETURNS DECIMAL(10,2) language java external name 'org.apache.derbyTesting.functionTests.tests.lang.outparams30.returnsBigDecimal' parameter style java");
@@ -181,6 +184,7 @@ public class parameterMetaDataJdbc30 {
       ps.execute();
 
       cs.close();
+      ps.close();    
 
       System.out.println("test: the scale returned should be the one set by registerOutParameter");
       s.executeUpdate("create procedure dummy_numeric_Proc(out a NUMERIC(30,15), out b NUMERIC(30,15)) language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.jdbcapi.parameterMetaDataJdbc30.dummy_numeric_Proc'");
@@ -252,6 +256,13 @@ public class parameterMetaDataJdbc30 {
 	  cs.close();
 	  s.execute("DROP PROCEDURE PMDD");
       }
+     s.close();
+     con = ij.startJBMS();
+     con.setAutoCommit(true); // make sure it is true
+     s = con.createStatement();
+	 TestUtil.cleanUpTest(s, testObjects);
+     s.close();
+     con.close();
      }
 	 catch (SQLException e) {
 	 dumpSQLExceptions(e);

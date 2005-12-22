@@ -166,6 +166,11 @@ public class resultset {
 			stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 									   ResultSet.CONCUR_UPDATABLE);
 
+            try { 
+                stmt.execute("drop table t"); 
+            } catch (SQLException se) {
+            } // ignore, assume it is because table does not exist
+
 			stmt.execute("create table t (i int, s smallint, r real, "+
 				"d double precision, dt date, t time, ts timestamp, "+
 				"c char(10), v varchar(40) not null, dc dec(10,2),"+
@@ -597,7 +602,8 @@ public class resultset {
 			System.out.println("rollback with auto commit");
 			showLocksForAutoCommitSelect(con, stmt, 2);
 
-
+            stmt.execute("drop table bug4810");
+			con.commit();
 			stmt.close();
 
 			testMutableValues(con);
@@ -877,6 +883,13 @@ public class resultset {
 		System.out.println("Schema name of first column is " + met.getSchemaName(1));
 		System.out.println("Table name of second column is " + met.getTableName(2));
 		System.out.println("Schema name of second column is " + met.getSchemaName(2));
+        stmt.execute("drop table s");
+        stmt.execute("drop table s1.t1");
+        stmt.execute("drop schema s1 restrict");
+        stmt.execute("drop table app1.t1");
+        stmt.execute("drop table app2.t1");
+        stmt.execute("drop schema app2 restrict");
+        stmt.execute("drop schema app1 restrict");
 	}
 
 	static private void doTheTests() throws Exception

@@ -30661,4 +30661,15 @@ None
 	Ordered null semantics on the following columns: 
 				qualifiers:
 None
+ij> -- cleanup
+drop table TENKTUP1;
+0 rows inserted/updated/deleted
+ij> drop table TENKTUP2;
+0 rows inserted/updated/deleted
+ij> drop table ONEKTUP;
+0 rows inserted/updated/deleted
+ij> drop table BPRIME;
+0 rows inserted/updated/deleted
+ij> drop procedure WISCINSERT;
+0 rows inserted/updated/deleted
 ij> 

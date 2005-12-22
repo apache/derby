@@ -2,7 +2,7 @@ Testing maxthreads
 org.apache.derby.drda.NetworkServerControl maxthreads 0 
 Max threads changed to 0.
 PASS - max threads value, 0 is correct
-org.apache.derby.drda.NetworkServerControl maxthreads -1 -h localhost -p 1527 
+org.apache.derby.drda.NetworkServerControl maxthreads -1 -h xxxFILTERED_HOSTNAMExxx -p 1527 
 Max threads changed to 0.
 PASS - max threads value, 0 is correct
 org.apache.derby.drda.NetworkServerControl maxthreads -12 

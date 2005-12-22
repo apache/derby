@@ -40,6 +40,7 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 public class lobStreams {
     
         static String[] fileName = new String[2];
+        static String sep;
         static long fileLength;
 
         static boolean debug = true;
@@ -47,13 +48,33 @@ public class lobStreams {
 
         static
         {
-            fileName[0] = "extin/aclob.txt";
-            fileName[1] = "extin/littleclob.txt";
+//            fileName[0] = "extin" + sep + "aclob.txt";
+ //           fileName[1] = "extin" + sep + "littleclob.txt";
+            fileName[0] =  "aclob.txt";
+            fileName[1] =  "littleclob.txt";
         }
         
         public static void main(String[] args)
         {
             System.out.println("Test lob stream with multiple writes starting");
+
+            // check to see if we have the correct extin path, if the files aren't right here, try one more time
+	    boolean exists = (new File("extin", fileName[0])).exists();
+            String sep =  System.getProperty("file.separator");
+	    if (!exists) 
+            {
+                // assume it's in a dir up, if that's wrong too, too bad...
+                String userdir =  System.getProperty("user.dir");
+                fileName[0] = userdir + sep + ".." + sep + "extin" + sep + fileName[0];
+                fileName[1] = userdir + sep + ".." + sep + "extin" + sep + fileName[1];
+            }
+            else
+            {
+                // assume it's in a dir up, if that's wrong too, too bad...
+                fileName[0] = "extin" + sep + fileName[0];
+                fileName[1] = "extin" + sep + fileName[1];
+            }
+
 
             try
             {
@@ -75,6 +96,8 @@ public class lobStreams {
                 testClobWrite1Param(conn);
 
                 // restart the connection
+                conn.commit();
+                cleanUp(conn);
                 conn.commit();
                 conn.close();
                 System.out.println("FINISHED TEST blobSetBinaryStream :-)");
@@ -443,4 +466,11 @@ public class lobStreams {
             } 
             return true;
         }
+
+        private static void cleanUp(Connection conn) throws SQLException {
+            String[] testObjects = {"table testBlobX1"};
+            Statement cleanupStmt = conn.createStatement();
+            TestUtil.cleanUpTest(cleanupStmt, testObjects);
+        }
+
 }

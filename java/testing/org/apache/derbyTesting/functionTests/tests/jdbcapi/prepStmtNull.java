@@ -6,6 +6,8 @@ import java.sql.*;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
 
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+
 public class prepStmtNull {
 
     public static void main(String[] args) {
@@ -51,6 +53,9 @@ public class prepStmtNull {
 			   System.out.println("ResultSet is: "+rs.getObject(1));
 			   System.out.println("ResultSet is: "+rs.getObject(2));
 			}
+			String[] testObjects = {"table nullTS"};
+                        TestUtil.cleanUpTest(stmt1, testObjects);
+   			con.commit();
  		} catch(SQLException sqle) {
  		   dumpSQLExceptions(sqle);
  		   sqle.printStackTrace();
@@ -99,6 +104,9 @@ public class prepStmtNull {
 			   System.out.println("ResultSet is: "+rs.getObject(1));
 			   System.out.println("ResultSet is: "+rs.getObject(2));
 			}
+			String[] testObjects = {"table nullBlob"};
+                        TestUtil.cleanUpTest(stmt1, testObjects);
+   			con.commit();
  		} catch(SQLException sqle) {
  		   dumpSQLExceptions(sqle);
  		   sqle.printStackTrace();

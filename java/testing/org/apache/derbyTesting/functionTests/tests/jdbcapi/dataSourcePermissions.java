@@ -24,6 +24,8 @@ import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 
+import java.util.Properties;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -44,6 +46,7 @@ import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionEvent;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 import java.io.*;
 import java.util.Hashtable;
@@ -62,6 +65,7 @@ public class dataSourcePermissions
 
 		ij.getPropertyArg(args);
 		new dataSourcePermissions().runTest();
+		new dataSourcePermissions().cleanUp();
 		System.out.println("Completed dataSourcePermissions");
 
 	}
@@ -281,6 +285,7 @@ public class dataSourcePermissions
 
 		shutdown();
 		}
+
 	}
 
 	private static void checkConnection(Connection conn) throws SQLException {
@@ -372,4 +377,47 @@ public class dataSourcePermissions
 			System.out.println("EXPECTED SHUTDOWN " + sqle.getMessage());
 		}
 	}
+
+	protected void cleanUp() throws Exception {
+		// clear up in case this test gets run with useprocess=false
+		try {
+			TestUtil.loadDriver();
+			Connection conn = DriverManager.getConnection(getJDBCUrl("wombat", "user=EDWARD;password=noodle"));
+			CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+			start();
+
+			cs.setString(1, "derby.connection.requireAuthentication");
+			cs.setString(2, "false");
+			cs.execute();
+			cs.close();
+
+			shutdown();
+			start();
+
+			conn = DriverManager.getConnection(getJDBCUrl("wombat", "user=EDWARD;password=noodle"));
+			cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+
+			cs.setString(1, "derby.user.EDWARD");
+			cs.setNull(2, java.sql.Types.VARCHAR);
+			cs.execute();
+
+			cs.setString(1, "derby.user.FRANCES");
+			cs.setNull(2, java.sql.Types.VARCHAR);
+			cs.execute();
+
+			cs.setString(1, "derby.user." + zeus);
+			cs.setNull(2, java.sql.Types.VARCHAR);
+			cs.execute();
+
+			cs.close();
+
+			conn.close();
+			shutdown();
+		
+		} catch (SQLException sqle) {
+			System.out.println("UNEXPECTED CONNFAIL " + sqle.getMessage());
+			System.out.println("could not clean up");
+		}
+	}
+
 }

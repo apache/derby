@@ -199,7 +199,7 @@ public class nullSQLText {
 			st.execute("drop table t1");
 		} catch (SQLException se) {}
 		try {
-			st.execute("drop procedure proc1");
+			st.execute("drop procedure za");
 		} catch (SQLException se) {}
 
 		st.close();

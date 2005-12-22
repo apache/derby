@@ -76,6 +76,7 @@ select c2 from t1 right outer join t2 on (i1=i2);
 select c1 from t1 left outer join t2 on (i1=i2);
 select c2 from t1 left outer join t2 on (i1=i2);
 
+drop table t;
 drop table t1;
 drop table t2;
 

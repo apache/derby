@@ -2,7 +2,7 @@ Testing timeslice
 org.apache.derby.drda.NetworkServerControl timeslice 0 
 Time slice changed to 0.
 PASS - time slice value, 0 is correct
-org.apache.derby.drda.NetworkServerControl timeslice -1 -h localhost -p 1527 
+org.apache.derby.drda.NetworkServerControl timeslice -1 -h xxxFILTERED_HOSTNAMExxx -p 1527 
 Time slice changed to 0.
 PASS - time slice value, 0 is correct
 org.apache.derby.drda.NetworkServerControl timeslice -12 

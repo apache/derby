@@ -105,6 +105,7 @@ public abstract class jvm {
     public String minorVersion = "";
     public int imajor = 0;
     public int iminor = 0;
+    String hostName;
 
 	// security defaults relative to WS
 	// not used if jvmargs serverPolicyFile or serverCodeBase are set
@@ -370,8 +371,11 @@ public abstract class jvm {
 		this.D.addElement(codebaseType + "=" + cb.toURL());
 		// file path to the codebase
 		this.D.addElement("csinfo.codedir=" + cb.getAbsolutePath());
-		this.D.addElement("csinfo.serverhost=localhost");
-		this.D.addElement("csinfo.trustedhost=localhost");	 
+		String hostName = (System.getProperty("hostName"));
+		if (hostName == null)
+			hostName="localhost";
+		this.D.addElement("csinfo.serverhost=" + hostName);
+		this.D.addElement("csinfo.trustedhost=" + hostName);	 
 		
 		// add an invalid path to the unused type 
 		this.D.addElement(unusedType + "=file://unused/");

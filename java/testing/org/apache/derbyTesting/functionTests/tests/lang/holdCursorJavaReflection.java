@@ -72,6 +72,7 @@ public class holdCursorJavaReflection {
 		ij.getPropertyArg(args);
 		Connection conn = ij.startJBMS();
 
+        dropTable(conn);
 		createAndPopulateTable(conn);
 
     //set autocommit to off after creating table and inserting data
@@ -80,6 +81,8 @@ public class holdCursorJavaReflection {
 		testPreparedStatement(conn);
 		testCallableStatement(conn);
 		conn.rollback();
+        conn.setAutoCommit(true);
+        dropTable(conn);
 		conn.close();
     } catch (Exception e) {
 		System.out.println("FAIL -- unexpected exception "+e);
@@ -99,6 +102,17 @@ public class holdCursorJavaReflection {
     System.out.println("done creating table and inserting data.");
 
     stmt.close();
+  }
+
+  //drop table
+  private static void dropTable(Connection conn)
+// throws SQLException 
+{
+    try {
+        Statement stmt = conn.createStatement();
+        stmt.executeUpdate( "DROP TABLE T1" );
+        stmt.close();
+    } catch (SQLException se) {} // assume any error is because table doesn't exist  
   }
 
   //test cursor holdability for callable statements

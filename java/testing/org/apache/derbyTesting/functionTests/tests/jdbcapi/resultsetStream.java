@@ -31,6 +31,7 @@ import java.sql.PreparedStatement;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -70,14 +71,22 @@ public class resultsetStream {
 			stmt.execute("create table t2 (len int, data LONG VARCHAR FOR BIT DATA)");
 			PreparedStatement ppw = con.prepareStatement(
 				"insert into t2 (len, data) values (?, ?)");
-			File file = new File("extin/littleclob.txt");
+			String filePath = "extin";
+			String sep = System.getProperty("file.separator");
+			boolean exists = (new File("extin", "littleclob.txt")).exists();
+			if (!exists)
+			{
+				String userDir = System.getProperty("user.dir");
+					filePath = userDir + sep + ".." + sep + filePath;
+			}
+			File file = new File(filePath + sep + "littleclob.txt");
 			int fileSize = (int) file.length();
 			BufferedInputStream fileData = new BufferedInputStream(new FileInputStream(file));
 			ppw.setInt(1, fileSize);
 			ppw.setBinaryStream(2, fileData, fileSize);
 			ppw.executeUpdate();
 
-			file = new File("extin/short.txt");
+			file = new File(filePath + sep + "short.txt");
 			fileSize = (int) file.length();
 			fileData = new BufferedInputStream(new FileInputStream(file));
 			ppw.setInt(1, fileSize);
@@ -89,7 +98,7 @@ public class resultsetStream {
 			ppw.executeUpdate();
 
 			// value copied over from original Java object test.
-			File rssg = new java.io.File("extin/resultsetStream.gif");
+			File rssg = new java.io.File(filePath + sep + "resultsetStream.gif");
 			int rssgLength = (int) rssg.length();
 			ppw.setInt(1, (int) rssgLength);
 			ppw.setBinaryStream(2, new FileInputStream(rssg), rssgLength);
@@ -282,10 +291,11 @@ public class resultsetStream {
 
 			ppw.close();
 			rs.close();
-			stmt.close();
 			
 			TestOfGetAsciiStream.executeTestOfGetAsciiStream(con);
 
+			cleanUp(stmt);
+			stmt.close();
 			con.close();
 
 		}
@@ -308,6 +318,10 @@ public class resultsetStream {
 		}
 	}
 	
+	private static void cleanUp(Statement stmt) throws SQLException {
+		String[] testObjects = { " table t3", "table t2" };
+		TestUtil.cleanUpTest(stmt, testObjects);
+	}
 	
 	static class TestOfGetAsciiStream {
 		

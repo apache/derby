@@ -312,4 +312,6 @@ ij> update t1 set c12=c12+1 where current of scrollCursor;
 ERROR 24000: Invalid cursor state - no current row.
 ij> -- clean up.
 close scrollCursor;
+ij> drop table t1;
+0 rows inserted/updated/deleted
 ij> 

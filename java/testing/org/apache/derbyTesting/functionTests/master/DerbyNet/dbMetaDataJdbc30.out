@@ -1,6 +1,6 @@
 Test dbMetaDataJdbc30 starting
 JDBC Driver 'IBM DB2 JDBC Universal Driver Architecture', version (EXPECTED VERSION)
-The URL is: jdbc:derby:net://localhost:1527/wombat;create=true
+The URL is: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/wombat;create=true
 supportsSavepoints() : true
 supportsNamedParameters() : false
 supportsMultipleOpenResults() : true

@@ -55,4 +55,6 @@ XADataSource with valid default user
 XA connected as EDWARD
 XA connected as FRANCES
 EXPECTED SHUTDOWN Derby system shutdown.
+EXPECTED SHUTDOWN Derby system shutdown.
+EXPECTED SHUTDOWN Derby system shutdown.
 Completed dataSourcePermissions

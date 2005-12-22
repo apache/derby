@@ -342,4 +342,5 @@ ij> drop procedure WAIT_FOR_POST_COMMIT;
 0 rows inserted/updated/deleted
 ij> drop table foo;
 0 rows inserted/updated/deleted
+ij> commit;
 ij> 

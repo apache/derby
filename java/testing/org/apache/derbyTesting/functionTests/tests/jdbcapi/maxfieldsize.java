@@ -61,6 +61,10 @@ public class maxfieldsize {
 		Connection conn;
 		Statement stmt;
 
+		// start by cleaning up, just in case
+		String[] testObjects = {"table tab1", "table tab2"};
+		
+
 		System.out.println("Test MaxFieldSize  starting");
 
 		isDerbyNet = TestUtil.isNetFramework();
@@ -71,6 +75,7 @@ public class maxfieldsize {
 			 ij.getPropertyArg(args);
 			 conn = ij.startJBMS();
 			 stmt = conn.createStatement();
+			 TestUtil.cleanUpTest(stmt, testObjects);
             //create a table, insert a row, do a select from the table,
 			 stmt.execute("create table tab1("+
                                            "c1 char(100) for bit data,"+
@@ -162,6 +167,8 @@ public class maxfieldsize {
 			System.out.println("Doing external sort");
 
 			testSort(conn, stmt);
+
+			TestUtil.cleanUpTest(stmt, testObjects);
 
 			stmt.close();
 			conn.close();
@@ -312,5 +319,11 @@ public class maxfieldsize {
 			se = se.getNextException();
         }
     }
+
+	static private void cleanUp(Connection conn) throws SQLException
+	{
+		
+	}
+
 
 }

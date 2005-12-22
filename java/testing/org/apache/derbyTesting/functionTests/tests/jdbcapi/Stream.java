@@ -270,6 +270,8 @@ public class Stream {
 	    st = conn.createStatement();
 	    st.execute("drop table SMALL_BLOB_TABLE");
 	    st.execute("drop table LARGE_BLOB_TABLE");
+	    st.execute("drop table SMALL_CLOB_TABLE");
+	    st.execute("drop table LARGE_CLOB_TABLE");
 
 	}finally{
 	    if(st != null)

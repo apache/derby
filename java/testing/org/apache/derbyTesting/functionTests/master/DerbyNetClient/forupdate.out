@@ -492,6 +492,8 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> drop table t2;
 0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
 ij> -- bug 5643
 ----- JCC throws NPE when trying to execute a cursor after the resultset is closed
 autocommit off;

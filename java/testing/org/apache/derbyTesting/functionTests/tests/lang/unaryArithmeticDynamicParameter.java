@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 
 /**
@@ -421,7 +422,22 @@ public class unaryArithmeticDynamicParameter {
 			System.out.println("SQL State : " + e.getSQLState());
 			System.out.println("Got expected exception " + e.getMessage());
 		}
+		finally {
+			cleanUp(conn);
+		}
 	};
+
+	private static void cleanUp(Connection conn) throws SQLException
+	{
+		Statement stmt = conn.createStatement();
+		String[] testObjects = { "table t1", "table t2", "view v1", 
+					"procedure abs_funct", "procedure max_cni"};
+		// this will drop all testobjects listed
+		TestUtil.cleanUpTest(stmt, testObjects);
+		stmt.close();
+		conn.close();
+	}
+
 	private static void dumpRS(ResultSet s) throws SQLException
 	{
 		if (s == null)

@@ -77,7 +77,8 @@ public class NSinSameJVM {
 			System.out.println("FAIL Network Server did not start");
 			return;
 		}
-		String jdbcUrlPrefix = TestUtil.getJdbcUrlPrefix("localhost", NETWORKSERVER_PORT);
+		String hostName = TestUtil.getHostName();
+		String jdbcUrlPrefix = TestUtil.getJdbcUrlPrefix(hostName, NETWORKSERVER_PORT);
 
         String url = jdbcUrlPrefix + databaseFileName;
 

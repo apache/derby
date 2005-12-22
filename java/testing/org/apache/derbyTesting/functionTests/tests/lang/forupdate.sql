@@ -243,6 +243,7 @@ autocommit on;
 -- drop the tables
 drop table t1;
 drop table t2;
+drop table t3;
 
 -- bug 5643
 -- JCC throws NPE when trying to execute a cursor after the resultset is closed

@@ -173,4 +173,7 @@ execute bestrow using 'values(''APP'',''T16'',3,''true'')';
 SCOPE |COLUMN_NAME                                                                                                                     |DATA_&|TYPE_NAME                                                                                                                       |COLUMN_SIZE|BUFFER_LEN&|DECIM&|PSEUD&
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij> rollback work;
+ij> drop procedure getBestRowID;
+0 rows inserted/updated/deleted
+ij> commit;
 ij> 

@@ -44,8 +44,12 @@ public class savepointJdbc30 {
 
 	static private boolean isDerbyNet = false;
 
+    static private String[] testObjects = { "table t1", "table t2", "table savepoint"};
+
+
+
 	public static void main(String[] args) {
-		Connection con = null, con2 = null;
+		Connection con = null, con2 = null, con3 = null;
 		Statement  s;
 		System.out.println("Test savepointJdbc30 starting");
 
@@ -80,6 +84,15 @@ public class savepointJdbc30 {
 			s.close();
 			con.close();
 			con2.close();
+
+			con3 = ij.startJBMS();
+			con3.setAutoCommit(true);
+			s = con3.createStatement();
+			TestUtil.cleanUpTest(s, testObjects);
+			s.close();
+			con3.close();
+
+
 		}
 		catch (SQLException e) {
 			dumpSQLExceptions(e);
@@ -873,6 +886,16 @@ public class savepointJdbc30 {
 	//Set up the test by creating the table used by the rest of the test.
 	static void setUpTest(Statement s)
 					throws SQLException {
+
+		try {
+			/* Drop the tables, just in case they're there from another test */
+			s.execute("drop table t1");
+			s.execute("drop table t2");
+			s.execute("drop table savepoint");
+		} catch (SQLException se) {
+			//System.out.println("Expected Exception is " + se.getMessage());
+		}
+
 		/* Create a table */
 		s.execute("create table t1 (c11 int, c12 smallint)");
 		s.execute("create table t2 (c11 int)");

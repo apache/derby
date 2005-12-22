@@ -7,7 +7,7 @@ derby.drda.portNumber=1527
 derby.drda.logConnections=false
 derby.drda.timeSlice=0
 derby.drda.startNetworkServer=false
-derby.drda.host=localhost
+derby.drda.host=xxxFILTERED_HOSTNAMExxx
 derby.drda.traceAll=false
 Properties with tracing on
 ----- listing properties --
@@ -20,7 +20,7 @@ derby.drda.portNumber=1527
 derby.drda.logConnections=true
 derby.drda.timeSlice=0
 derby.drda.startNetworkServer=false
-derby.drda.host=localhost
+derby.drda.host=xxxFILTERED_HOSTNAMExxx
 derby.drda.traceAll=false
 Properties with tracing on
 ----- listing properties --
@@ -32,5 +32,5 @@ derby.drda.portNumber=1527
 derby.drda.logConnections=true
 derby.drda.timeSlice=0
 derby.drda.startNetworkServer=false
-derby.drda.host=localhost
+derby.drda.host=xxxFILTERED_HOSTNAMExxx
 derby.drda.traceAll=true

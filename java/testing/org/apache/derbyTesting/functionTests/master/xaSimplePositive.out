@@ -189,6 +189,8 @@ A
 4          
 77         
 5          
+ij(XA)> drop table APP.foo;
+0 rows inserted/updated/deleted
 ij(XA)> xa_end xa_success 5;
 ij(XA)> xa_prepare 5;
 ij(XA)> xa_commit xa_2Phase 5;
@@ -225,6 +227,14 @@ selectRows - 1 arg - 1 rs
 I          |B              
 ---------------------------
 1          |one            
+ij(XA)> drop procedure DRS;
+0 rows inserted/updated/deleted
+ij(XA)> drop table t1;
+0 rows inserted/updated/deleted
+ij(XA)> drop view APP.global_xacttable;
+0 rows inserted/updated/deleted
+ij(XA)> drop schema sku restrict;
+0 rows inserted/updated/deleted
 ij(XA)> xa_end xa_success 6;
 ij(XA)> xa_commit xa_1Phase 6;
 ij(XA)> 

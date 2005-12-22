@@ -1102,4 +1102,13 @@ next test12;
 commit;
 
 close test12;
+
+
+drop table foo;
+drop table t1;
+drop table t2;
+drop function padstring;
+drop procedure wait_for_post_commit;
+commit;
+
 exit;

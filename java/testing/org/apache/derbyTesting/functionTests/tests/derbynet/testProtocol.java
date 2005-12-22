@@ -32,7 +32,7 @@ public class testProtocol {
 	private static final String DEFAULT_FILENAME = "protocol.tests";
 	
 	// constructor
-	private testProtocol() {}
+	public testProtocol() {}
 	
 
 	/**

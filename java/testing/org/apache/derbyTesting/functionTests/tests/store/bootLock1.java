@@ -50,6 +50,9 @@ public class bootLock1 {
 			ij.getPropertyArg(args);
 			Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
 			con = DriverManager.getConnection("jdbc:derby:wombat");
+			stmt = con.createStatement();
+			// while we're here, let's cleanup
+			stmt.execute("drop table t1");
 			//infinite loop until it gets killed.
 			for(;;)
 			{

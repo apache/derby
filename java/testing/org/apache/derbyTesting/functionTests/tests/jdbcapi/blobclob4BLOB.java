@@ -57,6 +57,10 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 public class blobclob4BLOB { 
 
 	static String[] fileName;
+	static String[] basefileName; // for printing messages so that no path info is in .out
+	static String filePath;
+	static String unicodeFilePath;
+	static String sep;
 	static long[] fileLength;
     static int numFiles;
     static int numRows;
@@ -72,14 +76,21 @@ public class blobclob4BLOB {
 	static
 	{
 		numFiles = 5;
+		filePath = "extin";
 		fileName = new String[numFiles];
+		basefileName = new String[numFiles];
 		fileLength = new long[numFiles];
 
-		fileName[0] = "extin/short.txt";	// set up a short (fit in one page) blob/clob
-		fileName[1] = "extin/littleclob.txt"; // set up a long (longer than a page) blob/clob
-		fileName[2] = "extin/empty.txt"; // set up a blob/clob with nothing in it
-		fileName[3] = "extin/searchclob.txt"; // set up a blob/clob to search with
-		fileName[4] = "extin/aclob.txt"; // set up a really long (over 300K) blob/clob
+		fileName[0] = "short.txt";	// set up a short (fit in one page) blob/clob
+		fileName[1] = "littleclob.txt"; // set up a long (longer than a page) blob/clob
+		fileName[2] = "empty.txt"; // set up a blob/clob with nothing in it
+		fileName[3] = "searchclob.txt"; // set up a blob/clob to search with
+		fileName[4] = "aclob.txt"; // set up a really long (over 300K) blob/clob
+
+		for (int i = 0 ; i < numFiles; i++)
+		{
+			basefileName[i] = fileName[i];
+		}
 
         numRows = 10;
 
@@ -90,7 +101,8 @@ public class blobclob4BLOB {
         unicodeStrings[2] = "\u05d0\u05d1\u05d2";
         numRowsUnicode = 6;
 
-        unicodeFileName = "extinout/unicodeFile.txt";
+        unicodeFilePath = "extinout";
+        unicodeFileName = "unicodeFile.txt";
     }
 
 
@@ -102,6 +114,21 @@ public class blobclob4BLOB {
 
 		try
         {
+            // first check to see if the path to extin/out dir is ok.
+            sep = System.getProperty("file.separator");
+            boolean exists = (new File(filePath, fileName[0])).exists();
+            if (!exists)
+            {
+                String userDir = System.getProperty("user.dir");
+                filePath = userDir + sep + ".." + sep + filePath;
+                unicodeFilePath = userDir + sep + ".." + sep + unicodeFilePath;
+            }
+            for (int i=0; i < numFiles; i++) 
+            {
+                fileName[i] = filePath + sep + fileName[i];
+            }
+            unicodeFileName = unicodeFilePath + sep + unicodeFileName;
+
 			// use the ij utility to read the property file and
 			// make the initial connection.
 			ij.getPropertyArg(args);
@@ -180,9 +207,23 @@ public class blobclob4BLOB {
             conn.commit();
             clobNegativeTest_Derby265(conn);
             blobNegativeTest_Derby265(conn);
+
+            // restart the connection for cleaning up
+            conn = ij.startJBMS();
+            String[] testObjects = {"table testclob_main", "table searchclob", 
+                                  "table testunicode", "table testunicode2", 
+                                  "table testclob10", "table testinteger", 
+                                  "table testclobcolumn", "table testclob2", 
+                                  "table testclob7", "table testlongrowclob", 
+                                  "table testblob", "table searchblob", 
+                                  "table testvarbinary", "table testinteger2", 
+                                  "table testblobcolumn", "table testblob2", 
+                                  "table testblobx", "table testlongrowblob", 
+                                  "table maps", "table maps_blob"};
+            Statement stmt = conn.createStatement();
+            TestUtil.cleanUpTest(stmt, testObjects);
             conn.close();
             System.out.println("FINISHED TEST blobclob :-)");
-
 		}
         catch (SQLException e)
         {
@@ -263,12 +304,12 @@ public class blobclob4BLOB {
                 fileLength[i] = file.length();
 				/*
 				System.out.println("inserting filename[" +i +
-								   "]" + fileName[i] +
+								   "]" + basefileName[i] +
 								   " length: " + fileLength[i]);
 				*/
                 InputStream fileIn = new FileInputStream(file);
 
-                System.out.println("===> inserting " + fileName[i] + " length = "
+                System.out.println("===> inserting " + basefileName[i] + " length = "
 				    				   + fileLength[i]);
 
                 // insert a streaming column
@@ -348,10 +389,10 @@ public class blobclob4BLOB {
 
 				/*
 				System.out.println("inserting filename[" +i +
-								   "]" + fileName[i] +
+								   "]" + basefileName[i] +
 								   " length: " + fileLength[i]);
 				*/
-                System.out.println("===> inserting " + fileName[i] + " length = "
+                System.out.println("===> inserting " + basefileName[i] + " length = "
 				    				   + fileLength[i]);
 
                 // insert a streaming column
@@ -2682,7 +2723,7 @@ public class blobclob4BLOB {
                 fileLength[i] = file.length();
                 InputStream fileIn = new FileInputStream(file);
 
-                System.out.println("===> inserting " + fileName[i] + " length = "
+                System.out.println("===> inserting " + basefileName[i] + " length = "
 				    				   + fileLength[i]);
 
                 // insert a streaming column
@@ -2797,7 +2838,7 @@ public class blobclob4BLOB {
                 fileLength[i] = file.length();
                 InputStream fileIn = new FileInputStream(file);
 
-                System.out.println("===> inserting " + fileName[i] + " length = "
+                System.out.println("===> inserting " + basefileName[i] + " length = "
 				    				   + fileLength[i]);
 
                 // insert a streaming column
@@ -4200,13 +4241,5 @@ public class blobclob4BLOB {
 		return false;
 	}
 }
-
-
-
-
-
-
-
-
 
 

@@ -32,6 +32,7 @@ public class procedureJdbc30
 { 
 
 	static private boolean isDerbyNet = false;
+	static private String[] testObjects = { "TABLE MRS.FIVERS", "PROCEDURE MRS.FIVEJP"};
 
 	public static void main (String[] argv) throws Throwable
 	{
@@ -56,6 +57,7 @@ public class procedureJdbc30
 	private static void testMoreResults(Connection conn) throws SQLException {
 
 		Statement s = conn.createStatement();
+		TestUtil.cleanUpTest(s, testObjects);
 
 		s.executeUpdate("create table MRS.FIVERS(i integer)");
 		PreparedStatement ps = conn.prepareStatement("insert into MRS.FIVERS values (?)");

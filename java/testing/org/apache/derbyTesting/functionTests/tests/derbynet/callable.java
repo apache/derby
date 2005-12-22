@@ -33,6 +33,7 @@ import java.sql.BatchUpdateException;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 /**
 	This test tests the JDBC CallableStatement.
 */
@@ -50,7 +51,8 @@ public class callable
 
 			// This also tests quoted pathname in database name portion of URL, beetle 4781.
 			String protocol = System.getProperty("ij.protocol");
-			System.setProperty("ij.database", protocol + "//localhost/\"" + System.getProperty("derby.system.home") + java.io.File.separator + "wombat;create=true\"");
+			String hostName = TestUtil.getHostName();
+			System.setProperty("ij.database", protocol + "//" + hostName + "/\"" + System.getProperty("derby.system.home") + java.io.File.separator + "wombat;create=true\"");
 			ij.getPropertyArg(args); 
 			Connection conn = ij.startJBMS();
 			if (conn == null)
@@ -228,6 +230,9 @@ public class callable
 			// Temporarily take out testbatch until jcc bug is fixed (5827)
 			// testBatch(conn);
 
+                        cleanUp(stmt);
+			stmt.close();
+			conn.close();
 			System.out.println("CallableStatement Test Ends");
         }
 		catch (Exception e)
@@ -693,6 +698,17 @@ public class callable
 			  e.printStackTrace();
 		  }
 	  
+	}
+
+
+	// test update of table in batch
+	public static void cleanUp (Statement stmt) throws SQLException 
+	{
+		String[] testObjects = { "table longvarbinary_tab", "table num_tab",
+			"procedure method1", "function method2",
+			"function method4", 
+			"procedure longvarbinary_in"}; 	
+		TestUtil.cleanUpTest(stmt, testObjects);
 	}
 
 }

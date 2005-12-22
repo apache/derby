@@ -2,8 +2,8 @@ jdbcCompliant() = true
 driver.getMajorVersion() = EXPECTED VERSION
 driver.getMinorVersion() = EXPECTED VERSION
 checking acceptsURL(jdbc:derby:wombat;create=true)
-checking acceptsURL(jdbc:derby://localhost:1527/wombat;create=true)
-checking acceptsURL(jdbc:derby:net://localhost:1527/wombat;create=true)
+checking acceptsURL(jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/wombat;create=true)
+checking acceptsURL(jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/wombat;create=true)
 checking acceptsURL(jdbc:db2j:wombat;create=true)
 testEmbeddedAttributes()
 Connection info for connect(jdbc:derby:testcreatedb1, {create=true})

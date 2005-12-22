@@ -58,4 +58,6 @@ No username, no password test: PASS.
 Turning on authentication
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 End username and password tests
+EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
+EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 Completed dataSourcePermissions_net

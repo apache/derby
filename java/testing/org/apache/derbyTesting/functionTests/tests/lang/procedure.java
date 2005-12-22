@@ -48,6 +48,7 @@ public class procedure
 	{
    		ij.getPropertyArg(argv); 
         Connection conn = ij.startJBMS();
+		cleanUp(conn);
 		isDerbyNet = TestUtil.isNetFramework();
 
 		// DB2 !!
@@ -86,6 +87,7 @@ public class procedure
 			testLiterals(conn);
             
             multipleRSTests(conn);
+			cleanUp(conn);
 		} catch (SQLException sqle) {
 			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
 			sqle.printStackTrace(System.out);
@@ -1760,5 +1762,22 @@ public class procedure
             return temp.booleanValue();
         } catch (Exception e) {return cs.getMoreResults();}//for jdks prior to jdk14 
     }
+
+    /** 
+     * clean up any objects not cleaned up by previous efforts
+     */
+    private static void cleanUp(Connection conn) throws SQLException {
+        String[] testObjects = {
+            "table t1", "procedure procdup", "schema s1 restrict",
+            "schema s2 restrict", "procedure drs", "procedure drs2",
+            "procedure litt.ty_smallint", "procedure litt.ty_integer", "procedure litt.ty_bigint",
+            "procedure litt.ty_real", "procedure litt.ty_double", "procedure litt.ty_decimal",
+            "procedure litt.ty_char", "procedure litt.ty_varchar",
+            "table SQLC.SQLCONTROL_DDL", "table SQLCONTROL_DDL",
+            "table SQLC.SQLCONTROL_DML",
+             }; 
+        Statement stmt = conn.createStatement();
+        TestUtil.cleanUpTest(stmt, testObjects);
+    } 
 
 }

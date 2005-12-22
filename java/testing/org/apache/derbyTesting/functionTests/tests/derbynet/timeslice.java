@@ -30,6 +30,7 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.functionTests.harness.jvm;
 import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derby.tools.ij;
 
 /**
@@ -55,7 +56,7 @@ public class timeslice
 			"timeslice", "a"};
     private static  BufferedOutputStream bos = null;
 	private static  NetworkServerControl server;
-	private static String host = "localhost";
+	private static String host;
 	private static int port = 1527;
 	/**
 	 * Execute the given command and dump the results to standard out
@@ -115,6 +116,8 @@ public class timeslice
 
 	public static void main (String args[]) throws Exception
 	{
+		host = TestUtil.getHostName();
+		timesliceCmd2[4] = host;
 		if ((System.getProperty("java.vm.name") != null) && System.getProperty("java.vm.name").equals("J9"))
 			jvm = jvm.getJvm("j9_13");
 		else

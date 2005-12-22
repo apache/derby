@@ -48,6 +48,7 @@ public class checkSecMgr
 			// bug 6021
 			// testIllegalDBCreate();
 			testIllegalPropertySet(conn);
+			cleanUp(conn);
 		}
 		catch (Exception e)
 		{
@@ -71,9 +72,18 @@ public class checkSecMgr
 			//    We seem to be able to create the database.
 			// Ideally this test should attempt to create the database
 			// ../wombat;create=true and get the security exception.
-			String databaseURL = TestUtil.getJdbcUrlPrefix() + "localhost/" + 
-				"\"D:/wombat;create=true\"";
-			System.out.println(databaseURL);
+			String hostName = TestUtil.getHostName();
+			String databaseURL;
+			if (hostName.equals("localhost"))
+			{
+				databaseURL = TestUtil.getJdbcUrlPrefix() + hostName + 
+				"/\"D:/wombat;create=true\"";
+			}
+			else
+			{
+				databaseURL = TestUtil.getJdbcUrlPrefix() + hostName + "wombat";
+			}
+			//System.out.println(databaseURL);
 			java.util.Properties properties = new java.util.Properties();
 			properties.put ("user", "cs");
 			properties.put ("password", "cs");
@@ -114,4 +124,15 @@ public class checkSecMgr
 	{
 		System.setProperty("notAllowed", "somevalue");
 	}
+
+	public static void cleanUp(Connection conn) throws SQLException
+	{
+		Statement stmt = conn.createStatement();
+		try {
+			stmt.executeUpdate("drop procedure setIllegalPropertyProc");
+		} catch (SQLException se) {
+			JDBCTestDisplayUtil.ShowCommonSQLException(System.out, se);
+		}
+	}
+
 }

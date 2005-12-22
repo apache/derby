@@ -39,6 +39,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  * Test of database meta-data.  This program simply calls each of the meta-data
@@ -1062,24 +1063,14 @@ public abstract class metadata_test {
 				" parameter style java"); 
             	s.execute("call isReadO()");
             }
-			s.execute("drop procedure isReadO");
-			s.execute("drop procedure GETPCTEST4Bx");
-			s.execute("drop procedure GETPCTEST4B");
-			s.execute("drop procedure GETPCTEST4A");
-			s.execute("drop procedure GETPCTEST3B");
-			s.execute("drop procedure GETPCTEST3A");
-			s.execute("drop procedure GETPCTEST2");
-			s.execute("drop procedure GETPCTEST1");
-			s.execute("drop table t");
-			s.execute("drop table reftab");
-			s.execute("drop table reftab2");
-			s.execute("drop view SCREWIE");
-			s.execute("drop table louie");
-			s.execute("drop table alltypes");
+			cleanUp(s);
+	
 			s.close();
+
 			if (con.getAutoCommit() == false)
 				con.commit();
 
+			
 			con.close();
 
 		}
@@ -1278,5 +1269,18 @@ public abstract class metadata_test {
 		return con;
 
 	}
+
+	protected void cleanUp(Statement stmt) throws SQLException {
+		con.setAutoCommit(true);
+		String[] testObjects = {"table t", "table t1", "view screwie", 
+			"table reftab", "table reftab2", "table inflight" , "table alltypes", 
+			"table louie",
+			"procedure getpctest1", "procedure getpctest2",
+			"procedure getpctest3a", "procedure getpctest3b",
+			"procedure getpctest4a", "procedure getpctest4b", "procedure getpctest4bx",
+			"procedure isreadO" };
+		TestUtil.cleanUpTest(stmt, testObjects);
+	}
+
 }
 

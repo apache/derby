@@ -65,10 +65,12 @@ public class StmtCloseFunTest {
 			// make the initial connection.
 			ij.getPropertyArg(args);
 			Connection conn = ij.startJBMS();
+			cleanUp(conn);
 			test1(conn);
 			test2(conn);
 			test3(conn);
 
+			cleanUp(conn);
 			conn.close();		
 				
 		} catch (SQLException e) {
@@ -80,6 +82,16 @@ public class StmtCloseFunTest {
 
 		System.out.println("Statement Close Fun Test finished");
 	}
+
+	
+    private static void cleanUp(Connection conn) throws SQLException {
+	Statement s = conn.createStatement();
+	String[] testObjects = {"PROCEDURE TAKESSTRING", "TABLE TAB1", "TABLE TAB2", "TABLE TAB3"};
+        try {
+		TestUtil.cleanUpTest(s, testObjects);
+	} catch (SQLException se){//
+	}
+    }
 
     private static void test1(Connection conn) {
 		Statement s;
@@ -583,7 +595,6 @@ public class StmtCloseFunTest {
 				}
 				catch(SQLException e) { }
 
-				s.execute("drop procedure takesString");
 				s.close();
 			}
 		

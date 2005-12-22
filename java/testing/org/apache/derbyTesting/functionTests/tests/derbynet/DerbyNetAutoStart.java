@@ -72,6 +72,7 @@ public class DerbyNetAutoStart
     private static Connection embeddedConn;
     private static int testNumber = 0;
     private static int portNumber;
+    private static String hostName;
     private static String homeDir;
     private static String databaseName;
     private static Properties baseProperties = new Properties();
@@ -113,6 +114,7 @@ public class DerbyNetAutoStart
 
 			ij.getPropertyArg(args);
             homeDir = System.getProperty( "derby.system.home", ".");
+            hostName = TestUtil.getHostName();
             
             for( int i = 0; i < args.length; i++)
             {
@@ -134,7 +136,7 @@ public class DerbyNetAutoStart
                     if( portNumber <= 0)
                         portNumber = NetworkServerControl.DEFAULT_PORTNUMBER;
                     
-                    NetworkServerControl server = new NetworkServerControl(InetAddress.getByName("localhost"),portNumber);
+                    NetworkServerControl server = new NetworkServerControl(InetAddress.getByName(hostName),portNumber);
                     server.start(null);
 					// Wait for server to come up 
 					for (int j = 0; j < 60; j++)
@@ -316,7 +318,7 @@ public class DerbyNetAutoStart
 
         Process serverProcess = Runtime.getRuntime().exec( cmd);
         // Wait for to start
-        String dbUrl = TestUtil.getJdbcUrlPrefix("localhost",
+        String dbUrl = TestUtil.getJdbcUrlPrefix(hostName,
 												 Integer.parseInt(portStr)) +
 			"database1";
         Connection drdaConn = null;
@@ -450,7 +452,7 @@ public class DerbyNetAutoStart
         try
         {
             NetworkServerControl server =
-				new NetworkServerControl(InetAddress.getByName("localhost"),
+				new NetworkServerControl(InetAddress.getByName(hostName),
 									 portNumber);
 			server.shutdown();
             Thread.sleep(5000);
@@ -540,7 +542,7 @@ public class DerbyNetAutoStart
                 try
                 {
                     drdaConn = DriverManager.getConnection(
-														   TestUtil.getJdbcUrlPrefix("localhost",portNumber) + databaseName,
+														   TestUtil.getJdbcUrlPrefix(hostName,portNumber) + databaseName,
 														   authenticationProperties);
                     break;
                 }
@@ -658,7 +660,7 @@ public class DerbyNetAutoStart
                 }
                 catch( InterruptedException ie){};
                 drdaConn = DriverManager.getConnection(
-													   TestUtil.getJdbcUrlPrefix("localhost", portNumber) +  databaseName,
+													   TestUtil.getJdbcUrlPrefix(hostName, portNumber) +  databaseName,
                                                         authenticationProperties);
                 passed = false;
                 System.out.println( "Was able to connect to the network server after Derby shut down.");

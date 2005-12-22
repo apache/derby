@@ -119,6 +119,7 @@ public class RunList
 	static Properties suiteProperties;
 	static Properties specialProperties; // for testSpecialProps
 	static BufferedReader runlistFile;
+	static String hostName;
 
     static String [] clientExclusionKeywords = new String [] {
         "at-or-before:", "at-or-after:", "when-at-or-before:jdk",
@@ -419,6 +420,8 @@ public class RunList
             jvmProps.addElement("serverJvm=" + serverJvm);
         if ( (serverJvmName != null) && (serverJvmName.length()>0) )
             jvmProps.addElement("serverJvmName=" + serverJvmName);
+        if ( (hostName != null) && (hostName.length()>0) )
+        	jvmProps.addElement("hostName=" + hostName);
         if ( useprocess == false )
             jvmProps.addElement("useprocess=false");
         if ( skipsed.equals("true") )
@@ -740,6 +743,7 @@ public class RunList
 		bootcp = suiteProperties.getProperty("bootcp");
 		serverJvm = suiteProperties.getProperty("serverJvm");
 		serverJvmName = suiteProperties.getProperty("serverJvmName");
+		hostName = suiteProperties.getProperty("hostName");
 		canondir = suiteProperties.getProperty("canondir");
 		mtestdir = suiteProperties.getProperty("mtestdir");
 		String usepr = suiteProperties.getProperty("useprocess");
@@ -823,7 +827,10 @@ public class RunList
             p.put("serverJvmName", serverJvmName);
 		else
             serverJvmName = p.getProperty("serverJvmName");
-
+        if ( hostName != null )
+            p.put("hostName", hostName);
+        else
+        	p.put("hostName","localhost");
         // Encryption may be set at the top or just for a subsuite
 	    if ( parentProperties.getProperty("encryption") != null )
 		    p.put("encryption", encryption);

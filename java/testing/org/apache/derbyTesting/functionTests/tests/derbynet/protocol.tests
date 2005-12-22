@@ -1265,6 +1265,34 @@ skipDss // RDBUPDRM
 checkSQLCard 0 "     "
 skipDss // ENDUOWRM
 skipDss // SQLCARD for commit
+// use default encoding for drop statement
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "drop table rdbcmtoktrue" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+skipDss // RDBUPDRM
+checkSQLCard 0 "     "
+skipDss // ENDUOWRM
+skipDss //SQLCARD for commit
 endTest
 //
 DISPLAY "Test for valid false value for RDBCMTOK in EXCSQLIMM"
@@ -1297,6 +1325,34 @@ skipDss // RDBUPDRM
 checkSQLCard 0 "     "
 skipDss // ENDUOWRM
 skipDss // SQLCARD for commit
+// use default encoding for drop statement
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "drop table rdbcmtokfalse" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+skipDss // RDBUPDRM
+checkSQLCard 0 "     "
+skipDss // ENDUOWRM
+skipDss //SQLCARD for commit
 endTest
 //
 DISPLAY "Test that we only send one RDBUPRM per transaction"
@@ -3100,4 +3156,35 @@ endDss
 flush
 checkError SYNTAXRM	8 29 TYPDEFNAM
 endTest
+// 
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "drop schema test restrict" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+skipDss // RDBUPDRM
+checkSQLCard 0 "     "
+skipDss // ENDUOWRM
+skipDss //SQLCARD for commit
+endTest
+completeTest
 //

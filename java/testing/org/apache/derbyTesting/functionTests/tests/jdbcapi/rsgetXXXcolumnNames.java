@@ -6,6 +6,8 @@ import java.sql.*;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
 
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+
 public class rsgetXXXcolumnNames {
 
     public static void main(String[] args) {
@@ -27,9 +29,14 @@ public class rsgetXXXcolumnNames {
                         ij.getPropertyArg(args);
                         con = ij.startJBMS();
 					
-			con.setAutoCommit(false);                        			              
 
                         stmt = con.createStatement(); 
+
+                        // first cleanup in case we're using useprocess false
+                        String[] testObjects = {"table caseiscol"};
+                        TestUtil.cleanUpTest(stmt, testObjects);
+
+			con.setAutoCommit(false);                        			              
 
 			// create a table with two columns, their names differ in they being in different cases.
                         stmt.executeUpdate("create table caseiscol(COL1 int ,\"col1\" int)");

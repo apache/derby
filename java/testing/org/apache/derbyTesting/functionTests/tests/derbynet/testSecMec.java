@@ -53,7 +53,7 @@ public class testSecMec extends dataSourcePermissions_net
 
 {
 
-	private static final int NETWORKSERVER_PORT = 20000;
+	private static int NETWORKSERVER_PORT;
 
 	private static NetworkServerControl networkServer = null;
 
@@ -61,6 +61,12 @@ public class testSecMec extends dataSourcePermissions_net
 
 		// Load harness properties.
 		ij.getPropertyArg(args);
+
+		String hostName = TestUtil.getHostName();
+		if (hostName.equals("localhost"))
+			NETWORKSERVER_PORT = 20000;
+		else
+			NETWORKSERVER_PORT = 1527;
 
 		// "runTest()" is going to try to connect to the database through
 		// the server at port NETWORKSERVER_PORT.  Thus, we have to
@@ -72,13 +78,16 @@ public class testSecMec extends dataSourcePermissions_net
 			e.printStackTrace();
 		}
 
-		// Start the NetworkServer on another thread
-		networkServer = new NetworkServerControl(InetAddress.getByName("localhost"),NETWORKSERVER_PORT);
-		networkServer.start(null);
+		// Start the NetworkServer on another thread, unless it's a remote host
+		networkServer = new NetworkServerControl(InetAddress.getByName(hostName),NETWORKSERVER_PORT);
+		if (hostName.equals("localhost"))
+		{
+			networkServer.start(null);
 
-		// Wait for the NetworkServer to start.
-		if (!isServerStarted(networkServer, 60))
-			System.exit(-1);
+			// Wait for the NetworkServer to start.
+			if (!isServerStarted(networkServer, 60))
+				System.exit(-1);
+		}
 
 		// Now, go ahead and run the test.
 		try {
@@ -96,10 +105,13 @@ public class testSecMec extends dataSourcePermissions_net
 		}
 
 		// Shutdown the server.
-		networkServer.shutdown();
-		// how do we do this with the new api?
-		//networkServer.join();
-		Thread.sleep(5000);
+		if (hostName.equals("localhost"))
+		{
+			networkServer.shutdown();
+			// how do we do this with the new api?
+			//networkServer.join();
+			Thread.sleep(5000);
+		}
 		System.out.println("Completed testSecMec");
 
 		System.out.close();

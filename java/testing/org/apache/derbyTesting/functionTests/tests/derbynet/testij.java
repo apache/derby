@@ -23,11 +23,17 @@ import java.sql.*;
 import java.util.Vector;
 import java.util.Properties;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 
 import org.apache.derbyTesting.functionTests.harness.jvm;
 import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
+import org.apache.derbyTesting.functionTests.harness.Sed;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 import org.apache.derby.drda.NetworkServerControl;
@@ -40,11 +46,15 @@ public class testij
 	private static Properties properties = new java.util.Properties();
 	private static jvm jvm;
 	private static Vector vCmd;
-	private static String[] jccIjCmd = new String[] {"org.apache.derby.tools.ij",
-		"extin/testij.sql"};
 
-	private static String[] clientIjCmd = new String[] {"org.apache.derby.tools.ij",
-													 "extin/testclientij.sql"};
+	private static String IjCmd="org.apache.derby.tools.ij";
+	private static String SqlDir="extin";
+	private static String jccSqlFile="testij.sql";
+	private static String sep;
+	private static String clientSqlFile="testclientij.sql";
+	private static String altExtinDir;
+	private static boolean useAltExtinDir=false;
+	
 	private static void execCmd (String[] args) throws Exception
 	{
 		int totalSize = vCmd.size() + args.length;
@@ -115,6 +125,42 @@ public class testij
 		bos.close();
 
 	}
+	
+    public static void massageSqlFile (String hostName, String fileName) throws Exception {
+        // only called if hostName is *not* localhost. 
+        // Need to replace each occurrence of the string 'localhost' with 
+        // whatever is the hostName
+        File tmpFile = new File("extin", "tmpFile.sql");
+        File orgFile = new File("extin", fileName);
+        // wrap this in a try to possibly try using user.dir to find the file
+        InputStream original; 
+        OutputStream copy; 
+        try { 
+            fileName = SqlDir + sep + fileName; 
+            original = new FileInputStream(fileName);
+            copy = new FileOutputStream(tmpFile);
+        }
+        catch (FileNotFoundException fnfe) {
+            // we must be running from within a suite...
+            useAltExtinDir = true;
+            String userdir =  System.getProperty("user.dir");
+            altExtinDir = userdir + sep + ".."; 
+            tmpFile = new File(altExtinDir, "tmpFile.sql");
+            orgFile = new File (altExtinDir,  fileName); 
+            fileName = altExtinDir + sep + fileName;
+            original = new FileInputStream(fileName);
+            copy = new FileOutputStream(tmpFile);
+        }
+        int content;
+        while ((content = original.read())> 0 ) {
+            copy.write(content);
+        }
+        copy.close();
+        original.close();
+        Sed hostSed = new Sed();
+        InputStream sedIs = new ByteArrayInputStream(("substitute=localhost;" + hostName).getBytes("UTF-8"));
+        hostSed.exec(tmpFile, orgFile, sedIs, false, false);		
+    }
 
 	public static void main (String args[]) throws Exception
 	{
@@ -123,6 +169,7 @@ public class testij
 		else
 			jvm = jvm.getJvm("currentjvm");		// ensure compatibility
 		vCmd = jvm.getCommandLine();
+		sep =  System.getProperty("file.separator");
 		try
 		{
 			/************************************************************
@@ -131,10 +178,27 @@ public class testij
 			//create wombat database
 			NetworkServerControl server = new NetworkServerControl();
 			System.out.println("Testing various ij connections and comments in front of selects");
-			if (TestUtil.isJCCFramework())
-				execCmdDumpResults(jccIjCmd);	
-			else   // Derby Client
-				execCmdDumpResults(clientIjCmd);	
+			
+			// first, we have to massage the .sql file to replace localhost, if 
+			// there is a system property set.
+						
+			String hostName=TestUtil.getHostName();
+			if (TestUtil.isJCCFramework()){
+				// use jccSqlfile
+				if (!hostName.equals("localhost")) 
+					massageSqlFile(hostName,jccSqlFile);
+				if (useAltExtinDir)	
+					execCmdDumpResults(new String[]{IjCmd,(altExtinDir + sep + SqlDir + sep + jccSqlFile)});
+				execCmdDumpResults(new String[]{IjCmd,(SqlDir + sep + jccSqlFile)});
+			} else {   // Derby Client
+				// use clientSqlFile
+				if(!hostName.equals("localhost")) {
+					massageSqlFile(hostName,clientSqlFile);
+				if (useAltExtinDir)	
+					execCmdDumpResults(new String[]{IjCmd,(altExtinDir + sep + SqlDir + sep + clientSqlFile)});
+				}
+				execCmdDumpResults(new String[]{IjCmd,(SqlDir + sep + clientSqlFile)});
+			}
 			System.out.println("End test");
 		}
 		catch (Exception e)

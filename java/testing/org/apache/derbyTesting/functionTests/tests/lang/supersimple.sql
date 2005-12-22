@@ -88,9 +88,13 @@ drop table a;
 
 -- Bug 4694 Test automatic rollback with close of connection
 -- in ij
+connect 'wombat';
 autocommit off;
 create table a (a int);
-
+select count(*) from a;
+disconnect;
+set connection connection0;
+select count(*) from a;
 
 -- Bug 4758 - Store error does not return properly to client
 autocommit off;
@@ -115,4 +119,8 @@ insert into t1 values ('some clob', '');
 select * from t1;
 select c2 from t1;
 drop table t1;
-
+commit;
+disconnect;
+set connection connection0;
+autocommit on;
+drop table t;

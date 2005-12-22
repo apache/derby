@@ -2685,18 +2685,16 @@ public class updatableResultSet {
 
 	static void teardown() throws SQLException {
 		Statement stmt = conn.createStatement();
-		stmt.executeUpdate("drop table t1");
-		stmt.executeUpdate("drop table t2");
-		stmt.executeUpdate("drop table t3");
-		stmt.executeUpdate("drop table tableWithConstraint");
-		stmt.executeUpdate("drop table tableWithPrimaryKey");
-		stmt.executeUpdate("drop table deleteTriggerInsertIntoThisTable");
-		stmt.executeUpdate("drop table updateTriggerInsertIntoThisTable");
-		stmt.executeUpdate("drop table table0WithTriggers");
-		stmt.executeUpdate("drop table table1WithTriggers");
-		stmt.executeUpdate("drop table table2WithTriggers");
-		stmt.executeUpdate("drop table selfReferencingT1");
-		stmt.executeUpdate("drop table selfReferencingT2");
+		String[] testObjects={"table \" t 11 \"", "table \"t1\"",
+			"trigger tr1", "trigger tr2", "trigger tr3", "trigger tr4",
+			"view v1", "table s2.t1", "schema s2 restrict", "table t2", 
+			"table t1", "table t3",	"table tableWithConstraint",
+			"table tableWithPrimaryKey", "table deleteTriggerInsertIntoThisTable",
+			"table updateTriggerInsertIntoThisTable", "table table0WithTriggers",
+			"table table1WithTriggers", "table table2WithTriggers",
+			"table selfReferencingT1", "table selfReferencingT2",
+			"table AllDataTypesForTestingTable", "table AllDataTypesNewValuesData"};
+		TestUtil.cleanUpTest(stmt, testObjects);	
 		conn.commit();
 		stmt.close();
 	}

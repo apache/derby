@@ -181,14 +181,27 @@ public class TestUtil {
 	/**
 	    Get URL prefix for current framework.
 		
-		@return url, assume localhost and port 1527 for Network Tests
+		@return url, assume localhost - unless set differently in System property - 
+		             and assume port 1527 for Network Tests
 		@see getJdbcUrlPrefix(String server, int port)
 		
 	*/
-	public static String getJdbcUrlPrefix()
-	{
-		return getJdbcUrlPrefix("localhost", 1527);
-	}
+    public static String getJdbcUrlPrefix()
+    {
+        String hostName=getHostName();
+        return getJdbcUrlPrefix(hostName, 1527);
+    }
+
+    /** Get hostName as passed in - if not, set it to "localhost" 
+        @return hostName, as passed into system properties, or "localhost"
+    */
+    public static String getHostName()
+    {
+        String hostName = (System.getProperty("hostName"));
+        if (hostName == null)
+            hostName="localhost";
+        return hostName;
+    }
 
 	/** 
 		Get URL prefix for current framework		
@@ -659,6 +672,26 @@ public class TestUtil {
 		}
 
 	}
+
+    /**
+        Drop the test objects passed in as a string identifying the
+        type of object (e.g. TABLE, PROCEDURE) and its name.
+        Thus, for example, a testObject array could be:
+        {"TABLE MYSCHEMA.MYTABLE", "PROCEDURE THISDUMMY"}
+        The statement passed in must be a 'live' statement in the test.
+    */
+    public static void cleanUpTest (Statement s, String[] testObjects)
+                                    throws SQLException {
+        /* drop each object named */
+        for (int i=0; i < testObjects.length; i++) {
+            try {
+                s.execute("drop " + testObjects[i]);
+                //System.out.println("now dropping " + testObjects[i]);
+            } catch (SQLException se) { // ignore...
+            }
+        }	
+    }
+
 	
 	public static Connection getDataSourceConnection (Properties prop) throws SQLException {
 		DataSource ds = TestUtil.getDataSource(prop);
@@ -683,5 +716,6 @@ public class TestUtil {
 			throw e;
 		}
 	}
+
 }
 

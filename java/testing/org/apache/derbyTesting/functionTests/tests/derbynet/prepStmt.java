@@ -40,9 +40,13 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 	This test tests the JDBC PreparedStatement.
 */
 
-class prepStmt
+public class prepStmt
 {
 	private static Connection conn = null;
+
+    private static String[] testObjects =  // string array for cleaning up
+        {"table t1", "table tab1", "table t2", "table bigtab", "table tstab",
+         "table doubletab", "table numtab", "table Numeric_Tab", "table jira614"};
 
 	public static void main (String args[])
 	{
@@ -57,6 +61,10 @@ class prepStmt
 				System.out.println("conn didn't work");
 				return;
 			}
+	
+			Statement cleanstmt = conn.createStatement();
+			TestUtil.cleanUpTest(cleanstmt, testObjects);
+
 			PreparedStatement ps;
 			ResultSet rs;
 			boolean hasResultSet;
@@ -301,6 +309,12 @@ class prepStmt
 			test5130(conn);
 			test5172(conn);
 			jira614Test(conn);
+			conn.close();
+			// refresh conn before cleaning up
+			conn = ij.startJBMS();
+			cleanstmt = conn.createStatement();
+			TestUtil.cleanUpTest(cleanstmt, testObjects);
+			cleanstmt.close();
 			conn.close();
 			System.out.println("prepStmt Test Ends");
         }

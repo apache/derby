@@ -71,6 +71,7 @@ public class RunSuite
 	static String canondir; // location of master dir (default is master)
 	static String bootcp; //  path for j9 bootclasspath setting
 	static String serverJvm; //  path for j9 bootclasspath setting
+	static String hostName; // needs to be settable for IPV6 testing; localhost otherwise. 
 	static String ijdefaultResourcePackage; // for ij tests only
 	static String debug; // for setting verbose mode to pass down to RunTest
     static String timeout; // to allow killing a hanging test
@@ -341,6 +342,7 @@ public class RunSuite
             outputdir = p.getProperty("outputdir");
             canondir = p.getProperty("canondir");
             bootcp = p.getProperty("bootcp");
+            hostName = p.getProperty("hostName");
             serverJvm = p.getProperty("serverJvm");
             systemdiff = p.getProperty("systemdiff");
             ijdefaultResourcePackage = p.getProperty("ij.defaultResourcePackage");
@@ -467,6 +469,9 @@ public class RunSuite
 		    bootcp = j9bootcp;
 		    suiteProperties.put("bootcp", bootcp);
 		}
+		String hostname = sp.getProperty("hostName");
+		if (hostname != null)
+			suiteProperties.put("hostName", hostname);
 		String serverJvm = sp.getProperty("serverJvm");
 		if (serverJvm != null)
 		    suiteProperties.put("serverJvm", serverJvm);

@@ -35,4 +35,6 @@ ConnectionPoolDataSource with valid default user
 CP connected as EDWARD
 CP connected as FRANCES
 EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
+EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
+EXPECTED SHUTDOWN DB2 SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 Completed dataSourcePermissions_net

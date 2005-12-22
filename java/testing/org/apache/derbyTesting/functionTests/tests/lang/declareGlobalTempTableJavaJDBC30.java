@@ -1185,8 +1185,8 @@ public class declareGlobalTempTableJavaJDBC30 {
 				ds.setDatabaseName("wombat");
 				ds.setUser("cs");
 				ds.setPassword("cs");
-
-				ds.setServerName("localhost");
+				hostName = TestUtil.getHostName();
+				ds.setServerName(hostName);
 				ds.setPortNumber(1527);
 				ds.setDriverType(4);
 				dsp = ds;

@@ -125,3 +125,5 @@ execute bestrow using 'values(''APP'',''T16'',3,''true'')';
 
 rollback work;
 
+drop procedure getBestRowID;
+commit;

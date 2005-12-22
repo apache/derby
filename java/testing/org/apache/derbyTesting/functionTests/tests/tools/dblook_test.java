@@ -386,7 +386,8 @@ public class dblook_test {
 
 		printAsHeader("\nDumping DDL for all objects, " +
 			"using\nNetwork Server:\n");
-		jdbcProtocol = TestUtil.getJdbcUrlPrefix("localhost",SERVER_PORT);
+		String hostName = TestUtil.getHostName();
+		jdbcProtocol = TestUtil.getJdbcUrlPrefix(hostName,SERVER_PORT);
 
 		String sourceDBUrl;
 		if (TestUtil.isJCCFramework())

@@ -30,16 +30,14 @@ public class RunClass implements Runnable
 	/**
 		param args the arguments to pass into ij
 	*/
-	public RunClass(Class theClass, Method methodToCall, Object args[])
+	public RunClass(Method methodToCall, Object args[])
 	{
 		mainMethod = methodToCall;
 		arguments=args;	
-		testClass = theClass;
 	}
 
 	Object arguments[];
 	Method mainMethod;
-	Class testClass;
 
 	public void run()
 	{
@@ -47,15 +45,14 @@ public class RunClass implements Runnable
         {
 		    try
 		    {
-			    mainMethod.invoke(testClass.newInstance(), arguments);				
-		    }
-		    catch (InstantiationException ie)
-		    {
-		        System.out.println("Class could not be instantiated: " + ie);
-		        System.exit(1);
+			    // we're invoking the test class's main method - which is always static
+			    // thus we can pass null, an underlying object argument would be 
+			    // ignored anyway. 
+			    mainMethod.invoke(null, arguments);
 		    }
 		    catch (IllegalAccessException iae)
 		    {
+			iae.printStackTrace();
 		        System.out.println("RunClass: " + iae + " make sure the test class is public.");
 		        System.exit(1);
 		    }

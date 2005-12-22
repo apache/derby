@@ -152,3 +152,4 @@ close test1;
 drop function PADSTRING;
 drop procedure WAIT_FOR_POST_COMMIT;
 drop table foo;
+commit;

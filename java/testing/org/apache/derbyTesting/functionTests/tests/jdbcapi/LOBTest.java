@@ -470,6 +470,7 @@ class LOBTester {
 				" ) values (cast (X'a78a' as blob(80)) )";
 			Xprint(insert);
 		}
+            Xprint("drop table blobCheck");
 	}
     public void test() throws SQLException {
         // create table for testing

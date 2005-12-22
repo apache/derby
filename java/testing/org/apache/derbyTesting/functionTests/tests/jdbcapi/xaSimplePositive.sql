@@ -135,6 +135,7 @@ xa_start xa_join 5;
 
 select * from APP.global_xactTable where gxid is not null order by gxid;
 select * from APP.foo;
+drop table APP.foo;
 xa_end xa_success 5;
 xa_prepare 5;
 xa_commit xa_2Phase 5;
@@ -156,5 +157,9 @@ create table t1(i int not null primary key, b char(15));
 insert into t1 values (1,'one'), (2, 'two'), (3,'three');
 create procedure DRS(p1 int) parameter style JAVA READS SQL DATA dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows';
 call DRS(1);
+drop procedure DRS;
+drop table t1;
+drop view APP.global_xacttable;
+drop schema sku restrict;
 xa_end xa_success 6;
 xa_commit xa_1Phase 6;

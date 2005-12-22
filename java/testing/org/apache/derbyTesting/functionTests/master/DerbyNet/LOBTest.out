@@ -3871,3 +3871,4 @@ insert into blobCheck (bl ) values (cast (X'C8' as blob(80)) )
 insert into blobCheck (bl ) values ( X'a78a' )
 	ERROR 42821: Columns of type 'BLOB' cannot hold values of type 'CHAR () FOR BIT DATA'. 
 insert into blobCheck (bl ) values (cast (X'a78a' as blob(80)) )
+drop table blobCheck

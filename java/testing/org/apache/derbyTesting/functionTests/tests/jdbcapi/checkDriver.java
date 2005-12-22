@@ -42,45 +42,20 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 
 public class checkDriver {
 
+	private static String hostName;
 	private static String EMBEDDED_URL = "jdbc:derby:wombat;create=true";
-	private static String CLIENT_URL = "jdbc:derby://localhost:1527/wombat;create=true";
-	private static String JCC_URL = "jdbc:derby:net://localhost:1527/wombat;create=true";
+	private static String CLIENT_URL;
+	private static String JCC_URL;
 	private static String INVALID_URL = "jdbc:db2j:wombat;create=true";
 	
 	private static String DERBY_SYSTEM_HOME = System.getProperty("derby.system.home");
 	
-	private static String CLIENT_URL_WITH_COLON1 = 
-		"jdbc:derby://localhost:1527/wombat:create=true";
-	private static String CLIENT_URL_WITH_COLON2 = 
-		"jdbc:derby://localhost:1527/"+ DERBY_SYSTEM_HOME + File.separator +"wombat:create=true";
-	private static String CLIENT_URL_WITH_DOUBLE_QUOTES1 = 
-		"jdbc:derby://localhost:1527/\"wombat\";create=true"; 
-	private static String CLIENT_URL_WITH_DOUBLE_QUOTES2 = 
-		"jdbc:derby://localhost:1527/\"" + DERBY_SYSTEM_HOME + File.separator + "wombat\";create=true";
-	private static String CLIENT_URL_WITH_SINGLE_QUOTES1 = 
-		"jdbc:derby://localhost:1527/'" + DERBY_SYSTEM_HOME + File.separator + "wombat';create=true";
-	private static String CLIENT_URL_WITH_SINGLE_QUOTES2 = 
-		"jdbc:derby://localhost:1527/'wombat';create=true";
-	
-	// URLS to check.  New urls need to also be added to the acceptsUrl table
-	private static String[] urls = new String[]
-	{
-	  	EMBEDDED_URL,
-		CLIENT_URL,
-		JCC_URL,
-		INVALID_URL,
-	};
-	
-	//Client URLS
-	private static String[] clientUrls = new String[]
-	{
-		CLIENT_URL_WITH_COLON1,
-		//CLIENT_URL_WITH_COLON2,
-		//CLIENT_URL_WITH_DOUBLE_QUOTES1,
-		//CLIENT_URL_WITH_DOUBLE_QUOTES2,
-		//CLIENT_URL_WITH_SINGLE_QUOTES1,
-		CLIENT_URL_WITH_SINGLE_QUOTES2
-	};
+	private static String CLIENT_URL_WITH_COLON1; 
+	private static String CLIENT_URL_WITH_COLON2;
+	private static String CLIENT_URL_WITH_DOUBLE_QUOTES1;  
+	private static String CLIENT_URL_WITH_DOUBLE_QUOTES2; 
+	private static String CLIENT_URL_WITH_SINGLE_QUOTES1; 
+	private static String CLIENT_URL_WITH_SINGLE_QUOTES2;
 	
 	/**
 	 * url prefix for this framework
@@ -90,7 +65,6 @@ public class checkDriver {
 	// The acceptsURLTable uses  the frameworkOffset column int he table 
 	// to check for valid results for each framework
 	private static int  frameworkOffset;
-	
 	
 	private static int EMBEDDED_OFFSET = 0;
 	private static int DERBYNETCLIENT_OFFSET = 1;
@@ -104,7 +78,38 @@ public class checkDriver {
 			frameworkOffset = DERBYNETCLIENT_OFFSET;
 		else if (TestUtil.isJCCFramework())
 			frameworkOffset = DERBYNET_OFFSET; // JCC
+		
+		hostName = TestUtil.getHostName();
+		CLIENT_URL = "jdbc:derby://" + hostName + ":1527/wombat;create=true";
+		JCC_URL = "jdbc:derby:net://" + hostName + ":1527/wombat;create=true";
+		CLIENT_URL_WITH_COLON1 = "jdbc:derby://" + hostName + ":1527/wombat:create=true";
+		CLIENT_URL_WITH_COLON2 = "jdbc:derby://" + hostName + ":1527/"+ DERBY_SYSTEM_HOME + File.separator +"wombat:create=true";
+		CLIENT_URL_WITH_DOUBLE_QUOTES1 = "jdbc:derby://" + hostName + ":1527/\"wombat\";create=true"; 
+		CLIENT_URL_WITH_DOUBLE_QUOTES2 = "jdbc:derby://" + hostName + ":1527/\"" + DERBY_SYSTEM_HOME + File.separator + "wombat\";create=true";
+		CLIENT_URL_WITH_SINGLE_QUOTES1 = "jdbc:derby://" + hostName + ":1527/'" + DERBY_SYSTEM_HOME + File.separator + "wombat';create=true";
+		CLIENT_URL_WITH_SINGLE_QUOTES2 = "jdbc:derby://" + hostName + ":1527/'wombat';create=true";
 	}
+
+	// URLS to check.  New urls need to also be added to the acceptsUrl table
+	private static String[] urls = new String[]
+	{
+	  	EMBEDDED_URL,
+		CLIENT_URL,
+		JCC_URL,
+		INVALID_URL,
+	};
+		
+	//Client URLS
+	private static String[] clientUrls = new String[]
+	{
+		CLIENT_URL_WITH_COLON1,
+		//CLIENT_URL_WITH_COLON2,
+		//CLIENT_URL_WITH_DOUBLE_QUOTES1,
+		//CLIENT_URL_WITH_DOUBLE_QUOTES2,
+		//CLIENT_URL_WITH_SINGLE_QUOTES1,
+		CLIENT_URL_WITH_SINGLE_QUOTES2
+	};
+	
 	
 	// Table that shows whether tested urls should return true for acceptsURL
 	// under the given framework
@@ -120,6 +125,7 @@ public class checkDriver {
 			
 
 	public static void main(String[] args) {
+		
 		try {
 			Driver driver = loadAndCheckDriverForFramework();			
 			checkAcceptsURL(driver);

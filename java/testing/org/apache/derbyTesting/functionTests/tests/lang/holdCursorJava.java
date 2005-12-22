@@ -33,10 +33,15 @@ import java.sql.Types;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
 
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+
 /**
  * Test hold cursor after commit
  */
 public class holdCursorJava {
+  private static String[] databaseObjects = {"PROCEDURE MYPROC", "TABLE T1", "TABLE T2",
+                                 "TABLE TESTTABLE1", "TABLE TESTTABLE2",
+                                 "TABLE BUG4385"};
 
   public static void main (String args[])
   {
@@ -57,7 +62,13 @@ public class holdCursorJava {
 		testIsolationLevelChange(conn);
 
 		conn.rollback();
+                conn.setAutoCommit(true);
+		
+		Statement stmt = conn.createStatement();
+                TestUtil.cleanUpTest(stmt, databaseObjects);
 		conn.close();
+               
+
     } catch (Exception e) {
 		System.out.println("FAIL -- unexpected exception "+e);
 		JDBCDisplayUtil.ShowException(System.out, e);
@@ -68,6 +79,9 @@ public class holdCursorJava {
   //create table and insert couple of rows
   private static void createAndPopulateTable(Connection conn) throws SQLException {
     Statement stmt = conn.createStatement();
+
+    // first drop the objects, in case something is left over from past runs or other tests
+    TestUtil.cleanUpTest(stmt, databaseObjects);
 
     System.out.println("Creating table...");
     stmt.executeUpdate( "CREATE TABLE T1 (c11 int, c12 int)" );
@@ -85,6 +99,19 @@ public class holdCursorJava {
     				"'org.apache.derbyTesting.functionTests.tests.lang.holdCursorJava.testProc' result sets 2");
     System.out.println("done creating table and inserting data.");
 
+    stmt.close();
+  }
+
+  //drop tables
+  private static void cleanUpTest(Connection conn) throws SQLException {
+    Statement stmt = conn.createStatement();
+    //System.out.println("dropping test objects...");
+    stmt.executeUpdate( "DROP PROCEDURE MYPROC" );
+    stmt.executeUpdate( "DROP TABLE T1" );
+    stmt.executeUpdate( "DROP TABLE T2" );
+    stmt.executeUpdate( "DROP TABLE testtable1" );
+    stmt.executeUpdate( "DROP TABLE testtable2" );
+    stmt.executeUpdate( "DROP TABLE BUG4385" );
     stmt.close();
   }
 

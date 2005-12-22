@@ -35,6 +35,7 @@ import org.apache.oro.text.regex.*;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class Sed
 {
@@ -57,6 +58,8 @@ public class Sed
     public void exec(File srcFile, File dstFile, InputStream isSed, boolean isJCC, boolean isI18N)
         throws IOException
     {
+    	String hostName = TestUtil.getHostName();
+    	
         // Vector for storing lines to be deleted
         Vector deleteLines = new Vector();
         deleteLines.addElement("^ij version.*$");
@@ -165,6 +168,8 @@ public class Sed
         searchStrings.addElement("  DB2ConnectionCorrelator: [0-9A-Z.]*");
 		// Filter for SAX exception name diffs between jvms.
         searchStrings.addElement("org.xml.sax.SAX.*$");
+        // Filter out localhost, or hostName
+        searchStrings.addElement(hostName);
 
         Vector subStrings = new Vector();
         subStrings.addElement("Transaction:(XXX)|");
@@ -202,6 +207,8 @@ public class Sed
         subStrings.addElement("");
 		// Filter for SAX exception name diffs between jvms.
         subStrings.addElement("xxxFILTERED-SAX-EXCEPTIONxxx'.");
+        // Filter out localhost, or hostName
+        subStrings.addElement("xxxFILTERED_HOSTNAMExxx");
         doWork(srcFile, dstFile, null, deleteLines, searchStrings, subStrings, isSed, isI18N);
         
     } // end exec

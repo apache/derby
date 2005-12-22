@@ -24,6 +24,7 @@ testProperties_derby.properties
 testProtocol_app.properties
 testProtocol_derby.properties
 testSecMec_app.properties
+testSecMec_sed.properties
 timeslice_app.properties
 protocol.tests
 excsat_accsecrd1.inc

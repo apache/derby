@@ -28,6 +28,7 @@ import java.io.BufferedOutputStream;
 
 import org.apache.derbyTesting.functionTests.harness.jvm;
 import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derby.tools.ij;
 
 /**
@@ -39,6 +40,7 @@ public class testconnection
 
 	private static jvm jvm;
 	private static Vector vCmd;
+	private static String hostName;
 	private static String[] TestConnectionCmd1 = new String[] {"org.apache.derby.drda.NetworkServerControl",
 		"ping"};
 	private static String[] TestConnectionCmd2 = new String[] {"org.apache.derby.drda.NetworkServerControl",
@@ -51,12 +53,29 @@ public class testconnection
 	private static String[] TestConnectionCmd5 = new String[] {"org.apache.derby.drda.NetworkServerControl",
 		"ping", "-h", "localhost", "-p", "9393"};
 	private static String[] TestConnectionCmd6 = new String[] {"org.apache.derby.drda.NetworkServerControl",
-		"ping", "-p", "1527"};
+		"ping", "-h", "localhost", "-p", "1527"};
+	private static String[] TestConnectionCmd6b = new String[] {"org.apache.derby.drda.NetworkServerControl",
+		"ping", "-h", "localhost", "-p", "1527"};
 	private static String[] TestConnectionCmd7 = new String[] {"org.apache.derby.drda.NetworkServerControl",
-		"ping", "-p", "9393"};
+		"ping", "-h", "localhost", "-p", "9393"};
+	private static String[] TestConnectionCmd7b = new String[] {"org.apache.derby.drda.NetworkServerControl",
+		"ping", "-h", "localhost", "-p", "9393"};
 
     private static  BufferedOutputStream bos = null;
     
+    /**
+	 * Execute the given command and dump the results to standard out
+	 *
+	 * @param args	command and arguments
+     * @param printcmd to printout the executing command or not
+	 * @exception Exception
+	 */
+    private static void execCmdDumpResults (String[] args, boolean printcmd)
+        throws Exception
+    {
+        execCmdDumpResults(args, 0, printcmd);
+    }
+
     /**
 	 * Execute the given command and dump the results to standard out
 	 *
@@ -66,7 +85,20 @@ public class testconnection
     private static void execCmdDumpResults (String[] args)
         throws Exception
     {
-        execCmdDumpResults(args, 0);
+        execCmdDumpResults(args, 0, true);
+    }
+
+
+	/**
+	 * Execute the given command and dump the results to standard out
+	 *
+	 * @param args	command and arguments
+     * @param expectedExitCode the exit code that we expect from running this
+     */
+	private static void execCmdDumpResults (String[] args, int expectedExitCode)
+        throws Exception
+	{
+        execCmdDumpResults(args, expectedExitCode, true);
     }
 
 	/**
@@ -74,10 +106,10 @@ public class testconnection
 	 *
 	 * @param args	command and arguments
      * @param expectedExitCode the exit code that we expect from running this
+     * @param printcmd to indicate if the executing command should get printed
 	 * @exception Exception
 	 */
-
-	private static void execCmdDumpResults (String[] args, int expectedExitCode)
+	private static void execCmdDumpResults (String[] args, int expectedExitCode, boolean printcmd)
         throws Exception
 	{
         // We need the process inputstream and errorstream
@@ -90,7 +122,10 @@ public class testconnection
         {
             sb.append(args[i] + " ");                    
         }
-        System.out.println(sb.toString());
+        if (printcmd)
+            System.out.println(sb.toString());
+        else
+            System.out.println("org.apache.derby.drda.NetworkServerControl ping...");            
 		int totalSize = vCmd.size() + args.length;
 		String serverCmd[] = new String[totalSize];
 		int i;
@@ -130,6 +165,15 @@ public class testconnection
 
 	public static void main (String args[]) throws Exception
 	{
+		hostName = TestUtil.getHostName();
+		TestConnectionCmd2[3] = hostName;
+		TestConnectionCmd4[3] = hostName;
+		TestConnectionCmd5[3] = hostName;
+		TestConnectionCmd6b[3] = hostName;
+		TestConnectionCmd7b[3] = hostName;
+        
+ 
+		
 		if ((System.getProperty("java.vm.name") != null) && System.getProperty("java.vm.name").equals("J9"))
 			jvm = jvm.getJvm("j9_13");
 		else
@@ -145,7 +189,12 @@ public class testconnection
 			 ************************************************************/
 			System.out.println("Testing testconnection");
 			//test connection - no parameters
-			execCmdDumpResults(TestConnectionCmd1);	
+            if (!hostName.equals("localhost")) // except with remote server, add the hostName 
+            {
+                execCmdDumpResults(TestConnectionCmd4, 0, false);
+            }
+            else
+		    	execCmdDumpResults(TestConnectionCmd1, false);	
 			//test connection - specifying host and port
 			execCmdDumpResults(TestConnectionCmd2);	
 			//test connection - specifying non-existant host and port
@@ -157,9 +206,15 @@ public class testconnection
 			//test connection - specifying host and invalid port
 			execCmdDumpResults(TestConnectionCmd5, 1);	
 			//test connection - specifying no host and valid port
-			execCmdDumpResults(TestConnectionCmd6);	
+            if (!hostName.equals("localhost")) // except with remote server, add the hostName
+			    execCmdDumpResults(TestConnectionCmd6b, false);	
+            else
+			    execCmdDumpResults(TestConnectionCmd6, false);	
 			//test connection - specifying no host and invalid port
-			execCmdDumpResults(TestConnectionCmd7, 1);	
+            if (!hostName.equals("localhost")) // except with remote server, add the hostName
+			    execCmdDumpResults(TestConnectionCmd7b, 1, false);	
+            else
+			    execCmdDumpResults(TestConnectionCmd7, 1, false);	
 
 			System.out.println("End test");
 			bos.close();

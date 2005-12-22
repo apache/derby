@@ -107,6 +107,7 @@ public class TestProto {
 	private static final int WRITE_ENCODED_LDSTRING = 53;
 	private static final int CHECK_SQLCARD = 54;
 	private static final int MORE_DATA = 55;
+	private static final int COMPLETE_TEST = 56;
 
 	private static final String MULTIVAL_START = "MULTIVALSTART";
 	private static final String MULTIVAL_SEP = "SEP";
@@ -175,7 +176,21 @@ public class TestProto {
 	{
 		String prev_filename = current_filename;
 		current_filename = filename;
-		FileReader fr = new FileReader(filename);
+        	String hostName=getHostName();
+		FileReader fr;
+                if (!hostName.equals("localhost")) 
+		{
+			// if we're not on localhost, we must also be starting
+			// the server remotely, and useprocess=false, so, the location may
+			// be different.
+			String userdir =  System.getProperty("user.dir");
+			String sep =  System.getProperty("file.separator");
+			fr = new FileReader(userdir + sep + ".." + sep + filename);
+		}
+		else
+		{
+			fr = new FileReader(filename);
+		}
 		tkn = new StreamTokenizer(fr);
 		int val;
 		while ( (val = tkn.nextToken()) != StreamTokenizer.TT_EOF)
@@ -198,13 +213,14 @@ public class TestProto {
 	 */
 	private void getConnection() 
 	{
+        String hostName=getHostName();
 		try {
-            monitorSocket = new Socket("localhost",1527);
+            monitorSocket = new Socket(hostName,1527);
         } catch (UnknownHostException e) {
-            System.err.println("Don't know about host: localhost");
+            System.err.println("Don't know about host: " + hostName);
             System.exit(1);
         } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to: localhost");
+            System.err.println("Couldn't get I/O for the connection to: " + hostName);
             System.exit(1);
         }
         try
@@ -214,7 +230,7 @@ public class TestProto {
 		}
 		catch (IOException e)
         {
-            System.err.println("Couldn't get I/O for the connection to: localhost");
+            System.err.println("Couldn't get I/O for the connection to: " + hostName);
             System.exit(1);
         }
 	}
@@ -239,6 +255,13 @@ public class TestProto {
 		getConnection();
 		reader.initialize(monitorIs);
 		writer.reset(null);
+	}
+	/**
+	 * finish by cleaning up the last connection
+	 */
+	private void completeTest()
+	{
+		closeConnection();
 	}
 	/**
 	 * Initialize hashtable for commands and set up a table to translate from
@@ -301,6 +324,7 @@ public class TestProto {
 		commandTable.put("writeencodedldstring", new Integer(WRITE_ENCODED_LDSTRING));
 		commandTable.put("checksqlcard", new Integer(CHECK_SQLCARD));
 		commandTable.put("moredata", new Integer(MORE_DATA));
+		commandTable.put("completetest", new Integer(COMPLETE_TEST));
 		
 		Integer key;
 		for (Enumeration e = codePointNameTable.keys(); e.hasMoreElements(); )
@@ -470,6 +494,9 @@ public class TestProto {
 				break;
 			case CHECK_SQLCARD:
 				checkSQLCARD(getInt(), getString());
+				break;
+			case COMPLETE_TEST:
+				completeTest();
 				break;
 			case END_TEST:
 				// print that we passed the test if we haven't failed
@@ -956,5 +983,13 @@ public class TestProto {
 		}
 		// skip the rest of the SQLCARD
 		reader.skipBytes();
+	}
+
+	private static String getHostName()
+	{
+		String hostName = (System.getProperty("hostName"));
+		if (hostName == null)
+			hostName="localhost";
+		return hostName;
 	}
 }

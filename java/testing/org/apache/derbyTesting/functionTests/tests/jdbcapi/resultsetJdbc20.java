@@ -31,6 +31,8 @@ import java.sql.Types;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
 
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+
 /**
  * Test of additional methods in JDBC2.0 result set meta-data.
  * This program simply calls each of the additional result set meta-data
@@ -39,11 +41,13 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  */
 
 public class resultsetJdbc20 { 
+	private static String[] testObjects = { "TABLE T"};
 	public static void main(String[] args) {
 		Connection con;
 		ResultSetMetaData met;
 		ResultSet rs;
 		Statement stmt;
+		
 		String[]  columnNames = {"i", "s", "r", "d", "dt", "t", "ts", "c", "v", "dc"};
 
 		System.out.println("Test resultsetJdbc20 starting");
@@ -55,6 +59,8 @@ public class resultsetJdbc20 {
 			ij.getPropertyArg(args);
 			con = ij.startJBMS();
 			stmt = con.createStatement();
+			// first clean up
+			TestUtil.cleanUpTest(stmt, testObjects);
 
       //create a table, insert a row, do a select from the table,
       //get the resultset meta data and go through each column in
@@ -91,6 +97,7 @@ public class resultsetJdbc20 {
 
 			rs.close();
 
+			TestUtil.cleanUpTest(stmt, testObjects);
 			stmt.close();
 			con.close();
 

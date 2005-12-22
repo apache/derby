@@ -123,9 +123,18 @@ ij> drop table a;
 0 rows inserted/updated/deleted
 ij> -- Bug 4694 Test automatic rollback with close of connection
 -- in ij
-autocommit off;
-ij> create table a (a int);
+connect 'wombat';
+ij(CONNECTION1)> autocommit off;
+ij(CONNECTION1)> create table a (a int);
 0 rows inserted/updated/deleted
+ij(CONNECTION1)> select count(*) from a;
+1          
+-----------
+0          
+ij(CONNECTION1)> disconnect;
+ij> set connection connection0;
+ij> select count(*) from a;
+ERROR 42X05: Table 'A' does not exist.
 ij> -- Bug 4758 - Store error does not return properly to client
 autocommit off;
 ij> create table t (i int);
@@ -176,4 +185,10 @@ C2
 some clob 
 ij(CONNECTION1)> drop table t1;
 0 rows inserted/updated/deleted
-ij(CONNECTION1)> 
+ij(CONNECTION1)> commit;
+ij(CONNECTION1)> disconnect;
+ij> set connection connection0;
+ij> autocommit on;
+ij> drop table t;
+0 rows inserted/updated/deleted
+ij> 

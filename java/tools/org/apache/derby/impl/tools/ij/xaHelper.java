@@ -89,8 +89,17 @@ class xaHelper implements xaAbstractHelper
 			  
 			  if (isJCC || isNetClient)
 			  {
-			  xaHelper.setDataSourceProperty(currentXADataSource,
-											 "ServerName", "localhost");
+			  	String hostName = System.getProperty("hostName");
+			  	if ((hostName != null ) && (!hostName.equals("localhost")))
+				{			
+			  		xaHelper.setDataSourceProperty(currentXADataSource,
+											 "ServerName", hostName);
+				}
+			  	else
+				{			
+			  		xaHelper.setDataSourceProperty(currentXADataSource,
+							 "ServerName", "localhost");
+				}
 			  xaHelper.setDataSourceProperty(currentXADataSource,
 											 "portNumber", 1527);
 			  

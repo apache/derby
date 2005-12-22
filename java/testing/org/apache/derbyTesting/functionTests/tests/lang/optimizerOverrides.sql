@@ -219,3 +219,4 @@ drop view v1;
 drop table t2;
 drop table t1;
 drop table temp1;
+commit;

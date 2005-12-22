@@ -1,0 +1,56 @@
+# this file holds tests that cannot be successfully run with DerbyNet framework
+# with a remote server. Tests in this file will be skipped in addition to those in 
+# DerbyNet.exclude when the property -DhostName is set to something else than the localhost
+#
+# excluding test   - because...
+# store/bootLock.java - this test uses local connections to make sure 
+#     a database cannot be loaded by 2 different instances.
+# jdbcapi/secureUsers,secureUsers1, users and users2.sql 
+#     because they expect the server to have been started with special derby.properties
+#     this test can be made to work by changing the properties from system properties
+#     i.e. set in a derby.properties file - to be database properties - i.e. set using
+#     SYSCS_SET_ procedure.
+# derbynet/dblook_test_net because it tries to search derby.log, which is on
+#     the server machine, and it assumes files in a location not consistent with running with 
+#     useprocess=false 
+# derbynet/getCurrentProperties for it exercises NetworkServerControl statements
+#     that are only supported on localhost
+# derbynet/NSinSameJVM - tries to start the server
+# derbynet/DataSourcePermissions_net - tries to use NetworkServerControl statements
+# derbynet/maxthreads - tries to use NetworkServerControl statements
+# derbynet/runtimeinfo - tries to use NetworkServerControl statements
+# derbynet/sysinfo - tries to use NetworkServerControl statements
+# derbynet/testProperties - tries to use NetworkServerControl statements
+# derbynet/timeslice - tries to use NetworkServerControl statements
+# derbynet/DerbyNetAutoStart - tries to start networkserver
+# derbynet/DerbyNetNewServer - tries to start networkserver and uses local connections to the db.
+# tools/ieptests - names files in extin dir, which is in a different location when run with
+#     useprocess=false
+# tools/importExport - tries to confirm correct export by file-comparing the exported files,
+#	which may be on a different machine and thus not found.
+# lang/wisconsin - optimization is quite different when running remote server.
+# lang/syscat - test is too sensitive to other tests leaving behind stuff
+# junitTests/derbyNet/CompatibilityTest.java - tries to start and shutdown the server, which will
+# 	give securitymanager errors.
+# 
+store/bootLock.java
+jdbcapi/secureUsers.sql
+jdbcapi/secureUsers1.sql
+jdbcapi/users.sql
+jdbcapi/users2.sql
+derbynet/dblook_test_net.java
+derbynet/getCurrentProperties.java
+derbynet/NSinSameJVM.java
+derbynet/DataSourcePermissions_net.java
+derbynet/maxthreads.java
+derbynet/runtimeinfo.java
+derbynet/sysinfo.java
+derbynet/testProperties.java
+derbynet/timeslice.java
+derbynet/DerbyNetAutoStart.java
+derbynet/DerbyNetNewServer.java
+tools/ieptests.sql
+tools/importExport.java
+lang/wisconsin.sql
+lang/syscat.sql
+junitTests/derbyNet/CompatibilityTest.java

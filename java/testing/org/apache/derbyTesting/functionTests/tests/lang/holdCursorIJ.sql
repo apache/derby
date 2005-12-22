@@ -208,4 +208,4 @@ update t1 set c12=c12+1 where current of scrollCursor;
 close scrollCursor;
 
 
-
+drop table t1;

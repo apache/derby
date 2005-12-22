@@ -144,6 +144,8 @@ C2
 -----
 String 1                                                        
 NULL                                                            
+ij> drop table t;
+0 rows inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> drop table t2;

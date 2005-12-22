@@ -59,18 +59,26 @@ import java.lang.reflect.*;
 public class dataSourcePermissions_net extends org.apache.derbyTesting.functionTests.tests.jdbcapi.dataSourcePermissions
 {
 
-	private static final int NETWORKSERVER_PORT = 20000;
-
+	private static int NETWORKSERVER_PORT;
+	private static String hostName;
 	private static NetworkServerControl networkServer = null;
 
 	public static void main(String[] args) throws Exception {
 
+		hostName = TestUtil.getHostName();
+		if (hostName.equals("localhost"))
+			NETWORKSERVER_PORT = 20000;
+		else
+			NETWORKSERVER_PORT = 1527;
+		
 		// Load harness properties.
 		ij.getPropertyArg(args);
 
 		// "runTest()" is going to try to connect to the database through
 		// the server at port NETWORKSERVER_PORT.  Thus, we have to
 		// start the server on that port before calling runTest.
+		// Except when we are using a remote server, then we assume the port is 1527,
+		// and we assume the server has been started already
 
 		try {
 			TestUtil.loadDriver();
@@ -78,13 +86,17 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 			e.printStackTrace();
 		}
 
-		// Start the NetworkServer on another thread
-		networkServer = new NetworkServerControl(InetAddress.getByName("localhost"),NETWORKSERVER_PORT);
-		networkServer.start(null);
 
-		// Wait for the NetworkServer to start.
-		if (!isServerStarted(networkServer, 60))
-			System.exit(-1);
+		if (hostName.equals("localhost"))
+		{
+			// Start the NetworkServer on another thread
+			networkServer = new NetworkServerControl(InetAddress.getByName("localhost"),NETWORKSERVER_PORT);
+			networkServer.start(null);
+
+			// Wait for the NetworkServer to start.
+			if (!isServerStarted(networkServer, 60))
+				System.exit(-1);
+		}
 
 		// Now, go ahead and run the test.
 		try {
@@ -93,6 +105,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 			tester.runTest();
 			if (TestUtil.isDerbyNetClientFramework())
 				tester.testClientDataSourceProperties();
+			new dataSourcePermissions_net().cleanUp();
 
 		} catch (Exception e) {
 		// if we catch an exception of some sort, we need to make sure to
@@ -105,10 +118,13 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		}
 
 		// Shutdown the server.
-		networkServer.shutdown();
-		// how do we do this with the new api?
-		//networkServer.join();
-		Thread.sleep(5000);
+		if (hostName.equals("localhost"))
+		{
+			networkServer.shutdown();
+			// how do we do this with the new api?
+			//networkServer.join();
+			Thread.sleep(5000);
+		}
 		System.out.println("Completed dataSourcePermissions_net");
 
 		System.out.close();
@@ -121,10 +137,9 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	}
 
 	public void setProperties() {
-
 		// Set required server properties.
 		System.setProperty("database",
-						   TestUtil.getJdbcUrlPrefix("localhost",
+						   TestUtil.getJdbcUrlPrefix(hostName,
 													 NETWORKSERVER_PORT) +
 						   "wombat;create=true");
 		System.setProperty("ij.user", "EDWARD");
@@ -133,15 +148,19 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	}
 
 	public String getJDBCUrl(String db, String attrs) {
-
-		String s = TestUtil.getJdbcUrlPrefix("localhost", NETWORKSERVER_PORT)
+		// this method is accessed from subclasses - need to establish hostName
+		String hostName = TestUtil.getHostName();
+		if (hostName.equals("localhost"))
+			NETWORKSERVER_PORT = 20000;	
+		else
+			NETWORKSERVER_PORT = 1527;
+		String s = TestUtil.getJdbcUrlPrefix(hostName, NETWORKSERVER_PORT)
 			+ db;
 		if (attrs != null)
 			if (TestUtil.isJCCFramework())
 				s = s + ":" + attrs + ";";
 			else
 				s = s + ";" + attrs;
-		//System.out.println("getJDBCUrl:" + s);
 		return s;
 
 	}
@@ -182,18 +201,27 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 
 	private Properties addRequiredAttributes(Properties attrs)
 	{
+		// this method is accessed from subclasses - need to establish hostName
+		hostName = TestUtil.getHostName();
 		if (TestUtil.isJCCFramework())
 		{
 			attrs.setProperty("driverType","4");
             /**
-             * As per the fix of derby-410
-             * servername should now default to localhost 
+             * As per the fix of derby-410 servername should
+             * default to localhost, but for jcc it's still needed  
              */
-            attrs.setProperty("serverName","localhost");
+            attrs.setProperty("serverName",hostName);
 		}
-
-
-		attrs.setProperty("portNumber","20000");
+		/** 
+		 * For a remote host of course it's also needed 
+		 */
+		if (!hostName.equals("localhost"))
+		{
+			attrs.setProperty("serverName",hostName);
+			attrs.setProperty("portNumber", "1527");
+		}
+		else
+			attrs.setProperty("portNumber", "20000");
 		//attrs.setProperty("retrieveMessagesFromServerOnGetMessage","true");
 		return attrs;
 	}
@@ -213,10 +241,9 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	}
 
 	public void shutdown() {
-
 		try {
-			DriverManager.getConnection(TestUtil.getJdbcUrlPrefix("localhost",
-																  NETWORKSERVER_PORT) +
+			DriverManager.getConnection(TestUtil.getJdbcUrlPrefix(hostName,
+															  NETWORKSERVER_PORT) +
 										"wombat;shutdown=true",
 				"EDWARD", "noodle");
 			System.out.println("FAIL - Shutdown returned connection");
@@ -224,8 +251,8 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		} catch (SQLException sqle) {
 			System.out.println("EXPECTED SHUTDOWN " + sqle.getMessage());
 		}
-
 	}
+
 	protected static boolean isServerStarted(NetworkServerControl server, int ntries)
 	{
 		for (int i = 1; i <= ntries; i ++)
