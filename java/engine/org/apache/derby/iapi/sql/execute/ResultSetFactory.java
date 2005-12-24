@@ -109,13 +109,11 @@ public interface ResultSetFactory {
 		@param source the result set from which to take rows to
 			be inserted into the target table.
 		@param checkGM	The code to enforce the check constraints, if any
-		@param activation the activation for this result set,
 		@return the insert operation as a result set.
 		@exception StandardException thrown when unable to perform the insert
 	 */
 	ResultSet getInsertResultSet(NoPutResultSet source, 
-								 GeneratedMethod checkGM,
-							     Activation activation)
+								 GeneratedMethod checkGM)
         throws StandardException;
 
 	/**
@@ -127,13 +125,11 @@ public interface ResultSetFactory {
 		@param source the result set from which to take rows to
 			be inserted into the target table.
 		@param vtiRS	The code to instantiate the VTI, if necessary
-		@param activation the activation for this result set,
 		@return the insert VTI operation as a result set.
 		@exception StandardException thrown when unable to perform the insert
 	 */
 	ResultSet getInsertVTIResultSet(NoPutResultSet source, 
-								 NoPutResultSet vtiRS,
-							     Activation activation)
+								 NoPutResultSet vtiRS)
         throws StandardException;
 
 	/**
@@ -144,12 +140,10 @@ public interface ResultSetFactory {
 
 		@param source the result set from which to take rows to
 			be inserted into the target table.
-		@param activation the activation for this result set,
 		@return the delete VTI operation as a result set.
 		@exception StandardException thrown when unable to perform the insert
 	 */
-	ResultSet getDeleteVTIResultSet(NoPutResultSet source, 
-							     Activation activation)
+	ResultSet getDeleteVTIResultSet(NoPutResultSet source)
         throws StandardException;
 
 	/**
@@ -162,12 +156,10 @@ public interface ResultSetFactory {
 			be deleted from the target table. This result set must
 			contain one column which provides RowLocations that are
 			valid in the target table.
-		@param activation 		the activation for this result set
 		@return the delete operation as a result set.
 		@exception StandardException thrown when unable to perform the delete
 	 */
-	ResultSet getDeleteResultSet(NoPutResultSet source,
-								 Activation activation)
+	ResultSet getDeleteResultSet(NoPutResultSet source)
 							throws StandardException;
 
 	/**
@@ -178,7 +170,6 @@ public interface ResultSetFactory {
 
 		@param source the result set from which to take rows to
 			be deleted from the target table.
-		@param activation 		the activation for this result set
 		@param constantActionItem a constant action saved object reference
 		@param dependentResultSets an array of DeleteCascade Resultsets
                                    for the current table referential action
@@ -191,7 +182,7 @@ public interface ResultSetFactory {
 		@exception StandardException thrown when unable to perform the delete
 	 */
 	ResultSet getDeleteCascadeResultSet(NoPutResultSet source,
-										Activation activation, int constantActionItem,
+										int constantActionItem,
 										ResultSet[] dependentResultSets, 
 										String resultSetId)
 							throws StandardException;
@@ -207,13 +198,11 @@ public interface ResultSetFactory {
 			a column which provides RowLocations that are valid in the 
 			target table, and new values to be placed in those rows.
 		@param checkGM	The code to enforce the check constraints, if any
-		@param activation 		the activation for this result set
 		@return the update operation as a result set.
 		@exception StandardException thrown when unable to perform the update
 	 */
 	ResultSet getUpdateResultSet(NoPutResultSet source, 
-								 GeneratedMethod checkGM,
-							     Activation activation)
+								 GeneratedMethod checkGM)
         throws StandardException;
 
 	/**
@@ -239,7 +228,6 @@ public interface ResultSetFactory {
 			a column which provides RowLocations that are valid in the 
 			target table, and new values to be placed in those rows.
 		@param checkGM	The code to enforce the check constraints, if any
-		@param activation 		the activation for this result set
 		@param constantActionItem a constant action saved object reference
 		@param rsdItem   result Description, saved object id. 				
 		@return the update operation as a result set.
@@ -247,7 +235,6 @@ public interface ResultSetFactory {
 	 */
 	ResultSet getDeleteCascadeUpdateResultSet(NoPutResultSet source, 
 								 GeneratedMethod checkGM,
-							     Activation activation,
 								 int constantActionItem,
 								 int rsdItem)
         throws StandardException;
@@ -281,10 +268,6 @@ public interface ResultSetFactory {
 
 		@param source the result set from which to take rows to be 
 			filtered by this operation.
-		@param activation the activation for this result set,
-			against whcih the restriction and projection are performed
-			and to which current rows must be assigned for the
-			projection and restriction to be performed.
 		@param restriction a reference to a method in the activation
 			that is applied to the activation's "current row" field
 			to determine whether the restriction is satisfied or not.
@@ -318,7 +301,7 @@ public interface ResultSetFactory {
 			result set
 	 */
 	NoPutResultSet getProjectRestrictResultSet(NoPutResultSet source,
-		Activation activation, GeneratedMethod restriction, 
+		GeneratedMethod restriction, 
 		GeneratedMethod projection, int resultSetNumber,
 		GeneratedMethod constantRestriction,
 		int mapArrayItem,
@@ -589,10 +572,6 @@ public interface ResultSetFactory {
 
 		@param source the result set from which to take rows to be 
 			filtered by this operation.
-		@param activation the activation for this result set,
-			against whcih the restriction and projection are performed
-			and to which current rows must be assigned for the
-			projection and restriction to be performed.
 		@param emptyRowFun a reference to a method in the activation
 			that is called if the source returns no rows
 		@param resultSetNumber		The resultSetNumber for the ResultSet
@@ -606,7 +585,7 @@ public interface ResultSetFactory {
 			result set
 	 */
 	NoPutResultSet getAnyResultSet(NoPutResultSet source,
-		Activation activation, GeneratedMethod emptyRowFun, int resultSetNumber,
+		GeneratedMethod emptyRowFun, int resultSetNumber,
 		int subqueryNumber, int pointOfAttachment,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost) 
@@ -620,10 +599,6 @@ public interface ResultSetFactory {
 
 		@param source the result set from which to take rows to be 
 			filtered by this operation.
-		@param activation the activation for this result set,
-			against whcih the restriction and projection are performed
-			and to which current rows must be assigned for the
-			projection and restriction to be performed.
 		@param emptyRowFun a reference to a method in the activation
 			that is called if the source returns no rows
 		@param cardinalityCheck The type of cardinality check, if any that
@@ -639,7 +614,7 @@ public interface ResultSetFactory {
 			result set
 	 */
 	NoPutResultSet getOnceResultSet(NoPutResultSet source,
-		Activation activation, GeneratedMethod emptyRowFun,
+		GeneratedMethod emptyRowFun,
 		int cardinalityCheck, int resultSetNumber, 
 		int subqueryNumber, int pointOfAttachment,
 		double optimizerEstimatedRowCount,
@@ -1309,8 +1284,6 @@ public interface ResultSetFactory {
 		will return results from the temp table.
 
 		@param source the result set input to this result set.
-		@param activation the activation for this result set,
-			which provides the context for normalization.
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
@@ -1320,7 +1293,7 @@ public interface ResultSetFactory {
 
 	 	@exception StandardException		Thrown on failure
 	 */
-	NoPutResultSet getMaterializedResultSet(NoPutResultSet source, Activation activation, 
+	NoPutResultSet getMaterializedResultSet(NoPutResultSet source, 
 											int resultSetNumber,
 											double optimizerEstimatedRowCount,
 											double optimizerEstimatedCost,
@@ -1358,8 +1331,6 @@ public interface ResultSetFactory {
 		REMIND: needs more description...
 
 		@param source the result set input to this result set.
-		@param activation the activation for this result set,
-			which provides the context for normalization.
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param erdNumber	int for ResultDescription 
 							(so it can be turned back into an object)
@@ -1372,7 +1343,6 @@ public interface ResultSetFactory {
 	 	@exception StandardException		Thrown on failure
 	 */
 	NoPutResultSet getNormalizeResultSet(NoPutResultSet source, 
-										 Activation activation, 
 										 int resultSetNumber, int erdNumber,
 										 double optimizerEstimatedRowCount,
 										 double optimizerEstimatedCost,
@@ -1420,7 +1390,6 @@ public interface ResultSetFactory {
 	 */
 	NoPutResultSet	getUnionResultSet(NoPutResultSet source1,
 					NoPutResultSet source2,
-					Activation activation, 
 					int resultSetNumber,
 					double optimizerEstimatedRowCount,
 					double optimizerEstimatedCost,

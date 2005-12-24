@@ -120,13 +120,12 @@ public class MaterializeResultSetNode extends SingleChildResultSetNode
 		acb.pushGetResultSetFactoryExpression(mb);
 
 		childResult.generate(acb, mb);
-		acb.pushThisAsActivation(mb);
 		mb.push(resultSetNumber);
 		mb.push(costEstimate.rowCount());
 		mb.push(costEstimate.getEstimatedCost());
 		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getMaterializedResultSet",
-						ClassName.NoPutResultSet, 6);
+						ClassName.NoPutResultSet, 5);
 	}
 }

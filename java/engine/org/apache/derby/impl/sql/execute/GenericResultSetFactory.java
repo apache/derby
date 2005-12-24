@@ -87,10 +87,10 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public ResultSet getInsertResultSet(NoPutResultSet source, 
-										GeneratedMethod checkGM,
-										Activation activation)
+										GeneratedMethod checkGM)
 		throws StandardException
 	{
+		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
 		return new InsertResultSet(source, checkGM, activation );
 	}
@@ -100,11 +100,11 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public ResultSet getInsertVTIResultSet(NoPutResultSet source, 
-										NoPutResultSet vtiRS,
-										Activation activation)
+										NoPutResultSet vtiRS
+										)
 		throws StandardException
 	{
-
+		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
 		return new InsertVTIResultSet(source, vtiRS, activation );
 	}
@@ -113,10 +113,10 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@see ResultSetFactory#getDeleteVTIResultSet
 		@exception StandardException thrown on error
 	 */
-	public ResultSet getDeleteVTIResultSet(NoPutResultSet source, 
-										Activation activation)
+	public ResultSet getDeleteVTIResultSet(NoPutResultSet source)
 		throws StandardException
 	{
+		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
 		return new DeleteVTIResultSet(source, activation);
 	}
@@ -125,10 +125,10 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@see ResultSetFactory#getDeleteResultSet
 		@exception StandardException thrown on error
 	 */
-	public ResultSet getDeleteResultSet(NoPutResultSet source,
-										Activation activation)
+	public ResultSet getDeleteResultSet(NoPutResultSet source)
 			throws StandardException
 	{
+		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
 		return new DeleteResultSet(source, activation );
 	}
@@ -139,13 +139,12 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public ResultSet getDeleteCascadeResultSet(NoPutResultSet source, 
-											   Activation activation,	
 											   int constantActionItem,
 											   ResultSet[] dependentResultSets,
 											   String resultSetId)
 		throws StandardException
 	{
-			
+		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
 		return new DeleteCascadeResultSet(source, activation, 
 										  constantActionItem,
@@ -160,10 +159,10 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public ResultSet getUpdateResultSet(NoPutResultSet source,
-										GeneratedMethod checkGM,
-										Activation activation)
+										GeneratedMethod checkGM)
 			throws StandardException
 	{
+		Activation activation = source.getActivation();
 		//The stress test failed with null pointer exception in here once and then
 		//it didn't happen again. It can be a jit problem because after this null
 		//pointer exception, the cleanup code in UpdateResultSet got a null
@@ -199,15 +198,11 @@ public class GenericResultSetFactory implements ResultSetFactory
 	 */
 	public ResultSet getDeleteCascadeUpdateResultSet(NoPutResultSet source,
 													 GeneratedMethod checkGM,
-													 Activation activation,
 													 int constantActionItem,
 													 int rsdItem)
 			throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(getAuthorizer(activation) != null, "Authorizer is null");
-		}
+		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
 		return new UpdateResultSet(source, checkGM, activation,
 								   constantActionItem, rsdItem);
@@ -231,7 +226,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getProjectRestrictResultSet(NoPutResultSet source,
-		Activation activation, GeneratedMethod restriction, 
+		GeneratedMethod restriction, 
 		GeneratedMethod projection, int resultSetNumber,
 		GeneratedMethod constantRestriction,
 		int mapRefItem,
@@ -242,7 +237,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		GeneratedMethod closeCleanup)
 			throws StandardException
 	{
-		return new ProjectRestrictResultSet(source, activation, 
+		return new ProjectRestrictResultSet(source, source.getActivation(), 
 			restriction, projection, resultSetNumber, 
 			constantRestriction, mapRefItem, 
 			reuseResult,
@@ -420,14 +415,14 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getAnyResultSet(NoPutResultSet source,
-		Activation activation, GeneratedMethod emptyRowFun, int resultSetNumber,
+		GeneratedMethod emptyRowFun, int resultSetNumber,
 		int subqueryNumber, int pointOfAttachment,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost)
 			throws StandardException
 	{
 		return new AnyResultSet(source,
-					 activation, emptyRowFun, resultSetNumber,
+					 source.getActivation(), emptyRowFun, resultSetNumber,
 					 subqueryNumber, pointOfAttachment,
 					 optimizerEstimatedRowCount,
 					 optimizerEstimatedCost);
@@ -438,7 +433,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getOnceResultSet(NoPutResultSet source,
-		Activation activation, GeneratedMethod emptyRowFun,
+	 GeneratedMethod emptyRowFun,
 		int cardinalityCheck, int resultSetNumber,
 		int subqueryNumber, int pointOfAttachment,
 		double optimizerEstimatedRowCount,
@@ -446,7 +441,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		return new OnceResultSet(source,
-					 activation, emptyRowFun, 
+					 source.getActivation(), emptyRowFun, 
 					 cardinalityCheck, resultSetNumber,
 					 subqueryNumber, pointOfAttachment,
 				     optimizerEstimatedRowCount,
@@ -935,13 +930,13 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getMaterializedResultSet(NoPutResultSet source,
-							Activation activation, int resultSetNumber,
+							int resultSetNumber,
 						    double optimizerEstimatedRowCount,
 							double optimizerEstimatedCost,
 								   GeneratedMethod closeCleanup)
 		throws StandardException
 	{
-		return new MaterializedResultSet(source, activation, 
+		return new MaterializedResultSet(source, source.getActivation(), 
 									  resultSetNumber, 
 									  optimizerEstimatedRowCount,
 									  optimizerEstimatedCost,
@@ -985,7 +980,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getNormalizeResultSet(NoPutResultSet source,
-							Activation activation, int resultSetNumber, 
+							int resultSetNumber, 
 							int erdNumber,
 						    double optimizerEstimatedRowCount,
 							double optimizerEstimatedCost,
@@ -993,7 +988,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 							GeneratedMethod closeCleanup)
 		throws StandardException
 	{
-		return new NormalizeResultSet(source, activation, 
+		return new NormalizeResultSet(source, source.getActivation(), 
 									  resultSetNumber, erdNumber, 
 									  optimizerEstimatedRowCount,
 									  optimizerEstimatedCost, forUpdate,
@@ -1038,7 +1033,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 	 */
     public NoPutResultSet getUnionResultSet(NoPutResultSet leftResultSet,
 								   NoPutResultSet rightResultSet,
-								   Activation activation,
 								   int resultSetNumber,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
@@ -1046,7 +1040,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		return new UnionResultSet(leftResultSet, rightResultSet, 
-								  activation,
+				                  leftResultSet.getActivation(),
 								  resultSetNumber, 
 								  optimizerEstimatedRowCount,
 								  optimizerEstimatedCost,

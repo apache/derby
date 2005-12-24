@@ -1878,8 +1878,6 @@ public class SubqueryNode extends ValueNode
 		 */
 		resultSet.getResultColumns().setResultSetNumber(subqResultSetNumber);
 
-		acb.pushThisAsActivation(mb);
-
 		/* Generate code for empty row */
 		resultSet.getResultColumns().generateNulls(acb, mb);
 
@@ -1921,10 +1919,10 @@ public class SubqueryNode extends ValueNode
 			 *											unique value
 			 */
 			mb.push(cardinalityCheck);
-			nargs = 9;
+			nargs = 8;
 
 		} else {
-			nargs = 8;
+			nargs = 7;
 		}
 
 		mb.push(subqResultSetNumber);

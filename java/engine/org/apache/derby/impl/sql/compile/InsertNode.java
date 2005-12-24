@@ -753,10 +753,7 @@ public final class InsertNode extends DMLModStatementNode
 			// arg 2 generate code to evaluate CHECK CONSTRAINTS
 			generateCheckConstraints( checkConstraints, acb, mb );
 
-			acb.pushThisAsActivation(mb); // arg 3
-
-
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getInsertResultSet", ClassName.ResultSet, 3);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getInsertResultSet", ClassName.ResultSet, 2);
 		}
 		else
 		{
@@ -771,7 +768,6 @@ public final class InsertNode extends DMLModStatementNode
 			/*
 			** Generate the insert VTI result set, giving it either the original
 			** source or the normalize result set, the constant action,
-			** and "this".
 			*/
 			acb.pushGetResultSetFactoryExpression(mb);
 
@@ -781,9 +777,7 @@ public final class InsertNode extends DMLModStatementNode
 			// arg 2
 			targetVTI.generate(acb, mb);
 
-			acb.pushThisAsActivation(mb); // arg 3
-
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getInsertVTIResultSet", ClassName.ResultSet, 3);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getInsertVTIResultSet", ClassName.ResultSet, 2);
 		}
 	}
 

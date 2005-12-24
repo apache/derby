@@ -95,6 +95,8 @@ public interface ResultSet
 	 *		statement.
 	 */
 	ResultDescription	getResultDescription();
+	
+	Activation getActivation();
 
 	/**
 	 * Needs to be called before the result set will do anything.

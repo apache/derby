@@ -553,14 +553,12 @@ public class UnionNode extends SetOperatorNode
 		 *  arg7: close method
 		 */
 
-
-		acb.pushThisAsActivation(mb);
 		mb.push(resultSetNumber);
 		mb.push(costEstimate.rowCount());
 		mb.push(costEstimate.getEstimatedCost());
 		closeMethodArgument(acb, mb);
 
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUnionResultSet", ClassName.NoPutResultSet, 7);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUnionResultSet", ClassName.NoPutResultSet, 6);
 	}
 
     String getOperatorName()

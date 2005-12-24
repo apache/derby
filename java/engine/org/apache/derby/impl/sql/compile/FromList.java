@@ -866,16 +866,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	}
 
 	/**
-		Move the mark for result set being the statement's outermost
-		result set down into the first table of the from list.
-		Generally expect there is only one table at this point.
-	 */
-	void markStatementResultSet()
-	{
-		((FromTable) elementAt(0)).markStatementResultSet();
-	}
-
-	/**
 	 * Get the FromTable from this list which has the specified ResultColumn in
 	 * its RCL.
 	 *

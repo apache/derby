@@ -1307,8 +1307,6 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			costEstimate = childResult.getFinalCostEstimate();
 		}
 
-		acb.pushThisAsActivation(mb);
-
 		// if there is no restriction, we just want to pass null.
 		if (restriction == null)
 		{
@@ -1417,7 +1415,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getProjectRestrictResultSet",
-					ClassName.NoPutResultSet, 12);
+					ClassName.NoPutResultSet, 11);
 	}
 
 	/**

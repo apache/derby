@@ -120,7 +120,6 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 
 		acb.pushGetResultSetFactoryExpression(mb);
 		childResult.generate(acb, mb);
-		acb.pushThisAsActivation(mb);
 		mb.push(resultSetNumber);
 		mb.push(erdNumber);
 		mb.push(costEstimate.rowCount());
@@ -128,7 +127,7 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 		mb.push(forUpdate);
 		closeMethodArgument(acb, mb);
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getNormalizeResultSet",
-					ClassName.NoPutResultSet, 8);
+					ClassName.NoPutResultSet, 7);
 	}
 
 	/**

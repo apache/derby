@@ -146,6 +146,11 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	{
 	    return (ResultDescription)null;
 	}
+	
+	public final Activation getActivation()
+	{
+		return activation;
+	}
 
 	/**
 	 * Returns the row at the absolute position from the query, 
