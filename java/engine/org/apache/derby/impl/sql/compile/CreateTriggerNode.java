@@ -66,7 +66,7 @@ import java.util.Vector;
  * @author jamie
  */
 
-public class CreateTriggerNode extends CreateStatementNode
+public class CreateTriggerNode extends DDLStatementNode
 {
 	private	TableName			triggerName;
 	private	TableName			tableName;

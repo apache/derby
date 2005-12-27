@@ -89,7 +89,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  * @author Jamie
  */
 
-public abstract class DMLModStatementNode extends DMLStatementNode
+abstract class DMLModStatementNode extends DMLStatementNode
 {
 //	protected DataDictionary	dataDictionary;
 	protected FromVTI			targetVTI;

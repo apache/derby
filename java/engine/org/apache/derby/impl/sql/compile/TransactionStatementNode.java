@@ -32,7 +32,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * @author Ames Carlson
  */
 
-public abstract class TransactionStatementNode extends StatementNode
+abstract class TransactionStatementNode extends StatementNode
 {
 	int activationKind()
 	{

@@ -59,7 +59,7 @@ import org.apache.derby.catalog.UUID;
  * @author Jerry Brenner
  */
 
-public class CreateViewNode extends CreateStatementNode
+public class CreateViewNode extends DDLStatementNode
 {
 	ResultColumnList	resultColumns;
 	ResultSetNode		queryExpression;

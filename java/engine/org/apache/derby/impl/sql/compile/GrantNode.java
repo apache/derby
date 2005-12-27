@@ -34,8 +34,8 @@ import java.util.List;
  */
 public class GrantNode extends MiscellaneousStatementNode
 {
-	PrivilegeNode privileges;
-	List grantees;
+	private PrivilegeNode privileges;
+	private List grantees;
 
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java

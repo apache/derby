@@ -45,7 +45,7 @@ import org.apache.derby.catalog.UUID;
  * @author Jeff Lichtman
  */
 
-public abstract class DDLStatementNode extends StatementNode
+abstract class DDLStatementNode extends StatementNode
 {
 	/////////////////////////////////////////////////////////////////////////
 	//

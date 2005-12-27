@@ -49,7 +49,7 @@ import java.util.Properties;
  * @author Jeff Lichtman
  */
 
-public class CreateTableNode extends CreateStatementNode
+public class CreateTableNode extends DDLStatementNode
 {
 	private char				lockGranularity;
 	private boolean				onCommitDeleteRows; //If true, on commit delete rows else on commit preserve rows of temporary table.

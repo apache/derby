@@ -61,7 +61,7 @@ import java.util.Vector;
  * @author Jerry Brenner
  */
 
-public class CreateAliasNode extends CreateStatementNode
+public class CreateAliasNode extends DDLStatementNode
 {
 	private String				javaClassName;
 	private String				methodName;

@@ -50,7 +50,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * @author Jerry Brenner
  */
 
-public class DropTableNode extends DropStatementNode
+public class DropTableNode extends DDLStatementNode
 {
 	private long		conglomerateNumber;
 	private int			dropBehavior;

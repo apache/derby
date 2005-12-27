@@ -59,7 +59,7 @@ import java.lang.reflect.Modifier;
 *	5/8/97	Rick Hilleags	Moved node-name-string to child classes.
 */
 
-public abstract class StatementNode extends QueryTreeNode
+abstract class StatementNode extends QueryTreeNode
 {
 
 	/**

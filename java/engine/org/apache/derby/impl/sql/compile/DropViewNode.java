@@ -41,7 +41,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * @author Jerry Brenner
  */
 
-public class DropViewNode extends DropStatementNode
+public class DropViewNode extends DDLStatementNode
 {
 
 	/**

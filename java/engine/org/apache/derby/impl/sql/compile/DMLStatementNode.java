@@ -67,7 +67,7 @@ import java.util.Vector;
  * @author Jeff Lichtman
  */
 
-public abstract class DMLStatementNode extends StatementNode
+abstract class DMLStatementNode extends StatementNode
 {
 
 	/**
@@ -84,10 +84,8 @@ public abstract class DMLStatementNode extends StatementNode
 	 * representing the keys will be added after parsing (perhaps in
 	 * the binding phase?).
 	 *
-	 * RESOLVE: This is public so RepDeleteNode can see it. Perhaps it should
-	 * hava a public accessor function.
 	 */
-	public ResultSetNode	resultSet;
+	ResultSetNode	resultSet;
 
 	/**
 	 * Initializer for a DMLStatementNode

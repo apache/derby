@@ -37,7 +37,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *
  * @author Jamie
  */
-public class DropTriggerNode extends DropStatementNode
+public class DropTriggerNode extends DDLStatementNode
 {
 	private TableDescriptor td;
 

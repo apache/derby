@@ -56,7 +56,7 @@ import java.util.Vector;
  * @author Jeff Lichtman
  */
 
-public class CursorNode extends ReadCursorNode
+public class CursorNode extends DMLStatementNode
 {
 	public final static int UNSPECIFIED = 0;
 	public final static int READ_ONLY = 1;
@@ -74,13 +74,12 @@ public class CursorNode extends ReadCursorNode
 	*/
 	private Vector	updatableColumns;
 	private FromTable updateTable;
-	private ResultColumnList	targetColumns;
 	private ResultColumnDescriptor[]	targetColumnDescriptors;
 
 	//If cursor references session schema tables, save the list of those table names in savedObjects in compiler context
 	//Following is the position of the session table names list in savedObjects in compiler context
 	//At generate time, we save this position in activation for easy access to session table names list from compiler context
-	protected int indexOfSessionTableNamesInSavedObjects = -1;
+	private int indexOfSessionTableNamesInSavedObjects = -1;
 
 	/**
 	 * Initializer for a CursorNode
@@ -111,16 +110,8 @@ public class CursorNode extends ReadCursorNode
 		init(resultSet);
 		this.name = (String) name;
 		this.statementType = (String) statementType;
-		if (orderByList != null)
-		{
-			// The above "if" is redundant but jdk118 will load
-			// OrderByList.class even if orderByList is null; i.e
-			// this.orderByList = (OrderByList)null; 
-			// will load orderByList.class-- this is a cheap way to not load
-			// this class under jdk118. 
-			// :) 
-			this.orderByList = (OrderByList) orderByList;
-		}
+		this.orderByList = (OrderByList) orderByList;
+
 		this.updateMode = ((Integer) updateMode).intValue();
 		this.updatableColumns = (Vector) updatableColumns;
 
@@ -247,8 +238,35 @@ public class CursorNode extends ReadCursorNode
 			orderByList.pullUpOrderByColumns(resultSet);
 		}
 
+		FromList	fromList = (FromList) getNodeFactory().getNode(
+				C_NodeTypes.FROM_LIST,
+				getNodeFactory().doJoinOrderOptimization(),
+				getContextManager());
+
+		/* Check for ? parameters directly under the ResultColums */
+		resultSet.rejectParameters();
+
 		super.bind(dataDictionary);
 
+		// bind the query expression
+		resultSet.bindResultColumns(fromList);
+
+		// this rejects any untyped nulls in the select list
+		// pass in null to indicate that we don't have any
+		// types for this node
+		resultSet.bindUntypedNullsToResultColumns(null);
+
+		// Reject any XML values in the select list; JDBC doesn't
+		// define how we bind these out, so we don't allow it.
+		resultSet.rejectXMLValues();
+
+		/* Verify that all underlying ResultSets reclaimed their FromList */
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(fromList.size() == 0,
+					"fromList.size() is expected to be 0, not "
+							+ fromList.size()
+							+ " on return from RS.bindExpressions()");
+		}
 		// bind the order by
 		if (orderByList != null)
 		{
@@ -548,8 +566,11 @@ public class CursorNode extends ReadCursorNode
 		// result set of the statement.
 		resultSet.markStatementResultSet();
 
-	    // this will generate an expression that will be a ResultSet
-        super.generate(acb, mb);
+		generateAuthorizeCheck(acb, mb,
+				org.apache.derby.iapi.sql.conn.Authorizer.SQL_SELECT_OP);
+
+		// this will generate an expression that will be a ResultSet
+	    resultSet.generate(acb, mb);
 
 		/*
 		** Generate the position code if this cursor is updatable.  This
@@ -615,7 +636,7 @@ public class CursorNode extends ReadCursorNode
 		the target table (this may contain non-updatable columns).
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnDescriptor[] genTargetResultColList()
+	private ResultColumnDescriptor[] genTargetResultColList()
 		throws StandardException
 	{
 		ResultColumnList newList;
@@ -663,7 +684,6 @@ public class CursorNode extends ReadCursorNode
 		}
 
 		// we save the result so we only do this once
-		targetColumns = newList;
 		targetColumnDescriptors = newList.makeResultDescriptors();
 		return targetColumnDescriptors;
 	}
@@ -768,5 +788,10 @@ public class CursorNode extends ReadCursorNode
 		updatableColumns.copyInto(names);
 
 		return names;
+	}
+	
+	public String getXML()
+	{
+		return null;
 	}
 }

@@ -97,7 +97,7 @@ import org.apache.derby.impl.sql.compile.ValueNode;
 import org.apache.derby.impl.sql.compile.ValueNodeList;
 import org.apache.derby.impl.sql.compile.GroupByColumn;
 import org.apache.derby.impl.sql.compile.CurrentDatetimeOperatorNode;
-import org.apache.derby.impl.sql.compile.CreateStatementNode;
+import org.apache.derby.impl.sql.compile.DDLStatementNode;
 import org.apache.derby.impl.sql.compile.AlterTableNode;
 
 import org.apache.derby.impl.sql.compile.StringSlicer;
@@ -11378,7 +11378,7 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 			if ( cdn.isAutoincrementColumn())
 				throw StandardException.newException(SQLState.LANG_ALTER_TABLE_AUTOINCREMENT_COLUMN_NOT_ALLOWED);
 		}
-		changeType[0] = CreateStatementNode.ADD_TYPE;
+		changeType[0] = DDLStatementNode.ADD_TYPE;
 		tableElementList.addTableElement(tableElement);
 		return lockGranularity;
 	}
@@ -11386,7 +11386,7 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 	<ALTER> [ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <SET>
 		typeDescriptor = DB2AlterColumn(autoIncrementInfo)
 	{
-		changeType[0] = CreateStatementNode.MODIFY_TYPE;
+		changeType[0] = DDLStatementNode.MODIFY_TYPE;
 		/* typeDescriptor is not null for MODIFY_COLUMN_TYPE_NODE */
 		if (typeDescriptor != null)
 			tableElementList.addTableElement((TableElementNode) nodeFactory.getNode(
@@ -11411,14 +11411,14 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
                         || getToken(2).kind == CHECK)} )
 	tableElement = dropTableConstraintDefinition()
 	{
-		changeType[0] = CreateStatementNode.DROP_TYPE;
+		changeType[0] = DDLStatementNode.DROP_TYPE;
 		tableElementList.addTableElement(tableElement);
 		return lockGranularity;
 	}
 |
 	lockGranularity = DB2lockGranularityClause()
 	{
-		changeType[0] = CreateStatementNode.LOCKING_TYPE;
+		changeType[0] = DDLStatementNode.LOCKING_TYPE;
 		return lockGranularity;
 	}
 }

@@ -93,7 +93,7 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 public class DeleteNode extends DMLModStatementNode
 {
 	/* Column name for the RowLocation column in the ResultSet */
-	public static final String COLUMNNAME = "###RowLocationToDelete";
+	private static final String COLUMNNAME = "###RowLocationToDelete";
 
 	/* Filled in by bind. */
 	protected boolean				deferred;

@@ -63,7 +63,7 @@ import java.util.Vector;
  * @author Jeff Lichtman
  */
 
-public class CreateIndexNode extends CreateStatementNode
+public class CreateIndexNode extends DDLStatementNode
 {
 	boolean				unique;
 	DataDictionary		dd = null;

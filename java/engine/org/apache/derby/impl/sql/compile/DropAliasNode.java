@@ -45,7 +45,7 @@ import org.apache.derby.catalog.AliasInfo;
  * @author Jerry Brenner
  */
 
-public class DropAliasNode extends DropStatementNode
+public class DropAliasNode extends DDLStatementNode
 {
 	private char aliasType;
 	private char nameSpace;

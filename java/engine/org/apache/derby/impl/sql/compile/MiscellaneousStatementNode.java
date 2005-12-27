@@ -45,7 +45,7 @@ import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
  * @author Jerry Brenner
  */
 
-public abstract class MiscellaneousStatementNode extends StatementNode
+abstract class MiscellaneousStatementNode extends StatementNode
 {
 
 	int activationKind()

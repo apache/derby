@@ -46,10 +46,10 @@ import org.apache.derby.iapi.error.StandardException;
  * @author Jeff Lichtman
  */
 
-public class DropIndexNode extends DropStatementNode
+public class DropIndexNode extends DDLStatementNode
 {
-	ConglomerateDescriptor	cd;
-	TableDescriptor			td;
+	private ConglomerateDescriptor	cd;
+	private TableDescriptor			td;
 
 	public String statementToString()
 	{

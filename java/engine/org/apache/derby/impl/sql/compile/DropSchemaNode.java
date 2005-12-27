@@ -35,7 +35,7 @@ import org.apache.derby.iapi.reference.SQLState;
  * @author jamie
  */
 
-public class DropSchemaNode extends DropStatementNode
+public class DropSchemaNode extends DDLStatementNode
 {
 	private int			dropBehavior;
 	private String		schemaName;
