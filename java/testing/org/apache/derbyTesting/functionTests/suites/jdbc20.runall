@@ -7,3 +7,5 @@ jdbcapi/statementJdbc20.java
 jdbcapi/connectionJdbc20.java
 jdbcapi/StmtCloseFunTest.java
 jdbcapi/resultsetJdbc20.java
+jdbcapi/dataSourceReference.java
+

@@ -6,6 +6,8 @@
 # excluding jdbcapi/resultsetJdbc30.java because the features tested are not implemented by Derby Client
 # excluding jdbcapi/checkDataSource30.java - Client behaves differently. Need to look into this
 # excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
+# excluding jdbcapi/dataSourceReference.java - client side only tests, tests all data sources
+#           regardless of framework
 lang/errorStream.java
 # lang/scrollCursors2.java
 jdbcapi/batchUpdate.java
@@ -14,3 +16,4 @@ jdbcapi/testRelative.java
 jdbcapi/resultsetJdbc30.java
 jdbcapi/checkDataSource30.java
 jdbcapi/statementJdbc30.java
+jdbcapi/dataSourceReference.java

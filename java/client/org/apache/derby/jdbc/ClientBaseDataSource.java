@@ -783,6 +783,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     }
 
     protected String connectionAttributes = null;
+    public final static String propertyKey_connectionAttributes = "connectionAttributes";
 
     /**
      * Set this property to pass in more Derby specific connection URL attributes.
