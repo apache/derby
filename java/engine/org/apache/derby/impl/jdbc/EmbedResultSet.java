@@ -41,6 +41,7 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.CursorActivation;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.UserDataValue;
 import org.apache.derby.iapi.types.VariableSizeDataValue;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.services.io.StreamStorable;
@@ -2718,7 +2719,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		int colType = getColumnType(columnIndex);
 		if (colType == org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT) {
 			try {
-				getDVDforColumnToBeUpdated(columnIndex, "updateObject").setValue(x);
+				((UserDataValue) getDVDforColumnToBeUpdated(columnIndex, "updateObject")).setValue(x);
 				return;
 			} catch (StandardException t) {
 				throw noStateChangeException(t);

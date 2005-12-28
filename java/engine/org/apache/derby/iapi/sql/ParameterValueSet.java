@@ -84,25 +84,6 @@ public interface ParameterValueSet
 	void registerOutParameter(int parameterIndex, int sqlType, int scale)
 		throws StandardException;
 
-
-    /**
-     * Get the value of a parameter as a Java object.
-     *
-     * <p>This method returns a Java object whose type coresponds to the SQL
-     * type that was registered for this parameter using registerOutParameter.
-     *
-     * <p>Note that this method may be used to read
-     * datatabase-specific, abstract data types. This is done by
-     * specifying a targetSqlType of java.sql.types.OTHER, which
-     * allows the driver to return a database-specific Java type.
-     *
-     * @param parameterIndex The first parameter is 1, the second is 2, ...
-     * @return A java.lang.Object holding the OUT parameter value.
-     * @exception StandardException if a database-access error occurs.
-     * @see java.sql.Types 
-     */
-    Object getObject(int parameterIndex) throws StandardException;
-
 	//////////////////////////////////////////////////////////////////
 	//
 	// MISC STATEMENT
@@ -147,7 +128,7 @@ public interface ParameterValueSet
 	public DataValueDescriptor getParameterForSet( int position ) throws StandardException;
 
 	/**
-		Set the value of this parameter to the passed in Object.
+		Set the value of this user defined parameter to the passed in Object.
 		
 		  @return	The parameter at the given position.
 		  @exception StandardException		Thrown on error

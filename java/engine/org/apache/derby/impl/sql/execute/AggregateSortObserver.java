@@ -130,11 +130,10 @@ public class AggregateSortObserver extends BasicSortObserver
 		if (aggsToInitialize.length > 0 &&
 			((Storable)returnRow[firstAggregatorColumn]).isNull())
 		{
-			UserDataValue 		wrapper;	
 			for (int i = 0; i < aggsToInitialize.length; i++)
 			{
 				GenericAggregator aggregator = aggsToInitialize[i];
-				wrapper = ((UserDataValue)returnRow[aggregator.aggregatorColumnId]);
+				UserDataValue wrapper = ((UserDataValue)returnRow[aggregator.aggregatorColumnId]);
 				if (SanityManager.DEBUG)
 				{
 					if (!wrapper.isNull())

@@ -485,11 +485,11 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 	 * @see CallableStatement#getObject
      * @exception SQLException NoOutputParameters thrown.
      */
-	public Object getObject(int parameterIndex) throws SQLException 
+	public final Object getObject(int parameterIndex) throws SQLException 
 	{
 		checkStatus();
 		try {
-			Object v = getParms().getObject(parameterIndex-1);
+			Object v = getParms().getParameterForGet(parameterIndex-1).getObject();
 			wasNull = (v == null);
 			return v;
 

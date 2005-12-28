@@ -1040,7 +1040,7 @@ public class EmbedCallableStatement20
 		checkStatus();
 		try {
 			/* JDBC is one-based, DBMS is zero-based */
-			getParms().getParameterForSet(parameterIndex - 1).setValue(x);
+			getParms().getParameterForSet(parameterIndex - 1).setBigDecimal(x);
 
 		} catch (Throwable t) {
 			throw EmbedResultSet.noStateChangeException(t);

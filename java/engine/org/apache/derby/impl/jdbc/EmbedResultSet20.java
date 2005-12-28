@@ -167,7 +167,7 @@ public class EmbedResultSet20
     public void updateBigDecimal(int columnIndex, BigDecimal x)
     throws SQLException {
         try {
-            getDVDforColumnToBeUpdated(columnIndex, "updateBigDecimal").setValue(x);
+            getDVDforColumnToBeUpdated(columnIndex, "updateBigDecimal").setBigDecimal(x);
         } catch (StandardException t) {
             throw noStateChangeException(t);
         }

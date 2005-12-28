@@ -29,6 +29,7 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.UserDataValue;
 
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -197,7 +198,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 
 	public void setParameterAsObject(int position, Object value) throws StandardException {
 
-		DataValueDescriptor dvd = getParameterForSet(position);
+		UserDataValue dvd = (UserDataValue) getParameterForSet(position);
 
 		GenericParameter gp = parms[position];
 		if (value != null && (gp.jdbcTypeId == Types.OTHER || gp.jdbcTypeId == org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT)) {
@@ -396,29 +397,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 	{
 		checkPosition(parameterIndex);
 		parms[parameterIndex].setOutParameter(sqlType, scale);
-	}
-
-    /**
-     * Get the value of a parameter as a Java object.
-     *
-     * <p>This method returns a Java object whose type coresponds to the SQL
-     * type that was registered for this parameter using registerOutParameter.
-     *
-     * <p>Note that this method may be used to read
-     * datatabase-specific, abstract data types. This is done by
-     * specifying a targetSqlType of java.sql.types.OTHER, which
-     * allows the driver to return a database-specific Java type.
-     *
-     * @param parameterIndex The first parameter is 1, the second is 2, ...
-     * @return A java.lang.Object holding the OUT parameter value.
-     * @exception StandardException if a database-access error occurs.
-     * @see Types 
-     */
-    public Object getObject(int parameterIndex) throws StandardException
-	{
-		DataValueDescriptor dvd = getParameterForGet(parameterIndex);
-
-		return dvd.getObject();
 	}
 
 	/**

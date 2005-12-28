@@ -100,17 +100,14 @@ class GenericAggregator
 	void initialize(ExecRow row)
 		throws StandardException
 	{
-		ExecAggregator		ua;
-		UserDataValue	aggregatorColumn;
-
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(row != null, "row is null");
 		}
 
-		aggregatorColumn = (UserDataValue) row.getColumn(aggregatorColumnId + 1);
+		UserDataValue aggregatorColumn = (UserDataValue) row.getColumn(aggregatorColumnId + 1);
 
-		ua = (ExecAggregator) aggregatorColumn.getObject();
+		ExecAggregator ua = (ExecAggregator) aggregatorColumn.getObject();
 		if (ua == null)
 		{
 			ua = getAggregatorInstance();
