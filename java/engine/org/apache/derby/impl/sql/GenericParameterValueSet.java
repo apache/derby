@@ -274,54 +274,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 		}
 	}
 
-	/*
-	 * workhorse for set and stuff storable data value
-	 */
-	/**
-	 * @see ParameterValueSet#setStorableDataValue
-	 */
-	public void setStorableDataValue(DataValueDescriptor sdv, int position, int jdbcTypeId, String className)
-	{
-		if (SanityManager.DEBUG) 
-		{
-			if (!(position >= 0 && position < parms.length))
-			{
-				SanityManager.THROWASSERT("position value of " 
-					+ position + " is out of range (0 to " + parms.length + ")");
-			}
-			if (parms[position].getValue() != null)
-			{
-//COMMENTED OUT BY MAMTA -- should this be removed?
-//			SanityManager.THROWASSERT(
-//					"Attempt to reset a DataValueDescriptor in a ParameterValueSet, " +
-//					"position = " + position);
-			}
-
-			/* We need the next assertion because this method gets called
-			 * from generated code, hence no run time checking on the
-			 * parameters.
-			 */
-			if (! (sdv instanceof DataValueDescriptor))
-			{
-				if (sdv == null)
-				{
-					SanityManager.THROWASSERT("sdv expected to be non-null");
-				}
-				SanityManager.THROWASSERT(
-					"sdv expected to be DataValueDescriptor, not " +
-					sdv.getClass().getName());
-			}
-		}
-
-		parms[position].initialize(sdv, jdbcTypeId, className);
-
-		/* NOTE: We do not deal with associated parameters here.
-		 * This method is only called from the generated code
-		 * when initializing the parameters to null.  All
-		 * parameters, user and generated, will get initialized.
-		 */
-	}
-
 	GenericParameter getGenericParameter(int position)
 	{
     return(parms[position]);
@@ -495,21 +447,22 @@ final class GenericParameterValueSet implements ParameterValueSet
 	}
 
     /**
-     * Set the value of the return parameter as a Java object.
+     * Get the value of the return parameter in order to set it.
      *
-     * @param value the return value
-	 *
+ 	 *
      * @exception StandardException if a database-access error occurs.
      */
-    public void setReturnValue(Object value) throws StandardException
+    public DataValueDescriptor getReturnValueForSet() throws StandardException
 	{
 		checkPosition(0);
+				
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(parms.length > 0, "no return value");
-			SanityManager.ASSERT(hasReturnOutputParam, "shouldn't call setReturnValue() unless pvs has a return value");
+			if (!hasReturnOutputParam)
+				SanityManager.THROWASSERT("getReturnValueForSet called on non-return parameter");
 		}
-		parms[0].stuffObject(value);
+		
+		return parms[0].getValue();
 	}
 
 	/**

@@ -302,23 +302,6 @@ final class GenericParameter
 	////////////////////////////////////////////////////
 
 	/**
-	 * do a setValue on the particular field.  Doesn't do
-	 * checks on what it is being set to or on whether
-	 * it is a return parameter or what.  This is only
-	 * called internally; it is not expected to be called
-	 * directly as a result of some jdbc call (e.g. setObject()).
-	 *
-	 * @param newValue the value to set
-	 *
-	 * @exception StandardException on error
-	 */
-	void stuffObject(Object newValue) throws StandardException
-	{
-		value.setValue(newValue);
-		isSet = true;
-	}
-
-	/**
 	 * get string for param number
 	 */
 	String getJDBCParameterNumberStr()

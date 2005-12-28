@@ -128,8 +128,8 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 
 				try
 				{
-					pvs.setReturnValue(results.getObject(1));
-
+					DataValueDescriptor returnValue = pvs.getReturnValueForSet();
+					returnValue.setValueFromResultSet(results, 1, true);
 				} catch (StandardException e)
 				{
 					throw EmbedResultSet.noStateChangeException(e);

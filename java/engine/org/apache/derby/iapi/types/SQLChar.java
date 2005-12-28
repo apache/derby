@@ -1088,7 +1088,10 @@ readingLoop:
 	*/
 	public void setBigDecimal(Number bigDecimal)  throws StandardException
 	{
-		setValue((Object) bigDecimal);
+		if (bigDecimal == null)
+			setToNull();
+		else
+			setValue(bigDecimal.toString());
 	}
 
 	/** @exception StandardException		Thrown on error */

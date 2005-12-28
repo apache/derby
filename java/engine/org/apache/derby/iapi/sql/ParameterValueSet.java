@@ -49,22 +49,6 @@ public interface ParameterValueSet
 	*/
     void setParameterMode(int position, int mode);
 
-	/**
-	 * Set a parameter position to a DataValueDescriptor.
-	 *
-	 * NOTE: This method assumes the caller will not pass a position that's
-	 * out of range.  The implementation may have an assertion that the position
-	 * is in range.
-	 *
-	 * @param sdv		The DataValueDescriptor to set
-	 * @param position	The parameter position to set it at
-	 * @param jdbcTypeId    The corresponding JDBC types from java.sql.Types
-	 * @param className  The declared class name for the type.
-	 */
-
-	void setStorableDataValue(DataValueDescriptor sdv, int position, int jdbcTypeId, String className);
-
-
 	//////////////////////////////////////////////////////////////////
 	//
 	// CALLABLE STATEMENT
@@ -135,12 +119,17 @@ public interface ParameterValueSet
 	*/
 	void setParameterAsObject(int parameterIndex, Object value) throws StandardException;
 	
-	
+	/**
+	 * Get the DataValueDescriptor for an INOUT or OUT parameter.
+	 * @param position Zero based index of the parameter.
+	 * @return Parameter's value holder.
+	 * @throws StandardException Position out of range or the parameter is not INOUT or OUT.
+	 */
 	public DataValueDescriptor getParameterForGet( int position ) throws StandardException;
 
 	/**
 	 * Tells whether all the parameters are set and ready for execution.
-	   OUT and Cloudscape static method INOUT parameters are not required to be set.
+	   OUT are not required to be set.
 	 *
 	 * @return	true if all parameters are set, false if at least one
 	 *			parameter is not set.
@@ -214,13 +203,12 @@ public interface ParameterValueSet
 
 
     /**
-     * Set the value of the return parameter as a Java object.
+     * Get the value of the return parameter in order to set it.
      *
-     * @param value the return value
      *
      * @exception StandardException if a database-access error occurs.
      */
-	void setReturnValue(Object value) throws StandardException;
+	DataValueDescriptor getReturnValueForSet() throws StandardException;
 
 	/**
 	 * Return the scale of the given parameter index in this pvs.

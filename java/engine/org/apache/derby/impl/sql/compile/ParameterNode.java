@@ -310,29 +310,11 @@ public class ParameterNode extends ValueNode
 	////////////////////////////////////////////////////////////////////
 
 	/**
-	 * For a ParameterNode, we generate a call to the type factory
-	 * to get a DataValueDescriptor, and pass the result to the
-	 * setStorableDataValue method of the ParameterValueSet for the
-	 * generated class.  We push the DataValueDescriptor field as the
-	 * generated expression.
-	 *
-	 * Generated code:
-	 *
-	 *   In the constructor for the generated class:
-	 *
-	 *	((ParameterValueSet) pvs).
-	 *		setStorableDataValue(
-	 *				<generated null>,
-	 *				parameterNumber, jdbcType, className);
-	 *
-	 *   For the return value:
+	 * For a ParameterNode, we generate for the return value:
 	 *
 	 *		(<java type name>)
-	 *			( (ParameterValueSet) pvs.
-	 *					getParameter(parameterNumber) )
+	 *			( (BaseActivation) this.getParameter(parameterNumber) )
 	 *
-	 * pvs is a ParameterValueSet that lives in the superclass of the class
-	 * being generated.
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the expression will go into
@@ -355,11 +337,6 @@ public class ParameterNode extends ValueNode
 			throw StandardException.newException(
 				SQLState.LANG_ATTEMPT_TO_BIND_XML);
 		}
-
-		// PUSHCOMPILE
-		/* Reuse code if possible */
-		//if (genRetval != null)
-		//	return genRetval;
 
         /* Generate the return value */
 
