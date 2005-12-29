@@ -118,10 +118,6 @@ class ControlInfo
     currentProperties.put(FIELD_START_DELIMITER, DEFAULT_FIELD_START_DELIMITER);
     currentProperties.put(FIELD_END_DELIMITER, DEFAULT_FIELD_END_DELIMITER);
     currentProperties.put(VERSION, DEFAULT_VERSION);
-    // set the default code set to the platform default encoding value
-    String default_data_codeset =
-                          (new InputStreamReader(System.in)).getEncoding();
-    currentProperties.put(DATA_CODESET, default_data_codeset);
     currentProperties.put(HAS_DELIMETER_AT_END, INTERNAL_FALSE);
   }
 
@@ -254,6 +250,11 @@ class ControlInfo
     return aDelimiter;
   }
 
+  /**
+   * 
+   * @return Code set, can return null for use the default code set.
+   * @throws Exception
+   */
   String getDataCodeset() throws Exception {
     return(getCurrentProperties().getProperty(DATA_CODESET));
   }

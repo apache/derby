@@ -104,10 +104,10 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 				encode = eEncode;
 			}
 		}
-		//last chance: get default encoding
-		if (encode == null ){
-		 	encode = new java.io.InputStreamReader(System.in).getEncoding();
-		}
+		
+		// If null at this point then the default encoding
+		// will be always used.
+
 		//get locale string from the caller first
 		locale = getNewLocale(locStr);
 
@@ -127,18 +127,8 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 			messageFileName = MESSAGE_FILE;
 		}
 		//create default in/out
-		try {
-			out = new LocalizedOutput(System.out,encode);
-		}
-		catch(UnsupportedEncodingException e){
-			out = new LocalizedOutput(System.out);
-		}
-		try {
-			in = new LocalizedInput(System.in, encode);
-		}
-		catch(UnsupportedEncodingException e){
-			in = new LocalizedInput(System.in);
-		}
+		out = getNewOutput(System.out);
+		in = getNewInput(System.in);
 
 		//for faster code: get the format objs
 		if (enableLocalized && locale != null){
@@ -224,20 +214,23 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 	}
 	public LocalizedInput getNewInput(InputStream i) {
 		try {
-			return new LocalizedInput(i,encode);
+			if (encode != null)
+			    return new LocalizedInput(i,encode);
 		}
 		catch (UnsupportedEncodingException e){
-			return new LocalizedInput(i);
+			
 		}
+		return new LocalizedInput(i);
 	}
 
 	public LocalizedOutput getNewOutput(OutputStream o){
 		try {
-			return new LocalizedOutput(o,encode);
+			if (encode != null)
+			    return new LocalizedOutput(o,encode);
 		}
 		catch(UnsupportedEncodingException e){
-			return new LocalizedOutput(o);
 		}
+		return new LocalizedOutput(o);
 	}
 	public String getTextMessage(String key ) {
 		if ( res == null){
@@ -429,9 +422,6 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 	}
 	public Locale getLocale(){
 			return locale;
-	}
-	public String getEncode(){
-		return encode;
 	}
 
 	private final synchronized String getEnvProperty(String key) {

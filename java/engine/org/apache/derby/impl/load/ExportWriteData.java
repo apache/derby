@@ -67,7 +67,11 @@ final class ExportWriteData extends ExportWriteDataAbstract
       outputFileName = url.getFile();
     } catch (MalformedURLException ex) {}
     FileOutputStream anOutputStream = new FileOutputStream(outputFileName);
-    aStream = new OutputStreamWriter(new BufferedOutputStream(anOutputStream), dataCodeset);
+    BufferedOutputStream buffered = new BufferedOutputStream(anOutputStream);
+    
+    aStream = dataCodeset == null ?
+    		new OutputStreamWriter(buffered) :
+    		new OutputStreamWriter(buffered, dataCodeset);    	        
   }
 
   /**if control file says true for column definition, write it as first line of the

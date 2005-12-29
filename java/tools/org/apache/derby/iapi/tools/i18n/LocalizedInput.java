@@ -30,7 +30,8 @@ public class LocalizedInput extends InputStreamReader{
 		super(i);
 		this.in = i;
 	}
-	public LocalizedInput(InputStream i, String encode) throws UnsupportedEncodingException{
+
+	LocalizedInput(InputStream i, String encode) throws UnsupportedEncodingException{
 		super(i,encode);
 		this.in = i;
 	}
