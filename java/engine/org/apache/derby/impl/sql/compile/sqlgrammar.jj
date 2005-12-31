@@ -100,7 +100,6 @@ import org.apache.derby.impl.sql.compile.CurrentDatetimeOperatorNode;
 import org.apache.derby.impl.sql.compile.DDLStatementNode;
 import org.apache.derby.impl.sql.compile.AlterTableNode;
 
-import org.apache.derby.impl.sql.compile.StringSlicer;
 import org.apache.derby.impl.sql.compile.ParseException;
 import org.apache.derby.impl.sql.compile.Token;
 import org.apache.derby.impl.sql.compile.TokenMgrError;
@@ -202,7 +201,6 @@ public class SQLParser
     private static final int INTERSECT_OP = 5;
     private static final int INTERSECT_ALL_OP = 6;
 
-	private StringSlicer				stringSlicer;
 	private Object[]					paramDefaults;
 	private String						statementSQLText;
 	private NodeFactory					nodeFactory;
@@ -474,15 +472,6 @@ public class SQLParser
 	private final ContextManager getContextManager()
 	{
 		return cm;
-	}
-
-	private StringSlicer	getStringSlicer()
-	{
-		if ( stringSlicer == null )
-		{
-			stringSlicer = new StringSlicer( statementSQLText);
-		}
-		return	stringSlicer;
 	}
 
 	/*
@@ -1651,8 +1640,7 @@ public class SQLParser
     {
         /* Do per-statement initialization here */
         parameterNumber = 0;
-        stringSlicer = null;
-        this.statementSQLText = statementSQLText;
+       this.statementSQLText = statementSQLText;
         this.paramDefaults = paramDefaults;
         nodeFactory = getNodeFactory();
         initUnnamedParameterList();
@@ -9551,7 +9539,7 @@ viewDefinition(Token beginToken) throws StandardException :
 								resultColumns, 
 								queryExpression,
 								ReuseFactory.getInteger(checkOptionType),
-								getStringSlicer().slice(
+								StringUtil.slice(statementSQLText,
 												beginToken.beginOffset,
 												endToken.endOffset,false),
 								getContextManager());
@@ -9639,7 +9627,7 @@ triggerDefinition() throws StandardException :
 								ReuseFactory.getInteger(0),
 											// when clause begin offset
 								actionNode,
-								getStringSlicer().slice(
+								StringUtil.slice(statementSQLText,
 									actionBegin,
 									actionEnd,false),
 								ReuseFactory.getInteger(actionBegin),
@@ -9889,7 +9877,7 @@ defaultOption(Token beginToken, long[] autoIncrementInfo,
 		value = (ValueNode) nodeFactory.getNode(
 								C_NodeTypes.DEFAULT_NODE,
 								value,
-								getStringSlicer().slice(
+								StringUtil.slice(statementSQLText,
 									beginToken.beginOffset + 7,
 									endToken.endOffset,true),
 								getContextManager()
@@ -10346,7 +10334,7 @@ checkConstraintDefinition(TableName constraintName, String columnName)
 					rclList,
 					null,
 					value,
-					getStringSlicer().slice(
+					StringUtil.slice(statementSQLText,
 						beginToken.beginOffset,
 						endToken.endOffset,true),
 					getContextManager()

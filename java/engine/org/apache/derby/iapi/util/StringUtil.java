@@ -129,6 +129,28 @@ public class StringUtil
 			value = value.substring(0, length);
 		return value;
 	}
+	
+	/**
+	 * Return a slice (substring) of the passed in value, optionally trimmed.
+	 * WARNING - endOffset is inclusive for historical reasons, unlike
+	 * String.substring() which has an exclusive ending offset.
+	 * @param value Value to slice, must be non-null.
+	 * @param beginOffset Inclusive start character
+	 * @param endOffset Inclusive end character
+	 * @param trim To trim or not to trim
+	 * @return Sliceed value.
+	 */
+	public static String slice(String value,
+			int beginOffset, int endOffset,
+			boolean trim)
+	{
+		String retval = value.substring(beginOffset, endOffset + 1);
+		
+		if (trim)
+			retval = retval.trim();
+		
+		return retval;
+	}
 
 
 	private static char[] hex_table = {
