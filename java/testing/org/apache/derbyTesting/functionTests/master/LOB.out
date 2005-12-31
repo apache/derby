@@ -205,7 +205,7 @@ C
 12345
 1234 
 12345
-1234&
+12345
 ij> select * from n;
 ERROR 42X05: Table 'N' does not exist.
 ij> -- concatenate
@@ -233,7 +233,7 @@ C
 12345
 1234 
 12345
-1234&
+12345
 ij> select * from n where n like '12%';
 ERROR 42X05: Table 'N' does not exist.
 ij> select * from b where b like cast('0102%' as blob(10));
@@ -245,7 +245,7 @@ C
 12345
 1234 
 12345
-1234&
+12345
 ij> select * from n where n like cast('12%' as nclob(10));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> -- cleanup

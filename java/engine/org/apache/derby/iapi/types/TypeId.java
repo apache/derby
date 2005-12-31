@@ -1759,7 +1759,9 @@ public final class TypeId implements Formatable
         }
 
         /**
-         * Is type variable length
+         * Does type hava a declared variable length (defined by the application).
+         * Examples are CHAR(10), CLOB(1M).
+         * Unbounded long types, like LONG VARCHAR return false here.
          * @return boolean true if type is variable length false if not.  
          */
         public boolean variableLength()
@@ -1774,16 +1776,8 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
                         case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
                         case StoredFormatIds.BLOB_TYPE_ID:
-// none of the LONG_VARCHAR types are true here...????
-//                        case StoredFormatIds.CLOB_TYPE_ID:
-//                        case StoredFormatIds.NCLOB_TYPE_ID:
-                        // RESOLVE: does "variableLength" here mean simply
-                        // that the length is variable, or that the user
-                        // can specify a length, such as "char(20)"?  The
-                        // answer to that determines where XML is supposed
-                        // to be...
-                        case StoredFormatIds.XML_TYPE_ID:
-                                return true;
+                        case StoredFormatIds.CLOB_TYPE_ID:
+                                 return true;
 
                         default:
                                 return false;
