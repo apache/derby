@@ -87,25 +87,12 @@ public class SQLRef extends DataType implements RefDataValue
 		return value;
 	}
 
-	/**
-	 * @see DataValueDescriptor#setValue
-	 */
-	public void setValue(Object theValue)
-		throws StandardException
-	{
-		if ((theValue instanceof RowLocation) ||
-			(theValue == null))
-		{
-			this.setValue((RowLocation)theValue);
-		}
-		else
-		{
-			throwLangSetMismatch(theValue);
-		}
-	}
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
-		setValue(theValue.getObject());
+		if (theValue.isNull())
+			setToNull();
+		else
+			value = (RowLocation) theValue.getObject();
 	}
 
 	public int getLength()

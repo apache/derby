@@ -630,32 +630,14 @@ public final class SQLTimestamp extends DataType
     } // end of parseDateOrTimestamp
 
 	/**
-	 * @see DataValueDescriptor#setValue
-	 *
+	 * Set the value from a correctly typed Timestamp object.
+	 * @throws StandardException 
 	 */
-	public void setValue(Object theValue) throws StandardException
+	void setObject(Object theValue) throws StandardException
 	{
-		if (theValue == null)
-		{
-			setToNull();
-		}
-		else if (theValue instanceof Date)
-		{
-			this.setValue((Date)theValue, (Calendar) null);
-		}
-		else if (theValue instanceof Time)
-		{
-			this.setValue((Time)theValue, (Calendar) null);
-		}
-		else if (theValue instanceof Timestamp)
-		{
-			this.setValue((Timestamp)theValue, (Calendar) null);
-		}
-		else
-		{
-			genericSetObject(theValue);
-		}
+		setValue((Timestamp) theValue);
 	}
+	
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
 		if (theValue instanceof SQLTimestamp) {

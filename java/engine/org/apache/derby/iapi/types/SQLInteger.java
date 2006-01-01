@@ -404,30 +404,6 @@ public final class SQLInteger
 		isnull = false;
 	}
 
-
-	/**
-	 * @see DataValueDescriptor#setValue
-	 *
-	 * @exception StandardException on failure of intValue on Number
-	 *
-	 */	
-	public void setValue(Object theValue) 
-		throws StandardException
-	{
-		if (theValue == null)
-		{
-			setToNull();
-		}
-		else if (theValue instanceof Number)
-		{
-			this.setValue(((Number)theValue).intValue());
-		}
-		else
-		{
-			genericSetObject(theValue);
-		}
-	}
-
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
 		setValue(theValue.getInt());

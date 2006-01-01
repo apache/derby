@@ -61,15 +61,13 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 
 /**
- * SQLBinary satisfies the DataValueDescriptor
- * interfaces (i.e., DataType). It implements a String holder,
- * e.g. for storing a column value; it can be specified
- * when constructed to not allow nulls. Nullability cannot be changed
- * after construction.
- * <p>
- * Because DataType is a subclass of DataType,
- * SQLBit can play a role in either a DataType/Value
- * or a DataType/KeyRow, interchangeably.
+ * SQLBinary is the abstract class for the binary datatypes.
+ * <UL>
+ * <LI> CHAR FOR BIT DATA
+ * <LI> VARCHAR FOR BIT DATA
+ * <LI> LONG VARCHAR
+ * <LI> BLOB
+ * </UL>
 
   <P>
   Format : <encoded length><raw data>
@@ -90,7 +88,7 @@ import java.sql.PreparedStatement;
   (0xE0 is an esacape to allow any number of arbitary encodings in the future).
   </UL>
  */
-public abstract class SQLBinary
+abstract class SQLBinary
 	extends DataType implements BitDataValue
 {
 

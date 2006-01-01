@@ -596,11 +596,13 @@ public class BinaryOperatorNode extends ValueNode
 			{
 				if (getTypeId().isNumericTypeId())
 				{
+					// to leave the DataValueDescriptor value on the stack, since setWidth is void
+					mb.dup();
+
 					mb.push(getTypeServices().getPrecision());
 					mb.push(getTypeServices().getScale());
 					mb.push(true);
-					mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue, "setWidth", ClassName.DataValueDescriptor, 3);
-					mb.cast(resultTypeName);
+					mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue, "setWidth", "void", 3);
 				}
 			}
 

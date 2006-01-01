@@ -58,34 +58,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * SQLBit satisfies the DataValueDescriptor
- * interfaces (i.e., DataType). It implements a String holder,
- * e.g. for storing a column value; it can be specified
- * when constructed to not allow nulls. Nullability cannot be changed
- * after construction.
- * <p>
- * Because DataType is a subclass of DataType,
- * SQLBit can play a role in either a DataType/Value
- * or a DataType/KeyRow, interchangeably.
-
-  <P>
-  Format : <encoded length><raw data>
-  <BR>
-  Length is encoded to support 5.x databases where the length was stored as the number of bits.
-  The first bit of the first byte indicates if the format is an old (5.x) style or a new 8.1 style.
-  8.1 then uses the next two bits to indicate how the length is encoded.
-  <BR>
-  <encoded length> is one of N styles.
-  <UL>
-  <LI> (5.x format) 4 byte Java format integer value 0 - either <raw data> is 0 bytes/bits  or an unknown number of bytes.
-  <LI> (5.x format) 4 byte Java format integer value >0 (positive) - number of bits in <raw data>, number of bytes in <raw data>
-  is the minimum number of bytes required to store the number of bits.
-  <LI> (8.1 format) 1 byte encoded length (0 <= L <= 31) - number of bytes of <raw data> - encoded = 0x80 & L
-  <LI> (8.1 format) 3 byte encoded length (32 <= L < 64k) - number of bytes of <raw data> - encoded = 0xA0 <L as Java format unsigned short>
-  <LI> (8.1 format) 5 byte encoded length (64k <= L < 2G) - number of bytes of <raw data> - encoded = 0xC0 <L as Java format integer>
-  <LI> (future) to be determined L >= 2G - encoded 0xE0 <encoding of L to be determined>
-  (0xE0 is an esacape to allow any number of arbitary encodings in the future).
-  </UL>
+ * SQLBit represents the SQL type CHAR FOR BIT DATA
  */
 public class SQLBit
 	extends SQLBinary
@@ -128,20 +101,19 @@ public class SQLBit
 	}
 
 	/** 
+	 * Obtain the value using getBytes. This works for all FOR BIT DATA types.
+	 * Getting a stream is problematic as any other getXXX() call on the ResultSet
+	 * will close the stream we fetched. Therefore we have to create the value in-memory
+	 * as a byte array.
 	 * @see DataValueDescriptor#setValueFromResultSet 
 	 *
 	 * @exception SQLException		Thrown on error
 	 */
-	public void setValueFromResultSet(ResultSet resultSet, int colNumber,
+	public final void setValueFromResultSet(ResultSet resultSet, int colNumber,
 									  boolean isNullable)
 		throws SQLException
 	{
-			dataValue = resultSet.getBytes(colNumber);
-
-			if (isNullable && resultSet.wasNull())
-			{
-				setToNull();
-			}
+			setValue(resultSet.getBytes(colNumber));
 	}
 
 	/*
@@ -152,6 +124,15 @@ public class SQLBit
 	public int typePrecedence()
 	{
 		return TypeId.BIT_PRECEDENCE;
+	}
+	
+	/**
+	 * Set the value from an non-null object.
+	 */
+	final void setObject(Object theValue)
+		throws StandardException
+	{
+		setValue((byte[]) theValue);
 	}
 
 	/*
@@ -168,28 +149,6 @@ public class SQLBit
 	public SQLBit(byte[] val)
 	{
 		dataValue = val;
-	}
-
-
-	/**
-	 * @see DataValueDescriptor#setValue
-	 *
-	 */	
-	public final void setValue(Object theValue)
-		throws StandardException
-	{
-		if (theValue == null)
-		{
-			setToNull();
-		}
-		else if (theValue instanceof byte[])
-		{
-			((SQLBinary) this).setValue((byte[])theValue);
-		}
-		else
-		{
-			throwLangSetMismatch(theValue);
-		}
 	}
 
 	/**
@@ -230,7 +189,7 @@ public class SQLBit
 	 * @exception StandardException		Thrown on non-zero truncation
 	 *		if errorOnTrunc is true	
 	 */
-	public DataValueDescriptor setWidth(int desiredWidth, 
+	public void setWidth(int desiredWidth, 
 			int desiredScale,	// Ignored 
 			boolean errorOnTrunc)
 			throws StandardException
@@ -240,7 +199,7 @@ public class SQLBit
 		*/
 		if (getValue() == null)
 		{
-			return this;
+			return;
 		}
 
 		int sourceWidth = dataValue.length;
@@ -286,7 +245,6 @@ public class SQLBit
 			dataValue = shrunkData;
 
 		}
-		return this;
 	}
 
 

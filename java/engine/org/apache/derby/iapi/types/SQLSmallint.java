@@ -443,27 +443,6 @@ public final class SQLSmallint
 		isnull = false;
 	}
 
-	/**
-	 * @see DataValueDescriptor#setValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */	
-	public void setValue(Object theValue)
-		throws StandardException
-	{
-		if (theValue == null)
-		{
-			setToNull();
-		}		
-		else if (theValue instanceof Number)
-		{
-			this.setValue(((Number)theValue).shortValue());
-		}
-		else
-		{
-			genericSetObject(theValue);
-		}
-	}
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
 		setValue(theValue.getShort());

@@ -201,7 +201,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 		UserDataValue dvd = (UserDataValue) getParameterForSet(position);
 
 		GenericParameter gp = parms[position];
-		if (value != null && (gp.jdbcTypeId == Types.OTHER || gp.jdbcTypeId == org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT)) {
+		if (value != null) {
 
 			{
 

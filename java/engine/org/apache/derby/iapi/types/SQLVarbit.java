@@ -47,17 +47,8 @@ import java.io.ObjectInput;
 import java.io.IOException;
 
 /**
- * SQLVarbit satisfies the DataValueDescriptor
- * interfaces (i.e., OrderableDataType). It implements a String holder,
- * e.g. for storing a column value; it can be specified
- * when constructed to not allow nulls. Nullability cannot be changed
- * after construction.
- * <p>
- * Because OrderableDataType is a subclass of DataType,
- * SQLVarbit can play a role in either a DataType/Value
- * or a OrderableDataType/KeyRow, interchangeably.
- *
- * It is an extension of SQLVarbit and is virtually indistinguishable
+ * SQLVarbit represents the SQL type VARCHAR FOR BIT DATA
+ * It is an extension of SQLBit and is virtually indistinguishable
  * other than normalization.
  */
 public class SQLVarbit extends SQLBit
@@ -108,7 +99,7 @@ public class SQLVarbit extends SQLBit
 		int		desiredWidth = desiredType.getMaximumWidth();
 
 		byte[] sourceData = source.getBytes();
-		((SQLBinary) this).setValue(sourceData);
+		setValue(sourceData);
 		if (sourceData.length > desiredWidth)
 			setWidth(desiredWidth, 0, true);
 	}
@@ -127,7 +118,7 @@ public class SQLVarbit extends SQLBit
 	 * @exception StandardException		Thrown on non-zero truncation
 	 *		if errorOnTrunc is true	
 	 */
-	public DataValueDescriptor setWidth(int desiredWidth, 
+	public void setWidth(int desiredWidth, 
 			int desiredScale,	// Ignored 
 			boolean errorOnTrunc)
 			throws StandardException
@@ -137,7 +128,7 @@ public class SQLVarbit extends SQLBit
 		*/
 		if (getValue() == null)
 		{
-			return this;
+			return;
 		}
 
 		int sourceWidth = dataValue.length;
@@ -169,7 +160,6 @@ public class SQLVarbit extends SQLBit
 			dataValue = shrunkData;
 
 		}
-		return this;
 	}
 
 

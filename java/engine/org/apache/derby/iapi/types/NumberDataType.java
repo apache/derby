@@ -406,6 +406,16 @@ public abstract class NumberDataType extends DataType
 		
 		setValue(theValue.intValue());
 	}
+	
+	/**
+	 * Set the value from a correctly typed Integer object.
+	 * Used for TINYINT, SMALLINT, INTEGER.
+	 * @throws StandardException 
+	 */
+	void setObject(Object theValue) throws StandardException
+	{
+		setValue(((Integer) theValue).intValue());
+	}
 
 	/**
 		setValue for integral exact numerics. Converts the BigDecimal

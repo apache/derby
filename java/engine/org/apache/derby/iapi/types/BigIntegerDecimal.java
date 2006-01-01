@@ -441,11 +441,11 @@ public final class BigIntegerDecimal extends BinaryDecimal
 	/* (non-Javadoc)
 	 * @see org.apache.derby.iapi.types.VariableSizeDataValue#setWidth(int, int, boolean)
 	 */
-	public DataValueDescriptor setWidth(int desiredPrecision, int desiredScale,
+	public void setWidth(int desiredPrecision, int desiredScale,
 			boolean errorOnTrunc) throws StandardException
 	{
 		if (isNull())
-			return this;
+			return;
 			
 		int deltaScale = desiredScale - sqlScale;
 		if (desiredPrecision != IGNORE_PRECISION)
@@ -460,7 +460,7 @@ public final class BigIntegerDecimal extends BinaryDecimal
 		}
 		
 		if (deltaScale == 0)
-			return this;
+			return;
 		
 		BigInteger bi = new BigInteger(data2c);
 		
@@ -468,7 +468,6 @@ public final class BigIntegerDecimal extends BinaryDecimal
 
 		data2c = bi.toByteArray();
 		sqlScale = desiredScale;		
-     	return this;
 	}
 	
 	/**

@@ -49,7 +49,7 @@ public interface VariableSizeDataValue
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public DataValueDescriptor setWidth(int desiredWidth,
+	public void setWidth(int desiredWidth,
 									int desiredScale,
 									boolean errorOnTrunc)
 							throws StandardException;

@@ -1042,8 +1042,8 @@ public class StaticMethodCallNode extends MethodCallNode
 							mb.push(isNumericType ? paramdtd.getPrecision() : paramdtd.getMaximumWidth());
 							mb.push(paramdtd.getScale());
 							mb.push(isNumericType);
-							mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue, "setWidth", ClassName.DataValueDescriptor, 3);
-							mb.endStatement();
+							mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue, "setWidth", "void", 3);
+							// mb.endStatement();
 						}
 					}
 				}

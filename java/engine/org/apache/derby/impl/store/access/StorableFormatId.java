@@ -247,26 +247,6 @@ public class StorableFormatId extends DataType
     }
 
 	/**
-	 * Set the value of this DataValueDescriptor to the given value
-	 *
-	 * @param theValue	An Object containing the value to set this
-	 *					DataValueDescriptor to.  Null means set the value
-	 *					to SQL null.
-	 *
-	 * @return	This DataValueDescriptor
-	 *
-	 * @exception StandardException		Thrown on error
-     *
-     * @see org.apache.derby.iapi.types.DataValueDescriptor#setValue
-	 */ 
-	public void setValue(Object theValue) 
-        throws StandardException
-    {
-        throw(StandardException.newException(
-                SQLState.HEAP_UNIMPLEMENTED_FEATURE));
-    }
-
-	/**
 	 * Set the value of this DataValueDescriptor from another.
 	 *
 	 * @param theValue	The Date value to set this DataValueDescriptor to

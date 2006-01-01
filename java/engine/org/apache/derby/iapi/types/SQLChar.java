@@ -108,7 +108,7 @@ public class SQLChar
 		}
 	}
 
-	public static void appendBlanks(char[] ca, int offset, int howMany) {
+	private static void appendBlanks(char[] ca, int offset, int howMany) {
 		while (howMany > 0) {
 
 			int count = howMany > BLANKS.length ? BLANKS.length : howMany;
@@ -1194,37 +1194,35 @@ readingLoop:
 		intLength = 0;
 		cKey = null;
 	}
-
+	
 	/**
-	 * @see DataValueDescriptor#setValue
+	 * Allow any Java type to be cast to a character type using
+	 * Object.toString.
+	 * @see DataValueDescriptor#setObjectForCast
+	 * 
+	 * @exception StandardException
+	 *                thrown on failure
+	 * 
+	 * @return me
 	 */
-	public void setValue(Object theValue)  throws StandardException
-	{
-		if ((theValue instanceof String) ||
-			(theValue == null))
+	public void setObjectForCast(Object theValue, boolean instanceOfResultType,
+			String resultTypeClassName) throws StandardException {
+		
+		if (theValue == null)
 		{
-			setValue((String) theValue);
+			setToNull();
+			return;
 		}
-		else
-		{
 
-			{
-				setValue(theValue.toString());
-			}
-		}
+		if ("java.lang.String".equals(resultTypeClassName))
+		    setValue(theValue.toString());
+		else
+			super.setObjectForCast(theValue, instanceOfResultType, resultTypeClassName);
 	}
+	
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
 		setValue(theValue.getString());
-	}
-
-
-	private void setAsToNationalString(Object theValue) 
-	{
-		String s = null;
-		if (theValue != null)
-			s = theValue.toString();
-		setValue(s);
 	}
 
 	/**
@@ -1348,7 +1346,7 @@ readingLoop:
 	 *		is true and when a shrink will truncate non-white
 	 *		spaces.
 	 */
-	public DataValueDescriptor setWidth(int desiredWidth,
+	public void setWidth(int desiredWidth,
 									int desiredScale, // Ignored
 									boolean errorOnTrunc)
 							throws StandardException
@@ -1360,7 +1358,7 @@ readingLoop:
 		*/
 		if (getString() == null)
 		{
-			return this;
+			return;
 		}
 
 		sourceWidth = getLength();
@@ -1401,7 +1399,7 @@ readingLoop:
 			*/
 			setValue(getString().substring(0, desiredWidth));
 		}
-		return this;
+		return;
 	}
 
 	/*

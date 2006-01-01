@@ -324,19 +324,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 		@exception StandardException thrown by me accessing my value.
 	*/
 	public void setInto(ResultSet rs, int position) throws SQLException, StandardException;
-
-	/**
-	 * Set the value of this DataValueDescriptor to the given value
-	 *
-	 * @param theValue	An Object containing the value to set this
-	 *					DataValueDescriptor to.  Null means set the value
-	 *					to SQL null.
-	 *
-	 * @return	This DataValueDescriptor
-	 *
-	 * @exception StandardException		Thrown on error
-	 */ 
-	public void setValue(Object theValue) throws StandardException;
 	
 	/**
 	 * Set the value of this DataValueDescriptor to the given int value
@@ -575,12 +562,15 @@ public interface DataValueDescriptor extends Storable, Orderable
 	public String	getTypeName();
 
 	/**
-	 * Set the Object that this Data Type contains (for an explicit cast).
+	 * Set this value from an Object. Used from CAST of a Java type to
+	 * another type, including SQL types. If the passed instanceOfResultType
+	 * is false then the object is not an instance of the declared
+	 * type resultTypeClassName. Usually an exception should be thrown.
 	 *
 	 * @param value					The new value
 	 * @param instanceOfResultType	Whether or not the new value 
 	 *								is an instanceof the result type.
-	 * @param resultTypeClassName   The class name of the resulting type 
+	 * @param resultTypeClassName   The class name of the resulting (declared) type 
      *                              (for error messages only).
 	 *
 	 * @exception StandardException		Thrown on error

@@ -157,16 +157,4 @@ public class BitConstantNode extends ConstantNode
 		mb.callMethod(VMOpcode.INVOKESTATIC, "org.apache.derby.iapi.util.StringUtil", "fromHexString",
 						"byte[]", 3);
 	}
-
-	
-	void setConstantWidth(ExpressionClassBuilder acb, MethodBuilder mb) {
-		if ((bitLength % 8) != 0) {
-			// temp for binary types.
-			mb.cast("org.apache.derby.iapi.types.VariableSizeDataValue");
-			mb.push(bitLength);
-			mb.push(0);
-			mb.push(false);
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "setWidth", "org.apache.derby.iapi.types.DataValueDescriptor", 3);
-		}
-	}
 }

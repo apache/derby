@@ -1588,4 +1588,67 @@ ij> values CAST (X'05' as LONG VARCHAR for bit data);
 ij> -- clean up
 drop table t1;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+ij> -- test some casting from a java type to standard SQL types.
+-- should all fail at runtime
+select cast (aliasinfo as BOOLEAN) from sys.sysaliases;
+1    
+-----
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'BOOLEAN'.
+ij> select cast (aliasinfo as SMALLINT) from sys.sysaliases;
+1     
+------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'SMALLINT'.
+ij> select cast (aliasinfo as INTEGER) from sys.sysaliases;
+1          
+-----------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'INTEGER'.
+ij> select cast (aliasinfo as BIGINT) from sys.sysaliases;
+1                   
+--------------------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'BIGINT'.
+ij> select cast (aliasinfo as REAL) from sys.sysaliases;
+1            
+-------------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'REAL'.
+ij> select cast (aliasinfo as DOUBLE) from sys.sysaliases;
+1                     
+----------------------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'DOUBLE'.
+ij> select cast (aliasinfo as DECIMAL(5,4)) from sys.sysaliases;
+1       
+--------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'DECIMAL'.
+ij> select cast (aliasinfo as CHAR(30) FOR BIT DATA) from sys.sysaliases;
+1                                                           
+------------------------------------------------------------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'CHAR () FOR BIT DATA'.
+ij> select cast (aliasinfo as VARCHAR(30) FOR BIT DATA) from sys.sysaliases;
+1                                                           
+------------------------------------------------------------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'VARCHAR () FOR BIT DATA'.
+ij> select cast (aliasinfo as LONG VARCHAR FOR BIT DATA) from sys.sysaliases;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+ij> select cast (aliasinfo as BLOB) from sys.sysaliases;
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'BLOB'.
+ij> select cast (aliasinfo as CLOB) from sys.sysaliases where alias = 'INSTALL_JAR';
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'CLOB'.
+ij> -- Java casts to character types excluding CLOB are supported using Object.toString
+select cast (aliasinfo as CHAR(240)) from sys.sysaliases where alias = 'INSTALL_JAR';
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+INSTALL_JAR(IN URL VARCHAR(256),IN JAR VARCHAR(128),IN DEPLOY INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA    &
+ij> select cast (aliasinfo as VARCHAR(240)) from sys.sysaliases where alias = 'INSTALL_JAR';
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+INSTALL_JAR(IN URL VARCHAR(256),IN JAR VARCHAR(128),IN DEPLOY INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA     
+ij> select cast (aliasinfo as LONG VARCHAR) from sys.sysaliases where alias = 'INSTALL_JAR';
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+INSTALL_JAR(IN URL VARCHAR(256),IN JAR VARCHAR(128),IN DEPLOY INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA     
 ij> 

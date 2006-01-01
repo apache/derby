@@ -691,3 +691,23 @@ values CAST (X'05' as LONG VARCHAR for bit data);
 
 -- clean up
 drop table t1;
+
+-- test some casting from a java type to standard SQL types.
+-- should all fail at runtime
+select cast (aliasinfo as BOOLEAN) from sys.sysaliases;
+select cast (aliasinfo as SMALLINT) from sys.sysaliases;
+select cast (aliasinfo as INTEGER) from sys.sysaliases;
+select cast (aliasinfo as BIGINT) from sys.sysaliases;
+select cast (aliasinfo as REAL) from sys.sysaliases;
+select cast (aliasinfo as DOUBLE) from sys.sysaliases;
+select cast (aliasinfo as DECIMAL(5,4)) from sys.sysaliases;
+select cast (aliasinfo as CHAR(30) FOR BIT DATA) from sys.sysaliases;
+select cast (aliasinfo as VARCHAR(30) FOR BIT DATA) from sys.sysaliases;
+select cast (aliasinfo as LONG VARCHAR FOR BIT DATA) from sys.sysaliases;
+select cast (aliasinfo as BLOB) from sys.sysaliases;
+select cast (aliasinfo as CLOB) from sys.sysaliases where alias = 'INSTALL_JAR';
+
+-- Java casts to character types excluding CLOB are supported using Object.toString
+select cast (aliasinfo as CHAR(240)) from sys.sysaliases where alias = 'INSTALL_JAR';
+select cast (aliasinfo as VARCHAR(240)) from sys.sysaliases where alias = 'INSTALL_JAR';
+select cast (aliasinfo as LONG VARCHAR) from sys.sysaliases where alias = 'INSTALL_JAR';

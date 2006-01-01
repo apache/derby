@@ -298,14 +298,4 @@ public class SQLClob
 	{
 		throwLangSetMismatch("byte[]");
 	}
-
-	public void setValue(Object theValue)
-		throws StandardException
-	{
-		if (theValue == null)
-			setToNull();
-		else
-			throwLangSetMismatch(theValue);
-	}
-
 }

@@ -119,14 +119,14 @@ public class SQLBlob extends SQLBinary
     // Anyhow, here we just ignore the call, since there is no padding to be done.
     // We do detect truncation, if the errorOnTrunc flag is set.
     // DB2 does return a WARNING on CAST and ERROR on INSERT.
-	public DataValueDescriptor setWidth(int desiredWidth,  // ignored!
+	public void setWidth(int desiredWidth,  // ignored!
 			int desiredScale,	// Ignored 
 			boolean errorOnTrunc)
 			throws StandardException
     {
 
 		if (isNull())
-			return this;
+			return;
 
 		int sourceWidth = getLength();
 
@@ -147,8 +147,6 @@ public class SQLBlob extends SQLBinary
 				dataValue = shrunkData;
             }
         }
-
-        return this;
     }
 
     /**

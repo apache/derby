@@ -611,21 +611,9 @@ public final class SQLBoolean
 	/**
 	 * @see DataValueDescriptor#setValue
 	 */	
-	public void setValue(Object theValue)
-		throws StandardException
+	void setObject(Object theValue)
 	{
-		if ((theValue instanceof Boolean) ||
-			(theValue == null))
-		{
-			this.setValue((Boolean)theValue);
-		}
-		else if (theValue instanceof Number) {
-			setValueCore((Number) theValue);
-		}
-		else
-		{
-			genericSetObject(theValue);
-		}
+		setValue((Boolean) theValue);
 	}
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 

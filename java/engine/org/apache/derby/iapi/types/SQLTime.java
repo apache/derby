@@ -586,25 +586,15 @@ public final class SQLTime extends DataType
         }
     } // end of parseTime
 
-	public void setValue(Object theValue) throws StandardException
+	/**
+	 * Set the value from a correctly typed Time object.
+	 * @throws StandardException 
+	 */
+	void setObject(Object theValue) throws StandardException
 	{
-		restoreToNull();
-		if (theValue != null)
-		{
-			if (theValue instanceof Time)
-			{
-				this.setValue((Time)theValue, (Calendar) null);
-			}
-			else if (theValue instanceof Timestamp)
-			{
-				this.setValue((Timestamp)theValue, (Calendar) null);
-			}
-			else
-			{
-				genericSetObject(theValue);
-			}
-		}
+		setValue((Time) theValue);
 	}
+    
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
 		if (theValue instanceof SQLTime) {

@@ -920,127 +920,43 @@ public class CastNode extends ValueNode
 			For most types generate
 
 			targetDVD.setValue(sourceDVD);
+			
+			For source or destination java types generate
+			
+			Object o = sourceDVD.getObject();
+			targetDVD.setObjectForCast(o, o instanceof dest java type, dest java type);
 
 			// optional for variable length types
 			targetDVD.setWidth();
 		*/
 
-		if (!sourceCTI.isNationalStringTypeId() && !sourceCTI.userType() && !destCTI.userType()) {
-		mb.getField(field); // targetDVD reference for the setValue method call
-		mb.swap();
-		mb.cast(ClassName.DataValueDescriptor);
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.DataValueDescriptor, "setValue", "void", 1);
-
-		mb.getField(field);
-		/* 
-		** If we are casting to a variable length datatype, we
-		** have to make sure we have set it to the correct
-		** length.
-		*/
-		if (destCTI.variableLength()) 
-		{
-			boolean isNumber = destCTI.isNumericTypeId();
-
-			/* setWidth() is on VSDV - upcast since
-			 * decimal implements subinterface
-			 * of VSDV.
-			 */
-			mb.push(isNumber ? castTarget.getPrecision() : castTarget.getMaximumWidth());
-			mb.push(castTarget.getScale());
-			mb.push(!sourceCTI.variableLength() || isNumber);
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue, "setWidth", ClassName.DataValueDescriptor, 3);
-
-			/* setWidth returns DataValueDescriptor - we need
- 			 * to cast result to actual subinterface getting returned.
-			 */
-			mb.cast(resultTypeName);
+		if (!sourceCTI.userType() && !destCTI.userType()) {
+			mb.getField(field); // targetDVD reference for the setValue method call
+			mb.swap();
+			mb.upCast(ClassName.DataValueDescriptor);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.DataValueDescriptor,
+					"setValue", "void", 1);
 		}
-
-		return;
-		}
-
-
-
-
-
-
-		/*
-		** If we are casting from a national string to a date, time,
-		** or timestamp, do a getDate(), getTime(), or getTimestamp()
-		** rather than a getObject(). This is because getObject() returns
-		** a String, and setValue() can't tell whether the String comes
-		** from a national or non-national character type, so it can't tell
-		** whether to use the database locale to do the conversion.
-		*/
-		String getMethod = "getObject";
-		String getType = "java.lang.Object";
-		String castType = sourceCTI.getCorrespondingJavaTypeName();
-		int argCount = 0;
-		if (sourceCTI.isNationalStringTypeId())
+		else
 		{
-			switch (destCTI.getJDBCTypeId())
-			{
-			  case Types.DATE:
-				getMethod = "getDate";
-				getType = "java.sql.Date";
-				castType = getType;
-				break;
+			/* 
+			** generate: expr.getObject()
+			*/
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.DataValueDescriptor,
+					"getObject", "java.lang.Object", 0);
 
-			  case Types.TIME:
-				getMethod = "getTime";
-				getType = "java.sql.Time";
-				castType = getType;
-				break;
+			//castExpr
 
-			  case Types.TIMESTAMP:
-				getMethod = "getTimestamp";
-				getType = "java.sql.Timestamp";
-				castType = getType;
-				break;
-			}
+			mb.getField(field); // instance for the setValue/setObjectForCast method call
+			mb.swap(); // push it before the value
 
-			if (!getMethod.equals("getObject")) {
-
-				mb.pushThis();
-				mb.callMethod(VMOpcode.INVOKEVIRTUAL, 
-					acb.getBaseClassName(), 
-					"getCalendar", "java.util.Calendar", 0);
-
-				argCount++;
-			}
-		}
-
-		/* 
-		** generate: field.setValue((<type>) expr.getObject ) 
-		** or		 field.setValue((<type>) expr.getDate )
-		** or		 field.setValue((<type>) expr.getTime )
-		** or		 field.setValue((<type>) expr.getTimestamp )
-		*/
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.DataValueDescriptor, getMethod, getType, argCount);
-
-		/* 
-		** Cast to java.lang.Object if source or destination type 
-		** is a java type because that's how the interface is defined.
-		*/
-		mb.cast(destCTI.userType() || sourceCTI.userType() ? "java.lang.Object" : castType);
-		//castExpr
-
-		mb.getField(field); // instance for the setValue/setObjectForCast method call
-		mb.swap(); // push it before the value
-
-		/*
-		** If we are casting a java type, then
-		** we generate:
-		**
-		**		DataValueDescriptor.setObjectForCast(java.lang.Object castExpr, boolean instanceOfExpr, destinationClassName)
-		** where instanceOfExpr is "source instanceof destinationClass".
-		**
-		** otherwise:
-		**
-		**		<specificDataValue>.setValue(<type>castExpr)
-		*/
-		if (sourceCTI.userType())
-		{
+			/*
+			** We are casting a java type, generate:
+			**
+			**		DataValueDescriptor.setObjectForCast(java.lang.Object castExpr, boolean instanceOfExpr, destinationClassName)
+			** where instanceOfExpr is "source instanceof destinationClass".
+			**
+			*/
 			String destinationType = getTypeId().getCorrespondingJavaTypeName();
 
 			// at this point method instance and cast result are on the stack
@@ -1048,19 +964,11 @@ public class CastNode extends ValueNode
 			mb.dup();
 			mb.isInstanceOf(destinationType);
 			mb.push(destinationType);
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.DataValueDescriptor, "setObjectForCast", "void", 3);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.DataValueDescriptor,
+					"setObjectForCast", "void", 3);
+
 		}
-		else
-		{
-			String itype = ClassName.DataValueDescriptor;
-			if (castType.startsWith("java.lang.")) {
-				if (!castType.equals("java.lang.String") && !castType.equals("java.lang.Object"))
-					itype = resultTypeName;
-			}
-			// System.out.println("type = " + castType);
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, itype, "setValue", "void", 1);
-			// mb.endStatement();
-		}
+
 		mb.getField(field);
 
 		/* 
@@ -1071,54 +979,22 @@ public class CastNode extends ValueNode
 		if (destCTI.variableLength()) 
 		{
 			boolean isNumber = destCTI.isNumericTypeId();
+			
+			// to leave the DataValueDescriptor value on the stack, since setWidth is void
+			mb.dup();
 
 			/* setWidth() is on VSDV - upcast since
 			 * decimal implements subinterface
 			 * of VSDV.
 			 */
+			
 			mb.push(isNumber ? castTarget.getPrecision() : castTarget.getMaximumWidth());
 			mb.push(castTarget.getScale());
 			mb.push(!sourceCTI.variableLength() || isNumber);
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue, "setWidth", ClassName.DataValueDescriptor, 3);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue,
+					"setWidth", "void", 3);
 
-								/*
-								** The last argument is true if we should
-								** throw error on truncation.  We throw an
-								** error on all but Bits and Strings
-								** (everything with variable length that
-								** isn't a number -- all variable length
-								** except DECIMAL/NUMERIC).
-								*/
-								/* RESOLVE:
-								** NOTE: If the source is a parameter
-								** then the user can pass any type
-								** in as the parameter.  We will not
-								** raise a truncation exception in
-								** this case, even if we would if the
-								** cast was directly on the value
-								** being passed in as a parameter.
-								** For example:
-								**	cast(123 as char(1)) throws truncation
-								**			exception
-								**	cast(? as char(1)), user passes 123
-								**		no truncation exception
-								** We are considering this behavior to be
-								** an extension, at least for now. We may 
-								** need to revisit this if there's a
-								** SQL-J compliance test with this.
-								** (The solution would be to add a method
-								** off of ParameterValueSet to get some
-								** info about the data type of the
-								** actual parameter and generate code for
-								** the 3rd parameter to setWidth() based
-								** on the execution time data type.
-								*/
-			/* setWidth returns DataValueDescriptor - we need
- 			 * to cast result to actual subinterface getting returned.
-			 */
-			mb.cast(resultTypeName);
 		}
-	
 	}
 
 	/**

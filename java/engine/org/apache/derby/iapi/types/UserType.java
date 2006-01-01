@@ -238,32 +238,6 @@ public class UserType extends DataType
 	{
 		return value;
 	}
-
-	/**
-	* @see DataValueDescriptor#setObjectForCast
-	*
-	* @exception StandardException thrown on failure
-	*
-	* @return me
-	*/
-	public void setObjectForCast(Object theValue, boolean instanceOfResultType, String resultTypeClassName)
-		throws StandardException
-	{
-		/* This check is a performance problem.  We need to it though
-		 * to catch ClassCastExceptions.
-		 */
-		/* Is the object of the right type? (only do the check if value is non-null */
-		if (theValue != null)
-		{
-			if ( ! instanceOfResultType)
-			{
-				throw StandardException.newException(SQLState.LANG_DATA_TYPE_SET_MISMATCH, 
-								getTypeName(), resultTypeClassName);
-			}
-		}
-
-		setValue(theValue);
-	}
 		
 	public int getLength()
 	{
@@ -275,6 +249,17 @@ public class UserType extends DataType
 	{
 
 		return isNull() ? "JAVA_OBJECT" : ClassInspector.readableClassName(value.getClass());
+	}
+	
+	/**
+	 * Get the type name of this value,  overriding
+	 * with the passed in class name (for user/java types).
+	 * @param className
+	 * @return
+	 */
+	String getTypeName(String className)
+	{
+		return className;
 	}
 
 	/*

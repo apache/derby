@@ -46,16 +46,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * SQLLongVarbit satisfies the DataValueDescriptor
- * interfaces (i.e., OrderableDataType). It implements a String holder,
- * e.g. for storing a column value; it can be specified
- * when constructed to not allow nulls. Nullability cannot be changed
- * after construction.
- * <p>
- * Because OrderableDataType is a subclass of DataType,
- * SQLLongVarbit can play a role in either a DataType/Value
- * or a OrderableDataType/KeyRow, interchangeably.
- *
+ * SQLLongVarbit represents the SQL type LONG VARCHAR FOR BIT DATA
  * It is an extension of SQLVarbit and is virtually indistinguishable
  * other than normalization.
  */
@@ -73,19 +64,6 @@ public class SQLLongVarbit extends SQLVarbit
 	public DataValueDescriptor getNewNull()
 	{
 		return new SQLLongVarbit();
-	}
-
-	/** 
-	 * @see DataValueDescriptor#setValueFromResultSet 
-	 *
-	 * @exception SQLException		Thrown on error
-	 */
-	public void setValueFromResultSet(ResultSet resultSet, int colNumber,
-									  boolean isNullable)
-		throws SQLException
-	{
-			stream = resultSet.getBinaryStream(colNumber);
-			dataValue = null;
 	}
 
 	/**
@@ -155,7 +133,7 @@ public class SQLLongVarbit extends SQLVarbit
 			this.dataValue = other.dataValue;
 		}
 		else
-			((SQLBinary) this).setValue(source.getBytes());
+			setValue(source.getBytes());
 	}
 
 	/*

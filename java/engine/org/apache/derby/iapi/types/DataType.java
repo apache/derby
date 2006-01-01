@@ -528,29 +528,57 @@ public abstract class DataType
 	 }
 
 	/**
-	 * Set the Object that this Data Type contains (for an explicit cast).
-	 *
-	 * @exception StandardException		Thrown on error
+	 * @see DataValueDescriptor#setObjectForCast
+	 * 
+	 * @exception StandardException
+	 *                thrown on failure
+	 * 
+	 * @return me
 	 */
-	public void setObjectForCast(Object value, boolean instanceOf, String resultTypeClassName) throws StandardException
-	{
-		setValue(value);
-	}
+	public void setObjectForCast(Object theValue, boolean instanceOfResultType,
+			String resultTypeClassName) throws StandardException {
+		
+		if (theValue == null)
+		{
+			setToNull();
+			return;
+		}
+			
+		/*
+		 * Is the object of the right type? (only do the check if value is
+		 * non-null
+		 */
+		if (!instanceOfResultType) {
+				throw StandardException.newException(
+						SQLState.LANG_DATA_TYPE_SET_MISMATCH,
+						theValue.getClass().getName(), getTypeName(resultTypeClassName));
+		}
 
+		setObject(theValue);
+	}
+		
 	/**
-		Set the value from an object.
-		Usually overridden. This implementation sets this to
-		NULL if the passed in value is null, otherwise an exception
-		is thrown.
-	*/
-	public void setValue(Object theValue)
+	 * Set the value from an non-null object. Usually overridden.
+	 * This implementation throws an exception.
+	 * The object will have been correctly typed from the call to setObjectForCast.
+	 */
+	void setObject(Object theValue)
 		throws StandardException
 	{
-		if (theValue == null)
-			setToNull();
-		else
-			throwLangSetMismatch(theValue);
+		genericSetObject(theValue);
 	}
+	
+	/**
+	 * Get the type name of this value, possibly overriding
+	 * with the passed in class name (for user/java types).
+	 * @param className
+	 * @return
+	 */
+	String getTypeName(String className)
+	{
+		return getTypeName();
+	}
+
 
 	/**
 	 * Gets the value in the data value descriptor as a int.
@@ -566,12 +594,9 @@ public abstract class DataType
 	}
 
 
-	protected void genericSetObject(Object theValue) throws StandardException {
+	void genericSetObject(Object theValue) throws StandardException {
 
-		//if (theValue instanceof String)
-		//	((DataValueDescriptor) this).setValue((String) theValue);
-		//else
-			throwLangSetMismatch(theValue);
+		throwLangSetMismatch(theValue);
 	}
 
 	/**

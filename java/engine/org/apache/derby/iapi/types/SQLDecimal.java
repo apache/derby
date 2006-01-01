@@ -369,27 +369,14 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	}
 
 	/**
-	 * @see DataValueDescriptor#setValue
-	 *
-	 */	
-	public void setValue(Object theValue)
-		throws StandardException
+	 * Set the value from a correctly typed BigDecimal object.
+	 * @throws StandardException 
+	 */
+	void setObject(Object theValue) throws StandardException
 	{
-		rawData = null;
-		if ((theValue instanceof BigDecimal) ||
-			(theValue == null))
-		{
-			setCoreValue((BigDecimal)theValue);
-		}
-		else if (theValue instanceof Number)
-		{
-			value = new BigDecimal(Double.toString(((Number)theValue).doubleValue()));
-		}
-		else
-		{
-			genericSetObject(theValue);
-		}
+		setValue((BigDecimal) theValue);
 	}
+	
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
 		setCoreValue(SQLDecimal.getBigDecimal(theValue));
@@ -1064,13 +1051,13 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 * @exception StandardException		Thrown on non-zero truncation
 	 *		if errorOnTrunc is true	
 	 */
-	public DataValueDescriptor setWidth(int desiredPrecision, 
+	public void setWidth(int desiredPrecision, 
 			int desiredScale,
 			boolean errorOnTrunc)
 			throws StandardException
 	{
 		if (isNull())
-			return this;
+			return;
 			
 		if (desiredPrecision != IGNORE_PRECISION &&
 			((desiredPrecision - desiredScale) <  SQLDecimal.getWholeDigits(getBigDecimal())))
@@ -1080,7 +1067,6 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		}
 		value = value.setScale(desiredScale, BigDecimal.ROUND_DOWN);
 		rawData = null;
-		return this;
 	}
 
 	/**

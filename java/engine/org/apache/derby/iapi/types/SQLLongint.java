@@ -426,26 +426,14 @@ public final class SQLLongint
 	}
 
 	/**
-	 * @see DataValueDescriptor#setValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */	
-	public void setValue(Object theValue)
-		throws StandardException
+	 * Set the value from a correctly typed Long object.
+	 * @throws StandardException 
+	 */
+	void setObject(Object theValue)
 	{
-		if (theValue == null)
-		{
-			setToNull();
-		}
-		else if (theValue instanceof Number)
-		{
-			this.setValue(((Number)theValue).longValue());
-		}
-		else
-		{
-			genericSetObject(theValue);
-		}
+		setValue(((Long) theValue).longValue());
 	}
+	
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
 		setValue(theValue.getLong());

@@ -534,25 +534,13 @@ public final class SQLDate extends DataType
         }
     } // end of parseDate
 
-	public void setValue(Object theValue) throws StandardException
+	/**
+	 * Set the value from a correctly typed Date object.
+	 * @throws StandardException 
+	 */
+	void setObject(Object theValue) throws StandardException
 	{
-		if (theValue == null)
-		{
-			setToNull();
-		}
-		else if (theValue instanceof Date)
-		{
-			setValue((Date)theValue, (Calendar) null);
-		}
-		else if (theValue instanceof Timestamp)
-		{
-			setValue((Timestamp)theValue, (Calendar) null);
-		}
-		else
-		{
-			genericSetObject(theValue);
-		}
-
+		setValue((Date) theValue);
 	}
 
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {

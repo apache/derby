@@ -466,27 +466,12 @@ public final class SQLReal
 	}
 
 	/**
-	 * @see DataValueDescriptor#setValue
-	 *
-	 * @exception StandardException		Thrown on error
-	 */	
-	public void setValue(Object theValue)
-		throws StandardException
+	 * Set the value from a correctly typed Float object.
+	 * @throws StandardException 
+	 */
+	void setObject(Object theValue) throws StandardException
 	{
-		if (theValue == null)
-		{
-			setToNull();
-		}
-		else if (theValue instanceof Number)
-		{
-            // rounding issue to solve!!!/jsk, INF, 0.0f
-			this.setValue(((Number)theValue).floatValue());
-		}
-		else
-		{
-            // will most likely call .setValue(String)
-			genericSetObject(theValue);
-		}
+		setValue(((Float) theValue).floatValue());
 	}
 
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {

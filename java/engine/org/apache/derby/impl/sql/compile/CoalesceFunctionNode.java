@@ -292,10 +292,13 @@ public class CoalesceFunctionNode extends ValueNode
 		if (getTypeId().variableLength())//since result type is variable length, generate setWidth code.
 		{
 			boolean isNumber = getTypeId().isNumericTypeId();
+			// to leave the DataValueDescriptor value on the stack, since setWidth is void
+			mb.dup();
+
 			mb.push(isNumber ? getTypeServices().getPrecision() : getTypeServices().getMaximumWidth());
 			mb.push(getTypeServices().getScale());
 			mb.push(true);
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue, "setWidth", ClassName.DataValueDescriptor, 3);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue, "setWidth", "void", 3);
 		}
 	}
 

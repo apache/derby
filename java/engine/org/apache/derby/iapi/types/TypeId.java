@@ -910,9 +910,7 @@ public final class TypeId implements Formatable
 
                         case StoredFormatIds.BLOB_TYPE_ID:
                                 typePrecedence = BLOB_PRECEDENCE;
-                                // no java type name, can't be used as java object
-                                javaTypeName = "byte[]"; 
-                                //javaTypeName = "java.sql.Blob";  // doesn't work w casting
+                                javaTypeName = "java.sql.Blob";
                                 maxMaxWidth = TypeId.BLOB_MAXWIDTH;
                                 isBitTypeId = true;
                                 isConcatableTypeId = true;
@@ -930,9 +928,7 @@ public final class TypeId implements Formatable
 
                       case StoredFormatIds.CLOB_TYPE_ID:
                               typePrecedence = CLOB_PRECEDENCE;
-                              // no java type name, can't be used as java object
-                              javaTypeName = "java.lang.String";
-                              //javaTypeName = "java.sql.Clob"; // doesn't work w casting
+                              javaTypeName = "java.sql.Clob";
                               maxMaxWidth = TypeId.CLOB_MAXWIDTH;
                               isStringTypeId = true;
                               isConcatableTypeId = true;
@@ -942,9 +938,7 @@ public final class TypeId implements Formatable
 
                       case StoredFormatIds.NCLOB_TYPE_ID:
                               typePrecedence = NCLOB_PRECEDENCE;
-                              // no java type name, can't be used as java object
-                              javaTypeName = "java.lang.String"; 
-                              //javaTypeName = "java.sql.Clob";  // doesn't work w casting
+                              javaTypeName = "java.sql.Clob";
                               maxMaxWidth = TypeId.NCLOB_MAXWIDTH;
                               isStringTypeId = true;
                               isConcatableTypeId = true;
