@@ -119,6 +119,10 @@ grant codeBase "${csinfo.codejar}derbyTesting.jar" {
   
   // Access all files under ${user.dir}to write the test directory structure
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
+ 
+  // When running with useprocess=false need to install and uninstall
+  // the security manager.
+  permission java.lang.RuntimePermission "setSecurityManager";
   
   // lang/errorStream.java
   permission java.lang.RuntimePermission "setIO";
@@ -149,6 +153,9 @@ grant codeBase "${csinfo.codeclasses}" {
   // Access all files under ${user.dir}to write the test directory structure
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
   
+  // When running with useprocess=false need to install and uninstall
+  // the security manager.
+  permission java.lang.RuntimePermission "setSecurityManager";
   
   // Import/export and other support files from these locations in tests
   permission java.io.FilePermission "${user.dir}${/}extin${/}*", "read";

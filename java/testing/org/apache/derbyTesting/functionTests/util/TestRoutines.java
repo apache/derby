@@ -64,6 +64,8 @@ public class TestRoutines {
 		// sleep
 		s.execute("CREATE PROCEDURE TESTROUTINE.SLEEP(IN SLEEP_TIME_MS BIGINT) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.sleep' language java parameter style java");
 
+		s.execute("CREATE FUNCTION TESTROUTINE.HAS_SECURITY_MANAGER() RETURNS INT NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.hasSecurityManager' language java parameter style java");
+
 		s.close();
 	}
 
@@ -93,6 +95,16 @@ public class TestRoutines {
 	public static void sleep(long ms) throws InterruptedException {
 
 		Thread.sleep(ms);
+	}
+	
+	/**
+	 * TESTROUTINE.HAS_SECURITY_MANAGER()
+	 * Return 0 is no security manager is installed, 1 if one is.
+	 * @return
+	 */
+	public static int hasSecurityManager()
+	{
+		return System.getSecurityManager() == null ? 0 : 1;
 	}
 }
 

@@ -5,6 +5,8 @@ CREATE PROCEDURE TESTROUTINE.SET_SYSTEM_PROPERTY(IN PROPERTY_KEY VARCHAR(32000),
 0 rows inserted/updated/deleted
 ij> CREATE PROCEDURE TESTROUTINE.SLEEP(IN SLEEP_TIME_MS BIGINT) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.sleep' language java parameter style java;
 0 rows inserted/updated/deleted
+ij> CREATE FUNCTION TESTROUTINE.HAS_SECURITY_MANAGER() RETURNS INT NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.hasSecurityManager' language java parameter style java;
+0 rows inserted/updated/deleted
 ij> CREATE FUNCTION GET_TABLE_PROPERTY (SCHEMA_NAME VARCHAR(128), TABLE_NAME VARCHAR(128), PROP_KEY VARCHAR(1000)) RETURNS VARCHAR(1000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getTableProperty' LANGUAGE JAVA PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
 ij> -- Get a property that hasn't been set yet - should return null

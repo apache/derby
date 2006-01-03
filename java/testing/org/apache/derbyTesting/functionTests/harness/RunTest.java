@@ -2286,6 +2286,9 @@ clp.list(System.out);
     	PrintStream ps = new PrintStream(new FileOutputStream(pathStr), true);
     	System.setOut(ps);
     	System.setErr(ps);
+    	
+    	// Install a security manager within this JVM for this test.
+    	boolean installedSecurityManager = installSecurityManager();
     	if (testType.equals("sql"))
     	{
     	    String[] ijarg = new String[3];
@@ -2408,6 +2411,9 @@ clp.list(System.out);
         }
         
         ps.close();
+        
+        if (installedSecurityManager)
+        	System.setSecurityManager(null);
         // Reset System.out and System.err
         System.setOut(stdout);
         System.setErr(stderr);
@@ -2464,6 +2470,56 @@ clp.list(System.out);
         //System.out.println(tmp);
         
         return tmp;
+    }
+    
+    /**
+     * Install the default security manager in this JVM for this
+     * test, used when useprocess is false.
+     * @return
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
+    private static boolean installSecurityManager() throws ClassNotFoundException, IOException
+    {
+    	boolean installedSecurityManager = false;
+    	// Set up the SecurityManager in this JVM for this test.
+    	boolean haveSecurityManagerAlready = System.getSecurityManager() != null;
+        if (runWithoutSecurityManager)
+        {
+        	// Test doesn't run with a SecurityManager but there's
+        	// a chance that a previous test will have installed one.
+        	// Currently when running with useProcess=false we install
+        	// the SecurityManager on the first test that requires it
+        	// and leave it there.
+        	if (haveSecurityManagerAlready)
+        		System.out.println(
+        				"noSecurityManager=true,useProcess=false but SecurityManager installed by previous test");
+        	else
+        	    System.out.println("-- SecurityManager not installed --");
+        }     
+        else if (!haveSecurityManagerAlready)
+    	{
+        	// Get the set of -D options that would be needed
+        	// for a spawned VM and convert them to system properties.
+    	    Vector propList = jvm.getSecurityProps(null);
+    	    for (Enumeration e = propList.elements(); e.hasMoreElements();)
+    	    {
+    	    	String dashDOpt = (String) e.nextElement();
+    	    	if ("java.security.manager".equals(dashDOpt))
+    	    		continue;
+    	    	
+    	    	int eq = dashDOpt.indexOf("=");
+    	    	String key = dashDOpt.substring(0, eq);
+    	    	String value = dashDOpt.substring(eq + 1);
+    	    	
+    	    	System.setProperty(key, value);
+    	    	
+     	    }
+		    System.setSecurityManager(new SecurityManager());
+		    installedSecurityManager = true;
+    	}
+        
+        return installedSecurityManager;
     }
 
 }

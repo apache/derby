@@ -23,6 +23,8 @@ package org.apache.derbyTesting.functionTests.harness;
 import java.util.Vector;
 import java.util.StringTokenizer;
 import java.io.File;
+import java.io.IOException;
+
 import org.apache.derby.impl.tools.sysinfo.ZipInfoProperties;
 
 
@@ -324,9 +326,15 @@ public abstract class jvm {
 	 * set up security properties for server command line.
 	 */
 	protected void setSecurityProps() throws java.io.IOException, ClassNotFoundException
+	{		
+		D = jvm.getSecurityProps(D);
+		
+	}
+	
+	static Vector getSecurityProps(Vector D) throws ClassNotFoundException, IOException
 	{
-		if (this.D == null)
-			this.D = new Vector();
+		if (D == null)
+			D = new Vector();
 		
 		String userDir = System.getProperty("user.dir");
 		String policyFile = System.getProperty("serverPolicyFile");
@@ -358,27 +366,29 @@ public abstract class jvm {
 							   "serverPolicy(" + policyFile + 
 							   ") or serverCodeBase(" +  serverCodeBase + 
 							   ") not available");
-		return;
+		return D;
 		}
 		
-		this.D.addElement("java.security.manager");
-		this.D.addElement("java.security.policy=" + policyFile);
+		D.addElement("java.security.manager");
+		D.addElement("java.security.policy=" + pf.getAbsolutePath());
 		
 		String codebaseType = isJar[0] ? "csinfo.codejar" : "csinfo.codeclasses";
 		String unusedType = isJar[0] ? "csinfo.codeclasses" : "csinfo.codejar";
 
 		// URL of the codebase
-		this.D.addElement(codebaseType + "=" + cb.toURL());
+		D.addElement(codebaseType + "=" + cb.toURL());
 		// file path to the codebase
-		this.D.addElement("csinfo.codedir=" + cb.getAbsolutePath());
+		D.addElement("csinfo.codedir=" + cb.getAbsolutePath());
 		String hostName = (System.getProperty("hostName"));
 		if (hostName == null)
 			hostName="localhost";
-		this.D.addElement("csinfo.serverhost=" + hostName);
-		this.D.addElement("csinfo.trustedhost=" + hostName);	 
+		D.addElement("csinfo.serverhost=" + hostName);
+		D.addElement("csinfo.trustedhost=" + hostName);	 
 		
 		// add an invalid path to the unused type 
-		this.D.addElement(unusedType + "=file://unused/");
+		D.addElement(unusedType + "=file://unused/");
+		
+		return D;
 		
 	}
 
@@ -386,7 +396,7 @@ public abstract class jvm {
 	 * @param resourceName (e.g. /org/apache/derbyTesting/functionTests/util/nwsvr.policy)
 	 * @return short name (e.g. nwsvr.policy)
 	 */
-	private String baseName(String resourceName)
+	private static String baseName(String resourceName)
 	{
 	  
 		return resourceName.substring(resourceName.lastIndexOf("/"),resourceName.length());

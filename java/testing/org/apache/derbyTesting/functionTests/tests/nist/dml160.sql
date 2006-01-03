@@ -278,3 +278,7 @@ AUTOCOMMIT OFF;
 --O-- END TEST >>> 0860 <<< END TEST
 --O-- *********************************************
 --O-- *************************************************////END-OF-MODULE
+
+-- Simple addition to check the test has a security manager installed.
+run resource '/org/apache/derbyTesting/functionTests/util/testRoutines.sql';
+values TESTROUTINE.HAS_SECURITY_MANAGER();
