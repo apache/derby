@@ -13,7 +13,10 @@
 --	   with right key
 --	   with wrong key
 --	   with right key
--- 	   test restoreFrom 
+--	   test restoreFrom
+-- Case 4: use invalid key when trying to create
+--     key length not even
+--     key contains invalid character(s)
 --	   
 ------------------------------------------------------------------------------------
 -- case1:	give external encryptionKey instead of bootpassword
@@ -83,3 +86,11 @@ disconnect;
 connect 'jdbc:derby:encdb;restoreFrom=extinout/mybackup2/encdb;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61626364656667686961626364656568';
 select * from t1;
 disconnect;
+
+-- case 4 : invalid keys
+-- key length not even
+connect 'jdbc:derby:encddbdb_invkey;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=123456789';
+
+-- key contains illegal character(s)
+connect 'jdbc:derby:encddbdb_invkey;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=616263646566676869616263646565XY';
+

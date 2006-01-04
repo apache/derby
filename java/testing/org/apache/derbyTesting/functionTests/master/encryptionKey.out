@@ -13,7 +13,10 @@ ij> ----------------------------------------------------------------------------
 --	   with right key
 --	   with wrong key
 --	   with right key
--- 	   test restoreFrom 
+--	   test restoreFrom
+-- Case 4: use invalid key when trying to create
+--     key length not even
+--     key contains invalid character(s)
 --	   
 ------------------------------------------------------------------------------------
 -- case1:	give external encryptionKey instead of bootpassword
@@ -113,4 +116,15 @@ I1         |C2
 --------------------------------
 1          |a                   
 ij(CONNECTION6)> disconnect;
+ij> -- case 4 : invalid keys
+-- key length not even
+connect 'jdbc:derby:encddbdb_invkey;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=123456789';
+ERROR XJ041: Failed to create database 'encddbdb_invkey', see the next exception for details.
+ERROR XBM01: Startup failed due to an exception. See next exception for details. 
+ERROR XBCXM: The length of the external encryption key must be an even number.
+ij> -- key contains illegal character(s)
+connect 'jdbc:derby:encddbdb_invkey;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=616263646566676869616263646565XY';
+ERROR XJ041: Failed to create database 'encddbdb_invkey', see the next exception for details.
+ERROR XBM01: Startup failed due to an exception. See next exception for details. 
+ERROR XBCXN: The external encryption key contains one or more illegal characters. Allowed characters for a hexedecimal number are 0-9, a-f and A-F.
 ij> 
