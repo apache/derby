@@ -22,8 +22,11 @@ package org.apache.derbyTesting.functionTests.util;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.sql.*;
 import java.io.*;
+
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
 
@@ -66,6 +69,7 @@ public class TestRoutines {
 
 		s.execute("CREATE FUNCTION TESTROUTINE.HAS_SECURITY_MANAGER() RETURNS INT NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.hasSecurityManager' language java parameter style java");
 
+		s.execute("CREATE FUNCTION TESTROUTINE.READ_FILE(FILE_NAME VARCHAR(60), ENCODING VARCHAR(60)) RETURNS VARCHAR(32000) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.readFile' language java parameter style java");
 		s.close();
 	}
 
@@ -105,6 +109,63 @@ public class TestRoutines {
 	public static int hasSecurityManager()
 	{
 		return System.getSecurityManager() == null ? 0 : 1;
+	}
+	
+	/**
+	TESTROUTINE.READ_FILE(FILE_NAME VARCHAR(60), ENCODING VARCHAR(60)) RETURNS VARCHAR(32000)
+	Read a file using the passed in encoding display its contents
+	as ASCII with unicode esacpes..
+	 * @throws PrivilegedActionException 
+	 * @throws IOException 
+   */
+    public static String readFile(final String fileName, final String encoding)
+    throws PrivilegedActionException, IOException
+    {
+
+		// needs to run in a privileged block as it will be
+		// called through a SQL statement and thus a generated
+		// class. The generated class on the stack has no permissions
+		// granted to it.
+    	FileInputStream fin = (FileInputStream)
+    	    AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			public Object run() throws FileNotFoundException {
+				return new FileInputStream(fileName); // nothing to return
+			}
+		});
+    	
+    	InputStreamReader isr = new InputStreamReader(
+    			new BufferedInputStream(fin, 32*1024), encoding);
+    	    	
+    	StringBuffer sb = new StringBuffer();
+    	for (;;)
+    	{
+    		int ci = isr.read();
+    		if (ci < 0)
+    			break;
+    		
+    		if (ci <= 0x7f)
+    		{
+    			sb.append((char) ci);
+    		}
+    		else
+    		{
+    			sb.append("\\u");
+    			String hex = Integer.toHexString(ci);
+    			   			
+    			switch (hex.length())
+    			{
+    			case 2:
+    				sb.append("00");
+    				break;
+    			case 3:
+    				sb.append("0");
+    				break;
+    			}
+    			sb.append(hex);
+    		}
+      	}
+
+    	return sb.toString();
 	}
 }
 

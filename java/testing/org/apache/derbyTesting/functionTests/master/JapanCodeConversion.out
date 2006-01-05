@@ -1,3 +1,14 @@
+ij> run resource '/org/apache/derbyTesting/functionTests/util/testRoutines.sql';
+ij> -- Changed to create individual procedures so that this will work with JSR169. 
+-- Direct call to 'installRoutines' uses nested connection
+CREATE PROCEDURE TESTROUTINE.SET_SYSTEM_PROPERTY(IN PROPERTY_KEY VARCHAR(32000), IN PROPERTY_VALUE VARCHAR(32000)) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.setSystemProperty' language java parameter style java;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE TESTROUTINE.SLEEP(IN SLEEP_TIME_MS BIGINT) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.sleep' language java parameter style java;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION TESTROUTINE.HAS_SECURITY_MANAGER() RETURNS INT NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.hasSecurityManager' language java parameter style java;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION TESTROUTINE.READ_FILE(FILE_NAME VARCHAR(60), ENCODING VARCHAR(60)) RETURNS VARCHAR(32000) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.readFile' language java parameter style java;
+0 rows inserted/updated/deleted
 ij> drop table T1_EUC_JP;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1_EUC_JP' because it does not exist.
 ij> -- table for data in EUC_JP encoding
@@ -107,68 +118,11 @@ ij> delete from T1_EUC_JP_IMPORT_AS_EUC_JP;
 16 rows inserted/updated/deleted
 ij> delete from T1_EUC_JP_IMPORT_AS_SJIS;
 16 rows inserted/updated/deleted
-ij> -- now import using the wrong encoding file just to ensure that different
--- encodings are being used.
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1_EUC_JP_IMPORT_AS_EUC_JP',
-   'extinout/jap_SJIS.dump',
-   NULL, NULL,
-   'EUC_JP', 0);
-0 rows inserted/updated/deleted
-ij> SELECT jnum, jtime, { fn length(jstring) } AS JLEN from T1_EUC_JP_IMPORT_AS_EUC_JP;
-JNUM       |JTIME   |JLEN       
---------------------------------
-1          |15:32:06|14         
-2          |15:32:10|20         
-3          |15:32:28|38         
-4          |15:32:29|27         
-5          |15:32:29|29         
-6          |15:32:30|10         
-7          |15:32:31|24         
-8          |15:33:22|14         
-9          |15:33:23|116        
-10         |15:33:40|14         
-11         |15:33:41|116        
-12         |15:33:43|27         
-13         |15:34:29|14         
-14         |15:34:30|116        
-15         |15:35:35|26         
-16         |15:39:10|27         
-ij> SELECT count(*) FROM T1_EUC_JP OG, T1_EUC_JP_IMPORT_AS_EUC_JP IM
-  WHERE OG.jnum = IM.jnum AND OG.jtime = IM.jtime AND OG.jstring = IM.jstring;
-1          
------------
-0          
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1_EUC_JP_IMPORT_AS_SJIS',
-   'extinout/jap_EUC_JP.dump',
-   NULL, NULL,
-   'SJIS', 0);
-0 rows inserted/updated/deleted
-ij> SELECT jnum, jtime, { fn length(jstring) } AS JLEN from T1_EUC_JP_IMPORT_AS_SJIS;
-JNUM       |JTIME   |JLEN       
---------------------------------
-1          |15:32:06|26         
-2          |15:32:10|24         
-3          |15:32:28|59         
-4          |15:32:29|51         
-5          |15:32:29|55         
-6          |15:32:30|12         
-7          |15:32:31|35         
-8          |15:33:22|26         
-9          |15:33:23|152        
-10         |15:33:40|26         
-11         |15:33:41|152        
-12         |15:33:43|51         
-13         |15:34:29|26         
-14         |15:34:30|152        
-15         |15:35:35|43         
-16         |15:39:10|51         
-ij> SELECT count(*) FROM T1_EUC_JP OG, T1_EUC_JP_IMPORT_AS_SJIS IM
-  WHERE OG.jnum = IM.jnum AND OG.jtime = IM.jtime AND OG.jstring = IM.jstring;
-1          
------------
-0          
+ij> maximumdisplaywidth 40000;
 ij> -- convert from EUC_JP to unicode with native2ascii
-! 'native2ascii -encoding EUC_JP extinout/jap_EUC_JP.dump';
+VALUES TESTROUTINE.READ_FILE('extinout/jap_EUC_JP.dump', 'EUC_JP');
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 1,"15:32:06","\u30a4\u30d9\u30f3\u30c8\u30a2\u30e9\u30fc\u30e0\u304c\u6709\u52b9\u3067\u3059\u3002                                                                                                                                                                                          "
 2,"15:32:10","DR:DRAUTO\u306f0 (Off)\u3067\u3059\u3002                                                                                                                                                                                    "
 3,"15:32:28","INFORMIX-OnLine\u304c\u521d\u671f\u5316\u3055\u308c\u3001\u30c7\u30a3\u30b9\u30af\u306e\u521d\u671f\u5316\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002                                                                                                                                                                  "
@@ -186,7 +140,9 @@ ij> -- convert from EUC_JP to unicode with native2ascii
 15,"15:35:35","sysmaster\u30c7\u30fc\u30bf\u30d9\u30fc\u30b9\u306e\u4f5c\u6210\u306f\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002                                                                                                                                                                              "
 16,"15:39:10","\u30c1\u30a7\u30c3\u30af\u30dd\u30a4\u30f3\u30c8\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f:\u7d99\u7d9a\u6642\u9593\u306f 8\u79d2\u3067\u3057\u305f                                                                                                                                                                             "
 ij> -- convert from SJIS to unicode with native2ascii
-! 'native2ascii -encoding SJIS extinout/jap_SJIS.dump';
+VALUES TESTROUTINE.READ_FILE('extinout/jap_SJIS.dump', 'SJIS');
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 1,"15:32:06","\u30a4\u30d9\u30f3\u30c8\u30a2\u30e9\u30fc\u30e0\u304c\u6709\u52b9\u3067\u3059\u3002                                                                                                                                                                                          "
 2,"15:32:10","DR:DRAUTO\u306f0 (Off)\u3067\u3059\u3002                                                                                                                                                                                    "
 3,"15:32:28","INFORMIX-OnLine\u304c\u521d\u671f\u5316\u3055\u308c\u3001\u30c7\u30a3\u30b9\u30af\u306e\u521d\u671f\u5316\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f\u3002                                                                                                                                                                  "

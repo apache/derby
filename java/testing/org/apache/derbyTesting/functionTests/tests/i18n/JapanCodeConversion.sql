@@ -1,3 +1,5 @@
+run resource '/org/apache/derbyTesting/functionTests/util/testRoutines.sql';
+
 drop table T1_EUC_JP;
 -- table for data in EUC_JP encoding
 create table T1_EUC_JP (	jnum int,
@@ -51,28 +53,11 @@ SELECT count(*) FROM T1_EUC_JP OG, T1_EUC_JP_IMPORT_AS_SJIS IM
 delete from T1_EUC_JP_IMPORT_AS_EUC_JP;
 delete from T1_EUC_JP_IMPORT_AS_SJIS;
 
--- now import using the wrong encoding file just to ensure that different
--- encodings are being used.
 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1_EUC_JP_IMPORT_AS_EUC_JP',
-   'extinout/jap_SJIS.dump',
-   NULL, NULL,
-   'EUC_JP', 0);
-SELECT jnum, jtime, { fn length(jstring) } AS JLEN from T1_EUC_JP_IMPORT_AS_EUC_JP;
-SELECT count(*) FROM T1_EUC_JP OG, T1_EUC_JP_IMPORT_AS_EUC_JP IM
-  WHERE OG.jnum = IM.jnum AND OG.jtime = IM.jtime AND OG.jstring = IM.jstring;   
-  
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1_EUC_JP_IMPORT_AS_SJIS',
-   'extinout/jap_EUC_JP.dump',
-   NULL, NULL,
-   'SJIS', 0);
-SELECT jnum, jtime, { fn length(jstring) } AS JLEN from T1_EUC_JP_IMPORT_AS_SJIS;
-SELECT count(*) FROM T1_EUC_JP OG, T1_EUC_JP_IMPORT_AS_SJIS IM
-  WHERE OG.jnum = IM.jnum AND OG.jtime = IM.jtime AND OG.jstring = IM.jstring;
-
+maximumdisplaywidth 40000;
 
 -- convert from EUC_JP to unicode with native2ascii
-! 'native2ascii -encoding EUC_JP extinout/jap_EUC_JP.dump';
+VALUES TESTROUTINE.READ_FILE('extinout/jap_EUC_JP.dump', 'EUC_JP');
 
 -- convert from SJIS to unicode with native2ascii
-! 'native2ascii -encoding SJIS extinout/jap_SJIS.dump';
+VALUES TESTROUTINE.READ_FILE('extinout/jap_SJIS.dump', 'SJIS');
