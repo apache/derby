@@ -1275,8 +1275,10 @@ nextModule:
 
         ClassLoader cl = getClass().getClassLoader();
         try {
-            for( Enumeration e = cl.getResources("org/apache/derby/modules.properties");
-                 e.hasMoreElements() ;) {
+        	Enumeration e = cl == null ?
+        		ClassLoader.getSystemResources("org/apache/derby/modules.properties") :
+        		cl.getResources("org/apache/derby/modules.properties");
+            while (e.hasMoreElements()) {
                 URL modulesPropertiesURL = (URL) e.nextElement();
                 InputStream is = null;
                 try {
