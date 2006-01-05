@@ -79,16 +79,16 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	**
 	********************************************************/
 
-	public	long						conglomId;
-	public  StaticCompiledOpenConglomInfo heapSCOCI;
-	public	IndexRowGenerator[] 		irgs;
-	public	long[]						indexCIDS;
-	public  StaticCompiledOpenConglomInfo[] indexSCOCIs;
-	public  String[]					indexNames;
-	public	boolean						deferred;
-	public  Properties					targetProperties;
-	public	UUID						targetUUID;
-	public	int							lockMode;
+	long						conglomId;
+	StaticCompiledOpenConglomInfo heapSCOCI;
+	IndexRowGenerator[] 		irgs;
+	long[]						indexCIDS;
+	StaticCompiledOpenConglomInfo[] indexSCOCIs;
+	String[]					indexNames;
+	boolean						deferred;
+	private  Properties			targetProperties;
+	UUID						targetUUID;
+	int							lockMode;
 	private	FKInfo[]					fkInfo;
 	private TriggerInfo					triggerInfo;
 
@@ -96,7 +96,7 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	private FormatableBitSet baseRowReadList;
 	private int[] baseRowReadMap;
 	private int[] streamStorableHeapColIds;
-	public boolean singleRowSource;
+	boolean singleRowSource;
 
 
 	// CONSTRUCTORS

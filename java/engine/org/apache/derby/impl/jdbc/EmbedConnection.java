@@ -94,9 +94,9 @@ public class EmbedConnection implements java.sql.Connection
 	//////////////////////////////////////////////////////////
 	// OBJECTS SHARED ACROSS CONNECTION NESTING
 	//////////////////////////////////////////////////////////
-	protected DatabaseMetaData dbMetadata;
+	DatabaseMetaData dbMetadata;
 
-	protected final TransactionResourceImpl tr; // always access tr thru getTR()
+	final TransactionResourceImpl tr; // always access tr thru getTR()
 
 
 	//////////////////////////////////////////////////////////
@@ -104,12 +104,12 @@ public class EmbedConnection implements java.sql.Connection
 	// specific)
 	//////////////////////////////////////////////////////////
 	private boolean	active;
-	protected boolean	autoCommit = true;
+	boolean	autoCommit = true;
 	boolean	needCommit;
 	//following is a new feature in JDBC3.0 where you can specify the holdability
 	//of a resultset at the end of the transaction. This gets set by the
 	//new method setHoldability(int) in JDBC3.0
-	protected int	connectionHoldAbility = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+	int	connectionHoldAbility = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
 
 
 	//////////////////////////////////////////////////////////
@@ -121,12 +121,12 @@ public class EmbedConnection implements java.sql.Connection
 	** we are the root connection unless we are created
 	** by copying the state from another connection.
 	*/
-	protected final EmbedConnection rootConnection;
+	final EmbedConnection rootConnection;
 	private SQLWarning 		topWarning;
 	/**	
 		Factory for JDBC objects to be created.
 	*/
-	public InternalDriver factory;
+	private InternalDriver factory;
 
 	/**
 		The Connection object the application is using when accessing the

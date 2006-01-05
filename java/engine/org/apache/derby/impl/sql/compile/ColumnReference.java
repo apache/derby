@@ -51,24 +51,24 @@ import java.util.Vector;
 
 public class ColumnReference extends ValueNode
 {
-	public String	columnName;
+	String	columnName;
 
 	/*
 	** This is the user-specified table name.  It will be null if the
 	** user specifies a column without a table name.  Leave it null even
 	** when the column is bound as it is only used in binding.
 	*/
-	public TableName	tableName;
+	TableName	tableName;
 	/* The table this column reference is bound to */
-	public int			tableNumber;	
+	private int			tableNumber;	
 	/* The column number in the underlying base table */
-	public int			columnNumber;	
+	private int			columnNumber;	
 	/* This is where the value for this column reference will be coming from */
-	public ResultColumn	source;
+	private ResultColumn	source;
 
 	/* For unRemapping */
 	ResultColumn	origSource;
-	public String	origName;
+	private String	origName;
 	int				origTableNumber = -1;
 	int				origColumnNumber = -1;
 

@@ -68,13 +68,13 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
     
 	private Vector eventListener; // who wants to know I am closed or error
 
-	protected EmbedConnection realConnection;
-	protected int defaultIsolationLevel;
+	EmbedConnection realConnection;
+	int defaultIsolationLevel;
 	private boolean defaultReadOnly;
-	protected BrokeredConnection currentConnectionHandle;
+	BrokeredConnection currentConnectionHandle;
 
 	// set up once by the data source
-	protected final ReferenceableDataSource dataSource;
+	final ReferenceableDataSource dataSource;
 	private final String username;
 	private final String password;
 	/**
@@ -156,7 +156,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		return c;
 	}
 
-	protected final void openRealConnection() throws SQLException {
+	final void openRealConnection() throws SQLException {
 		// first time we establish a connection
 		Connection rc = dataSource.getConnection(username, password, requestPassword);
 
@@ -167,7 +167,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 			realConnection.setApplicationConnection(currentConnectionHandle);
 	}
 
-	protected final Connection getNewCurrentConnectionHandle() {
+	final Connection getNewCurrentConnectionHandle() {
 		Connection applicationConnection = currentConnectionHandle =
 			((org.apache.derby.jdbc.Driver20) (realConnection.getLocalDriver())).newBrokeredConnection(this);
 		realConnection.setApplicationConnection(applicationConnection);
@@ -178,7 +178,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	/**
 		In this case the Listeners are *not* notified. JDBC 3.0 spec section 11.4
 	*/
-	protected void closeCurrentConnectionHandle() throws SQLException {
+	private void closeCurrentConnectionHandle() throws SQLException {
 		if (currentConnectionHandle != null)
 		{
 			Vector tmpEventListener = eventListener;
@@ -194,7 +194,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		}
 	}
 
-	protected void resetRealConnection() throws SQLException {
+	void resetRealConnection() throws SQLException {
 
 		// ensure any outstanding changes from the previous
 		// user are rolledback.
@@ -328,7 +328,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		}
 	}
 
-	protected final void checkActive() throws SQLException {
+	final void checkActive() throws SQLException {
 		if (!isActive)
 			throw Util.noCurrentConnection();
 	}

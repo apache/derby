@@ -48,13 +48,13 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 public class BaseColumnNode extends ValueNode
 {
-	public String	columnName;
+	private String	columnName;
 
 	/*
 	** This is the user-specified table name.  It will be null if the
 	** user specifies a column without a table name.  
 	*/
-	public TableName	tableName;
+	private TableName	tableName;
 
 	/**
 	 * Initializer for when you only have the column name.

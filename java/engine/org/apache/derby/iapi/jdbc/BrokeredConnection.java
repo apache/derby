@@ -47,9 +47,9 @@ public class BrokeredConnection implements Connection
 {
 	
 	// default for Derby
-	protected int stateHoldability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+	int stateHoldability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
 
-	protected final BrokeredConnectionControl control;
+	final BrokeredConnectionControl control;
 	private boolean isClosed;
         private String connString;
 
@@ -371,14 +371,14 @@ public class BrokeredConnection implements Connection
 	  *
 	  *	@return	the current connection
 	  */
-	protected final Connection getRealConnection() throws SQLException {
+	final Connection getRealConnection() throws SQLException {
 		if (isClosed)
 			throw Util.noCurrentConnection();
 
 		return control.getRealConnection();
 	}
 
-	protected final void notifyException(SQLException sqle) {
+	final void notifyException(SQLException sqle) {
 		if (!isClosed)
 			control.notifyException(sqle);
 	}
@@ -525,5 +525,5 @@ public class BrokeredConnection implements Connection
         return connString;
     }
 
-	protected int getJDBCLevel() { return 2;}
+	int getJDBCLevel() { return 2;}
 }

@@ -50,7 +50,7 @@ import java.util.Vector;
  *
  * @author jamie
  */
-public class TriggerInfo implements Formatable 
+public final class TriggerInfo implements Formatable 
 {
 	/********************************************************
 	**
@@ -69,9 +69,9 @@ public class TriggerInfo implements Formatable
 	**
 	********************************************************/
 
-	public TriggerDescriptor[] 	triggerArray; 
-	public String[]				columnNames;
-	public int[]				columnIds;
+	TriggerDescriptor[] 	triggerArray; 
+	String[]				columnNames;
+	int[]				columnIds;
 
 	/**
 	 * Niladic constructor for Formattable
@@ -86,14 +86,13 @@ public class TriggerInfo implements Formatable
 	 *		causing the trigger to fire
 	 * @param triggers the list of trigger descriptors
 	 * 	
-	 * @exception StandardException on error
 	 */
 	public TriggerInfo
 	(
 		TableDescriptor			td,
 		int[]					changedCols,
 		GenericDescriptorList	triggers
-	) throws StandardException
+	)
 	{
 		this.columnIds = changedCols;
 

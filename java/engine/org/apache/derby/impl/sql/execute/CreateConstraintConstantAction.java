@@ -73,8 +73,8 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 
 public class CreateConstraintConstantAction extends ConstraintConstantAction
 {
-	public	String[]		columnNames;
-	public	String			constraintText;
+	String[]		columnNames;
+	private	String			constraintText;
 
 	private ConstraintInfo	otherConstraintInfo;
 	private	ClassFactory	cf;

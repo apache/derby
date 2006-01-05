@@ -221,6 +221,6 @@ public class BrokeredConnection30 extends BrokeredConnection
 		return new BrokeredCallableStatement30(statementControl, getJDBCLevel(), sql);
 	}
 
-	protected int getJDBCLevel() { return 3;}
+	int getJDBCLevel() { return 3;}
 
 }

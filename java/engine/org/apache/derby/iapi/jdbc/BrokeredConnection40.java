@@ -93,7 +93,7 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
         throw Util.notImplemented();
     }
     
-    protected int getJDBCLevel() { return 4;}
+    int getJDBCLevel() { return 4;}
     
     
 }

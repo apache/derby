@@ -22,33 +22,29 @@ package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.jdbc.InternalDriver;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.db.Database;
-
 import java.sql.SQLException;
 
 /**
-	Any class in the local JDBC driver (ie this package) that needs to
+	Any class in the embedded JDBC driver (ie this package) that needs to
 	refer back to the EmbedConnection object extends this class.
 */
 
 abstract class ConnectionChild {
 
 	// parameters to handleException
-	protected static final boolean CLOSE = true;
-	protected static final boolean NOCLOSE = false;
+	static final boolean CLOSE = true;
+	static final boolean NOCLOSE = false;
 
 	/*
 	** Local connection is the current EmbedConnection
 	** object that we use for all our work.
 	*/
-	protected EmbedConnection localConn;
+	EmbedConnection localConn;
 
 	/**	
 		Factory for JDBC objects to be created.
 	*/
-	protected final InternalDriver factory;
+	final InternalDriver factory;
 
 	/**
 		Calendar for data operations.
@@ -56,7 +52,7 @@ abstract class ConnectionChild {
 	private java.util.Calendar cal;
 
 
-	protected ConnectionChild(EmbedConnection conn) {
+	ConnectionChild(EmbedConnection conn) {
 		super();
 		localConn = conn;
 		factory = conn.getLocalDriver();
@@ -65,7 +61,7 @@ abstract class ConnectionChild {
 	/**
 		Return a reference to the EmbedConnection
 	*/
-	protected final EmbedConnection getEmbedConnection() {
+	final EmbedConnection getEmbedConnection() {
 		return localConn;
 	}
 
@@ -73,7 +69,7 @@ abstract class ConnectionChild {
 	 * Return an object to be used for connection
 	 * synchronization.
 	 */
-	protected final Object getConnectionSynchronization()
+	final Object getConnectionSynchronization()
 	{
 		return localConn.getConnectionSynchronization();
 	}
@@ -83,7 +79,7 @@ abstract class ConnectionChild {
 		@see EmbedConnection#handleException
 		@exception SQLException thrown if can't handle
 	*/
-	protected final SQLException handleException(Throwable t)
+	final SQLException handleException(Throwable t)
 			throws SQLException {
 		return localConn.handleException(t);
 	}
@@ -93,7 +89,7 @@ abstract class ConnectionChild {
 		@see EmbedConnection#handleException
 		@exception SQLException thrown if can't handle
 	*/
-	protected final SQLException handleException(Throwable t, boolean close)
+	final SQLException handleException(Throwable t, boolean close)
 			throws SQLException {
 		return localConn.handleException(t, close);
 	}
@@ -101,7 +97,7 @@ abstract class ConnectionChild {
 		If Autocommit is on, note that a commit is needed.
 		@see EmbedConnection#needCommit
 	 */
-	protected final void needCommit() {
+	final void needCommit() {
 		localConn.needCommit();
 	}
 
@@ -110,7 +106,7 @@ abstract class ConnectionChild {
 		@see EmbedConnection#commitIfNeeded
 		@exception SQLException thrown on failure
 	 */
-	protected final void commitIfNeeded() throws SQLException {
+	final void commitIfNeeded() throws SQLException {
 		//System.out.println(this + " <> " + localConn.getClass());
 		//new Throwable("cin").printStackTrace(System.out);
 		localConn.commitIfNeeded();
@@ -121,7 +117,7 @@ abstract class ConnectionChild {
 		@see EmbedConnection#commitIfNeeded
 		@exception SQLException thrown on failure
 	 */
-	protected final void commitIfAutoCommit() throws SQLException {
+	final void commitIfAutoCommit() throws SQLException {
 		//System.out.println(this + " <> " + localConn.getClass());
 		//new Throwable("cin").printStackTrace(System.out);
 		localConn.commitIfAutoCommit();
@@ -133,7 +129,7 @@ abstract class ConnectionChild {
 		@see EmbedConnection#setupContextStack
 		@exception SQLException thrown on failure
 	 */
-	protected final void setupContextStack() throws SQLException {
+	final void setupContextStack() throws SQLException {
 		localConn.setupContextStack();
 	}
 
@@ -143,19 +139,9 @@ abstract class ConnectionChild {
 		@see EmbedConnection#restoreContextStack
 		@exception SQLException thrown on failure
 	 */
-	protected final void restoreContextStack() throws SQLException {
+	final void restoreContextStack() throws SQLException {
 		localConn.restoreContextStack();
 	}
-
-    public ContextManager getContextManager()
-    {
-        return localConn.getContextManager();
-    }
-
-    public Database getDatabase()
-    {
-        return localConn.getDatabase();
-    }
 
 	/**
 		Get and save a unique calendar object for this JDBC object.
@@ -164,19 +150,19 @@ abstract class ConnectionChild {
 		a small window where each would get its own Calendar for a
 		single call.
 	*/
-	protected java.util.Calendar getCal() {
+	java.util.Calendar getCal() {
 		if (cal == null)
 			cal = new java.util.GregorianCalendar();
 		return cal;
 	}
 
-	protected SQLException newSQLException(String messageId) {
+	SQLException newSQLException(String messageId) {
 		return localConn.newSQLException(messageId);
 	}
-	protected SQLException newSQLException(String messageId, Object arg1) {
+	SQLException newSQLException(String messageId, Object arg1) {
 		return localConn.newSQLException(messageId, arg1);
 	}
-	protected SQLException newSQLException(String messageId, Object arg1, Object arg2) {
+	SQLException newSQLException(String messageId, Object arg1, Object arg2) {
 		return localConn.newSQLException(messageId, arg1, arg2);
 	}
 }

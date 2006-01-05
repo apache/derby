@@ -65,16 +65,13 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 	**	ITS read/writeExternal.
 	**
 	********************************************************/
-
-	public	ExecRow						emptyHeapRow;
-
+	
 	/* 
 	** Integer array of columns that are being updated.
-	** Used by rep, hence public.
 	*/
-	public int[]	changedColumnIds;
+	int[]	changedColumnIds;
 
-	public boolean positionedUpdate;
+	private boolean positionedUpdate;
 
 	int numColumns;
 
