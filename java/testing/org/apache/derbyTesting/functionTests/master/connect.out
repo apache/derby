@@ -29,4 +29,14 @@ ERROR XJ004: Database '' not found.
 ij> -- and this should succeed (no database name in URL)
 connect 'jdbc:derby:;databaseName=wombat';
 ij> disconnect;
+ij> -- Doing some simple grant/revoke negative tests in legacy database.
+-- All should fail with errors.
+connect 'jdbc:derby:wombat';
+ij> create table mytab(i int);
+0 rows inserted/updated/deleted
+ij> grant select on mytab to satheesh;
+ERROR 42Z60: GRANT not allowed unless database property derby.database.defaultConnectionMode has value 'sqlStandard'.
+ij> revoke select on mytab to satheesh;
+ERROR 42Z60: REVOKE not allowed unless database property derby.database.defaultConnectionMode has value 'sqlStandard'.
+ij> disconnect;
 ij> 

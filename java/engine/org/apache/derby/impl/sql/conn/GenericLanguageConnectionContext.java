@@ -188,6 +188,7 @@ public class GenericLanguageConnectionContext
 	protected String userName = null; //The name the user connects with.
 	                                  //May still be quoted.
 	
+	protected boolean usesSqlPermissions = false;
 	protected SchemaDescriptor	sd;
 
 	// RESOLVE - How do we want to set the default.
@@ -302,6 +303,13 @@ public class GenericLanguageConnectionContext
 					"derby.language.logQueryPlan");
 		logQueryPlan = Boolean.valueOf(logQueryPlanProperty).booleanValue();
 
+		// GrantRevoke TODO: May need to make database property value override system value
+		String modeS = PropertyUtil.getServiceProperty(getTransactionCompile(),
+									Property.DEFAULT_CONNECTION_MODE_PROPERTY);
+		if (modeS != null &&
+			 StringUtil.SQLEqualsIgnoreCase(modeS, Property.SQL_STANDARD_ACCESS))
+			usesSqlPermissions = true;
+
 		setRunTimeStatisticsMode(logQueryPlan);
 
 		lockEscalationThreshold = 
@@ -395,6 +403,14 @@ public class GenericLanguageConnectionContext
 	public boolean getLogQueryPlan()
 	{
 		return logQueryPlan;
+	}
+
+	/**
+	 * @see LanguageConnectionContext#usesSqlStandardPermissions
+	 */
+	public boolean usesSqlStandardPermissions()
+	{
+		return usesSqlPermissions;
 	}
 
 	/**

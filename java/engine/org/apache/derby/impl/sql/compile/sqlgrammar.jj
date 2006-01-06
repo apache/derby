@@ -326,7 +326,7 @@ public class SQLParser
     */
 	private void checkSqlStandardAccess( String command) throws StandardException
 	{
-		if( getLanguageConnectionContext().getAuthorizer().usesSqlStandardPermissions())
+		if( getLanguageConnectionContext().usesSqlStandardPermissions())
 			return;
 
 		throw StandardException.newException(SQLState.LANG_GRANT_REVOKE_WITH_LEGACY_ACCESS,
@@ -11736,8 +11736,7 @@ externalSecurity() throws StandardException :
 {
 	<EXTERNAL> <SECURITY>
 	{
-		// GrantRevoke TODO: This needs to check for 10.2 version
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_1, "EXTERNAL SECURITY");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "EXTERNAL SECURITY");
 		checkSqlStandardAccess( "EXTERNAL SECURITY");
 	}
 	( invocationType = securityDefinerInvoker())
@@ -11771,8 +11770,7 @@ grantStatement() throws StandardException :
 {
 	<GRANT>
 	{
-		// GrantRevoke TODO: This needs to check for 10.2 version
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_1, "GRANT");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "GRANT");
 		checkSqlStandardAccess( "GRANT");
 	}
 	( node = tableGrantStatement() | node = routineGrantStatement() )

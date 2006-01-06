@@ -693,18 +693,14 @@ public class CompilerContextImpl extends ContextImpl
 		requiredColumnPrivileges = null;
 		requiredTablePrivileges = null;
 		requiredRoutinePrivileges = null;
-		try
+		LanguageConnectionContext lcc = (LanguageConnectionContext)
+		getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
+		if( lcc.usesSqlStandardPermissions())
 		{
-			LanguageConnectionContext lcc = (LanguageConnectionContext)
-			getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
-			if( lcc.getAuthorizer().usesSqlStandardPermissions())
-			{
-				requiredColumnPrivileges = new HashMap();
-				requiredTablePrivileges = new HashMap();
-				requiredRoutinePrivileges = new HashMap();
-			}
+			requiredColumnPrivileges = new HashMap();
+			requiredTablePrivileges = new HashMap();
+			requiredRoutinePrivileges = new HashMap();
 		}
-		catch( StandardException se){}
 	} // end of initRequiredPriv
 
 	/**

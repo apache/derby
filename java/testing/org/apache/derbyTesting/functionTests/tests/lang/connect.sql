@@ -26,3 +26,13 @@ connect 'jdbc:derby: ;databaseName=wombat';
 -- and this should succeed (no database name in URL)
 connect 'jdbc:derby:;databaseName=wombat';
 disconnect;
+
+-- Doing some simple grant/revoke negative tests in legacy database.
+-- All should fail with errors.
+
+connect 'jdbc:derby:wombat';
+create table mytab(i int);
+
+grant select on mytab to satheesh;
+revoke select on mytab to satheesh;
+disconnect;

@@ -1111,4 +1111,10 @@ public interface LanguageConnectionContext extends Context {
 	 */
 	public String getDbname();
 
+	/**
+	 * Check if in SQL standard mode, with support for Grant & Revoke
+	 *
+	 * @return True if SQL standard permissions are being used
+	 */
+	public boolean usesSqlStandardPermissions();
 }

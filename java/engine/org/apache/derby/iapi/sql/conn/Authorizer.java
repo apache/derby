@@ -125,12 +125,4 @@ public interface Authorizer
 	 @exception StandardException Oops.
 	 */
    public void refresh() throws StandardException;  
-
-	/**
- 	  * @return true if the authorizer uses the SQL standard permissions (grant/revoke),
-	  *         false if the legacy Derby permissions system is used.
-	  *
-	  * @exception StandardException standard error policy.
-	 */
-	public boolean usesSqlStandardPermissions() throws StandardException;
 }

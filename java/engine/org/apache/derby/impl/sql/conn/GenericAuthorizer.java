@@ -284,21 +284,4 @@ implements Authorizer
 		if (userAccessLevel == NO_ACCESS)
 			throw StandardException.newException(SQLState.AUTH_DATABASE_CONNECTION_REFUSED);
 	}
-
-    public boolean usesSqlStandardPermissions() throws StandardException
-    {
-		// GrantRevoke TODO: Disabling this mode because of two failing tests.
-		if (true)
-		return false;
-
-		// RESOLVE use getDefaultAccessLevel() when SQL standard permissions are fully implemented
-		// GrantRevoke TODO: May need to make database property value override system value
-		PersistentSet tc = lcc.getTransactionExecute();
-		String modeS = (String)
-		PropertyUtil.getServiceProperty(tc,
-									Property.DEFAULT_CONNECTION_MODE_PROPERTY);
-		if( modeS == null)
-            return false;
-		return StringUtil.SQLEqualsIgnoreCase(modeS, Property.SQL_STANDARD_ACCESS);
-    } // end of usesSqlStandardPermissions
 }
