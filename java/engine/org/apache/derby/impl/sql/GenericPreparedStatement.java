@@ -198,16 +198,7 @@ public class GenericPreparedStatement
 	public synchronized boolean	upToDate()
 		throws StandardException
 	{
-		boolean	upToDate =  isValid && (activationClass != null) && !compilingStatement;
-
-		// this if for the Plugin
-		if ( executionConstants != null )
-	    {
-			boolean		constantsUpToDate = executionConstants.upToDate();
-			upToDate = upToDate && constantsUpToDate;
-		}
-
-		return upToDate;
+		return  isValid && (activationClass != null) && !compilingStatement;
 	}
 
 	public void rePrepare(LanguageConnectionContext lcc) 

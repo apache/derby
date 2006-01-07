@@ -39,11 +39,6 @@ import org.apache.derby.catalog.UUID;
 
 public interface ConstantAction
 {
-
-	/* Types of Statistics commands */
-	public static final int STATISTICSTIMING = 1;
-	public static final int RUNTIMESTATISTICS = 2;
-
 	/**
 	 *	Run the ConstantAction.
 	 *
@@ -67,14 +62,4 @@ public interface ConstantAction
 	 * @exception StandardException on error
 	 */
 	public boolean modifiesTableId(UUID tableId) throws StandardException;
-
-    /**
-	  *	Reports whether these constants are up-to-date. This returns true
-	  *	for homogenous Cloudscape/Cloudsync. For the Plugin, this may
-	  *	return false;
-	  *
-	  *	@return	true if these constants are up-to-date
-	  *			false otherwise
-	  */
-	public	boolean	upToDate()  throws StandardException;
 }

@@ -75,30 +75,4 @@ abstract class GenericConstantAction implements ConstantAction
 
 	public final void readExternal(java.io.ObjectInput in ) {}
 	public final void writeExternal(java.io.ObjectOutput out) {}
-
-
-    /**
-	  *	Reports whether these constants are up-to-date. This returns true
-	  *	for homogenous Cloudscape/Cloudsync. For the Plugin, this may
-	  *	return false;
-	  *
-	  *	@return	true if these constants are up-to-date
-	  *			false otherwise
-	  */
-	public	final boolean	upToDate()  throws StandardException
-	{ return true; }
-
-/*	protected final void writeFormatableArray(FormatableHashtable fh, String tag, Object[] array)
-	{
-		fh.put(tag, array == null ? null : new FormatableArrayHolder(array));
-	}
-
-	protected final Object[] readFormatableArray(FormatableHashtable fh, String tag, Class type)
-	{
-		FormatableArrayHolder fah = (FormatableArrayHolder)fh.get(tag);
-		return (fah != null) ?
-			fah.getArray(type) :
-			null;
-	}
-	*/
 }

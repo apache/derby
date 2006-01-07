@@ -229,18 +229,6 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	//
 	///////////////////////////////////////////////////////////////////
 
-
-    /**
-	  *	Reports whether these constants are up-to-date. This returns true
-	  *	for homogenous Cloudscape/Cloudsync. For the Plugin, this may
-	  *	return false;
-	  *
-	  *	@return	true if these constants are up-to-date
-	  *			false otherwise
-	  */
-	public	boolean	upToDate()
-	{ return true; }
-
 	/**
 	 *	NOP routine. The work is done in InsertResultSet.
 	 *
@@ -248,7 +236,7 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void	executeConstantAction( Activation activation )
+	public final void	executeConstantAction( Activation activation )
 		throws StandardException { }
 
 	// Formatable methods

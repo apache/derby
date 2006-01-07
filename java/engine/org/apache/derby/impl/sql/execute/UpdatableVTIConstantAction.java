@@ -140,17 +140,6 @@ public class UpdatableVTIConstantAction extends WriteCursorConstantAction
 	 */
 	public	int	getTypeFormatId()	{ return StoredFormatIds.UPDATABLE_VTI_CONSTANT_ACTION_V01_ID; }
 
-
-	/**
-	 *	NOP routine. The work is done in subclass.
-	 *
-	 *	@see ConstantAction#executeConstantAction
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	public void	executeConstantAction( Activation activation )
-		throws StandardException { }
-
 	// CLASS METHODS
 
 }
