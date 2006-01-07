@@ -20,6 +20,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.store;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,8 +105,11 @@ public class OnlineBackupTest3 {
 	void shutdown(String dbName) {
 
 		try{
-			// shutdown 
-            TestUtil.shutdownUsingDataSource(TEST_DATABASE_NAME);
+			//shutdown
+			if(TestUtil.HAVE_DRIVER_CLASS)
+				DriverManager.getConnection("jdbc:derby:" + dbName + ";shutdown=true");
+			else 
+				TestUtil.shutdownUsingDataSource(dbName);
 		}catch(SQLException se){
 			if (se.getSQLState() != null && se.getSQLState().equals("08006"))
 				System.out.println("database shutdown properly");
@@ -119,9 +123,14 @@ public class OnlineBackupTest3 {
      */
     Connection getConnection() throws SQLException 
     {
-        Properties prop = new Properties();
-        prop.setProperty("databaseName", TEST_DATABASE_NAME);
-        Connection conn = TestUtil.getDataSourceConnection(prop);
+    	Connection conn;
+    	if(TestUtil.HAVE_DRIVER_CLASS)
+			conn = DriverManager.getConnection("jdbc:derby:" + TEST_DATABASE_NAME );
+    	else {
+	    	Properties prop = new Properties();
+	        prop.setProperty("databaseName", TEST_DATABASE_NAME);
+	        conn = TestUtil.getDataSourceConnection(prop);
+    	}
         return conn;
     }
 

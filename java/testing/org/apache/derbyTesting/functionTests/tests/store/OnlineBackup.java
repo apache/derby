@@ -21,6 +21,7 @@ Derby - Class org.apache.derbyTesting.functionTests.store.OnlineBackup
 package org.apache.derbyTesting.functionTests.tests.store;
 import java.sql.Connection;
 import java.sql.CallableStatement;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
@@ -171,10 +172,16 @@ public class OnlineBackup implements Runnable{
                                      String connAttrs) 
         throws SQLException 
     {
-        Properties prop = new Properties();
-        prop.setProperty("databaseName", databaseName);
-        prop.setProperty("connectionAttributes", connAttrs);
-        Connection conn = TestUtil.getDataSourceConnection(prop);
+    	Connection conn;
+    	if(TestUtil.HAVE_DRIVER_CLASS)
+			conn = DriverManager.getConnection("jdbc:derby:" + databaseName 
+												+ ";" + connAttrs );
+    	else {
+	    	Properties prop = new Properties();
+	        prop.setProperty("databaseName", databaseName);
+	        prop.setProperty("connectionAttributes", connAttrs);
+	        conn = TestUtil.getDataSourceConnection(prop);
+    	}
         return conn;
     }
 }
