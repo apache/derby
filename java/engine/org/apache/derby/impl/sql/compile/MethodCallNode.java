@@ -66,18 +66,18 @@ import java.util.Vector;
  * @author Jeff Lichtman
  */
 
-public abstract class MethodCallNode extends JavaValueNode
+abstract class MethodCallNode extends JavaValueNode
 {
 	/*
 	** Name of the method.
 	*/
-	protected String	methodName;
+	 String	methodName;
 
     /** The name of the class containing the method. May not be known until bindExpression() has been called.
      * @see #bindExpression
      * @see #getJavaClassName()
      */
-    protected String javaClassName;
+    String javaClassName;
 	
 	/**
 		For a procedure or function call

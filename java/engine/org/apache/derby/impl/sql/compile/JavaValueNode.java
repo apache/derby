@@ -60,12 +60,11 @@ import java.util.Vector;
  * This abstract node class represents a data value in the Java domain.
  */
 
-public abstract class JavaValueNode extends QueryTreeNode
+abstract class JavaValueNode extends QueryTreeNode
 {
 	private boolean	mustCastToPrimitive;
 
 	protected boolean forCallStatement;
-	private int clause = ValueNode.IN_UNKNOWN_CLAUSE;
 	private boolean valueReturnedToSQLDomain;
 	private boolean returnValueDiscarded;
 

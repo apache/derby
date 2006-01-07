@@ -46,12 +46,12 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 		return v.size();
 	}
 
-	public QueryTreeNode elementAt(int index)
+	QueryTreeNode elementAt(int index)
 	{
 		return (QueryTreeNode) v.elementAt(index);
 	}
 
-	public final void addElement(QueryTreeNode qt)
+	final void addElement(QueryTreeNode qt)
 	{
 		v.addElement(qt);
 	}
@@ -81,13 +81,13 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 		v.setElementAt(qt, index);
 	}
 
-	public void destructiveAppend(QueryTreeNodeVector qtnv)
+	void destructiveAppend(QueryTreeNodeVector qtnv)
 	{
 		nondestructiveAppend(qtnv);
 		qtnv.removeAllElements();
 	}
 
-	public void nondestructiveAppend(QueryTreeNodeVector qtnv)
+	void nondestructiveAppend(QueryTreeNodeVector qtnv)
 	{
 		int qtnvSize = qtnv.size();
 		for (int index = 0; index < qtnvSize; index++)
