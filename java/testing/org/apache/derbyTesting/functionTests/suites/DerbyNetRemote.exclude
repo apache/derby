@@ -51,6 +51,6 @@ derbynet/DerbyNetAutoStart.java
 derbynet/DerbyNetNewServer.java
 tools/ieptests.sql
 tools/importExport.java
-lang/wisconsin.sql
+lang/wisconsin.java
 lang/syscat.sql
 junitTests/derbyNet/CompatibilityTest.java

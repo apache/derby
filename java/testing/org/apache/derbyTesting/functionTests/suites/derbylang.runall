@@ -144,4 +144,4 @@ lang/update.sql
 lang/updateCursor.java
 lang/valuesclause.sql
 lang/views.sql
-lang/wisconsin.sql
+lang/wisconsin.java
