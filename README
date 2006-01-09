@@ -1,8 +1,12 @@
-Derby is an effort undergoing incubation at the Apache Software Foundation 
-(ASF), sponsored by the Apache DB project. Incubation is required of all
-newly accepted projects until a further review indicates that the
-infrastructure, communications, and decision making process have stabilized
-in a manner consistent with other successful ASF projects. While incubation
-status is not necessarily a reflection of the completeness or stability of 
-the code, it does indicate that the project has yet to be fully endorsed by 
-the ASF.
+Apache Derby is a subproject of the Apache DB project.
+You can find Derby on the web at:
+
+http://db.apache.org/derby/
+
+Apache Derby releases can be downloaded from the following page:
+
+http://db.apache.org/derby/derby_downloads.html
+
+Derby is a pure Java, standards-based relational database engine.
+Derby aims to be an easy to use solution for data management for
+software developers with zero administration for end users. 
