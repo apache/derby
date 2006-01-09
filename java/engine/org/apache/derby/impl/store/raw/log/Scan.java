@@ -706,6 +706,37 @@ public class Scan implements StreamLogScan {
 					return null;
 				}
 
+				// scan is position just past the log header
+				recordStartPosition = scan.getFilePointer();
+
+                // Verify that the header of the new log file refers
+                // to the end of the log record of the previous file
+                // (Rest of header has been verified by getLogFileAtBeginning)
+				scan.seek(LogToFile
+                          .LOG_FILE_HEADER_PREVIOUS_LOG_INSTANT_OFFSET);
+                long previousLogInstant = scan.readLong();
+                if (previousLogInstant != knownGoodLogEnd) {
+                    // If there is a mismatch, something is wrong and
+                    // we return null to stop the scan.  The same
+                    // behavior occurs when getLogFileAtBeginning
+                    // detects an error in the other fields of the header.
+                    if (SanityManager.DEBUG) {
+                        if (SanityManager.DEBUG_ON(LogToFile.DBG_FLAG)) {
+                            SanityManager.DEBUG(LogToFile.DBG_FLAG, 
+                                                "log file " 
+                                                + currentLogFileNumber  
+                                                + ": previous log record: "
+                                                + previousLogInstant
+                                                + " known previous log record: "
+                                                + knownGoodLogEnd);
+                        }
+                    }
+                    return null;
+				}
+
+
+				scan.seek(recordStartPosition);
+
 				if (SanityManager.DEBUG) 
                 {
                     if (SanityManager.DEBUG_ON(LogToFile.DBG_FLAG))
@@ -716,8 +747,11 @@ public class Scan implements StreamLogScan {
                     }
                 }
 
-				// scan is position just past the log header
-				recordStartPosition = scan.getFilePointer();
+                // Advance knownGoodLogEnd to make sure that if this
+                // log file is the last log file and empty, logging
+                // continues in this file, not the old file.
+                knownGoodLogEnd = LogCounter.makeLogInstantAsLong
+                    (currentLogFileNumber, recordStartPosition);
 
 				// set this.currentLogFileLength
 				currentLogFileLength = scan.length();
@@ -734,14 +768,6 @@ public class Scan implements StreamLogScan {
                         }
                     }
 
-					// ideally, we would want to start writing on this new
-					// empty log file, but the scan is closed and there is
-					// no way to tell the difference between an empty log
-					// file and a log file which is not there.  We will be
-					// writing to the end of the previous log file instead
-					// but when we next switch the log, the empty log file
-					// will be written over.
-
 					return null;
 				}
 
@@ -755,7 +781,7 @@ public class Scan implements StreamLogScan {
 
 			// read the current log instant
 			currentInstant = scan.readLong();
-			
+
 			/*check if the current instant happens is less than the last one. 
 			 *This can happen if system crashed before writing the log instant
 			 *completely. If the instant is partially written it will be less
@@ -945,8 +971,8 @@ public class Scan implements StreamLogScan {
 			recordStartPosition += recordLength + LogToFile.LOG_RECORD_OVERHEAD;
 			knownGoodLogEnd = LogCounter.makeLogInstantAsLong
 								(currentLogFileNumber, recordStartPosition);
-			
-			
+
+
 			if (SanityManager.DEBUG)
 			{
 				if (recordStartPosition != scan.getFilePointer())
@@ -1173,7 +1199,12 @@ public class Scan implements StreamLogScan {
 
 	/**
 		Return the log instant at the end of the log record on the current
-		LogFile in the form of a log instant
+		LogFile in the form of a log instant.
+        After the scan has been closed, the end of the last log record will be
+        returned except when the scan ended in an empty log file.  In that
+        case, the start of this empty log file will be returned.  (This is
+        done to make sure new log records are inserted into the newest log
+        file.)
 	*/
 	public long getLogRecordEnd()
 	{
@@ -1222,7 +1253,8 @@ public class Scan implements StreamLogScan {
 		logFactory = null;
 		currentLogFileNumber = -1;
 		currentLogFileLength = -1;
-		knownGoodLogEnd = LogCounter.INVALID_LOG_INSTANT;
+        // Do not reset knownGoodLogEnd, it needs to be available after the
+        // scan has closed.
 		currentInstant = LogCounter.INVALID_LOG_INSTANT;
 		stopAt = LogCounter.INVALID_LOG_INSTANT;
 		scanDirection = 0;

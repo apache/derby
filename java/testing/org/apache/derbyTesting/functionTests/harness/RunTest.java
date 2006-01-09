@@ -1852,15 +1852,13 @@ clp.list(System.out);
 			        //System.out.println(logfile.getPath());
 			        //status = logfile.delete();
 		        }
-            }
 
-			//delete the directories where external input/output files were created
-			if(extInDir!=null)
-				deleteFile(extInDir);
-			if(extOutDir!=null)
-				deleteFile(extOutDir);
-			if(extInDir!=null)
-				deleteFile(extInOutDir);
+                // delete the directories where external input/output files 
+                // were created
+                if (extInDir!=null) deleteFile(extInDir);
+                if (extOutDir!=null) deleteFile(extOutDir);
+                if (extInDir!=null) deleteFile(extInOutDir);
+            }
         }
 	    // reset for next test
 	    // the next line is a bug fix to get cleanup working correctly when

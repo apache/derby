@@ -3,6 +3,8 @@ EscalateLock.sql
 EscalateLock_app.properties
 EscalateLock_derby.properties
 LockTableQuery.subsql
+RecoveryAfterBackupSetup_app.properties
+RecoveryAfterBackup_app.properties
 Rllmodule1.sql
 Rllmodule1_derby.properties
 Rllmodule2.sql

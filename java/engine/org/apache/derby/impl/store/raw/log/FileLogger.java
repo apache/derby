@@ -1508,7 +1508,16 @@ public class FileLogger implements Logger {
 
 					recoveryTransaction.commit();
 				}
-			}
+			} // while redoScan.getNextRecord() != null
+
+            // If the scan ended in an empty file, update logEnd to reflect that
+            // in order to avoid to continue logging to an older file
+            long end = redoScan.getLogRecordEnd(); 
+            if (end != LogCounter.INVALID_LOG_INSTANT
+                && (LogCounter.getLogFileNumber(logEnd) 
+                    < LogCounter.getLogFileNumber(end))) {
+                logEnd = end;
+            }
 		}
 		catch (StandardException se)
 		{
@@ -1557,10 +1566,12 @@ public class FileLogger implements Logger {
 			if (instant != LogCounter.INVALID_LOG_INSTANT)	
             {
 				SanityManager.ASSERT(
-                    LogCounter.getLogFileNumber(instant) ==
+                    LogCounter.getLogFileNumber(instant) <
+                         LogCounter.getLogFileNumber(logEnd) ||
+                    (LogCounter.getLogFileNumber(instant) ==
                          LogCounter.getLogFileNumber(logEnd) &&
                      LogCounter.getLogFilePosition(instant) <=
-                         LogCounter.getLogFilePosition(logEnd));
+                         LogCounter.getLogFilePosition(logEnd)));
             }
 			else
             {
