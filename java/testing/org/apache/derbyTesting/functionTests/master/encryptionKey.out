@@ -126,5 +126,5 @@ ij> -- key contains illegal character(s)
 connect 'jdbc:derby:encddbdb_invkey;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=616263646566676869616263646565XY';
 ERROR XJ041: Failed to create database 'encddbdb_invkey', see the next exception for details.
 ERROR XBM01: Startup failed due to an exception. See next exception for details. 
-ERROR XBCXN: The external encryption key contains one or more illegal characters. Allowed characters for a hexedecimal number are 0-9, a-f and A-F.
+ERROR XBCXN: The external encryption key contains one or more illegal characters. Allowed characters for a hexadecimal number are 0-9, a-f and A-F.
 ij> 
