@@ -41,7 +41,7 @@ import java.util.Properties;
  * and triggers to be executed based on the c's and t's
  * compiled into the insert plan.
  */
-public class DeleteVTIResultSet extends DMLVTIResultSet
+class DeleteVTIResultSet extends DMLVTIResultSet
 {
 
 	private java.sql.ResultSet		rs;
@@ -76,7 +76,7 @@ public class DeleteVTIResultSet extends DMLVTIResultSet
 	{
 		lcc.getStatementContext().setTopResultSet(this, subqueryTrackingArray);
 
-		row = getNextRowCore(sourceResultSet);
+		ExecRow row = getNextRowCore(sourceResultSet);
 
 		if (row != null)
 		{

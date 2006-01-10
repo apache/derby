@@ -61,12 +61,12 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
 	 *
  	 * @exception StandardException on error
 	 */
-	protected DMLWriteResultSet(Activation activation)
+	DMLWriteResultSet(Activation activation)
 		throws StandardException
 	{
 		this(activation, activation.getConstantAction());
 	}
-	protected DMLWriteResultSet(Activation activation, ConstantAction constantAction)
+	DMLWriteResultSet(Activation activation, ConstantAction constantAction)
 		throws StandardException
 	{
 		super(activation);

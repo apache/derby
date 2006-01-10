@@ -44,7 +44,7 @@ import java.util.Properties;
  * Update the rows from the source into the specified
  * base table.
  */
-public class UpdateVTIResultSet extends DMLVTIResultSet
+class UpdateVTIResultSet extends DMLVTIResultSet
 {
 	private java.sql.ResultSet		rs;
 
@@ -71,7 +71,7 @@ public class UpdateVTIResultSet extends DMLVTIResultSet
         boolean firstRow = true;
         
         rs = activation.getTargetVTI();
-		row = getNextRowCore(sourceResultSet);
+		ExecRow row = getNextRowCore(sourceResultSet);
 
         if( null != row)
             rowLocationColumn = row.nColumns();
@@ -120,7 +120,7 @@ public class UpdateVTIResultSet extends DMLVTIResultSet
                     rowHolder.insert(row);
                 }
                 else
-                    updateVTI( rs);
+                    updateVTI(rs, row);
                 rowCount++;
 
                 // No need to do a next on a single row source
@@ -152,15 +152,12 @@ public class UpdateVTIResultSet extends DMLVTIResultSet
 			CursorResultSet tempRS = rowHolder.getResultSet();
 			try
 			{
-                ExecRow	deferredRowBuffer = null;
-
 				tempRS.open();
-				while ((deferredRowBuffer = tempRS.getNextRow()) != null)
+				while ((row = tempRS.getNextRow()) != null)
 				{
-					row = deferredRowBuffer;
                     int rowNumber = row.getColumn( rowLocationColumn).getInt();
                     rs.absolute( rowNumber);
-					updateVTI(rs);
+					updateVTI(rs, row);
 				}
 			}
             catch (Throwable t)
@@ -181,7 +178,7 @@ public class UpdateVTIResultSet extends DMLVTIResultSet
 		}
 	} // end of openCore
 
-	private void updateVTI(ResultSet target)
+	private void updateVTI(ResultSet target, ExecRow row)
 		throws StandardException
 	{
         int[] changedColumnIds = constants.changedColumnIds;

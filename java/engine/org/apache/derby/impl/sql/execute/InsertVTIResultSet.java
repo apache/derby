@@ -48,7 +48,7 @@ import java.util.Properties;
  * and triggers to be executed based on the c's and t's
  * compiled into the insert plan.
  */
-public class InsertVTIResultSet extends DMLVTIResultSet
+class InsertVTIResultSet extends DMLVTIResultSet
 {
 
 	private PreparedStatement		ps;
@@ -95,7 +95,7 @@ public class InsertVTIResultSet extends DMLVTIResultSet
             }
         }
 
-		row = getNextRowCore(sourceResultSet);
+		ExecRow row = getNextRowCore(sourceResultSet);
 
 		try
 		{
@@ -105,14 +105,7 @@ public class InsertVTIResultSet extends DMLVTIResultSet
 		{
 			throw StandardException.unexpectedUserException(t);
 		}
-		normalInsertCore(lcc, firstExecute);
-	} // end of openCore
 
-
-	// Do the work for a "normal" insert
-	private void normalInsertCore(LanguageConnectionContext lcc, boolean firstExecute)
-		throws StandardException
-	{
 		/* Get or re-use the row changer.
 		 * NOTE: We need to set ourself as the top result set
 		 * if this is not the 1st execution.  (Done in constructor
@@ -157,7 +150,7 @@ public class InsertVTIResultSet extends DMLVTIResultSet
 			}
 			else
 			{
-				insertIntoVTI(rs);
+				insertIntoVTI(rs, row);
 			}
 
             rowCount++;
@@ -182,13 +175,10 @@ public class InsertVTIResultSet extends DMLVTIResultSet
 			CursorResultSet tempRS = rowHolder.getResultSet();
 			try
 			{
-                ExecRow	deferredRowBuffer = null;
-
 				tempRS.open();
-				while ((deferredRowBuffer = tempRS.getNextRow()) != null)
+				while ((row = tempRS.getNextRow()) != null)
 				{
-					row = deferredRowBuffer;
-					insertIntoVTI(rs);
+					insertIntoVTI(rs, row);
 				}
 			} finally
 			{
@@ -204,7 +194,7 @@ public class InsertVTIResultSet extends DMLVTIResultSet
 		}
     } // end of normalInsertCore
 
-	private void insertIntoVTI(ResultSet target)
+	private void insertIntoVTI(ResultSet target, ExecRow row)
 		throws StandardException
 	{
 		try

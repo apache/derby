@@ -45,17 +45,14 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 
 	// passed in at construction time
 
-	protected NoPutResultSet sourceResultSet;
-	public  NoPutResultSet savedSource;
-	public	UpdatableVTIConstantAction	constants;
-	public	TransactionController 	tc;
-	public	LanguageConnectionContext			lcc;
+	NoPutResultSet sourceResultSet;
+	NoPutResultSet savedSource;
+	UpdatableVTIConstantAction	constants;
+	TransactionController 	tc;
 
-    public	ResultDescription 		resultDescription;
+    ResultDescription 		resultDescription;
 	private int						numOpens;
-	protected boolean				firstExecute;
-
-	public	ExecRow					row;
+	boolean				firstExecute;
 
 	/**
      * Returns the description of the inserted rows.
@@ -70,7 +67,7 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 	 *
 	 * @exception StandardException		Thrown on error
      */
-    public DMLVTIResultSet(NoPutResultSet source, 
+    DMLVTIResultSet(NoPutResultSet source, 
 						   Activation activation)
 		throws StandardException
     {
@@ -78,7 +75,6 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 		sourceResultSet = source;
 		constants = (UpdatableVTIConstantAction) constantAction;
 
-		lcc = activation.getLanguageConnectionContext();
         tc = activation.getTransactionController();
 
         resultDescription = sourceResultSet.getResultDescription();
@@ -104,9 +100,7 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 		}
 
         openCore();
-
-        row = null;
-        
+       
 		/* Cache query plan text for source, before it gets blown away */
 		if (lcc.getRunTimeStatisticsMode())
 		{

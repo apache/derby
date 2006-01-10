@@ -51,7 +51,7 @@ import java.util.Vector;
 /**
   Perform row at a time DML operations of tables and maintain indexes.
   */
-public class RowChangerImpl	implements	RowChanger
+class RowChangerImpl	implements	RowChanger
 {
 	boolean isOpen = false;
 
@@ -69,7 +69,7 @@ public class RowChangerImpl	implements	RowChanger
 	TransactionController	tc;
 	FormatableBitSet 	changedColumnBitSet;	
 	FormatableBitSet 	baseRowReadList;	
-	protected int[]		baseRowReadMap;	//index=heap column, value=input row column.
+	private int[]		baseRowReadMap;	//index=heap column, value=input row column.
 	int[]		changedColumnIds;
 	TemporaryRowHolderImpl	rowHolder;
 	
@@ -78,9 +78,9 @@ public class RowChangerImpl	implements	RowChanger
 
 	//
 	//Stuff filled in by open
-	protected ConglomerateController baseCC = null;
-	protected RowLocation	baseRowLocation = null;
-	IndexSetChanger isc;
+	private ConglomerateController baseCC;
+	private RowLocation	baseRowLocation;
+	private IndexSetChanger isc;
 
 	// a row array with all non-updated columns compacted out
 	private DataValueDescriptor[] sparseRowArray;

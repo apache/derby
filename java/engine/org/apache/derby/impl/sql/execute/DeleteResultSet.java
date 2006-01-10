@@ -61,19 +61,18 @@ import org.apache.derby.iapi.sql.execute.ExecIndexRow;
  * and triggers to be executed based on the c's and t's
  * compiled into the insert plan.
  */
-public class DeleteResultSet extends DMLWriteResultSet
+class DeleteResultSet extends DMLWriteResultSet
 {
-	public TransactionController   	tc;
-	public DeleteConstantAction		constants;
+	private TransactionController   	tc;
+	DeleteConstantAction		constants;
     protected ResultDescription 				resultDescription;
 	protected  NoPutResultSet			source;
-	public  NoPutResultSet			savedSource;
+	NoPutResultSet			savedSource;
 	int 							numIndexes;
 	protected RowChanger 			rc;
-	public ExecRow					row;
+	private ExecRow					row;
 
 	protected ConglomerateController	deferredBaseCC;
-	public		LanguageConnectionContext lcc;
 
 	protected TemporaryRowHolderImpl	rowHolder;
 
@@ -109,7 +108,7 @@ public class DeleteResultSet extends DMLWriteResultSet
      * class interface
      *
      */
-    public DeleteResultSet
+    DeleteResultSet
 	(
 		NoPutResultSet		source,
 		Activation			activation
@@ -127,7 +126,7 @@ public class DeleteResultSet extends DMLWriteResultSet
      *
 	 * @exception StandardException		Thrown on error
      */
-    protected DeleteResultSet
+    DeleteResultSet
 	(
 		NoPutResultSet		source,
 		ConstantAction		passedInConstantAction,
@@ -138,7 +137,6 @@ public class DeleteResultSet extends DMLWriteResultSet
 		super(activation, passedInConstantAction);
 		this.source = source;
 
-		lcc = activation.getLanguageConnectionContext();
 		tc = activation.getTransactionController();
 		constants = (DeleteConstantAction) constantAction;
 		fkInfoArray = constants.getFKInfo( lcc.getExecutionContext() );

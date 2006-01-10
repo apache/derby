@@ -51,7 +51,7 @@ import org.apache.derby.iapi.types.RowLocation;
  *
  * @author ames
  */
-public class RowResultSet extends NoPutResultSetImpl
+class RowResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {
 
 	/* Run time statistics variables */

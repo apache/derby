@@ -79,10 +79,9 @@ import java.sql.SQLWarning;
  */
 abstract class NoRowsResultSetImpl implements ResultSet
 {
-	protected final Activation    activation;
-	private boolean isTopResultSet = true;
+	final Activation    activation;
 	private boolean dumpedStats;
-	protected NoPutResultSet[]	subqueryTrackingArray;
+	NoPutResultSet[]	subqueryTrackingArray;
 
 	private final boolean statisticsTimingOn;
 	private boolean isClosed;
@@ -93,7 +92,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	protected int sourceDepth;
 
 	/* Run time statistics variables */
-	protected final LanguageConnectionContext lcc;
+	final LanguageConnectionContext lcc;
 	protected long beginTime;
 	protected long endTime;
 	protected long beginExecutionTime;

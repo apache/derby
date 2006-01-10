@@ -68,17 +68,17 @@ import java.util.Hashtable;
  *
  * @author ames
  */
-public class UpdateResultSet extends DMLWriteResultSet
+class UpdateResultSet extends DMLWriteResultSet
 {
-	public TransactionController 	tc;
-	public ExecRow					newBaseRow;
-	public ExecRow 					row;
-	public ExecRow 					deferredSparseRow;
-	public UpdateConstantAction		constants;
+	private TransactionController 	tc;
+	private ExecRow					newBaseRow;
+	private ExecRow 					row;
+	private ExecRow 					deferredSparseRow;
+	UpdateConstantAction		constants;
 	
     private ResultDescription 		resultDescription;
 	private NoPutResultSet			source;
-	public	NoPutResultSet			savedSource;
+	NoPutResultSet			savedSource;
 	private RowChanger				rowChanger;
 
 	protected ConglomerateController	deferredBaseCC;
@@ -87,7 +87,6 @@ public class UpdateResultSet extends DMLWriteResultSet
 	protected boolean[]				deferredUniqueCreated;
 	protected ConglomerateController	deferredUniqueCC[];
 	protected ScanController[]		deferredUniqueScans;
-	public	LanguageConnectionContext lcc;
 
 	private	TemporaryRowHolderImpl	deletedRowHolder;
 	private	TemporaryRowHolderImpl	insertedRowHolder;
@@ -133,7 +132,7 @@ public class UpdateResultSet extends DMLWriteResultSet
 	 * @param compiledConstants constantAction for the update
 	 * @exception StandardException thrown on error
      */
-    public UpdateResultSet(NoPutResultSet source,
+    UpdateResultSet(NoPutResultSet source,
 						   GeneratedMethod checkGM,
 						   Activation activation)
       throws StandardException
@@ -153,7 +152,7 @@ public class UpdateResultSet extends DMLWriteResultSet
 	 * @param rsdItem  id of the Result Description saved object
 	 * @exception StandardException thrown on error
      */
-    public UpdateResultSet(NoPutResultSet source,
+    UpdateResultSet(NoPutResultSet source,
 						   GeneratedMethod checkGM,
 						   Activation activation, 
 						   int constantActionItem,
@@ -179,7 +178,7 @@ public class UpdateResultSet extends DMLWriteResultSet
 	 * @param compiledConstants constantAction for the update
 	 * @exception StandardException thrown on error
      */
-    public UpdateResultSet(NoPutResultSet source,
+    UpdateResultSet(NoPutResultSet source,
 						   GeneratedMethod checkGM,
 						   Activation activation,
 						   ConstantAction passedInConstantAction,
@@ -187,9 +186,8 @@ public class UpdateResultSet extends DMLWriteResultSet
       throws StandardException
     {
 		super(activation, passedInConstantAction);
-		// find the language context.
-		lcc = activation.getLanguageConnectionContext();
-        // Get the current transaction controller
+
+		// Get the current transaction controller
         tc = activation.getTransactionController();
 		this.source = source;
 		this.checkGM = checkGM;
