@@ -749,9 +749,8 @@ public class TabInfoImpl implements TabInfo
 			heapCC.newRowLocationTemplate(),
 			crf.makeEmptyRow());
 
-		while (drivingScan.next())
+		while (drivingScan.fetchNext(drivingIndexRow.getRowArray()))
 		{
-			drivingScan.fetch(drivingIndexRow.getRowArray());
 			baseRowLocation = (RowLocation)
 						drivingIndexRow.getColumn(drivingIndexRow.nColumns());
 
@@ -895,9 +894,8 @@ public class TabInfoImpl implements TabInfo
 			crf.makeEmptyRow());
 
 		try	{
-			if (drivingScan.next())
+			if (drivingScan.fetchNext(drivingIndexRow.getRowArray()))
 			{
-				drivingScan.fetch(drivingIndexRow.getRowArray());
 				rl[0] = baseRowLocation = (RowLocation)
 					drivingIndexRow.getColumn(drivingIndexRow.nColumns());
 				boolean base_row_exists = 
@@ -1093,10 +1091,8 @@ public class TabInfoImpl implements TabInfo
 			crf.makeEmptyRow());
 
 		int rowNum = 0;
-		while (drivingScan.next())
+		while (drivingScan.fetchNext(drivingIndexRow.getRowArray()))
 		{
-			drivingScan.fetch(drivingIndexRow.getRowArray());
-
 			baseRowLocation = (RowLocation)
 						drivingIndexRow.getColumn(drivingIndexRow.nColumns());
 			boolean base_row_exists = 

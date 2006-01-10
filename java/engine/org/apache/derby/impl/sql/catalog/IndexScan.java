@@ -143,12 +143,11 @@ public class IndexScan
 		 throws StandardException
 	{ 
 		if (sc == null) return null;
-		if (!sc.next())
+		if (!sc.fetchNext(indexRow.getRowArray()))
 		{
 			sc.close();
 			return null;
 		}
-		sc.fetch(indexRow.getRowArray());
 		return indexRow;
 	}
 

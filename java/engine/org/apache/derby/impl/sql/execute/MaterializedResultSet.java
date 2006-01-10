@@ -286,9 +286,8 @@ public class MaterializedResultSet extends NoPutResultSetImpl
 		/* Get and return the next row from the temp conglomerate,
 		 * if one exists.
 		 */
-		if (materializedScan != null && materializedScan.next())
+		if (materializedScan != null && materializedScan.fetchNext(materializedRowBuffer.getRowArray()))
 		{
-			materializedScan.fetch(materializedRowBuffer.getRowArray());
 			fetchTCTime += getElapsedMillis(beginTCTime);
 			return materializedRowBuffer;
 		}

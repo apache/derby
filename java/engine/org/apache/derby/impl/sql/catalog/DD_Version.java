@@ -561,10 +561,9 @@ public	class DD_Version implements	Formatable
 				TransactionController.MODE_TABLE,
 				TransactionController.ISOLATION_REPEATABLE_READ);
 
-		while ( heapScan.next() )
+		while ( heapScan.fetchNext(heapRow.getRowArray()) )
         {
-            heapScan.fetch( heapRow.getRowArray() );
-			heapScan.fetchLocation( heapLocation );
+ 			heapScan.fetchLocation( heapLocation );
 
 			indexRowGenerator.getIndexRow( heapRow, heapLocation, indexableRow, (FormatableBitSet) null );
 

@@ -431,12 +431,11 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 	private ExecRow getNextAppendedRow() throws StandardException
 	{
 		if (indexsc == null) return null;
-		if (!indexsc.next())
+		if (!indexsc.fetchNext(indexRow))
 		{
 			return null;
 		}
 		
-		indexsc.fetch(indexRow);
 		RowLocation baseRowLocation =  (RowLocation) indexRow[1];
 		boolean base_row_exists = 
             heapCC.fetch(

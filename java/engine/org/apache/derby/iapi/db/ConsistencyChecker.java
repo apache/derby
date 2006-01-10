@@ -308,18 +308,13 @@ public class ConsistencyChecker
 				}
 			
 				/* Get the index rows and count them */
-				for (indexRows = 0; scan.next(); indexRows++)
+				for (indexRows = 0; scan.fetchNext(indexRow.getRowArray()); indexRows++)
 				{
-					RowLocation	baseRL;
-
-					/* Get the index row */
-					scan.fetch(indexRow.getRowArray());
-
 					/*
 					** Get the base row using the RowLocation in the index row,
 					** which is in the last column.  
 					*/
-					baseRL = (RowLocation) indexRow.getColumn(baseColumns + 1);
+					RowLocation baseRL = (RowLocation) indexRow.getColumn(baseColumns + 1);
 
 					boolean base_row_exists = 
 		                baseCC.fetch(

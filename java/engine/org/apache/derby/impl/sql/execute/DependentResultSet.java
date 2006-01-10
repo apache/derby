@@ -341,11 +341,10 @@ public class DependentResultSet extends NoPutResultSetImpl implements CursorResu
 	private ExecRow fetchIndexRow()
 		 throws StandardException
 	{ 
-		if (!indexSC.next())
+		if (!indexSC.fetchNext(indexRow.getRowArray()))
 		{
 			return null;
 		}
-		indexSC.fetch(indexRow.getRowArray());
 		return indexRow;
 	}
 
