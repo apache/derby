@@ -862,6 +862,7 @@
       <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
       <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
       <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
+      <attribute name="Class-Path" value="derbyLocale_de_DE.jar derbyLocale_es.jar derbyLocale_fr.jar derbyLocale_it.jar derbyLocale_ja_JP.jar derbyLocale_ko_KR.jar derbyLocale_pt_BR.jar derbyLocale_zh_CN.jar derbyLocale_zh_TW.jar"/>
 
       	<attribute name="Sealed" value="true"/>
     	<section name="org/apache/derby/impl/tools/sysinfo/">
