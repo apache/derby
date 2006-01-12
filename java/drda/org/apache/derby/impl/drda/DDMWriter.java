@@ -962,6 +962,24 @@ class DDMWriter
 	}
 
 	/**
+	 * Write padded scalar <code>DRDAString</code> object value. The
+	 * string is converted into the appropriate codeset.
+	 *
+	 * @param drdaString string to be written
+	 * @param paddedLength length to pad string to
+	 */
+	protected void writeScalarPaddedString (DRDAString drdaString, int paddedLength)
+	{
+		int stringLength = drdaString.length();
+		int fillLength = paddedLength - stringLength;
+		ensureLength(paddedLength);
+		System.arraycopy(drdaString.getBytes(), 0, bytes, offset, stringLength);
+		offset += stringLength;
+		Arrays.fill(bytes, offset, offset + fillLength, ccsidManager.space);
+		offset += fillLength;
+	}
+
+	/**
 	 * Write padded scalar byte array object includes length, codepoint and value
 	 *
 	 * @param 	codePoint - code point to write

@@ -80,7 +80,7 @@ class DRDAResultSet
 	
 	private ArrayList rsExtPositions;
 
-	protected String pkgcnstknStr;               // Unique consistency token for ResultSet 0
+	protected ConsistencyToken pkgcnstkn; // Unique consistency token for ResultSet 0
 
 	// splitQRYDTA is normally null. If it is non-null, it means that
 	// the last QRYDTA response which was sent for this statement was
@@ -119,9 +119,9 @@ class DRDAResultSet
 	 * set consistency token for this resultSet
 	 *
 	 */
-	protected void setPkgcnstknStr(String pkgcnstknStr)
+	protected void setPkgcnstkn(ConsistencyToken pkgcnstkn)
 	{
-		this.pkgcnstknStr = pkgcnstknStr;
+		this.pkgcnstkn = pkgcnstkn;
 	}
 
 
@@ -460,7 +460,7 @@ class DRDAResultSet
 	{
 		String s = indent + "***** DRDASResultSet toDebugString ******\n";
 		s += indent + "State:" + getStateString(state)+ "\n";
-		s += indent + "pkgcnstknStr: {" +pkgcnstknStr  + "}\n"; 
+		s += indent + "pkgcnstkn: {" + pkgcnstkn + "}\n"; 
 		s += indent + "cursor Name: ";
 		String cursorName = null;
 		try {
