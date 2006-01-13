@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.3  (Win32)">
+	<META NAME="AUTHOR" CONTENT="K M">
+	<META NAME="CREATED" CONTENT="20060113;5464555">
+	<META NAME="CHANGEDBY" CONTENT="K M">
+	<META NAME="CHANGED" CONTENT="20060113;6142329">
+	<STYLE>
+	<!--
+		@page { size: 8.5in 11in }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<H1>Network Server Implementation 
+</H1>
+<P>Network Server accepts connections from DRDA clients, translates
+incoming DRDA Requests into embedded JDBC calls and then translates
+results back into DRDA for return to the client. Below is a summary
+of the implementation.</P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Classes
+Summary</FONT></FONT></P>
+<P><B>NetworkServerControlImpl</B> - This class implements methods
+used by the public API and main.  It's functions include:</P>
+<UL>
+	<UL>
+		<LI><P>Launching a ConnectionThread to accept incomming
+		connections.</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<LI><P>Manaintaining  a list of sessions, a queue of Sessions
+		waiting for free thread and free list of DRDAConnections which are
+		available for reuse.</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<LI><P>Handling non-DRDA proprietary protocol requests (e.g.
+		turning tracing on/off)</P>
+	</UL>
+</UL>
+<P><BR><BR>
+</P>
+<P><B>ClientThread </B>-  A single instance of this thread is launced
+to accept connections. It is responsible for 
+</P>
+<UL>
+	<UL>
+		<LI><P> accepting connections</P>
+		<LI><P>    creating a new Sessions and adding them to the session
+		table.</P>
+		<LI><P>     Starting a DRDAConnThread (either one from the free
+		list or a new one) or putting the sessions waiting for a thread if
+		maxThreads is exceeded.</P>
+	</UL>
+</UL>
+<P><B>ApplicationRequester</B> - this contains information about a
+particular application requester(e.g, type, version, level of
+protocol it supports).</P>
+<P><B>Session</B> - this contains information about the client
+session,  (e.g., client socket, AppRequester , current state, etc). 
+It refers to a Database object which contains information about the
+database connection.</P>
+<P><B>Database</B> - this  contains info about the database
+connection, prepared statements etc.  It contains a hash table of
+DRDAStatements that are keyed by the package name and section number
+for the statement. Prepared statements are identified in the DRDA
+protocol by a package and section number.  
+</P>
+<P><B>DRDAStatement</B> - This contains the Statement and all of its
+DRDA related information as well as the statement's DRDAResultSets
+which contain result set information.  DRDA type information for the
+parameter metadata is also contained in this class.  (It would be
+good to break it out).  For JCC each statement has its isolation
+level encoded in the package name, and the isolation level is
+asssociated with the statement instead of the the connection.  The
+isoloation level for the statement will be set accordingly if the
+client is JCC. DerbyClient sets the isololation on the connection per
+the JDBC spec and does not use the statement isolation level.</P>
+<P><B>DRDAResultSet</B> - Contains  the result set and related
+metadata and DRDA type information.  There is a package name and
+section number associated with the  ResultSet as well. If a statement
+has only a single ResultSet the package and section number is the
+same as the statement. Additional ResultSets   (created by stored
+procedures) are assigned a different section number by the server.</P>
+<P><B>DRDAConnThread </B>- This is the main workhorse for the DRDA
+connections.  It sets up the input streams, creates instances of the
+DDMReader and DDMWriter classes and processes DRDA commands.  Most of
+the DRDA protocol is in this class. 
+</P>
+<P><B>DDMReader</B> - This class contains the utility methods for
+reading the incoming DRDA protocol and command protocol.</P>
+<P><B>DDMWriter</B> - This class contains the utility methods for
+writing the outgoing DRDA protocol and command protocol.</P>
+<P><B>DRDAProtocolException</B> - This class handles DRDA protocol
+errors.</P>
+<P><B>EXTDTAInputStream</B> - An input stream for  externalized data
+(large object). 
+</P>
+<P><B>CcsidManager</B> - This is an abstract class for performing
+character conversions.</P>
+<P><B>EbcdicCcsidManager</B>- This class converts from EBCDIC to Java
+Unicode.  The DDM parameters are transmitted in EBCDIC and need to be
+converted to Java Unicode.</P>
+<P><B>CodePoint</B>- static values for DDM Codepoints.  These are
+predefined values used in the DRDA protocol.</P>
+<P><B>CodePointNameTable</B> - hash table with codepoint names, used
+to produce tracing information.</P>
+<P><B>DssTrace</B> - provides server side tracing for the DRDA
+protocol.</P>
+<P><B>FdocaConstants</B>  -FDOCA (Formatted Data Object Content
+Architecture) describes the layout and data types of the data being
+transmitted between the requester and server.  This class defines
+statics for the constant values.</P>
+<P><B>SQLTypes</B> - DRDA describes SQL Types for the data types
+being transmitted.  This class defines statics for the constant
+values.</P>
+<P><B>EncryptionManager</B>- routines for decrypting userid and
+password to handle encrypted userid and password security.  This
+requires IBM JCE</P>
+<P><B>SignedBinary</B> - this is a conversion class that translates
+the incoming  values from the client into the correct byte order. 
+The DRDA protocol requires that the receiver of data translates the
+data into it's format (i.e., the writer writes data in its own
+format).  Data has to be converted from the writer format to the
+local format.</P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Scheduling</FONT></FONT></P>
+<P>The scheduling algorithm used is first in first out.  When a
+client session connects to the server, the server checks to see if
+there are any DRDAConnThreads which are free to handle the session. 
+If there are, it notifies the thread.  If there are no available
+threads and we haven't reached the maximum number of  connection
+threads we can have, the server creates a new thread with the session
+information.  If we have already reached the maximum number of
+connection threads, the server places the session on a run queue for
+the next available thread.</P>
+<P>How long a thread works on a particular session depends on the
+value of the timeslice.  If  timeslice is 0, the thread works on the
+session until the session ends.  If the timeslice is greater than 0,
+the thread checks the amount of time it has spent on the session
+after each complete communication once the session has been
+initiated.  A complete communication consists of a packet from the
+client and the return from the server.  For example, for an execute
+immediate of  a create table command, the packet from the client
+would include the create table command and a commit.  The return from
+the server would be information about the result of the command.  For
+a cursor, each fetch would represent a separate communication.</P>
+<P>A timeout of the timeslice is set on the client socket so that the
+connection thread won't be blocked for more than the timeslice by an
+idle client.</P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Coordinating
+information between Server and Connection Threads</FONT></FONT></P>
+<P>Several commands change information needed by the connection
+threads.  For example, timeslice can be changed.  This is handled by
+keeping a copy of the value in the connection thread.  If the value
+is changed, the command changing the value is responsible for
+changing the value in the thread's copy.  The result of this is that
+instead of one synchronization point in the server which all threads
+will block on to read, each thread has a copy which it can separately
+sync on.</P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Command
+Protocol</FONT></FONT></P>
+<P>The command protocol is used to send commands such as shutdown,
+turn tracing on, etc. to a running network server.    The client
+sends:</P>
+<P>    4 bytes  - String CMD:</P>
+<P>    2 bytes  - Protocol version</P>
+<P>    1 byte  - command</P>
+<P>    n bytes  - parameters for the command</P>
+<P>The server returns:</P>
+<P>    1 byte  - command result, 0 - OK, 1 - error</P>
+<P>    1 byte - number of messages</P>
+<P>    2 bytes  - length of message (or message key)</P>
+<P>    n bytes  - message or message key</P>
+<P>    1 byte  - number of parameters to message</P>
+<P>    {2 bytes  - length of parameter</P>
+<P>    n bytes  - parameter} for each parameter</P>
+<P>Note, the 3rd byte of the command header must not be 'D0' to
+distinquish it  from DRDA DSS structures.</P>
+<P>The protocol for the parameters for each command is in the javadoc
+for NetworkServerControlImpl.</P>
+<P>The processing routine is synchronized so that multiple threads
+don't clobber each other. This means that configuration commands will
+be serialized. This shouldn't be a problem since they should be
+fairly rare.</P>
+<P><BR><BR>
+</P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>DRDA
+Protocol</FONT></FONT></P>
+<P>The DRDA protocol is described at great length in the DRDA
+Reference manuals.  DRDA Protocol is divided into three layers
+corresponding to the DDM three-tier architecture. For each layer,
+their is a DSS (Data Stream Structure) defined.</P>
+<P>Layer A Communications management services</P>
+<P>Layer B Agent services</P>
+<P>Layer C Data management services</P>
+<P>At layer A are request, reply and data correlation, structure
+chaining, continuation or termination of chains when errors are
+detected, interleaving and multi-leaving request, reply, and data
+DSSs for multitasking environments. For TCP/IP, the format of the DDM
+envelope is</P>
+<P>2 bytes Length of the data</P>
+<P>1 byte 'D0' - indicates DDM data</P>
+<P>1 byte DDM format byte(DSSFMT) - type of DSS(RQSDSS,RPYDSS),
+whether it is chained, information about the next chained DSS</P>
+<P>2 bytes request correlation identifier</P>
+<P>The correlation identifier ties together a request, the request
+data and the reply. In a chained DSS, each request has a correlation
+identifier which is higher than the previous request (all correlation
+identifiers must be greater than 0).</P>
+<P>At layer B are object mapping, object validation and command
+routing. Layer B objects with data 5 bytes less than 32K bytes
+consist of</P>
+<P>2 bytes Length</P>
+<P>2 bytes Type of the object (code point)</P>
+<P>Object data</P>
+<P>Object data is either SCALAR or COLLECTION data.</P>
+<P>Scalar data consists of a string of bytes formatted as the class
+description of the object required. Collections consist of a set of
+objects in which the entries in the collection are nested within the
+length/ code point of the collection.</P>
+<P>Layer B objects with data &gt;=32763 bytes long format is</P>
+<P>2 bytes Length - length of class, length, and extended total
+length fields (high order bit set, indicating &gt;=32763)</P>
+<P>2 bytes Type of the object (code point)</P>
+<P>n bytes Extended total length - length of the object (n = Length &ndash;
+4)</P>
+<P>Object data</P>
+<P>Some of  the objects in the collections are required and some are
+optional.  To handle this, a required array is created for each
+command with optional objects with the required codepoints and each
+element is zeroed as the required objects are found.  A check is done
+to see if there are any required objects missing and an error message
+is produced indicating the missing codepoints if some have not been
+sent.</P>
+<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Albany, sans-serif"><FONT SIZE=4>Packages</FONT></FONT></P>
+<P>In DRDA, dynamic SQL is bound to predefined  packages.  Since
+Derby doesn't support packages, PACKAGE messages will be handled
+entirely in the network server.The network server will just validate
+the protocol and &quot;pretend&quot; to execute the bind command.  
+</P>
+<P>*This document was based in large part on a design document
+written by Judy Peachey when Network Server was first implemented.</P>
+</BODY>
+</HTML>
