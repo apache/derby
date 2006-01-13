@@ -4,7 +4,7 @@ create table iep.t1(a int);
 insert into iep.t1 values(100) , (101) , (102) , (103) , (104) , (105) , (106);
 --export error cases
 --export can not create file
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'nodir/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extout/nodir/t1.dat' , 
                                  null, null, null) ;
 --export table not found
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
@@ -68,7 +68,7 @@ select * from t1;
 
 --import error cases
 --import can not find input file
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'nodir/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extin/nodir/t1.dat' , 
                                  null, null, null, 0) ;
 --import table not found
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 

@@ -11,7 +11,7 @@ ij> insert into iep.t1 values(100) , (101) , (102) , (103) , (104) , (105) , (10
 7 rows inserted/updated/deleted
 ij> --export error cases
 --export can not create file
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'nodir/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extout/nodir/t1.dat' , 
                                  null, null, null) ;
 ERROR XIE0I: Se ha producido una excepci EnC:>243< n de E/S al grabar datos en el archivo.
 ij> --export table not found
@@ -94,12 +94,12 @@ A
 7 rows selected
 ij> --import error cases
 --import can not find input file
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'nodir/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extin/nodir/t1.dat' , 
                                  null, null, null, 0) ;
 ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
 ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
-ERROR XIE04: Archivo de datos no encontrado: nodir/t1.dat
+ERROR XIE04: Archivo de datos no encontrado: extin/nodir/t1.dat
 ij> --import table not found
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null, 0) ;
