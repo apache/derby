@@ -309,6 +309,7 @@ public class prepStmt
 			test5130(conn);
 			test5172(conn);
 			jira614Test(conn);
+			jira170Test(conn);
 			conn.close();
 			// refresh conn before cleaning up
 			conn = ij.startJBMS();
@@ -743,6 +744,48 @@ public class prepStmt
 	    for (int i = 0; i < howMany; i++)
 		    buf.append(c);
 	    return buf.toString();
+    }
+    // Jira-170 has to do with how the server handles re-synchronization of
+    // the data stream when an enormous parameter value follows a failed
+    // prepare statement. Note that it is deliberate here that we are preparing
+    // a statement referring to a non-existing table.
+    private static void jira170Test(Connection conn)
+        throws Exception
+    {
+        Statement stmt = conn.createStatement();
+        PreparedStatement ps = null ;
+	    try {
+		    stmt.execute("drop table jira170");
+	    } catch (Throwable t) { }
+        // Create a huge array of chars to be used as the input parameter
+        char []cData = new char[1000000];
+        for (int i = 0; i < cData.length; i++)
+            cData[i] = Character.forDigit(i%10, 10);
+        // The behavior of this test program depends on how the JDBC driver
+        // handles statement prepares. The DB2 Universal JDBC driver implements
+        // something called "deferred prepares" by default. This means that it
+        // doesn't do the prepare of the statement until the statement is
+        // actually executed. Other drivers, such as the standard Derby client
+        // driver, do the prepare at the time of the prepare. This means that,
+        // depending on which driver we're using and what the driver's
+        // configuration is, we'll get the "table not found" error either on
+        // the prepare or on the execute. It doesn't really matter for the
+        // purposes of the test, because the whole point is that we *dont*
+        // get a DRDA Protocol Exception, but rather a table-not-found
+        // exception.
+        try {
+            ps = conn.prepareStatement("insert into jira170 values (?)");
+            ps.setString(1, new String(cData));
+            ps.execute();
+            System.out.println("Test Jira170 failed: no exception when trying to execute a failed prepare with an enormous parameter");
+        }
+        catch (SQLException e)
+        {
+            if (e.getSQLState().equals("42X05"))
+                System.out.println("Jira170: caught expected table not found");
+            else
+                e.printStackTrace();
+        }
     }
 }
 
