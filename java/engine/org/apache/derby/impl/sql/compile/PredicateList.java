@@ -2126,7 +2126,10 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				ValueNode left = bcon.getLeftOperand();
 				ValueNode right = bcon.getRightOperand();
 
-				if (left instanceof ColumnReference && right instanceof ConstantNode)
+				// Consider using variant type of the expression, instead of ConstantNode
+				// or ParameterNode while porting this fix to trunk.
+				if (left instanceof ColumnReference && 
+					  (right instanceof ConstantNode || right instanceof ParameterNode))
 				{
 					searchClauses.addElement(predicate);
 				}
@@ -2166,8 +2169,14 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			else
 			{
 				searchCR = (ColumnReference) ((BinaryComparisonOperatorNode) ro).getLeftOperand();
-				ConstantNode currCN = (ConstantNode) ((BinaryComparisonOperatorNode) ro).getRightOperand();
-				searchODV = (DataValueDescriptor) currCN.getValue();
+
+				// Don't get value for parameterNode since not known yet.
+				if (((BinaryComparisonOperatorNode) ro).getRightOperand() instanceof ConstantNode)
+				{
+					ConstantNode currCN = (ConstantNode) ((BinaryComparisonOperatorNode) ro).getRightOperand();
+					searchODV = (DataValueDescriptor) currCN.getValue();
+				}
+				else searchODV = null;
 			}
 			// Cache the table and column numbers of searchCR
 			int tableNumber = searchCR.getTableNumber();
@@ -2241,8 +2250,12 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					else
 					{
 						searchCR2 = (ColumnReference) ((BinaryComparisonOperatorNode) ro2).getLeftOperand();
-						ConstantNode currCN = (ConstantNode) ((BinaryComparisonOperatorNode) ro2).getRightOperand();
-						currODV = (DataValueDescriptor) currCN.getValue();
+						if (((BinaryComparisonOperatorNode) ro2).getRightOperand() instanceof ConstantNode)
+						{
+							ConstantNode currCN = (ConstantNode) ((BinaryComparisonOperatorNode) ro2).getRightOperand();
+							currODV = (DataValueDescriptor) currCN.getValue();
+						}
+						else currODV = null;
 					}
 
 					/* Is this a match? A match is a search clause with
