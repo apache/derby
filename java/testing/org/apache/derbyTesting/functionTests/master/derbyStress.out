@@ -1,0 +1,4 @@
+Test derbyStress starting
+Testing with 5000 prepared statements
+PASS -- Prepared statement test
+Test derbyStress finished.

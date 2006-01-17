@@ -1613,7 +1613,7 @@ public class PreparedStatement extends Statement
     public void listenToUnitOfWork() {
         if (!listenToUnitOfWork_) {
             listenToUnitOfWork_ = true;
-            connection_.CommitAndRollbackListeners_.add(this);
+            connection_.CommitAndRollbackListeners_.put(this,null);
         }
     }
 

@@ -2017,12 +2017,18 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
     // Only called on positioned upate statements
+    //Removing resultset from hashtable is called for all statements
     void resetCursorNameAndRemoveFromWhereCurrentOfMappings() {
         // Remove client/server cursorName -> ResultSet mapping from the hashtable.
         // If Statement.close() is called before ResultSet.close(), then statement_.section is null.
         if (section_ != null) {
             agent_.sectionManager_.removeCursorNameToResultSetMapping(cursorName_,
                     section_.getServerCursorNameForPositionedUpdate());
+            
+            // remove resultset mapping for other cursors (other than positioned
+            // update statements)
+            agent_.sectionManager_.removeCursorNameToResultSetMapping(cursorName_,
+                    section_.getServerCursorName());
 
             // Remove client and server cursorName -> QuerySection mapping from the hashtable
             // if one exists
