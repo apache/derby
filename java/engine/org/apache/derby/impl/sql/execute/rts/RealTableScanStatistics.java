@@ -53,6 +53,7 @@ public class RealTableScanStatistics
 	public int		fetchSize;
 	public String isolationLevel;
 	public String tableName;
+	public String userSuppliedOptimizerOverrides;
 	public String indexName;
 	public String lockString;
 	public String qualifiers;
@@ -75,6 +76,7 @@ public class RealTableScanStatistics
 									long closeTime,
 									int resultSetNumber,
 									String tableName,
+									String userSuppliedOptimizerOverrides,
 									String indexName,
 									boolean isConstraint,
 									String qualifiers,
@@ -102,6 +104,7 @@ public class RealTableScanStatistics
 			optimizerEstimatedCost
 			);
 		this.tableName = tableName;
+		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		this.indexName = indexName;
 		this.isConstraint = isConstraint;
 		this.qualifiers = qualifiers;
@@ -130,14 +133,21 @@ public class RealTableScanStatistics
 	 */
 	public String getStatementExecutionPlanText(int depth)
 	{
-		String header;
+		String header = "";
 		String isolationString = null;
 
 		initFormatInfo(depth);
 
+		if (userSuppliedOptimizerOverrides != null)
+		{ 
+			header = 
+				indent + MessageService.getTextMessage(SQLState.RTS_USER_SUPPLIED_OPTIMIZER_OVERRIDES_FOR_TABLE,
+						tableName, userSuppliedOptimizerOverrides);
+			header = header + "\n";
+		}
 		if (indexName != null)
 		{
-			header =
+			header = header +
 				indent + MessageService.getTextMessage(
 											SQLState.RTS_IS_RS_USING,
 											tableName,
@@ -150,7 +160,7 @@ public class RealTableScanStatistics
 		}
 		else
 		{
-			header =
+			header = header +
 				indent + MessageService.getTextMessage(
 											SQLState.RTS_TS_RS_FOR,
 											tableName);

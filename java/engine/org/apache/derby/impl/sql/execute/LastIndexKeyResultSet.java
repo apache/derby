@@ -70,6 +70,7 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
 	protected Qualifier[][] qualifiers;
 	protected GeneratedMethod closeCleanup;
 	public String tableName;
+	public String userSuppliedOptimizerOverrides;
 	public String indexName;
 	protected boolean runTimeStatisticsOn;
 	protected FormatableBitSet accessedCols;
@@ -95,6 +96,7 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
 	 *		ExecRow rowAllocator() throws StandardException; </verbatim>
 	 * @param conglomId 		the conglomerate of the table to be scanned.
 	 * @param tableName			The full name of the table
+	 * @param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 	 * @param indexName			The name of the index, if one used to access table.
 	 * @param colRefItem		An saved item for a bitSet of columns that
 	 *							are referenced in the underlying table.  -1 if
@@ -119,6 +121,7 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
 		GeneratedMethod resultRowAllocator, 
 		long conglomId, 
 		String tableName,
+		String userSuppliedOptimizerOverrides,
 		String indexName,
 		int colRefItem,
 		int lockMode,
@@ -144,6 +147,7 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
 
 		this.resultRowAllocator = resultRowAllocator;
 		this.tableName = tableName;
+		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		this.indexName = indexName;
 		this.lockMode = lockMode;
 		if (colRefItem != -1)

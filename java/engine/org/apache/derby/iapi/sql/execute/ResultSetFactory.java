@@ -739,7 +739,8 @@ public interface ResultSetFactory {
 		@param loadFactor		The loadFactor for the HashTable.
 		@param maxCapacity		The maximum size for the HashTable.
 		@param hashKeyColumn	The 0-based column # for the hash key.
-		@param tableName		The full name of the table
+		@param tableName		The full name of the table 
+		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 		@param indexName		The name of the index, if one used to access table.
 		@param isConstraint		If index, if used, is a backing index for a constraint.
 		@param forUpdate		True means open for update
@@ -777,6 +778,7 @@ public interface ResultSetFactory {
 								int maxCapacity,
 								int hashKeyColumn,
 								String tableName,
+								String userSuppliedOptimizerOverrides,
 								String indexName,
 								boolean isConstraint,
 								boolean forUpdate,
@@ -807,6 +809,7 @@ public interface ResultSetFactory {
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param hashKeyColumn	The 0-based column # for the hash key.
 		@param tableName		The full name of the table
+		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 		@param indexName		The name of the index, if one used to access table.
 		@param isConstraint		If index, if used, is a backing index for a constraint.
 		@param colRefItem		An saved item for a bitSet of columns that
@@ -833,6 +836,7 @@ public interface ResultSetFactory {
 								int resultSetNumber,
 								int hashKeyColumn,
 								String tableName,
+								String userSuppliedOptimizerOverrides,
 								String indexName,
 								boolean isConstraint,
 								int colRefItem,
@@ -886,6 +890,7 @@ public interface ResultSetFactory {
 		@param qualifiers the array of Qualifiers for the scan.
 			Null or an array length of zero means there are no qualifiers.
 		@param tableName		The full name of the table
+		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 		@param indexName		The name of the index, if one used to access table.
 		@param isConstraint		If index, if used, is a backing index for a constraint.
 		@param forUpdate		True means open for update
@@ -920,6 +925,7 @@ public interface ResultSetFactory {
 								boolean sameStartStopPosition,
 								Qualifier[][] qualifiers,
 								String tableName,
+								String userSuppliedOptimizerOverrides,
 								String indexName,
 								boolean isConstraint,
 								boolean forUpdate,
@@ -976,6 +982,7 @@ public interface ResultSetFactory {
 		@param qualifiers the array of Qualifiers for the scan.
 			Null or an array length of zero means there are no qualifiers.
 		@param tableName		The full name of the table
+		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 		@param indexName		The name of the index, if one used to access table.
 		@param isConstraint		If index, if used, is a backing index for a constraint.
 		@param forUpdate		True means open for update
@@ -1011,6 +1018,7 @@ public interface ResultSetFactory {
 								boolean sameStartStopPosition,
 								Qualifier[][] qualifiers,
 								String tableName,
+								String userSuppliedOptimizerOverrides,
 								String indexName,
 								boolean isConstraint,
 								boolean forUpdate,
@@ -1112,6 +1120,7 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
+		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the nested loop join operation as a result set.
 		@exception StandardException thrown when unable to create the
@@ -1128,6 +1137,7 @@ public interface ResultSetFactory {
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+								   String userSuppliedOptimizerOverrides,
 								   GeneratedMethod closeCleanup)
 			throws StandardException;
 
@@ -1155,6 +1165,7 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
+		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the nested loop join operation as a result set.
 		@exception StandardException thrown when unable to create the
@@ -1171,6 +1182,7 @@ public interface ResultSetFactory {
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+								   String userSuppliedOptimizerOverrides,
 								   GeneratedMethod closeCleanup)
 			throws StandardException;
 
@@ -1210,6 +1222,7 @@ public interface ResultSetFactory {
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
 		@param closeCleanup	any cleanup the activation needs to do on close.
+		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 		@return the nested loop join operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -1227,6 +1240,7 @@ public interface ResultSetFactory {
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+								   String userSuppliedOptimizerOverrides,
 								   GeneratedMethod closeCleanup)
 			throws StandardException;
 
@@ -1257,6 +1271,7 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
+		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the nested loop join operation as a result set.
 		@exception StandardException thrown when unable to create the
@@ -1275,6 +1290,7 @@ public interface ResultSetFactory {
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+								   String userSuppliedOptimizerOverrides,
 								   GeneratedMethod closeCleanup)
 			throws StandardException;
 
@@ -1455,6 +1471,7 @@ public interface ResultSetFactory {
 	 *		ExecRow rowAllocator() throws StandardException; </verbatim>
 	 * @param conglomId 		the conglomerate of the table to be scanned.
 	 * @param tableName			The full name of the table
+	 * @param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 	 * @param indexName			The name of the index, if one used to access table.
 	 * @param colRefItem		An saved item for a bitSet of columns that
 	 *							are referenced in the underlying table.  -1 if
@@ -1481,6 +1498,7 @@ public interface ResultSetFactory {
 		GeneratedMethod 	resultRowAllocator,
 		long 				conglomId,
 		String 				tableName,
+		String 				userSuppliedOptimizerOverrides,
 		String 				indexName,
 		int 				colRefItem,
 		int 				lockMode,
@@ -1530,6 +1548,7 @@ public interface ResultSetFactory {
 		@param qualifiers the array of Qualifiers for the scan.
 			Null or an array length of zero means there are no qualifiers.
 		@param tableName		The full name of the table
+		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 		@param indexName		The name of the index, if one used to access table.
 		@param isConstraint		If index, if used, is a backing index for a constraint.
 		@param forUpdate		True means open for update
@@ -1570,6 +1589,7 @@ public interface ResultSetFactory {
 									boolean sameStartStopPosition,
 									Qualifier[][] qualifiers,
 									String tableName,
+									String userSuppliedOptimizerOverrides,
 									String indexName,
 									boolean isConstraint,
 									boolean forUpdate,

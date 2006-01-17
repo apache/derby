@@ -55,6 +55,7 @@ public class RealHashJoinStatistics
 								boolean oneRowRightSide,
 								double optimizerEstimatedRowCount,
 								double optimizerEstimatedCost,
+								String userSuppliedOptimizerOverrides,
 								ResultSetStatistics leftResultSetStatistics,
 								ResultSetStatistics rightResultSetStatistics
 								)
@@ -75,6 +76,7 @@ public class RealHashJoinStatistics
 			oneRowRightSide,
 			optimizerEstimatedRowCount,
 			optimizerEstimatedCost,
+			userSuppliedOptimizerOverrides,
 			leftResultSetStatistics,
 			rightResultSetStatistics
 			);

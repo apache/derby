@@ -82,6 +82,7 @@ public class DistinctScanResultSet extends HashScanResultSet
 		int resultSetNumber,
 		int hashKeyItem,
 		String tableName,
+		String userSuppliedOptimizerOverrides,
 		String indexName,
 		boolean isConstraint,
 		int colRefItem,
@@ -102,7 +103,7 @@ public class DistinctScanResultSet extends HashScanResultSet
 			  (Qualifier[][]) null,	  // scanQualifiers
 			  (Qualifier[][]) null,	  // nextQualifiers
 			  DEFAULT_INITIAL_CAPACITY, DEFAULT_LOADFACTOR, DEFAULT_MAX_CAPACITY,
-			  hashKeyItem, tableName, indexName, isConstraint, 
+			  hashKeyItem, tableName, userSuppliedOptimizerOverrides, indexName, isConstraint, 
 			  false,				  // forUpdate
 			  colRefItem, lockMode, tableLocked, isolationLevel,
 			  false,

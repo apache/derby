@@ -95,6 +95,7 @@ public class TableScanResultSet extends NoPutResultSetImpl
 	public    Qualifier[][] qualifiers;
 	protected GeneratedMethod closeCleanup;
 	public String tableName;
+	public String userSuppliedOptimizerOverrides;
 	public String indexName;
 	protected boolean runTimeStatisticsOn;
 	protected FormatableBitSet accessedCols;
@@ -150,6 +151,7 @@ public class TableScanResultSet extends NoPutResultSetImpl
 		boolean sameStartStopPosition,
 		Qualifier[][] qualifiers,
 		String tableName,
+		String userSuppliedOptimizerOverrides,
 		String indexName,
 		boolean isConstraint,
 		boolean forUpdate,
@@ -198,6 +200,7 @@ public class TableScanResultSet extends NoPutResultSetImpl
 		this.sameStartStopPosition = sameStartStopPosition;
 		this.qualifiers = qualifiers;
 		this.tableName = tableName;
+		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		this.indexName = indexName;
 		this.isConstraint = isConstraint;
 		this.forUpdate = forUpdate;

@@ -110,6 +110,7 @@ public class HashScanResultSet extends NoPutResultSetImpl
 	private int maxCapacity;
 	private GeneratedMethod closeCleanup;
 	public String tableName;
+	public String userSuppliedOptimizerOverrides;
 	public String indexName;
 	public boolean forUpdate;
 	private boolean runTimeStatisticsOn;
@@ -152,6 +153,7 @@ public class HashScanResultSet extends NoPutResultSetImpl
 		int maxCapacity,
 		int hashKeyItem,
 		String tableName,
+		String userSuppliedOptimizerOverrides,
 		String indexName,
 		boolean isConstraint,
 		boolean forUpdate,
@@ -195,6 +197,7 @@ public class HashScanResultSet extends NoPutResultSetImpl
 		this.loadFactor = loadFactor;
 		this.maxCapacity = maxCapacity;
         this.tableName = tableName;
+        this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
         this.indexName = indexName;
 		this.isConstraint = isConstraint;
 		this.forUpdate = forUpdate;

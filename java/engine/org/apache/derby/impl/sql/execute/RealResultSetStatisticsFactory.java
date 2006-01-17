@@ -595,6 +595,7 @@ public class RealResultSetStatisticsFactory
                     tsrs.closeTime,
                     tsrs.resultSetNumber,
                     tsrs.tableName,
+					tsrs.userSuppliedOptimizerOverrides,
                     tsrs.indexName,
                     tsrs.isConstraint,
                     tsrs.printQualifiers(tsrs.qualifiers),
@@ -688,6 +689,7 @@ public class RealResultSetStatisticsFactory
 											hlojrs.restrictionTime,
 											hlojrs.optimizerEstimatedRowCount,
 											hlojrs.optimizerEstimatedCost,
+											hlojrs.userSuppliedOptimizerOverrides,
 											getResultSetStatistics(
 												hlojrs.leftResultSet),
 											getResultSetStatistics(
@@ -714,6 +716,7 @@ public class RealResultSetStatisticsFactory
 											nllojrs.restrictionTime,
 											nllojrs.optimizerEstimatedRowCount,
 											nllojrs.optimizerEstimatedCost,
+											nllojrs.userSuppliedOptimizerOverrides,
 											getResultSetStatistics(
 												nllojrs.leftResultSet),
 											getResultSetStatistics(
@@ -740,6 +743,7 @@ public class RealResultSetStatisticsFactory
 											hjrs.oneRowRightSide,
 											hjrs.optimizerEstimatedRowCount,
 											hjrs.optimizerEstimatedCost,
+											hjrs.userSuppliedOptimizerOverrides,
 											getResultSetStatistics(
 												hjrs.leftResultSet),
 											getResultSetStatistics(
@@ -766,6 +770,7 @@ public class RealResultSetStatisticsFactory
 											nljrs.oneRowRightSide,
 											nljrs.optimizerEstimatedRowCount,
 											nljrs.optimizerEstimatedCost,
+											nljrs.userSuppliedOptimizerOverrides,
 											getResultSetStatistics(
 												nljrs.leftResultSet),
 											getResultSetStatistics(
@@ -1269,6 +1274,7 @@ public class RealResultSetStatisticsFactory
                     dsrs.closeTime,
                     dsrs.resultSetNumber,
                     dsrs.tableName,
+					null,
                     dsrs.indexName,
                     dsrs.isConstraint,
                     dsrs.printQualifiers(),

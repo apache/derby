@@ -47,6 +47,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.ClassName;
 
+import org.apache.derby.iapi.util.PropertyUtil;
+
 abstract public class BaseJoinStrategy implements JoinStrategy {
 	public BaseJoinStrategy() {
 	}
@@ -112,6 +114,13 @@ abstract public class BaseJoinStrategy implements JoinStrategy {
 		throws StandardException
 	{
 		mb.push(innerTable.getBaseTableName());
+		//User may have supplied optimizer overrides in the sql
+		//Pass them onto execute phase so it can be shown in 
+		//run time statistics.
+		if (innerTable.getProperties() != null)
+			mb.push(PropertyUtil.sortProperties(innerTable.getProperties()));
+		else
+			mb.pushNull("java.lang.String");
 
 		ConglomerateDescriptor cd =
 			innerTable.getTrulyTheBestAccessPath().getConglomerateDescriptor();

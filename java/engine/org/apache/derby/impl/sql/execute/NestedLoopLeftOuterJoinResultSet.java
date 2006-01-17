@@ -283,13 +283,14 @@ public class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
 					    boolean notExistsRightSide,
  					    double optimizerEstimatedRowCount,
 						double optimizerEstimatedCost,
+						String userSuppliedOptimizerOverrides,
 						GeneratedMethod closeCleanup)
     {
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,
 			  activation, restriction, resultSetNumber, 
 			  oneRowRightSide, notExistsRightSide,
 			  optimizerEstimatedRowCount, optimizerEstimatedCost, 
-			  closeCleanup);
+			  userSuppliedOptimizerOverrides, closeCleanup);
 		this.emptyRowFun = emptyRowFun;
 		this.wasRightOuterJoin = wasRightOuterJoin;
     }

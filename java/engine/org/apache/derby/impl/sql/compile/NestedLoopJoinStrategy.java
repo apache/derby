@@ -224,11 +224,11 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 
 		if (bulkFetch > 1)
 		{
-			numArgs = 25;
+			numArgs = 26;
 		}
 		else
 		{
-			numArgs = 24;
+			numArgs = 25;
 		}
 
 		fillInScanArgs1(tc, mb,

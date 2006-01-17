@@ -74,6 +74,7 @@ public class RealNestedLoopJoinStatistics
 								boolean oneRowRightSide,
 								double optimizerEstimatedRowCount,
 								double optimizerEstimatedCost,
+								String userSuppliedOptimizerOverrides,
 								ResultSetStatistics leftResultSetStatistics,
 								ResultSetStatistics rightResultSetStatistics
 								)
@@ -92,7 +93,8 @@ public class RealNestedLoopJoinStatistics
 			rowsReturned,
 			restrictionTime,
 			optimizerEstimatedRowCount,
-			optimizerEstimatedCost
+			optimizerEstimatedCost,
+			userSuppliedOptimizerOverrides
 			);
 		this.oneRowRightSide = oneRowRightSide;
 		this.leftResultSetStatistics = leftResultSetStatistics;
@@ -114,7 +116,17 @@ public class RealNestedLoopJoinStatistics
 	{
 		initFormatInfo(depth);
 
+		String header = "";
+		if (userSuppliedOptimizerOverrides != null)
+		{ 
+			header = 
+				indent + MessageService.getTextMessage(SQLState.RTS_USER_SUPPLIED_OPTIMIZER_OVERRIDES_FOR_JOIN,
+						userSuppliedOptimizerOverrides);
+			header = header + "\n";
+		}
+		
 		return
+		header +
 			indent + resultSetName + ":\n" +
 			indent + MessageService.getTextMessage(SQLState.RTS_NUM_OPENS) +
 				" = " + numOpens + "\n" + 

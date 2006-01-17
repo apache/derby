@@ -58,6 +58,7 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 
 import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.iapi.util.PropertyUtil;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.util.Properties;
@@ -96,6 +97,8 @@ public class JoinNode extends TableOperatorNode
 	boolean	            joinClauseNormalized;
 	PredicateList		joinPredicates;
 	ResultColumnList	usingClause;
+	//User provided optimizer overrides
+	Properties joinOrderStrategyProperties;
 
 
 	/**
@@ -107,6 +110,7 @@ public class JoinNode extends TableOperatorNode
 	 * @param usingClause	The USING clause
 	 * @param selectList	The result column list for the join
 	 * @param tableProperties	Properties list associated with the table
+	 * @param joinOrderStrategyProperties	User provided optimizer overrides
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -116,7 +120,8 @@ public class JoinNode extends TableOperatorNode
 					Object onClause,
 					Object usingClause,
 					Object selectList,
-					Object tableProperties)
+					Object tableProperties,
+					Object joinOrderStrategyProperties)
 			throws StandardException
 	{
 		super.init(leftResult, rightResult, tableProperties);
@@ -124,6 +129,7 @@ public class JoinNode extends TableOperatorNode
 		joinClause = (ValueNode) onClause;
 		joinClauseNormalized = false;
 		this.usingClause = (ResultColumnList) usingClause;
+		this.joinOrderStrategyProperties = (Properties)joinOrderStrategyProperties;
 
 		/* JoinNodes can be generated in the parser or at the end of optimization.
 		 * Those generated in the parser do not have resultColumns yet.
@@ -1645,6 +1651,14 @@ public class JoinNode extends TableOperatorNode
 		// estimated cost
 		mb.push(costEstimate.getEstimatedCost());
 
+		//User may have supplied optimizer overrides in the sql
+		//Pass them onto execute phase so it can be shown in 
+		//run time statistics.
+		if (joinOrderStrategyProperties != null)
+			mb.push(PropertyUtil.sortProperties(joinOrderStrategyProperties));
+		else
+			mb.pushNull("java.lang.String");
+		
 		closeMethodArgument(acb, mb);
 
 		return numArgs;
@@ -1665,7 +1679,7 @@ public class JoinNode extends TableOperatorNode
 	 */
 	protected int getNumJoinArguments()
 	{
-		return 12;
+		return 13;
 	}
 
 	/**

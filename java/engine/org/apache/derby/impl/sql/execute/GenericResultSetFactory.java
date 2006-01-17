@@ -521,6 +521,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									int maxCapacity,
 									int hashKeyColumn,
 									String tableName,
+									String userSuppliedOptimizerOverrides,
 									String indexName,
 									boolean isConstraint,
 									boolean forUpdate,
@@ -555,6 +556,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								maxCapacity,
 								hashKeyColumn,
 								tableName,
+								userSuppliedOptimizerOverrides,
 								indexName,
 								isConstraint,
 								forUpdate,
@@ -581,6 +583,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									int resultSetNumber,
 									int hashKeyColumn,
 									String tableName,
+									String userSuppliedOptimizerOverrides,
 									String indexName,
 									boolean isConstraint,
 									int colRefItem,
@@ -602,6 +605,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								resultSetNumber,
 								hashKeyColumn,
 								tableName,
+								userSuppliedOptimizerOverrides,
 								indexName,
 								isConstraint,
 								colRefItem,
@@ -631,6 +635,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									boolean sameStartStopPosition,
 									Qualifier[][] qualifiers,
 									String tableName,
+									String userSuppliedOptimizerOverrides,
 									String indexName,
 									boolean isConstraint,
 									boolean forUpdate,
@@ -660,6 +665,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								sameStartStopPosition,
 								qualifiers,
 								tableName,
+								userSuppliedOptimizerOverrides,
 								indexName,
 								isConstraint,
 								forUpdate,
@@ -693,6 +699,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									boolean sameStartStopPosition,
 									Qualifier[][] qualifiers,
 									String tableName,
+									String userSuppliedOptimizerOverrides,
 									String indexName,
 									boolean isConstraint,
 									boolean forUpdate,
@@ -730,6 +737,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								sameStartStopPosition,
 								qualifiers,
 								tableName,
+								userSuppliedOptimizerOverrides,
 								indexName,
 								isConstraint,
 								forUpdate,
@@ -801,6 +809,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+								   String userSuppliedOptimizerOverrides,
 								   GeneratedMethod closeCleanup)
 			throws StandardException
 	{
@@ -812,6 +821,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 										   notExistsRightSide, 
 										   optimizerEstimatedRowCount,
 										   optimizerEstimatedCost,
+										   userSuppliedOptimizerOverrides,
 										   closeCleanup);
 	}
 
@@ -831,6 +841,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+								   String userSuppliedOptimizerOverrides,
 								   GeneratedMethod closeCleanup)
 			throws StandardException
 	{
@@ -842,6 +853,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 										   notExistsRightSide, 
 										   optimizerEstimatedRowCount,
 										   optimizerEstimatedCost,
+										   userSuppliedOptimizerOverrides,
 										   closeCleanup);
 	}
 
@@ -863,6 +875,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+								   String userSuppliedOptimizerOverrides,
 								   GeneratedMethod closeCleanup)
 			throws StandardException
 	{
@@ -876,6 +889,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 										   notExistsRightSide,
 										   optimizerEstimatedRowCount,
 										   optimizerEstimatedCost,
+										   userSuppliedOptimizerOverrides,
 										   closeCleanup);
 	}
 
@@ -897,6 +911,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+								   String userSuppliedOptimizerOverrides,
 								   GeneratedMethod closeCleanup)
 			throws StandardException
 	{
@@ -910,6 +925,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 										   notExistsRightSide,
 										   optimizerEstimatedRowCount,
 										   optimizerEstimatedCost,
+										   userSuppliedOptimizerOverrides,
 										   closeCleanup);
 	}
 
@@ -1086,6 +1102,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	 *		ExecRow rowAllocator() throws StandardException; </verbatim>
 	 * @param conglomId 		the conglomerate of the table to be scanned.
 	 * @param tableName			The full name of the table
+	 * @param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 	 * @param indexName			The name of the index, if one used to access table.
 	 * @param colRefItem		An saved item for a bitSet of columns that
 	 *							are referenced in the underlying table.  -1 if
@@ -1112,6 +1129,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		GeneratedMethod 	resultRowAllocator,
 		long 				conglomId,
 		String 				tableName,
+		String 				userSuppliedOptimizerOverrides,
 		String 				indexName,
 		int 				colRefItem,
 		int 				lockMode,
@@ -1128,6 +1146,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 					resultRowAllocator,
 					conglomId,
 					tableName,
+					userSuppliedOptimizerOverrides,
 					indexName,
 					colRefItem,
 					lockMode,
@@ -1158,6 +1177,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									boolean sameStartStopPosition,
 									Qualifier[][] qualifiers,
 									String tableName,
+									String userSuppliedOptimizerOverrides,
 									String indexName,
 									boolean isConstraint,
 									boolean forUpdate,
@@ -1191,6 +1211,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								sameStartStopPosition,
 								qualifiers,
 								tableName,
+								userSuppliedOptimizerOverrides,
 								indexName,
 								isConstraint,
 								forUpdate,

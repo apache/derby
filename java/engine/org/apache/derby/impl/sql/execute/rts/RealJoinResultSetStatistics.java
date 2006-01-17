@@ -46,6 +46,7 @@ public abstract class RealJoinResultSetStatistics
 	public int rowsSeenRight;
 	public int rowsReturned;
 	public long restrictionTime;
+	public String userSuppliedOptimizerOverrides;
 
 
 	// CONSTRUCTORS
@@ -68,7 +69,8 @@ public abstract class RealJoinResultSetStatistics
 										int rowsReturned,
 										long restrictionTime,
 										double optimizerEstimatedRowCount,
-										double optimizerEstimatedCost
+										double optimizerEstimatedCost,
+										String userSuppliedOptimizerOverrides
 										)
 	{
 		super(
@@ -87,6 +89,7 @@ public abstract class RealJoinResultSetStatistics
 		this.rowsSeenRight = rowsSeenRight;
 		this.rowsReturned = rowsReturned;
 		this.restrictionTime = restrictionTime;
+		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;	
 	}
 
  

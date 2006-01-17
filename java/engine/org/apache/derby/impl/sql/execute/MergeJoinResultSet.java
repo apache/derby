@@ -93,7 +93,7 @@ public class MergeJoinResultSet extends JoinResultSet
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,
 			  activation, restriction, resultSetNumber, 
 			  oneRowRightSide, notExistsRightSide, optimizerEstimatedRowCount, 
-			  optimizerEstimatedCost, closeCleanup);
+			  optimizerEstimatedCost, null, closeCleanup);
 
 		this.leftGreaterThanRight = leftGreaterThanRight;
     }

@@ -90,7 +90,8 @@ public class HalfOuterJoinNode extends JoinNode
 				onClause,
 				usingClause,
 				null,
-				tableProperties);
+				tableProperties,
+				null);
 		this.rightOuterJoin = ((Boolean) rightOuterJoin).booleanValue();
 
 		/* We can only flatten an outer join
@@ -628,6 +629,7 @@ public class HalfOuterJoinNode extends JoinNode
 												joinClause,
 												null,
 												resultColumns,
+												null,
 												null,
 												getContextManager());
 						ij.setTableNumber(tableNumber);

@@ -65,6 +65,7 @@ public class RealNestedLoopLeftOuterJoinStatistics
 								long restrictionTime,
 								double optimizerEstimatedRowCount,
 								double optimizerEstimatedCost,
+								String userSuppliedOptimizerOverrides,
 								ResultSetStatistics leftResultSetStatistics,
 								ResultSetStatistics rightResultSetStatistics,
 								int emptyRightRowsReturned
@@ -86,6 +87,7 @@ public class RealNestedLoopLeftOuterJoinStatistics
 			false,		// We never do an EXISTS join for an outer join
 			optimizerEstimatedRowCount,
 			optimizerEstimatedCost,
+			userSuppliedOptimizerOverrides,
 			leftResultSetStatistics,
 			rightResultSetStatistics
 			);

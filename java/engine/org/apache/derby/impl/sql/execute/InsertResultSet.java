@@ -2329,6 +2329,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 							false,
 							(Qualifier[][])null,	// qualifiers
 							"tableName",
+							(String)null,
 							(String)null,			// index name
 							false,					// is constraint
 							false,					// for update

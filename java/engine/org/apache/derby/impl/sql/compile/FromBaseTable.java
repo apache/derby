@@ -3131,6 +3131,13 @@ public class FromBaseTable extends FromTable
 		resultColumns.generateHolder(acb, mb, referencedCols, (FormatableBitSet) null);
 		mb.push(cd.getConglomerateNumber());
 		mb.push(tableDescriptor.getName());
+		//User may have supplied optimizer overrides in the sql
+		//Pass them onto execute phase so it can be shown in 
+		//run time statistics.
+		if (tableProperties != null)
+			mb.push(org.apache.derby.iapi.util.PropertyUtil.sortProperties(tableProperties));
+		else
+			mb.pushNull("java.lang.String");
 		mb.push(cd.getConglomerateName());
 		mb.push(colRefItem);
 		mb.push(getTrulyTheBestAccessPath().getLockMode());
@@ -3141,7 +3148,7 @@ public class FromBaseTable extends FromTable
 		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getLastIndexKeyResultSet",
-					ClassName.NoPutResultSet, 13);
+					ClassName.NoPutResultSet, 14);
 
 
 	}
@@ -3218,6 +3225,13 @@ public class FromBaseTable extends FromTable
 		mb.push(getResultSetNumber());
 		mb.push(hashKeyItem);
 		mb.push(tableDescriptor.getName());
+		//User may have supplied optimizer overrides in the sql
+		//Pass them onto execute phase so it can be shown in 
+		//run time statistics.
+		if (tableProperties != null)
+			mb.push(org.apache.derby.iapi.util.PropertyUtil.sortProperties(tableProperties));
+		else
+			mb.pushNull("java.lang.String");
 		mb.push(cd.getConglomerateName());
 		mb.push(cd.isConstraint());
 		mb.push(colRefItem);
@@ -3230,7 +3244,7 @@ public class FromBaseTable extends FromTable
 
 		
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getDistinctScanResultSet",
-							ClassName.NoPutResultSet, 16);
+							ClassName.NoPutResultSet, 17);
 	}
 
 

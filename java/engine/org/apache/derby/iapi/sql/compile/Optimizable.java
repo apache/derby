@@ -182,7 +182,7 @@ public interface Optimizable {
 	public boolean isCoveringIndex(ConglomerateDescriptor cd) throws StandardException;
 
 	/**
-	 * Get the Properties list, if any, associated with this optimizalbe.
+	 * Get the Properties list, if any, associated with this optimizable.
 	 *
 	 * @return The Properties list, if any, associated with this optimizable.
 	 */

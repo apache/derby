@@ -1,5 +1,9 @@
 ij> -- test the optimizer overrides
 autocommit off;
+ij> -- change display width in anticipation of runtimestatistics
+maximumdisplaywidth 5000;
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+Statement executed.
 ij> -- create the tables
 create table t1 (c1 int, c2 int, c3 int, constraint cons1 primary key(c1, c2));
 0 rows inserted/updated/deleted
@@ -115,6 +119,59 @@ C1 |C2 |C3
 2 |2 |2          
 3 |3 |3          
 4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select * from t1 --derby-properties index = t1_c1 
+for update
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=T1_C1 }
+	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=2
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
 ij> select * from t1 exposedname --derby-properties index = t1_c1 
 for update;
 C1 |C2 |C3         
@@ -123,6 +180,59 @@ C1 |C2 |C3
 2 |2 |2          
 3 |3 |3          
 4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select * from t1 exposedname --derby-properties index = t1_c1 
+for update
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=T1_C1 }
+	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=2
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
 ij> select * from t1 --derby-properties index = t1_c1 
 for update of c2, c1;
 C1 |C2 |C3         
@@ -131,6 +241,59 @@ C1 |C2 |C3
 2 |2 |2          
 3 |3 |3          
 4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select * from t1 --derby-properties index = t1_c1 
+for update of c2, c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=T1_C1 }
+	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=2
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
 ij> select * from t1 exposedname --derby-properties index = t1_c1 
 for update of c2, c1;
 C1 |C2 |C3         
@@ -139,6 +302,59 @@ C1 |C2 |C3
 2 |2 |2          
 3 |3 |3          
 4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select * from t1 exposedname --derby-properties index = t1_c1 
+for update of c2, c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=T1_C1 }
+	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=2
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
 ij> -- constraint which includes columns in for update of list
 select * from t1 --derby-properties constraint = cons1 
 for update;
@@ -148,6 +364,59 @@ C1 |C2 |C3
 2 |2 |2          
 3 |3 |3          
 4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select * from t1 --derby-properties constraint = cons1 
+for update
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=xxxxGENERATED-IDxxxx }
+	Index Scan ResultSet for T1 using constraint CONS1 at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
 ij> select * from t1 exposedname --derby-properties constraint = cons1 
 for update;
 C1 |C2 |C3         
@@ -156,6 +425,59 @@ C1 |C2 |C3
 2 |2 |2          
 3 |3 |3          
 4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select * from t1 exposedname --derby-properties constraint = cons1 
+for update
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=xxxxGENERATED-IDxxxx }
+	Index Scan ResultSet for T1 using constraint CONS1 at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
 ij> select * from t1 --derby-properties constraint = cons1 
 for update of c2, c1;
 C1 |C2 |C3         
@@ -164,6 +486,59 @@ C1 |C2 |C3
 2 |2 |2          
 3 |3 |3          
 4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select * from t1 --derby-properties constraint = cons1 
+for update of c2, c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=xxxxGENERATED-IDxxxx }
+	Index Scan ResultSet for T1 using constraint CONS1 at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
 ij> select * from t1 exposedname --derby-properties constraint = cons1 
 for update of c2, c1;
 C1 |C2 |C3         
@@ -172,9 +547,81 @@ C1 |C2 |C3
 2 |2 |2          
 3 |3 |3          
 4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select * from t1 exposedname --derby-properties constraint = cons1 
+for update of c2, c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=xxxxGENERATED-IDxxxx }
+	Index Scan ResultSet for T1 using constraint CONS1 at read committed isolation level using exclusive row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 1
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
 ij> -- select from view with bad derby-properties list
 select * from neg_v1;
 ERROR 42Y44: Invalid key 'asdf' specified in the Properties list of a FROM list. The case-sensitive keys that are currently supported are 'index, constraint, joinStrategy'. 
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	null
+Statement Text: 
+	call SYSIBM.SQLCAMESSAGE(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+null                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
 ij> -- bad derby-properties tests on outer joins
 select * from t1 --derby-properties i = a 
 left outer join t2 on 1=1;
@@ -198,6 +645,25 @@ commit;
 ij> -- dependent on index
 prepare p1 as 'select * from t1 --derby-properties index = t1_c1
 ';
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	null
+Statement Text: 
+	call SYSIBM.SQLCAMESSAGE(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+null                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
 ij> execute p1;
 C1 |C2 |C3         
 -----
@@ -205,15 +671,111 @@ C1 |C2 |C3
 2 |2 |2          
 3 |3 |3          
 4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select * from t1 --derby-properties index = t1_c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=T1_C1 }
+	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched={1}
+		Number of columns fetched=1
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
 ij> drop index t1_c1;
 0 rows inserted/updated/deleted
 ij> execute p1;
 ERROR 42Y46: Invalid Properties list in FROM list.  There is no index 'T1_C1' on table 'T1'.
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	null
+Statement Text: 
+	call SYSIBM.SQLCAMESSAGE(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+null                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
 ij> remove p1;
 ij> rollback;
 ij> -- dependent on constraint
 prepare p2 as 'select * from t1 --derby-properties constraint = cons1
 ';
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C2
+Statement Text: 
+	values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Row ResultSet:
+Number of opens = 1
+Rows returned = 1
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
 ij> execute p2;
 C1 |C2 |C3         
 -----
@@ -221,16 +783,83 @@ C1 |C2 |C3
 2 |2 |2          
 3 |3 |3          
 4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select * from t1 --derby-properties constraint = cons1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Index Row to Base Row ResultSet for T1:
+Number of opens = 1
+Rows seen = 4
+Columns accessed from heap = {0, 1, 2}
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=xxxxGENERATED-IDxxxx }
+	Index Scan ResultSet for T1 using constraint CONS1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+	Number of opens = 1
+	Rows seen = 4
+	Rows filtered = 0
+	Fetch Size = 16
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched={2}
+		Number of columns fetched=1
+		Number of deleted rows visited=0
+		Number of pages visited=1
+		Number of rows qualified=4
+		Number of rows visited=4
+		Scan type=btree
+		Tree height=1
+		start position: 
+	None
+		stop position: 
+	None
+		qualifiers:
+None
 ij> alter table t1 drop constraint cons1;
 0 rows inserted/updated/deleted
 ij> execute p2;
 ERROR 42Y48: Invalid Properties list in FROM list.  Either there is no named constraint 'CONS1' on table 'T1' or the constraint does not have a backing index.
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	null
+Statement Text: 
+	call SYSIBM.SQLCAMESSAGE(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+null                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
 ij> remove p2;
 ij> rollback;
-ij> -- change display width in anticipation of runtimestatistics
-maximumdisplaywidth 5000;
-ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
-Statement executed.
 ij> -- the token derby-properties is case insensitive. Few tests for that
 select * from t1 --DeRbY-pRoPeRtIeS index = t1_c1 
 ;
@@ -266,6 +895,7 @@ Columns accessed from heap = {0, 1, 2}
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=T1_C1 }
 	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 	Number of opens = 1
 	Rows seen = 4
@@ -378,6 +1008,7 @@ Columns accessed from heap = {0, 1, 2}
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=t1_c2c1 }
 	Index Scan ResultSet for T1 using index t1_c2c1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 	Number of opens = 1
 	Rows seen = 4
@@ -430,6 +1061,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
+User supplied optimizer overrides on T1 are { index=NULL }
 Table Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 Number of opens = 1
 Rows seen = 4
@@ -485,6 +1117,7 @@ Columns accessed from heap = {1, 2}
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=T1_C1 }
 	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using share row locking chosen by the optimizer
 	Number of opens = 1
 	Rows seen = 4
@@ -546,6 +1179,7 @@ Columns accessed from heap = {0, 1, 2}
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
+	User supplied optimizer overrides on T1 are { index=T1_C1 }
 	Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using exclusive row locking chosen by the optimizer
 	Number of opens = 1
 	Rows seen = 4
@@ -636,6 +1270,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 	Left result set:
+		User supplied optimizer overrides on T1 are { index=T1_C1 }
 		Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 		Number of opens = 1
 		Rows seen = 4
@@ -662,6 +1297,7 @@ Source result set:
 			qualifiers:
 None
 	Right result set:
+		User supplied optimizer overrides on T2 are { index=T2_C2 }
 		Index Scan ResultSet for T2 using index T2_C2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 		Number of opens = 4
 		Rows seen = 16
@@ -687,6 +1323,116 @@ None
 	None
 			qualifiers:
 None
+ij> select 1 from --derby-PROPERTIES joinOrder=fixed
+t1, t2 where t1.c1 = t2.c1;
+1          
+-----
+1          
+1          
+1          
+1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURSH200C1
+Statement Text: 
+	select 1 from --derby-PROPERTIES joinOrder=fixed
+t1, t2 where t1.c1 = t2.c1
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (4):
+Number of opens = 1
+Rows seen = 4
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	User supplied optimizer overrides for join are { joinOrder=FIXED }
+	Hash Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 4
+	Rows seen from the right = 4
+	Rows filtered = 0
+	Rows returned = 4
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Index Scan ResultSet for T1 using constraint CONS1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 4
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=4
+			Number of rows visited=4
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			qualifiers:
+None
+	Right result set:
+		Hash Scan ResultSet for T2 using constraint CONS2 at read committed isolation level using instantaneous share row locking: 
+		Number of opens = 4
+		Hash table size = 4
+		Hash key is column number 0
+		Rows seen = 4
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched={0}
+			Number of columns fetched=1
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=4
+			Number of rows visited=4
+			Scan type=btree
+			Tree height=1
+			start position: 
+	None
+			stop position: 
+	None
+			scan qualifiers:
+None
+			next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 ij> -- comparisons that can't get pushed down
 select * from t1 --derby-properties index = t1_c1 
 where c1 = c1;
@@ -762,6 +1508,7 @@ Left result set:
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
+		User supplied optimizer overrides on T1 are { index=T1_C1 }
 		Index Scan ResultSet for T1 using index T1_C1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 		Number of opens = 1
 		Rows seen = 4
@@ -809,6 +1556,7 @@ Right result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
+			User supplied optimizer overrides on T2 are { index=T2_C2 }
 			Index Scan ResultSet for T2 using index T2_C2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 			Number of opens = 4
 			Rows seen = 16
@@ -886,6 +1634,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 	Left result set:
+		User supplied optimizer overrides on T1 are { joinStrategy=NESTEDLOOP }
 		Index Scan ResultSet for T1 using index T1_C1C2C3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 		Number of opens = 1
 		Rows seen = 4

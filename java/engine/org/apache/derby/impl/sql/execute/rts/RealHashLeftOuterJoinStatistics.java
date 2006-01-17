@@ -56,6 +56,7 @@ public class RealHashLeftOuterJoinStatistics
 								long restrictionTime,
 								double optimizerEstimatedRowCount,
 								double optimizerEstimatedCost,
+								String userSuppliedOptimizerOverrides,
 								ResultSetStatistics leftResultSetStatistics,
 								ResultSetStatistics rightResultSetStatistics,
 								int emptyRightRowsReturned
@@ -76,6 +77,7 @@ public class RealHashLeftOuterJoinStatistics
 			restrictionTime,
 			optimizerEstimatedRowCount,
 			optimizerEstimatedCost,
+			userSuppliedOptimizerOverrides,
 			leftResultSetStatistics,
 			rightResultSetStatistics,
 			emptyRightRowsReturned

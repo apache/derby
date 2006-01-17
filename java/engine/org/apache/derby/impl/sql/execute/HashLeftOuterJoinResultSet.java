@@ -59,6 +59,7 @@ public class HashLeftOuterJoinResultSet extends NestedLoopLeftOuterJoinResultSet
 					    boolean notExistsRightSide,
  					    double optimizerEstimatedRowCount,
 						double optimizerEstimatedCost,
+						String userSuppliedOptimizerOverrides,
 						GeneratedMethod closeCleanup)
     {
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,
@@ -66,6 +67,6 @@ public class HashLeftOuterJoinResultSet extends NestedLoopLeftOuterJoinResultSet
 			  emptyRowFun, wasRightOuterJoin,
 			  oneRowRightSide, notExistsRightSide,
 			  optimizerEstimatedRowCount, optimizerEstimatedCost, 
-			  closeCleanup);
+			  userSuppliedOptimizerOverrides, closeCleanup);
     }
 }

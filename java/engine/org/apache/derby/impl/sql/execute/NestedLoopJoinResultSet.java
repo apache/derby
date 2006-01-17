@@ -287,12 +287,13 @@ public class NestedLoopJoinResultSet extends JoinResultSet
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+								   String userSuppliedOptimizerOverrides,
 								   GeneratedMethod closeCleanup)
     {
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,
 			  activation, restriction, resultSetNumber, 
 			  oneRowRightSide, notExistsRightSide, optimizerEstimatedRowCount, 
-			  optimizerEstimatedCost, closeCleanup);
+			  optimizerEstimatedCost, userSuppliedOptimizerOverrides, closeCleanup);
 		if (notExistsRightSide)
 			rightTemplate = getExecutionFactory().getValueRow(rightNumCols);
     }

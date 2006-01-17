@@ -8563,6 +8563,7 @@ qualifiedJoin(ResultSetNode leftRSN, boolean nestedInParens) throws StandardExce
 									usingClause,
 									null,
 									null,
+									null,
 									getContextManager());
 				break;
 

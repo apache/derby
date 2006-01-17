@@ -1,6 +1,10 @@
 -- test the optimizer overrides
 autocommit off;
 
+-- change display width in anticipation of runtimestatistics
+maximumdisplaywidth 5000;
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+
 -- create the tables
 create table t1 (c1 int, c2 int, c3 int, constraint cons1 primary key(c1, c2));
 create table t2 (c1 int not null, c2 int not null, c3 int, constraint cons2 unique(c1, c2));
@@ -89,25 +93,40 @@ select * from t1 exposedname --derby-properties index = t1_c1, constraint = cons
 -- index which includes columns in for update of list
 select * from t1 --derby-properties index = t1_c1 
 for update;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
 select * from t1 exposedname --derby-properties index = t1_c1 
 for update;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
 select * from t1 --derby-properties index = t1_c1 
 for update of c2, c1;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
 select * from t1 exposedname --derby-properties index = t1_c1 
 for update of c2, c1;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 -- constraint which includes columns in for update of list
 select * from t1 --derby-properties constraint = cons1 
 for update;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
 select * from t1 exposedname --derby-properties constraint = cons1 
 for update;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
 select * from t1 --derby-properties constraint = cons1 
 for update of c2, c1;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
 select * from t1 exposedname --derby-properties constraint = cons1 
 for update of c2, c1;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 -- select from view with bad derby-properties list
 select * from neg_v1;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 -- bad derby-properties tests on outer joins
 select * from t1 --derby-properties i = a 
@@ -131,25 +150,26 @@ commit;
 -- dependent on index
 prepare p1 as 'select * from t1 --derby-properties index = t1_c1
 ';
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 execute p1;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 drop index t1_c1;
 execute p1;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 remove p1;
 rollback;
 
 -- dependent on constraint
 prepare p2 as 'select * from t1 --derby-properties constraint = cons1
 ';
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 execute p2;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 alter table t1 drop constraint cons1;
 execute p2;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 remove p2;
 rollback;
-
--- change display width in anticipation of runtimestatistics
-maximumdisplaywidth 5000;
-
-call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 
 -- the token derby-properties is case insensitive. Few tests for that
 select * from t1 --DeRbY-pRoPeRtIeS index = t1_c1 
@@ -184,6 +204,10 @@ values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 select 1 from t1 a --derby-properties index = t1_c1
 , t2 b --derby-properties index = t2_c2
 ;values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+select 1 from --derby-PROPERTIES joinOrder=fixed
+t1, t2 where t1.c1 = t2.c1;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 -- comparisons that can't get pushed down
 select * from t1 --derby-properties index = t1_c1 

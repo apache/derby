@@ -65,6 +65,8 @@ public abstract class JoinResultSet extends NoPutResultSetImpl
     protected GeneratedMethod closeCleanup;
 	public	  boolean oneRowRightSide;
 	public	  boolean notExistsRightSide;  //right side is NOT EXISTS
+	
+	String userSuppliedOptimizerOverrides;
 
     /*
      * class interface
@@ -81,6 +83,7 @@ public abstract class JoinResultSet extends NoPutResultSetImpl
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
+								   String userSuppliedOptimizerOverrides,
 								   GeneratedMethod closeCleanup)
     {
 		super(activation, resultSetNumber, optimizerEstimatedRowCount, 
@@ -94,6 +97,7 @@ public abstract class JoinResultSet extends NoPutResultSetImpl
 		this.notExistsRightSide = notExistsRightSide;
         this.closeCleanup = closeCleanup;
 		constructorTime += getElapsedMillis(beginTime);
+		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
     }
 
 	//

@@ -1660,6 +1660,8 @@ public class SelectNode extends ResultSetNode
 												null,
 												leftRCList,
 												null,
+												//user supplied optimizer overrides
+												fromList.properties,
 												getContextManager()
 												),
 							0
