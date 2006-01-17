@@ -110,29 +110,29 @@ SYSTRIGGERS_INDEX1                                                              
 SYSTRIGGERS_INDEX2                                                                                                              |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSTRIGGERS_INDEX3                                                                                                              |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSVIEWS_INDEX1                                                                                                                 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
-ij> select TABLENAME, TABLETYPE from sys.systables;
+ij> select TABLENAME, TABLETYPE from sys.systables order by tablename;
 TABLENAME                                                                                                                       |&
 ----------------------------------------------------------------------------------------------------------------------------------
-SYSCONGLOMERATES                                                                                                                |S
-SYSTABLES                                                                                                                       |S
-SYSCOLUMNS                                                                                                                      |S
-SYSSCHEMAS                                                                                                                      |S
-SYSCONSTRAINTS                                                                                                                  |S
-SYSKEYS                                                                                                                         |S
-SYSDEPENDS                                                                                                                      |S
 SYSALIASES                                                                                                                      |S
-SYSVIEWS                                                                                                                        |S
 SYSCHECKS                                                                                                                       |S
-SYSFOREIGNKEYS                                                                                                                  |S
-SYSSTATEMENTS                                                                                                                   |S
-SYSFILES                                                                                                                        |S
-SYSTRIGGERS                                                                                                                     |S
-SYSSTATISTICS                                                                                                                   |S
-SYSDUMMY1                                                                                                                       |S
-SYSTABLEPERMS                                                                                                                   |S
 SYSCOLPERMS                                                                                                                     |S
-SYSROUTINEPERMS                                                                                                                 |S
+SYSCOLUMNS                                                                                                                      |S
+SYSCONGLOMERATES                                                                                                                |S
+SYSCONSTRAINTS                                                                                                                  |S
+SYSDEPENDS                                                                                                                      |S
+SYSDUMMY1                                                                                                                       |S
+SYSFILES                                                                                                                        |S
+SYSFOREIGNKEYS                                                                                                                  |S
+SYSKEYS                                                                                                                         |S
 SYSREQUIREDPERM                                                                                                                 |S
+SYSROUTINEPERMS                                                                                                                 |S
+SYSSCHEMAS                                                                                                                      |S
+SYSSTATEMENTS                                                                                                                   |S
+SYSSTATISTICS                                                                                                                   |S
+SYSTABLEPERMS                                                                                                                   |S
+SYSTABLES                                                                                                                       |S
+SYSTRIGGERS                                                                                                                     |S
+SYSVIEWS                                                                                                                        |S
 ij> select TABLENAME,
 	COLUMNNAME, COLUMNNUMBER,
 	columndatatype
@@ -324,29 +324,29 @@ SYSVIEWS                                                                        
 SYSVIEWS                                                                                                                        |true 
 ij> create table t (i int, s smallint);
 0 rows inserted/updated/deleted
-ij> select TABLENAME, TABLETYPE from sys.systables;
+ij> select TABLENAME, TABLETYPE from sys.systables order by tablename;
 TABLENAME                                                                                                                       |&
 ----------------------------------------------------------------------------------------------------------------------------------
-SYSCONGLOMERATES                                                                                                                |S
-SYSTABLES                                                                                                                       |S
-SYSCOLUMNS                                                                                                                      |S
-SYSSCHEMAS                                                                                                                      |S
-SYSCONSTRAINTS                                                                                                                  |S
-SYSKEYS                                                                                                                         |S
-SYSDEPENDS                                                                                                                      |S
 SYSALIASES                                                                                                                      |S
-SYSVIEWS                                                                                                                        |S
 SYSCHECKS                                                                                                                       |S
-SYSFOREIGNKEYS                                                                                                                  |S
-SYSSTATEMENTS                                                                                                                   |S
-SYSFILES                                                                                                                        |S
-SYSTRIGGERS                                                                                                                     |S
-SYSSTATISTICS                                                                                                                   |S
-SYSDUMMY1                                                                                                                       |S
-SYSTABLEPERMS                                                                                                                   |S
 SYSCOLPERMS                                                                                                                     |S
-SYSROUTINEPERMS                                                                                                                 |S
+SYSCOLUMNS                                                                                                                      |S
+SYSCONGLOMERATES                                                                                                                |S
+SYSCONSTRAINTS                                                                                                                  |S
+SYSDEPENDS                                                                                                                      |S
+SYSDUMMY1                                                                                                                       |S
+SYSFILES                                                                                                                        |S
+SYSFOREIGNKEYS                                                                                                                  |S
+SYSKEYS                                                                                                                         |S
 SYSREQUIREDPERM                                                                                                                 |S
+SYSROUTINEPERMS                                                                                                                 |S
+SYSSCHEMAS                                                                                                                      |S
+SYSSTATEMENTS                                                                                                                   |S
+SYSSTATISTICS                                                                                                                   |S
+SYSTABLEPERMS                                                                                                                   |S
+SYSTABLES                                                                                                                       |S
+SYSTRIGGERS                                                                                                                     |S
+SYSVIEWS                                                                                                                        |S
 T                                                                                                                               |T
 ij> select TABLENAME,
 	COLUMNNAME, COLUMNNUMBER,
@@ -544,32 +544,32 @@ ij> -- > 30 char table and column names
 create table t234567890123456789012345678901234567890
 (c23456789012345678901234567890 int);
 0 rows inserted/updated/deleted
-ij> select TABLENAME from sys.systables where length(TABLENAME) > 30;
+ij> select TABLENAME from sys.systables where length(TABLENAME) > 30 order by tablename;
 TABLENAME                                                                                                                       
 --------------------------------------------------------------------------------------------------------------------------------
 T234567890123456789012345678901234567890                                                                                        
-ij> select COLUMNNAME from sys.syscolumns where {fn length(COLUMNNAME)} > 30;
+ij> select COLUMNNAME from sys.syscolumns where {fn length(COLUMNNAME)} > 30 order by columnname;
 COLUMNNAME                                                                                                                      
 --------------------------------------------------------------------------------------------------------------------------------
 ij> -- primary key
 create table primkey1 (c1 int not null constraint prim1 primary key);
 0 rows inserted/updated/deleted
 ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t
-where c.tableid = t.tableid and not t.tablename like 'UNNAMED%';
+where c.tableid = t.tableid and not t.tablename like 'UNNAMED%' order by c.constraintname;
 CONSTRAINTNAME                                                                                                                  |&
 ----------------------------------------------------------------------------------------------------------------------------------
 PRIM1                                                                                                                           |P
 ij> create table unnamed_primkey2 (c1 int not null primary key);
 0 rows inserted/updated/deleted
 ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t
-where c.tableid = t.tableid and not t.tablename like 'UNNAMED%';
+where c.tableid = t.tableid and not t.tablename like 'UNNAMED%' order by c.constraintname;
 CONSTRAINTNAME                                                                                                                  |&
 ----------------------------------------------------------------------------------------------------------------------------------
 PRIM1                                                                                                                           |P
 ij> create table primkey3 (c1 int not null, c2 int not null, constraint prim3 primary key(c2, c1));
 0 rows inserted/updated/deleted
 ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t
-where c.tableid = t.tableid and not t.tablename like 'UNNAMED%';
+where c.tableid = t.tableid and not t.tablename like 'UNNAMED%' order by c.constraintname;
 CONSTRAINTNAME                                                                                                                  |&
 ----------------------------------------------------------------------------------------------------------------------------------
 PRIM1                                                                                                                           |P
@@ -577,7 +577,7 @@ PRIM3                                                                           
 ij> create table uniquekey1 (c1 int not null constraint uniq1 unique);
 0 rows inserted/updated/deleted
 ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t
-where c.tableid = t.tableid and not t.tablename like 'UNNAMED%';
+where c.tableid = t.tableid and not t.tablename like 'UNNAMED%' order by c.constraintname;
 CONSTRAINTNAME                                                                                                                  |&
 ----------------------------------------------------------------------------------------------------------------------------------
 PRIM1                                                                                                                           |P
@@ -586,7 +586,7 @@ UNIQ1                                                                           
 ij> create table unnamed_uniquekey2 (c1 int not null unique);
 0 rows inserted/updated/deleted
 ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t
-where c.tableid = t.tableid and not t.tablename like 'UNNAMED%';
+where c.tableid = t.tableid and not t.tablename like 'UNNAMED%' order by c.constraintname;
 CONSTRAINTNAME                                                                                                                  |&
 ----------------------------------------------------------------------------------------------------------------------------------
 PRIM1                                                                                                                           |P
@@ -595,7 +595,7 @@ UNIQ1                                                                           
 ij> create table uniquekey3 (c1 int not null, c2 int not null, constraint uniq3 unique(c2, c1));
 0 rows inserted/updated/deleted
 ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t
-where c.tableid = t.tableid and not t.tablename like 'UNNAMED%';
+where c.tableid = t.tableid and not t.tablename like 'UNNAMED%' order by c.constraintname;
 CONSTRAINTNAME                                                                                                                  |&
 ----------------------------------------------------------------------------------------------------------------------------------
 PRIM1                                                                                                                           |P
@@ -606,35 +606,35 @@ ij> -- views
 create view dummyview as select * from t, uniquekey3;
 0 rows inserted/updated/deleted
 ij> select tablename from sys.systables t, sys.sysviews v
-where t.tableid = v.tableid;
+where t.tableid = v.tableid order by tablename;
 TABLENAME                                                                                                                       
 --------------------------------------------------------------------------------------------------------------------------------
 DUMMYVIEW                                                                                                                       
 ij> -- RESOLVE - add selects from sysdepends when simplified
 -- verify the consistency of the indexes on the system catalogs
 select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
-from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1' order by tablename;
 TABLENAME                                                                                                                       |2          
 --------------------------------------------------------------------------------------------------------------------------------------------
-SYSCONGLOMERATES                                                                                                                |1          
-SYSTABLES                                                                                                                       |1          
-SYSCOLUMNS                                                                                                                      |1          
-SYSSCHEMAS                                                                                                                      |1          
-SYSCONSTRAINTS                                                                                                                  |1          
-SYSKEYS                                                                                                                         |1          
-SYSDEPENDS                                                                                                                      |1          
 SYSALIASES                                                                                                                      |1          
-SYSVIEWS                                                                                                                        |1          
 SYSCHECKS                                                                                                                       |1          
-SYSFOREIGNKEYS                                                                                                                  |1          
-SYSSTATEMENTS                                                                                                                   |1          
+SYSCOLPERMS                                                                                                                     |1          
+SYSCOLUMNS                                                                                                                      |1          
+SYSCONGLOMERATES                                                                                                                |1          
+SYSCONSTRAINTS                                                                                                                  |1          
+SYSDEPENDS                                                                                                                      |1          
 SYSFILES                                                                                                                        |1          
-SYSTRIGGERS                                                                                                                     |1          
+SYSFOREIGNKEYS                                                                                                                  |1          
+SYSKEYS                                                                                                                         |1          
+SYSREQUIREDPERM                                                                                                                 |1          
+SYSROUTINEPERMS                                                                                                                 |1          
+SYSSCHEMAS                                                                                                                      |1          
+SYSSTATEMENTS                                                                                                                   |1          
 SYSSTATISTICS                                                                                                                   |1          
 SYSTABLEPERMS                                                                                                                   |1          
-SYSCOLPERMS                                                                                                                     |1          
-SYSROUTINEPERMS                                                                                                                 |1          
-SYSREQUIREDPERM                                                                                                                 |1          
+SYSTABLES                                                                                                                       |1          
+SYSTRIGGERS                                                                                                                     |1          
+SYSVIEWS                                                                                                                        |1          
 ij> -- drop views
 drop view dummyview;
 0 rows inserted/updated/deleted
@@ -644,7 +644,7 @@ create table decimal_tab (dcol decimal(5,2), ncol numeric(5,2) default 1.0);
 0 rows inserted/updated/deleted
 ij> select columnname, columnnumber, columndatatype
 from sys.syscolumns
-where columnname IN ('DCOL', 'NCOL');
+where columnname IN ('DCOL', 'NCOL') order by columnname;
 COLUMNNAME                                                                                                                      |COLUMNNUMB&|COLUMNDATATYPE 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 DCOL                                                                                                                            |1          |DECIMAL(5,2)   
@@ -656,7 +656,7 @@ create index decimal_tab_idx on decimal_tab(dcol);
 ij> -- index descriptor.
 select conglomeratename, descriptor
 from sys.sysconglomerates 
-where conglomeratename = 'DECIMAL_TAB_IDX';
+where conglomeratename = 'DECIMAL_TAB_IDX' order by conglomeratename;
 CONGLOMERATENAME                                                                                                                |DESCRIPTOR     
 ------------------------------------------------------------------------------------------------------------------------------------------------
 DECIMAL_TAB_IDX                                                                                                                 |BTREE (1)      
@@ -664,7 +664,7 @@ ij> create trigger t1 after update on decimal_tab for each row mode db2sql value
 0 rows inserted/updated/deleted
 ij> -- referenced columns.
 select triggername, referencedcolumns
-from sys.systriggers;
+from sys.systriggers order by triggername;
 TRIGGERNAME                                                                                                                     |REFERENCEDCOLU&
 ------------------------------------------------------------------------------------------------------------------------------------------------
 T1                                                                                                                              |NULL           
@@ -696,26 +696,26 @@ ij> drop table defaultAutoinc;
 0 rows inserted/updated/deleted
 ij> -- verify the consistency of the indexes on the system catalogs
 select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
-from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1' order by tablename;
 TABLENAME                                                                                                                       |2          
 --------------------------------------------------------------------------------------------------------------------------------------------
-SYSCONGLOMERATES                                                                                                                |1          
-SYSTABLES                                                                                                                       |1          
-SYSCOLUMNS                                                                                                                      |1          
-SYSSCHEMAS                                                                                                                      |1          
-SYSCONSTRAINTS                                                                                                                  |1          
-SYSKEYS                                                                                                                         |1          
-SYSDEPENDS                                                                                                                      |1          
 SYSALIASES                                                                                                                      |1          
-SYSVIEWS                                                                                                                        |1          
 SYSCHECKS                                                                                                                       |1          
-SYSFOREIGNKEYS                                                                                                                  |1          
-SYSSTATEMENTS                                                                                                                   |1          
+SYSCOLPERMS                                                                                                                     |1          
+SYSCOLUMNS                                                                                                                      |1          
+SYSCONGLOMERATES                                                                                                                |1          
+SYSCONSTRAINTS                                                                                                                  |1          
+SYSDEPENDS                                                                                                                      |1          
 SYSFILES                                                                                                                        |1          
-SYSTRIGGERS                                                                                                                     |1          
+SYSFOREIGNKEYS                                                                                                                  |1          
+SYSKEYS                                                                                                                         |1          
+SYSREQUIREDPERM                                                                                                                 |1          
+SYSROUTINEPERMS                                                                                                                 |1          
+SYSSCHEMAS                                                                                                                      |1          
+SYSSTATEMENTS                                                                                                                   |1          
 SYSSTATISTICS                                                                                                                   |1          
 SYSTABLEPERMS                                                                                                                   |1          
-SYSCOLPERMS                                                                                                                     |1          
-SYSROUTINEPERMS                                                                                                                 |1          
-SYSREQUIREDPERM                                                                                                                 |1          
+SYSTABLES                                                                                                                       |1          
+SYSTRIGGERS                                                                                                                     |1          
+SYSVIEWS                                                                                                                        |1          
 ij> 
