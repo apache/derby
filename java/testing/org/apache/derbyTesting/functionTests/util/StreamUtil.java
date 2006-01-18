@@ -37,6 +37,7 @@ public class StreamUtil
 
 	public static void insertAsciiColumn
 	(
+		Connection 		conn,	
 		String 			stmtText, 
 		int				colNumber,
 		String 			value, 
@@ -44,7 +45,6 @@ public class StreamUtil
 	)
 		throws Throwable
 	{
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 		PreparedStatement ps = conn.prepareStatement(stmtText);
 		setAsciiColumn(ps, colNumber, value.charAt(0), length);
 		ps.setInt(colNumber + 1, length);
@@ -53,6 +53,7 @@ public class StreamUtil
 	
 	public static void insertBinaryColumn
 	(
+		Connection 		conn,
 		String 			stmtText, 
 		int				colNumber,
 		String 			value, 
@@ -60,7 +61,6 @@ public class StreamUtil
 	)
 		throws Throwable
 	{
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 		PreparedStatement ps = conn.prepareStatement(stmtText);
 		setBinaryColumn(ps, colNumber, value.charAt(0), length);
 		ps.setInt(colNumber + 1, length);

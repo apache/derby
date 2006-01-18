@@ -27,9 +27,11 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Properties;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  *Just make a connection to wombat , 
@@ -48,8 +50,10 @@ public class bootLock1 {
 			// use the ij utility to read the property file and
 			// make the initial connection.
 			ij.getPropertyArg(args);
-			Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-			con = DriverManager.getConnection("jdbc:derby:wombat");
+			Properties prop = new Properties();
+			prop.setProperty("databaseName", "wombat");
+			con = TestUtil.getDataSourceConnection(prop);
+
 			stmt = con.createStatement();
 			// while we're here, let's cleanup
 			stmt.execute("drop table t1");

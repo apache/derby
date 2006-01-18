@@ -176,6 +176,17 @@ public class mtTestCase
                }
             }
             
+			// If the initial connection is being specified as a DataSource
+			// on the command line using -Dij.dataSource=<dsclassname>
+			// then remove the ij.database and ij.protocol property.
+            // This is because the ij.database and ij.protocol 
+            // will override the ij.dataSource property.
+			if (System.getProperty("ij.dataSource") != null)
+			{
+				p.remove("ij.database");
+				p.remove("ij.protocol");
+			}
+            
 			System.setProperties(p);
 		}
 		// set input stream

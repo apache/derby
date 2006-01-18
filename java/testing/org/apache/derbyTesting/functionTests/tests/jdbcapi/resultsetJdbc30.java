@@ -86,7 +86,10 @@ public class resultsetJdbc30 {
 			  System.out.println("trying rs.updateRef(int, Ref) :");
 			  rs.updateRef(8,null);
 			  System.out.println("Shouldn't reach here. Method not implemented yet.");
- 			} catch (SQLException ex) {
+			} catch (NoSuchMethodError nsme) {
+				System.out.println("ResultSet.updateRef not present - correct for JSR169");
+			}
+			catch (SQLException ex) {
 			  System.out.println("Expected : " + ex.getMessage());
  			}
 
@@ -95,7 +98,9 @@ public class resultsetJdbc30 {
 			  System.out.println("trying rs.updateRef(String, Ref) :");
 			  rs.updateRef("c",null);
 			  System.out.println("Shouldn't reach here. Method not implemented yet.");
- 			} catch (SQLException ex) {
+ 			} catch (NoSuchMethodError nsme) {
+				System.out.println("ResultSet.updateRef not present - correct for JSR169");
+			} catch (SQLException ex) {
 			  System.out.println("Expected : " + ex.getMessage());
  			}
 
@@ -140,16 +145,20 @@ public class resultsetJdbc30 {
 			  System.out.println("trying rs.updateArray(int, Array) :");
 			  rs.updateArray(8,null);
 			  System.out.println("Shouldn't reach here. Method not implemented yet.");
- 			} catch (SQLException ex) {
+ 			} catch (NoSuchMethodError nsme) {
+				System.out.println("ResultSet.updateArray not present - correct for JSR169");
+			} catch (SQLException ex) {
 			  System.out.println("Expected : " + ex.getMessage());
  			}
 
 			try {
 			  System.out.println();
-			  System.out.println("trying rs.updateClob(String, Array) :");
+			  System.out.println("trying rs.updateArray(String, Array) :");
 			  rs.updateArray("c",null);
 			  System.out.println("Shouldn't reach here. Method not implemented yet.");
- 			} catch (SQLException ex) {
+ 			} catch (NoSuchMethodError nsme) {
+				System.out.println("ResultSet.updateArray not present - correct for JSR169");
+			}catch (SQLException ex) {
 			  System.out.println("Expected : " + ex.getMessage());
  			}
 

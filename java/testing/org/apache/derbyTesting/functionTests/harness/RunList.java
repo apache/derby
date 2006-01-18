@@ -64,8 +64,7 @@ public class RunList
 	static boolean excludedFromJCC = false;
 	static String clientExclusionMessage;
 	static Boolean needIBMjvm = null;
-	static boolean needJdk14 = false;
-        static boolean needEncryption = false;
+	static boolean needEncryption = false;
 	static String jvmflags;
 	static String testJavaFlags;
 	static String classpath;
@@ -81,7 +80,6 @@ public class RunList
 	static String testEncryptionAlgorithm;
 	static String jdk12test;
 	static String jdk12exttest;
-	static String jdk14test;
 	static String runwithibmjvm = null;
 	static String runwithj9;
 	static String runwithjvm;
@@ -275,8 +273,6 @@ public class RunList
                     	pwOut.println("Cannot run the suite, requires jdk12 or higher with extensions");
 					else if(needJdk12)
                     	pwOut.println("Cannot run the suite, requires jdk12 or higher, have jdk" + javaVersion);
-					else if(needJdk14)
-                    	pwOut.println("Cannot run the suite, requires jdk14 or higher, have jdk" + javaVersion);
 					else if(excludedFromJCC)
                     	pwOut.println(clientExclusionMessage);
 					else if((needIBMjvm == null || needIBMjvm.booleanValue() == false))
@@ -396,8 +392,6 @@ public class RunList
             jvmProps.addElement("jdk12test=" + jdk12test);
         if (jdk12exttest != null)
             jvmProps.addElement("jdk12exttest=" + jdk12exttest);
-        if (jdk14test != null)
-            jvmProps.addElement("jdk14test=" + jdk14test);
         if (keepfiles != null)
             jvmProps.addElement("keepfiles=" + keepfiles);
         if ( (outputdir != null) && (outputdir.length()>0) )
@@ -630,11 +624,11 @@ public class RunList
             // And do the same for jdk12test
             jdk12test = parentProps.getProperty("jdk12test");
             jdk12exttest = parentProps.getProperty("jdk12exttest");
-	    // and jdk14test
-            jdk14test = parentProps.getProperty("jdk14test");
-            runwithj9 = parentProps.getProperty("runwithj9");
+	        runwithj9 = parentProps.getProperty("runwithj9");
             runwithibmjvm = parentProps.getProperty("runwithibmjvm");
-            String testJVM = (jvmName.startsWith("j9") ? "j9" : jvmName);
+            String testJVM = jvmName;
+            if (jvmName.startsWith("j9"))
+            	testJVM = (jvmName.equals("j9_foundation") ? "foundation" : "j9");            
             runwithjvm = parentProps.getProperty("runwith" + testJVM);
             excludeJCC = parentProps.getProperty("excludeJCC");
         }                
@@ -726,11 +720,12 @@ public class RunList
 		testEncryptionAlgorithm = suiteProperties.getProperty("testEncryptionAlgorithm");
 		jdk12test = suiteProperties.getProperty("jdk12test");
 		jdk12exttest = suiteProperties.getProperty("jdk12exttest");
-		jdk14test = suiteProperties.getProperty("jdk14test");
 		runwithibmjvm = suiteProperties.getProperty("runwithibmjvm");
 		runwithj9 = suiteProperties.getProperty("runwithj9");
-		String testJVM = (jvmName.startsWith("j9") ? "j9" : jvmName);
-		runwithjvm = suiteProperties.getProperty("runwith" + testJVM);
+        String testJVM = jvmName;
+        if (jvmName.startsWith("j9"))
+        	testJVM = (jvmName.equals("j9_foundation") ? "foundation" : "j9");
+        runwithjvm = suiteProperties.getProperty("runwith" + testJVM);
 		excludeJCC = suiteProperties.getProperty("excludeJCC");
 		keepfiles = suiteProperties.getProperty("keepfiles");
 		systemdiff = suiteProperties.getProperty("systemdiff");
@@ -861,12 +856,6 @@ public class RunList
 		else
             jdk12exttest = p.getProperty("jdk12exttest");
 
-        // jdk14test may be set at the top or just for a subsuite
-	    if ( parentProperties.getProperty("jdk14test") != null )
-		    p.put("jdk14test", jdk14test);
-		else
-            jdk14test = p.getProperty("jdk14test");
-
         // runwithibmjvm may be set at the top or just for a subsuite
 	    if ( parentProperties.getProperty("runwithibmjvm") != null )
 		    p.put("runwithibmjvm", runwithibmjvm);
@@ -874,7 +863,9 @@ public class RunList
             runwithibmjvm = p.getProperty("runwithibmjvm");
 
         // runwithjvm may be set at the top or just for a subsuite
-	    String testJVM = (jvmName.startsWith("j9") ? "j9" : jvmName);
+	    String testJVM = jvmName;
+        if (jvmName.startsWith("j9"))
+        	testJVM = (jvmName.equals("j9_foundation") ? "foundation" : "j9");
 	    if ( parentProperties.getProperty("runwith" + testJVM) != null )
 		    p.put("runwith" + testJVM, runwithjvm);
 		else
@@ -991,14 +982,11 @@ public class RunList
 
 	// figure out if suite should be skipped ... adhoc rules
 	boolean isJdk12 = false; // really now 'isJdk12orHigher'
-	boolean isJdk14 = false;
-	boolean isJdk15 = false;
 	boolean isJdk118 = false;
 	boolean isJdk117 = false;
 	boolean isEncryption = false;
 	boolean isJdk12Test = false;
 	boolean isJdk12ExtTest = false;
-	boolean isJdk14Test = false;
 	boolean isSyncTest = false;
 	boolean isSyncProduct = false;
 	boolean isExcludeJCC = false;
@@ -1010,18 +998,15 @@ public class RunList
 	needSync = false;
 	needJdk12 = false;
 	needJdk12ext = false;
-	needJdk14 = false;
 	excludedFromJCC = false;
 	needIBMjvm = null;
 
 
 	// Determine if this is jdk12 or higher (with or without extensions)
-        if (iminor >= 2) isJdk12 = true;
+    if (iminor >= 2) isJdk12 = true;
 	if ( System.getProperty("java.version").startsWith("1.1.8") ) isJdk118 = true;
-        if ( System.getProperty("java.version").startsWith("1.1.7") ) isJdk117 = true;
-        if ( System.getProperty("java.version").startsWith("1.4.") ) isJdk14 = true;
-        if ( System.getProperty("java.version").startsWith("1.5.") ) isJdk15 = true;
-
+    if ( System.getProperty("java.version").startsWith("1.1.7") ) isJdk117 = true;
+    
 	// if a test needs an ibm jvm, skip if runwithibmjvm is true.
 	// if a test needs to not run in an ibm jvm, skip if runwithibmjvm is false.
 	// if null, continue in all cases.
@@ -1081,9 +1066,7 @@ public class RunList
             if ("true".equalsIgnoreCase(jdk12test)) isJdk12Test = true;		
         if ( (jdk12exttest != null) && (jdk12exttest.length()>0) )
             if ("true".equalsIgnoreCase(jdk12exttest)) isJdk12ExtTest = true;
-        if ( (jdk14test != null) && (jdk14test.length()>0) )
-            if ("true".equalsIgnoreCase(jdk14test)) isJdk14Test = true;		
-
+        
         // Skip any suite if jvm is not jdk12 or higher for encryption, jdk12test or jdk12exttest
         if (!isJdk12)
         {
@@ -1095,14 +1078,7 @@ public class RunList
 	    if (result) return true; // stop looking once know should skip
  	}		
 
-        // Skip any suite if jvm is not jdk14 or higher for jdk14test
-        if ((!isJdk14 && !isJdk15) &&  isJdk14Test)
-	{
-		needJdk14 = true;
-  		return true;
-        }
-	
-        // Also require jdk12 extensions for encryption and jdk12exttest
+    // Also require jdk12 extensions for encryption and jdk12exttest
 	if ( (isEncryption) || (isJdk12ExtTest) )
 	{
 	    needJdk12ext = true;

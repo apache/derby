@@ -37,6 +37,8 @@ import java.nio.channels.FileLock;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import java.util.Properties;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  *Testing for FileLocks that prevent Derby Double Boot.
@@ -63,7 +65,7 @@ public class bootLock {
 			stmt.close();
 			con.close();
 			try{
-				con = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
+				TestUtil.shutdownUsingDataSource("wombat");
 			}catch(Exception e)
 			{
 				//Shutdown will throw exception , just ignore it.	
@@ -83,7 +85,9 @@ public class bootLock {
 			//Now if we try to boot , we should get an multiple 
 			//instance exception
 			try{
-				con = DriverManager.getConnection("jdbc:derby:wombat");
+				Properties prop = new Properties();
+				prop.setProperty("databaseName", "wombat");
+				TestUtil.getDataSourceConnection(prop);
 			}catch(SQLException e) {
 				System.out.println("expected exception");
 				dumpSQLExceptions(e);

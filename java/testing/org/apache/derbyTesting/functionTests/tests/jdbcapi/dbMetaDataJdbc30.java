@@ -66,8 +66,13 @@ public class dbMetaDataJdbc30 {
 							   "." + met.getDriverMinorVersion() +
 							   " (" + met.getDriverVersion() + ")");
 
-			System.out.println("The URL is: " + met.getURL());
-
+			try {
+				System.out.println("The URL is: " + met.getURL());
+			} catch (NoSuchMethodError msme)
+			{
+				System.out.println("DatabaseMetaData.getURL not present - correct for JSR169");
+			}
+			
 			System.out.println();
 			System.out.println("supportsSavepoints() : " + met.supportsSavepoints());
 

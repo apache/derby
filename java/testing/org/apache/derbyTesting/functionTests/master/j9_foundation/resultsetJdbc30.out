@@ -4,9 +4,9 @@ Expected : Feature not implemented: no details.
 trying rs.getURL(String) :
 Expected : Feature not implemented: no details.
 trying rs.updateRef(int, Ref) :
-Expected : Feature not implemented: no details.
+ResultSet.updateRef not present - correct for JSR169
 trying rs.updateRef(String, Ref) :
-Expected : Feature not implemented: no details.
+ResultSet.updateRef not present - correct for JSR169
 trying rs.updateBlob(int, Blob) :
 Expected : 'updateBlob' not allowed because the ResultSet is not an updatable ResultSet. 
 trying rs.updateBlob(String, Blob) :
@@ -16,7 +16,7 @@ Expected : 'updateClob' not allowed because the ResultSet is not an updatable Re
 trying rs.updateClob(String, Clob) :
 Expected : 'updateClob' not allowed because the ResultSet is not an updatable ResultSet. 
 trying rs.updateArray(int, Array) :
-Expected : Feature not implemented: no details.
+ResultSet.updateArray not present - correct for JSR169
 trying rs.updateArray(String, Array) :
-Expected : Feature not implemented: no details.
+ResultSet.updateArray not present - correct for JSR169
 Test resultsetJdbc30 finished

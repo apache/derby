@@ -84,7 +84,7 @@ lang/logStream.java
 lang/logop.sql
 lang/lojreorder.sql
 lang/longStringColumn.java
-lang/maxMemPerTab.sql
+lang/maxMemPerTab.java
 lang/miscerrors.sql
 lang/modifyColumn.sql
 lang/nestedCommit.sql
@@ -134,7 +134,7 @@ lang/triggerBeforeTrig.sql
 lang/triggerGeneral.sql
 lang/triggerRecursion.sql
 lang/triggerRefClause.sql
-lang/triggerStream.sql
+lang/triggerStream.java
 lang/unaryArithmeticDynamicParameter.java
 lang/ungroupedAggregatesNegative.sql
 lang/union.sql

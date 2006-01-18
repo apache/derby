@@ -42,6 +42,18 @@ public class holdCursorJava {
   private static String[] databaseObjects = {"PROCEDURE MYPROC", "TABLE T1", "TABLE T2",
                                  "TABLE TESTTABLE1", "TABLE TESTTABLE2",
                                  "TABLE BUG4385"};
+  private static boolean HAVE_DRIVER_MANAGER_CLASS;
+	
+  static{
+  	try{
+  		Class.forName("java.sql.DriverManager");
+  		HAVE_DRIVER_MANAGER_CLASS = true;
+	}
+	catch(ClassNotFoundException e){
+	  //Used for JSR169
+	  HAVE_DRIVER_MANAGER_CLASS = false;
+	}
+  } 	
 
   public static void main (String args[])
   {
@@ -54,10 +66,14 @@ public class holdCursorJava {
 
 		createAndPopulateTable(conn);
 
-    //set autocommit to off after creating table and inserting data
-    conn.setAutoCommit(false);
-    testHoldability(conn,ResultSet.HOLD_CURSORS_OVER_COMMIT);
-    testHoldability(conn,ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		//set autocommit to off after creating table and inserting data
+		conn.setAutoCommit(false);
+    
+		if(HAVE_DRIVER_MANAGER_CLASS){
+			testHoldability(conn,ResultSet.HOLD_CURSORS_OVER_COMMIT);
+			testHoldability(conn,ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		}
+    
 		testHoldCursorOnMultiTableQuery(conn);
 		testIsolationLevelChange(conn);
 

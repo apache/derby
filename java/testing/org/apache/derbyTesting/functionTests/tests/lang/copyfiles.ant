@@ -136,7 +136,6 @@ logop.sql
 logStream_app.properties
 lojreorder.sql
 longStringColumn_derby.properties
-maxMemPerTab.sql
 maxMemPerTab_app.properties
 maxMemPerTab_derby.properties
 miscerrors.sql
@@ -227,7 +226,6 @@ triggerRecursion.sql
 triggerRecursion_derby.properties
 triggerRefClause.sql
 triggerRefClause_app.properties
-triggerStream.sql
 triggerStream_app.properties
 triggerStream_derby.properties
 unaryArithmeticDynamicParameter_app.properties
@@ -241,7 +239,7 @@ updatableResultSet_app.properties
 updatableResultSet_sed.properties
 valuesclause.sql
 views.sql
-wisconsin.sql
+wisc_setup.sql
 wisconsin_app.properties
 wisconsin_derby.properties
 wisconsin_sed.properties
