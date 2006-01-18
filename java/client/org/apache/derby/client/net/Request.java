@@ -900,10 +900,8 @@ public class Request {
                 }
 
                 // perform the shift
-                for (int i = 0; i < dataToShift; i++) {
-                    bytes_[dataByte + shiftOffset] = bytes_[dataByte];
-                    dataByte--;
-                }
+                dataByte -= dataToShift;
+                System.arraycopy(bytes_, dataByte + 1,bytes_, dataByte + shiftOffset + 1, dataToShift);
 
                 // calculate the value the value of the 2 byte continuation dss header which
                 // includes the length of itself.  On the first pass, if the length is 32767

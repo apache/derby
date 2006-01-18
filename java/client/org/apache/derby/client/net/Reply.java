@@ -22,6 +22,7 @@ package org.apache.derby.client.net;
 
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 
 import org.apache.derby.client.am.SignedBinary;
 import org.apache.derby.client.am.SqlException;
@@ -75,9 +76,7 @@ public class Reply {
         pos_ = 0;
         count_ = 0;
         topDdmCollectionStack_ = Reply.EMPTY_STACK;
-        for (int i = 0; i < Reply.MAX_MARKS_NESTING; i++) {
-            ddmCollectionLenStack_[i] = 0;
-        }
+        Arrays.fill(ddmCollectionLenStack_, 0);
         ddmScalarLen_ = 0;
         dssLength_ = 0;
         dssIsContinued_ = false;
@@ -300,13 +299,8 @@ public class Reply {
                 bytesToShift = dssLength_;
             }
 
-            tempPos -= (shiftSize - 1);
-            // perform the compress
-            for (int j = 0; j < bytesToShift; j++) {
-                buffer_[tempPos + shiftSize] = buffer_[tempPos];
-                tempPos--;
-            }
-            tempPos += (shiftSize + 1);
+            tempPos -= (bytesToShift - 2);
+            System.arraycopy(buffer_, tempPos - shiftSize, buffer_, tempPos , bytesToShift);
         }
         // reposition the start of the data after the final dss shift.
         pos_ = tempPos;
