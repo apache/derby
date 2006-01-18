@@ -83,8 +83,13 @@ public class RecoveryAfterBackup
             try {
                 DataSource ds = TestUtil.getDataSource(shutdownAttrs);
                 ds.getConnection();
-            } catch (Throwable ith) {
-                ith.printStackTrace();
+            } catch(SQLException sqle) {
+                if (sqle.getSQLState() != null 
+                    && sqle.getSQLState().equals("XJ015")) {
+					System.out.println("Database shutdown completed");
+                } else {
+                    throw sqle;
+                }
             }
 
             // Start up with rollforward-recovery
