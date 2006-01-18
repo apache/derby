@@ -293,6 +293,47 @@ public class SelectNode extends ResultSetNode
 		return groupByList;
 	}
 
+	/*
+	 * DERBY-649: Find colName in the result columns and return underlying
+	 * columnReference.  This is useful for pushing union predicates into underlying
+	 * select statements.
+	 *
+	 * Handle the case of single table selects for now. Also if there is an
+	 * expression under the result column, it is not possible yet to push the
+	 * predicates for now.
+	 *
+	 * @return ColumnReference	If colName could be remapped to a table reference
+	 */
+	public ColumnReference findColumnReferenceInResult(String colName)
+					throws StandardException
+	{
+		if (fromList.size() != 1)
+			return null;
+
+		// This logic is similar to SubQueryNode.singleFromBaseTable(). Refactor
+		FromTable ft = (FromTable) fromList.elementAt(0);
+		if (! ((ft instanceof ProjectRestrictNode) &&
+		 		((ProjectRestrictNode) ft).getChildResult() instanceof FromBaseTable) &&
+				!(ft instanceof FromBaseTable))
+			return null;
+
+		// Loop through the result columns looking for a match
+		int rclSize = resultColumns.size();
+		for (int index = 0; index < rclSize; index++)
+		{
+			ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);
+			if (! (rc.getExpression() instanceof ColumnReference))
+				return null;
+
+			ColumnReference crNode = (ColumnReference) rc.getExpression();
+
+			if (crNode.columnName.equals(colName))
+				return (ColumnReference) crNode.getClone();
+		}
+
+		return null;
+	}
+
 	/**
 	 * Return the whereClause for this SelectNode.
 	 *

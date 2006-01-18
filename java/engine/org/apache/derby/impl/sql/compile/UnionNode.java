@@ -257,6 +257,34 @@ public class UnionNode extends SetOperatorNode
 		return costEstimate;
 	}
 
+	/*
+	 * DERBY-649: Handle pushing predicates into UnionNodes. For now, we only push simple
+	 * single column predicates that are binaryOperations. It should be possible to expand
+	 * this logic to cover more cases. Even pushing expressions (like a+b = 10) into SELECTs
+	 * would improve performance, even if they don't make Qualifiers. It would mean
+	 * evaluating expressions closer to data and hence could avoid sorting or other
+	 * overheads that UNION may require.
+	 *
+	 * Note that the predicates are not removed after pushing. This is to ensure if
+	 * pushing is not possible or only partially feasible.
+	 */
+	public void pushExpressions(PredicateList predicateList)
+					throws StandardException
+	{
+		// If left or right side is a UnionNode, further push the predicate list
+		// Note, it is OK not to push these predicates since they are also evaluated
+		// in the ProjectRestrictNode.
+		if (leftResultSet instanceof UnionNode)
+			((UnionNode)leftResultSet).pushExpressions(predicateList);
+		else if (leftResultSet instanceof SelectNode)
+			predicateList.pushExpressionsIntoSelect((SelectNode)leftResultSet, true);
+
+		if (rightResultSet instanceof UnionNode)
+			((UnionNode)rightResultSet).pushExpressions(predicateList);
+		else if (rightResultSet instanceof SelectNode)
+			predicateList.pushExpressionsIntoSelect((SelectNode)rightResultSet, true);
+	}
+
 	/**
 	 * @see Optimizable#modifyAccessPath
 	 *

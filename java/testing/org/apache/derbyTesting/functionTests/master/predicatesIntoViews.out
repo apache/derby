@@ -1963,6 +1963,437 @@ ij> drop view sv1;
 0 rows inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
+ij> -- DERBY-649: Test for making sure predicates are pushed into unions.
+create table test.table1(a integer, b integer, c integer);
+0 rows inserted/updated/deleted
+ij> create index test.table1idx on test.table1(b);
+0 rows inserted/updated/deleted
+ij> create table test.table2(a integer, b integer, c integer);
+0 rows inserted/updated/deleted
+ij> create index test.table2idx on test.table2(b);
+0 rows inserted/updated/deleted
+ij> create view test.view0 as select all a,b from test.table1 union all select a,b from test.table2;
+0 rows inserted/updated/deleted
+ij> create view test.view1(a,b) as select all a,b from test.table1 union all select a,b from test.table2
+			union all select 1,1 from test.table1;
+0 rows inserted/updated/deleted
+ij> -- Following Selects using the tables directly would use index
+CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> select a from test.table1 where b=25;
+A          
+-----------
+ij> VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select a from test.table1 where b=25
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (3):
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Index Row to Base Row ResultSet for TABLE1:
+	Number of opens = 1
+	Rows seen = 0
+	Columns accessed from heap = {0, 1}
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		Index Scan ResultSet for TABLE1 using index TABLE1IDX at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 0
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=0
+			Number of rows visited=0
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
+ij> select a from test.table2 where b=25;
+A          
+-----------
+ij> VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select a from test.table2 where b=25
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (3):
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Index Row to Base Row ResultSet for TABLE2:
+	Number of opens = 1
+	Rows seen = 0
+	Columns accessed from heap = {0, 1}
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		Index Scan ResultSet for TABLE2 using index TABLE2IDX at serializable isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 0
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of deleted rows visited=0
+			Number of pages visited=1
+			Number of rows qualified=0
+			Number of rows visited=0
+			Scan type=btree
+			Tree height=1
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
+None
+ij> -- This select from a view based on the tables would use TableScan before DERBY-649
+select a from test.view0 where b=25;
+A          
+-----------
+ij> VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- This select from a view based on the tables would use TableScan before DERBY-649
+select a from test.view0 where b=25
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (7):
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (6):
+	Number of opens = 1
+	Rows seen = 0
+	Rows filtered = 0
+	restriction = true
+	projection = false
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Union ResultSet:
+		Number of opens = 1
+		Rows seen from the left = 0
+		Rows seen from the right = 0
+		Rows returned = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Left result set:
+			Index Row to Base Row ResultSet for TABLE1:
+			Number of opens = 1
+			Rows seen = 0
+			Columns accessed from heap = {0}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for TABLE1 using index TABLE1IDX at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 0
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=0
+					Number of rows visited=0
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+		Right result set:
+			Index Row to Base Row ResultSet for TABLE2:
+			Number of opens = 1
+			Rows seen = 0
+			Columns accessed from heap = {0}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for TABLE2 using index TABLE2IDX at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 0
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=0
+					Number of rows visited=0
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+ij> -- This select should use index for first two selects, table scan for the third
+select a from test.view1 where b=25;
+A          
+-----------
+ij> VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- This select should use index for first two selects, table scan for the third
+select a from test.view1 where b=25
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (8):
+Number of opens = 1
+Rows seen = 0
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Project-Restrict ResultSet (7):
+	Number of opens = 1
+	Rows seen = 0
+	Rows filtered = 0
+	restriction = true
+	projection = false
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Union ResultSet:
+		Number of opens = 1
+		Rows seen from the left = 0
+		Rows seen from the right = 0
+		Rows returned = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Left result set:
+			Union ResultSet:
+			Number of opens = 1
+			Rows seen from the left = 0
+			Rows seen from the right = 0
+			Rows returned = 0
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Table Scan ResultSet for TABLE1 at serializable isolation level using share table locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 0
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				scan information: 
+					Bit set of columns fetched={0, 1}
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=0
+					Number of rows visited=0
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+			Right result set:
+				Table Scan ResultSet for TABLE2 at serializable isolation level using share table locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 0
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				scan information: 
+					Bit set of columns fetched={0, 1}
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=0
+					Number of rows visited=0
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+		Right result set:
+			Project-Restrict ResultSet (6):
+			Number of opens = 1
+			Rows seen = 0
+			Rows filtered = 0
+			restriction = false
+			projection = true
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Index Scan ResultSet for TABLE1 using index TABLE1IDX at serializable isolation level using share table locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 0
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				scan information: 
+					Bit set of columns fetched={}
+					Number of columns fetched=0
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=0
+					Number of rows visited=0
+					Scan type=btree
+					Tree height=1
+					start position: 
+	None
+					stop position: 
+	None
+					qualifiers:
+None
+ij> CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
+0 rows inserted/updated/deleted
 ij> -- Beetle 4983, customer case, complex query involving views, wrong column remapping
 -- after view flattening, NullPointerException, and didn't get predicate pushed down
 -- all the way to base table.
@@ -6436,4 +6867,67 @@ Ordered nulls: false
 Unknown return value: false
 Negate comparison result: false
 ij> rollback;
+ij> autocommit on;
+ij> CREATE TABLE D1 (A INT, B VARCHAR(4) FOR BIT DATA);
+0 rows inserted/updated/deleted
+ij> INSERT INTO D1 VALUES (1, x'600Eaaef') ;
+1 row inserted/updated/deleted
+ij> INSERT INTO D1 VALUES (2, x'83452213') ;
+1 row inserted/updated/deleted
+ij> select * from D1 where B IN (x'600Eaaef',x'83452213') ;
+A          |B       
+--------------------
+1          |600eaaef
+2          |83452213
+ij> select * from D1 where B IN (x'83452213') ;
+A          |B       
+--------------------
+2          |83452213
+ij> select * from D1 where B  IN (x'600Eaaef') ;
+A          |B       
+--------------------
+1          |600eaaef
+ij> CREATE VIEW V1 AS SELECT A,B FROM D1 UNION SELECT A,B FROM D1;
+0 rows inserted/updated/deleted
+ij> SELECT * FROM V1;
+A          |B       
+--------------------
+1          |600eaaef
+2          |83452213
+ij> select * from V1 where B IN (x'83452213') ;
+A          |B       
+--------------------
+2          |83452213
+ij> select * from V1 where B  IN (x'600Eaaef') ;
+A          |B       
+--------------------
+1          |600eaaef
+ij> select * from V1 where B  = x'600Eaaef' ;
+A          |B       
+--------------------
+1          |600eaaef
+ij> -- these all failed with the initial patch to DERBY-649.
+select * from V1 where B IN (x'600Eaaef',x'83452213') ;
+A          |B       
+--------------------
+1          |600eaaef
+2          |83452213
+ij> select * from V1 where B  >= x'600Eaaef' ;
+A          |B       
+--------------------
+1          |600eaaef
+2          |83452213
+ij> select * from V1 where B  <= x'83452213' ;
+A          |B       
+--------------------
+1          |600eaaef
+2          |83452213
+ij> select * from V1 where B  <> x'83452213' ;
+A          |B       
+--------------------
+1          |600eaaef
+ij> DROP VIEW V1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE D1;
+0 rows inserted/updated/deleted
 ij> 

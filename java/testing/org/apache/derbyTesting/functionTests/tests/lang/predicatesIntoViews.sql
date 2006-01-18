@@ -87,6 +87,34 @@ drop view sv2;
 drop view sv1;
 drop table t1;
 
+-- DERBY-649: Test for making sure predicates are pushed into unions.
+create table test.table1(a integer, b integer, c integer); 
+create index test.table1idx on test.table1(b); 
+
+create table test.table2(a integer, b integer, c integer); 
+create index test.table2idx on test.table2(b); 
+ 
+create view test.view0 as select all a,b from test.table1 union all select a,b from test.table2; 
+create view test.view1(a,b) as select all a,b from test.table1 union all select a,b from test.table2
+			union all select 1,1 from test.table1;
+ 
+-- Following Selects using the tables directly would use index
+CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1); 
+select a from test.table1 where b=25; 
+VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS(); 
+select a from test.table2 where b=25; 
+VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS(); 
+
+-- This select from a view based on the tables would use TableScan before DERBY-649
+select a from test.view0 where b=25; 
+VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS(); 
+
+-- This select should use index for first two selects, table scan for the third
+select a from test.view1 where b=25; 
+VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS(); 
+
+CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0); 
+
 -- Beetle 4983, customer case, complex query involving views, wrong column remapping
 -- after view flattening, NullPointerException, and didn't get predicate pushed down
 -- all the way to base table.
@@ -4196,3 +4224,32 @@ order by versionname asc;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 rollback;
+
+autocommit on;
+CREATE TABLE D1 (A INT, B VARCHAR(4) FOR BIT DATA);
+
+INSERT INTO D1 VALUES (1, x'600Eaaef') ; 
+INSERT INTO D1 VALUES (2, x'83452213') ; 
+
+select * from D1 where B IN (x'600Eaaef',x'83452213') ;  
+select * from D1 where B IN (x'83452213') ; 
+select * from D1 where B  IN (x'600Eaaef') ; 
+
+CREATE VIEW V1 AS SELECT A,B FROM D1 UNION SELECT A,B FROM D1;
+
+SELECT * FROM V1;
+
+
+select * from V1 where B IN (x'83452213') ; 
+select * from V1 where B  IN (x'600Eaaef') ; 
+
+select * from V1 where B  = x'600Eaaef' ;
+
+-- these all failed with the initial patch to DERBY-649.
+select * from V1 where B IN (x'600Eaaef',x'83452213') ;  
+select * from V1 where B  >= x'600Eaaef' ;
+select * from V1 where B  <= x'83452213' ;
+select * from V1 where B  <> x'83452213' ;
+
+DROP VIEW V1;
+DROP TABLE D1;
