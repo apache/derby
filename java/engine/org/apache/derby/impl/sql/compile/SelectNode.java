@@ -293,16 +293,16 @@ public class SelectNode extends ResultSetNode
 		return groupByList;
 	}
 
-	/*
-	 * DERBY-649: Find colName in the result columns and return underlying
-	 * columnReference.  This is useful for pushing union predicates into underlying
-	 * select statements.
+	/**
+	 * Find colName in the result columns and return underlying columnReference.
+	 * Note that this function returns null if there are more than one FromTable
+	 * for this SelectNode and the columnReference needs to be directly under
+	 * the resultColumn. So having an expression under the resultSet would cause
+	 * returning null.
 	 *
-	 * Handle the case of single table selects for now. Also if there is an
-	 * expression under the result column, it is not possible yet to push the
-	 * predicates for now.
+	 * @param	colName		Name of the column
 	 *
-	 * @return ColumnReference	If colName could be remapped to a table reference
+	 * @return	ColumnReference	ColumnReference to the column, if found
 	 */
 	public ColumnReference findColumnReferenceInResult(String colName)
 					throws StandardException
