@@ -3055,7 +3055,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void listenToUnitOfWork() {
         if (!listenToUnitOfWork_) {
             listenToUnitOfWork_ = true;
-            connection_.CommitAndRollbackListeners_.put(this,null);
+            connection_.CommitAndRollbackListeners_.add(this);
         }
     }
 

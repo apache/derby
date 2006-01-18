@@ -12,7 +12,6 @@
 # excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
 # excluding jdbcapi/holdCursorJava.java - JCC behaves differently with hold cursors.
 # excluding jdbcapi/dataSourceReference.java - client side only tests, tests all data sources
-# excluding jdbcapi/derbyStress.java - jcc runs out of memory with this test
 #           regardless of framework
 jdbcapi/resultsetStream.java
 lang/errorStream.java
@@ -29,4 +28,3 @@ jdbcapi/checkDataSource30.java
 jdbcapi/statementJdbc30.java
 lang/holdCursorJava.java
 jdbcapi/dataSourceReference.java
-jdbcapi/derbyStress.java
