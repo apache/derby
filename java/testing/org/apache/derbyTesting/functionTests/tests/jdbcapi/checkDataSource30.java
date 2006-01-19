@@ -45,6 +45,7 @@ import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionEvent;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 
 import java.io.*;
 import java.util.Hashtable;
@@ -52,6 +53,12 @@ import java.util.Hashtable;
 import javax.naming.*;
 import javax.naming.directory.*;
 
+/**
+ * Extends checkDataSource to provide testing of JDBC 3.0 specific
+ * methods for the embedded DataSource implementations.
+ * @author djd
+ *
+ */
 public class checkDataSource30 extends checkDataSource
 { 
 
@@ -62,6 +69,11 @@ public class checkDataSource30 extends checkDataSource
 
 		tester.runTest(args);
 		tester.checkXAHoldability();
+		
+		// Print a report on System.out of the issues
+		// found with the security checks.
+		SecurityCheck.report();
+		
 		System.out.println("Completed checkDataSource30");
 
 	}

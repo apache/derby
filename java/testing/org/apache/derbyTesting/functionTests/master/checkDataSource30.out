@@ -854,4 +854,12 @@ Expected SQLException (local CallableStatement hold) Cannot set holdability Resu
 Expected SQLException (local CallableStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 CONNECTION(held) HOLDABILITY true
 PASS XA HOLDABILITY TEST
+Checked class declared as: java.sql.CallableStatement
+Checked class declared as: java.sql.Connection
+Checked class declared as: java.sql.DatabaseMetaData
+Checked class declared as: java.sql.ResultSet
+Checked class declared as: java.sql.Statement
+Checked class declared as: javax.sql.DataSource
+Checked class declared as: javax.sql.PooledConnection
+Checked class declared as: javax.sql.XAConnection
 Completed checkDataSource30

@@ -37,6 +37,7 @@ import java.sql.Types;
 import java.lang.reflect.*;
 
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.JDBCTestDisplayUtil;
 import org.apache.derby.iapi.reference.JDBC30Translation;
@@ -51,7 +52,11 @@ import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
  * discern whether it passes or not.
  *
  * Test is only touching on known result set hot-spots at present.
- *
+
+ * Performs SecurityCheck analysis on the JDBC ResultSet and
+ * ResultSetMetaData objects returned.
+ * 
+ * @see org.apache.derbyTesting.functionTests.util.SecurityCheck
  * @author ames
  */
 
@@ -131,6 +136,13 @@ public class resultset {
 		{NULL_VALUE,VALID_TIMESTAMP_STRING,VALID_TIMESTAMP_STRING,VALID_TIMESTAMP_STRING},   // TIMESTAMP
 		{NULL_VALUE,NULL_VALUE,NULL_VALUE,NULL_VALUE}                 // BLOB
 	};
+
+ /**
+	 * Hang onto the SecurityCheck class while running the
+	 * tests so that it is not garbage collected during the
+	 * test and lose the information it has collected.
+	 */
+	private final Object nogc = SecurityCheck.class;
 
 	public static void main(String[] args) throws Throwable {
 
@@ -627,6 +639,9 @@ public class resultset {
 			e.printStackTrace();
 		}
 
+		// Print a report on System.out of the issues
+		// found with the security checks. 
+		SecurityCheck.report();
 		System.out.println("Test resultset finished");
     }
 
@@ -755,6 +770,8 @@ public class resultset {
 
 	public static void dumpRS(ResultSet s) throws SQLException
 	{
+		SecurityCheck.inspect(s, "java.sql.ResultSet");
+		
 		if (s == null)
 		{
 			System.out.println("<NULL>");
@@ -762,6 +779,7 @@ public class resultset {
 		}
 
 		ResultSetMetaData rsmd = s.getMetaData();
+		SecurityCheck.inspect(rsmd, "java.sql.ResultSetMetaData");
 
 		// Get the number of columns in the result set
 		int numCols = rsmd.getColumnCount();

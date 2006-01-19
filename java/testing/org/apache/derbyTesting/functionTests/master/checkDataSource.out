@@ -670,4 +670,12 @@ XADataSource - databaseName=wombat, attributesAsPassword=true
   getXAConnection(fred, databaseName=wombat) - 08004:Connection refused : Invalid authentication.
   getXAConnection(fred, databaseName=wombat;password=wilma) - OK
   getXAConnection(fred, databaseName=wombat;password=betty) - 08004:Connection refused : Invalid authentication.
+Checked class declared as: java.sql.CallableStatement
+Checked class declared as: java.sql.Connection
+Checked class declared as: java.sql.DatabaseMetaData
+Checked class declared as: java.sql.ResultSet
+Checked class declared as: java.sql.Statement
+Checked class declared as: javax.sql.DataSource
+Checked class declared as: javax.sql.PooledConnection
+Checked class declared as: javax.sql.XAConnection
 Completed checkDataSource

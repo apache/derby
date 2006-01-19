@@ -1991,4 +1991,6 @@ Testing nullif(?,BLOB(1k))
 ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
 Single RS auto-commit test: PASS.
 SingleRSCloseCursorsAtCommit: PASS.
+Checked class declared as: java.sql.ResultSet
+Checked class declared as: java.sql.ResultSetMetaData
 Test resultset finished

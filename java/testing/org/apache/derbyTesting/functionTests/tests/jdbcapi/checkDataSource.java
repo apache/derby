@@ -24,8 +24,6 @@ import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
-import org.apache.derby.iapi.jdbc.BrokeredConnection;
-import org.apache.derby.impl.jdbc.EmbedConnection;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -47,6 +45,7 @@ import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionEvent;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 
 import java.io.*;
 import java.util.Hashtable;
@@ -55,6 +54,16 @@ import org.apache.oro.text.perl.Perl5Util;
 import javax.naming.*;
 import javax.naming.directory.*;
 
+/**
+ * Test the various embedded DataSource implementations of Derby.
+ * 
+ * Performs SecurityCheck analysis on the JDBC objects returned.
+ * This is because this test returns to the client a number of
+ * different implementations of Connection, Statement etc.
+ * 
+ * @see org.apache.derbyTesting.functionTests.util.SecurityCheck
+ *
+ */
 public class checkDataSource
 { 
     /**
@@ -78,13 +87,26 @@ public class checkDataSource
     private static final String CONNSTRING_FORMAT = "\\S+@[0-9]+ " +
         "\\(XID = .*\\), \\(SESSIONID = [0-9]+\\), " +
         "\\(DATABASE = [A-Za-z]+\\), \\(DRDAID = .+\\)";
+    
+	/**
+	 * Hang onto the SecurityCheck class while running the
+	 * tests so that it is not garbage collected during the
+	 * test and lose the information it has collected.
+	 */
+	private final Object nogc = SecurityCheck.class;
+  
 
 	public static void main(String[] args) throws Exception {
 
         try
         {
 			new checkDataSource().runTest(args);
-        }
+			
+			// Print a report on System.out of the issues
+			// found with the security checks. 
+			SecurityCheck.report();
+
+	    }
         catch ( Exception e )
         {
             e.printStackTrace();
@@ -93,7 +115,6 @@ public class checkDataSource
 		System.out.println("Completed checkDataSource");
 
 	}
-
 
 	public checkDataSource() throws Exception {
 	}
@@ -136,6 +157,7 @@ public class checkDataSource
 		checkToString(dsp);
 
 		PooledConnection pc = dsp.getPooledConnection();
+		SecurityCheck.inspect(pc, "javax.sql.PooledConnection");
 		pc.addConnectionEventListener(new EventCatcher(1));
 
 		checkConnection("EmbeddedConnectionPoolDataSource", pc.getConnection());
@@ -195,6 +217,7 @@ public class checkDataSource
 		checkToString(dsx);
 
 		XAConnection xac = dsx.getXAConnection();
+		SecurityCheck.inspect(xac, "javax.sql.XAConnection");
 		xac.addConnectionEventListener(new EventCatcher(3));
 
 		checkConnection("EmbeddedXADataSource", xac.getConnection());
@@ -238,6 +261,7 @@ public class checkDataSource
 		dmc = ij.startJBMS();
 
 		cs = dmc.prepareCall("call checkConn2(?)");
+		SecurityCheck.inspect(cs, "java.sql.CallableStatement");
 		cs.setString(1,"Nested");
 		cs.execute();
 		
@@ -268,6 +292,7 @@ public class checkDataSource
 		xac = dsx.getXAConnection();
 		xac.addConnectionEventListener(new EventCatcher(5));
 		XAResource xar = xac.getXAResource();
+		SecurityCheck.inspect(xar, "javax.transaction.xa.XAResource");
 		Xid xid = new cdsXid(1, (byte) 35, (byte) 47);
 		xar.start(xid, XAResource.TMNOFLAGS);
 		Connection xacc = xac.getConnection();
@@ -659,7 +684,6 @@ public class checkDataSource
 		}
 
 		testDSRequestAuthentication();
-		
 	}
 
 	protected void showXAException(String tag, XAException xae) {
@@ -792,6 +816,7 @@ public class checkDataSource
 
 	private static void resultSetQuery(String tag, ResultSet rs) throws SQLException {
 		System.out.print(tag + ": ru(" + rs.getCursorName() + ") contents");
+		SecurityCheck.inspect(rs, "java.sql.ResultSet");
 		while (rs.next()) {
 			System.out.print(" {" + rs.getInt(1) + "}");
 		}
@@ -822,6 +847,9 @@ public class checkDataSource
 	public static void checkConnectionS(String dsName, Connection conn) throws SQLException {
 
 		System.out.println("Running connection checks on " + dsName);
+		
+		SecurityCheck.inspect(conn, "java.sql.Connection");
+		SecurityCheck.inspect(conn.getMetaData(), "java.sql.DatabaseMetaData");
 
 		//System.out.println("  url             " + conn.getMetaData().getURL());
 		System.out.println("  isolation level " + conn.getTransactionIsolation());
@@ -846,6 +874,9 @@ public class checkDataSource
 	public void checkConnection(String dsName, Connection conn) throws SQLException {
 
 		System.out.println("Running connection checks on " + dsName);
+
+		SecurityCheck.inspect(conn, "java.sql.Connection");
+		SecurityCheck.inspect(conn.getMetaData(), "java.sql.DatabaseMetaData");
 
 		//System.out.println("  url             " + conn.getMetaData().getURL());
 		System.out.println("  isolation level " + conn.getTransactionIsolation());
@@ -944,27 +975,6 @@ public class checkDataSource
         {
             throw new Exception( "Connection.toString() (" + connstr + ") " +
               "does not match expected format (" + format + ")");
-        }
-    }
-    
-    /**
-     * Check the format for the toString() of a Connection that is an
-     * instance of BrokeredConnection.  This is different, as the Brokered
-     * Connection prints out its class name and then the toString() value
-     * of the underlying, wrapped connection.
-     */
-    protected static void checkStringFormat(BrokeredConnection conn) throws Exception
-    {
-        String connstr = conn.toString();
-        String prefix = checkStringPrefix(connstr);
-        
-        String format = "/" + prefix + ", Wrapped Connection = " + 
-            "<none>|" + CONNSTRING_FORMAT + "/";
-
-        if ( ! p5u.match(format, connstr) )
-        {
-            throw new Exception( "Connection.toString() (" + connstr + ") " +
-                "does not match expected format (" + format + ")");
         }
     }
         
@@ -1184,6 +1194,8 @@ public class checkDataSource
 
 	protected static void checkStatementS(Connection conn, Statement s) throws SQLException {
 
+		SecurityCheck.inspect(s, "java.sql.Statement");
+		
 		Connection c1 = s.getConnection();
 		if (c1 != conn)
 			System.out.println("FAIL incorrect connection object returned for Statement.getConnection()");
@@ -1199,7 +1211,7 @@ public class checkDataSource
 		s.close();
 	}
 	protected void checkStatement(Connection conn, Statement s) throws SQLException {
-
+		
 		Connection c1 = s.getConnection();
 		if (c1 != conn)
 			System.out.println("FAIL incorrect connection object returned for Statement.getConnection()");
@@ -1342,6 +1354,9 @@ public class checkDataSource
 	}
 
 	private static void dsConnectionRequests(DataSource ds) {
+		
+		SecurityCheck.inspect(ds, "javax.sql.DataSource");
+		
 		try {
 			Connection c1 = ds.getConnection();
 			System.out.println("  getConnection() - OK");
