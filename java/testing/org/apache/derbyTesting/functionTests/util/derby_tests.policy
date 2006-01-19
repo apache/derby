@@ -32,9 +32,9 @@ grant codeBase "${csinfo.codejar}derby.jar" {
   permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
 
   // Import/export and other support files from these locations in tests
-  permission java.io.FilePermission "${user.dir}${/}extin${/}*", "read";
-  permission java.io.FilePermission "${user.dir}${/}extinout${/}*", "read, write";
-  permission java.io.FilePermission "${user.dir}${/}extout${/}*", "write"; 
+  permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
+  permission java.io.FilePermission "${user.dir}${/}extinout${/}-", "read, write";
+  permission java.io.FilePermission "${user.dir}${/}extout${/}-", "write";
   permission java.io.FilePermission "${user.dir}${/}extinout", "read,write";
   
   // unit tests set this property (called from derbyTesting.jar through
@@ -151,17 +151,13 @@ grant codeBase "${csinfo.codeclasses}" {
   permission java.net.SocketPermission "${csinfo.trustedhost}", "accept"; 
   
   // Access all files under ${user.dir}to write the test directory structure
+  // Also covers extin, extout and extinout locations
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
   
   // When running with useprocess=false need to install and uninstall
   // the security manager.
   permission java.lang.RuntimePermission "setSecurityManager";
-  
-  // Import/export and other support files from these locations in tests
-  permission java.io.FilePermission "${user.dir}${/}extin${/}*", "read";
-  permission java.io.FilePermission "${user.dir}${/}extinout${/}*", "read, write";
-  permission java.io.FilePermission "${user.dir}${/}extout${/}*", "write"; 
-  
+    
   // sane=true, jdbcapi/secureUsers1.sql
   permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
   
