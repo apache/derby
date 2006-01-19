@@ -49,7 +49,7 @@ public class wisconsin {
         BufferedInputStream inStream;
         
 		// set input stream
-		String filePath = "wisconsin.sql";
+		String filePath = "wisc_setup.sql";
 
 		try 
 		{
