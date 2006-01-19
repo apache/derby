@@ -245,7 +245,7 @@ public class Xact extends RawTransaction implements Limit  {
 	// true, if the transaction executed some operations(like unlogged
 	// operations) that block the  online backup to prevent inconsistent
 	// backup copy.
-	private boolean inBackupBlockingState;
+	private boolean backupBlocked;
 
 
 	/*
@@ -285,7 +285,7 @@ public class Xact extends RawTransaction implements Limit  {
 
 		setIdleState();
 
-		inBackupBlockingState = false; 
+		backupBlocked = false; 
 
         /*
         System.out.println("Xact.constructor: readonly = " + this.readOnly +
@@ -1910,9 +1910,9 @@ public class Xact extends RawTransaction implements Limit  {
 		setIdleState();
 
 		// any backup blocking operations (like unlogged ops) in this 
-		// transaction are done with post commit/abort work by this time, 
-		// change the transaction to unblock the backup state.
-		setUnblockBackupState();
+		// transaction are done with post commit/abort work by now, 
+		// unblock the backup.
+		unblockBackup();
 		inComplete = null;
 	}
 
@@ -2318,38 +2318,47 @@ public class Xact extends RawTransaction implements Limit  {
 		postCompleteMode = true;
 	}
 
+
     /*
-     * Try setting the transaction to be in backup blocking state.
+     * Make the transaction block the online backup.
      *
      * @param wait if <tt>true</tt>, waits until the transaction
-     *             can be set into backup blocking state.
-     *
+     *             can block the backup.
+     * @return     <tt>true</tt> if the transaction  blocked the  
+     *             backup.  <tt>false</tt> otherwise.
      * @exception StandardException if interrupted while waiting 
-     *            for backup to complete to set the transaction into
-     *            backup blocking state.
+     *            for the backup in progress to complete.
      */
-    public boolean setBackupBlockingState(boolean wait) 
+    public boolean blockBackup(boolean wait) 
         throws StandardException
     {
-		if (!inBackupBlockingState)
-        {
-			inBackupBlockingState = 
-                xactFactory.canStartBackupBlockingOperation(wait);
+		if (!backupBlocked) {
+			backupBlocked = xactFactory.blockBackup(wait);
         }
 
-		return inBackupBlockingState;
+		return backupBlocked;
 	}
 	
 	/*
 	 * Unblock the backup, if it was blocked by some operation in 
-	 * this transaction. Unbloking is done at commit/abort of this 
+	 * this transaction. Unblocking is done at commit/abort of this 
 	 * transaction.
 	 */
-	private void setUnblockBackupState() {
-		if (inBackupBlockingState)
-			xactFactory.backupBlockingOperationFinished();	
-		inBackupBlockingState = false;
+	private void unblockBackup() {
+		if (backupBlocked)
+			xactFactory.unblockBackup();	
+		backupBlocked = false;
 	}
+
+
+    /**
+     * Check if the transaction is blocking the backup ?
+     * @return <tt> true </tt> if this transaction is 
+     *         blocking the backup, otherwise <tt> false </tt>
+     */
+    public boolean isBlockingBackup() {
+        return backupBlocked;
+    }
 
 	/*
 	** Lock escalation related

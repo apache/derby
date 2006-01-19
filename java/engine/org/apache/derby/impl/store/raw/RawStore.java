@@ -42,6 +42,7 @@ import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.raw.ScanHandle;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
+import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
@@ -377,6 +378,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		return xactFactory.getLockFactory();
 	}
 
+    
+    /**
+		Get the Transaction Factory to use with this store.
+	*/
+	public TransactionFactory getXactFactory() {
+        return xactFactory;  
+    }
+
 	/*
 	 * Return the module providing XAresource interface to the transaction
      * table.
@@ -492,15 +501,28 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 		// find the user transaction, it is necessary for online backup 
 		// to open the container through page cache
-		Transaction t = 
-            findUserTransaction(
+		RawTransaction t = 
+            xactFactory.findUserTransaction(this,
                 ContextService.getFactory().getCurrentContextManager(), 
                 AccessFactoryGlobals.USER_TRANS_NAME);
 
 		try {
-            // check if there any backup blocking operations are in progress
+
+            // check if  any backup blocking operations are in progress
+            // in the same transaction backup is being executed? Backup is 
+            // not allowed if the transaction has uncommitted
+            // unlogged operations that are blocking the backup.
+            
+            if (t.isBlockingBackup())
+            {
+                throw StandardException.newException(
+                      SQLState.BACKUP_OPERATIONS_NOT_ALLOWED);  
+            }
+
+
+            // check if any backup blocking operations are in progress
             // and stop new ones from starting until the backup is completed.
-            if (!xactFactory.stopBackupBlockingOperations(wait))
+            if (!xactFactory.blockBackupBlockingOperations(wait))
             {
                 throw StandardException.newException(
                       SQLState.BACKUP_BLOCKING_OPERATIONS_IN_PROGRESS);  
@@ -511,7 +533,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }finally {
             // let the xactfatory know that backup is done, so that
             // it can allow backup blocking operations. 
-            xactFactory.backupFinished();
+            xactFactory.unblockBackupBlockingOperations();
         }
 	}
 
@@ -812,7 +834,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		throws StandardException
 	{
         boolean enabledLogArchive = false;
-        boolean error = true;
         try {
             // Enable the log archive mode, if it is not already enabled.
             if(!logFactory.logArchived()) {
@@ -829,14 +850,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             {
                 logFactory.deleteOnlineArchivedLogFiles();
             }
-            error = false;
-        } finally {
+        }catch (Throwable error) {
             // On any errors , disable the log archive, if it 
             // is enabled on this call. 
-            if(error) {
-                if (enabledLogArchive)
+            if (enabledLogArchive)
                 logFactory.disableLogArchiveMode();
-            }
+            throw StandardException.plainWrapException(error);
         }
 	}
 

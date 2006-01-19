@@ -298,22 +298,22 @@ public interface TransactionFactory extends Corruptable {
 
 	/**
 	 * Checks if there any backup blocking operations are in progress and 
-	 * stops from new ones from starting until the backup is finished. 
+	 * prevents new ones from starting until the backup is finished. 
 	 *
 	 * @param wait if <tt>true</tt>, waits for the current backup blocking 
-	 *             operation in progress to finish.
+	 *             operations in progress to finish.
 	 * @return     <tt>true</tt> if there are no backup blocking 
 	 *             operations in progress.
 	 *             <tt>false</tt> otherwise.
 	 * @exception StandardException if interrupted or a runtime exception occurs.
 	 */
-	public boolean stopBackupBlockingOperations(boolean wait) 
+	public boolean blockBackupBlockingOperations(boolean wait) 
 		throws StandardException ;
 
 	/**
 	 * Backup completed. Allow backup blocking operations. 
 	 */
-	public void backupFinished();
+	public void  unblockBackupBlockingOperations();
 
 													   
 

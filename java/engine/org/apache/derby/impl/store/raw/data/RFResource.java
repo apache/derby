@@ -79,15 +79,19 @@ class RFResource implements FileResource {
             ContextManager cm = 
                 ContextService.getFactory().getCurrentContextManager();
 
-            Transaction tran = 
-                factory.getRawStoreFactory().findUserTransaction(
-                        cm, AccessFactoryGlobals.USER_TRANS_NAME);
+            RawTransaction tran = 
+                factory.getRawStoreFactory().getXactFactory().findUserTransaction(
+                        factory.getRawStoreFactory(), 
+                        cm, 
+                        AccessFactoryGlobals.USER_TRANS_NAME);
             
-            // Prevent backup operation when a jar file is being added
-            // by setting the transaction into a backup blocking state.
-            // If backup is already in progress this call will wait 
-            // for the backup to finish .
-            ((RawTransaction)tran).setBackupBlockingState(true);
+            // Block the backup, If backup is already in progress wait 
+            // for the backup to finish. Jar files are unlogged but the 
+            // changes to the  references to the jar file in the catalogs 
+            // is logged. A consistent backup can not be made when jar file 
+            // is being added.
+
+            tran.blockBackup(true);
 
 			StorageFile directory = file.getParentDir();
             if (!directory.exists())
@@ -152,15 +156,19 @@ class RFResource implements FileResource {
 			
 		ContextManager cm = ContextService.getFactory().getCurrentContextManager();
 
-		Transaction tran = 
-            factory.getRawStoreFactory().findUserTransaction(
-                cm, AccessFactoryGlobals.USER_TRANS_NAME);
+        RawTransaction tran = 
+            factory.getRawStoreFactory().getXactFactory().findUserTransaction(
+                        factory.getRawStoreFactory(), 
+                        cm, 
+                        AccessFactoryGlobals.USER_TRANS_NAME);
+                    
+        // Block the backup, If backup is already in progress wait 
+        // for the backup to finish. Jar files are unlogged but the 
+        // changes to the  references to the jar file in the catalogs 
+        // is logged. A consistent backup can not be made when jar file 
+        // is being removed.
 
-        // Prevent backup operation when a jar file is being removed
-        // by setting the transaction into a backup blocking state.
-        // If backup is already in progress this call will wait 
-        // for the backup to finish.
-        ((RawTransaction)tran).setBackupBlockingState(true);
+        tran.blockBackup(true);
 
 		tran.logAndDo(new RemoveFileOperation(name, currentGenerationId, purgeOnCommit));
 

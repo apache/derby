@@ -27,7 +27,7 @@ import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.property.PersistentSet;
 
 import org.apache.derby.iapi.store.access.TransactionInfo;
-
+import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -878,4 +878,10 @@ public interface RawStoreFactory extends Corruptable {
      **/
     long getMaxContainerId()
 		throws StandardException;
+
+
+    /**
+		Get the Transaction Factory to use with this store.
+	*/
+	public TransactionFactory getXactFactory();
 }

@@ -1,7 +1,7 @@
 Begin Online Backup Test3
 Initial Setup Complete
 Begin Install Jar Test
-ERROR XSRSA: Cannot backup the database when backup blocking unlogged operations are pending. Please commit the transactions with backup blocking operations or use the backup procedure with option to wait for them to complete. 
+ERROR XSRSA: Cannot backup the database when unlogged operations are uncommitted. Please commit the transactions with backup blocking operations. 
 Backup-1 Started
 The transaction that was blocking the backup has ended
 Backup-1 Completed
@@ -19,7 +19,7 @@ No of rows in table customer: 2
 database shutdown properly
 End Of Install Jar Test.
 Begin Remove Jar Test
-ERROR XSRSA: Cannot backup the database when backup blocking unlogged operations are pending. Please commit the transactions with backup blocking operations or use the backup procedure with option to wait for them to complete. 
+ERROR XSRSA: Cannot backup the database when unlogged operations are uncommitted. Please commit the transactions with backup blocking operations. 
 Backup-3 Started
 The transaction that was blocking the backup has ended
 Backup-3 Completed

@@ -968,17 +968,18 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 
     /**
-     * Checks if a backup blocking operation can be started.
-     *
-     * @param wait if <tt>true</tt>, waits until a backup blocking 
-     *             operation can be started. 
-     *
-     * @return     <tt>true</tt> if backup blocking operations can be started.
+     * Block the online backup. Backup needs to be blocked while 
+     * executing any unlogged operations or any opearation that 
+     * prevents from  making a consistent backup.
+     * 
+     * @param wait if <tt>true</tt>, waits until the backup 
+     *             is blocked. 
+     * @return     <tt>true</tt> if backup is blocked.
      *			   <tt>false</tt> otherwise.
-     * @exception StandardException if interrupted while waiting for backup 
-     *             to complete.
+     * @exception StandardException if interrupted while waiting for a 
+     *           backup  to complete.
      */
-	protected boolean canStartBackupBlockingOperation(boolean wait)
+	protected boolean blockBackup(boolean wait)
         throws StandardException 
 	{
 		synchronized(backupSemaphore) {
@@ -1007,9 +1008,9 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 
 	/**
-	 * Mark that a backup blocking operation finished. 
+     * Unblock the backup, a backup blocking operation finished. 
 	 */
-	protected void backupBlockingOperationFinished()
+	protected void unblockBackup()
 	{
 		synchronized(backupSemaphore) {
 			if (SanityManager.DEBUG)
@@ -1027,7 +1028,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 	/**
 	 * Checks if there are any backup blocking operations in progress and 
-	 * stops new ones from starting until the backup is finished. 
+	 * prevents new ones from starting until the backup is finished. 
 	 * If backup blocking operations are in progress and  <code> wait </code>
 	 * parameter value is <tt>true</tt>, then it will wait for the current 
 	 * backup blocking operations to finish. 
@@ -1042,7 +1043,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	 *             <tt>false</tt> otherwise.
 	 * @exception StandardException if interrupted or a runtime exception occurs
 	 */
-	public boolean stopBackupBlockingOperations(boolean wait) 
+	public boolean blockBackupBlockingOperations(boolean wait) 
 		throws StandardException 
 	{
 		synchronized(backupSemaphore) {
@@ -1099,7 +1100,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	/**
 	 * Backup completed. Allow backup blocking operations. 
 	 */
-	public void backupFinished()
+	public void unblockBackupBlockingOperations()
 	{
 		synchronized(backupSemaphore) {
 			inBackup = false;

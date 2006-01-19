@@ -39,28 +39,28 @@ import java.util.Properties;
 
 public class OnlineBackupTest3 {
 
-	private static final String TEST_DATABASE_NAME = "wombat" ;
+    private static final String TEST_DATABASE_NAME = "wombat" ;
 
-	public static void main(String[] argv) throws Throwable {
-		
+    public static void main(String[] argv) throws Throwable {
+
         OnlineBackupTest3 test = new OnlineBackupTest3();
-   		ij.getPropertyArg(argv); 
+        ij.getPropertyArg(argv); 
 
         try {
             test.runTest();
         }
         catch (SQLException sqle) {
-			dumpSQLException(sqle);
-		} 
+            dumpSQLException(sqle);
+        } 
     }
 
 
-	/*
-	 * Test online backup with unlogged jar operations running in parallel. 
-	 */
-	private void runTest() throws SQLException, Exception {
-		logMessage("Begin Online Backup Test3");
-		Connection conn = ij.startJBMS();
+    /*
+     * Test online backup with unlogged jar operations running in parallel. 
+     */
+    private void runTest() throws SQLException, Exception {
+        logMessage("Begin Online Backup Test3");
+        Connection conn = ij.startJBMS();
         conn.setAutoCommit(false);
         Statement stmt = conn.createStatement();
         stmt.execute("create table t1(a int ) ");
@@ -94,63 +94,62 @@ public class OnlineBackupTest3 {
         // online backup running in parallel.
         removeJarTest();
 
-		logMessage("End Online Backup Test3");
-	}
+        logMessage("End Online Backup Test3");
+    }
 
-		
-	/**
-	 * Shutdown the datbase
-	 * @param  dbName  Name of the database to shutdown.
-	 */
-	void shutdown(String dbName) {
 
-		try{
-			//shutdown
-			if(TestUtil.HAVE_DRIVER_CLASS)
-				DriverManager.getConnection("jdbc:derby:" + dbName + ";shutdown=true");
-			else 
-				TestUtil.shutdownUsingDataSource(dbName);
-		}catch(SQLException se){
-			if (se.getSQLState() != null && se.getSQLState().equals("08006"))
-				System.out.println("database shutdown properly");
-			else
-				dumpSQLException(se);
-		}
-	}
+    /**
+     * Shutdown the datbase
+     * @param  dbName  Name of the database to shutdown.
+     */
+    void shutdown(String dbName) {
+
+        try{
+            //shutdown
+            if(TestUtil.HAVE_DRIVER_CLASS)
+                DriverManager.getConnection("jdbc:derby:" + dbName + ";shutdown=true");
+            else 
+                TestUtil.shutdownUsingDataSource(dbName);
+        }catch(SQLException se){
+            if (se.getSQLState() != null && se.getSQLState().equals("08006"))
+                System.out.println("database shutdown properly");
+            else
+                dumpSQLException(se);
+        }
+    }
 
     /*
      * get connection to the test database
      */
     Connection getConnection() throws SQLException 
     {
-    	Connection conn;
-    	if(TestUtil.HAVE_DRIVER_CLASS)
-			conn = DriverManager.getConnection("jdbc:derby:" + TEST_DATABASE_NAME );
-    	else {
-	    	Properties prop = new Properties();
-	        prop.setProperty("databaseName", TEST_DATABASE_NAME);
-	        conn = TestUtil.getDataSourceConnection(prop);
-    	}
+        Connection conn;
+        if(TestUtil.HAVE_DRIVER_CLASS)
+            conn = DriverManager.getConnection("jdbc:derby:" + TEST_DATABASE_NAME );
+        else {
+            Properties prop = new Properties();
+            prop.setProperty("databaseName", TEST_DATABASE_NAME);
+            conn = TestUtil.getDataSourceConnection(prop);
+        }
         return conn;
     }
 
 
-	/**
-	 * Write message to the standard output.
-	 */
-	void logMessage(String   str)	{
-			System.out.println(str);
-	}
+    /**
+     * Write message to the standard output.
+     */
+    void logMessage(String   str){
+        System.out.println(str);
+    }
 
-	
-	/**
-	 * dump the SQLException to the standard output.
-	 */
-	static private void dumpSQLException(SQLException sqle) {
-		
-		org.apache.derby.tools.JDBCDisplayUtil.	ShowSQLException(System.out, sqle);
-		sqle.printStackTrace(System.out);
-	}
+    /**
+     * dump the SQLException to the standard output.
+     */
+    static private void dumpSQLException(SQLException sqle) {
+
+        org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
+        sqle.printStackTrace(System.out);
+    }
 
     
     private int countRows(Connection conn, 
@@ -183,54 +182,52 @@ public class OnlineBackupTest3 {
            "call sqlj.install_jar('extin/brtestjar.jar', 'math_routines', 0)");
         
         try {
-            // followng backup call should because jar operation is pending 
+            // followng backup call should fail because jar operation is pending 
            conn2_stmt.execute(
-            "call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE('extinout/mybackup', 0)");
+            "call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_NOWAIT('extinout/mybackup')");
         } catch (SQLException sqle) {
             //above statement should have failed. 
-            org.apache.derby.tools.JDBCDisplayUtil.	ShowSQLException(System.out, sqle);
+            org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
         }
 
-        // invoke backup in another thread, should block for the above install jar 
-        // operation for 'brtestjar.jar to commit.
+        // invoke backup in another thread, it should block for the above install jar 
+        // operation to install  'brtestjar.jar to commit.
         
         // start a  thread to perform online backup
-		OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME);
-		Thread backupThread = new Thread(backup, "BACKUP1");
-		backupThread.start();	
-		// wait for the backup to start
-		backup.waitForBackupToBegin();
-		logMessage("Backup-1 Started");
+        OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME);
+        Thread backupThread = new Thread(backup, "BACKUP1");
+        backupThread.start();
+        // wait for the backup to start
+        backup.waitForBackupToBegin();
+        logMessage("Backup-1 Started");
 
-        // sleep for few seconds just to make sure backup thread is actually
-		// gone to a wait state for unlogged actions to commit.
-		java.lang.Thread.sleep(1000);
-			
-		// backup should not even start doing real work before the
-		// unlogged transaction is commited
-		if(!backup.isRunning())
-			logMessage("Backup is not waiting for unlogged " +  
+        // sleep for few seconds just to make sure backup thread has actually
+        // gone into a wait state for unlogged actions to commit.
+        java.lang.Thread.sleep(1000);
+        
+        // backup should not even start doing real work before the
+        // unlogged transaction is commited
+        if(!backup.isRunning())
+            logMessage("Backup is not waiting for unlogged " +  
                        "install jar action to commit");
 
         //insert some rows that should appear in the backup.
         conn1_stmt.execute("insert into t1 values(3)");
         conn1_stmt.execute("insert into t1 values(4)");
-
+        conn1_stmt.execute("insert into t1 values(5)");
         
         // set the database class with both the jars  installed above.
         conn1_stmt.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY( " + 
                            "'derby.database.classpath', " + 
                            "'APP.math_routines') " ) ;
 
-        //Now commit the jar operation in connection1 for backup to proceed. 
-        conn1_stmt.execute("insert into t1 values(5)");
         //commit the transaction with jar opearation that is blocking the backup.
         conn1.commit();
         logMessage("The transaction that was blocking the backup has ended");
 
         // wait for backup to finish. 
         backup.waitForBackupToEnd();
-		backupThread.join();
+        backupThread.join();
         logMessage("Backup-1 Completed");
         
         // Case : jar op should block if backup is in progress
@@ -241,19 +238,19 @@ public class OnlineBackupTest3 {
         // start a  thread to perform online backup
         backup = new OnlineBackup(TEST_DATABASE_NAME);
         backupThread = new Thread(backup, "BACKUP2");
-		backupThread.start();	
-		// wait for the backup to start
-		backup.waitForBackupToBegin();
-		logMessage("Backup-2 Started");
+        backupThread.start();
+        // wait for the backup to start
+        backup.waitForBackupToBegin();
+        logMessage("Backup-2 Started");
 
         // sleep for few seconds just to make sure backup thread is actually
-		// gone to a wait state for unlogged actions to commit.
-		java.lang.Thread.sleep(1000);
-			
-		// backup should not even start doing real work before the
-		// unlogged transaction is commited
-		if(!backup.isRunning())
-			logMessage("Backup is not waiting for unlogged " +  
+        // gone to a wait state for unlogged actions to commit.
+        java.lang.Thread.sleep(1000);
+
+        // backup should not even start doing real work before the
+        // unlogged transaction is commited
+        if(!backup.isRunning())
+            logMessage("Backup is not waiting for unlogged " +  
                        "index action to commit");
 
 
@@ -278,7 +275,7 @@ public class OnlineBackupTest3 {
 
         // wait for backup to finish. 
         backup.waitForBackupToEnd();
-		backupThread.join();
+        backupThread.join();
         logMessage("Backup-2 Completed");
         
         // wait for customer app jar installation to finish now. 
@@ -308,10 +305,10 @@ public class OnlineBackupTest3 {
         conn2.close();
         
         //shutdown the test db 
-		shutdown(TEST_DATABASE_NAME);
-		// restore the database from the backup and run some checks 
-		backup.restoreFromBackup();
-		logMessage("Restored From the Backup");
+        shutdown(TEST_DATABASE_NAME);
+        // restore the database from the backup and run some checks 
+        backup.restoreFromBackup();
+        logMessage("Restored From the Backup");
         Connection conn = getConnection();
         Statement stmt = conn.createStatement();
         logMessage("No of rows in table t1: " + countRows(conn, "T1"));
@@ -336,9 +333,9 @@ public class OnlineBackupTest3 {
         stmt.close();
         conn.close();
 
-		//shutdown the test db 
-		shutdown(TEST_DATABASE_NAME);
-		logMessage("End Of Install Jar Test.");
+        //shutdown the test db 
+        shutdown(TEST_DATABASE_NAME);
+        logMessage("End Of Install Jar Test.");
 
     }
 
@@ -362,7 +359,7 @@ public class OnlineBackupTest3 {
         }
 
         // remove both the jars from the class path , 
-        // so that we can remove them. 
+        // so that we can remove them from the database. 
         conn1_stmt.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY( " + 
                         "'derby.database.classpath', '')") ;
         conn1.commit();
@@ -370,35 +367,44 @@ public class OnlineBackupTest3 {
         conn1_stmt.execute(
            "call sqlj.remove_jar('APP.math_routines', 0)");
         
+        // Case 0: backup call that is not waiting for unlogged 
+        // opereation to complete should fail when a remove jar 
+        // is not ended when backup started. 
+
         try {
-            // followng backup call should because remove 
+            // followng backup call should fail because remove 
             // jar operation is pending 
            conn2_stmt.execute(
-            "call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE('extinout/mybackup', 0)");
+            "call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_NOWAIT('extinout/mybackup')");
         } catch (SQLException sqle) {
             //above statement should have failed. 
-            org.apache.derby.tools.JDBCDisplayUtil.	ShowSQLException(System.out, sqle);
+            org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
         }
-            
+
+
+                
+        // Case 1: backup should block because when a remove jar
+        // is not ended when backup started. 
+
         // invoke backup in another thread, should block for 
         // the above remove jar  to commit.
         
         // start a  thread to perform online backup
-		OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME);
-		Thread backupThread = new Thread(backup, "BACKUP3");
-		backupThread.start();	
-		// wait for the backup to start
-		backup.waitForBackupToBegin();
-		logMessage("Backup-3 Started");
+        OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME);
+        Thread backupThread = new Thread(backup, "BACKUP3");
+        backupThread.start();
+        // wait for the backup to start
+        backup.waitForBackupToBegin();
+        logMessage("Backup-3 Started");
 
         // sleep for few seconds just to make sure backup thread is actually
-		// gone to a wait state for unlogged actions to commit.
-		java.lang.Thread.sleep(1000);
-			
-		// backup should not even start doing real work before the
-		// unlogged transaction is commited
-		if(!backup.isRunning())
-			logMessage("Backup is not waiting for unlogged " +  
+        // gone to a wait state for unlogged actions to commit.
+        java.lang.Thread.sleep(1000);
+
+        // backup should not even start doing real work before the
+        // unlogged transaction is commited
+        if(!backup.isRunning())
+            logMessage("Backup is not waiting for unlogged " +  
                        "remove jar action to commit");
 
         //insert some rows that should appear in the backup.
@@ -411,7 +417,7 @@ public class OnlineBackupTest3 {
         
         // wait for backup to finish. 
         backup.waitForBackupToEnd();
-		backupThread.join();
+        backupThread.join();
 
         logMessage("Backup-3 Completed");
         
@@ -423,19 +429,19 @@ public class OnlineBackupTest3 {
         // start a  thread to perform online backup
         backup = new OnlineBackup(TEST_DATABASE_NAME);
         backupThread = new Thread(backup, "BACKUP4");
-		backupThread.start();	
-		// wait for the backup to start
-		backup.waitForBackupToBegin();
-		logMessage("Backup-4 Started");
+        backupThread.start();
+        // wait for the backup to start
+        backup.waitForBackupToBegin();
+        logMessage("Backup-4 Started");
 
         // sleep for few seconds just to make sure backup thread is actually
-		// gone to a wait state for unlogged actions to commit.
-		java.lang.Thread.sleep(1000);
-			
-		// backup should not even start doing real work before the
-		// unlogged transaction is commited
-		if(!backup.isRunning())
-			logMessage("Backup is not waiting for unlogged " +  
+        // gone to a wait state for unlogged actions to commit.
+        java.lang.Thread.sleep(1000);
+
+        // backup should not even start doing real work before the
+        // unlogged transaction is commited
+        if(!backup.isRunning())
+            logMessage("Backup is not waiting for unlogged " +  
                        "index action to commit");
 
 
@@ -459,10 +465,10 @@ public class OnlineBackupTest3 {
         logMessage("The transaction that was blocking the backup has ended");
         // wait for backup to finish. 
         backup.waitForBackupToEnd();
-		backupThread.join();
+        backupThread.join();
         logMessage("Backup-4 Completed");
 
-        // wait for customer app jar installation to finish now. 
+        // wait for customer app jar removal to finish now. 
         asyncJarActionThread.join();
         logMessage("obtest_customer.jar remove is complete");
         
@@ -480,10 +486,10 @@ public class OnlineBackupTest3 {
         conn2.close();
         
         //shutdown the test db 
-		shutdown(TEST_DATABASE_NAME);
-		// restore the database from the backup and run some checks 
-		backup.restoreFromBackup();
-		logMessage("Restored From the Backup");
+        shutdown(TEST_DATABASE_NAME);
+        // restore the database from the backup and run some checks 
+        backup.restoreFromBackup();
+        logMessage("Restored From the Backup");
         Connection conn = getConnection();
         Statement stmt = conn.createStatement();
         logMessage("No of rows in table t1: " + countRows(conn, "T1"));
@@ -493,22 +499,23 @@ public class OnlineBackupTest3 {
         // check if the jar removal was successful.
         // APP.math_routines should not be in backup.
         try {
-            // set the database class with both the jars  installed above.
+            // set the database class path with the jar removed above, 
+            // it should fail.
             stmt.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY( " + 
                            "'derby.database.classpath', " + 
                            "'APP.math_routines') " ) ;
         }catch (SQLException sqle) {
             //above statement should have failed. 
-            org.apache.derby.tools.JDBCDisplayUtil.	ShowSQLException(System.out, sqle);
+            org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
         }
         
 
         stmt.close();
         conn.close();
 
-		//shutdown the test db 
-		shutdown(TEST_DATABASE_NAME);
-		logMessage("End Of Remove Jar Test.");
+        //shutdown the test db 
+        shutdown(TEST_DATABASE_NAME);
+        logMessage("End Of Remove Jar Test.");
 
     }
 
@@ -537,7 +544,7 @@ public class OnlineBackupTest3 {
                 conn.commit();
             } catch (SQLException sqle) {
                 org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
-				sqle.printStackTrace(System.out);
+                sqle.printStackTrace(System.out);
             }
             aStatement = null;
         }

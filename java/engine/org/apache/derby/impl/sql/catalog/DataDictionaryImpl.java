@@ -9494,25 +9494,22 @@ public final class	DataDictionaryImpl
 		throws StandardException
     {
 
-        // void SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE(
-        //     IN BACKUPDIR        VARCHAR(Limits.DB2_VARCHAR_MAXWIDTH),
-        //     IN WAIT             SMALLINT
+        // void SYSCS_UTIL.SYSCS_BACKUP_DATABASE_NOWAIT(
+        //     IN BACKUPDIR        VARCHAR(Limits.DB2_VARCHAR_MAXWIDTH)
         //     )
         
         {
             // procedure argument names
-            String[] arg_names = {"BACKUPDIR", "WAIT"};
+            String[] arg_names = {"BACKUPDIR"};
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT)
+                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH)
             };
 
             createSystemProcedureOrFunction(
-                "SYSCS_ONLINE_BACKUP_DATABASE",
+                "SYSCS_BACKUP_DATABASE_NOWAIT",
                 sysUtilUUID,
                 arg_names,
                 arg_types,
@@ -9524,28 +9521,25 @@ public final class	DataDictionaryImpl
         }
 
         // void 
-        // SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
+        // SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT(
         //   IN BACKUPDIR                 VARCHAR(Limits.DB2_VARCHAR_MAXWIDTH),
-        //   IN DELETE_ARCHIVED_LOG_FILES SMALLINT,
-        //   IN WAIT                      SMALLINT
+        //   IN DELETE_ARCHIVED_LOG_FILES SMALLINT
         //   )
         {
             // procedure argument names
             String[] arg_names = 
-                {"BACKUPDIR", "DELETE_ARCHIVED_LOG_FILES", "WAIT"};
+                {"BACKUPDIR", "DELETE_ARCHIVED_LOG_FILES"};
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
                     Types.SMALLINT)
             };
 
             createSystemProcedureOrFunction(
-                "SYSCS_ONLINE_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE",
+                "SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT",
                 sysUtilUUID,
                 arg_names,
                 arg_types,

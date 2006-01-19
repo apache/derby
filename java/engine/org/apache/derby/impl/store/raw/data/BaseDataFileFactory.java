@@ -662,10 +662,10 @@ public final class BaseDataFileFactory
 						((mode & ContainerHandle.MODE_CREATE_UNLOGGED) == 
 						 ContainerHandle.MODE_CREATE_UNLOGGED))									   
 					{
-						if (!t.setBackupBlockingState(false)) {
+						if (!t.blockBackup(false)) {
 							// when a backup is in progress transaction can not
-                            // be set to backup blocking state, so convert 
-                            // unlogged opens to logged mode.
+                            // block the backup, so convert  unlogged opens 
+                            // to logged mode.
 							mode &= ~(ContainerHandle.MODE_UNLOGGED |
 									  ContainerHandle.MODE_CREATE_UNLOGGED);
 						}

@@ -684,13 +684,16 @@ public class SystemProcedures  {
     }
 
     /**
-     * Backup the database to a backup directory. By default this 
-     * procedure will wait for the backup blocking unlogged operations to
-     * complete before starting the backup.  
+     * Backup the database to a backup directory. 
+     *
+     * This procedure will throw error, if there are any unlogged 
+     * operation executed in the same transaction backup is started.
+     * If there any unlogged operations in progess in other transaction, it
+     * will wait until those transactions are completed before starting the backup.
      *
      * Examples of unlogged operations include: create index and bulk insert.
      * Note that once the backup begins these operations will not block, 
-     * instead they will automatically procede and be logged.
+     * instead they are automatically converted into logged operations.
      * 
      * @param backupDir the name of the directory where the backup should be
      *                  stored. This directory will be created if it 
@@ -700,83 +703,45 @@ public class SystemProcedures  {
     public static void SYSCS_BACKUP_DATABASE(String  backupDir)
 		throws SQLException
     {
-		backupDatabase(backupDir , true);
+        Factory.getDatabaseOfConnection().backup(backupDir, true);
     }
 
     /**
      * Backup the database to a backup directory.
      *
-     * Backup the database to a backup directory. Use the "wait" parameter
-     * to determine if the operation should block waiting for the backup 
-     * blocking unlogged operations to complete before starting the backup.  
-     *
+     * This procedure will throw error, if there are any uncommitted unlogged 
+     * operation before stating the backup. It will not wait for the unlogged
+     * operations to complete.
+     * 
      * Examples of unlogged operations include: create index and bulk insert.
      * Note that once the backup begins these operations will not block, 
-     * instead they will automatically procede and be logged.
+     * instead they are automatically converted into logged operations.
      * 
      * @param backupDir the name of the directory where the backup should be
      *                  stored. This directory will be created if it 
      *                  does not exist.
-     * @param wait if <tt>non-zero</tt>, waits for  all the backup blocking 
-     *             operation in progress to finish.
      * @exception StandardException thrown on error
      */
-    public static void SYSCS_ONLINE_BACKUP_DATABASE(
-    String  backupDir, 
-    int     wait)
+    public static void SYSCS_BACKUP_DATABASE_NOWAIT(String  backupDir)
         throws SQLException
     {
-        backupDatabase(backupDir, (wait != 0));
+        Factory.getDatabaseOfConnection().backup(backupDir, false);
     }
 
-
-    /**
-     * Backup the database to a backup directory.
-     *
-     * Backup the database to a backup directory. Use the "wait" parameter
-     * to determine if the operation should block waiting for the backup 
-     * blocking unlogged operations to complete before starting the backup.  
-     *
-     * Examples of unlogged operations include: create index and bulk insert.
-     * Note that once the backup begins these operations will not block, 
-     * instead they will automatically procede and be logged.
-     * 
-     * @param backupDir the name of the directory where the backup should be
-     *                  stored. This directory will be created if it 
-     *                  does not exist.
-     * @param wait if <tt>true</tt>, waits for  all the backup blocking 
-     *             operation in progress to finish.
-     * @exception StandardException thrown on error
-     */
-    private static void backupDatabase(
-    String  backupDir, 
-    boolean wait)
-        throws SQLException
-    {
-        checkBackupTransactionIsIdle();
-        Connection conn = getDefaultConn();
-        try {
-            Factory.getDatabaseOfConnection().backup(backupDir, wait);
-        }catch(SQLException se)
-        {
-            // issue a rollback on any errors
-            conn.rollback();
-            throw  se;
-        }
-        // finished successfully, commit it.
-        conn.commit();	
-    }
 
     /**
      * Backup the database to a backup directory and enable the log archive
      * mode that will keep the archived log files required for roll-forward
-     * from this version of the backup. By default this procedure will wait 
-     * for the backup blocking unlogged operations to complete before starting 
-     * the backup.  
+     * from this version of the backup.
+     *
+     * This procedure will throw error if there are any unlogged 
+     * operation executed in the same transaction backup is started.
+     * If there any unlogged operations in progess in other transaction, it
+     * will wait until those transactions are completed before starting the backup.
      *
      * Examples of unlogged operations include: create index and bulk insert.
      * Note that once the backup begins these operations will not block, 
-     * instead they will automatically procede and be logged.
+     * instead they are automatically converted into logged operations.
      *
      * @param backupDir the name of the directory where the backup should be
      *                  stored. This directory will be created if not it 
@@ -791,10 +756,11 @@ public class SystemProcedures  {
     int     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
-        backupDatabaseAndEnableLogArchiveMode(
-            backupDir, 
-            (deleteOnlineArchivedLogFiles != 0),
-            true);
+
+        Factory.getDatabaseOfConnection().backupAndEnableLogArchiveMode(
+                backupDir, 
+                (deleteOnlineArchivedLogFiles != 0),
+                true);
 	}
 
     /**
@@ -802,69 +768,36 @@ public class SystemProcedures  {
 	 * mode that will keep the archived log files required for roll-forward
 	 * from this version backup.
      *
+     * This procedure will throw error, if there are any uncommitted unlogged 
+     * operation before stating the backup. It will not wait for the unlogged
+     * operations to complete.
+     * 
+
      * Examples of unlogged operations include: create index and bulk insert.
      * Note that once the backup begins these operations will not block, 
-     * instead they will automatically procede and be logged.
+     * instead they are automatically converted into logged operations.
      *
      * @param backupDir the name of the directory where the backup should be
      *                  stored. This directory will be created if not it 
      *                  does not exist.   
      *
      * @param deleteOnlineArchivedLogFiles  If <tt>non-zero</tt> deletes online 
-     *                  archived log files that exist before this backup, delete     *                  will occur  only after the backup is  complete.
+     *                  archived log files that exist before this backup, delete     
+     *                  will occur  only after the backup is  complete.
      *
-     * @param wait      if <tt>non-zero</tt>, waits for  all the backup blocking     *                  operations in progress to finish.
      * @exception StandardException thrown on error.
      */
-    public static void SYSCS_ONLINE_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
+    public static void SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT(
     String  backupDir,
-    int     deleteOnlineArchivedLogFiles,
-	int     wait)
+    int     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
-        backupDatabaseAndEnableLogArchiveMode(
-            backupDir,
-            (deleteOnlineArchivedLogFiles != 0),
-            (wait != 0));
+
+        Factory.getDatabaseOfConnection().backupAndEnableLogArchiveMode(
+                backupDir,
+                (deleteOnlineArchivedLogFiles != 0),
+                false);
 	}
-
-
-    /**
-     * Backup the database to a backup directory and enable the log archive
-	 * mode that will keep the archived log files required for roll-forward
-	 * from this version of the backup.
-     *
-     * @param backupDir the name of the directory where the backup should be
-     *                  stored. This directory will be created if not it 
-     *                  does not exist.   
-     * @param deleteOnlineArchivedLogFiles  If <tt>true</tt> deletes online 
-     *                  archived log files that exist before this backup, delete     *                  will occur  only after the backup is  complete.
-	 * @param wait      if <tt>true</tt>, waits for  all the backup blocking 
-	 *                  operations in progress to finish.
-     * @exception StandardException thrown on error.
-     */
-    private static void backupDatabaseAndEnableLogArchiveMode(
-    String  backupDir,
-    boolean deleteOnlineArchivedLogFiles,
-	boolean wait)
-		throws SQLException
-    {
-		checkBackupTransactionIsIdle();
-		Connection conn = getDefaultConn();
-		try {
-            Factory.getDatabaseOfConnection().backupAndEnableLogArchiveMode(
-                backupDir, 
-                deleteOnlineArchivedLogFiles,
-                wait);
-		}catch(SQLException se)
-		{
-            // issue a rollback on any errors
-            conn.rollback();
-            throw  se;
-        }
-        // finished successfully, commit it.
-        conn.commit();
-    }
 
 
     /**
@@ -881,35 +814,9 @@ public class SystemProcedures  {
     int     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
-		checkBackupTransactionIsIdle();
-		Connection conn = getDefaultConn();
-		try { 
-			Factory.getDatabaseOfConnection().disableLogArchiveMode(
+        Factory.getDatabaseOfConnection().disableLogArchiveMode(
                 (deleteOnlineArchivedLogFiles != 0));
-		}catch(SQLException se)
-		{
-			// issue a rollback on any errors
-			conn.rollback();
-			throw  se;
-		}
-		// finished successfully, commit it.
-		conn.commit();
     }
-
-
-    /**
-     * Check if the transnaction is idle ? , Backup related operation are 
-     * allowed only in a new transaction.
-     */
-    private static void checkBackupTransactionIsIdle() throws SQLException 
-    {
-        if (!(ConnectionUtil.getCurrentLCC().getTransactionExecute().isIdle())) 
-        {
-            throw PublicAPI.wrapStandardException(
-                    StandardException.newException(
-                    SQLState.BACKUP_OPERATIONS_NOT_ALLOWED_IN_ACTIVE_XACT));								  
-		}
-	}
 
 
     public static void SYSCS_SET_RUNTIMESTATISTICS(

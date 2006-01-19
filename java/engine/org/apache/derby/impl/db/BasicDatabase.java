@@ -349,10 +349,9 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 
 
-    public void backupAndEnableLogArchiveMode(
-    String  backupDir, 
-    boolean deleteOnlineArchivedLogFiles,
-    boolean wait)
+    public void backupAndEnableLogArchiveMode(String  backupDir, 
+                                              boolean deleteOnlineArchivedLogFiles,
+                                              boolean wait)
         throws SQLException
 	{
 		try {

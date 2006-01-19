@@ -215,7 +215,7 @@ public interface AccessFactory
 
 	/**
 	  * Freeze the database temporarily so a backup can be taken.
-	  * <P>Please see cloudscape on line documentation on backup and restore.
+	  * <P>Please see Derby on line documentation on backup and restore.
 	  *
 	  * @exception StandardException Thrown on error
 	  */
@@ -223,7 +223,7 @@ public interface AccessFactory
 
 	/**
 	  * Unfreeze the database after a backup has been taken.
-	  * <P>Please see cloudscape on line documentation on backup and restore.
+	  * <P>Please see Derby on line documentation on backup and restore.
 	  *
 	  * @exception StandardException Thrown on error
 	  */
@@ -231,7 +231,7 @@ public interface AccessFactory
 
 	/**
      * Backup the database to backupDir.  
-     * <P>Please see cloudscape on line documentation on backup and restore.
+     * <P>Please see Derby on line documentation on backup and restore.
      *
      * @param backupDir the name of the directory where the backup should be
      *		             stored.

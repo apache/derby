@@ -40,7 +40,9 @@ import java.util.Properties;
 public class OnlineBackupTest1 {
 
 	private static final String TEST_DATABASE_NAME = "wombat" ;
-	private static final String TEST_TABLE_NAME =    "emp";
+	private static final String TEST_TABLE_NAME   =    "emp";
+    private static final String TEST_TABLE_NAME_1 =    "emp_1";
+    private static final String TEST_TABLE_NAME_2 =    "emp_2";
 
 	public static void main(String[] argv) throws Throwable {
 		
@@ -67,10 +69,23 @@ public class OnlineBackupTest1 {
 		Connection conn = ij.startJBMS();
 		conn.setAutoCommit(false);
 		DatabaseActions dbActions = new DatabaseActions(conn);
-		//create the test  table. 
+		//create the test  tables. 
 		dbActions.createTable(TEST_TABLE_NAME);
-		dbActions.startUnloggedAction(TEST_TABLE_NAME);
-		logMessage("A Transaction with Unlogged Operation Started");
+        dbActions.createTable(TEST_TABLE_NAME_1);
+        dbActions.createTable(TEST_TABLE_NAME_2);
+
+        // start first unlogged operation
+		dbActions.startUnloggedAction(TEST_TABLE_NAME_1);
+		logMessage("First Transaction with Unlogged Operation Started");
+
+        // start second unlogged opearation
+        Connection conn1 = ij.startJBMS();
+		conn1.setAutoCommit(false);
+		DatabaseActions dbActions1 = new DatabaseActions(conn1);
+		dbActions1.startUnloggedAction(TEST_TABLE_NAME_2);
+		logMessage("Second Transaction with Unlogged Operation Started");
+        
+
 		// start a  thread to perform online backup
 		OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME);
 		Thread backupThread = new Thread(backup, "BACKUP");
@@ -111,8 +126,10 @@ public class OnlineBackupTest1 {
 			logMessage("Backup is not waiting for unlogged actions to commit");
 
 		// end the unlogged work transaction.
-		dbActions.endUnloggedAction(TEST_TABLE_NAME);
-		
+		dbActions.endUnloggedAction(TEST_TABLE_NAME_1);
+        // end the unlogged work transaction.
+		dbActions1.endUnloggedAction(TEST_TABLE_NAME_2);
+        
 		backup.waitForBackupToEnd();
 		backupThread.join();
 		dmlActions.stopActivity();
@@ -122,6 +139,7 @@ public class OnlineBackupTest1 {
         
         // close the connections.
         conn.close();
+        conn1.close();
         dmlConn.close();
         ddlConn.close() ;
 
@@ -147,7 +165,11 @@ public class OnlineBackupTest1 {
         Connection conn = getConnection();
 		Statement stmt = conn.createStatement();
 		stmt.execute("values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP',  'EMP')");
-		//TO DO : Consistency check all the tables including the system tables. 
+        //check the data in the EMP table.
+        DatabaseActions dbActions = new DatabaseActions(conn);
+        dbActions.select(TEST_TABLE_NAME);
+        dbActions.select(TEST_TABLE_NAME_1);
+        dbActions.select(TEST_TABLE_NAME_2);
 		conn.close();
 
 	}
@@ -273,10 +295,9 @@ public class OnlineBackupTest1 {
 		 */
 		void performDmlActions() throws SQLException {
 			
-			while(stopActivity) {
+			while(!stopActivity) {
 				insert(TEST_TABLE_NAME, 100, COMMIT, 10);
 				insert(TEST_TABLE_NAME, 100, ROLLBACK, 10);
-				update(TEST_TABLE_NAME, 50, COMMIT, 10);
 				update(TEST_TABLE_NAME, 50, ROLLBACK, 10);
 				select(TEST_TABLE_NAME);
 			}
@@ -294,9 +315,10 @@ public class OnlineBackupTest1 {
 			insert(tableName, 100, COMMIT, 10);
 			// execute a unlogged database operation
 			Statement s = conn.createStatement();
-			// index creation does not log the index entries 
-			s.executeUpdate("create index " + tableName + "_name_idx on " + 
-							TEST_TABLE_NAME + "(name) ");
+			
+            // index creation does not log the index entries 
+            s.executeUpdate("create index " + tableName + "_name_idx on " + 
+                            tableName + "(name) ");
 			s.close();
 		}
 
@@ -307,10 +329,11 @@ public class OnlineBackupTest1 {
 		 * @exception SQLException if any database exception occurs.
 		 */
 		void endUnloggedAction(String tableName) throws SQLException {
+            // insert some rows, insert should be successful even if
+            // backup is blocking for uncommitted unlogged operations. 
 			insert(tableName, 1000, OPENTX, 10);
 			conn.commit();
 		}
-
 
 				
 		/**
@@ -401,10 +424,10 @@ public class OnlineBackupTest1 {
 		
 		/**
 		 * update some rows in the table.
-		 * @param  tableName  name of the table that rows are inserted.
-		 * @param  rowCount   Number of rows to Insert.
+		 * @param  tableName  name of the table that rows are updates.
+		 * @param  rowCount   Number of rows to update.
 		 * @param  txStaus    Transacton status commit/rollback/open.
-		 * @param  commitCount After how many inserts commit/rollbacku should
+		 * @param  commitCount After how many updates commit/rollback should
 		 *                      happen.
 		 * @exception SQLException if any database exception occurs.
 		 */
@@ -414,11 +437,10 @@ public class OnlineBackupTest1 {
 		{
 
 			PreparedStatement ps = conn.prepareStatement("update " + tableName + 
-														 " SET salary=? where id=?");
+								 " SET name = ?  where id=?");
 		
 			for (int i = 0; i < rowCount; i++) {
-
-				ps.setFloat(1, (float)(i * 2000 * 0.08));
+                ps.setString(1 ,  "moonwalker" + i);
 				ps.setInt(2, i); // ID
 				ps.executeUpdate();
 				if ((i % commitCount) == 0)
@@ -447,7 +469,7 @@ public class OnlineBackupTest1 {
 			{
 				int tid = rs.getInt(1);
 				String name = rs.getString(2);
-				if(name.equals("skywalker" + id) && tid!= id)
+ 				if(name.equals("skywalker" + id) && tid!= id)
 				{
 					logMessage("DATA IN THE TABLE IS NOT AS EXPECTED");
 					logMessage("Got :ID=" +  tid + " Name=:" + name);
@@ -457,9 +479,10 @@ public class OnlineBackupTest1 {
 				id++;
 				count++;
 			}
-
+            
 			rs.close();
 			s.close();
+            conn.commit();
 		}
 
 		/* 

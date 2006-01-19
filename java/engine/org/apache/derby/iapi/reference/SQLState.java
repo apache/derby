@@ -357,7 +357,7 @@ public interface SQLState {
     String RAWSTORE_CANNOT_CHANGE_LOGDEVICE                     = "XSRS8.S";
     String RAWSTORE_RECORD_VANISHED                             = "XSRS9.S";
     String BACKUP_BLOCKING_OPERATIONS_IN_PROGRESS               = "XSRSA.S";
-    String BACKUP_OPERATIONS_NOT_ALLOWED_IN_ACTIVE_XACT         = "XSRSB.S";
+    String BACKUP_OPERATIONS_NOT_ALLOWED                        = "XSRSB.S";
     
 
 	/*

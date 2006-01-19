@@ -25,35 +25,32 @@ create table t1(a int ) ;
 insert into t1 values(1) ;
 insert into t1 values(2) ; 
 commit ;
--- make sure backup procedure are not allowed in an non-idle transaction.
-insert into t1 values(3) ;
+-- make sure backup calls are not allowed in a transaction that
+-- has executed unlogged operations before the backup calls. 
+insert into t1 values(3); 
+create index idx1 on t1(a);
 call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup') ;
-commit;
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_NOWAIT('extinout/mybackup') ;
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
+                                              'extinout/mybackup', 1);
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT(
+                                              'extinout/mybackup', 1);
+--backup failures should not rollback/commit the transaction. 
 select * from t1 ;
-call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE('extinout/mybackup' , 1) ;
-rollback;
-select * from t1 ;
-call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE('extinout/mybackup' , 0) ;
+insert into t1 values(4) ;
 commit;
-update t1 set a = a + 1 ;
-call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
-                                              'extinout/mybackup', 1, 1);
-commit;
-update t1 set a = a - 1 ;
-call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
+drop index idx1;
 commit;
 --- make sure backup calls can be run one after another.
-insert into t1 values(4) ;
 insert into t1 values(5) ;
-rollback;
 call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup') ;
-call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE('extinout/mybackup' , 1) ;
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_NOWAIT('extinout/mybackup');
 call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
                                            'extinout/mybackup', 1);
-call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
-                                               'extinout/mybackup', 1, 1);
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT(
+                                               'extinout/mybackup', 1);
 call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
-
+commit;
 -- make sure backup is not allowed when non-logged 
 -- operations are pending
 connect 'wombat' as c2 ;
@@ -64,12 +61,12 @@ create index idx1 on t1(a) ;
 
 set connection c1 ;
 -- following two backup calls should fail , because they are not waiting
--- for the unlogged index creation to commit/rollback.
+-- for the unlogged index creation in anothere transaction to commit/rollback.
 
-call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE('extinout/mybackup' , 0) ;
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_NOWAIT('extinout/mybackup') ;
 
-call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
-                                               'extinout/mybackup', 1, 0);
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT(
+                                               'extinout/mybackup', 1);
 
 set connection c2;
 rollback ;
@@ -97,8 +94,8 @@ set connection c1;
 -- make sure backup does not already exists at the backup location.
 values removeDirectory('extinout/ulbackup1');
 values fileExists('extinout/ulbackup1'); 
-async bthread1 'call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE(
-                                    ''extinout/ulbackup1'' , 1)' ;
+async bthread1 'call SYSCS_UTIL.SYSCS_BACKUP_DATABASE(
+                                    ''extinout/ulbackup1'')' ;
 set connection c2;
 -- sleep for a while for the backup thread to 
 -- really get into the wait state
@@ -151,8 +148,8 @@ set connection c1;
 values removeDirectory('extinout/ulbackup3');
 values fileExists('extinout/ulbackup3'); 
 async bthread1 
-  'call SYSCS_UTIL.SYSCS_ONLINE_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
-                                    ''extinout/ulbackup3'' , 1, 1)' ;
+  'call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
+                                    ''extinout/ulbackup3'' , 1)' ;
 set connection c2;
 -- sleep for a while for the backup thread to 
 -- really get into the wait state
