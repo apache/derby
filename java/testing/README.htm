@@ -1523,7 +1523,7 @@ at<br>
 ${derby.source}/java/testing/org/apache/derbyTesting/functionTests/util/derby_tests.policy</p>
 <p>During a test run this policy file is copied into ${user.dir} and
 used from there.</p>
-<p>There are three environments for the installation of the
+<p>There are two environments for the installation of the
 SecurityManager.</p>
 <ul>
   <li>
@@ -1531,9 +1531,10 @@ SecurityManager.</p>
 SecurityManager.</p>
   </li>
   <li>
-    <p>Client side JVM for all tests when useProcess not false.
+    <p>Client side JVM, this is the JVM executing the JDBC calls against any Derby driver.
 Installs a SecurityManager unless:</p>
   </li>
+  <UL>
   <li>
     <p><font face="Courier New"><font size="2"><font color="#000000">noSecurityManager=</font><font
  color="#2a00ff">true </font><font size="3"><font
@@ -1541,9 +1542,9 @@ Installs a SecurityManager unless:</p>
 _app.properties file.Used to disable individual tests that cannot run
 under the security manager, or if the test has a functional requirement
 not to run with the SecurityManager. Ideally, few tests will have this
-property set. Initially a number of tests have this set to allow the
-remaining tests to be running with the SecuirtyManager, the disabled
-tests need to be investigated.</font></font></font></font></font></p>
+property set. Any disabling of the SecurityManager for a test requires
+a comment in the test's _app.properties file indicating why the test cannot run under the SecurityManager.
+</font></font></font></font></font></p>
   </li>
   <li>
     <p><font color="#000000"><font face="Times New Roman, serif"><font
@@ -1551,11 +1552,7 @@ tests need to be investigated.</font></font></font></font></font></p>
 Currently does not install a SecurityManager, no technical reasons,
 just has not been done.</font></font></font></p>
   </li>
-  <li>
-    <p>Client side JVM for all tests when useProcess is false (e.g.
-nist suite). Currently does not install a SecurityManager, no technical
-reasons, just has not been done yet.</p>
-  </li>
+  </ul>
 </ul>
 <h3><a name="hostName"></a><br>
 4.14 Testing with Network Server on a remote host</h3>
