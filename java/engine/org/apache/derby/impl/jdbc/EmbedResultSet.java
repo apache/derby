@@ -72,6 +72,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
 
+import java.util.Arrays;
 import java.util.Calendar;
 
 /**
@@ -158,6 +159,10 @@ public abstract class EmbedResultSet extends ConnectionChild
     private int fetchDirection;
     private int fetchSize;
     
+    /**
+     * Indicates which columns have already been fetched
+     * as a stream for a row. Created on-demand by a getXXXStream call.
+     */
     private boolean[] streamUsedFlags;
 
 	/**
@@ -205,11 +210,14 @@ public abstract class EmbedResultSet extends ConnectionChild
 		// Fill in the column types
 		resultDescription = theResults.getResultDescription();
 
-		//initialize arrays related to updateRow implementation
-		columnGotUpdated = new boolean[getMetaData().getColumnCount()];
-		copyOfDatabaseRow = new DataValueDescriptor[columnGotUpdated.length];
-		
-		initStreamUseFlags(getMetaData().getColumnCount());
+		// Only incur the cost of allocating and maintaining
+		// updated column information if the columns can be updated.
+		if (concurrencyOfThisResultSet == JDBC20Translation.CONCUR_UPDATABLE)
+		{
+		    //initialize arrays related to updateRow implementation
+		    columnGotUpdated = new boolean[getMetaData().getColumnCount()];
+		    copyOfDatabaseRow = new DataValueDescriptor[columnGotUpdated.length];
+		}
 
         // assign the max rows and maxfiled size limit for this result set
         if (stmt != null)
@@ -302,10 +310,12 @@ public abstract class EmbedResultSet extends ConnectionChild
             }
         }
 
-	    //since we are moving off of the current row, need to initialize state corresponding to updateRow implementation
-	    for (int i=0; i < columnGotUpdated.length; i++)
-            columnGotUpdated[i] = false;
-	    currentRowHasBeenUpdated = false;
+        if (columnGotUpdated != null)
+        {
+	        //since we are moving off of the current row, need to initialize state corresponding to updateRow implementation
+	        Arrays.fill(columnGotUpdated, false);
+	        currentRowHasBeenUpdated = false;
+        }
 
 	    return movePosition(NEXT, 0, "next");
 	}
@@ -447,7 +457,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 			rowData = onRow ? currentRow.getRowArray() : null;
 			
-			unuseStreams();
+			// Clear the indication of which columns were fetched as streams.
+			if (streamUsedFlags != null)
+			    Arrays.fill(streamUsedFlags, false);
 			
 			return onRow;
 			} finally {
@@ -545,10 +557,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 			currentRow = null;
 			rowData = null;
 			rMetaData = null; // let it go, we can make a new one
-	    //since we are moving off of the current row(by closing the resultset), need to initialize state corresponding to updateRow implementation
-	    for (int i=0; i < columnGotUpdated.length; i++)
-				columnGotUpdated[i] = false;
-	    currentRowHasBeenUpdated = false;
 
 			// we hang on to theResults and messenger
 			// in case more calls come in on this resultSet
@@ -3977,41 +3985,21 @@ public abstract class EmbedResultSet extends ConnectionChild
 			resultDescription.getColumnDescriptor(column).getType().getTypeId().getSQLTypeName(), targetType);
 	}
     
-    
-    private void initStreamUseFlags(int numOfCol){
-	
-	streamUsedFlags = new boolean[numOfCol];
-	
-	// Next code is not neccesary because initial value is false, which is default initial value for boolean.
-	/*
-	  clearStreamUsedFlags();
-	*/
+    /**
+     * Mark a column as already having a stream accessed from it.
+     * If the stream was already accessed, then throw an exception.
+     * @param columnIndex
+     * @throws SQLException
+     */
+    final void useStream(int columnIndex) throws SQLException {
+    	
+    	if (streamUsedFlags == null)
+    		streamUsedFlags = new boolean[getMetaData().getColumnCount()];
+    	
+    	else if (streamUsedFlags[columnIndex - 1])
+	        throw newSQLException(SQLState.LANG_STREAM_RETRIEVED_ALREADY);
+    	
+    	streamUsedFlags[columnIndex - 1] = true;
     }
-    
-    
-    void useStream(int columnIndex) throws SQLException {
-	
-	if(streamUsedFlags[columnIndex - 1]){
-	    throw newSQLException(SQLState.LANG_STREAM_RETRIEVED_ALREADY);
-	}
-
-	streamUsedFlags[columnIndex - 1] = true;
-
-    }
-
-
-    private void unuseStreams(){
-	
-	for(int i = 0;
-	    i < streamUsedFlags.length;
-	    i ++){
-	    
-	    streamUsedFlags[i] = false;
-	    
-	}
-	
-    }
-    
-    
 }
 
