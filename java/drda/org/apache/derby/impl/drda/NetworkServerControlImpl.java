@@ -146,6 +146,8 @@ public final class NetworkServerControlImpl {
 	protected static String att_extnam;
 	protected static String att_srvrlslv; 
 	protected static String prdId;
+    protected static byte[] prdIdBytes_;
+    
 	private static String buildNumber;
 	// we will use single or mixed, not double byte to reduce traffic on the
 	// wire, this is in keeping with JCC
@@ -345,7 +347,9 @@ public final class NetworkServerControlImpl {
 		
 		prdId += drdaMaintStr;
 		att_srvrlslv = prdId + "/" + myPVH.getVersionBuildString(false);
-		
+                // Precompute this to save some cycles
+                prdIdBytes_ = prdId.getBytes(DEFAULT_ENCODING);
+ 
 		if (SanityManager.DEBUG)
 		{
 			if (majorStr.length() > 2  || 
