@@ -89,7 +89,7 @@ public class splitmessages {
         // Open the client properties file for the given locale
         // from the client locales directory, and then intialize
         // clientProps with what we find in there
-        String clientPropsFileName = "client-messages" + locale + ".properties";
+        String clientPropsFileName = "clientmessages" + locale + ".properties";
         try
         {
             InputStream clientInStream = new FileInputStream(
@@ -155,7 +155,7 @@ public class splitmessages {
         {
             // Save the English messages as the base
             clientOutStream = new BufferedOutputStream(
-                new FileOutputStream(new File(dir, "client-messages.properties")), 
+                new FileOutputStream(new File(dir, "clientmessages.properties")), 
                 16 * 1024);
 
             clientProps.save(clientOutStream, (String)null);

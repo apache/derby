@@ -61,7 +61,7 @@ public class SqlException extends java.sql.SQLException implements Diagnosable {
     private String batchPositionLabel_; // for batched exceptions only
     
     public static String CLIENT_MESSAGE_RESOURCE_NAME =
-        "org.apache.derby.loc.client-messages";
+        "org.apache.derby.loc.clientmessages";
     
     // The message utility instance we use to find messages
     // It's primed with the name of the client message bundle so that
