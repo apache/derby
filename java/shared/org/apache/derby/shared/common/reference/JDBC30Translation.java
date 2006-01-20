@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.reference.JDBC30Translation
+   Derby - Class org.apache.derby.shared.common.reference.JDBC30Translation
 
    Copyright 2001, 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -18,7 +18,7 @@
 
  */
 
-package org.apache.derby.iapi.reference;
+package org.apache.derby.shared.common.reference;
 import java.sql.DatabaseMetaData;
 import java.sql.ParameterMetaData;
 import java.sql.ResultSet;

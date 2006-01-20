@@ -712,10 +712,10 @@ blobTest53 finished
 START: blobTest54
 EXPECTED SQLSTATE(XCL12): An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'.
 START: blobTest6
-EXPECTED SQLSTATE(null): Invalid position 0 or length 5
-EXPECTED SQLSTATE(null): Invalid position 1 or length -76
-EXPECTED SQLSTATE(null): Search pattern cannot be null.
-EXPECTED SQLSTATE(null): Search pattern cannot be null.
+EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
+EXPECTED SQLSTATE(XJ071): Zero or negative length argument '-76' passed in a BLOB or CLOB method.
+EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB position method.
+EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB position method.
 blobTest6 finished
 START: blobTest7
 blobTest7 finished

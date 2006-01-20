@@ -20,7 +20,12 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
+
 import org.apache.derby.client.resources.ResourceKeys;
+import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.shared.common.i18n.MessageUtil;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 
 
 // The signature of the stored procedure SQLCAMessage I have come out so far is as follows:
@@ -49,146 +54,163 @@ import org.apache.derby.client.resources.ResourceKeys;
 // 4. What if the invocation of stored procedure failed (due to, eg, connection dropping)? In this case, we probably need to return some client-side message.
 
 public class SqlException extends java.sql.SQLException implements Diagnosable {
+    protected static final int DEFAULT_ERRCODE = 99999;
     java.lang.Throwable throwable_ = null;
     protected Sqlca sqlca_ = null; // for engine generated errors only
+    protected String message_ = null;
     private String batchPositionLabel_; // for batched exceptions only
+    
+    public static String CLIENT_MESSAGE_RESOURCE_NAME =
+        "org.apache.derby.loc.client-messages";
+    
+    // The message utility instance we use to find messages
+    // It's primed with the name of the client message bundle so that
+    // it knows to look there if the message isn't found in the
+    // shared message bundle.
+    private static MessageUtil msgutil_ = 
+        new MessageUtil(CLIENT_MESSAGE_RESOURCE_NAME);
 
+    
     //-----------------constructors-----------------------------------------------
-
-    public SqlException(LogWriter logWriter, ErrorKey errorKey) {
-        super(ResourceUtilities.getResource(ResourceKeys.driverOriginationIndicator) +
-                ResourceUtilities.getResource(errorKey.getResourceKey()),
-                errorKey.getSQLState(),
-                errorKey.getErrorCode());
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    public SqlException(LogWriter logWriter, ErrorKey errorKey, Object[] args) {
-        super(ResourceUtilities.getResource(ResourceKeys.driverOriginationIndicator) +
-                ResourceUtilities.getResource(errorKey.getResourceKey(), args),
-                errorKey.getSQLState(),
-                errorKey.getErrorCode());
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    public SqlException(LogWriter logWriter, ErrorKey errorKey, Object arg) {
-        this(logWriter, errorKey, new Object[]{arg});
-    }
-
-    public SqlException(LogWriter logWriter, Sqlca sqlca) {
-        super();
-        sqlca_ = sqlca;
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    // Temporary constructor until all error keys are defined.
-    public SqlException(LogWriter logWriter) {
-        super(null, null, -99999);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    /*
-    // Temporary constructor until all error keys are defined.
-    public SQLException (LogWriter logWriter, java.lang.Throwable throwable)
+    // New constructors that support internationalized messages
+    // The message id is wrapped inside a class so that we can distinguish
+    // between the signatures of the new constructors and the old constructors
+    public SqlException(LogWriter logwriter, 
+        MessageId msgid, Object[] args, Throwable cause)
     {
-      super ();
-      throwable_ = throwable;
-      if (logWriter != null) logWriter.traceDiagnosable (this);
+        this(
+            logwriter,
+            msgutil_.getCompleteMessage(
+                msgid.msgid,
+                args),
+            ExceptionUtil.getSQLStateFromIdentifier(msgid.msgid),
+            ExceptionUtil.getSeverityFromIdentifier(msgid.msgid));
     }
-    */
+    
+    public SqlException(LogWriter logwriter, MessageId msgid, Object[] args)
+    {
+        this(logwriter, msgid, args, null);
+    }
+    
+    public SqlException (LogWriter logwriter, MessageId msgid)
+    {
+        this(logwriter, msgid, null);
+    }
+    
+    public SqlException(LogWriter logwriter, MessageId msgid, Object arg1)
+    {
+        this(logwriter, msgid, new Object[] { arg1 });
+    }
+    
+    public SqlException(LogWriter logwriter,
+        MessageId msgid, Object arg1, Object arg2)
+    {
+        this(logwriter, msgid, new Object[] { arg1, arg2 });
+    }
+    
+    public SqlException(LogWriter logwriter,
+        MessageId msgid, Object arg1, Object arg2, Object arg3)
+    {
+        this(logwriter, msgid, new Object[] { arg1, arg2, arg3 });
+    }
+    
+    public SqlException(LogWriter logWriter, Sqlca sqlca) {
+        this.sqlca_ = sqlca;
+        if ( logWriter != null )
+        {
+            logWriter.traceDiagnosable(this);
+        }
+    }
+    
+    // Once all messages are internationalized, these methods should become
+    // private
+    public SqlException(LogWriter logWriter, String reason, String sqlState,
+        int errorCode)
+    {
+        this(logWriter, null, reason, sqlState, errorCode);
+    }
 
-    // Temporary constructor until all error keys are defined.
+    private SqlException(LogWriter logWriter, java.lang.Throwable throwable, 
+        String reason, String sqlState, int errorCode ) {
+        super(reason, sqlState, errorCode);
+        message_ = reason;
+        throwable_ = throwable;
+
+        setCause();
+        
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+        
+    }
+        
+    protected void setCause()
+    {
+        // Store the throwable correctly depending upon its class
+        // and whether initCause() is available
+        if (throwable_ != null  )
+        {
+            if ( throwable_ instanceof SQLException )
+            {
+                setNextException((SQLException)throwable_);
+            }
+            else if ( JVMInfo.JDK_ID >= JVMInfo.J2SE_14 )
+            {
+    			initCause(throwable_);
+            }
+            else
+            {
+                message_ = message_ + " Caused by exception " + 
+                    throwable_.getClass() + ": " + throwable_.getMessage();
+
+            }
+        }
+    }
+        
+    // Constructors for backward-compatibility while we're internationalizng
+    // all the messages
+    public SqlException(LogWriter logWriter) {
+        if (logWriter != null) {
+            logWriter.traceDiagnosable(this);
+        }
+    }
+
     public SqlException(LogWriter logWriter, String reason) {
-        super(reason, null, -99999);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, reason, null, DEFAULT_ERRCODE);
     }
 
-    // Temporary constructor until all error keys are defined.
     public SqlException(LogWriter logWriter, java.lang.Throwable throwable, String reason) {
-        super(reason, null, -99999);
-        throwable_ = throwable;
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, throwable, reason, null, DEFAULT_ERRCODE);
     }
 
-    // Temporary constructor until all error keys are defined.
     public SqlException(LogWriter logWriter, java.lang.Throwable throwable, String reason, SqlState sqlstate) {
-        super(reason, sqlstate.getState(), -99999);
-        throwable_ = throwable;
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, throwable, reason, sqlstate.getState(), DEFAULT_ERRCODE);
     }
 
-    // Temporary constructor until all error keys are defined, for subsystem use only.
     public SqlException(LogWriter logWriter, java.lang.Throwable throwable, String reason, String sqlstate) {
-        super(reason, sqlstate, -99999);
-        throwable_ = throwable;
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, throwable, reason, sqlstate, DEFAULT_ERRCODE);
     }
 
-    // Temporary constructor until all error keys are defined.
     public SqlException(LogWriter logWriter, String reason, SqlState sqlState) {
-        super(reason, sqlState.getState(), -99999);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, reason, sqlState.getState(), DEFAULT_ERRCODE);
     }
 
-    // Temporary constructor until all error keys are defined, for subsystem use only.
     public SqlException(LogWriter logWriter, String reason, String sqlState) {
-        super(reason, sqlState, -99999);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, reason, sqlState, DEFAULT_ERRCODE);
     }
 
-    // Temporary constructor until all error keys are defined.
     public SqlException(LogWriter logWriter, String reason, SqlState sqlState, SqlCode errorCode) {
-        super(reason, (sqlState == null) ? null : sqlState.getState(), errorCode.getCode());
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, reason, sqlState.getState(), errorCode.getCode());
     }
+    
 
-    // Temporary constructor until all error keys are defined, for subsystem use only.
-    public SqlException(LogWriter logWriter, String reason, String sqlState, int errorCode) {
-        super(reason, sqlState, errorCode);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    // Temporary constructor until all error keys are defined.
     public SqlException(LogWriter logWriter, java.lang.Throwable throwable, String reason, SqlState sqlState, SqlCode errorCode) {
-        super(reason, sqlState.getState(), errorCode.getCode());
-        throwable_ = throwable;
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, throwable, reason, sqlState.getState(), 
+            errorCode.getCode());
     }
 
-    // Temporary constructor until all error keys are defined, for subsystem use only.
-    public SqlException(LogWriter logWriter, java.lang.Throwable throwable, String reason, String sqlState, int errorCode) {
-        super(reason, sqlState, errorCode);
-        throwable_ = throwable;
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
+    //--- End backward-compatibility constructors ----------------------
+    
 
     // Label an exception element in a batched update exception chain.
     // This text will be prepended onto the exceptions message text dynamically
@@ -207,19 +229,15 @@ public class SqlException extends java.sql.SQLException implements Diagnosable {
     }
 
     public String getMessage() {
-        String message;
-
-        if (sqlca_ == null) {
-            message = super.getMessage();
-        } else {
-            message = ((Sqlca) sqlca_).getJDBCMessage();
+        if (sqlca_ != null) {
+            message_ = ((Sqlca) sqlca_).getJDBCMessage();
         }
 
         if (batchPositionLabel_ == null) {
-            return message;
+            return message_;
         }
 
-        return batchPositionLabel_ + message;
+        return batchPositionLabel_ + message_;
     }
 
     public String getSQLState() {
@@ -241,7 +259,7 @@ public class SqlException extends java.sql.SQLException implements Diagnosable {
     public void printTrace(java.io.PrintWriter printWriter, String header) {
         ExceptionFormatter.printTrace(this, printWriter, header);
     }
-
+    
     // Return a single SQLException without the "next" pointing to another SQLException.
     // Because the "next" is a private field in java.sql.SQLException,
     // we have to create a new SqlException in order to break the chain with "next" as null.

@@ -280,7 +280,7 @@
 <!--                   Derby Engine build target                     -->
 <!-- ==================================================================== -->
 
-  <target name="engine" depends="state,parsers">
+  <target name="engine" depends="shared,state,parsers">
     <ant dir="${derby.engine.src.dir}"/>
     <antcall target="build"/>
     <ant dir="${derby.engine.dir}/loc"/>
@@ -308,11 +308,15 @@
     <ant dir="${derby.tools.src.dir}"/>
   </target>
 
+  <target name="shared" depends="init">
+    <ant dir="${derby.shared.src.dir}"/>
+  </target>
+  
   <target name="drda" depends="engine">
     <ant dir="${derby.drda.src.dir}"/>
   </target>
 
-  <target name="client" depends="engine,init">
+  <target name="client" depends="engine,shared">
     <ant dir="${derby.client.src.dir}"/>
     <antcall target="compile_jdbc4_target">
     	                 <param name="coj.buildscript" value="${derby.client.src.dir}/build.xml"/>
@@ -1120,8 +1124,11 @@
     	 manifest="${derby.jar.dir}/lists/smfclient.mf">
       <fileset dir="${out.dir}"
                includes="org/apache/derby/client/**,
-			org/apache/derby/client/jdbc/Client**,org/apache/derby/jdbc/Client**,org/apache/derby/iapi/services/info/**
-                         org/apache/derby/info/dnc.properties"/>
+			org/apache/derby/client/jdbc/Client**,org/apache/derby/jdbc/Client**,org/apache/derby/iapi/services/info/**,
+                         org/apache/derby/shared/**,
+                         org/apache/derby/info/dnc.properties,
+                         org/apache/derby/loc/client-messages*.properties"
+               excludes="org/apache/derby/shared/common/reference/**"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>

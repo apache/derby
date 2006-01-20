@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 public class Blob extends Lob implements java.sql.Blob {
     //-----------------------------state------------------------------------------
 
@@ -76,8 +78,15 @@ public class Blob extends Lob implements java.sql.Blob {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBytes", (int) pos, length);
             }
-            if ((pos <= 0) || (length < 0)) {
-                throw new SqlException(agent_.logWriter_, "Invalid position " + pos + " or length " + length);
+            if (pos <= 0) {
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.BLOB_BAD_POSITION), 
+                    new Long(pos));
+            }
+            if (length < 0) {
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
+                    new Integer(length));
             }
             byte[] retVal = getBytesX(pos, length);
             if (agent_.loggingEnabled()) {
@@ -129,7 +138,8 @@ public class Blob extends Lob implements java.sql.Blob {
                 agent_.logWriter_.traceEntry(this, "position(byte[], long)", pattern, start);
             }
             if (pattern == null) {
-                throw new SqlException(agent_.logWriter_, "Search pattern cannot be null.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.BLOB_NULL_PATTERN));
             }
             long pos = positionX(pattern, start);
             if (agent_.loggingEnabled()) {
@@ -151,7 +161,8 @@ public class Blob extends Lob implements java.sql.Blob {
                 agent_.logWriter_.traceEntry(this, "position(Blob, long)", pattern, start);
             }
             if (pattern == null) {
-                throw new SqlException(agent_.logWriter_, "Search pattern cannot be null.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.BLOB_NULL_PATTERN));
             }
             long pos = positionX(pattern, start);
             if (agent_.loggingEnabled()) {
@@ -202,13 +213,25 @@ public class Blob extends Lob implements java.sql.Blob {
 
     public int setBytesX(long pos, byte[] bytes, int offset, int len) throws SqlException {
         int length = 0;
-        if ((int) pos <= 0 || pos > binaryString_.length - dataOffset_) {
-            throw new SqlException(agent_.logWriter_, "Invalid position " + pos
-                    + " , offset " + offset + " or length " + len);
+        if ((int) pos <= 0) {
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.BLOB_BAD_POSITION), new Long(pos));
         }
-        if ((offset < 0) || offset > bytes.length || len < 0) {
-            throw new SqlException(agent_.logWriter_, "Invalid position " + pos
-                    + " , offset " + offset + " or length " + len);
+        
+        if ( pos > binaryString_.length - dataOffset_) {
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.BLOB_POSITION_TOO_LARGE), new Long(pos));
+        }
+        if ((offset < 0) || offset > bytes.length )
+        {
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.INVALID_BLOB_OFFSET), 
+                new Integer(offset));
+        }
+        if ( len < 0 ) {
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
+                new Integer(length));
         }
         if (len == 0) {
             return 0;
@@ -246,7 +269,9 @@ public class Blob extends Lob implements java.sql.Blob {
                 agent_.logWriter_.traceEntry(this, " truncate", (int) len);
             }
             if (len < 0 || len > this.length()) {
-                throw new SqlException(agent_.logWriter_, "Invalid length " + len);
+                throw new SqlException(agent_.logWriter_,
+                    new MessageId(SQLState.INVALID_API_PARAMETER),
+                    new Long(len), "len", "Blob.truncate()");
             }
             if (len == this.length()) {
                 return;

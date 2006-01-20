@@ -20,7 +20,7 @@
 
 package org.apache.derby.client.am;
 
-
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class CallableStatement extends PreparedStatement
         implements java.sql.PreparedStatement,
@@ -250,7 +250,8 @@ public class CallableStatement extends PreparedStatement
     private boolean wasNullX() throws SqlException {
         super.checkForClosedStatement();
         if (wasNull_ == WAS_NULL_UNSET) {
-            throw new SqlException(agent_.logWriter_, "Invalid operation: wasNull() called with no data retrieved.");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.WASNULL_INVALID));
         }
         return wasNull_ == WAS_NULL;
     }
@@ -503,7 +504,8 @@ public class CallableStatement extends PreparedStatement
             super.checkForClosedStatement();
             parameterIndex = checkForEscapedCallWithResult(parameterIndex);
             if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, "Invalid method call: parameter 1 is an integer OUT parameter returned by the stored procedure, use getInt call.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
             }
             checkGetterPreconditions(parameterIndex);
             setWasNull(parameterIndex);
@@ -521,7 +523,8 @@ public class CallableStatement extends PreparedStatement
                 agent_.logWriter_.traceEntry(this, "getDate", parameterIndex, cal);
             }
             if (cal == null) {
-                throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.CALENDAR_IS_NULL));
             }
             java.sql.Date result = getDate(parameterIndex);
             if (result != null) {
@@ -551,7 +554,8 @@ public class CallableStatement extends PreparedStatement
             super.checkForClosedStatement();
             parameterIndex = checkForEscapedCallWithResult(parameterIndex);
             if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, "Invalid method call: parameter 1 is an integer OUT parameter returned by the stored procedure, use getInt call.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
             }
             checkGetterPreconditions(parameterIndex);
             setWasNull(parameterIndex);
@@ -569,7 +573,8 @@ public class CallableStatement extends PreparedStatement
                 agent_.logWriter_.traceEntry(this, "getTime", parameterIndex, cal);
             }
             if (cal == null) {
-                throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.CALENDAR_IS_NULL));
             }
             java.sql.Time result = getTime(parameterIndex);
             if (result != null) {
@@ -599,7 +604,8 @@ public class CallableStatement extends PreparedStatement
             super.checkForClosedStatement();
             parameterIndex = checkForEscapedCallWithResult(parameterIndex);
             if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, "Invalid method call: parameter 1 is an integer OUT parameter returned by the stored procedure, use getInt call.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
             }
             checkGetterPreconditions(parameterIndex);
             setWasNull(parameterIndex);
@@ -617,7 +623,8 @@ public class CallableStatement extends PreparedStatement
                 agent_.logWriter_.traceEntry(this, "getTimestamp", parameterIndex, cal);
             }
             if (cal == null) {
-                throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.CALENDAR_IS_NULL));
             }
             java.sql.Timestamp result = getTimestamp(parameterIndex);
             if (result != null) {
@@ -675,7 +682,8 @@ public class CallableStatement extends PreparedStatement
             super.checkForClosedStatement();
             parameterIndex = checkForEscapedCallWithResult(parameterIndex);
             if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, "Invalid method call: parameter 1 is an integer OUT parameter returned by the stored procedure, use getInt call.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
             }
             checkGetterPreconditions(parameterIndex);
             setWasNull(parameterIndex);
@@ -695,7 +703,8 @@ public class CallableStatement extends PreparedStatement
             super.checkForClosedStatement();
             parameterIndex = checkForEscapedCallWithResult(parameterIndex);
             if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, "Invalid method call: parameter 1 is an integer OUT parameter returned by the stored procedure, use getInt call.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
             }
             checkGetterPreconditions(parameterIndex);
             setWasNull(parameterIndex);
@@ -715,7 +724,8 @@ public class CallableStatement extends PreparedStatement
             super.checkForClosedStatement();
             parameterIndex = checkForEscapedCallWithResult(parameterIndex);
             if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, "Invalid method call: parameter 1 is an integer OUT parameter returned by the stored procedure, use getInt call.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
             }
             checkGetterPreconditions(parameterIndex);
             setWasNull(parameterIndex);
@@ -735,13 +745,15 @@ public class CallableStatement extends PreparedStatement
             super.checkForClosedStatement();
             parameterIndex = checkForEscapedCallWithResult(parameterIndex);
             if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, "Invalid method call: parameter 1 is an integer OUT parameter returned by the stored procedure, use getInt call.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));                    
             }
             checkGetterPreconditions(parameterIndex);
             setWasNull(parameterIndex);
             java.sql.Array result = wasNullX() ? null : singletonRowData_.getArray(parameterIndex);
             if (true) {
-                throw new SqlException(agent_.logWriter_, "jdbc 2 method is not yet implemented");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
             }
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getArray", result);
@@ -758,13 +770,15 @@ public class CallableStatement extends PreparedStatement
             super.checkForClosedStatement();
             parameterIndex = checkForEscapedCallWithResult(parameterIndex);
             if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, "Invalid method call: parameter 1 is an integer OUT parameter returned by the stored procedure, use getInt call.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
             }
             checkGetterPreconditions(parameterIndex);
             setWasNull(parameterIndex);
             java.sql.Ref result = wasNullX() ? null : singletonRowData_.getRef(parameterIndex);
             if (true) {
-                throw new SqlException(agent_.logWriter_, "jdbc 2 method is not yet implemented");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
             }
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getRef", result);
@@ -809,7 +823,8 @@ public class CallableStatement extends PreparedStatement
             Object result;
             checkGetterPreconditions(parameterIndex);
             if (true) {
-                throw new SqlException(agent_.logWriter_, "jdbc 2 method is not yet implemented.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
             }
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getObject", result);
@@ -825,7 +840,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterName, sqlType);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void registerOutParameter(String parameterName, int sqlType, int scale) throws SqlException {
@@ -833,7 +848,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterName, sqlType, scale);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void registerOutParameter(String parameterName, int sqlType, String typeName) throws SqlException {
@@ -841,7 +856,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterName, sqlType, typeName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.net.URL getURL(int parameterIndex) throws SqlException {
@@ -849,7 +864,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getURL", parameterIndex);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setURL(String parameterName, java.net.URL x) throws SqlException {
@@ -857,7 +872,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setURL", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setNull(String parameterName, int sqlType) throws SqlException {
@@ -865,7 +880,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setNull", parameterName, sqlType);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setBoolean(String parameterName, boolean x) throws SqlException {
@@ -873,7 +888,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setBoolean", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setByte(String parameterName, byte x) throws SqlException {
@@ -881,7 +896,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setByte", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setShort(String parameterName, short x) throws SqlException {
@@ -889,7 +904,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setShort", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setInt(String parameterName, int x) throws SqlException {
@@ -897,7 +912,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setInt", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setLong(String parameterName, long x) throws SqlException {
@@ -905,7 +920,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setLong", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setFloat(String parameterName, float x) throws SqlException {
@@ -913,7 +928,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setFloat", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setDouble(String parameterName, double x) throws SqlException {
@@ -921,7 +936,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setDouble", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setBigDecimal(String parameterName, java.math.BigDecimal x) throws SqlException {
@@ -929,7 +944,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setBigDecimal", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setString(String parameterName, String x) throws SqlException {
@@ -937,7 +952,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setString", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setBytes(String parameterName, byte x[]) throws SqlException {
@@ -945,7 +960,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setBytes", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setDate(String parameterName, java.sql.Date x) throws SqlException {
@@ -953,7 +968,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setDate", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setTime(String parameterName, java.sql.Time x) throws SqlException {
@@ -961,7 +976,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setTime", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setTimestamp(String parameterName, java.sql.Timestamp x) throws SqlException {
@@ -969,7 +984,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setTimestamp", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setAsciiStream(String parameterName, java.io.InputStream x, int length) throws SqlException {
@@ -977,7 +992,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterName, x, length);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setBinaryStream(String parameterName, java.io.InputStream x, int length) throws SqlException {
@@ -985,7 +1000,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterName, x, length);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setObject(String parameterName, Object x, int targetSqlType, int scale) throws SqlException {
@@ -993,7 +1008,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setObject", parameterName, x, targetSqlType, scale);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setObject(String parameterName, Object x, int targetSqlType) throws SqlException {
@@ -1001,7 +1016,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setObject", parameterName, x, targetSqlType);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setObject(String parameterName, Object x) throws SqlException {
@@ -1009,7 +1024,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setObject", parameterName, x);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setCharacterStream(String parameterName, java.io.Reader reader, int length) throws SqlException {
@@ -1017,7 +1032,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterName, reader, length);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setDate(String parameterName, java.sql.Date x, java.util.Calendar calendar) throws SqlException {
@@ -1025,7 +1040,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setDate", parameterName, x, calendar);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setTime(String parameterName, java.sql.Time x, java.util.Calendar calendar) throws SqlException {
@@ -1033,7 +1048,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setTime", parameterName, x, calendar);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setTimestamp(String parameterName, java.sql.Timestamp x, java.util.Calendar calendar) throws SqlException {
@@ -1041,7 +1056,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setTimestamp", parameterName, x, calendar);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public void setNull(String parameterName, int sqlType, String typeName) throws SqlException {
@@ -1049,7 +1064,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "setNull", parameterName, sqlType, typeName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public String getString(String parameterName) throws SqlException {
@@ -1057,7 +1072,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getString", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public boolean getBoolean(String parameterName) throws SqlException {
@@ -1065,7 +1080,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getBoolean", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public byte getByte(String parameterName) throws SqlException {
@@ -1073,7 +1088,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getByte", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public short getShort(String parameterName) throws SqlException {
@@ -1081,7 +1096,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getShort", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public int getInt(String parameterName) throws SqlException {
@@ -1089,7 +1104,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getInt", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public long getLong(String parameterName) throws SqlException {
@@ -1097,7 +1112,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getLong", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public float getFloat(String parameterName) throws SqlException {
@@ -1105,7 +1120,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getFloat", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public double getDouble(String parameterName) throws SqlException {
@@ -1113,7 +1128,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getDouble", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public byte[] getBytes(String parameterName) throws SqlException {
@@ -1121,7 +1136,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getBytes", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.sql.Date getDate(String parameterName) throws SqlException {
@@ -1129,7 +1144,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getDate", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.sql.Time getTime(String parameterName) throws SqlException {
@@ -1137,7 +1152,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getTime", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.sql.Timestamp getTimestamp(String parameterName) throws SqlException {
@@ -1145,7 +1160,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getTimestamp", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public Object getObject(String parameterName) throws SqlException {
@@ -1153,7 +1168,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getObject", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.math.BigDecimal getBigDecimal(String parameterName) throws SqlException {
@@ -1161,7 +1176,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getBigDecimal", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public Object getObject(String parameterName, java.util.Map map) throws SqlException {
@@ -1169,7 +1184,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getObject", parameterName, map);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.sql.Ref getRef(String parameterName) throws SqlException {
@@ -1177,7 +1192,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getRef", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.sql.Blob getBlob(String parameterName) throws SqlException {
@@ -1185,7 +1200,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getBlob", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.sql.Clob getClob(String parameterName) throws SqlException {
@@ -1193,7 +1208,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getClob", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.sql.Array getArray(String parameterName) throws SqlException {
@@ -1201,7 +1216,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getArray", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.sql.Date getDate(String parameterName, java.util.Calendar calendar) throws SqlException {
@@ -1209,7 +1224,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getDate", parameterName, calendar);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.sql.Time getTime(String parameterName, java.util.Calendar calendar) throws SqlException {
@@ -1217,7 +1232,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getTime", parameterName, calendar);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.sql.Timestamp getTimestamp(String parameterName, java.util.Calendar calendar) throws SqlException {
@@ -1225,7 +1240,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getTimestamp", parameterName, calendar);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     public java.net.URL getURL(String parameterName) throws SqlException {
@@ -1233,7 +1248,7 @@ public class CallableStatement extends PreparedStatement
             agent_.logWriter_.traceEntry(this, "getURL", parameterName);
         }
         super.checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        throw jdbc3MethodNotSupported();
     }
 
     //----------------------------helper methods----------------------------------
@@ -1248,7 +1263,8 @@ public class CallableStatement extends PreparedStatement
     private int checkForEscapedCallWithResult(int parameterIndex, int jdbcType) throws SqlException {
         if (escapedProcedureCallWithResult_) {
             if (parameterIndex == 1 && jdbcType != java.sql.Types.INTEGER) {
-                throw new SqlException(agent_.logWriter_, "Parameter 1 is the return caluse of the stored procedure call, it can only be registered as an integer type");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.RETURN_PARAM_MUST_BE_INT));
             } else {
                 parameterIndex--;
             }
@@ -1263,8 +1279,9 @@ public class CallableStatement extends PreparedStatement
 
     private void checkForValidOutParameter(int parameterIndex) throws SqlException {
         if (parameterMetaData_ == null || parameterMetaData_.sqlxParmmode_[parameterIndex - 1] < java.sql.ParameterMetaData.parameterModeInOut) {
-            throw new SqlException(agent_.logWriter_, "Invalid argument: parameter index " + parameterIndex +
-                    " is not an OUT or INOUT parameter.");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.PARAM_NOT_OUT_OR_INOUT), 
+                new Integer(parameterIndex));
         }
     }
 
@@ -1274,6 +1291,12 @@ public class CallableStatement extends PreparedStatement
         } else {
             wasNull_ = singletonRowData_.isNull_[parameterIndex - 1] ? WAS_NULL : WAS_NOT_NULL;
         }
+    }
+    
+    private SqlException jdbc3MethodNotSupported()
+    {
+        return new SqlException(agent_.logWriter_, 
+            new MessageId(SQLState.JDBC3_METHOD_NOT_SUPPORTED));
     }
 }
 

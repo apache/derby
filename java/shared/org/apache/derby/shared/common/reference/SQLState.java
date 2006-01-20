@@ -1,8 +1,8 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.reference.SQLState
+   Derby - Class org.apache.derby.shared.common.reference.SQLState
 
-   Copyright 1999, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 2006 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
  */
 
-package org.apache.derby.iapi.reference;
+package org.apache.derby.shared.common.reference;
 
 
 /**
@@ -1479,6 +1479,25 @@ public interface SQLState {
     String UNSERIALIZABLE_CONNECTION = "XJ038.U";
     String NO_UPGRADE = "XJ050.U";
 
+    /**
+     * Client-specific JDBC messages
+     * We use the class XN to distinguish these from engine-specific or 
+     * shared message ids
+     *
+     * I don't try to organize by severity because it's just too hard
+     * to keep track of the numbers to ensure we don't duplicate the 
+     * SQL State
+     */
+    String NOGETCONN_ON_CLOSED_POOLED_CONNECTION = "XN001.C";
+    String INVALID_BLOB_OFFSET = "XN003.S";
+    String WASNULL_INVALID = "XN004.S";
+    String INVALID_PARAM_USE_GETINT = "XN005.S";
+    String CALENDAR_IS_NULL = "XN006.S";
+    String JDBC2_METHOD_NOT_IMPLEMENTED = "XN007.S";
+    String JDBC3_METHOD_NOT_SUPPORTED = "XN008.S";
+    String PARAM_NOT_OUT_OR_INOUT = "XN009.S";
+    String RETURN_PARAM_MUST_BE_INT = "XN010.S";
+    
 	/*
 	** org.apache.derby.database.UserUtility
 		*/

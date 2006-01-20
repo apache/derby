@@ -72,6 +72,7 @@
           failonerror="true">
       <arg value="${loc.dir}"/> 
       <arg value="${split.properties}"/>
+      <arg value="${derby.client.dir}/loc"/>
     </java>
     <touch file="${split.donefile}"/>
   </target>

@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.reference.JDBC20Translation
+   Derby - Class org.apache.derby.shared.common.reference.JDBC20Translation
 
    Copyright 1999, 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -18,7 +18,7 @@
 
  */
 
-package org.apache.derby.iapi.reference;
+package org.apache.derby.shared.common.reference;
 
 import java.sql.ResultSet;
 import javax.transaction.xa.XAResource;

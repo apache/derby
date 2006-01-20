@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
+	<TITLE></TITLE>
+	<META NAME="CHANGEDBY" CONTENT="David Van Couvering">
+</HEAD>
+<BODY>
+<P>This package and its sub-packages provides functionality that is
+shared between top-level Derby jar files. 
+<p>
+<b>NOTE - at this time, this code is not yet shared, but is used solely
+by derbyclient.jar.  The code placed here was to enable internationalization
+of the client.  It is put under the shared package because we expect
+a framework to be put into place soon that will allow sharing across
+jar files.</b>
+<P>
+<H2><A NAME="List of Shared Components"/>List of Available Shared Components</H2>
+Shared code is provided through one or more <I>shared components</I>.
+This section lists each shared component, providing essential information for
+the consumers of these components.
+<p>
+When you create a shared component, you need to add a section here to describe
+it for your consumers.
+<p>
+<b>NOTE: Introducing a new shared component requires a vote with
+consensus approval.  Adding a new package within an existing shared component 
+requires a vote with lazy consensus. </b> This is to help ensure that 
+what we are sharing makes sense and does not accidentally paint us into 
+some kind of architectural corner.  Adding new classes or methods to an 
+existing shared package does not need to be put up for a vote but should be
+reviewed using the standard patch review mechanism.
+<H3>Common</H3>
+<b>Description:</b>
+<BR>
+This shared component is for code that is (or could be) used across all 
+Derby jar files.  This is a good place for utility routines and services
+such as logging/tracing, internationalization, error handling, etc.
+<p>
+<b>Packages:</b>
+<br>
+The Common shared component contains the following packages, all under
+<code>org.apache.derby.shared</code>
+<br>
+<ul>
+<li><b>common.error</b> - utility code for error and exception handling
+<li><b>common.i18n</b> - utility code for internationlization
+<li><b>common.reference</b> - contains classes with shared constants
+<li><b>common.info</b> - utility code that provides runtime information
+</ul>
+<p>
+<b>Consumers</b>
+<br>
+The only jar file currently using (and thus including) the packages in this 
+component is derbyclient.jar but it is intended to be used by other jar 
+files once we have a working shared component infrastructure in place.
+<H2><A NAME="TermsAndDefinitions"/>Terms and Definitions</H2>
+<p>
+<b>Shared Component</b>
+<br>
+A <i>shared component</i> is a collection of one or more packages under
+<code>org.apache.derby.shared</code> that is used by code in more than one
+Derby jar file (for example, between derbyclient.jar and derby.jar, or between
+derbynet.jar and derbytools.jar).  
+<p>
+There need only be one shared component
+in the system (e.g. the shared package and all its subpackages), but in some
+cases it may be desirable or necessary to split out some of these packages into
+a separate shared component.  For example, if there are packages that only need
+to be shared between the network client and the network server, there is no need
+to put these classes into derby.jar, and thus these should probably be 
+pulled out as a separate shared component.
+<p>
+<b>Backward Compatibility</b>
+<br>
+A consumer built against version X of a shared component should
+work with version X' of a module where X' &gt; X. This is called
+<i>backward compatibility</i>. 
+<p>
+<b>Forward Compatibility</b>
+<br>
+A consumer built against version X of a shared component should
+work with version X' of a module where X' &lt; X. This is called
+<i>forward compatibility</i>. 
+<p>
+<b><A NAME="MixedVersionEnvironment"/>Mixed Version Environment</b>
+<br>
+If it is possible for two or more versions of Derby to be available to
+the same classloader, this is called a <i>mixed version environment</i>.  
+It is a requirement that Derby continue to function correctly even in a
+mixed version environment.  In particular, a Derby class that consumes
+a shared component must continue to run without failure, regardless of
+the ordering of the search path of the classloader or any other factors.
+<p>
+Any shared code infrastructure that we implement must meet this
+requirement.
+<p>
+<H2><A NAME="Issus with Compatibility"/>Issues with Compatibility</H2>
+Using backward and forward compatibility can allow Derby to run 
+<i>fairly well</i> in a mixed version environment.  However, there
+are a couple of significant issues with this approach.  
+<p>
+First of all, maintaining compatibility, particularly forward compatibility,
+places a huge burden of responsibility on Derby engineers, and can also
+create some ugly code.  Basically, for forward compatibility, you are required
+to check to see if any new feature exists in the current runtime environment
+before actually using that feature.  This can get pretty ugly.
+<p>
+Maintaining backward and forward compatibility also does
+not solve the issue of 
+<i>shadowing</i>.  Shadowing occurs when a particular application is upgraded 
+to use the new behavior of an existing
+shared component, but this behavior is not available because it is shadowed by
+an older version of the component.  
+<p>
+For example, say Application A and Application B are both deployed in the
+same application container.  The jar files for A (including Derby jars) are
+placed in directory A and the jar files for B (including Derby jars) are 
+placed in directory B.  In this container environment, the jars for A are
+loaded before the jars for B.
+<p>
+B is running at version 10.4 of Derby and A is running at 10.3.  The Derby
+code for B depends upon functionality provided in a new shared package that 
+does not exist in version 10.3.  B then upgrades to 10.4.1 to get a bug fix, 
+and are quite happy.  Then A upgrades to 10.4.0, which includes the new
+shared package.  The shared package in A shadows the shared package in B,
+and all of a sudden B's bugfix disappears and regresses.
+<p>
+For these reasons, we need another approach that guarantees that the 
+correct version of a shared class
+is loaded for each consumer.  We need to guarantee that Application B 
+use 10.3 shared classes, and Application C uses 10.4 shared classes.
+<p>
+This can be solved in one of two ways.  Which approach we use has yet to
+be decided.  
+<P>
+<ul>
+<li><b>Derby classloader</b> - in this approach a specialized classloader is
+written that loads only from the correct jar file.  This approach is 
+currently under investigation and implementation by David Van Couvering.
+<p>
+<li><b>Code copying</b> - in this approach, at build time every shared class 
+copied and given a different package name for each jar file that uses it.  
+For example, 
+<code>org.apache.derby.shared.common.i18n.MessageUtil</code> would be
+copied as 
+<code>org.apache.derby.shared.engine.common.i18n.MessageUtil</code> 
+for use by derby.jar and as 
+<code>org.apache.derby.shared.client.common.i18n.MessageUtil</code>
+for use by derbyclient.jar.  In this way there is no chance of clashing
+or shadowing in a mixed version environment.
+<p>
+The problem with this approach is that developers must use discipline
+to modify the <b>original</b> source file and <b>not</b> the generated
+version.  For this reason, this approach will only be used if the 
+classloader approach ends up being unfeasible.
+</ul>
+<p>
+Note that these solutions do <b>not</b> allow complete flexibility
+in terms of mixed version environments.  In particular, the application
+programmer or runtime administrator can not run two different versions of
+the embedded driver within the same classloader.  As a matter of fact, 
+that exact configuration is currently not allowed.  The proposed solutions
+only guarantee that if you <b>do</b> have a mixed version environment
+(even by accident), nothing strange or unexpected will happen.  It also 
+allows the network driver to run at 
+a different version from the embedded driver within the same classloader.
+<H2><A NAME="LocationAndDistributionOfSharedComponents"></A>Location
+and Distribution of Shared Components</H2>
+<P>All shared components should comprise of one or more packages
+under the package <code>org.apache.derby.shared</code>
+(stored in the source tree under
+<code>java/common/org/apache/derby/shared</code>). 
+</P>
+<P>Although it would be conceptually nice to have a separate JAR file
+for each shared component, it is a priority for us to keep a very
+simple user experience. For this reason, the classes of a shared
+components will be merged into the appropriate subset of the existing
+jar files. 
+</P>
+<H2><A NAME="UserVisibleImpact"></A>User Visible
+Impact and Restrictions</H2>
+The intent is that the shared component infrastructure and code will have 
+minimal to no visible impact to users.
+</BODY>
+</HTML>
