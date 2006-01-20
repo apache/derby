@@ -2180,6 +2180,7 @@ TOKEN [IGNORE_CASE] :
 |	<PRECISION: "precision">
 |	<RELEASE: "release">
 |	<REPEATABLE: "repeatable">
+|	<RESTART: "restart">
 |	<RETURNS: "returns">
 |	<ROW: "row">
 |	<SAVEPOINT: "savepoint">
@@ -3608,7 +3609,7 @@ columnDefinition(TableElementList tableElementList) throws StandardException :
 	DataTypeDescriptor	typeDescriptor = null;
 	ValueNode			defaultNode = null;
 	String				columnName;
-	long[]				autoIncrementInfo = new long[3];
+	long[]				autoIncrementInfo = new long[4];
 }
 {
 	/*
@@ -9802,6 +9803,7 @@ generatedColumnOption(long[] autoIncrementInfo) throws StandardException :
 	autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = 1;
 	autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = 1;
 	autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_IS_AUTOINCREMENT_INDEX] = 1;
+	autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.CREATE_AUTOINCREMENT;
     }
 
 	<GENERATED> 
@@ -9835,6 +9837,7 @@ autoIncrementBeginEnd(long[] autoIncrementInfo) throws StandardException :
         <INCREMENT> <BY> autoIncrementIncrement = exactNumber()
     {
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.CREATE_AUTOINCREMENT;
 		return;
     }
 |
@@ -9842,6 +9845,7 @@ autoIncrementBeginEnd(long[] autoIncrementInfo) throws StandardException :
     {
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = autoIncrementInitial;
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.CREATE_AUTOINCREMENT;
 		return;
     }
 }
@@ -11350,7 +11354,7 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 	DataTypeDescriptor	typeDescriptor;
 	Token				tok = null;
 	String				columnName;
-	long[]				autoIncrementInfo = new long[3];
+	long[]				autoIncrementInfo = new long[4];
 }
 {
 	<ADD>
@@ -11372,7 +11376,7 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 		return lockGranularity;
 	}
 |
-	<ALTER> [ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <SET>
+	<ALTER> [ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
 		typeDescriptor = DB2AlterColumn(autoIncrementInfo)
 	{
 		changeType[0] = DDLStatementNode.MODIFY_TYPE;
@@ -11443,7 +11447,7 @@ columnAlterClause(String columnName) throws StandardException :
 {
 	ValueNode	defaultNode;
 	DataTypeDescriptor typeDescriptor;
-	long[]				autoIncrementInfo = new long[3];
+	long[]				autoIncrementInfo = new long[4];
 }
 {
 	// MODIFY column_name [WITH] DEFAULT <Value>
@@ -11511,17 +11515,28 @@ DataTypeDescriptor
 DB2AlterColumn(long[] autoIncrementInfo) throws StandardException :
 {
 	long				autoIncrementIncrement = 1;
+	long				autoIncrementRestartWith = 1;
 	DataTypeDescriptor	typeDescriptor = null;
 }
 {
-	<DATA> <TYPE> typeDescriptor = dataTypeDDL()
+	LOOKAHEAD( {getToken(2).kind == DATA} )
+	<SET> <DATA> <TYPE> typeDescriptor = dataTypeDDL()
 	{
 		return typeDescriptor;
 	}
 |
-	<INCREMENT> <BY> autoIncrementIncrement = exactNumber()
+	LOOKAHEAD( {getToken(2).kind == INCREMENT} )
+	<SET> <INCREMENT> <BY> autoIncrementIncrement = exactNumber()
 	{
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE;
+		return typeDescriptor;
+	}
+|
+	<RESTART> <WITH> autoIncrementRestartWith = exactNumber()
+	{
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = autoIncrementRestartWith;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE;
 		return typeDescriptor;
 	}
 }

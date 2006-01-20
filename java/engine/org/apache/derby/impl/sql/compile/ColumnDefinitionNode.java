@@ -72,8 +72,27 @@ public class ColumnDefinitionNode extends TableElementNode
 	DefaultNode					defaultNode;
 	long						autoincrementIncrement;
 	long						autoincrementStart;
+	//This variable tells if the autoincrement column is participating 
+	//in create or alter table. And if it is participating in alter
+	//table, then it further knows if it is represting a change in 
+	//increment value or a change in start value.
+	//This information is later used to make sure that the autoincrement
+	//column's increment value is not 0 at the time of create, or is not
+	//getting set to 0 at the time of increment value modification.
+	long						autoinc_create_or_modify_Start_Increment;
 	boolean						autoincrementVerify;
 
+	//autoinc_create_or_modify_Start_Increment will be set to one of the
+	//following 3 values.
+	//CREATE_AUTOINCREMENT - this autoincrement column definition is for create table
+	public static final int CREATE_AUTOINCREMENT = 0;
+	//MODIFY_AUTOINCREMENT_RESTART_VALUE - this column definition is for
+	//alter table command to change the start value of the column
+	public static final int MODIFY_AUTOINCREMENT_RESTART_VALUE = 1;
+	//MODIFY_AUTOINCREMENT_INC_VALUE - this column definition is for
+	//alter table command to change the increment value of the column
+	public static final int MODIFY_AUTOINCREMENT_INC_VALUE = 2;
+	
 	/**
 	 * Initializer for a ColumnDefinitionNode
 	 *
@@ -122,7 +141,13 @@ public class ColumnDefinitionNode extends TableElementNode
 				long[] aii = (long[]) autoIncrementInfo;
 				autoincrementStart = aii[QueryTreeNode.AUTOINCREMENT_START_INDEX];
 				autoincrementIncrement = aii[QueryTreeNode.AUTOINCREMENT_INC_INDEX];
-
+				//Parser has passed the info about autoincrement column's status in the
+				//following array element. It will tell if the autoinc column is part of 
+				//a create table or if is a part of alter table. And if it is part of 
+				//alter table, is it for changing the increment value or for changing 
+				//the start value?
+				autoinc_create_or_modify_Start_Increment = aii[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY];
+				
 				/*
 				 * If using DB2 syntax to set increment value, will need to check if column
 				 * is already created for autoincrement.
@@ -224,7 +249,12 @@ public class ColumnDefinitionNode extends TableElementNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			if (isAutoincrement && autoincrementIncrement == 0)
+			//increment value for autoincrement column can't be 0 if the autoinc column
+			//is part of create table or it is part of alter table to change the 
+			//increment value. 
+			if (isAutoincrement && autoincrementIncrement == 0 && 
+					(autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.CREATE_AUTOINCREMENT ||
+							autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE))
 			{
 				SanityManager.THROWASSERT(
 					"autoincrementIncrement expected to be non-zero");
@@ -269,6 +299,26 @@ public class ColumnDefinitionNode extends TableElementNode
 		return autoincrementIncrement;
 	}
 
+	/**
+	 * Get the status of this autoincrement column 
+	 *
+	 * @return ColumnDefinitionNode.CREATE_AUTOINCREMENT - 
+	 * 		if this definition is for autoincrement column creatoin
+	 *   ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE -
+	 * 		if this definition is for alter sutoincrement column to change the start value 
+	 *   ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE 
+	 * 		if this definition is for alter autoincrement column to change the increment value
+	 */
+	long getAutoinc_create_or_modify_Start_Increment()
+	{
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.ASSERT(isAutoincrement,
+				"isAutoincrement expected to be true");
+		}
+		return autoinc_create_or_modify_Start_Increment;
+	}
+	
 	/**
 	 * Check the validity of a user type.  Checks whether this column
 	 * definition describes a user type that either doesn't exist or is
@@ -406,7 +456,12 @@ public class ColumnDefinitionNode extends TableElementNode
 		if (tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
 			throw StandardException.newException(SQLState.LANG_NOT_ALLOWED_FOR_DECLARED_GLOBAL_TEMP_TABLE);
 
-		if (autoincrementIncrement == 0)
+		//increment value for autoincrement column can't be 0 if the autoinc column
+		//is part of create table or it is part of alter table to change the 
+		//increment value. 
+		if (autoincrementIncrement == 0 && 
+				(autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.CREATE_AUTOINCREMENT ||
+						autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE))
 			throw StandardException.newException(SQLState.LANG_AI_INVALID_INCREMENT, getColumnName());
 		int jdbctype = dataTypeServices.getTypeId().getJDBCTypeId();
 		switch (jdbctype)

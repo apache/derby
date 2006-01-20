@@ -81,6 +81,9 @@ public abstract class QueryTreeNode implements Visitable
 	public static final int AUTOINCREMENT_START_INDEX = 0;
 	public static final int AUTOINCREMENT_INC_INDEX   = 1;
 	public static final int AUTOINCREMENT_IS_AUTOINCREMENT_INDEX   = 2;
+	//Parser uses this static field to make a note if the autoincrement column 
+	//is participating in create or alter table.
+	public static final int AUTOINCREMENT_CREATE_MODIFY  = 3;
 
 	private int		beginOffset = -1;		// offset into SQL input of the substring
 	                                // which this query node encodes.

@@ -76,13 +76,21 @@ public class ColumnInfo implements Formatable
 	// autoinc columns.
 	public long 						autoincStart;
 	public long 						autoincInc;
+	//if this is an autoincrement column, then following variable will have CREATE or
+	//MODIFY_COLUMN_DEFAULT_RESTART or MODIFY_COLUMN_DEFAULT_INCREMENT. Otherwise,
+	//this variable will be set to -1.
+	public long 						autoinc_create_or_modify_Start_Increment = -1;
 
+	//This indicates column is for CREATE TABLE
 	public static final int CREATE					= 0;
-	public static final int MODIFY_COLUMN_DEFAULT	= 1;
-	public static final int DROP					= 2;
-	public static final int MODIFY_COLUMN_TYPE      = 3;
-	public static final int MODIFY_COLUMN_CONSTRAINT = 4;
-	public static final int MODIFY_COLUMN_CONSTRAINT_NOT_NULL = 5;
+	public static final int DROP					= 1;
+	public static final int MODIFY_COLUMN_TYPE      = 2;
+	public static final int MODIFY_COLUMN_CONSTRAINT = 3;
+	public static final int MODIFY_COLUMN_CONSTRAINT_NOT_NULL = 4;
+	//This indicates column is for ALTER TABLE to change the start value of autoinc column 
+	public static final int MODIFY_COLUMN_DEFAULT_RESTART	= 5;
+	//This indicates column is for ALTER TABLE to change the increment value of autoinc column 
+	public static final int MODIFY_COLUMN_DEFAULT_INCREMENT	= 6;
 	// CONSTRUCTORS
 
 	/**
@@ -115,7 +123,8 @@ public class ColumnInfo implements Formatable
 					   UUID							oldDefaultUUID,
 					   int							action,
 					   long							autoincStart,
-					   long							autoincInc)
+					   long							autoincInc,
+					   long							autoinc_create_or_modify_Start_Increment)
 	{
 		this.name = name;
 		this.dataType = dataType;
@@ -126,6 +135,7 @@ public class ColumnInfo implements Formatable
 		this.action = action;
 		this.autoincStart = autoincStart;
 		this.autoincInc = autoincInc;
+		this.autoinc_create_or_modify_Start_Increment = autoinc_create_or_modify_Start_Increment;
 	}
 
 	// Formatable methods

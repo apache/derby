@@ -38,7 +38,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.impl.sql.execute.BaseActivation;
-import org.apache.derby.impl.sql.execute.ColumnInfo;
 
 import java.util.Properties;
 

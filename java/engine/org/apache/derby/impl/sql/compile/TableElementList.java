@@ -377,7 +377,7 @@ public class TableElementList extends QueryTreeNodeVector
 				colInfos[index] = new ColumnInfo(
 								((TableElementNode) elementAt(index)).getName(),
 								null, null, null, null, null,
-								ColumnInfo.DROP, 0, 0);
+								ColumnInfo.DROP, 0, 0, 0);
 				break;
 			}
 
@@ -408,7 +408,9 @@ public class TableElementList extends QueryTreeNodeVector
 							   (coldef.isAutoincrementColumn() ? 
 								coldef.getAutoincrementStart() : 0),
 							   (coldef.isAutoincrementColumn() ? 
-								coldef.getAutoincrementIncrement() : 0));
+								coldef.getAutoincrementIncrement() : 0),
+							   (coldef.isAutoincrementColumn() ? 
+								coldef.getAutoinc_create_or_modify_Start_Increment() : -1));
 
 			/* Remember how many constraints that we've seen */
 			if (coldef.hasConstraint())

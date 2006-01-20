@@ -30,6 +30,8 @@ import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
 
+import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
+
 /**
  * This class represents a column descriptor.
  *
@@ -67,9 +69,18 @@ public class ColumnDescriptor extends TupleDescriptor
 	UUID				defaultUUID;
 	long				autoincStart;
 	long				autoincInc;
+	//Following variable is used to see if the user is adding an autoincrement 
+	//column, or if user is altering the existing autoincrement column to change 
+	//the increment value or to change the start value. If none of the above,
+	//then it will be set to -1
+	long				autoinc_create_or_modify_Start_Increment = -1; 
 
 	/**
-	 * Constructor for a ColumnDescriptor
+	 * Constructor for a ColumnDescriptor when the column involved
+	 * is an autoincrement column. The last parameter to this method
+	 * indicates if an autoincrement column is getting added or if
+	 * the autoincrement column is being modified to change the
+	 * increment value or to change the start value
 	 *
 	 * @param columnName		The name of the column
 	 * @param columnPosition	The ordinal position of the column
@@ -85,14 +96,49 @@ public class ColumnDescriptor extends TupleDescriptor
 	 * @param autoincStart	Start value for an autoincrement column.
 	 * @param autoincInc	Increment for autoincrement column
 	 * @param autoinc		boolean value for sanity checking.
+	 * @param userChangedWhat		Adding an autoincrement column OR
+	 *						changing increment value or start value of
+	 *						the autoincrement column.
 	 */
 
 	public ColumnDescriptor(String columnName, int columnPosition,
 					 DataTypeDescriptor columnType, DataValueDescriptor columnDefault,
 					 DefaultInfo columnDefaultInfo,
 					 TableDescriptor table,
-					 UUID defaultUUID, long autoincStart, long autoincInc, boolean autoinc)
+					 UUID defaultUUID, long autoincStart, long autoincInc, boolean autoinc,
+					 long userChangedWhat)
 	{
+		this(columnName, columnPosition, columnType, columnDefault,
+				columnDefaultInfo, table, defaultUUID, autoincStart,
+				autoincInc, autoinc);				
+		autoinc_create_or_modify_Start_Increment = userChangedWhat;
+	}
+
+		/**
+		 * Constructor for a ColumnDescriptor
+		 *
+		 * @param columnName		The name of the column
+		 * @param columnPosition	The ordinal position of the column
+		 * @param columnType		A DataTypeDescriptor for the type of
+		 *				the column
+		 * @param columnDefault		A DataValueDescriptor representing the
+		 *							default value of the column, if any
+		 *							(null if no default)
+		 * @param columnDefaultInfo		The default info for the column.
+		 * @param table			A TableDescriptor for the table the
+		 *						column is in
+		 * @param defaultUUID			The UUID for the default, if any.
+		 * @param autoincStart	Start value for an autoincrement column.
+		 * @param autoincInc	Increment for autoincrement column
+		 * @param autoinc		boolean value for sanity checking.
+		 */
+
+		public ColumnDescriptor(String columnName, int columnPosition,
+						 DataTypeDescriptor columnType, DataValueDescriptor columnDefault,
+						 DefaultInfo columnDefaultInfo,
+						 TableDescriptor table,
+						 UUID defaultUUID, long autoincStart, long autoincInc, boolean autoinc)
+		{
 		this.columnName = columnName;
 		this.columnPosition = columnPosition;
 		this.columnType = columnType;
@@ -335,6 +381,11 @@ public class ColumnDescriptor extends TupleDescriptor
 	public long getAutoincInc()
 	{
 		return autoincInc;
+	}
+
+	public long getAutoinc_create_or_modify_Start_Increment()
+	{
+		return autoinc_create_or_modify_Start_Increment;
 	}
 
 	/**

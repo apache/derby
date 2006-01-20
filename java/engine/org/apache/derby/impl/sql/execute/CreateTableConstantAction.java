@@ -266,7 +266,8 @@ class CreateTableConstantAction extends DDLConstantAction
 								   defaultUUID,
 								   columnInfo[ix].autoincStart,
 								   columnInfo[ix].autoincInc,
-								   columnInfo[ix].autoincInc != 0
+								   columnInfo[ix].autoincInc != 0,
+								   columnInfo[ix].autoinc_create_or_modify_Start_Increment
 							   );
 
 			cdlArray[ix] = columnDescriptor;

@@ -64,6 +64,8 @@ import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
 
+import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
+
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 
 import org.apache.derby.iapi.types.*;
@@ -199,6 +201,13 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		Object					defaultSerializable = null;
 		long					autoincStart = 0;
 		long					autoincInc = 0;
+		//The SYSCOLUMNS table's autoinc related columns change with different
+		//values depending on what happened to the autoinc column, ie is the 
+		//user adding an autoincrement column, or is user changing the existing 
+		//autoincrement column to change it's increment value or to change it's
+		//start value? Following variable is used to keep track of what happened 
+		//to the autoincrement column.
+		long autoinc_create_or_modify_Start_Increment = -1;
 
 		if (td != null)
 		{
@@ -212,6 +221,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 			colID = new Integer(column.getPosition() );
 			autoincStart = column.getAutoincStart();
 			autoincInc   = column.getAutoincInc();
+			autoinc_create_or_modify_Start_Increment = column.getAutoinc_create_or_modify_Start_Increment();
 			if (column.getDefaultInfo() != null)
 			{
 				defaultSerializable = column.getDefaultInfo();
@@ -256,14 +266,25 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		/* 6th column is DEFAULTID (UUID - char(36)) */
 		row.setColumn(SYSCOLUMNS_COLUMNDEFAULTID, dvf.getCharDataValue(defaultID));
 
-		if (autoincInc != 0)
-		{
+		if (autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.CREATE_AUTOINCREMENT ||
+				autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE)
+		{//user is adding an autoinc column or is changing the increment value of autoinc column
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTVALUE, 
 						  new SQLLongint(autoincStart));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTSTART, 
 						  new SQLLongint(autoincStart));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC, 
 						  new SQLLongint(autoincInc));
+		} else if (autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE)
+		{//user asked for restart with a new value, so don't change increment by and original start
+			//with values in the SYSCOLUMNS table. Just record the RESTART WITH value as the
+			//next value to be generated in the SYSCOLUMNS table
+			ColumnDescriptor  column = (ColumnDescriptor)td;
+			row.setColumn(SYSCOLUMNS_AUTOINCREMENTVALUE, new SQLLongint(autoincStart));
+			row.setColumn(SYSCOLUMNS_AUTOINCREMENTSTART, new SQLLongint(
+					column.getTableDescriptor().getColumnDescriptor(colName).getAutoincStart()));
+			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC, new SQLLongint(
+					column.getTableDescriptor().getColumnDescriptor(colName).getAutoincInc()));
 		}
 		else
 		{

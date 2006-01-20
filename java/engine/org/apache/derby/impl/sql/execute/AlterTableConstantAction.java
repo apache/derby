@@ -398,7 +398,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					addNewColumnToTable(activation, ix);
 				}
 				else if (columnInfo[ix].action == 
-						 ColumnInfo.MODIFY_COLUMN_DEFAULT)
+						 ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART ||
+						 columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT)
 				{
 					modifyColumnDefault(activation, ix);
 				}
@@ -1039,7 +1040,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 												   defaultUUID,
 												   columnInfo[ix].autoincStart,
 												   columnInfo[ix].autoincInc,
-												   columnInfo[ix].autoincInc != 0
+												   columnInfo[ix].autoincInc != 0,
+												   columnInfo[ix].autoinc_create_or_modify_Start_Increment
 												   );
 
 		// Update the ColumnDescriptor with new default info
@@ -1047,7 +1049,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		dd.addDescriptor(columnDescriptor, td,
 						 DataDictionary.SYSCOLUMNS_CATALOG_NUM, false, tc);
 	
-		if (columnInfo[ix].autoincInc != 0)
+		if (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT)
 		{
 			// adding an autoincrement default-- calculate the maximum value 
 			// of the autoincrement column.
@@ -1056,7 +1058,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 										 columnInfo[ix].autoincStart);
 			dd.setAutoincrementValue(tc, td.getUUID(), columnInfo[ix].name,
 									 maxValue, true);
-		}
+		} else if (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART)
+		{
+			dd.setAutoincrementValue(tc, td.getUUID(), columnInfo[ix].name,
+					 columnInfo[ix].autoincStart, false);
+		} 
 	}
 
 

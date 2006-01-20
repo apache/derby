@@ -227,7 +227,10 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 		switch (getNodeType())
 		{
 		case C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE:
-			return ColumnInfo.MODIFY_COLUMN_DEFAULT;
+			if (autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE)
+				return ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART;
+			else
+				return ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT;
 		case C_NodeTypes.MODIFY_COLUMN_TYPE_NODE:
 			return ColumnInfo.MODIFY_COLUMN_TYPE;
 		case C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE:
