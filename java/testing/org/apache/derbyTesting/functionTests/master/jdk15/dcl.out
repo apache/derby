@@ -236,7 +236,7 @@ ERROR 42X51: The class 'org.apache.derbyTesting.databaseclassloader.emc' does no
 ERROR XJ001: Java exception: 'org.apache.derbyTesting.databaseclassloader.emc : Bad version number in .class file: java.lang.ClassNotFoundException'.
 ij> -- cleanup
 CALL SQLJ.REMOVE_JAR('EMC.MAIL_APP', 0);
-ERROR X0X07: Cannot drop jar file '"EMC"."MAIL_APP"' because its on your db2j.database.classpath '"EMC"."MAIL_APP"'.
+ERROR X0X07: Cannot remove jar file '"EMC"."MAIL_APP"' because it is on your derby.database.classpath '"EMC"."MAIL_APP"'.
 ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', '"emcAddOn"."MailAddOn"');
 0 rows inserted/updated/deleted
 ij> CALL EMC.ADDCONTACT(99, 'cash@venture.com');
