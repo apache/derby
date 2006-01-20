@@ -199,20 +199,34 @@ public abstract class metadata_test {
 			//rs = s.executeQuery("select dc from t where tn = 10 union select dc from t where i = 1");
 			rs = s.executeQuery("select dc from t where dc = 11.1 union select dc from t where i = 1");
 			rsmet = rs.getMetaData();
-			System.out.println("Column display size of the union result is: " + rsmet.getColumnDisplaySize(1));
+			metadata_test.showNumericMetaData("Union Result", rsmet, 1);
 			rs.close();
 
-			rs = s.executeQuery("select dc, dc, r+dc, d-dc, dc-d from t");
+			rs = s.executeQuery("select dc, r, d, r+dc, d-dc, dc-d from t");
 			rsmet = rs.getMetaData();
-			System.out.println("dec(10,2) -- precision: " + rsmet.getPrecision(1) + " scale: " + rsmet.getScale(1) + " display size: " + rsmet.getColumnDisplaySize(1) + " type name: " + rsmet.getColumnTypeName(1));
-			System.out.println("dec(10,2) -- precision: " + rsmet.getPrecision(2) + " scale: " + rsmet.getScale(2) + " display size: " + rsmet.getColumnDisplaySize(2) + " type name: " + rsmet.getColumnTypeName(2));
-			System.out.println("real + dec(10,2) -- precision: " + rsmet.getPrecision(3) + " scale: " + rsmet.getScale(3) + " display size: " + rsmet.getColumnDisplaySize(3) + " type name: " + rsmet.getColumnTypeName(3));
-			System.out.println("double precision - dec(10,2) -- precision: " + rsmet.getPrecision(4) + " scale: " + rsmet.getScale(4) + " display size: " + rsmet.getColumnDisplaySize(4) + " type name: " + rsmet.getColumnTypeName(4));
-			// result is double, precision/scale don't make sense
-			System.out.println("dec(10,2) - double precision -- precision: " + rsmet.getPrecision(5) + " scale: " + rsmet.getScale(5) + " display size: " + rsmet.getColumnDisplaySize(5) + " type name: " + rsmet.getColumnTypeName(5));
+			metadata_test.showNumericMetaData("dec(10,2)", rsmet, 1);
+			metadata_test.showNumericMetaData("real", rsmet, 2);
+			metadata_test.showNumericMetaData("double", rsmet, 3);
+			metadata_test.showNumericMetaData("real + dec(10,2)", rsmet, 4);
+			metadata_test.showNumericMetaData("double precision - dec(10,2)", rsmet, 5);
+			metadata_test.showNumericMetaData("dec(10,2) - double precision", rsmet, 6);
+
 			while (rs.next())
-				System.out.println("result row: " + rs.getString(1) + " " + rs.getString(2) + " " + rs.getString(3) + " " + rs.getString(4) + " " + rs.getString(5));
+				System.out.println("result row: " + rs.getString(1) + " "
+						+ rs.getString(2) + " " + rs.getString(3)
+						+ " " + rs.getString(4) + " " + rs.getString(5)
+						+ " " + rs.getString(6)
+						);
 			rs.close();
+
+			rsmet = s.executeQuery("VALUES CAST (0.0 AS DECIMAL(10,0))").getMetaData();
+			metadata_test.showNumericMetaData("DECIMAL(10,0)", rsmet, 1);
+			
+			rsmet = s.executeQuery("VALUES CAST (0.0 AS DECIMAL(10,10))").getMetaData();
+			metadata_test.showNumericMetaData("DECIMAL(10,10)", rsmet, 1);
+			
+			rsmet = s.executeQuery("VALUES CAST (0.0 AS DECIMAL(10,2))").getMetaData();
+			metadata_test.showNumericMetaData("DECIMAL(10,2)", rsmet, 1);
 
 			s.execute("insert into t values(1,2,3.3,4.4,date('1990-05-05'),"+
 						 "time('12:06:06'),timestamp('1990-07-07 07:07:07.07'),"+
@@ -1281,6 +1295,35 @@ public abstract class metadata_test {
 			"procedure isreadO" };
 		TestUtil.cleanUpTest(stmt, testObjects);
 	}
+	
+	/**
+	 * Display the numeric JDBC metadata for a column
+	 * @param expression Description of the expression
+	 * @param rsmd thje meta data
+	 * @param col which column
+	 * @throws SQLException
+	 */
+	private static void showNumericMetaData(String expression,
+			ResultSetMetaData rsmd, int col)
+	   throws SQLException
+   {
+		System.out.print(expression);
+		System.out.print(" --");
+		
+		System.out.print(" precision: ");
+		System.out.print(rsmd.getPrecision(col));
+		
+		System.out.print(" scale: ");
+		System.out.print(rsmd.getScale(col));
+		
+		System.out.print(" display size: ");
+		System.out.print(rsmd.getColumnDisplaySize(col));
 
+		System.out.print(" type name: ");
+		System.out.print(rsmd.getColumnTypeName(col));
+		
+		System.out.println("");
+		
+   }
 }
 
