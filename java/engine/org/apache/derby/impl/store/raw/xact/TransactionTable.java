@@ -337,10 +337,10 @@ public class TransactionTable implements Formatable
     /**
      * Find a transaction in the table by Global transaction id.
      * <p>
-     * Only called by XactXAResourceManager.find() during offline recovery
-     * of in-doubt transactions, we do not expect this to be called often 
-     * so performance is not critical.  Just to linear search of id's. 
-     * <p>
+     * This routine use to be only called during offline recovery so performance
+     * was not critical.  Since that time more calls have been made, including
+     * one in startGlobalTransaction() so a linear search may no longer
+     * be appropriate.  See DERBY-828.
      *
 	 * @return The ContextManager of the transaction being searched for.
      *
@@ -359,11 +359,15 @@ public class TransactionTable implements Formatable
                 TransactionTableEntry entry = 
                     (TransactionTableEntry) e.nextElement();
 
-                if (entry.getGid() != null && 
-					entry.getGid().equals(global_id))
+                if (entry != null)
                 {
-                    cm = entry.getXact().getContextManager();
-                    break;
+                    GlobalTransactionId entry_gid = entry.getGid();
+
+                    if (entry_gid != null && entry_gid.equals(global_id))
+                    {
+                        cm = entry.getXact().getContextManager();
+                        break;
+                    }
                 }
             }
         }
