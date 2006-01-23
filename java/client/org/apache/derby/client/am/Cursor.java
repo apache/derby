@@ -22,6 +22,8 @@ package org.apache.derby.client.am;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
+import java.sql.SQLException;
+
 // When we calculate column offsets make sure we calculate the correct offsets for double byte charactr5er data
 // length from server is number of chars, not bytes
 // Direct byte-level converters are called directly by this class, cross converters are deferred to the CrossConverters class.
@@ -784,191 +786,216 @@ public abstract class Cursor {
     }
 
     final String getString(int column) throws SqlException {
-        String tempString = null;
-        switch (jdbcTypes_[column - 1]) {
-        case JDBC30Translation.BOOLEAN:
-            return agent_.crossConverters_.getStringFromBoolean( getBoolean(column) );
-        case java.sql.Types.CHAR:
-            return getCHAR(column);
-        case java.sql.Types.VARCHAR:
-        case java.sql.Types.LONGVARCHAR:
-            return getVARCHAR(column);
+        try {
+            String tempString = null;
+            switch (jdbcTypes_[column - 1]) {
+            case JDBC30Translation.BOOLEAN:
+                return agent_.crossConverters_.getStringFromBoolean( getBoolean(column) );
+            case java.sql.Types.CHAR:
+                return getCHAR(column);
+            case java.sql.Types.VARCHAR:
+            case java.sql.Types.LONGVARCHAR:
+                return getVARCHAR(column);
 
-        case java.sql.Types.SMALLINT:
-            return String.valueOf(get_SMALLINT(column));
-        case java.sql.Types.INTEGER:
-            return String.valueOf(get_INTEGER(column));
-        case java.sql.Types.BIGINT:
-            return String.valueOf(get_BIGINT(column));
-        case java.sql.Types.REAL:
-            return String.valueOf(get_FLOAT(column));
-        case java.sql.Types.DOUBLE:
-            return String.valueOf(get_DOUBLE(column));
-        case java.sql.Types.DECIMAL:
-            // We could get better performance here if we didn't materialize the BigDecimal,
-            // but converted directly from decimal bytes to a string.
-            return String.valueOf(get_DECIMAL(column));
-        case java.sql.Types.DATE:
-            return getStringFromDATE(column);
-        case java.sql.Types.TIME:
-            return getStringFromTIME(column);
-        case java.sql.Types.TIMESTAMP:
-            return getStringFromTIMESTAMP(column);
-        case Types.BINARY:
-            tempString =
-                    agent_.crossConverters_.getStringFromBytes(get_CHAR_FOR_BIT_DATA(column));
-            return (maxFieldSize_ == 0) ? tempString :
-                    tempString.substring(0, java.lang.Math.min(maxFieldSize_, tempString.length()));
-        case java.sql.Types.VARBINARY:
-        case java.sql.Types.LONGVARBINARY:
-            tempString =
-                    agent_.crossConverters_.getStringFromBytes(get_VARCHAR_FOR_BIT_DATA(column));
-            return (maxFieldSize_ == 0) ? tempString :
-                    tempString.substring(0, java.lang.Math.min(maxFieldSize_, tempString.length()));
-        case java.sql.Types.BLOB:
-            Blob b = (Blob) getBlobColumn_(column, agent_);
-            return agent_.crossConverters_.getStringFromBytes(b.getBytes(1, (int) b.length()));
-        case java.sql.Types.CLOB:
-            Clob c = getClobColumn_(column, agent_);
-            return c.getSubString(1, (int) c.length());
-        default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            case java.sql.Types.SMALLINT:
+                return String.valueOf(get_SMALLINT(column));
+            case java.sql.Types.INTEGER:
+                return String.valueOf(get_INTEGER(column));
+            case java.sql.Types.BIGINT:
+                return String.valueOf(get_BIGINT(column));
+            case java.sql.Types.REAL:
+                return String.valueOf(get_FLOAT(column));
+            case java.sql.Types.DOUBLE:
+                return String.valueOf(get_DOUBLE(column));
+            case java.sql.Types.DECIMAL:
+                // We could get better performance here if we didn't materialize the BigDecimal,
+                // but converted directly from decimal bytes to a string.
+                return String.valueOf(get_DECIMAL(column));
+            case java.sql.Types.DATE:
+                return getStringFromDATE(column);
+            case java.sql.Types.TIME:
+                return getStringFromTIME(column);
+            case java.sql.Types.TIMESTAMP:
+                return getStringFromTIMESTAMP(column);
+            case Types.BINARY:
+                tempString =
+                        agent_.crossConverters_.getStringFromBytes(get_CHAR_FOR_BIT_DATA(column));
+                return (maxFieldSize_ == 0) ? tempString :
+                        tempString.substring(0, java.lang.Math.min(maxFieldSize_, tempString.length()));
+            case java.sql.Types.VARBINARY:
+            case java.sql.Types.LONGVARBINARY:
+                tempString =
+                        agent_.crossConverters_.getStringFromBytes(get_VARCHAR_FOR_BIT_DATA(column));
+                return (maxFieldSize_ == 0) ? tempString :
+                        tempString.substring(0, java.lang.Math.min(maxFieldSize_, tempString.length()));
+            case java.sql.Types.BLOB:
+                Blob b = (Blob) getBlobColumn_(column, agent_);
+                return agent_.crossConverters_.getStringFromBytes(b.getBytes(1, (int) b.length()));
+            case java.sql.Types.CLOB:
+                Clob c = getClobColumn_(column, agent_);
+                return c.getSubString(1, (int) c.length());
+            default:
+                throw new ColumnTypeConversionException(agent_.logWriter_);
+            }
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
         }
     }
 
     final byte[] getBytes(int column) throws SqlException {
-        switch (jdbcTypes_[column - 1]) {
-        case java.sql.Types.BINARY:
-            return get_CHAR_FOR_BIT_DATA(column);
-        case java.sql.Types.VARBINARY:
-        case java.sql.Types.LONGVARBINARY:
-            return get_VARCHAR_FOR_BIT_DATA(column);
-        case java.sql.Types.BLOB:
-            Blob b = (Blob) getBlobColumn_(column, agent_);
-            return b.getBytes(1, (int) b.length());
-        default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+        try {
+            switch (jdbcTypes_[column - 1]) {
+            case java.sql.Types.BINARY:
+                return get_CHAR_FOR_BIT_DATA(column);
+            case java.sql.Types.VARBINARY:
+            case java.sql.Types.LONGVARBINARY:
+                return get_VARCHAR_FOR_BIT_DATA(column);
+            case java.sql.Types.BLOB:
+                Blob b = (Blob) getBlobColumn_(column, agent_);
+                return b.getBytes(1, (int) b.length());
+            default:
+                throw new ColumnTypeConversionException(agent_.logWriter_);
+            }
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
         }
     }
 
     public final java.io.InputStream getBinaryStream(int column) throws SqlException {
-        switch (jdbcTypes_[column - 1]) {
-        case java.sql.Types.BINARY:
-            return new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
-        case java.sql.Types.VARBINARY:
-        case java.sql.Types.LONGVARBINARY:
-            return new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column));
-        case java.sql.Types.BLOB:
-            Blob b = (Blob) getBlobColumn_(column, agent_);
-            return b.getBinaryStream();
-        default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+        try {
+            switch (jdbcTypes_[column - 1]) {
+            case java.sql.Types.BINARY:
+                return new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
+            case java.sql.Types.VARBINARY:
+            case java.sql.Types.LONGVARBINARY:
+                return new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column));
+            case java.sql.Types.BLOB:
+                Blob b = (Blob) getBlobColumn_(column, agent_);
+                return b.getBinaryStream();
+            default:
+                throw new ColumnTypeConversionException(agent_.logWriter_);
+            }
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
         }
     }
 
     public final java.io.InputStream getAsciiStream(int column) throws SqlException {
-        switch (jdbcTypes_[column - 1]) {
-        case java.sql.Types.CLOB:
-            Clob c = getClobColumn_(column, agent_);
-            return c.getAsciiStream();
-        case java.sql.Types.CHAR:
-            try {
-                return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("US-ASCII"));
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new SqlException(agent_.logWriter_, e.getMessage());
+        try {
+            switch (jdbcTypes_[column - 1]) {
+            case java.sql.Types.CLOB:
+                Clob c = getClobColumn_(column, agent_);
+                return c.getAsciiStream();
+            case java.sql.Types.CHAR:
+                try {
+                    return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("US-ASCII"));
+                } catch (java.io.UnsupportedEncodingException e) {
+                    throw new SqlException(agent_.logWriter_, e.getMessage());
+                }
+            case java.sql.Types.VARCHAR:
+            case java.sql.Types.LONGVARCHAR:
+                try {
+                    return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("US-ASCII"));
+                } catch (java.io.UnsupportedEncodingException e) {
+                    throw new SqlException(agent_.logWriter_, e.getMessage());
+                }
+            case java.sql.Types.BINARY:
+                return new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
+            case java.sql.Types.VARBINARY:
+            case java.sql.Types.LONGVARBINARY:
+                return new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column));
+            case java.sql.Types.BLOB:
+                Blob b = (Blob) getBlobColumn_(column, agent_);
+                return b.getBinaryStream();
+            default:
+                throw new ColumnTypeConversionException(agent_.logWriter_);
             }
-        case java.sql.Types.VARCHAR:
-        case java.sql.Types.LONGVARCHAR:
-            try {
-                return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("US-ASCII"));
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new SqlException(agent_.logWriter_, e.getMessage());
-            }
-        case java.sql.Types.BINARY:
-            return new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
-        case java.sql.Types.VARBINARY:
-        case java.sql.Types.LONGVARBINARY:
-            return new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column));
-        case java.sql.Types.BLOB:
-            Blob b = (Blob) getBlobColumn_(column, agent_);
-            return b.getBinaryStream();
-        default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+        }
+        catch ( SQLException se ) {
+            throw new SqlException(se);
         }
     }
 
     public final java.io.InputStream getUnicodeStream(int column) throws SqlException {
-        switch (jdbcTypes_[column - 1]) {
-        case java.sql.Types.CLOB:
-            {
-                Clob c = getClobColumn_(column, agent_);
-                String s = c.getSubString(1L, (int) c.length());
+        try {
+            switch (jdbcTypes_[column - 1]) {
+            case java.sql.Types.CLOB:
+                {
+                    Clob c = getClobColumn_(column, agent_);
+                    String s = c.getSubString(1L, (int) c.length());
+                    try {
+                        return new java.io.ByteArrayInputStream(s.getBytes("UTF-8"));
+                    } catch (java.io.UnsupportedEncodingException e) {
+                        throw new SqlException(agent_.logWriter_, e.getMessage());
+                    }
+                }
+            case java.sql.Types.CHAR:
+                {
+                    try {
+                        return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("UTF-8"));
+                    } catch (java.io.UnsupportedEncodingException e) {
+                        throw new SqlException(agent_.logWriter_, e.getMessage());
+                    }
+                }
+            case java.sql.Types.VARCHAR:
+            case java.sql.Types.LONGVARCHAR:
                 try {
-                    return new java.io.ByteArrayInputStream(s.getBytes("UTF-8"));
+                    return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("UTF-8"));
                 } catch (java.io.UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, e.getMessage());
                 }
+            case java.sql.Types.BINARY:
+                return new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
+            case java.sql.Types.VARBINARY:
+            case java.sql.Types.LONGVARBINARY:
+                return new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column));
+            case java.sql.Types.BLOB:
+                Blob b = (Blob) getBlobColumn_(column, agent_);
+                return b.getBinaryStream();
+            default:
+                throw new ColumnTypeConversionException(agent_.logWriter_);
             }
-        case java.sql.Types.CHAR:
-            {
-                try {
-                    return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("UTF-8"));
-                } catch (java.io.UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, e.getMessage());
-                }
-            }
-        case java.sql.Types.VARCHAR:
-        case java.sql.Types.LONGVARCHAR:
-            try {
-                return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("UTF-8"));
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new SqlException(agent_.logWriter_, e.getMessage());
-            }
-        case java.sql.Types.BINARY:
-            return new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
-        case java.sql.Types.VARBINARY:
-        case java.sql.Types.LONGVARBINARY:
-            return new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column));
-        case java.sql.Types.BLOB:
-            Blob b = (Blob) getBlobColumn_(column, agent_);
-            return b.getBinaryStream();
-        default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
         }
     }
 
     public final java.io.Reader getCharacterStream(int column) throws SqlException {
-        switch (jdbcTypes_[column - 1]) {
-        case java.sql.Types.CLOB:
-            Clob c = getClobColumn_(column, agent_);
-            return c.getCharacterStream();
-        case java.sql.Types.CHAR:
-            return new java.io.StringReader(getCHAR(column));
-        case java.sql.Types.VARCHAR:
-        case java.sql.Types.LONGVARCHAR:
-            return new java.io.StringReader(getVARCHAR(column));
-        case java.sql.Types.BINARY:
-            try {
-                return new java.io.InputStreamReader(new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column)), "UTF-16BE");
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new SqlException(agent_.logWriter_, "UnsupportedEncodingException: " + e.getMessage());
+        try {
+            switch (jdbcTypes_[column - 1]) {
+            case java.sql.Types.CLOB:
+                Clob c = getClobColumn_(column, agent_);
+                return c.getCharacterStream();
+            case java.sql.Types.CHAR:
+                return new java.io.StringReader(getCHAR(column));
+            case java.sql.Types.VARCHAR:
+            case java.sql.Types.LONGVARCHAR:
+                return new java.io.StringReader(getVARCHAR(column));
+            case java.sql.Types.BINARY:
+                try {
+                    return new java.io.InputStreamReader(new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column)), "UTF-16BE");
+                } catch (java.io.UnsupportedEncodingException e) {
+                    throw new SqlException(agent_.logWriter_, "UnsupportedEncodingException: " + e.getMessage());
+                }
+            case java.sql.Types.VARBINARY:
+            case java.sql.Types.LONGVARBINARY:
+                try {
+                    return new java.io.InputStreamReader(new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column)), "UTF-16BE");
+                } catch (java.io.UnsupportedEncodingException e) {
+                    throw new SqlException(agent_.logWriter_, "UnsupportedEncodingException: " + e.getMessage());
+                }
+            case java.sql.Types.BLOB:
+                try {
+                    Blob b = (Blob) getBlobColumn_(column, agent_);
+                    return new java.io.InputStreamReader(b.getBinaryStream(), "UTF-16BE");
+                } catch (java.io.UnsupportedEncodingException e) {
+                    throw new SqlException(agent_.logWriter_, "UnsupportedEncodingException: " + e.getMessage());
+                }
+            default:
+                throw new ColumnTypeConversionException(agent_.logWriter_);
             }
-        case java.sql.Types.VARBINARY:
-        case java.sql.Types.LONGVARBINARY:
-            try {
-                return new java.io.InputStreamReader(new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column)), "UTF-16BE");
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new SqlException(agent_.logWriter_, "UnsupportedEncodingException: " + e.getMessage());
-            }
-        case java.sql.Types.BLOB:
-            try {
-                Blob b = (Blob) getBlobColumn_(column, agent_);
-                return new java.io.InputStreamReader(b.getBinaryStream(), "UTF-16BE");
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new SqlException(agent_.logWriter_, "UnsupportedEncodingException: " + e.getMessage());
-            }
-        default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
         }
     }
 

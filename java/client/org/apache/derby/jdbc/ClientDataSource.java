@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.apache.derby.client.am.LogWriter;
+import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetConnection;
 import org.apache.derby.client.net.NetLogWriter;
 
@@ -146,14 +147,21 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
      * @throws java.sql.SQLException if a database-access error occurs.
      */
     public Connection getConnection(String user, String password) throws SQLException {
-        // Jdbc 2 connections will write driver trace info on a
-        // datasource-wide basis using the jdbc 2 data source log writer.
-        // This log writer may be narrowed to the connection-level
-        // This log writer will be passed to the agent constructor.
+        try
+        {
+            // Jdbc 2 connections will write driver trace info on a
+            // datasource-wide basis using the jdbc 2 data source log writer.
+            // This log writer may be narrowed to the connection-level
+            // This log writer will be passed to the agent constructor.
 
-        LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
-        updateDataSourceValues(tokenizeAttributes(getConnectionAttributes(), null));
-        return new NetConnection((NetLogWriter) dncLogWriter, user, password, this, -1, false);
+            LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
+            updateDataSourceValues(tokenizeAttributes(getConnectionAttributes(), null));
+            return new NetConnection((NetLogWriter) dncLogWriter, user, password, this, -1, false);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
 }

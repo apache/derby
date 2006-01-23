@@ -26,6 +26,7 @@ import javax.sql.XADataSource;
 
 import org.apache.derby.client.ClientXAConnection;
 import org.apache.derby.client.net.NetLogWriter;
+import org.apache.derby.client.am.SqlException;
 
 
 public class ClientXADataSource extends ClientDataSource implements XADataSource {
@@ -43,7 +44,14 @@ public class ClientXADataSource extends ClientDataSource implements XADataSource
     }
 
     public XAConnection getXAConnection(String user, String password) throws SQLException {
-        NetLogWriter dncLogWriter = (NetLogWriter) super.computeDncLogWriterForNewConnection("_xads");
-        return new ClientXAConnection(this, dncLogWriter, user, password);
+        try
+        {
+            NetLogWriter dncLogWriter = (NetLogWriter) super.computeDncLogWriterForNewConnection("_xads");
+            return new ClientXAConnection(this, dncLogWriter, user, password);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 }

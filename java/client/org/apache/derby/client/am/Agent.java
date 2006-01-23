@@ -270,7 +270,7 @@ public abstract class Agent {
                     "at least one exception occurred on an individual member of the batch. " +
                     "Use getNextException() to retrieve the exceptions for specific batched elements.",
                             updateCounts);
-            bue.setNextException(accumulatedExceptions);
+            bue.setNextException(accumulatedExceptions.getSQLException());
             throw bue;
         }
     }

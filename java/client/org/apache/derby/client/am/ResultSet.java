@@ -21,6 +21,7 @@
 package org.apache.derby.client.am;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public abstract class ResultSet implements java.sql.ResultSet,
         ResultSetCallbackInterface,
@@ -242,16 +243,23 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     // ---------------------------jdbc 1------------------------------------------
 
-    public final boolean next() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "next");
+    public final boolean next() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "next");
+                }
+                boolean isValidCursorPosition = nextX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "next", isValidCursorPosition);
+                }
+                return isValidCursorPosition;
             }
-            boolean isValidCursorPosition = nextX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "next", isValidCursorPosition);
-            }
-            return isValidCursorPosition;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -377,12 +385,19 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
 
-    public void close() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "close");
+    public void close() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "close");
+                }
+                closeX();
             }
-            closeX();
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -484,645 +499,808 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public boolean wasNull() throws SqlException {
+    public boolean wasNull() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "wasNull");
+            }
+            checkForClosedResultSet();
 
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "wasNull");
-        }
-        checkForClosedResultSet();
+            if (wasNull_ == ResultSet.WAS_NULL_UNSET) {
+                throw new SqlException(agent_.logWriter_, "Invalid operation: wasNull() called with no data retrieved");
+            }
 
-        if (wasNull_ == ResultSet.WAS_NULL_UNSET) {
-            throw new SqlException(agent_.logWriter_, "Invalid operation: wasNull() called with no data retrieved");
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "wasNull", wasNull_ == ResultSet.WAS_NULL);
+            }
+            return wasNull_ == ResultSet.WAS_NULL;
         }
-
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "wasNull", wasNull_ == ResultSet.WAS_NULL);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return wasNull_ == ResultSet.WAS_NULL;
     }
 
     //------------------- getters on column index --------------------------------
 
     // Live life on the edge and run unsynchronized
-    public boolean getBoolean(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getBoolean", column);
-        }
-        checkGetterPreconditions(column);
-        boolean result = false;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = agent_.crossConverters_.setBooleanFromObject(updatedColumns_[column - 1],
-                    resultSetMetaData_.types_[column - 1]);
-        } else {
-            result = isNull(column) ? false : cursor_.getBoolean(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getBoolean", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
+    public boolean getBoolean(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
 
-    // Live life on the edge and run unsynchronized
-    public byte getByte(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getByte", column);
-        }
-        checkGetterPreconditions(column);
-        byte result = 0;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = agent_.crossConverters_.setByteFromObject(updatedColumns_[column - 1],
-                    resultSetMetaData_.types_[column - 1]);
-        } else {
-            result = isNull(column) ? 0 : cursor_.getByte(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getByte", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public short getShort(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getShort", column);
-        }
-        checkGetterPreconditions(column);
-        short result = 0;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = ((Short) agent_.crossConverters_.setObject(java.sql.Types.SMALLINT,
-                    updatedColumns_[column - 1])).shortValue();
-        } else {
-            result = isNull(column) ? 0 : cursor_.getShort(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getShort", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public int getInt(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getInt", column);
-        }
-        checkGetterPreconditions(column);
-        int result = 0;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = ((Integer) agent_.crossConverters_.setObject(java.sql.Types.INTEGER,
-                    updatedColumns_[column - 1])).intValue();
-        } else {
-            result = isNull(column) ? 0 : cursor_.getInt(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getInt", result);
-        }
-        setWasNull(column); // this is placed here close to the return to minimize risk of race condition.
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public long getLong(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getLong", column);
-        }
-        checkGetterPreconditions(column);
-        long result = 0;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = ((Long) agent_.crossConverters_.setObject(java.sql.Types.BIGINT,
-                    updatedColumns_[column - 1])).longValue();
-        } else {
-            result = isNull(column) ? 0 : cursor_.getLong(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getLong", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public float getFloat(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getFloat", column);
-        }
-        checkGetterPreconditions(column);
-        float result = 0;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = ((Float) agent_.crossConverters_.setObject(java.sql.Types.REAL,
-                    updatedColumns_[column - 1])).floatValue();
-        } else {
-            result = isNull(column) ? 0 : cursor_.getFloat(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getFloat", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public double getDouble(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getDouble", column);
-        }
-        checkGetterPreconditions(column);
-        double result = 0;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = ((Double) agent_.crossConverters_.setObject(java.sql.Types.DOUBLE,
-                    updatedColumns_[column - 1])).doubleValue();
-        } else {
-            result = isNull(column) ? 0 : cursor_.getDouble(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getDouble", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.math.BigDecimal getBigDecimal(int column, int scale) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", column, scale);
-        }
-        checkGetterPreconditions(column);
-        java.math.BigDecimal result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result =
-                    ((java.math.BigDecimal) agent_.crossConverters_.setObject(java.sql.Types.DECIMAL,
-                            updatedColumns_[column - 1])).setScale(scale, java.math.BigDecimal.ROUND_DOWN);
-        } else {
-            result =
-                    isNull(column) ? null : cursor_.getBigDecimal(column).setScale(scale, java.math.BigDecimal.ROUND_DOWN);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceDeprecatedExit(this, "getBigDecimal", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.math.BigDecimal getBigDecimal(int column) throws SqlException {
-
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getBigDecimal", column);
-        }
-        checkGetterPreconditions(column);
-        java.math.BigDecimal result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result =
-                    (java.math.BigDecimal) agent_.crossConverters_.setObject(java.sql.Types.DECIMAL,
-                            updatedColumns_[column - 1]);
-        } else {
-            result = isNull(column) ? null : cursor_.getBigDecimal(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getBigDecimal", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.sql.Date getDate(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getDate", column);
-        }
-        checkGetterPreconditions(column);
-        java.sql.Date result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = (java.sql.Date) agent_.crossConverters_.setObject(java.sql.Types.DATE, updatedColumns_[column - 1]);
-        } else {
-            result = isNull(column) ? null : cursor_.getDate(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getDate", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.sql.Date getDate(int column, java.util.Calendar calendar) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getDate", column, calendar);
-        }
-        if (calendar == null) {
-            throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
-        }
-        java.sql.Date date = getDate(column);
-        if (date != null) {
-            java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-            targetCalendar.clear();
-            targetCalendar.setTime(date);
-            java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-            defaultCalendar.clear();
-            defaultCalendar.setTime(date);
-            long timeZoneOffset =
-                    targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                    targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-            date.setTime(date.getTime() - timeZoneOffset);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getDate", date);
-        }
-        return date;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.sql.Time getTime(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getTime", column);
-        }
-        checkGetterPreconditions(column);
-        java.sql.Time result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = (java.sql.Time) agent_.crossConverters_.setObject(java.sql.Types.TIME, updatedColumns_[column - 1]);
-        } else {
-            result = isNull(column) ? null : cursor_.getTime(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getTime", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.sql.Time getTime(int column, java.util.Calendar calendar) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getTime", column, calendar);
-        }
-        if (calendar == null) {
-            throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
-        }
-        java.sql.Time time = getTime(column);
-        if (time != null) {
-            java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-            targetCalendar.clear();
-            targetCalendar.setTime(time);
-            java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-            defaultCalendar.clear();
-            defaultCalendar.setTime(time);
-            long timeZoneOffset =
-                    targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                    targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-            time.setTime(time.getTime() - timeZoneOffset);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getTime", time);
-        }
-        return time;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.sql.Timestamp getTimestamp(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getTimestamp", column);
-        }
-        checkGetterPreconditions(column);
-        java.sql.Timestamp result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = (java.sql.Timestamp) agent_.crossConverters_.setObject(java.sql.Types.TIMESTAMP, updatedColumns_[column - 1]);
-        } else {
-            result = isNull(column) ? null : cursor_.getTimestamp(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getTimestamp", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.sql.Timestamp getTimestamp(int column, java.util.Calendar calendar) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getTimestamp", column, calendar);
-        }
-        if (calendar == null) {
-            throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
-        }
-        java.sql.Timestamp timestamp = getTimestamp(column);
-        if (timestamp != null) {
-            int nano = timestamp.getNanos();
-            java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-            targetCalendar.clear();
-            targetCalendar.setTime(timestamp);
-            java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-            defaultCalendar.clear();
-            defaultCalendar.setTime(timestamp);
-            long timeZoneOffset =
-                    targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                    targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-            timestamp.setTime(timestamp.getTime() - timeZoneOffset);
-            timestamp.setNanos(nano);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getTimestamp", timestamp);
-        }
-        return timestamp;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public String getString(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getString", column);
-        }
-        checkGetterPreconditions(column);
-        String result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = (String) agent_.crossConverters_.setObject(java.sql.Types.CHAR, updatedColumns_[column - 1]);
-        } else {
-            result = isNull(column) ? null : cursor_.getString(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getString", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public byte[] getBytes(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getBytes", column);
-        }
-        checkGetterPreconditions(column);
-        byte[] result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = (byte[]) agent_.crossConverters_.setObject(java.sql.Types.BINARY, updatedColumns_[column - 1]);
-        } else {
-            result = isNull(column) ? null : cursor_.getBytes(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getBytes", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.io.InputStream getBinaryStream(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getBinaryStream", column);
-        }
-	
-        checkGetterPreconditions(column);
-	useStream(column);
-
-        java.io.InputStream result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = new java.io.ByteArrayInputStream((byte[]) agent_.crossConverters_.setObject(java.sql.Types.BINARY, updatedColumns_[column - 1]));
-        } else {
-            result = isNull(column) ? null : cursor_.getBinaryStream(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getBinaryStream", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return createCloseFilterInputStream(result);
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.io.InputStream getAsciiStream(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getAsciiStream", column);
-        }
-	
-        checkGetterPreconditions(column);
-	useStream(column);
-
-        java.io.InputStream result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-		
-		result = new AsciiStream((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR,
-										    updatedColumns_[column - 1]));
-        } else {
-            result = isNull(column) ? null : cursor_.getAsciiStream(column);
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getAsciiStream", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return createCloseFilterInputStream(result);
-    }
-
-    // Live life on the edge and run unsynchronized
-    public java.io.InputStream getUnicodeStream(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceDeprecatedEntry(this, "getUnicodeStream", column);
-        }
-	
-        checkGetterPreconditions(column);
-	useStream(column);
-	
-        java.io.InputStream result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            try {
-                result = new java.io.ByteArrayInputStream
-                        (((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR,
-                                updatedColumns_[column - 1])).getBytes("UTF-8"));
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new SqlException(agent_.logWriter_, e, e.getMessage());
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBoolean", column);
             }
-        } else {
-            result = isNull(column) ? null : cursor_.getUnicodeStream(column);
+            checkGetterPreconditions(column);
+            boolean result = false;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = agent_.crossConverters_.setBooleanFromObject(updatedColumns_[column - 1],
+                        resultSetMetaData_.types_[column - 1]);
+            } else {
+                result = isNull(column) ? false : cursor_.getBoolean(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getBoolean", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
         }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceDeprecatedExit(this, "getUnicodeStream", result);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return createCloseFilterInputStream(result);
     }
 
     // Live life on the edge and run unsynchronized
-    public java.io.Reader getCharacterStream(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getCharacterStream", column);
+    public byte getByte(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getByte", column);
+            }
+            checkGetterPreconditions(column);
+            byte result = 0;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = agent_.crossConverters_.setByteFromObject(updatedColumns_[column - 1],
+                        resultSetMetaData_.types_[column - 1]);
+            } else {
+                result = isNull(column) ? 0 : cursor_.getByte(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getByte", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
         }
-	
-        checkGetterPreconditions(column);
-	useStream(column);
-	
-        java.io.Reader result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = new java.io.StringReader
-                    ((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR, updatedColumns_[column - 1]));
-        } else {
-            result = isNull(column) ? null : cursor_.getCharacterStream(column);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getCharacterStream", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Blob getBlob(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getBlob", column);
+    public short getShort(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getShort", column);
+            }
+            checkGetterPreconditions(column);
+            short result = 0;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = ((Short) agent_.crossConverters_.setObject(java.sql.Types.SMALLINT,
+                        updatedColumns_[column - 1])).shortValue();
+            } else {
+                result = isNull(column) ? 0 : cursor_.getShort(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getShort", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
         }
-        checkGetterPreconditions(column);
-        java.sql.Blob result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = (java.sql.Blob) agent_.crossConverters_.setObject(java.sql.Types.BLOB,
-                    updatedColumns_[column - 1]);
-        } else {
-            result = isNull(column) ? null : cursor_.getBlob(column);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getBlob", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Clob getClob(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getClob", column);
+    public int getInt(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getInt", column);
+            }
+            checkGetterPreconditions(column);
+            int result = 0;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = ((Integer) agent_.crossConverters_.setObject(java.sql.Types.INTEGER,
+                        updatedColumns_[column - 1])).intValue();
+            } else {
+                result = isNull(column) ? 0 : cursor_.getInt(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getInt", result);
+            }
+            setWasNull(column); // this is placed here close to the return to minimize risk of race condition.
+            return result;
         }
-        checkGetterPreconditions(column);
-        java.sql.Clob result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = (java.sql.Clob) agent_.crossConverters_.setObject(java.sql.Types.CLOB,
-                    updatedColumns_[column - 1]);
-        } else {
-            result = isNull(column) ? null : cursor_.getClob(column);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getClob", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Ref getRef(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getRef", column);
+    public long getLong(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getLong", column);
+            }
+            checkGetterPreconditions(column);
+            long result = 0;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = ((Long) agent_.crossConverters_.setObject(java.sql.Types.BIGINT,
+                        updatedColumns_[column - 1])).longValue();
+            } else {
+                result = isNull(column) ? 0 : cursor_.getLong(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getLong", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
         }
-        checkGetterPreconditions(column);
-        java.sql.Ref result = isNull(column) ? null : cursor_.getRef(column);
-        if (true) {
-            throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented");
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getRef", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Array getArray(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getArray", column);
+    public float getFloat(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getFloat", column);
+            }
+            checkGetterPreconditions(column);
+            float result = 0;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = ((Float) agent_.crossConverters_.setObject(java.sql.Types.REAL,
+                        updatedColumns_[column - 1])).floatValue();
+            } else {
+                result = isNull(column) ? 0 : cursor_.getFloat(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getFloat", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
         }
-        checkGetterPreconditions(column);
-        java.sql.Array result = isNull(column) ? null : cursor_.getArray(column);
-        if (true) {
-            throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented");
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getArray", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
     }
 
     // Live life on the edge and run unsynchronized
-    public Object getObject(int column) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getObject", column);
+    public double getDouble(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getDouble", column);
+            }
+            checkGetterPreconditions(column);
+            double result = 0;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = ((Double) agent_.crossConverters_.setObject(java.sql.Types.DOUBLE,
+                        updatedColumns_[column - 1])).doubleValue();
+            } else {
+                result = isNull(column) ? 0 : cursor_.getDouble(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getDouble", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
         }
-        Object result = getObjectX(column);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getObject", result);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return result;
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.math.BigDecimal getBigDecimal(int column, int scale) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", column, scale);
+            }
+            checkGetterPreconditions(column);
+            java.math.BigDecimal result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result =
+                        ((java.math.BigDecimal) agent_.crossConverters_.setObject(java.sql.Types.DECIMAL,
+                                updatedColumns_[column - 1])).setScale(scale, java.math.BigDecimal.ROUND_DOWN);
+            } else {
+                result =
+                        isNull(column) ? null : cursor_.getBigDecimal(column).setScale(scale, java.math.BigDecimal.ROUND_DOWN);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceDeprecatedExit(this, "getBigDecimal", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.math.BigDecimal getBigDecimal(int column) throws SQLException {
+        try
+        {
+
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBigDecimal", column);
+            }
+            checkGetterPreconditions(column);
+            java.math.BigDecimal result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result =
+                        (java.math.BigDecimal) agent_.crossConverters_.setObject(java.sql.Types.DECIMAL,
+                                updatedColumns_[column - 1]);
+            } else {
+                result = isNull(column) ? null : cursor_.getBigDecimal(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getBigDecimal", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.sql.Date getDate(int column) throws SQLException {
+	    try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getDate", column);
+            }
+            checkGetterPreconditions(column);
+            java.sql.Date result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = (java.sql.Date) agent_.crossConverters_.setObject(java.sql.Types.DATE, updatedColumns_[column - 1]);
+            } else {
+                result = isNull(column) ? null : cursor_.getDate(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getDate", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.sql.Date getDate(int column, java.util.Calendar calendar) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getDate", column, calendar);
+            }
+            if (calendar == null) {
+                throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+            }
+            java.sql.Date date = getDate(column);
+            if (date != null) {
+                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
+                targetCalendar.clear();
+                targetCalendar.setTime(date);
+                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
+                defaultCalendar.clear();
+                defaultCalendar.setTime(date);
+                long timeZoneOffset =
+                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
+                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
+                date.setTime(date.getTime() - timeZoneOffset);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getDate", date);
+            }
+            return date;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }            
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.sql.Time getTime(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getTime", column);
+            }
+            checkGetterPreconditions(column);
+            java.sql.Time result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = (java.sql.Time) agent_.crossConverters_.setObject(java.sql.Types.TIME, updatedColumns_[column - 1]);
+            } else {
+                result = isNull(column) ? null : cursor_.getTime(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getTime", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.sql.Time getTime(int column, java.util.Calendar calendar) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getTime", column, calendar);
+            }
+            if (calendar == null) {
+                throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+            }
+            java.sql.Time time = getTime(column);
+            if (time != null) {
+                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
+                targetCalendar.clear();
+                targetCalendar.setTime(time);
+                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
+                defaultCalendar.clear();
+                defaultCalendar.setTime(time);
+                long timeZoneOffset =
+                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
+                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
+                time.setTime(time.getTime() - timeZoneOffset);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getTime", time);
+            }
+            return time;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.sql.Timestamp getTimestamp(int column) throws SQLException {
+	    try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getTimestamp", column);
+            }
+            checkGetterPreconditions(column);
+            java.sql.Timestamp result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = (java.sql.Timestamp) agent_.crossConverters_.setObject(java.sql.Types.TIMESTAMP, updatedColumns_[column - 1]);
+            } else {
+                result = isNull(column) ? null : cursor_.getTimestamp(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getTimestamp", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.sql.Timestamp getTimestamp(int column, java.util.Calendar calendar) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getTimestamp", column, calendar);
+            }
+            if (calendar == null) {
+                throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+            }
+            java.sql.Timestamp timestamp = getTimestamp(column);
+            if (timestamp != null) {
+                int nano = timestamp.getNanos();
+                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
+                targetCalendar.clear();
+                targetCalendar.setTime(timestamp);
+                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
+                defaultCalendar.clear();
+                defaultCalendar.setTime(timestamp);
+                long timeZoneOffset =
+                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
+                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
+                timestamp.setTime(timestamp.getTime() - timeZoneOffset);
+                timestamp.setNanos(nano);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getTimestamp", timestamp);
+            }
+            return timestamp;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public String getString(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getString", column);
+            }
+            checkGetterPreconditions(column);
+            String result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = (String) agent_.crossConverters_.setObject(java.sql.Types.CHAR, updatedColumns_[column - 1]);
+            } else {
+                result = isNull(column) ? null : cursor_.getString(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getString", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public byte[] getBytes(int column) throws SQLException {
+	    try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBytes", column);
+            }
+            checkGetterPreconditions(column);
+            byte[] result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = (byte[]) agent_.crossConverters_.setObject(java.sql.Types.BINARY, updatedColumns_[column - 1]);
+            } else {
+                result = isNull(column) ? null : cursor_.getBytes(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getBytes", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.io.InputStream getBinaryStream(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBinaryStream", column);
+            }
+
+            checkGetterPreconditions(column);
+        useStream(column);
+
+            java.io.InputStream result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = new java.io.ByteArrayInputStream((byte[]) agent_.crossConverters_.setObject(java.sql.Types.BINARY, updatedColumns_[column - 1]));
+            } else {
+                result = isNull(column) ? null : cursor_.getBinaryStream(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getBinaryStream", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return createCloseFilterInputStream(result);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.io.InputStream getAsciiStream(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getAsciiStream", column);
+            }
+
+            checkGetterPreconditions(column);
+        useStream(column);
+
+            java.io.InputStream result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+
+            result = new AsciiStream((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR,
+                                                updatedColumns_[column - 1]));
+            } else {
+                result = isNull(column) ? null : cursor_.getAsciiStream(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getAsciiStream", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return createCloseFilterInputStream(result);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.io.InputStream getUnicodeStream(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceDeprecatedEntry(this, "getUnicodeStream", column);
+            }
+
+            checkGetterPreconditions(column);
+        useStream(column);
+
+            java.io.InputStream result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                try {
+                    result = new java.io.ByteArrayInputStream
+                            (((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR,
+                                    updatedColumns_[column - 1])).getBytes("UTF-8"));
+                } catch (java.io.UnsupportedEncodingException e) {
+                    throw new SqlException(agent_.logWriter_, e, e.getMessage());
+                }
+            } else {
+                result = isNull(column) ? null : cursor_.getUnicodeStream(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceDeprecatedExit(this, "getUnicodeStream", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return createCloseFilterInputStream(result);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.io.Reader getCharacterStream(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getCharacterStream", column);
+            }
+
+            checkGetterPreconditions(column);
+        useStream(column);
+
+            java.io.Reader result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = new java.io.StringReader
+                        ((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR, updatedColumns_[column - 1]));
+            } else {
+                result = isNull(column) ? null : cursor_.getCharacterStream(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getCharacterStream", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.sql.Blob getBlob(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBlob", column);
+            }
+            checkGetterPreconditions(column);
+            java.sql.Blob result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = (java.sql.Blob) agent_.crossConverters_.setObject(java.sql.Types.BLOB,
+                        updatedColumns_[column - 1]);
+            } else {
+                result = isNull(column) ? null : cursor_.getBlob(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getBlob", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.sql.Clob getClob(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getClob", column);
+            }
+            checkGetterPreconditions(column);
+            java.sql.Clob result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = (java.sql.Clob) agent_.crossConverters_.setObject(java.sql.Types.CLOB,
+                        updatedColumns_[column - 1]);
+            } else {
+                result = isNull(column) ? null : cursor_.getClob(column);
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getClob", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.sql.Ref getRef(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getRef", column);
+            }
+            checkGetterPreconditions(column);
+            java.sql.Ref result = isNull(column) ? null : cursor_.getRef(column);
+            if (true) {
+                throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented");
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getRef", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public java.sql.Array getArray(int column) throws SQLException {
+	    try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getArray", column);
+            }
+            checkGetterPreconditions(column);
+            java.sql.Array result = isNull(column) ? null : cursor_.getArray(column);
+            if (true) {
+                throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented");
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getArray", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Live life on the edge and run unsynchronized
+    public Object getObject(int column) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getObject", column);
+            }
+            Object result = getObjectX(column);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getObject", result);
+            }
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     // used by DBMD
@@ -1139,28 +1317,34 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public Object getObject(int column, java.util.Map map) throws SqlException {
-	    
-	    closeCloseFilterInputStream();
-	    
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getObject", column, map);
+    public Object getObject(int column, java.util.Map map) throws SQLException {
+        try
+        {
+            closeCloseFilterInputStream();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getObject", column, map);
+            }
+            checkGetterPreconditions(column);
+            Object result = null;
+            if (wasNonNullSensitiveUpdate(column)) {
+                result = updatedColumns_[column - 1];
+            } else {
+                result = isNull(column) ? null : cursor_.getObject(column);
+            }
+            if (true) {
+                throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented");
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getObject", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
         }
-        checkGetterPreconditions(column);
-        Object result = null;
-        if (wasNonNullSensitiveUpdate(column)) {
-            result = updatedColumns_[column - 1];
-        } else {
-            result = isNull(column) ? null : cursor_.getObject(column);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        if (true) {
-            throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented");
-        }
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getObject", result);
-        }
-        setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-        return result;
     }
 
     //----------------------------------------------------------------------------
@@ -1205,193 +1389,382 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     // ------------- Methods for accessing results by column name ----------------
 
-    public final boolean getBoolean(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getBoolean", columnName);
+    public final boolean getBoolean(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBoolean", columnName);
+            }
+            return getBoolean(findColumnX(columnName));
         }
-        return getBoolean(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final byte getByte(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getByte", columnName);
+    public final byte getByte(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getByte", columnName);
+            }
+            return getByte(findColumnX(columnName));
         }
-        return getByte(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final short getShort(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getShort", columnName);
+    public final short getShort(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getShort", columnName);
+            }
+            return getShort(findColumnX(columnName));
         }
-        return getShort(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final int getInt(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getInt", columnName);
+    public final int getInt(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getInt", columnName);
+            }
+            return getInt(findColumnX(columnName));
         }
-        return getInt(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final long getLong(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getLong", columnName);
+    public final long getLong(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getLong", columnName);
+            }
+            return getLong(findColumnX(columnName));
         }
-        return getLong(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final float getFloat(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getFloat", columnName);
+    public final float getFloat(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getFloat", columnName);
+            }
+            return getFloat(findColumnX(columnName));
         }
-        return getFloat(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final double getDouble(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getDouble", columnName);
+    public final double getDouble(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getDouble", columnName);
+            }
+            return getDouble(findColumnX(columnName));
         }
-        return getDouble(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.math.BigDecimal getBigDecimal(String columnName, int scale) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", columnName, scale);
+    public final java.math.BigDecimal getBigDecimal(String columnName, int scale) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", columnName, scale);
+            }
+            return getBigDecimal(findColumnX(columnName), scale);
         }
-        return getBigDecimal(findColumnX(columnName), scale);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.math.BigDecimal getBigDecimal(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getBigDecimal", columnName);
+    public final java.math.BigDecimal getBigDecimal(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBigDecimal", columnName);
+            }
+            return getBigDecimal(findColumnX(columnName));
         }
-        return getBigDecimal(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.sql.Date getDate(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getDate", columnName);
+    public final java.sql.Date getDate(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getDate", columnName);
+            }
+            return getDate(findColumnX(columnName));
         }
-        return getDate(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.sql.Date getDate(String columnName, java.util.Calendar cal) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getDate", columnName, cal);
+    public final java.sql.Date getDate(String columnName, java.util.Calendar cal) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getDate", columnName, cal);
+            }
+            return getDate(findColumnX(columnName), cal);
         }
-        return getDate(findColumnX(columnName), cal);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.sql.Time getTime(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getTime", columnName);
+    public final java.sql.Time getTime(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getTime", columnName);
+            }
+            return getTime(findColumnX(columnName));
         }
-        return getTime(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.sql.Time getTime(String columnName, java.util.Calendar cal) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getTime", columnName, cal);
+    public final java.sql.Time getTime(String columnName, java.util.Calendar cal) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getTime", columnName, cal);
+            }
+            return getTime(findColumnX(columnName), cal);
         }
-        return getTime(findColumnX(columnName), cal);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.sql.Timestamp getTimestamp(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getTimestamp", columnName);
+    public final java.sql.Timestamp getTimestamp(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getTimestamp", columnName);
+            }
+            return getTimestamp(findColumnX(columnName));
         }
-        return getTimestamp(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.sql.Timestamp getTimestamp(String columnName, java.util.Calendar cal) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getTimestamp", columnName, cal);
+    public final java.sql.Timestamp getTimestamp(String columnName, java.util.Calendar cal) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getTimestamp", columnName, cal);
+            }
+            return getTimestamp(findColumnX(columnName), cal);
         }
-        return getTimestamp(findColumnX(columnName), cal);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final String getString(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getString", columnName);
+    public final String getString(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getString", columnName);
+            }
+            return getString(findColumnX(columnName));
         }
-        return getString(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final byte[] getBytes(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getBytes", columnName);
+    public final byte[] getBytes(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBytes", columnName);
+            }
+            return getBytes(findColumnX(columnName));
         }
-        return getBytes(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.io.InputStream getBinaryStream(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getBinaryStream", columnName);
+    public final java.io.InputStream getBinaryStream(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBinaryStream", columnName);
+            }
+            return getBinaryStream(findColumnX(columnName));
         }
-        return getBinaryStream(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.io.InputStream getAsciiStream(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getAsciiStream", columnName);
+    public final java.io.InputStream getAsciiStream(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getAsciiStream", columnName);
+            }
+            return getAsciiStream(findColumnX(columnName));
         }
-        return getAsciiStream(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.io.InputStream getUnicodeStream(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceDeprecatedEntry(this, "getUnicodeStream", columnName);
+    public final java.io.InputStream getUnicodeStream(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceDeprecatedEntry(this, "getUnicodeStream", columnName);
+            }
+            return getUnicodeStream(findColumnX(columnName));
         }
-        return getUnicodeStream(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.io.Reader getCharacterStream(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getCharacterStream", columnName);
+    public final java.io.Reader getCharacterStream(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getCharacterStream", columnName);
+            }
+            return getCharacterStream(findColumnX(columnName));
         }
-        return getCharacterStream(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.sql.Blob getBlob(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getBlob", columnName);
+    public final java.sql.Blob getBlob(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBlob", columnName);
+            }
+            return getBlob(findColumnX(columnName));
         }
-        return getBlob(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.sql.Clob getClob(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getClob", columnName);
+    public final java.sql.Clob getClob(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getClob", columnName);
+            }
+            return getClob(findColumnX(columnName));
         }
-        return getClob(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.sql.Array getArray(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getArray", columnName);
+    public final java.sql.Array getArray(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getArray", columnName);
+            }
+            return getArray(findColumnX(columnName));
         }
-        return getArray(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final java.sql.Ref getRef(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getRef", columnName);
+    public final java.sql.Ref getRef(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getRef", columnName);
+            }
+            return getRef(findColumnX(columnName));
         }
-        return getRef(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final Object getObject(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getObject", columnName);
+    public final Object getObject(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getObject", columnName);
+            }
+            return getObject(findColumnX(columnName));
         }
-        return getObject(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public final Object getObject(String columnName, java.util.Map map) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getObject", columnName, map);
+    public final Object getObject(String columnName, java.util.Map map) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getObject", columnName, map);
+            }
+            return getObject(findColumnX(columnName), map);
         }
-        return getObject(findColumnX(columnName), map);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     // ----------------Advanced features -----------------------------------------
@@ -1403,7 +1776,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return warnings_;
     }
 
-    public final void clearWarnings() throws SqlException {
+    public final void clearWarnings() throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "clearWarnings");
@@ -1417,38 +1790,52 @@ public abstract class ResultSet implements java.sql.ResultSet,
         warnings_ = null;
     }
 
-    public String getCursorName() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getCursorName");
-            }
-            checkForClosedResultSet();
-            if (generatedSection_ != null) {
-                return "stored procedure generated cursor:" + generatedSection_.getServerCursorName();
-            }
-            if (statement_.cursorName_ == null) {// cursor name is not in the maps yet.
-                statement_.cursorName_ = statement_.section_.getServerCursorName();
-                if (statement_.section_ instanceof Section) {
-                    agent_.sectionManager_.mapCursorNameToQuerySection(statement_.cursorName_,
-                            (Section) statement_.section_);
+    public String getCursorName() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getCursorName");
                 }
+                checkForClosedResultSet();
+                if (generatedSection_ != null) {
+                    return "stored procedure generated cursor:" + generatedSection_.getServerCursorName();
+                }
+                if (statement_.cursorName_ == null) {// cursor name is not in the maps yet.
+                    statement_.cursorName_ = statement_.section_.getServerCursorName();
+                    if (statement_.section_ instanceof Section) {
+                        agent_.sectionManager_.mapCursorNameToQuerySection(statement_.cursorName_,
+                                (Section) statement_.section_);
+                    }
+                }
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getCursorName", statement_.cursorName_);
+                }
+                return statement_.cursorName_;
             }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getCursorName", statement_.cursorName_);
-            }
-            return statement_.cursorName_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.sql.ResultSetMetaData getMetaData() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getMetaData");
+    public java.sql.ResultSetMetaData getMetaData() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getMetaData");
+            }
+            java.sql.ResultSetMetaData resultSetMetaData = getMetaDataX();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getMetaData", resultSetMetaData);
+            }
+            return resultSetMetaData;
         }
-        java.sql.ResultSetMetaData resultSetMetaData = getMetaDataX();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getMetaData", resultSetMetaData);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return resultSetMetaData;
     }
 
     // used by DBMD
@@ -1458,16 +1845,23 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
 
-    public final int findColumn(String columnName) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "findColumn", columnName);
+    public final int findColumn(String columnName) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "findColumn", columnName);
+                }
+                int column = findColumnX(columnName);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "findColumn", column);
+                }
+                return column;
             }
-            int column = findColumnX(columnName);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "findColumn", column);
-            }
-            return column;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -1479,18 +1873,25 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     //-------------------------- Traversal/Positioning ---------------------------
 
-    public boolean isBeforeFirst() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "isBeforeFirst");
+    public boolean isBeforeFirst() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "isBeforeFirst");
+            }
+            checkForClosedResultSet();
+            checkThatResultSetTypeIsScrollable();
+            // Returns false if the ResultSet contains no rows.
+            boolean isBeforeFirst = isBeforeFirstX();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "isBeforeFirst", isBeforeFirst);
+            }
+            return isBeforeFirst;
         }
-        checkForClosedResultSet();
-        checkThatResultSetTypeIsScrollable();
-        // Returns false if the ResultSet contains no rows.
-        boolean isBeforeFirst = isBeforeFirstX();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "isBeforeFirst", isBeforeFirst);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return isBeforeFirst;
     }
 
     private boolean isBeforeFirstX() throws SqlException {
@@ -1503,18 +1904,25 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public boolean isAfterLast() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "isAfterLast");
+    public boolean isAfterLast() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "isAfterLast");
+            }
+            checkForClosedResultSet();
+            checkThatResultSetTypeIsScrollable();
+            // Returns false if the ResultSet contains no rows.
+            boolean isAfterLast = isAfterLastX();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "isAfterLast", isAfterLast);
+            }
+            return isAfterLast;
         }
-        checkForClosedResultSet();
-        checkThatResultSetTypeIsScrollable();
-        // Returns false if the ResultSet contains no rows.
-        boolean isAfterLast = isAfterLastX();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "isAfterLast", isAfterLast);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return isAfterLast;
     }
 
     private boolean isAfterLastX() throws SqlException {
@@ -1529,19 +1937,26 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public boolean isFirst() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "isFirst");
+    public boolean isFirst() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "isFirst");
+            }
+            checkForClosedResultSet();
+            checkThatResultSetTypeIsScrollable();
+            // Not necessary to get the rowCount_ since currentRowInRowset_ is initialized to -1,
+            // and it will not be changed if there is no rows in the ResultSet.
+            boolean isFirst = isFirstX();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "isFirst", isFirst);
+            }
+            return isFirst;
         }
-        checkForClosedResultSet();
-        checkThatResultSetTypeIsScrollable();
-        // Not necessary to get the rowCount_ since currentRowInRowset_ is initialized to -1,
-        // and it will not be changed if there is no rows in the ResultSet.
-        boolean isFirst = isFirstX();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "isFirst", isFirst);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return isFirst;
     }
 
     private boolean isFirstX() {
@@ -1551,18 +1966,25 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return (firstRowInRowset_ == 1 && currentRowInRowset_ == 0);
     }
 
-    public boolean isLast() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "isLast");
+    public boolean isLast() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "isLast");
+            }
+            checkForClosedResultSet();
+            checkThatResultSetTypeIsScrollable();
+            // Returns false if the ResultSet contains no rows.
+            boolean isLast = isLastX();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "isLast", isLast);
+            }
+            return isLast;
         }
-        checkForClosedResultSet();
-        checkThatResultSetTypeIsScrollable();
-        // Returns false if the ResultSet contains no rows.
-        boolean isLast = isLastX();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "isLast", isLast);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return isLast;
     }
 
     private boolean isLastX() throws SqlException {
@@ -1574,15 +1996,22 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void beforeFirst() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "beforeFirst");
+    public void beforeFirst() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "beforeFirst");
+                }
+                checkForClosedResultSet();
+                checkThatResultSetTypeIsScrollable();
+                clearWarningsX();
+                beforeFirstX();
             }
-            checkForClosedResultSet();
-            checkThatResultSetTypeIsScrollable();
-            clearWarningsX();
-            beforeFirstX();
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -1606,22 +2035,29 @@ public abstract class ResultSet implements java.sql.ResultSet,
         isValidCursorPosition_ = false;
     }
 
-    public void afterLast() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "afterLast");
+    public void afterLast() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "afterLast");
+                }
+                checkForClosedResultSet();
+                checkThatResultSetTypeIsScrollable();
+                clearWarningsX();
+                afterLastX();
             }
-            checkForClosedResultSet();
-            checkThatResultSetTypeIsScrollable();
-            clearWarningsX();
-            afterLastX();
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     private void afterLastX() throws SqlException {
         resetRowsetFlags();
-	unuseStreams();
-	
+    unuseStreams();
+
         // this method has no effect if the result set has no rows.
         // only send cntqry to position the cursor after last if
         // resultset contains rows and it is not already after last, or
@@ -1637,16 +2073,23 @@ public abstract class ResultSet implements java.sql.ResultSet,
         isValidCursorPosition_ = false;
     }
 
-    public boolean first() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "first");
+    public boolean first() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "first");
+                }
+                boolean isValidCursorPosition = firstX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "first", isValidCursorPosition);
+                }
+                return isValidCursorPosition;
             }
-            boolean isValidCursorPosition = firstX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "first", isValidCursorPosition);
-            }
-            return isValidCursorPosition;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -1661,7 +2104,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         resetUpdatedColumns();
 
         resetRowsetFlags();
-	unuseStreams();
+    unuseStreams();
 
         // if first row is not in the current rowset, fetch the first rowset from the server.
         // rowIsInCurrentRowset with orientation first will always return false for dynamic cursors.
@@ -1683,16 +2126,23 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return isValidCursorPosition_;
     }
 
-    public boolean last() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "last");
+    public boolean last() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "last");
+                }
+                boolean isValidCursorPosition = lastX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "last", isValidCursorPosition);
+                }
+                return isValidCursorPosition;
             }
-            boolean isValidCursorPosition = lastX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "last", isValidCursorPosition);
-            }
-            return isValidCursorPosition;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -1739,16 +2189,23 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return isValidCursorPosition_;
     }
 
-    public int getRow() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getRow");
+    public int getRow() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getRow");
+                }
+                int row = getRowX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getRow", row);
+                }
+                return row;
             }
-            int row = getRowX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getRow", row);
-            }
-            return row;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -1782,16 +2239,23 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return (int) row;
     }
 
-    public boolean absolute(int row) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "absolute", row);
+    public boolean absolute(int row) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "absolute", row);
+                }
+                boolean isValidCursorPosition = absoluteX(row);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "absolute", isValidCursorPosition);
+                }
+                return isValidCursorPosition;
             }
-            boolean isValidCursorPosition = absoluteX(row);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "absolute", isValidCursorPosition);
-            }
-            return isValidCursorPosition;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -1858,16 +2322,23 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return isValidCursorPosition_;
     }
 
-    public boolean relative(int rows) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "relative", rows);
+    public boolean relative(int rows) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "relative", rows);
+                }
+                boolean isValidCursorPosition = relativeX(rows);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "relative", isValidCursorPosition);
+                }
+                return isValidCursorPosition;
             }
-            boolean isValidCursorPosition = relativeX(rows);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "relative", isValidCursorPosition);
-            }
-            return isValidCursorPosition;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -1972,16 +2443,23 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return isValidCursorPosition_;
     }
 
-    public boolean previous() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "previous");
+    public boolean previous() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "previous");
+                }
+                boolean isValidCursorPosition = previousX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "previous", isValidCursorPosition);
+                }
+                return isValidCursorPosition;
             }
-            boolean isValidCursorPosition = previousX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "previous", isValidCursorPosition);
-            }
-            return isValidCursorPosition;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -2028,477 +2506,820 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return isValidCursorPosition_;
     }
 
-    public void setFetchDirection(int direction) throws SqlException {
-        synchronized (connection_) {
+    public void setFetchDirection(int direction) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setFetchDirection", direction);
+                }
+                checkForClosedResultSet();
+                checkThatResultSetTypeIsScrollable();
+
+                switch (direction) {
+                case java.sql.ResultSet.FETCH_FORWARD:
+                case java.sql.ResultSet.FETCH_REVERSE:
+                case java.sql.ResultSet.FETCH_UNKNOWN:
+                    fetchDirection_ = direction;
+                    break;
+                default:
+                    throw new SqlException(agent_.logWriter_, "Invalid fetch direction " + direction);
+                }
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public int getFetchDirection() throws SQLException {
+        try
+        {
+            checkForClosedResultSet();
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setFetchDirection", direction);
+                agent_.logWriter_.traceExit(this, "getFetchDirection", fetchDirection_);
+            }
+            return fetchDirection_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public void setFetchSize(int rows) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setFetchSize", rows);
+                }
+                checkForClosedResultSet();
+                if (rows < 0 || (maxRows_ != 0 && rows > maxRows_)) {
+                    throw new SqlException(agent_.logWriter_, "Invalid fetch size " + rows).getSQLException();
+                }
+                setFetchSize_(rows);
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public int getFetchSize() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getFetchSize", fetchSize_);
             }
             checkForClosedResultSet();
-            checkThatResultSetTypeIsScrollable();
-
-            switch (direction) {
-            case java.sql.ResultSet.FETCH_FORWARD:
-            case java.sql.ResultSet.FETCH_REVERSE:
-            case java.sql.ResultSet.FETCH_UNKNOWN:
-                fetchDirection_ = direction;
-                break;
-            default:
-                throw new SqlException(agent_.logWriter_, "Invalid fetch direction " + direction);
-            }
+            return fetchSize_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int getFetchDirection() throws SqlException {
-        checkForClosedResultSet();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getFetchDirection", fetchDirection_);
-        }
-        return fetchDirection_;
-    }
-
-    public void setFetchSize(int rows) throws SqlException {
-        synchronized (connection_) {
+    public int getType() throws SQLException {
+        try
+        {
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setFetchSize", rows);
+                agent_.logWriter_.traceExit(this, "getType", resultSetType_);
             }
             checkForClosedResultSet();
-            if (rows < 0 || (maxRows_ != 0 && rows > maxRows_)) {
-                throw new SqlException(agent_.logWriter_, "Invalid fetch size " + rows);
+            return resultSetType_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public int getConcurrency() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getConcurrency", resultSetConcurrency_);
             }
-            setFetchSize_(rows);
+            checkForClosedResultSet();
+            return resultSetConcurrency_;
         }
-    }
-
-    public int getFetchSize() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getFetchSize", fetchSize_);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        checkForClosedResultSet();
-        return fetchSize_;
-    }
-
-    public int getType() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getType", resultSetType_);
-        }
-        checkForClosedResultSet();
-        return resultSetType_;
-    }
-
-    public int getConcurrency() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getConcurrency", resultSetConcurrency_);
-        }
-        checkForClosedResultSet();
-        return resultSetConcurrency_;
     }
 
     //----------------------------- Updates --------------------------------------
 
-    public boolean rowUpdated() throws SqlException {
-        // we cannot tell whether the ResultSet has been updated, so always return false here.
-        boolean rowUpdated = false;
-        checkForClosedResultSet();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "rowUpdated", rowUpdated);
+    public boolean rowUpdated() throws SQLException {
+        try
+        {
+            // we cannot tell whether the ResultSet has been updated, so always return false here.
+            boolean rowUpdated = false;
+            checkForClosedResultSet();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "rowUpdated", rowUpdated);
+            }
+            return rowUpdated;
         }
-        return rowUpdated;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public boolean rowInserted() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "rowInserted");
+    public boolean rowInserted() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "rowInserted");
+            }
+            checkForClosedResultSet();
+            if (true) {
+                throw new SqlException(agent_.logWriter_, "under construction");
+            }
+            boolean rowInserted = false;
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "rowInserted", rowInserted);
+            }
+            return rowInserted;
         }
-        checkForClosedResultSet();
-        if (true) {
-            throw new SqlException(agent_.logWriter_, "under construction");
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        boolean rowInserted = false;
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "rowInserted", rowInserted);
-        }
-        return rowInserted;
     }
 
-    public boolean rowDeleted() throws SqlException {
-        // rowDeleted is visible through a delete hole, (sqlcode +222).
-        // Always return false and do not check the return code for now.
-        boolean rowDeleted = false;
-        checkForClosedResultSet();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "rowDeleted", rowDeleted);
+    public boolean rowDeleted() throws SQLException {
+        try
+        {
+            // rowDeleted is visible through a delete hole, (sqlcode +222).
+            // Always return false and do not check the return code for now.
+            boolean rowDeleted = false;
+            checkForClosedResultSet();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "rowDeleted", rowDeleted);
+            }
+            return rowDeleted;
         }
-        return rowDeleted;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     // --------------------------- update column methods -------------------------
 
-    public void updateNull(int column) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateNull", column);
+    public void updateNull(int column) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateNull", column);
+                }
+                checkUpdatePreconditions(column);
+                if (!resultSetMetaData_.nullable_[column - 1]) {
+                    throw new SqlException(agent_.logWriter_, "Invalid operation to update a non-nullable column to null.");
+                }
+                updateColumn(column, null);
             }
-            checkUpdatePreconditions(column);
-            if (!resultSetMetaData_.nullable_[column - 1]) {
-                throw new SqlException(agent_.logWriter_, "Invalid operation to update a non-nullable column to null.");
-            }
-            updateColumn(column, null);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateBoolean(int column, boolean x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateBoolean", column, x);
+    public void updateBoolean(int column, boolean x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateBoolean", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateByte(int column, byte x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateByte", column, x);
+    public void updateByte(int column, byte x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateByte", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateShort(int column, short x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateShort", column, x);
+    public void updateShort(int column, short x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateShort", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateInt(int column, int x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateInt", column, x);
+    public void updateInt(int column, int x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateInt", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateLong(int column, long x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateLong", column, x);
+    public void updateLong(int column, long x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateLong", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateFloat(int column, float x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateFloat", column, x);
+    public void updateFloat(int column, float x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateFloat", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateDouble(int column, double x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateDouble", column, x);
+    public void updateDouble(int column, double x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateDouble", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateBigDecimal(int column, java.math.BigDecimal x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateBigDecimal", column, x);
+    public void updateBigDecimal(int column, java.math.BigDecimal x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateBigDecimal", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateDate(int column, java.sql.Date x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateDate", column, x);
+    public void updateDate(int column, java.sql.Date x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateDate", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateTime(int column, java.sql.Time x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateTime", column, x);
+    public void updateTime(int column, java.sql.Time x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateTime", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateTimestamp(int column, java.sql.Timestamp x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateTimestamp", column, x);
+    public void updateTimestamp(int column, java.sql.Timestamp x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateTimestamp", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateString(int column, String x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateString", column, x);
+    public void updateString(int column, String x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateString", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateBytes(int column, byte x[]) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateBytes", column, x);
+    public void updateBytes(int column, byte x[]) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateBytes", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     public void updateBinaryStream(int column,
                                    java.io.InputStream x,
-                                   int length) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateBinaryStream", column, x, length);
+                                   int length) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateBinaryStream", column, x, length);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObjectFromBinaryStream(resultSetMetaData_.types_[column - 1], x, length));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObjectFromBinaryStream(resultSetMetaData_.types_[column - 1], x, length));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     public void updateAsciiStream(int column,
                                   java.io.InputStream x,
-                                  int length) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateAsciiStream", column, x, length);
+                                  int length) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateAsciiStream", column, x, length);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObjectFromCharacterStream(resultSetMetaData_.types_[column - 1], x, "US-ASCII", length));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObjectFromCharacterStream(resultSetMetaData_.types_[column - 1], x, "US-ASCII", length));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     public void updateCharacterStream(int column,
                                       java.io.Reader x,
-                                      int length) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateCharacterStream", column, x, length);
+                                      int length) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateCharacterStream", column, x, length);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x, length));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x, length));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateObject(int column, Object x, int scale) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateObject", column, x, scale);
+    public void updateObject(int column, Object x, int scale) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateObject", column, x, scale);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void updateObject(int column, Object x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateObject", column, x);
+    public void updateObject(int column, Object x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateObject", column, x);
+                }
+                checkUpdatePreconditions(column);
+                updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
-            checkUpdatePreconditions(column);
-            updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     // ---------------------- update on column name methods ----------------------
 
-    public void updateNull(String columnName) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateNull", columnName);
+    public void updateNull(String columnName) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateNull", columnName);
+            }
+            updateNull(findColumnX(columnName));
         }
-        updateNull(findColumnX(columnName));
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateBoolean(String columnName, boolean x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateBoolean", columnName, x);
+    public void updateBoolean(String columnName, boolean x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateBoolean", columnName, x);
+            }
+            updateBoolean(findColumnX(columnName), x);
         }
-        updateBoolean(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateByte(String columnName, byte x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateByte", columnName, x);
+    public void updateByte(String columnName, byte x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateByte", columnName, x);
+            }
+            updateByte(findColumnX(columnName), x);
         }
-        updateByte(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateShort(String columnName, short x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateShort", columnName, x);
+    public void updateShort(String columnName, short x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateShort", columnName, x);
+            }
+            updateShort(findColumnX(columnName), x);
         }
-        updateShort(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateInt(String columnName, int x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateInt", columnName, x);
+    public void updateInt(String columnName, int x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateInt", columnName, x);
+            }
+            updateInt(findColumnX(columnName), x);
         }
-        updateInt(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateLong(String columnName, long x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateLong", columnName, x);
+    public void updateLong(String columnName, long x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateLong", columnName, x);
+            }
+            updateLong(findColumnX(columnName), x);
         }
-        updateLong(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateFloat(String columnName, float x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateFloat", columnName, x);
+    public void updateFloat(String columnName, float x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateFloat", columnName, x);
+            }
+            updateFloat(findColumnX(columnName), x);
         }
-        updateFloat(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateDouble(String columnName, double x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateDouble", columnName, x);
+    public void updateDouble(String columnName, double x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateDouble", columnName, x);
+            }
+            updateDouble(findColumnX(columnName), x);
         }
-        updateDouble(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateBigDecimal(String columnName, java.math.BigDecimal x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateBigDecimal", columnName, x);
+    public void updateBigDecimal(String columnName, java.math.BigDecimal x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateBigDecimal", columnName, x);
+            }
+            updateBigDecimal(findColumnX(columnName), x);
         }
-        updateBigDecimal(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateDate(String columnName, java.sql.Date x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateDate", columnName, x);
+    public void updateDate(String columnName, java.sql.Date x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateDate", columnName, x);
+            }
+            updateDate(findColumnX(columnName), x);
         }
-        updateDate(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateTime(String columnName, java.sql.Time x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateTime", columnName, x);
+    public void updateTime(String columnName, java.sql.Time x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateTime", columnName, x);
+            }
+            updateTime(findColumnX(columnName), x);
         }
-        updateTime(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateTimestamp(String columnName, java.sql.Timestamp x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateTimestamp", columnName, x);
+    public void updateTimestamp(String columnName, java.sql.Timestamp x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateTimestamp", columnName, x);
+            }
+            updateTimestamp(findColumnX(columnName), x);
         }
-        updateTimestamp(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateString(String columnName, String x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateString", columnName, x);
+    public void updateString(String columnName, String x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateString", columnName, x);
+            }
+            updateString(findColumnX(columnName), x);
         }
-        updateString(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateBytes(String columnName, byte x[]) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateBytes", columnName, x);
+    public void updateBytes(String columnName, byte x[]) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateBytes", columnName, x);
+            }
+            updateBytes(findColumnX(columnName), x);
         }
-        updateBytes(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     public void updateBinaryStream(String columnName,
                                    java.io.InputStream x,
-                                   int length) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateBinaryStream", columnName, x, length);
+                                   int length) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateBinaryStream", columnName, x, length);
+            }
+            updateBinaryStream(findColumnX(columnName), x, length);
         }
-        updateBinaryStream(findColumnX(columnName), x, length);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     public void updateAsciiStream(String columnName,
                                   java.io.InputStream x,
-                                  int length) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateAsciiStream", columnName, x, length);
+                                  int length) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateAsciiStream", columnName, x, length);
+            }
+            updateAsciiStream(findColumnX(columnName), x, length);
         }
-        updateAsciiStream(findColumnX(columnName), x, length);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     public void updateCharacterStream(String columnName,
                                       java.io.Reader x,
-                                      int length) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateCharacterStream", columnName, x, length);
+                                      int length) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateCharacterStream", columnName, x, length);
+            }
+            updateCharacterStream(findColumnX(columnName), x, length);
         }
-        updateCharacterStream(findColumnX(columnName), x, length);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateObject(String columnName, Object x, int scale) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateObject", columnName, x, scale);
+    public void updateObject(String columnName, Object x, int scale) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateObject", columnName, x, scale);
+            }
+            updateObject(findColumnX(columnName), x, scale);
         }
-        updateObject(findColumnX(columnName), x, scale);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void updateObject(String columnName, Object x) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "updateObject", columnName, x);
+    public void updateObject(String columnName, Object x) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateObject", columnName, x);
+            }
+            updateObject(findColumnX(columnName), x);
         }
-        updateObject(findColumnX(columnName), x);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     // ---------------------------------------------------------------------------
 
-    public void insertRow() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "insertRow");
+    public void insertRow() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "insertRow");
+                }
+                checkForClosedResultSet();
+                throw new SqlException(agent_.logWriter_, "Driver not capable: insertRow");
             }
-            checkForClosedResultSet();
-            throw new SqlException(agent_.logWriter_, "Driver not capable: insertRow");
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     public void updateRow() throws java.sql.SQLException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "updateRow");
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateRow");
+                }
+                //If updateXXX were issued on the row before updateRow, then
+                //position the ResultSet to right before the next row after updateRow
+                if (updateRowX())
+                    isValidCursorPosition_ = false;
             }
-            //If updateXXX were issued on the row before updateRow, then
-            //position the ResultSet to right before the next row after updateRow
-            if (updateRowX())
-                isValidCursorPosition_ = false;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     //if no updateXXX were issued before this updateRow, then return false
-    private boolean updateRowX() throws java.sql.SQLException {
+    private boolean updateRowX() throws SqlException {
         checkForClosedResultSet();
         if (isOnInsertRow_ || resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
             throw new SqlException(agent_.logWriter_, "This method cannot be invoked while the cursor is on the insert " +
@@ -2554,7 +3375,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 } else {
                     // Check if the original column is null.  Calling CrossConverters.setObject on a null
                     // column causes "Data Conversion" Exception.
-                    Object originalObj = getObject(i + 1);
+                    Object originalObj;
+                    try {
+                        originalObj = getObject(i + 1);
+                    } catch ( SQLException se ) {
+                        throw new SqlException(se);
+                    }
+                    
                     if (originalObj == null) {
                         preparedStatementForUpdate_.setInput(paramNumber, null);
                     } else {
@@ -2574,26 +3401,37 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             updateRowCalled_ = true;
         } catch (SqlException e) {
-            cancelRowUpdates();
+            try {
+                cancelRowUpdates();
+            } catch ( SQLException se ) {
+                throw new SqlException(se);
+            }
             throw e;
         }
         return true;
     }
 
     public void deleteRow() throws java.sql.SQLException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "deleteRow");
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "deleteRow");
+                }
+                deleteRowX();
+                //the cursor is not positioned on the deleted row after deleteRow.
+                //User needs to issue ResultSet.next to reposition the ResultSet
+                //on a valid row
+                isValidCursorPosition_ = false;
             }
-            deleteRowX();
-            //the cursor is not positioned on the deleted row after deleteRow.
-            //User needs to issue ResultSet.next to reposition the ResultSet
-            //on a valid row
-            isValidCursorPosition_ = false;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    private void deleteRowX() throws java.sql.SQLException {
+    private void deleteRowX() throws SqlException {
         checkForClosedResultSet();
 
         // discard all previous updates
@@ -2623,12 +3461,19 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void refreshRow() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "refreshRow");
+    public void refreshRow() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "refreshRow");
+                }
+                refreshRowX();
             }
-            refreshRowX();
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -2647,63 +3492,88 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // this method does nothing if ResultSet is TYPE_SCROLL_INSENSITIVE
         if (resultSetType_ == java.sql.ResultSet.TYPE_SCROLL_SENSITIVE) {
             isValidCursorPosition_ = getRefreshRowset();
-            cancelRowUpdates();
+            try {
+                cancelRowUpdates();
+            } catch ( SQLException sqle ) {
+                throw new SqlException(sqle);
+            }
 	    
-	    unuseStreams();
+    	    unuseStreams();
 	    
         }
     }
 
-    public void cancelRowUpdates() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "cancelRowUpdates");
-            }
-            checkForClosedResultSet();
-            if (isOnInsertRow_ || resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
-                throw new SqlException(agent_.logWriter_, "This method cannot be invoked while the cursor is on the insert " +
-                        "row or if this ResultSet object has a concurrency of CONCUR_READ_ONLY.");
-            }
+    public void cancelRowUpdates() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "cancelRowUpdates");
+                }
+                checkForClosedResultSet();
+                if (isOnInsertRow_ || resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+                    throw new SqlException(agent_.logWriter_, "This method cannot be invoked while the cursor is on the insert " +
+                            "row or if this ResultSet object has a concurrency of CONCUR_READ_ONLY.");
+                }
 
-            // if not on a valid row, then do not accept cancelRowUpdates call
-            if (!isValidCursorPosition_)
-                throw new SqlException(agent_.logWriter_, "Invalid operation " +
-                        "at current cursor position.");
+                // if not on a valid row, then do not accept cancelRowUpdates call
+                if (!isValidCursorPosition_)
+                    throw new SqlException(agent_.logWriter_, "Invalid operation " +
+                            "at current cursor position.");
 
-            // if updateRow() has already been called, then cancelRowUpdates should have
-            // no effect.  updateRowCalled_ is reset to false as soon as the cursor moves to a new row.
-            if (!updateRowCalled_) {
-                resetUpdatedColumns();
+                // if updateRow() has already been called, then cancelRowUpdates should have
+                // no effect.  updateRowCalled_ is reset to false as soon as the cursor moves to a new row.
+                if (!updateRowCalled_) {
+                    resetUpdatedColumns();
+                }
             }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void moveToInsertRow() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "moveToInsertRow");
+    public void moveToInsertRow() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "moveToInsertRow");
+                }
+                checkForClosedResultSet();
+                throw new SqlException(agent_.logWriter_, "Driver not capable");
             }
-            checkForClosedResultSet();
-            throw new SqlException(agent_.logWriter_, "Driver not capable");
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void moveToCurrentRow() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "moveToCurrentRow");
-            }
-            checkForClosedResultSet();
-            if (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
-                throw new SqlException(agent_.logWriter_, "This method should only be called on ResultSet objects that are " +
-                        "updatable(concurrency type CONCUR_UPDATABLE).");
-            }
+    public void moveToCurrentRow() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "moveToCurrentRow");
+                }
+                checkForClosedResultSet();
+                if (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+                    throw new SqlException(agent_.logWriter_, "This method should only be called on ResultSet objects that are " +
+                            "updatable(concurrency type CONCUR_UPDATABLE).");
+                }
 
-            if (!isOnInsertRow_) {
-                // no affect
-            } else {
-                throw new SqlException(agent_.logWriter_, "Driver no capable");
+                if (!isOnInsertRow_) {
+                    // no affect
+                } else {
+                    throw new SqlException(agent_.logWriter_, "Driver no capable");
+                }
             }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -2716,44 +3586,44 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     //-------------------------- JDBC 3.0 ----------------------------------------
 
-    public java.net.URL getURL(int columnIndex) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+    public java.net.URL getURL(int columnIndex) throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
-    public java.net.URL getURL(String columnName) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+    public java.net.URL getURL(String columnName) throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
-    public void updateRef(int columnIndex, java.sql.Ref x) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+    public void updateRef(int columnIndex, java.sql.Ref x) throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
-    public void updateRef(String columnName, java.sql.Ref x) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+    public void updateRef(String columnName, java.sql.Ref x) throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
-    public void updateBlob(int columnIndex, java.sql.Blob x) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+    public void updateBlob(int columnIndex, java.sql.Blob x) throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
-    public void updateBlob(String columnName, java.sql.Blob x) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+    public void updateBlob(String columnName, java.sql.Blob x) throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
-    public void updateClob(int columnIndex, java.sql.Clob x) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+    public void updateClob(int columnIndex, java.sql.Clob x) throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
-    public void updateClob(String columnName, java.sql.Clob x) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+    public void updateClob(String columnName, java.sql.Clob x) throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
-    public void updateArray(int columnIndex, java.sql.Array x) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+    public void updateArray(int columnIndex, java.sql.Array x) throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
-    public void updateArray(String columnName, java.sql.Array x) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+    public void updateArray(String columnName, java.sql.Array x) throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
     public boolean repositionScrollableResultSetBeforeJDBC1PositionedUpdateDelete() throws SqlException {
@@ -2816,8 +3686,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
             preparedStatementForUpdate_.materialPreparedStatement_.writePrepare_(preparedStatementForUpdate_.sql_,
                     preparedStatementForUpdate_.section_);
         }
-
-        writeUpdateRow(false);
+        
+        try {
+            writeUpdateRow(false);
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
+        }
+        
 
         agent_.flow(statement_);
 
@@ -2851,11 +3726,19 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
 
         if (isRowsetCursor_) {
-            preparedStatementForUpdate_.setInt(updatedColumns_.length + 1, (int) (currentRowInRowset_ + 1));
+            try {
+                preparedStatementForUpdate_.setInt(updatedColumns_.length + 1, (int) (currentRowInRowset_ + 1));
+            } catch ( SQLException se ) {
+                throw new SqlException(se);
+            }
         }
 
         boolean chainAutoCommit = connection_.willAutoCommitGenerateFlow();
-        writeUpdateRow(chainAutoCommit);
+        try {
+            writeUpdateRow(chainAutoCommit);
+        } catch (SQLException se ) {
+            throw new SqlException(se);
+        }
         if (chainAutoCommit) {
             connection_.writeCommit();
         }
@@ -2897,7 +3780,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     preparedStatementForDelete_.section_);
         }
 
-        writeDeleteRow();
+        try {
+            writeDeleteRow();
+        } catch ( SQLException sqle ) {
+            throw new SqlException(sqle);
+        }
 
         agent_.flow(statement_);
 
@@ -2922,35 +3809,42 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     protected void delete() throws SqlException {
-        agent_.beginWriteChain(statement_);
+        try
+        {
+            agent_.beginWriteChain(statement_);
 
-        // re-prepare the update statement if repreparing is needed after a commit.
-        if (!preparedStatementForDelete_.openOnServer_) {
-            preparedStatementForDelete_.materialPreparedStatement_.writePrepare_(preparedStatementForDelete_.sql_,
-                    preparedStatementForDelete_.section_);
+            // re-prepare the update statement if repreparing is needed after a commit.
+            if (!preparedStatementForDelete_.openOnServer_) {
+                preparedStatementForDelete_.materialPreparedStatement_.writePrepare_(preparedStatementForDelete_.sql_,
+                        preparedStatementForDelete_.section_);
+            }
+
+            if (isRowsetCursor_) {
+                preparedStatementForDelete_.setInt(1, (int) (currentRowInRowset_ + 1));
+            }
+
+            writeDeleteRow();
+
+            if (connection_.autoCommit_) {
+                connection_.writeAutoCommit();
+            }
+
+            agent_.flow(statement_);
+
+            // read prepare replies if the update statement is re-prepared after a commit.
+            if (!preparedStatementForDelete_.openOnServer_) {
+                preparedStatementForDelete_.materialPreparedStatement_.readPrepare_();
+            }
+            readDeleteRow();
+            if (connection_.autoCommit_) {
+                connection_.readAutoCommit();
+            }
+            agent_.endReadChain();
         }
-
-        if (isRowsetCursor_) {
-            preparedStatementForDelete_.setInt(1, (int) (currentRowInRowset_ + 1));
+        catch ( SQLException se )
+        {
+            throw new SqlException(se);
         }
-
-        writeDeleteRow();
-
-        if (connection_.autoCommit_) {
-            connection_.writeAutoCommit();
-        }
-
-        agent_.flow(statement_);
-
-        // read prepare replies if the update statement is re-prepared after a commit.
-        if (!preparedStatementForDelete_.openOnServer_) {
-            preparedStatementForDelete_.materialPreparedStatement_.readPrepare_();
-        }
-        readDeleteRow();
-        if (connection_.autoCommit_) {
-            connection_.readAutoCommit();
-        }
-        agent_.endReadChain();
     }
 
     // Resets all rowset related flags.
@@ -3013,30 +3907,44 @@ public abstract class ResultSet implements java.sql.ResultSet,
         agent_.endReadChain();
     }
 
-    public void writeUpdateRow(boolean chainedWritesFollowingSetLob) throws SqlException {
-        preparedStatementForUpdate_.materialPreparedStatement_.writeExecute_(preparedStatementForUpdate_.section_,
-                preparedStatementForUpdate_.parameterMetaData_,
-                preparedStatementForUpdate_.parameters_,
-                preparedStatementForUpdate_.parameterMetaData_.getColumnCount(),
-                false, // false means we're not expecting output
-                chainedWritesFollowingSetLob);  // chaining after the execute
+    public void writeUpdateRow(boolean chainedWritesFollowingSetLob) throws SQLException {
+        try
+        {
+            preparedStatementForUpdate_.materialPreparedStatement_.writeExecute_(preparedStatementForUpdate_.section_,
+                    preparedStatementForUpdate_.parameterMetaData_,
+                    preparedStatementForUpdate_.parameters_,
+                    preparedStatementForUpdate_.parameterMetaData_.getColumnCount(),
+                    false, // false means we're not expecting output
+                    chainedWritesFollowingSetLob);  // chaining after the execute
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public void writeDeleteRow() throws SqlException {
-        if (isRowsetCursor_) {
-            preparedStatementForDelete_.materialPreparedStatement_.writeExecute_(preparedStatementForDelete_.section_,
-                    preparedStatementForDelete_.parameterMetaData_,
-                    preparedStatementForDelete_.parameters_,
-                    preparedStatementForDelete_.parameterMetaData_.getColumnCount(),
-                    false, // false means we're not expecting output
-                    false);  // false means we don't chain anything after the execute
-        } else {
-            preparedStatementForDelete_.materialPreparedStatement_.writeExecute_(preparedStatementForDelete_.section_,
-                    null, // do not need parameterMetaData since there is no input
-                    null, // no inputs
-                    0, // number of input columns is 0 for positioned delete
-                    false, // false means we're not expecting output
-                    false);  // false means we don't chain anything after the execute
+    public void writeDeleteRow() throws SQLException {
+        try
+        {
+            if (isRowsetCursor_) {
+                preparedStatementForDelete_.materialPreparedStatement_.writeExecute_(preparedStatementForDelete_.section_,
+                        preparedStatementForDelete_.parameterMetaData_,
+                        preparedStatementForDelete_.parameters_,
+                        preparedStatementForDelete_.parameterMetaData_.getColumnCount(),
+                        false, // false means we're not expecting output
+                        false);  // false means we don't chain anything after the execute
+            } else {
+                preparedStatementForDelete_.materialPreparedStatement_.writeExecute_(preparedStatementForDelete_.section_,
+                        null, // do not need parameterMetaData since there is no input
+                        null, // no inputs
+                        0, // number of input columns is 0 for positioned delete
+                        false, // false means we're not expecting output
+                        false);  // false means we don't chain anything after the execute
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -3226,7 +4134,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (foundOneUpdatedColumnAlready) {
                     updateString += ",";
                 }
-                updateString += "\"" + resultSetMetaData_.getColumnName(column) + "\" = ? ";
+                try {
+                    updateString += "\"" + resultSetMetaData_.getColumnName(column) + "\" = ? ";
+                } catch ( SQLException sqle ) {
+                    throw new SqlException(sqle);
+                }
                 numColumns++;
                 foundOneUpdatedColumnAlready = true;
             }
@@ -3270,7 +4182,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
     private String getTableName() throws SqlException {
         String tableName = "";
         int baseTableColumn = 0;
-        int totalColumns = resultSetMetaData_.getColumnCount();
+        int totalColumns;
+        try {
+            totalColumns = resultSetMetaData_.getColumnCount();
+        } catch ( SQLException sqle ) {
+            throw new SqlException(sqle);
+        }
         for (; baseTableColumn < totalColumns; baseTableColumn++) {
             if (resultSetMetaData_.sqlxBasename_[baseTableColumn] != null)
                 break;
@@ -3294,7 +4211,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return statement_.section_.getServerCursorName();
     }
 
-    private void getPreparedStatementForUpdate() throws java.sql.SQLException {
+    private void getPreparedStatementForUpdate() throws SqlException {
         // each column is associated with a tableName in the extended describe info.
         String updateString = buildUpdateString();
 
@@ -3307,7 +4224,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     }
 
-    private void getPreparedStatementForDelete() throws java.sql.SQLException {
+    private void getPreparedStatementForDelete() throws SqlException {
         // each column is associated with a tableName in the extended describe info.
         String deleteString = buildDeleteString();
 
@@ -4082,6 +4999,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
 	}
 	
     }
-    
+
+    private SQLException jdbc3MethodNotSupported()
+    {
+        // This will get internationalized in another patch
+        return new SqlException(agent_.logWriter_, 
+            "JDBC 3 method called - not yet supported").getSQLException();
+    }
     
 }

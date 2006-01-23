@@ -20,6 +20,7 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class CallableStatement extends PreparedStatement
@@ -106,16 +107,23 @@ public class CallableStatement extends PreparedStatement
 
     //---------------------------entry points-------------------------------------
 
-    public boolean execute() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "execute");
+    public boolean execute() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "execute");
+                }
+                boolean b = executeX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "execute", b);
+                }
+                return b;
             }
-            boolean b = executeX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "execute", b);
-            }
-            return b;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -125,16 +133,23 @@ public class CallableStatement extends PreparedStatement
         return resultSet_ != null;
     }
 
-    public java.sql.ResultSet executeQuery() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "executeQuery");
+    public java.sql.ResultSet executeQuery() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeQuery");
+                }
+                ResultSet resultSet = executeQueryX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeQuery", resultSet);
+                }
+                return resultSet;
             }
-            ResultSet resultSet = executeQueryX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "executeQuery", resultSet);
-            }
-            return resultSet;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -145,16 +160,23 @@ public class CallableStatement extends PreparedStatement
         return resultSet_;
     }
 
-    public int executeUpdate() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "executeUpdate");
+    public int executeUpdate() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeUpdate");
+                }
+                int updateValue = executeUpdateX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
+                }
+                return updateValue;
             }
-            int updateValue = executeUpdateX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
-            }
-            return updateValue;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -168,7 +190,7 @@ public class CallableStatement extends PreparedStatement
     }
 
 
-    public void clearParameters() throws SqlException {
+    public void clearParameters() throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "clearParameters");
@@ -178,12 +200,19 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public void registerOutParameter(int parameterIndex, int jdbcType) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterIndex, jdbcType);
+    public void registerOutParameter(int parameterIndex, int jdbcType) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterIndex, jdbcType);
+                }
+                registerOutParameterX(parameterIndex, jdbcType);
             }
-            registerOutParameterX(parameterIndex, jdbcType);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -204,13 +233,20 @@ public class CallableStatement extends PreparedStatement
         return 8; // default to scale of 8 if not specified
     }
 
-    public void registerOutParameter(int parameterIndex, int jdbcType, int scale) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterIndex, jdbcType, scale);
+    public void registerOutParameter(int parameterIndex, int jdbcType, int scale) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterIndex, jdbcType, scale);
+                }
+                super.checkForClosedStatement();
+                registerOutParameterX(parameterIndex, jdbcType, scale);
             }
-            super.checkForClosedStatement();
-            registerOutParameterX(parameterIndex, jdbcType, scale);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -227,24 +263,38 @@ public class CallableStatement extends PreparedStatement
         parameterRegistered_[parameterIndex - 1] = true;
     }
 
-    public void registerOutParameter(int parameterIndex, int jdbcType, String typeName) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterIndex, jdbcType, typeName);
+    public void registerOutParameter(int parameterIndex, int jdbcType, String typeName) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterIndex, jdbcType, typeName);
+                }
+                super.checkForClosedStatement();
             }
-            super.checkForClosedStatement();
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public boolean wasNull() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "wasNull");
+    public boolean wasNull() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "wasNull");
+            }
+            boolean result = wasNullX();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "wasNull", result);
+            }
+            return result;
         }
-        boolean result = wasNullX();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "wasNull", result);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return result;
     }
 
     private boolean wasNullX() throws SqlException {
@@ -258,94 +308,122 @@ public class CallableStatement extends PreparedStatement
 
     //--------------------------------getter methods------------------------------
 
-    public boolean getBoolean(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getBoolean", parameterIndex);
-            }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            boolean result;
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                result = agent_.crossConverters_.getBooleanFromInt(returnValueFromProcedure_);
-                this.wasNull_ = this.WAS_NOT_NULL;
+    public boolean getBoolean(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getBoolean", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                boolean result;
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    result = agent_.crossConverters_.getBooleanFromInt(returnValueFromProcedure_);
+                    this.wasNull_ = this.WAS_NOT_NULL;
+                    if (agent_.loggingEnabled()) {
+                        agent_.logWriter_.traceExit(this, "getBoolean", result);
+                    }
+                    return result;
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                result = wasNullX() ? false : singletonRowData_.getBoolean(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getBoolean", result);
                 }
                 return result;
             }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            result = wasNullX() ? false : singletonRowData_.getBoolean(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getBoolean", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public byte getByte(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getByte", parameterIndex);
-            }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            byte result;
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                result = agent_.crossConverters_.getByteFromInt(returnValueFromProcedure_);
-                this.wasNull_ = this.WAS_NOT_NULL;
+    public byte getByte(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getByte", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                byte result;
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    result = agent_.crossConverters_.getByteFromInt(returnValueFromProcedure_);
+                    this.wasNull_ = this.WAS_NOT_NULL;
+                    if (agent_.loggingEnabled()) {
+                        agent_.logWriter_.traceExit(this, "getByte", result);
+                    }
+                    return result;
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                result = wasNullX() ? 0 : singletonRowData_.getByte(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getByte", result);
                 }
                 return result;
             }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            result = wasNullX() ? 0 : singletonRowData_.getByte(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getByte", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public short getShort(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getShort", parameterIndex);
-            }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            short result;
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                result = agent_.crossConverters_.getShortFromInt(returnValueFromProcedure_);
-                this.wasNull_ = this.WAS_NOT_NULL;
+    public short getShort(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getShort", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                short result;
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    result = agent_.crossConverters_.getShortFromInt(returnValueFromProcedure_);
+                    this.wasNull_ = this.WAS_NOT_NULL;
+                    if (agent_.loggingEnabled()) {
+                        agent_.logWriter_.traceExit(this, "getShort", result);
+                    }
+                    return result;
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                result = wasNullX() ? 0 : singletonRowData_.getShort(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getShort", result);
                 }
                 return result;
             }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            result = wasNullX() ? 0 : singletonRowData_.getShort(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getShort", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int getInt(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getInt", parameterIndex);
+    public int getInt(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getInt", parameterIndex);
+                }
+                int result = getIntX(parameterIndex);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getInt", result);
+                }
+                return result;
             }
-            int result = getIntX(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getInt", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -362,169 +440,211 @@ public class CallableStatement extends PreparedStatement
         return wasNullX() ? 0 : singletonRowData_.getInt(parameterIndex);
     }
 
-    public long getLong(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getLong", parameterIndex);
-            }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            long result;
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                result = (long) returnValueFromProcedure_;
-                this.wasNull_ = this.WAS_NOT_NULL;
+    public long getLong(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getLong", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                long result;
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    result = (long) returnValueFromProcedure_;
+                    this.wasNull_ = this.WAS_NOT_NULL;
+                    if (agent_.loggingEnabled()) {
+                        agent_.logWriter_.traceExit(this, "getLong", result);
+                    }
+                    return result;
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                result = wasNullX() ? 0 : singletonRowData_.getLong(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getLong", result);
                 }
                 return result;
             }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            result = wasNullX() ? 0 : singletonRowData_.getLong(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getLong", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public float getFloat(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getFloat", parameterIndex);
-            }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            float result;
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                result = (float) returnValueFromProcedure_;
-                this.wasNull_ = this.WAS_NOT_NULL;
+    public float getFloat(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getFloat", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                float result;
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    result = (float) returnValueFromProcedure_;
+                    this.wasNull_ = this.WAS_NOT_NULL;
+                    if (agent_.loggingEnabled()) {
+                        agent_.logWriter_.traceExit(this, "getFloat", result);
+                    }
+                    return result;
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                result = wasNullX() ? 0 : singletonRowData_.getFloat(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getFloat", result);
                 }
                 return result;
             }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            result = wasNullX() ? 0 : singletonRowData_.getFloat(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getFloat", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public double getDouble(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getDouble", parameterIndex);
-            }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            double result;
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                result = (double) returnValueFromProcedure_;
-                this.wasNull_ = this.WAS_NOT_NULL;
+    public double getDouble(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getDouble", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                double result;
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    result = (double) returnValueFromProcedure_;
+                    this.wasNull_ = this.WAS_NOT_NULL;
+                    if (agent_.loggingEnabled()) {
+                        agent_.logWriter_.traceExit(this, "getDouble", result);
+                    }
+                    return result;
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                result = wasNullX() ? 0 : singletonRowData_.getDouble(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getDouble", result);
                 }
                 return result;
             }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            result = wasNullX() ? 0 : singletonRowData_.getDouble(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getDouble", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.math.BigDecimal getBigDecimal(int parameterIndex, int scale) throws SqlException, ArithmeticException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", parameterIndex, scale);
-            }
-            super.checkForClosedStatement();
-            checkForValidScale(scale);
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            java.math.BigDecimal result;
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                result = java.math.BigDecimal.valueOf(returnValueFromProcedure_).setScale(scale);
-                this.wasNull_ = this.WAS_NOT_NULL;
+    public java.math.BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException, ArithmeticException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", parameterIndex, scale);
+                }
+                super.checkForClosedStatement();
+                checkForValidScale(scale);
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                java.math.BigDecimal result;
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    result = java.math.BigDecimal.valueOf(returnValueFromProcedure_).setScale(scale);
+                    this.wasNull_ = this.WAS_NOT_NULL;
+                    if (agent_.loggingEnabled()) {
+                        agent_.logWriter_.traceDeprecatedExit(this, "getBigDecimal", result);
+                    }
+                    return result;
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                result = wasNullX() ? null : singletonRowData_.getBigDecimal(parameterIndex);
+                if (result != null) {
+                    result = result.setScale(scale, java.math.BigDecimal.ROUND_DOWN);
+                }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceDeprecatedExit(this, "getBigDecimal", result);
                 }
                 return result;
             }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            result = wasNullX() ? null : singletonRowData_.getBigDecimal(parameterIndex);
-            if (result != null) {
-                result = result.setScale(scale, java.math.BigDecimal.ROUND_DOWN);
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceDeprecatedExit(this, "getBigDecimal", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.math.BigDecimal getBigDecimal(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getBigDecimal", parameterIndex);
-            }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            java.math.BigDecimal result;
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                result = java.math.BigDecimal.valueOf(returnValueFromProcedure_);
-                this.wasNull_ = this.WAS_NOT_NULL;
+    public java.math.BigDecimal getBigDecimal(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getBigDecimal", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                java.math.BigDecimal result;
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    result = java.math.BigDecimal.valueOf(returnValueFromProcedure_);
+                    this.wasNull_ = this.WAS_NOT_NULL;
+                    if (agent_.loggingEnabled()) {
+                        agent_.logWriter_.traceExit(this, "getBigDecimal", result);
+                    }
+                    return result;
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                result = wasNullX() ? null : singletonRowData_.getBigDecimal(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getBigDecimal", result);
                 }
                 return result;
             }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            result = wasNullX() ? null : singletonRowData_.getBigDecimal(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getBigDecimal", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.sql.Date getDate(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getDate", parameterIndex);
+    public java.sql.Date getDate(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getDate", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                java.sql.Date result = wasNullX() ? null : singletonRowData_.getDate(parameterIndex);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getDate", result);
+                }
+                return result;
             }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
-            }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            java.sql.Date result = wasNullX() ? null : singletonRowData_.getDate(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getDate", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.sql.Date getDate(int parameterIndex, java.util.Calendar cal) throws SqlException {
+    public java.sql.Date getDate(int parameterIndex, java.util.Calendar cal) throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDate", parameterIndex, cal);
             }
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.CALENDAR_IS_NULL));
+                    new MessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
             }
             java.sql.Date result = getDate(parameterIndex);
             if (result != null) {
@@ -533,6 +653,7 @@ public class CallableStatement extends PreparedStatement
                 targetCalendar.setTime(result);
                 java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
                 defaultCalendar.clear();
+
                 defaultCalendar.setTime(result);
                 long timeZoneOffset =
                         targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
@@ -546,35 +667,42 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public java.sql.Time getTime(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getTime", parameterIndex);
+    public java.sql.Time getTime(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getTime", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                java.sql.Time result = wasNullX() ? null : singletonRowData_.getTime(parameterIndex);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getTime", result);
+                }
+                return result;
             }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
-            }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            java.sql.Time result = wasNullX() ? null : singletonRowData_.getTime(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getTime", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.sql.Time getTime(int parameterIndex, java.util.Calendar cal) throws SqlException {
+    public java.sql.Time getTime(int parameterIndex, java.util.Calendar cal) throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTime", parameterIndex, cal);
             }
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.CALENDAR_IS_NULL));
+                    new MessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
             }
             java.sql.Time result = getTime(parameterIndex);
             if (result != null) {
@@ -596,35 +724,42 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public java.sql.Timestamp getTimestamp(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getTimestamp", parameterIndex);
+    public java.sql.Timestamp getTimestamp(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getTimestamp", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                java.sql.Timestamp result = wasNullX() ? null : singletonRowData_.getTimestamp(parameterIndex);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getTimestamp", result);
+                }
+                return result;
             }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
-            }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            java.sql.Timestamp result = wasNullX() ? null : singletonRowData_.getTimestamp(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getTimestamp", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.sql.Timestamp getTimestamp(int parameterIndex, java.util.Calendar cal) throws SqlException {
+    public java.sql.Timestamp getTimestamp(int parameterIndex, java.util.Calendar cal) throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTimestamp", parameterIndex, cal);
             }
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.CALENDAR_IS_NULL));
+                    new MessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
             }
             java.sql.Timestamp result = getTimestamp(parameterIndex);
             if (result != null) {
@@ -648,16 +783,23 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public String getString(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getString", parameterIndex);
+    public String getString(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getString", parameterIndex);
+                }
+                String result = getStringX(parameterIndex);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getString", result);
+                }
+                return result;
             }
-            String result = getStringX(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getString", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -674,580 +816,573 @@ public class CallableStatement extends PreparedStatement
         return wasNullX() ? null : singletonRowData_.getString(parameterIndex);
     }
 
-    public byte[] getBytes(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getBytes", parameterIndex);
+    public byte[] getBytes(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getBytes", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                byte[] result = wasNullX() ? null : singletonRowData_.getBytes(parameterIndex);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getBytes", result);
+                }
+                return result;
             }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
-            }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            byte[] result = wasNullX() ? null : singletonRowData_.getBytes(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getBytes", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.sql.Blob getBlob(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getBlob", parameterIndex);
+    public java.sql.Blob getBlob(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getBlob", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                java.sql.Blob result = wasNullX() ? null : singletonRowData_.getBlob(parameterIndex);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getBlob", result);
+                }
+                return result;
             }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
-            }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            java.sql.Blob result = wasNullX() ? null : singletonRowData_.getBlob(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getBlob", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.sql.Clob getClob(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getClob", parameterIndex);
+    public java.sql.Clob getClob(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                java.sql.Clob result = wasNullX() ? null : singletonRowData_.getClob(parameterIndex);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getClob", result);
+                }
+                return result;
             }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
-            }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            java.sql.Clob result = wasNullX() ? null : singletonRowData_.getClob(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getClob", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.sql.Array getArray(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getArray", parameterIndex);
+    public java.sql.Array getArray(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getArray", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));                    
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                java.sql.Array result = wasNullX() ? null : singletonRowData_.getArray(parameterIndex);
+                if (true) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
+                }
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getArray", result);
+                }
+                return result;
             }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));                    
-            }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            java.sql.Array result = wasNullX() ? null : singletonRowData_.getArray(parameterIndex);
-            if (true) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getArray", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.sql.Ref getRef(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getRef", parameterIndex);
+    public java.sql.Ref getRef(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getRef", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                java.sql.Ref result = wasNullX() ? null : singletonRowData_.getRef(parameterIndex);
+                if (true) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
+                }
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getRef", result);
+                }
+                return result;
             }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
-            }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            java.sql.Ref result = wasNullX() ? null : singletonRowData_.getRef(parameterIndex);
-            if (true) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getRef", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public Object getObject(int parameterIndex) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getObject", parameterIndex);
-            }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            Object result;
-            if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                result = new Integer(returnValueFromProcedure_);
-                this.wasNull_ = this.WAS_NOT_NULL;
+    public Object getObject(int parameterIndex) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getObject", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                Object result;
+                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
+                    result = new Integer(returnValueFromProcedure_);
+                    this.wasNull_ = this.WAS_NOT_NULL;
+                    if (agent_.loggingEnabled()) {
+                        agent_.logWriter_.traceExit(this, "getObject", result);
+                    }
+                    return result;
+                }
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                result = wasNullX() ? null : singletonRowData_.getObject(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getObject", result);
                 }
                 return result;
             }
-            checkGetterPreconditions(parameterIndex);
-            setWasNull(parameterIndex);
-            result = wasNullX() ? null : singletonRowData_.getObject(parameterIndex);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getObject", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public Object getObject(int parameterIndex, java.util.Map map) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getObject", parameterIndex, map);
+    public Object getObject(int parameterIndex, java.util.Map map) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getObject", parameterIndex, map);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                Object result;
+                checkGetterPreconditions(parameterIndex);
+                if (true) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
+                }
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getObject", result);
+                }
+                return result;
             }
-            super.checkForClosedStatement();
-            parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-            Object result;
-            checkGetterPreconditions(parameterIndex);
-            if (true) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getObject", result);
-            }
-            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     //--------------------------JDBC 3.0------------------------------------------
 
-    public void registerOutParameter(String parameterName, int sqlType) throws SqlException {
+    public void registerOutParameter(String parameterName, int sqlType) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterName, sqlType);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void registerOutParameter(String parameterName, int sqlType, int scale) throws SqlException {
+    public void registerOutParameter(String parameterName, int sqlType, int scale) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterName, sqlType, scale);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void registerOutParameter(String parameterName, int sqlType, String typeName) throws SqlException {
+    public void registerOutParameter(String parameterName, int sqlType, String typeName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterName, sqlType, typeName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.net.URL getURL(int parameterIndex) throws SqlException {
+    public java.net.URL getURL(int parameterIndex) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getURL", parameterIndex);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setURL(String parameterName, java.net.URL x) throws SqlException {
+    public void setURL(String parameterName, java.net.URL x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setURL", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setNull(String parameterName, int sqlType) throws SqlException {
+    public void setNull(String parameterName, int sqlType) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setNull", parameterName, sqlType);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setBoolean(String parameterName, boolean x) throws SqlException {
+    public void setBoolean(String parameterName, boolean x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBoolean", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setByte(String parameterName, byte x) throws SqlException {
+    public void setByte(String parameterName, byte x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setByte", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setShort(String parameterName, short x) throws SqlException {
+    public void setShort(String parameterName, short x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setShort", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setInt(String parameterName, int x) throws SqlException {
+    public void setInt(String parameterName, int x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setInt", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setLong(String parameterName, long x) throws SqlException {
+    public void setLong(String parameterName, long x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setLong", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setFloat(String parameterName, float x) throws SqlException {
+    public void setFloat(String parameterName, float x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setFloat", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setDouble(String parameterName, double x) throws SqlException {
+    public void setDouble(String parameterName, double x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setDouble", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setBigDecimal(String parameterName, java.math.BigDecimal x) throws SqlException {
+    public void setBigDecimal(String parameterName, java.math.BigDecimal x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBigDecimal", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setString(String parameterName, String x) throws SqlException {
+    public void setString(String parameterName, String x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setString", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setBytes(String parameterName, byte x[]) throws SqlException {
+    public void setBytes(String parameterName, byte x[]) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBytes", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setDate(String parameterName, java.sql.Date x) throws SqlException {
+    public void setDate(String parameterName, java.sql.Date x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setDate", parameterName, x);
         }
-        super.checkForClosedStatement();
-        throw jdbc3MethodNotSupported();
     }
 
-    public void setTime(String parameterName, java.sql.Time x) throws SqlException {
+    public void setTime(String parameterName, java.sql.Time x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTime", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setTimestamp(String parameterName, java.sql.Timestamp x) throws SqlException {
+    public void setTimestamp(String parameterName, java.sql.Timestamp x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTimestamp", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setAsciiStream(String parameterName, java.io.InputStream x, int length) throws SqlException {
+    public void setAsciiStream(String parameterName, java.io.InputStream x, int length) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterName, x, length);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setBinaryStream(String parameterName, java.io.InputStream x, int length) throws SqlException {
+    public void setBinaryStream(String parameterName, java.io.InputStream x, int length) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterName, x, length);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setObject(String parameterName, Object x, int targetSqlType, int scale) throws SqlException {
+    public void setObject(String parameterName, Object x, int targetSqlType, int scale) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setObject", parameterName, x, targetSqlType, scale);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setObject(String parameterName, Object x, int targetSqlType) throws SqlException {
+    public void setObject(String parameterName, Object x, int targetSqlType) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setObject", parameterName, x, targetSqlType);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setObject(String parameterName, Object x) throws SqlException {
+    public void setObject(String parameterName, Object x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setObject", parameterName, x);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setCharacterStream(String parameterName, java.io.Reader reader, int length) throws SqlException {
+    public void setCharacterStream(String parameterName, java.io.Reader reader, int length) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterName, reader, length);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setDate(String parameterName, java.sql.Date x, java.util.Calendar calendar) throws SqlException {
+    public void setDate(String parameterName, java.sql.Date x, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setDate", parameterName, x, calendar);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setTime(String parameterName, java.sql.Time x, java.util.Calendar calendar) throws SqlException {
+    public void setTime(String parameterName, java.sql.Time x, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTime", parameterName, x, calendar);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setTimestamp(String parameterName, java.sql.Timestamp x, java.util.Calendar calendar) throws SqlException {
+    public void setTimestamp(String parameterName, java.sql.Timestamp x, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTimestamp", parameterName, x, calendar);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public void setNull(String parameterName, int sqlType, String typeName) throws SqlException {
+    public void setNull(String parameterName, int sqlType, String typeName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setNull", parameterName, sqlType, typeName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public String getString(String parameterName) throws SqlException {
+    public String getString(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getString", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public boolean getBoolean(String parameterName) throws SqlException {
+    public boolean getBoolean(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBoolean", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public byte getByte(String parameterName) throws SqlException {
+    public byte getByte(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getByte", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public short getShort(String parameterName) throws SqlException {
+    public short getShort(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getShort", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public int getInt(String parameterName) throws SqlException {
+    public int getInt(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getInt", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public long getLong(String parameterName) throws SqlException {
+    public long getLong(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getLong", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public float getFloat(String parameterName) throws SqlException {
+    public float getFloat(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getFloat", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public double getDouble(String parameterName) throws SqlException {
+    public double getDouble(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getDouble", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public byte[] getBytes(String parameterName) throws SqlException {
+    public byte[] getBytes(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBytes", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.sql.Date getDate(String parameterName) throws SqlException {
+    public java.sql.Date getDate(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getDate", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.sql.Time getTime(String parameterName) throws SqlException {
+    public java.sql.Time getTime(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTime", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.sql.Timestamp getTimestamp(String parameterName) throws SqlException {
+    public java.sql.Timestamp getTimestamp(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTimestamp", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public Object getObject(String parameterName) throws SqlException {
+    public Object getObject(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getObject", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.math.BigDecimal getBigDecimal(String parameterName) throws SqlException {
+    public java.math.BigDecimal getBigDecimal(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBigDecimal", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public Object getObject(String parameterName, java.util.Map map) throws SqlException {
+    public Object getObject(String parameterName, java.util.Map map) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getObject", parameterName, map);
-        }
-        super.checkForClosedStatement();
+            }
         throw jdbc3MethodNotSupported();
     }
 
-    public java.sql.Ref getRef(String parameterName) throws SqlException {
+    public java.sql.Ref getRef(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getRef", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.sql.Blob getBlob(String parameterName) throws SqlException {
+    public java.sql.Blob getBlob(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBlob", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.sql.Clob getClob(String parameterName) throws SqlException {
+    public java.sql.Clob getClob(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getClob", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.sql.Array getArray(String parameterName) throws SqlException {
+    public java.sql.Array getArray(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getArray", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.sql.Date getDate(String parameterName, java.util.Calendar calendar) throws SqlException {
+    public java.sql.Date getDate(String parameterName, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getDate", parameterName, calendar);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.sql.Time getTime(String parameterName, java.util.Calendar calendar) throws SqlException {
+    public java.sql.Time getTime(String parameterName, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTime", parameterName, calendar);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.sql.Timestamp getTimestamp(String parameterName, java.util.Calendar calendar) throws SqlException {
+    public java.sql.Timestamp getTimestamp(String parameterName, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTimestamp", parameterName, calendar);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
-    public java.net.URL getURL(String parameterName) throws SqlException {
+    public java.net.URL getURL(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getURL", parameterName);
         }
-        super.checkForClosedStatement();
         throw jdbc3MethodNotSupported();
     }
 
@@ -1293,10 +1428,18 @@ public class CallableStatement extends PreparedStatement
         }
     }
     
-    private SqlException jdbc3MethodNotSupported()
+    private SQLException jdbc3MethodNotSupported() throws SQLException
     {
+        try
+        {
+            super.checkForClosedStatement();
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
         return new SqlException(agent_.logWriter_, 
-            new MessageId(SQLState.JDBC3_METHOD_NOT_SUPPORTED));
+            new MessageId(SQLState.JDBC3_METHOD_NOT_SUPPORTED)).getSQLException();
     }
 }
 

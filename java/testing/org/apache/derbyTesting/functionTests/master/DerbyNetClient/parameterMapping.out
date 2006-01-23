@@ -87,8 +87,8 @@ setNull() with all JDBC Types on SMALLINT
   setNull with batching support(BLOB) getShort=0 was null true
   setNull(Types.NULL) getShort=0 was null true
   setNull with batching support(Types.NULL) getShort=0 was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on SMALLINT
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getShort=98 was null false JDBC MATCH(OK)
@@ -260,8 +260,8 @@ setNull() with all JDBC Types on INTEGER
   setNull with batching support(BLOB) getInt=0 was null true
   setNull(Types.NULL) getInt=0 was null true
   setNull with batching support(Types.NULL) getInt=0 was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on INTEGER
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getInt=98 was null false JDBC MATCH(OK)
@@ -433,8 +433,8 @@ setNull() with all JDBC Types on BIGINT
   setNull with batching support(BLOB) getLong=0 was null true
   setNull(Types.NULL) getLong=0 was null true
   setNull with batching support(Types.NULL) getLong=0 was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on BIGINT
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getLong=98 was null false JDBC MATCH(OK)
@@ -606,8 +606,8 @@ setNull() with all JDBC Types on REAL
   setNull with batching support(BLOB) getFloat=0.0 was null true
   setNull(Types.NULL) getFloat=0.0 was null true
   setNull with batching support(Types.NULL) getFloat=0.0 was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on REAL
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getFloat=98.0 was null false JDBC MATCH(OK)
@@ -780,8 +780,8 @@ setNull() with all JDBC Types on FLOAT
   setNull with batching support(BLOB) getDouble=0.0 was null true
   setNull(Types.NULL) getDouble=0.0 was null true
   setNull with batching support(Types.NULL) getDouble=0.0 was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on FLOAT
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getDouble=98.0 was null false JDBC MATCH(OK)
@@ -953,8 +953,8 @@ setNull() with all JDBC Types on DOUBLE
   setNull with batching support(BLOB) getDouble=0.0 was null true
   setNull(Types.NULL) getDouble=0.0 was null true
   setNull with batching support(Types.NULL) getDouble=0.0 was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on DOUBLE
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getDouble=98.0 was null false JDBC MATCH(OK)
@@ -1126,8 +1126,8 @@ setNull() with all JDBC Types on DECIMAL(10,5)
   setNull with batching support(BLOB) getBigDecimal=null was null true
   setNull(Types.NULL) getBigDecimal=null was null true
   setNull with batching support(Types.NULL) getBigDecimal=null was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on DECIMAL(10,5)
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getBigDecimal=98.00000 was null false JDBC MATCH(OK)
@@ -1305,8 +1305,8 @@ setNull() with all JDBC Types on CHAR(60)
   setNull with batching support(BLOB) getString=null was null true
   setNull(Types.NULL) getString=null was null true
   setNull with batching support(Types.NULL) getString=null was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on CHAR(60)
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getString=98                                                           was null false JDBC MATCH(OK)
@@ -1477,8 +1477,8 @@ setNull() with all JDBC Types on VARCHAR(60)
   setNull with batching support(BLOB) getString=null was null true
   setNull(Types.NULL) getString=null was null true
   setNull with batching support(Types.NULL) getString=null was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on VARCHAR(60)
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getString=98 was null false JDBC MATCH(OK)
@@ -1649,8 +1649,8 @@ setNull() with all JDBC Types on LONG VARCHAR
   setNull with batching support(BLOB) getString=null was null true
   setNull(Types.NULL) getString=null was null true
   setNull with batching support(Types.NULL) getString=null was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on LONG VARCHAR
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() getString=98 was null false JDBC MATCH(OK)
@@ -1823,8 +1823,8 @@ setNull() with all JDBC Types on VARCHAR(60) FOR BIT DATA
   setNull with batching support(BLOB) getBytes=null was null true
   setNull(Types.NULL) getBytes=null was null true
   setNull with batching support(Types.NULL) getBytes=null was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on VARCHAR(60) FOR BIT DATA
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
@@ -1956,8 +1956,8 @@ setNull() with all JDBC Types on DATE
   setNull with batching support(BLOB) getDate=null was null true
   setNull(Types.NULL) getDate=null was null true
   setNull with batching support(Types.NULL) getDate=null was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on DATE
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
@@ -2087,8 +2087,8 @@ setNull() with all JDBC Types on TIME
   setNull with batching support(BLOB) getTime=null was null true
   setNull(Types.NULL) getTime=null was null true
   setNull with batching support(Types.NULL) getTime=null was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on TIME
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
@@ -2218,8 +2218,8 @@ setNull() with all JDBC Types on TIMESTAMP
   setNull with batching support(BLOB) getTimestamp=null was null true
   setNull(Types.NULL) getTimestamp=null was null true
   setNull with batching support(Types.NULL) getTimestamp=null was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on TIMESTAMP
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
@@ -2349,8 +2349,8 @@ setNull() with all JDBC Types on CLOB(1k)
   setNull with batching support(BLOB) getClob=null was null true
   setNull(Types.NULL) getClob=null was null true
   setNull with batching support(Types.NULL) getClob=null was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on CLOB(1k)
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)
@@ -2479,8 +2479,8 @@ setNull() with all JDBC Types on BLOB(1k)
   setNull with batching support(BLOB) getBlob=null was null true
   setNull(Types.NULL) getBlob=null was null true
   setNull with batching support(Types.NULL) getBlob=null was null true
-  setNull(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
-  setNull with batching support(235350345) SQLSTATE(null): org.apache.derby.client.am.SqlException: unrecognized sql type
+  setNull(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
+  setNull with batching support(235350345) SQLSTATE(null): java.sql.SQLException: unrecognized sql type
 setXXX() with all JDBC Types on BLOB(1k)
 For setXXX() methods that pass an object, a null and valid values are checked
   setByte() IC JDBC MATCH (INVALID)

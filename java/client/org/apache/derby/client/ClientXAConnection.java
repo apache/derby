@@ -20,6 +20,7 @@
 package org.apache.derby.client;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 
@@ -42,7 +43,7 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
     public ClientXAConnection(ClientXADataSource ds,
                               org.apache.derby.client.net.NetLogWriter logWtr,
                               String userId,
-                              String password) throws SqlException {
+                              String password) throws SQLException {
         super(ds, logWtr, userId, password, getUnigueRmId());
         derbyds_ = ds;
 
@@ -57,7 +58,7 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
         xares_ = netXares_;
     }
 
-    public Connection getConnection() throws SqlException {
+    public Connection getConnection() throws SQLException {
         if (fFirstGetConnection_) {
             // Since super.getConnection() has already been called once
             // in the constructor, we don't need to call it again for the
@@ -84,7 +85,7 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
         return rmId_;
     }
 
-    public XAResource getXAResource() throws SqlException {
+    public XAResource getXAResource() throws SQLException {
         if (logWriter_ != null) {
             logWriter_.traceExit(this, "getXAResource", xares_);
         }
@@ -105,25 +106,31 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
                                                    String password,
                                                    org.apache.derby.jdbc.ClientDataSource dataSource,
                                                    int rmId,
-                                                   boolean isXAConn) throws SqlException {
+                                                   boolean isXAConn) throws SQLException {
+        try
+        {
+            controlCon_ = new NetXAConnection(logWriter,
+                    user,
+                    password,
+                    dataSource,
+                    rmId,
+                    isXAConn);
+            controlCon_.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 
-        controlCon_ = new NetXAConnection(logWriter,
-                user,
-                password,
-                dataSource,
-                rmId,
-                isXAConn);
-        controlCon_.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+            if (logWriter_ != null) {
+                logWriter_.traceExit(this, "createControlConnection", controlCon_);
+            }
 
-        if (logWriter_ != null) {
-            logWriter_.traceExit(this, "createControlConnection", controlCon_);
+            return controlCon_;
         }
-
-        return controlCon_;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }            
     }
 
 
-    public synchronized void close() throws SqlException {
+    public synchronized void close() throws SQLException {
         super.close();
     }
 }

@@ -19,7 +19,7 @@
 */
 package org.apache.derby.client.am;
 
-
+import java.sql.SQLException;
 
 public class Statement implements java.sql.Statement, StatementCallbackInterface, UnitOfWorkListener {
 
@@ -370,17 +370,25 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
     // ---------------------------jdbc 1------------------------------------------
 
-    public java.sql.ResultSet executeQuery(String sql) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "executeQuery", sql);
+    public java.sql.ResultSet executeQuery(String sql) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeQuery", sql);
+                }
+                ResultSet resultSet = executeQueryX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeQuery", resultSet);
+                }
+                return resultSet;
             }
-            ResultSet resultSet = executeQueryX(sql);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "executeQuery", resultSet);
-            }
-            return resultSet;
         }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+        
     }
 
     private ResultSet executeQueryX(String sql) throws SqlException {
@@ -405,16 +413,23 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
-    public int executeUpdate(String sql) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "executeUpdate", sql);
+    public int executeUpdate(String sql) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeUpdate", sql);
+                }
+                int updateValue = executeUpdateX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
+                }
+                return updateValue;
             }
-            int updateValue = executeUpdateX(sql);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
-            }
-            return updateValue;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -442,12 +457,19 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
     // The server holds statement resources until transaction end.
-    public void close() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "close");
+    public void close() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "close");
+                }
+                closeX();
             }
-            closeX();
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -477,99 +499,155 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
-    public int getMaxFieldSize() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getMaxFieldSize");
-        }
-        checkForClosedStatement();
-        return maxFieldSize_;
-    }
-
-    public void setMaxFieldSize(int max) throws SqlException {
-        synchronized (connection_) {
+    public int getMaxFieldSize() throws SQLException {
+        try
+        {
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setMaxFieldSize", max);
+                agent_.logWriter_.traceEntry(this, "getMaxFieldSize");
             }
             checkForClosedStatement();
-            if (max < 0) {
-                throw new SqlException(agent_.logWriter_, "Invalid maxFieldSize value: " + max);
+            return maxFieldSize_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public void setMaxFieldSize(int max) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setMaxFieldSize", max);
+                }
+                checkForClosedStatement();
+                if (max < 0) {
+                    throw new SqlException(agent_.logWriter_, "Invalid maxFieldSize value: " + max);
+                }
+                maxFieldSize_ = max;
             }
-            maxFieldSize_ = max;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int getMaxRows() throws SqlException {
-        checkForClosedStatement();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getMaxRows", maxRows_);
-        }
-        return maxRows_;
-    }
-
-    public void setMaxRows(int maxRows) throws SqlException {
-        synchronized (connection_) {
+    public int getMaxRows() throws SQLException {
+        try
+        {
+            checkForClosedStatement();
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setMaxRows", maxRows);
+                agent_.logWriter_.traceExit(this, "getMaxRows", maxRows_);
+            }
+            return maxRows_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public void setMaxRows(int maxRows) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setMaxRows", maxRows);
+                }
+                checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
+                if (maxRows < 0) {
+                    throw new SqlException(agent_.logWriter_, "Invalid maxRows value: " + maxRows);
+                }
+                maxRows_ = maxRows;
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public void setEscapeProcessing(boolean enable) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setEscapeProcessing", enable);
+                }
+                checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public int getQueryTimeout() throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getQueryTimeout", timeout_);
+            }
+            return timeout_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public void setQueryTimeout(int seconds) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setQueryTimeout", seconds);
+                }
+                checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
+                if (seconds < 0) {
+                    throw new SqlException(agent_.logWriter_,
+                                           "Attempt to set a negative query timeout",
+                                           "XJ074.S");
+                }
+                if (seconds != timeout_) {
+                    timeout_ = seconds;
+                    doWriteTimeout = true;
+                }
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public void cancel() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "cancel");
             }
             checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
-            if (maxRows < 0) {
-                throw new SqlException(agent_.logWriter_, "Invalid maxRows value: " + maxRows);
-            }
-            maxRows_ = maxRows;
+            throw new SqlException(agent_.logWriter_, "cancel() not supported by server");
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setEscapeProcessing(boolean enable) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setEscapeProcessing", enable);
-            }
-            checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
-        }
-    }
-
-    public int getQueryTimeout() throws SqlException {
-        checkForClosedStatement();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getQueryTimeout", timeout_);
-        }
-        return timeout_;
-    }
-
-    public void setQueryTimeout(int seconds) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setQueryTimeout", seconds);
-            }
-            checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
-            if (seconds < 0) {
-                throw new SqlException(agent_.logWriter_,
-                                       "Attempt to set a negative query timeout",
-                                       "XJ074.S");
-            }
-            if (seconds != timeout_) {
-                timeout_ = seconds;
-                doWriteTimeout = true;
-            }
-        }
-    }
-
-    public void cancel() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "cancel");
-        }
-        checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
-        throw new SqlException(agent_.logWriter_, "cancel() not supported by server");
-    }
-
-    public java.sql.SQLWarning getWarnings() throws SqlException {
+    public java.sql.SQLWarning getWarnings() throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getWarnings", warnings_);
         }
         return warnings_;
     }
 
-    public void clearWarnings() throws SqlException {
+    public void clearWarnings() throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "clearWarnings");
@@ -588,54 +666,68 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     // ResultSet.getCursorName() should be used to
     // obtain the for update cursor name to use when executing a positioned update statement.
     // See Jdbc 3 spec section 14.2.4.4.
-    public void setCursorName(String name) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setCursorName", name);
-            }
-            checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
-            if (name == null || name.equals("")) {
-                throw new SqlException(agent_.logWriter_, "Invalid cursor name.");
-            }
+    public void setCursorName(String name) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setCursorName", name);
+                }
+                checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
+                if (name == null || name.equals("")) {
+                    throw new SqlException(agent_.logWriter_, "Invalid cursor name.");
+                }
 
-            // Invalid to set the cursor name if there are ResultSet's open on the Statement.
-            if (resultSet_ != null && resultSet_.openOnClient_) {
-                throw new SqlException(agent_.logWriter_, "Invalid operation: setCursorName() " +
-                        "called when there are open ResultSet's on the Statement.");
-            }
+                // Invalid to set the cursor name if there are ResultSet's open on the Statement.
+                if (resultSet_ != null && resultSet_.openOnClient_) {
+                    throw new SqlException(agent_.logWriter_, "Invalid operation: setCursorName() " +
+                            "called when there are open ResultSet's on the Statement.");
+                }
 
-            // Duplicate cursor names not allowed.
-            if (connection_.clientCursorNameCache_.containsKey(name)) {
-                throw new SqlException(agent_.logWriter_, "Duplicate cursor names are not allowed.");
-            }
-            connection_.clientCursorNameCache_.put(name, name);
+                // Duplicate cursor names not allowed.
+                if (connection_.clientCursorNameCache_.containsKey(name)) {
+                    throw new SqlException(agent_.logWriter_, "Duplicate cursor names are not allowed.");
+                }
+                connection_.clientCursorNameCache_.put(name, name);
 
-            // section_ is null for Statement objects.  We will defer the mapping of cursorName
-            // to section until when the query is executed.
-            if (section_ != null) {
-                agent_.sectionManager_.mapCursorNameToQuerySection(name, (Section) section_);
+                // section_ is null for Statement objects.  We will defer the mapping of cursorName
+                // to section until when the query is executed.
+                if (section_ != null) {
+                    agent_.sectionManager_.mapCursorNameToQuerySection(name, (Section) section_);
 
-                // This means we must subtitute the <users-cursor-name> with the <canned-cursor-name>
-                // in the pass-thru sql string "...where current of <canned-cursor-name>".
-                section_.setClientCursorName(name);
+                    // This means we must subtitute the <users-cursor-name> with the <canned-cursor-name>
+                    // in the pass-thru sql string "...where current of <canned-cursor-name>".
+                    section_.setClientCursorName(name);
+                }
+                cursorName_ = name;
             }
-            cursorName_ = name;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     //----------------------- Multiple Results --------------------------
 
 
-    public boolean execute(String sql) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "execute", sql);
+    public boolean execute(String sql) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "execute", sql);
+                }
+                boolean b = executeX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "execute", b);
+                }
+                return b;
             }
-            boolean b = executeX(sql);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "execute", b);
-            }
-            return b;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -644,142 +736,226 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         return resultSet_ != null;
     }
 
-    public java.sql.ResultSet getResultSet() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getResultSet");
+    public java.sql.ResultSet getResultSet() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getResultSet");
+                }
+                checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getResultSet", resultSet_);
+                }
+                return resultSet_;
             }
-            checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getResultSet", resultSet_);
-            }
-            return resultSet_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int getUpdateCount() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getUpdateCount");
+    public int getUpdateCount() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getUpdateCount");
+                }
+                checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getUpdateCount", updateCount_);
+                }
+                return updateCount_;
             }
-            checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getUpdateCount", updateCount_);
-            }
-            return updateCount_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public boolean getMoreResults() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getMoreResults");
+    public boolean getMoreResults() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getMoreResults");
+                }
+                boolean resultIsResultSet = getMoreResultsX(CLOSE_ALL_RESULTS);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getMoreResults", resultIsResultSet);
+                }
+                return resultIsResultSet;
             }
-            boolean resultIsResultSet = getMoreResultsX(CLOSE_ALL_RESULTS);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getMoreResults", resultIsResultSet);
-            }
-            return resultIsResultSet;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     //--------------------------JDBC 2.0-----------------------------
 
-    public void setFetchDirection(int direction) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setFetchDirection", direction);
+    public void setFetchDirection(int direction) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setFetchDirection", direction);
+                }
+                checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
+                switch (direction) {
+                case java.sql.ResultSet.FETCH_FORWARD:
+                case java.sql.ResultSet.FETCH_REVERSE:
+                case java.sql.ResultSet.FETCH_UNKNOWN:
+                    fetchDirection_ = direction;
+                    break;
+                default:
+                    throw new SqlException(agent_.logWriter_, "Invalid fetch direction " + direction);
+                }
             }
-            checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
-            switch (direction) {
-            case java.sql.ResultSet.FETCH_FORWARD:
-            case java.sql.ResultSet.FETCH_REVERSE:
-            case java.sql.ResultSet.FETCH_UNKNOWN:
-                fetchDirection_ = direction;
-                break;
-            default:
-                throw new SqlException(agent_.logWriter_, "Invalid fetch direction " + direction);
-            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int getFetchDirection() throws SqlException {
-        checkForClosedStatement();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getFetchDirection", fetchDirection_);
-        }
-        return fetchDirection_;
-    }
-
-    public void setFetchSize(int rows) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setFetchSize", rows);
-            }
-            checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
-
-            if (rows < 0 || (maxRows_ != 0 && rows > maxRows_)) {
-                throw new SqlException(agent_.logWriter_, "Invalid fetch size " + rows);
-            }
-            fetchSize_ = rows;
-        }
-    }
-
-    public int getFetchSize() throws SqlException {
-        checkForClosedStatement();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getFetchSize", fetchSize_);
-        }
-        return fetchSize_;
-    }
-
-    public int getResultSetConcurrency() throws SqlException {
-        checkForClosedStatement();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getResultSetConcurrency", resultSetConcurrency_);
-        }
-        return resultSetConcurrency_;
-    }
-
-    public int getResultSetType() throws SqlException {
-        checkForClosedStatement();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getResultSetType", resultSetType_);
-        }
-        return resultSetType_;
-    }
-
-    public void addBatch(String sql) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "addBatch", sql);
-            }
+    public int getFetchDirection() throws SQLException {
+        try
+        {
             checkForClosedStatement();
-            sql = connection_.nativeSQLX(sql);
-            batch_.add(sql);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getFetchDirection", fetchDirection_);
+            }
+            return fetchDirection_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void clearBatch() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "clearBatch");
+    public void setFetchSize(int rows) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setFetchSize", rows);
+                }
+                checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
+
+                if (rows < 0 || (maxRows_ != 0 && rows > maxRows_)) {
+                    throw new SqlException(agent_.logWriter_, "Invalid fetch size " + rows).getSQLException();
+                }
+                fetchSize_ = rows;
             }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public int getFetchSize() throws SQLException {
+        try
+        {
             checkForClosedStatement();
-            batch_.clear();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getFetchSize", fetchSize_);
+            }
+            return fetchSize_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int[] executeBatch() throws SqlException, BatchUpdateException {
-        synchronized (connection_) {
+    public int getResultSetConcurrency() throws SQLException {
+        try
+        {
+            checkForClosedStatement();
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "executeBatch");
+                agent_.logWriter_.traceExit(this, "getResultSetConcurrency", resultSetConcurrency_);
             }
-            int[] updateCounts = executeBatchX();
+            return resultSetConcurrency_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public int getResultSetType() throws SQLException {
+        try
+        {
+            checkForClosedStatement();
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "executeBatch", updateCounts);
+                agent_.logWriter_.traceExit(this, "getResultSetType", resultSetType_);
             }
-            return updateCounts;
+            return resultSetType_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public void addBatch(String sql) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "addBatch", sql);
+                }
+                checkForClosedStatement();
+                sql = connection_.nativeSQLX(sql);
+                batch_.add(sql);
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public void clearBatch() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "clearBatch");
+                }
+                checkForClosedStatement();
+                batch_.clear();
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public int[] executeBatch() throws SQLException, BatchUpdateException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeBatch");
+                }
+                int[] updateCounts = executeBatchX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeBatch", updateCounts);
+                }
+                return updateCounts;
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -787,7 +963,6 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
         clearWarningsX(); // Per jdbc spec 0.7, and getWarnings() javadoc
         resultSetList_ = null;
-
         // Initialize all the updateCounts to indicate failure
         // This is done to account for "chain-breaking" errors where we cannot
         // read any more replies
@@ -796,30 +971,43 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             updateCounts[i] = -3;
         }
         flowExecuteBatch(updateCounts);
-
         return updateCounts;
     }
 
-    public java.sql.Connection getConnection() throws SqlException {
-        checkForClosedStatement();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getConnection", connection_);
+    public java.sql.Connection getConnection() throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getConnection", connection_);
+            }
+            return connection_;
         }
-        return connection_;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     //--------------------------JDBC 3.0-----------------------------
 
-    public boolean getMoreResults(int current) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getMoreResults", current);
+    public boolean getMoreResults(int current) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getMoreResults", current);
+                }
+                boolean resultIsResultSet = getMoreResultsX(current);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getMoreResults", resultIsResultSet);
+                }
+                return resultIsResultSet;
             }
-            boolean resultIsResultSet = getMoreResultsX(current);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getMoreResults", resultIsResultSet);
-            }
-            return resultIsResultSet;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -861,95 +1049,151 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         return resultIsResultSet;
     }
 
-    public java.sql.ResultSet getGeneratedKeys() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getGeneratedKeys");
-        }
-        checkForClosedStatement();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getGeneratedKeys", generatedKeysResultSet_);
-        }
-        return generatedKeysResultSet_;
-    }
-
-    public int executeUpdate(String sql, int autoGeneratedKeys) throws SqlException {
-        synchronized (connection_) {
+    public java.sql.ResultSet getGeneratedKeys() throws SQLException {
+        try
+        {
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "executeUpdate", sql, autoGeneratedKeys);
+                agent_.logWriter_.traceEntry(this, "getGeneratedKeys");
             }
-            autoGeneratedKeys_ = autoGeneratedKeys;
-            int updateValue = executeUpdateX(sql);
+            checkForClosedStatement();
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
+                agent_.logWriter_.traceExit(this, "getGeneratedKeys", generatedKeysResultSet_);
             }
-            return updateValue;
+            return generatedKeysResultSet_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int executeUpdate(String sql, int columnIndexes[]) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "executeUpdate", sql, columnIndexes);
+    public int executeUpdate(String sql, int autoGeneratedKeys) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeUpdate", sql, autoGeneratedKeys);
+                }
+                autoGeneratedKeys_ = autoGeneratedKeys;
+                int updateValue = executeUpdateX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
+                }
+                return updateValue;
+            }
         }
-        checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "Driver not capable");
-    }
-
-    public int executeUpdate(String sql, String columnNames[]) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "executeUpdate", sql, columnNames);
-            }
-            generatedKeysColumnNames_ = columnNames;
-            int updateValue = executeUpdateX(sql);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
-            }
-            return updateValue;
-        }
-    }
-
-    public boolean execute(String sql, int autoGeneratedKeys) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "execute", sql, autoGeneratedKeys);
-            }
-            autoGeneratedKeys_ = autoGeneratedKeys;
-            boolean b = executeX(sql);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "execute", b);
-            }
-            return b;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public boolean execute(String sql, int columnIndexes[]) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "execute", sql, columnIndexes);
+    public int executeUpdate(String sql, int columnIndexes[]) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "executeUpdate", sql, columnIndexes);
+            }
+            checkForClosedStatement();
+            throw new SqlException(agent_.logWriter_, "Driver not capable");
         }
-        checkForClosedStatement();
-        throw new SqlException(agent_.logWriter_, "Driver not capable");
-    }
-
-    public boolean execute(String sql, String columnNames[]) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "execute", sql, columnNames);
-            }
-            generatedKeysColumnNames_ = columnNames;
-            boolean b = executeX(sql);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "execute", b);
-            }
-            return b;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int getResultSetHoldability() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getResultSetHoldability");
+    public int executeUpdate(String sql, String columnNames[]) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeUpdate", sql, columnNames);
+                }
+                generatedKeysColumnNames_ = columnNames;
+                int updateValue = executeUpdateX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
+                }
+                return updateValue;
+            }
         }
-        checkForClosedStatement();
-        return resultSetHoldability_;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public boolean execute(String sql, int autoGeneratedKeys) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "execute", sql, autoGeneratedKeys);
+                }
+                autoGeneratedKeys_ = autoGeneratedKeys;
+                boolean b = executeX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "execute", b);
+                }
+                return b;
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public boolean execute(String sql, int columnIndexes[]) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "execute", sql, columnIndexes);
+            }
+            checkForClosedStatement();
+            throw new SqlException(agent_.logWriter_, "Driver not capable");
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public boolean execute(String sql, String columnNames[]) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "execute", sql, columnNames);
+                }
+                generatedKeysColumnNames_ = columnNames;
+                boolean b = executeX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "execute", b);
+                }
+                return b;
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    public int getResultSetHoldability() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getResultSetHoldability");
+            }
+            checkForClosedStatement();
+            return resultSetHoldability_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     // ----------------------- box car and callback methods ---------------------
@@ -2245,4 +2489,26 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             resultSet_.markAutoCommitted();
         }
     }
+    
+    protected SQLException jdbc3FeatureNotSupported(boolean checkStatement)
+        throws SQLException
+    {
+        try
+        {
+            if ( checkStatement )
+                checkForClosedStatement();
+            
+            throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+    
+    protected SQLException jdbc3FeatureNotSupported() throws SQLException
+    {
+        return jdbc3FeatureNotSupported(true);
+    }
+
 }

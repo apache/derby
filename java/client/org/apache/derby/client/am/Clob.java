@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
+
 public class Clob extends Lob implements java.sql.Clob {
     //---------------------navigational members-----------------------------------
 
@@ -133,65 +135,93 @@ public class Clob extends Lob implements java.sql.Clob {
 
     // ---------------------------jdbc 2------------------------------------------
     // Create another method lengthX for internal calls
-    public long length() throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "length");
-            }
+    public long length() throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "length");
+                }
 
-            if (lengthObtained_) {
+                if (lengthObtained_) {
+                    return sqlLength_;
+                }
+
+                lengthInBytes_ = super.sqlLength();
+
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "length", sqlLength_);
+                }
                 return sqlLength_;
             }
-
-            lengthInBytes_ = super.sqlLength();
-
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "length", sqlLength_);
-            }
-            return sqlLength_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public String getSubString(long pos, int length) throws SqlException {
-        synchronized (agent_.connection_) {
-            String retVal = null;
+    public String getSubString(long pos, int length) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                String retVal = null;
 
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getSubString", (int) pos, length);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getSubString", (int) pos, length);
+                }
+
+                // We can also do a check for pos > length()
+                // Defer it till FP7 so that proper testing can be performed on this
+                if ((pos <= 0) || (length < 0)) {
+                    throw new SqlException(agent_.logWriter_, "Invalid position " + pos + " or length " + length);
+                }
+
+                retVal = getSubStringX(pos, length);
+
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getSubString", retVal);
+                }
+                return retVal;
             }
-
-            // We can also do a check for pos > length()
-            // Defer it till FP7 so that proper testing can be performed on this
-            if ((pos <= 0) || (length < 0)) {
-                throw new SqlException(agent_.logWriter_, "Invalid position " + pos + " or length " + length);
-            }
-
-            retVal = getSubStringX(pos, length);
-
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getSubString", retVal);
-            }
-            return retVal;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     private String getSubStringX(long pos, int length) throws SqlException {
-        checkForClosedConnection();
-        long actualLength = Math.min(this.length() - pos + 1, (long) length);
-        return string_.substring((int) pos - 1, (int) (pos - 1 + actualLength));
+        try
+        {
+            checkForClosedConnection();
+            long actualLength = Math.min(this.length() - pos + 1, (long) length);
+            return string_.substring((int) pos - 1, (int) (pos - 1 + actualLength));
+        }
+        catch ( SQLException se )
+        {
+            throw new SqlException(se);
+        }
     }
 
-    public java.io.Reader getCharacterStream() throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getCharacterStream");
-            }
+    public java.io.Reader getCharacterStream() throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getCharacterStream");
+                }
 
-            java.io.Reader retVal = getCharacterStreamX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getCharacterStream", retVal);
+                java.io.Reader retVal = getCharacterStreamX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getCharacterStream", retVal);
+                }
+                return retVal;
             }
-            return retVal;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -206,17 +236,24 @@ public class Clob extends Lob implements java.sql.Clob {
         return new java.io.StringReader(string_);
     }
 
-    public java.io.InputStream getAsciiStream() throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getAsciiStream");
-            }
+    public java.io.InputStream getAsciiStream() throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getAsciiStream");
+                }
 
-            java.io.InputStream retVal = getAsciiStreamX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getAsciiStream", retVal);
+                java.io.InputStream retVal = getAsciiStreamX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getAsciiStream", retVal);
+                }
+                return retVal;
             }
-            return retVal;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -231,23 +268,30 @@ public class Clob extends Lob implements java.sql.Clob {
         return new AsciiStream(string_, new java.io.StringReader(string_));
     }
 
-    public long position(String searchstr, long start) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this,
-                        "position(String, long)",
-                        searchstr,
-                        start);
-            }
-            if (searchstr == null) {
-                throw new SqlException(agent_.logWriter_, "Search string cannot be null.");
-            }
+    public long position(String searchstr, long start) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this,
+                            "position(String, long)",
+                            searchstr,
+                            start);
+                }
+                if (searchstr == null) {
+                    throw new SqlException(agent_.logWriter_, "Search string cannot be null.");
+                }
 
-            long pos = positionX(searchstr, start);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "position(String, long)", pos);
+                long pos = positionX(searchstr, start);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "position(String, long)", pos);
+                }
+                return pos;
             }
-            return pos;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -266,22 +310,29 @@ public class Clob extends Lob implements java.sql.Clob {
         return (long) index;
     }
 
-    public long position(java.sql.Clob searchstr, long start) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this,
-                        "position(Clob, long)",
-                        searchstr,
-                        start);
+    public long position(java.sql.Clob searchstr, long start) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this,
+                            "position(Clob, long)",
+                            searchstr,
+                            start);
+                }
+                if (searchstr == null) {
+                    throw new SqlException(agent_.logWriter_, "Search string cannot be null.");
+                }
+                long pos = positionX(searchstr, start);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "position(Clob, long)", pos);
+                }
+                return pos;
             }
-            if (searchstr == null) {
-                throw new SqlException(agent_.logWriter_, "Search string cannot be null.");
-            }
-            long pos = positionX(searchstr, start);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "position(Clob, long)", pos);
-            }
-            return pos;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -311,29 +362,43 @@ public class Clob extends Lob implements java.sql.Clob {
 
     //---------------------------- jdbc 3.0 -----------------------------------
 
-    public int setString(long pos, String str) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setString", (int) pos, str);
+    public int setString(long pos, String str) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setString", (int) pos, str);
+                }
+                int length = setStringX(pos, str, 0, str.length());
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "setString", length);
+                }
+                return length;
             }
-            int length = setStringX(pos, str, 0, str.length());
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "setString", length);
-            }
-            return length;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int setString(long pos, String str, int offset, int len) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setString", (int) pos, str, offset, len);
+    public int setString(long pos, String str, int offset, int len) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setString", (int) pos, str, offset, len);
+                }
+                int length = setStringX(pos, str, offset, len);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "setString", length);
+                }
+                return length;
             }
-            int length = setStringX(pos, str, offset, len);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "setString", length);
-            }
-            return length;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -361,51 +426,72 @@ public class Clob extends Lob implements java.sql.Clob {
         return length;
     }
 
-    public java.io.OutputStream setAsciiStream(long pos) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setAsciiStream", (int) pos);
-            }
-            ClobOutputStream outStream = new ClobOutputStream(this, pos);
+    public java.io.OutputStream setAsciiStream(long pos) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setAsciiStream", (int) pos);
+                }
+                ClobOutputStream outStream = new ClobOutputStream(this, pos);
 
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "setAsciiStream", outStream);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "setAsciiStream", outStream);
+                }
+                return outStream;
             }
-            return outStream;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.io.Writer setCharacterStream(long pos) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setCharacterStream", (int) pos);
-            }
-            ClobWriter writer = new ClobWriter(this, pos);
+    public java.io.Writer setCharacterStream(long pos) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setCharacterStream", (int) pos);
+                }
+                ClobWriter writer = new ClobWriter(this, pos);
 
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "setCharacterStream", writer);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "setCharacterStream", writer);
+                }
+                return writer;
             }
-            return writer;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void truncate(long len) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, " truncate", (int) len);
+    public void truncate(long len) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, " truncate", (int) len);
+                }
+                if (len < 0 || len > this.length()) {
+                    throw new SqlException(agent_.logWriter_, "Invalid length " + len);
+                }
+                if (len == this.length()) {
+                    return;
+                }
+                String newstr = string_.substring(0, (int) len);
+                string_ = newstr;
+                asciiStream_ = new java.io.StringBufferInputStream(string_);
+                unicodeStream_ = new java.io.StringBufferInputStream(string_);
+                characterStream_ = new java.io.StringReader(string_);
+                sqlLength_ = string_.length();
             }
-            if (len < 0 || len > this.length()) {
-                throw new SqlException(agent_.logWriter_, "Invalid length " + len);
-            }
-            if (len == this.length()) {
-                return;
-            }
-            String newstr = string_.substring(0, (int) len);
-            string_ = newstr;
-            asciiStream_ = new java.io.StringBufferInputStream(string_);
-            unicodeStream_ = new java.io.StringBufferInputStream(string_);
-            characterStream_ = new java.io.StringReader(string_);
-            sqlLength_ = string_.length();
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -490,12 +576,12 @@ public class Clob extends Lob implements java.sql.Clob {
 
     // this method is primarily for mixed clob length calculations.
     // it was introduced to prevent recursion in the actual char length calculation
-    public long getByteLength() throws SqlException {
-        if (lengthObtained_ == true) {
-            return lengthInBytes_;
-        }
+    public long getByteLength() throws SQLException {
+            if (lengthObtained_ == true) {
+                return lengthInBytes_;
+            }
 
-        length();
-        return lengthInBytes_;
+            length();
+            return lengthInBytes_;
     }
 }

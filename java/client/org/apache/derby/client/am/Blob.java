@@ -20,8 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.SQLState;
-
 public class Blob extends Lob implements java.sql.Blob {
     //-----------------------------state------------------------------------------
 
@@ -58,41 +58,55 @@ public class Blob extends Lob implements java.sql.Blob {
 
     // ---------------------------jdbc 2------------------------------------------
 
-    public long length() throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "length");
+    public long length() throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "length");
+                }
+                long retVal = super.sqlLength();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "length", retVal);
+                }
+                return retVal;
             }
-            long retVal = super.sqlLength();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "length", retVal);
-            }
-            return retVal;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     // can return an array that may be have a length shorter than the supplied
     // length (no padding occurs)
-    public byte[] getBytes(long pos, int length) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getBytes", (int) pos, length);
+    public byte[] getBytes(long pos, int length) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getBytes", (int) pos, length);
+                }
+                if (pos <= 0) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.BLOB_BAD_POSITION), 
+                        new Long(pos));
+                }
+                if (length < 0) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
+                        new Integer(length));
+                }
+                byte[] retVal = getBytesX(pos, length);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getBytes", retVal);
+                }
+                return retVal;
             }
-            if (pos <= 0) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.BLOB_BAD_POSITION), 
-                    new Long(pos));
-            }
-            if (length < 0) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
-                    new Integer(length));
-            }
-            byte[] retVal = getBytesX(pos, length);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getBytes", retVal);
-            }
-            return retVal;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -100,7 +114,12 @@ public class Blob extends Lob implements java.sql.Blob {
         checkForClosedConnection();
 
         // we may need to check for overflow on this cast
-        long actualLength = Math.min(this.length() - pos + 1, (long) length);
+        long actualLength;
+        try {
+            actualLength = Math.min(this.length() - pos + 1, (long) length);
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
+        }
 
         byte[] retVal = new byte[(int) actualLength];
         System.arraycopy(binaryString_, (int) pos + dataOffset_ - 1, retVal, 0, (int) actualLength);
@@ -108,16 +127,23 @@ public class Blob extends Lob implements java.sql.Blob {
     }
 
 
-    public java.io.InputStream getBinaryStream() throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getBinaryStream");
+    public java.io.InputStream getBinaryStream() throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getBinaryStream");
+                }
+                java.io.InputStream retVal = getBinaryStreamX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getBinaryStream", retVal);
+                }
+                return retVal;
             }
-            java.io.InputStream retVal = getBinaryStreamX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getBinaryStream", retVal);
-            }
-            return retVal;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -132,20 +158,27 @@ public class Blob extends Lob implements java.sql.Blob {
         return new java.io.ByteArrayInputStream(binaryString_, dataOffset_, binaryString_.length - dataOffset_);
     }
 
-    public long position(byte[] pattern, long start) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "position(byte[], long)", pattern, start);
+    public long position(byte[] pattern, long start) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "position(byte[], long)", pattern, start);
+                }
+                if (pattern == null) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.BLOB_NULL_PATTERN));
+                }
+                long pos = positionX(pattern, start);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "position(byte[], long)", pos);
+                }
+                return pos;
             }
-            if (pattern == null) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.BLOB_NULL_PATTERN));
-            }
-            long pos = positionX(pattern, start);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "position(byte[], long)", pos);
-            }
-            return pos;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -155,20 +188,27 @@ public class Blob extends Lob implements java.sql.Blob {
         return binaryStringPosition(pattern, start);
     }
 
-    public long position(java.sql.Blob pattern, long start) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "position(Blob, long)", pattern, start);
+    public long position(java.sql.Blob pattern, long start) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "position(Blob, long)", pattern, start);
+                }
+                if (pattern == null) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.BLOB_NULL_PATTERN));
+                }
+                long pos = positionX(pattern, start);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "position(Blob, long)", pos);
+                }
+                return pos;
             }
-            if (pattern == null) {
-                throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.BLOB_NULL_PATTERN));
-            }
-            long pos = positionX(pattern, start);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "position(Blob, long)", pos);
-            }
-            return pos;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -185,29 +225,43 @@ public class Blob extends Lob implements java.sql.Blob {
     // -------------------------- JDBC 3.0 -----------------------------------
 
 
-    public int setBytes(long pos, byte[] bytes) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setBytes", (int) pos, bytes);
+    public int setBytes(long pos, byte[] bytes) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setBytes", (int) pos, bytes);
+                }
+                int length = setBytesX(pos, bytes, 0, bytes.length);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "setBytes", length);
+                }
+                return length;
             }
-            int length = setBytesX(pos, bytes, 0, bytes.length);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "setBytes", length);
-            }
-            return length;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int setBytes(long pos, byte[] bytes, int offset, int len) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setBytes", (int) pos, bytes, offset, len);
+    public int setBytes(long pos, byte[] bytes, int offset, int len) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setBytes", (int) pos, bytes, offset, len);
+                }
+                int length = setBytesX(pos, bytes, offset, len);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "setBytes", length);
+                }
+                return length;
             }
-            int length = setBytesX(pos, bytes, offset, len);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "setBytes", length);
-            }
-            return length;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -249,7 +303,7 @@ public class Blob extends Lob implements java.sql.Blob {
         return length;
     }
 
-    public java.io.OutputStream setBinaryStream(long pos) throws SqlException {
+    public java.io.OutputStream setBinaryStream(long pos) throws SQLException {
         synchronized (agent_.connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "setBinaryStream", (int) pos);
@@ -263,25 +317,32 @@ public class Blob extends Lob implements java.sql.Blob {
         }
     }
 
-    public void truncate(long len) throws SqlException {
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, " truncate", (int) len);
+    public void truncate(long len) throws SQLException {
+        try
+        {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, " truncate", (int) len);
+                }
+                if (len < 0 || len > this.length()) {
+                    throw new SqlException(agent_.logWriter_,
+                        new MessageId(SQLState.INVALID_API_PARAMETER),
+                        new Long(len), "len", "Blob.truncate()");
+                }
+                if (len == this.length()) {
+                    return;
+                }
+                long newLength = (int) len + dataOffset_;
+                byte newbuf[] = new byte[(int) len + dataOffset_];
+                System.arraycopy(binaryString_, 0, newbuf, 0, (int) newLength);
+                binaryString_ = newbuf;
+                binaryStream_ = new java.io.ByteArrayInputStream(binaryString_);
+                sqlLength_ = binaryString_.length - dataOffset_;
             }
-            if (len < 0 || len > this.length()) {
-                throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.INVALID_API_PARAMETER),
-                    new Long(len), "len", "Blob.truncate()");
-            }
-            if (len == this.length()) {
-                return;
-            }
-            long newLength = (int) len + dataOffset_;
-            byte newbuf[] = new byte[(int) len + dataOffset_];
-            System.arraycopy(binaryString_, 0, newbuf, 0, (int) newLength);
-            binaryString_ = newbuf;
-            binaryStream_ = new java.io.ByteArrayInputStream(binaryString_);
-            sqlLength_ = binaryString_.length - dataOffset_;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 

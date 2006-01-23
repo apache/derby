@@ -245,7 +245,7 @@ public abstract class Sqlca {
                 if (cs != null) {
                     try {
                         cs.closeX();
-                    } catch (java.sql.SQLException doNothing) {
+                    } catch (SqlException doNothing) {
                     }
                 }
             }
@@ -260,7 +260,7 @@ public abstract class Sqlca {
                 return getMessage();
             } catch (SqlException e) {
                 // Invocation of stored procedure fails, so we return error message tokens directly.
-                exceptionThrownOnStoredProcInvocation_ = e;
+                exceptionThrownOnStoredProcInvocation_ = e.getSQLException();
                 chainDeferredExceptionsToAgentOrAsConnectionWarnings((SqlException) e);
                 return getUnformattedMessage();
             }
@@ -284,7 +284,7 @@ public abstract class Sqlca {
                         " See chained exception." +
                         " The stored procedure SYSIBM.SQLCAMESSAGE is not installed on server." +
                         " Contact your DBA.");
-                warningForStoredProcFailure.setNextException(current);
+                warningForStoredProcFailure.setNextException(current.getSQLException());
                 connection_.accumulate440WarningForMessageProcFailure(warningForStoredProcFailure);
             } else if (current.getErrorCode() == -444) {
                 SqlWarning warningForStoredProcFailure = new SqlWarning(agent_.logWriter_,
@@ -292,7 +292,7 @@ public abstract class Sqlca {
                         " See chained exception." +
                         " The stored procedure SYSIBM.SQLCAMESSAGE cannot be accessed on the server." +
                         " Contact your DBA.");
-                warningForStoredProcFailure.setNextException(current);
+                warningForStoredProcFailure.setNextException(current.getSQLException());
                 connection_.accumulate444WarningForMessageProcFailure(warningForStoredProcFailure);
             } else {
                 agent_.accumulateDeferredException(current);

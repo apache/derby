@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
+
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
@@ -155,223 +157,321 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
 
     // ---------------------------jdbc 1------------------------------------------
 
-    public int getColumnCount() throws SqlException {
-        checkForClosedStatement();
-        return columns_;
+    public int getColumnCount() throws SQLException {
+        try
+        {            
+            checkForClosedStatement();
+            return columns_;
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
     }
 
-    public boolean isAutoIncrement(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        return false;
+    public boolean isAutoIncrement(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            return false;
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
     }
 
-    public boolean isCaseSensitive(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        //return true if the SQLTYPE is CHAR, VARCHAR, LOGVARCHAR or CLOB
-        int type = types_[column - 1];
-        return
-                type == Types.CHAR ||
-                type == Types.VARCHAR ||
-                type == Types.LONGVARCHAR ||
-                type == Types.CLOB;
+    public boolean isCaseSensitive(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            //return true if the SQLTYPE is CHAR, VARCHAR, LOGVARCHAR or CLOB
+            int type = types_[column - 1];
+            return
+                    type == Types.CHAR ||
+                    type == Types.VARCHAR ||
+                    type == Types.LONGVARCHAR ||
+                    type == Types.CLOB;
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
     }
 
     // all searchable except distinct
-    public boolean isSearchable(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        return true;
-    }
-
-    public boolean isCurrency(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        return false;
-    }
-
-    public int isNullable(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        if (nullable_[column - 1]) {
-            return java.sql.ResultSetMetaData.columnNullable;
-        } else {
-            return java.sql.ResultSetMetaData.columnNoNulls;
+    public boolean isSearchable(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            return true;
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
         }
     }
 
-    public boolean isSigned(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        //return true only if the SQLType is SMALLINT, INT, BIGINT, FLOAT, REAL, DOUBLE, NUMERIC OR DECIMAL
-        int type = types_[column - 1];
-        return
-                type == Types.SMALLINT ||
-                type == Types.INTEGER ||
-                type == Types.BIGINT ||
-                type == java.sql.Types.FLOAT ||
-                type == Types.REAL ||
-                type == Types.DOUBLE ||
-                type == java.sql.Types.NUMERIC ||
-                type == Types.DECIMAL;
-    }
-
-    public int getColumnDisplaySize(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        int jdbcType = types_[column - 1];
-        switch (jdbcType) {
-        case Types.BOOLEAN:
-            return 5;
-        case Types.INTEGER:
-            return 11;
-        case Types.SMALLINT:
-            return 6;
-        case Types.BIGINT:
-            return 20;
-        case Types.REAL:
-            return 13;
-        case Types.DOUBLE:
-        case java.sql.Types.FLOAT:
-            return 22;
-        case Types.DECIMAL:
-        case java.sql.Types.NUMERIC:
-            return getPrecision(column) + 2;  // add 1 for sign and 1 for decimal
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
-        case Types.CLOB:
-            return (int) sqlLength_[column - 1];
-        case Types.DATE:
-            return 10;
-        case Types.TIME:
-            return 8;
-        case Types.TIMESTAMP:
-            return 26;
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-        case Types.BLOB:
-            return (int) (2 * sqlLength_[column - 1]); // eg. "FF" represents just one byte
-        default:
-            throw new SqlException(logWriter_, "not supported");
+    public boolean isCurrency(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            return false;
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
         }
     }
 
-    public String getColumnLabel(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        // return labels if label is turned on, otherwise, return column name
-        if (sqlLabel_ != null && sqlLabel_[column - 1] != null) {
-            return sqlLabel_[column - 1];
+    public int isNullable(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            if (nullable_[column - 1]) {
+                return java.sql.ResultSetMetaData.columnNullable;
+            } else {
+                return java.sql.ResultSetMetaData.columnNoNulls;
+            }
         }
-        if (sqlName_ == null || sqlName_[column - 1] == null) {
-            assignColumnName(column);
-        }
-        return sqlName_[column - 1];
-    }
-
-    public String getColumnName(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        // The Javadoc and Jdbc book explicitly state that the empty string ("") is returned if "not applicable"
-        // for the following methods:
-        //   getSchemaName()
-        //   getTableName()
-        //   getCatalogName()
-        // Since the empty string is a valid string and is not really a proper table name, schema name, or catalog name,
-        // we're not sure why the empty string was chosen over null, except possibly to be friendly to lazy jdbc apps
-        // that may not be checking for nulls, thereby minimizing potential NPE's.
-        // By induction, it would make sense to return the empty string when column name is not available/applicable.
-        //
-        // The JDBC specification contains blanket statements about SQL compliance levels,
-        // so elaboration within the JDBC specification is often bypassed.
-        // Personally, I would prefer to return Java null for all the not-applicable cases,
-        // but it appears that we have precedent for the empty ("") string.
-        //
-        // We assume a straightforward induction from jdbc spec that the column name be "" (empty)
-        // in preference to null or NULL for the not applicable case.
-        //
-        if (sqlName_ == null || sqlName_[column - 1] == null) {
-            assignColumnName(column);
-        }
-        return sqlName_[column - 1];
-    }
-
-    public String getSchemaName(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        if (sqlxSchema_ == null || sqlxSchema_[column - 1] == null) {
-            return ""; // Per jdbc spec
-        }
-        return sqlxSchema_[column - 1];
-    }
-
-    public int getPrecision(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        int jdbcType = types_[column - 1];
-
-        switch (jdbcType) {
-        case java.sql.Types.NUMERIC:
-        case Types.DECIMAL:
-            return sqlPrecision_[column - 1];
-        case Types.SMALLINT:
-            return 5;
-        case Types.INTEGER:
-            return 10;
-        case Types.BIGINT:
-            return 19;
-        case java.sql.Types.FLOAT:
-            return 15;
-        case Types.REAL:
-            return 7;  // This is the number of signed digits for IEEE float with mantissa 24, ie. 2^24
-        case Types.DOUBLE:
-            return 15; // This is the number of signed digits for IEEE float with mantissa 24, ie. 2^24
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-        case Types.CLOB:
-        case Types.BLOB:
-            return (int) sqlLength_[column - 1];
-        case Types.DATE:
-            return 10;
-        case Types.TIME:
-            return 8;
-        case Types.TIMESTAMP:
-            return 26;
-        default:
-            throw new SqlException(logWriter_, "Unregistered column type");
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
         }
     }
 
-    public int getScale(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-
-        // We get the scale from the SQLDA as returned by DERBY, but DERBY does not return the ANSI-defined
-        // value of scale 6 for TIMESTAMP.
-        //
-        //   The JDBC drivers should hardcode this info as a short/near term solution.
-        //
-        if (types_[column - 1] == Types.TIMESTAMP) {
-            return 6;
+    public boolean isSigned(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            //return true only if the SQLType is SMALLINT, INT, BIGINT, FLOAT, REAL, DOUBLE, NUMERIC OR DECIMAL
+            int type = types_[column - 1];
+            return
+                    type == Types.SMALLINT ||
+                    type == Types.INTEGER ||
+                    type == Types.BIGINT ||
+                    type == java.sql.Types.FLOAT ||
+                    type == Types.REAL ||
+                    type == Types.DOUBLE ||
+                    type == java.sql.Types.NUMERIC ||
+                    type == Types.DECIMAL;
         }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
+}
 
-        return sqlScale_[column - 1];
+    public int getColumnDisplaySize(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            int jdbcType = types_[column - 1];
+            switch (jdbcType) {
+            case Types.BOOLEAN:
+                return 5;
+            case Types.INTEGER:
+                return 11;
+            case Types.SMALLINT:
+                return 6;
+            case Types.BIGINT:
+                return 20;
+            case Types.REAL:
+                return 13;
+            case Types.DOUBLE:
+            case java.sql.Types.FLOAT:
+                return 22;
+            case Types.DECIMAL:
+            case java.sql.Types.NUMERIC:
+                return getPrecision(column) + 2;  // add 1 for sign and 1 for decimal
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.CLOB:
+                return (int) sqlLength_[column - 1];
+            case Types.DATE:
+                return 10;
+            case Types.TIME:
+                return 8;
+            case Types.TIMESTAMP:
+                return 26;
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+            case Types.BLOB:
+                return (int) (2 * sqlLength_[column - 1]); // eg. "FF" represents just one byte
+            default:
+                throw new SqlException(logWriter_, "not supported");
+            }
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
     }
 
-    public String getTableName(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        if (sqlxBasename_ == null || sqlxBasename_[column - 1] == null) {
-            return ""; // Per jdbc spec
+    public String getColumnLabel(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            // return labels if label is turned on, otherwise, return column name
+            if (sqlLabel_ != null && sqlLabel_[column - 1] != null) {
+                return sqlLabel_[column - 1];
+            }
+            if (sqlName_ == null || sqlName_[column - 1] == null) {
+                assignColumnName(column);
+            }
+            return sqlName_[column - 1];
         }
-        return sqlxBasename_[column - 1];
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
+    }
+
+    public String getColumnName(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            // The Javadoc and Jdbc book explicitly state that the empty string ("") is returned if "not applicable"
+            // for the following methods:
+            //   getSchemaName()
+            //   getTableName()
+            //   getCatalogName()
+            // Since the empty string is a valid string and is not really a proper table name, schema name, or catalog name,
+            // we're not sure why the empty string was chosen over null, except possibly to be friendly to lazy jdbc apps
+            // that may not be checking for nulls, thereby minimizing potential NPE's.
+            // By induction, it would make sense to return the empty string when column name is not available/applicable.
+            //
+            // The JDBC specification contains blanket statements about SQL compliance levels,
+            // so elaboration within the JDBC specification is often bypassed.
+            // Personally, I would prefer to return Java null for all the not-applicable cases,
+            // but it appears that we have precedent for the empty ("") string.
+            //
+            // We assume a straightforward induction from jdbc spec that the column name be "" (empty)
+            // in preference to null or NULL for the not applicable case.
+            //
+            if (sqlName_ == null || sqlName_[column - 1] == null) {
+                assignColumnName(column);
+            }
+            return sqlName_[column - 1];
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
+    }
+
+    public String getSchemaName(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            if (sqlxSchema_ == null || sqlxSchema_[column - 1] == null) {
+                return ""; // Per jdbc spec
+            }
+            return sqlxSchema_[column - 1];
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
+    }
+
+    public int getPrecision(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            int jdbcType = types_[column - 1];
+
+            switch (jdbcType) {
+            case java.sql.Types.NUMERIC:
+            case Types.DECIMAL:
+                return sqlPrecision_[column - 1];
+            case Types.SMALLINT:
+                return 5;
+            case Types.INTEGER:
+                return 10;
+            case Types.BIGINT:
+                return 19;
+            case java.sql.Types.FLOAT:
+                return 15;
+            case Types.REAL:
+                return 7;  // This is the number of signed digits for IEEE float with mantissa 24, ie. 2^24
+            case Types.DOUBLE:
+                return 15; // This is the number of signed digits for IEEE float with mantissa 24, ie. 2^24
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+            case Types.CLOB:
+            case Types.BLOB:
+                return (int) sqlLength_[column - 1];
+            case Types.DATE:
+                return 10;
+            case Types.TIME:
+                return 8;
+            case Types.TIMESTAMP:
+                return 26;
+            default:
+                throw new SqlException(logWriter_, "Unregistered column type");
+            }
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
+    }
+
+    public int getScale(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+
+            // We get the scale from the SQLDA as returned by DERBY, but DERBY does not return the ANSI-defined
+            // value of scale 6 for TIMESTAMP.
+            //
+            //   The JDBC drivers should hardcode this info as a short/near term solution.
+            //
+            if (types_[column - 1] == Types.TIMESTAMP) {
+                return 6;
+            }
+
+            return sqlScale_[column - 1];
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
+    }
+
+    public String getTableName(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            if (sqlxBasename_ == null || sqlxBasename_[column - 1] == null) {
+                return ""; // Per jdbc spec
+            }
+            return sqlxBasename_[column - 1];
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
     }
 
     /**
@@ -383,180 +483,229 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
      *
      * @throws SQLException thrown on failure
      */
-    public String getCatalogName(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        return "";
-    }
-
-    public int getColumnType(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-
-        return types_[column - 1];
-    }
-
-    public String getColumnTypeName(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-
-        int jdbcType = types_[column - 1];
-        // So these all come back zero for downlevel servers in PROTOCOL.
-        // John is going to write some code to construct the sqlType_ array
-        // based on the protocol types from the query descriptor.
-        int sqlType = sqlType_[column - 1];
-
-        switch (sqlType) {
-        case DRDAConstants.DB2_SQLTYPE_BOOLEAN:
-        case DRDAConstants.DB2_SQLTYPE_NBOOLEAN:
-            return "BOOLEAN";
-        case DRDAConstants.DB2_SQLTYPE_DATE:
-        case DRDAConstants.DB2_SQLTYPE_NDATE:
-            return "DATE";
-        case DRDAConstants.DB2_SQLTYPE_TIME:
-        case DRDAConstants.DB2_SQLTYPE_NTIME:
-            return "TIME";
-        case DRDAConstants.DB2_SQLTYPE_TIMESTAMP:
-        case DRDAConstants.DB2_SQLTYPE_NTIMESTAMP:
-            return "TIMESTAMP";
-        case DRDAConstants.DB2_SQLTYPE_BLOB:
-        case DRDAConstants.DB2_SQLTYPE_NBLOB:
-            return "BLOB";
-        case DRDAConstants.DB2_SQLTYPE_CLOB:
-        case DRDAConstants.DB2_SQLTYPE_NCLOB:
-            return "CLOB";
-        case DRDAConstants.DB2_SQLTYPE_VARCHAR:
-        case DRDAConstants.DB2_SQLTYPE_NVARCHAR:
-            if (jdbcType == Types.VARBINARY) {
-                return "VARCHAR FOR BIT DATA";
-            } else {
-                return "VARCHAR";
-            }
-        case DRDAConstants.DB2_SQLTYPE_CHAR:
-        case DRDAConstants.DB2_SQLTYPE_NCHAR:
-            if (jdbcType == Types.BINARY) {
-                return "CHAR FOR BIT DATA";
-            } else {
-                return "CHAR";
-            }
-        case DRDAConstants.DB2_SQLTYPE_LONG:
-        case DRDAConstants.DB2_SQLTYPE_NLONG:
-            if (jdbcType == Types.LONGVARBINARY) {
-                return "LONG VARCHAR FOR BIT DATA";
-            } else {
-                return "LONG VARCHAR";
-            }
-        case DRDAConstants.DB2_SQLTYPE_CSTR:
-        case DRDAConstants.DB2_SQLTYPE_NCSTR:
-            return "SBCS";
-        case DRDAConstants.DB2_SQLTYPE_FLOAT:
-        case DRDAConstants.DB2_SQLTYPE_NFLOAT:
-            if (jdbcType == Types.DOUBLE) {
-                return "DOUBLE";
-            }
-            if (jdbcType == Types.REAL) {
-                return "REAL";
-            }
-        case DRDAConstants.DB2_SQLTYPE_DECIMAL:
-        case DRDAConstants.DB2_SQLTYPE_NDECIMAL:
-            return "DECIMAL";
-        case DRDAConstants.DB2_SQLTYPE_BIGINT:
-        case DRDAConstants.DB2_SQLTYPE_NBIGINT:
-            return "BIGINT";
-        case DRDAConstants.DB2_SQLTYPE_INTEGER:
-        case DRDAConstants.DB2_SQLTYPE_NINTEGER:
-            return "INTEGER";
-        case DRDAConstants.DB2_SQLTYPE_SMALL:
-        case DRDAConstants.DB2_SQLTYPE_NSMALL:
-            return "SMALLINT";
-        case DRDAConstants.DB2_SQLTYPE_NUMERIC:
-        case DRDAConstants.DB2_SQLTYPE_NNUMERIC:
-            return "NUMERIC";
-        default:
-            throw new SqlException(logWriter_, "Not supported");
+    public String getCatalogName(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            return "";
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
         }
     }
 
-    public boolean isReadOnly(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        if (sqlxUpdatable_ == null) {
-            return (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY); // If no extended describe, return resultSet's concurrecnty
+    public int getColumnType(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+
+            return types_[column - 1];
         }
-        return sqlxUpdatable_[column - 1] == 0; // PROTOCOL 0 means not updatable, 1 means updatable
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
     }
 
-    public boolean isWritable(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        if (sqlxUpdatable_ == null) {
-            return (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_UPDATABLE); // If no extended describe, return resultSet's concurrency
+    public String getColumnTypeName(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+
+            int jdbcType = types_[column - 1];
+            // So these all come back zero for downlevel servers in PROTOCOL.
+            // John is going to write some code to construct the sqlType_ array
+            // based on the protocol types from the query descriptor.
+            int sqlType = sqlType_[column - 1];
+
+            switch (sqlType) {
+            case DRDAConstants.DB2_SQLTYPE_BOOLEAN:
+            case DRDAConstants.DB2_SQLTYPE_NBOOLEAN:
+                return "BOOLEAN";
+            case DRDAConstants.DB2_SQLTYPE_DATE:
+            case DRDAConstants.DB2_SQLTYPE_NDATE:
+                return "DATE";
+            case DRDAConstants.DB2_SQLTYPE_TIME:
+            case DRDAConstants.DB2_SQLTYPE_NTIME:
+                return "TIME";
+            case DRDAConstants.DB2_SQLTYPE_TIMESTAMP:
+            case DRDAConstants.DB2_SQLTYPE_NTIMESTAMP:
+                return "TIMESTAMP";
+            case DRDAConstants.DB2_SQLTYPE_BLOB:
+            case DRDAConstants.DB2_SQLTYPE_NBLOB:
+                return "BLOB";
+            case DRDAConstants.DB2_SQLTYPE_CLOB:
+            case DRDAConstants.DB2_SQLTYPE_NCLOB:
+                return "CLOB";
+            case DRDAConstants.DB2_SQLTYPE_VARCHAR:
+            case DRDAConstants.DB2_SQLTYPE_NVARCHAR:
+                if (jdbcType == Types.VARBINARY) {
+                    return "VARCHAR FOR BIT DATA";
+                } else {
+                    return "VARCHAR";
+                }
+            case DRDAConstants.DB2_SQLTYPE_CHAR:
+            case DRDAConstants.DB2_SQLTYPE_NCHAR:
+                if (jdbcType == Types.BINARY) {
+                    return "CHAR FOR BIT DATA";
+                } else {
+                    return "CHAR";
+                }
+            case DRDAConstants.DB2_SQLTYPE_LONG:
+            case DRDAConstants.DB2_SQLTYPE_NLONG:
+                if (jdbcType == Types.LONGVARBINARY) {
+                    return "LONG VARCHAR FOR BIT DATA";
+                } else {
+                    return "LONG VARCHAR";
+                }
+            case DRDAConstants.DB2_SQLTYPE_CSTR:
+            case DRDAConstants.DB2_SQLTYPE_NCSTR:
+                return "SBCS";
+            case DRDAConstants.DB2_SQLTYPE_FLOAT:
+            case DRDAConstants.DB2_SQLTYPE_NFLOAT:
+                if (jdbcType == Types.DOUBLE) {
+                    return "DOUBLE";
+                }
+                if (jdbcType == Types.REAL) {
+                    return "REAL";
+                }
+            case DRDAConstants.DB2_SQLTYPE_DECIMAL:
+            case DRDAConstants.DB2_SQLTYPE_NDECIMAL:
+                return "DECIMAL";
+            case DRDAConstants.DB2_SQLTYPE_BIGINT:
+            case DRDAConstants.DB2_SQLTYPE_NBIGINT:
+                return "BIGINT";
+            case DRDAConstants.DB2_SQLTYPE_INTEGER:
+            case DRDAConstants.DB2_SQLTYPE_NINTEGER:
+                return "INTEGER";
+            case DRDAConstants.DB2_SQLTYPE_SMALL:
+            case DRDAConstants.DB2_SQLTYPE_NSMALL:
+                return "SMALLINT";
+            case DRDAConstants.DB2_SQLTYPE_NUMERIC:
+            case DRDAConstants.DB2_SQLTYPE_NNUMERIC:
+                return "NUMERIC";
+            default:
+                throw new SqlException(logWriter_, "Not supported");
+            }
         }
-        return sqlxUpdatable_[column - 1] == 1; // PROTOCOL 0 means not updatable, 1 means updatable
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
     }
 
-    public boolean isDefinitelyWritable(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
-        if (sqlxUpdatable_ == null) {
-            return false;
+    public boolean isReadOnly(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            if (sqlxUpdatable_ == null) {
+                return (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY); // If no extended describe, return resultSet's concurrecnty
+            }
+            return sqlxUpdatable_[column - 1] == 0; // PROTOCOL 0 means not updatable, 1 means updatable
         }
-        return sqlxUpdatable_[column - 1] == 1; // PROTOCOL 0 means not updatable, 1 means updatable
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
+    }
+
+    public boolean isWritable(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            if (sqlxUpdatable_ == null) {
+                return (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_UPDATABLE); // If no extended describe, return resultSet's concurrency
+            }
+            return sqlxUpdatable_[column - 1] == 1; // PROTOCOL 0 means not updatable, 1 means updatable
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
+    }
+
+    public boolean isDefinitelyWritable(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
+            if (sqlxUpdatable_ == null) {
+                return false;
+            }
+            return sqlxUpdatable_[column - 1] == 1; // PROTOCOL 0 means not updatable, 1 means updatable
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
     }
 
     //--------------------------jdbc 2.0-----------------------------------
 
-    public String getColumnClassName(int column) throws SqlException {
-        checkForClosedStatement();
-        checkForValidColumnIndex(column);
+    public String getColumnClassName(int column) throws SQLException {
+        try
+        {
+            checkForClosedStatement();
+            checkForValidColumnIndex(column);
 
-        int jdbcType = types_[column - 1];
-        switch (jdbcType) {
-        case java.sql.Types.BIT:
-            return "java.lang.Boolean";
-        case java.sql.Types.TINYINT:
-            return "java.lang.Integer";
-        case Types.SMALLINT:
-            return "java.lang.Integer";
-        case Types.INTEGER:
-            return "java.lang.Integer";
-        case Types.BIGINT:
-            return "java.lang.Long";
-        case java.sql.Types.FLOAT:
-            return "java.lang.Double";
-        case Types.REAL:
-            return "java.lang.Float";
-        case Types.DOUBLE:
-            return "java.lang.Double";
-        case java.sql.Types.NUMERIC:
-        case Types.DECIMAL:
-            return "java.math.BigDecimal";
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
-            return "java.lang.String";
-        case Types.DATE:
-            return "java.sql.Date";
-        case Types.TIME:
-            return "java.sql.Time";
-        case Types.TIMESTAMP:
-            return "java.sql.Timestamp";
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-            return "byte[]";
-        case java.sql.Types.STRUCT:
-            return "java.sql.Struct";
-        case java.sql.Types.ARRAY:
-            return "java.sql.Array";
-        case Types.BLOB:
-            return "java.sql.Blob";
-        case Types.CLOB:
-            return "java.sql.Clob";
-        case java.sql.Types.REF:
-            return "java.sql.Ref";
-        default:
-            throw new SqlException(logWriter_, "Not supported");
+            int jdbcType = types_[column - 1];
+            switch (jdbcType) {
+            case java.sql.Types.BIT:
+                return "java.lang.Boolean";
+            case java.sql.Types.TINYINT:
+                return "java.lang.Integer";
+            case Types.SMALLINT:
+                return "java.lang.Integer";
+            case Types.INTEGER:
+                return "java.lang.Integer";
+            case Types.BIGINT:
+                return "java.lang.Long";
+            case java.sql.Types.FLOAT:
+                return "java.lang.Double";
+            case Types.REAL:
+                return "java.lang.Float";
+            case Types.DOUBLE:
+                return "java.lang.Double";
+            case java.sql.Types.NUMERIC:
+            case Types.DECIMAL:
+                return "java.math.BigDecimal";
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+                return "java.lang.String";
+            case Types.DATE:
+                return "java.sql.Date";
+            case Types.TIME:
+                return "java.sql.Time";
+            case Types.TIMESTAMP:
+                return "java.sql.Timestamp";
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+                return "byte[]";
+            case java.sql.Types.STRUCT:
+                return "java.sql.Struct";
+            case java.sql.Types.ARRAY:
+                return "java.sql.Array";
+            case Types.BLOB:
+                return "java.sql.Blob";
+            case Types.CLOB:
+                return "java.sql.Clob";
+            case java.sql.Types.REF:
+                return "java.sql.Ref";
+            default:
+                throw new SqlException(logWriter_, "Not supported");
+            }
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
         }
     }
 

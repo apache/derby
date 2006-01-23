@@ -20,6 +20,7 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
 
 public class PreparedStatement extends Statement
         implements java.sql.PreparedStatement,
@@ -250,47 +251,54 @@ public class PreparedStatement extends Statement
 
     //------------------- Prohibited overrides from Statement --------------------
 
-    public boolean execute(String sql) throws SqlException {
+    public boolean execute(String sql) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "execute", sql);
         }
         throw new SqlException(agent_.logWriter_,
                 "The method java.sql.Statement.execute (String sql) cannot be called on a " +
                 " prepared statement instance." +
-                " Use java.sql.PreparedStatement.execute () with no sql string argument.");
+                " Use java.sql.PreparedStatement.execute () with no sql string argument.").getSQLException();
     }
 
-    public java.sql.ResultSet executeQuery(String sql) throws SqlException {
+    public java.sql.ResultSet executeQuery(String sql) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "executeQuery", sql);
         }
         throw new SqlException(agent_.logWriter_,
                 "The method java.sql.Statement.executeQuery (String sql) cannot be called on a " +
                 " prepared statement instance." +
-                " Use java.sql.PreparedStatement.executeQuery () with no sql string argument.");
+                " Use java.sql.PreparedStatement.executeQuery () with no sql string argument.").getSQLException();
     }
 
-    public int executeUpdate(String sql) throws SqlException {
+    public int executeUpdate(String sql) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "executeUpdate", sql);
         }
         throw new SqlException(agent_.logWriter_,
                 "The method java.sql.Statement.executeUpdate (String sql) cannot be called on a " +
                 " prepared statement instance." +
-                " Use java.sql.PreparedStatement.executeUpdate () with no sql string argument.");
+                " Use java.sql.PreparedStatement.executeUpdate () with no sql string argument.").getSQLException();
     }
     // ---------------------------jdbc 1------------------------------------------
 
-    public java.sql.ResultSet executeQuery() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "executeQuery");
+    public java.sql.ResultSet executeQuery() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeQuery");
+                }
+                ResultSet resultSet = executeQueryX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeQuery", resultSet);
+                }
+                return resultSet;
             }
-            ResultSet resultSet = executeQueryX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "executeQuery", resultSet);
-            }
-            return resultSet;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -303,16 +311,23 @@ public class PreparedStatement extends Statement
     }
 
 
-    public int executeUpdate() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "executeUpdate");
+    public int executeUpdate() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeUpdate");
+                }
+                int updateValue = executeUpdateX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
+                }
+                return updateValue;
             }
-            int updateValue = executeUpdateX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
-            }
-            return updateValue;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -326,12 +341,19 @@ public class PreparedStatement extends Statement
         return updateCount_;
     }
 
-    public void setNull(int parameterIndex, int jdbcType) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setNull", parameterIndex, jdbcType);
+    public void setNull(int parameterIndex, int jdbcType) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setNull", parameterIndex, jdbcType);
+                }
+                setNullX(parameterIndex, jdbcType);
             }
-            setNullX(parameterIndex, jdbcType);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -348,44 +370,72 @@ public class PreparedStatement extends Statement
         setInput(parameterIndex, null);
     }
 
-    public void setNull(int parameterIndex, int jdbcType, String typeName) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setNull", parameterIndex, jdbcType, typeName);
+    public void setNull(int parameterIndex, int jdbcType, String typeName) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setNull", parameterIndex, jdbcType, typeName);
+                }
+                super.checkForClosedStatement();
+                setNull(parameterIndex, jdbcType);
             }
-            super.checkForClosedStatement();
-            setNull(parameterIndex, jdbcType);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setBoolean(int parameterIndex, boolean x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setBoolean", parameterIndex, x);
+    public void setBoolean(int parameterIndex, boolean x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setBoolean", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BIT;
+                setInput(parameterIndex, new Short((short) (x ? 1 : 0)));
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BIT;
-            setInput(parameterIndex, new Short((short) (x ? 1 : 0)));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setByte(int parameterIndex, byte x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setByte", parameterIndex, x);
+    public void setByte(int parameterIndex, byte x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setByte", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TINYINT;
+                setInput(parameterIndex, new Short(x));
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TINYINT;
-            setInput(parameterIndex, new Short(x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setShort(int parameterIndex, short x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setShort", parameterIndex, x);
+    public void setShort(int parameterIndex, short x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setShort", parameterIndex, x);
+                }
+                setShortX(parameterIndex, x);
             }
-            setShortX(parameterIndex, x);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -397,12 +447,19 @@ public class PreparedStatement extends Statement
 
     }
 
-    public void setInt(int parameterIndex, int x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setInt", parameterIndex, x);
+    public void setInt(int parameterIndex, int x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setInt", parameterIndex, x);
+                }
+                setIntX(parameterIndex, x);
             }
-            setIntX(parameterIndex, x);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -414,186 +471,263 @@ public class PreparedStatement extends Statement
     }
 
 
-    public void setLong(int parameterIndex, long x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setLong", parameterIndex, x);
+    public void setLong(int parameterIndex, long x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setLong", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BIGINT;
+                setInput(parameterIndex, new Long(x));
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BIGINT;
-            setInput(parameterIndex, new Long(x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setFloat(int parameterIndex, float x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setFloat", parameterIndex, x);
+    public void setFloat(int parameterIndex, float x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setFloat", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.REAL;
+                setInput(parameterIndex, new Float(x));
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.REAL;
-            setInput(parameterIndex, new Float(x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setDouble(int parameterIndex, double x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setDouble", parameterIndex, x);
+    public void setDouble(int parameterIndex, double x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setDouble", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DOUBLE;
+                setInput(parameterIndex, new Double(x));
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DOUBLE;
-            setInput(parameterIndex, new Double(x));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setBigDecimal(int parameterIndex, java.math.BigDecimal x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setBigDecimal", parameterIndex, x);
+    public void setBigDecimal(int parameterIndex, java.math.BigDecimal x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setBigDecimal", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DECIMAL;
+                if (x == null) {
+                    setNull(parameterIndex, java.sql.Types.DECIMAL);
+                    return;
+                }
+                int registerOutScale = 0;
+                setInput(parameterIndex, x);
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DECIMAL;
-            if (x == null) {
-                setNull(parameterIndex, java.sql.Types.DECIMAL);
-                return;
-            }
-            int registerOutScale = 0;
-            setInput(parameterIndex, x);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setDate(int parameterIndex, java.sql.Date x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x);
+    public void setDate(int parameterIndex, java.sql.Date x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DATE;
+                if (x == null) {
+                    setNull(parameterIndex, java.sql.Types.DATE);
+                    return;
+                }
+                setInput(parameterIndex, x);
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DATE;
-            if (x == null) {
-                setNull(parameterIndex, java.sql.Types.DATE);
-                return;
-            }
-            setInput(parameterIndex, x);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     public void setDate(int parameterIndex,
                         java.sql.Date x,
-                        java.util.Calendar calendar) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x, calendar);
+                        java.util.Calendar calendar) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x, calendar);
+                }
+                if (calendar == null) {
+                    throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+                }
+                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
+                targetCalendar.clear();
+                targetCalendar.setTime(x);
+                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
+                defaultCalendar.clear();
+                defaultCalendar.setTime(x);
+                long timeZoneOffset =
+                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
+                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
+                java.sql.Date adjustedDate = ((timeZoneOffset == 0) || (x == null)) ? x : new java.sql.Date(x.getTime() + timeZoneOffset);
+                setDate(parameterIndex, adjustedDate);
             }
-            if (calendar == null) {
-                throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
-            }
-            java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-            targetCalendar.clear();
-            targetCalendar.setTime(x);
-            java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-            defaultCalendar.clear();
-            defaultCalendar.setTime(x);
-            long timeZoneOffset =
-                    targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                    targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-            java.sql.Date adjustedDate = ((timeZoneOffset == 0) || (x == null)) ? x : new java.sql.Date(x.getTime() + timeZoneOffset);
-            setDate(parameterIndex, adjustedDate);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setTime(int parameterIndex, java.sql.Time x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setTime", parameterIndex, x);
-            }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIME;
-            if (x == null) {
-                setNull(parameterIndex, java.sql.Types.TIME);
-                return;
-            }
-            setInput(parameterIndex, x);
+    public void setTime(int parameterIndex, java.sql.Time x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setTime", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIME;
+                if (x == null) {
+                    setNull(parameterIndex, java.sql.Types.TIME);
+                    return;
+                }
+                setInput(parameterIndex, x);
 
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     public void setTime(int parameterIndex,
                         java.sql.Time x,
-                        java.util.Calendar calendar) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setTime", parameterIndex, x, calendar);
+                        java.util.Calendar calendar) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setTime", parameterIndex, x, calendar);
+                }
+                if (calendar == null) {
+                    throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+                }
+                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
+                targetCalendar.clear();
+                targetCalendar.setTime(x);
+                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
+                defaultCalendar.clear();
+                defaultCalendar.setTime(x);
+                long timeZoneOffset =
+                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
+                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
+                java.sql.Time adjustedTime = ((timeZoneOffset == 0) || (x == null)) ? x : new java.sql.Time(x.getTime() + timeZoneOffset);
+                setTime(parameterIndex, adjustedTime);
             }
-            if (calendar == null) {
-                throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
-            }
-            java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-            targetCalendar.clear();
-            targetCalendar.setTime(x);
-            java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-            defaultCalendar.clear();
-            defaultCalendar.setTime(x);
-            long timeZoneOffset =
-                    targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                    targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-            java.sql.Time adjustedTime = ((timeZoneOffset == 0) || (x == null)) ? x : new java.sql.Time(x.getTime() + timeZoneOffset);
-            setTime(parameterIndex, adjustedTime);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setTimestamp(int parameterIndex, java.sql.Timestamp x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setTimestamp", parameterIndex, x);
-            }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIMESTAMP;
+    public void setTimestamp(int parameterIndex, java.sql.Timestamp x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setTimestamp", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIMESTAMP;
 
-            if (x == null) {
-                setNull(parameterIndex, java.sql.Types.TIMESTAMP);
-                return;
+                if (x == null) {
+                    setNull(parameterIndex, java.sql.Types.TIMESTAMP);
+                    return;
+                }
+                setInput(parameterIndex, x);
+                // once the nanosecond field of timestamp is trim to microsecond for DERBY, should we throw a warning
+                //if (getParameterType (parameterIndex) == java.sql.Types.TIMESTAMP && x.getNanos() % 1000 != 0)
+                //  accumulateWarning (new SqlWarning (agent_.logWriter_, "DERBY timestamp can only store up to microsecond, conversion from nanosecond to microsecond causes rounding."));
             }
-            setInput(parameterIndex, x);
-            // once the nanosecond field of timestamp is trim to microsecond for DERBY, should we throw a warning
-            //if (getParameterType (parameterIndex) == java.sql.Types.TIMESTAMP && x.getNanos() % 1000 != 0)
-            //  accumulateWarning (new SqlWarning (agent_.logWriter_, "DERBY timestamp can only store up to microsecond, conversion from nanosecond to microsecond causes rounding."));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     public void setTimestamp(int parameterIndex,
                              java.sql.Timestamp x,
-                             java.util.Calendar calendar) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setTimestamp", parameterIndex, x, calendar);
+                             java.util.Calendar calendar) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setTimestamp", parameterIndex, x, calendar);
+                }
+                if (calendar == null) {
+                    throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+                }
+                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
+                targetCalendar.clear();
+                targetCalendar.setTime(x);
+                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
+                defaultCalendar.clear();
+                defaultCalendar.setTime(x);
+                long timeZoneOffset =
+                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
+                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
+                java.sql.Timestamp adjustedTimestamp = ((timeZoneOffset == 0) || (x == null)) ? x : new java.sql.Timestamp(x.getTime() + timeZoneOffset);
+                if (x != null) {
+                    adjustedTimestamp.setNanos(x.getNanos());
+                }
+                setTimestamp(parameterIndex, adjustedTimestamp);
             }
-            if (calendar == null) {
-                throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
-            }
-            java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-            targetCalendar.clear();
-            targetCalendar.setTime(x);
-            java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-            defaultCalendar.clear();
-            defaultCalendar.setTime(x);
-            long timeZoneOffset =
-                    targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                    targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-            java.sql.Timestamp adjustedTimestamp = ((timeZoneOffset == 0) || (x == null)) ? x : new java.sql.Timestamp(x.getTime() + timeZoneOffset);
-            if (x != null) {
-                adjustedTimestamp.setNanos(x.getNanos());
-            }
-            setTimestamp(parameterIndex, adjustedTimestamp);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setString(int parameterIndex, String x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setString", parameterIndex, x);
+    public void setString(int parameterIndex, String x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setString", parameterIndex, x);
+                }
+                setStringX(parameterIndex, x);
             }
-            setStringX(parameterIndex, x);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -602,18 +736,25 @@ public class PreparedStatement extends Statement
         parameterIndex = checkSetterPreconditions(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.LONGVARCHAR;
         if (x == null) {
-            setNull(parameterIndex, java.sql.Types.LONGVARCHAR);
+            setNullX(parameterIndex, java.sql.Types.LONGVARCHAR);
             return;
         }
         setInput(parameterIndex, x);
     }
 
-    public void setBytes(int parameterIndex, byte[] x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setBytes", parameterIndex, x);
+    public void setBytes(int parameterIndex, byte[] x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setBytes", parameterIndex, x);
+                }
+                setBytesX(parameterIndex, x);
             }
-            setBytesX(parameterIndex, x);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -622,7 +763,7 @@ public class PreparedStatement extends Statement
         parameterIndex = checkSetterPreconditions(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.LONGVARBINARY;
         if (x == null) {
-            setNull(parameterIndex, java.sql.Types.LONGVARBINARY);
+            setNullX(parameterIndex, java.sql.Types.LONGVARBINARY);
             return;
         }
         setInput(parameterIndex, x);
@@ -631,12 +772,19 @@ public class PreparedStatement extends Statement
 
     public void setBinaryStream(int parameterIndex,
                                 java.io.InputStream x,
-                                int length) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterIndex, "<input stream>", length);
+                                int length) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterIndex, "<input stream>", length);
+                }
+                setBinaryStreamX(parameterIndex, x, length);
             }
-            setBinaryStreamX(parameterIndex, x, length);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -646,7 +794,7 @@ public class PreparedStatement extends Statement
         parameterIndex = checkSetterPreconditions(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BLOB;
         if (x == null) {
-            setNull(parameterIndex, java.sql.Types.BLOB);
+            setNullX(parameterIndex, java.sql.Types.BLOB);
             return;
         }
         setInput(parameterIndex, new Blob(agent_, x, length));
@@ -654,61 +802,89 @@ public class PreparedStatement extends Statement
 
     public void setAsciiStream(int parameterIndex,
                                java.io.InputStream x,
-                               int length) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterIndex, "<input stream>", length);
+                               int length) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterIndex, "<input stream>", length);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
+                if (x == null) {
+                    setNull(parameterIndex, java.sql.Types.CLOB);
+                    return;
+                }
+                setInput(parameterIndex, new Clob(agent_, x, "US-ASCII", length));
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
-            if (x == null) {
-                setNull(parameterIndex, java.sql.Types.CLOB);
-                return;
-            }
-            setInput(parameterIndex, new Clob(agent_, x, "US-ASCII", length));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     public void setUnicodeStream(int parameterIndex,
                                  java.io.InputStream x,
-                                 int length) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceDeprecatedEntry(this, "setUnicodeStream", parameterIndex, "<input stream>", length);
+                                 int length) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceDeprecatedEntry(this, "setUnicodeStream", parameterIndex, "<input stream>", length);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
+                if (x == null) {
+                    setNull(parameterIndex, java.sql.Types.CLOB);
+                    return;
+                }
+                setInput(parameterIndex, new Clob(agent_, x, "UnicodeBigUnmarked", length));
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
-            if (x == null) {
-                setNull(parameterIndex, java.sql.Types.CLOB);
-                return;
-            }
-            setInput(parameterIndex, new Clob(agent_, x, "UnicodeBigUnmarked", length));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     public void setCharacterStream(int parameterIndex,
                                    java.io.Reader x,
-                                   int length) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterIndex, x, length);
+                                   int length) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterIndex, x, length);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
+                if (x == null) {
+                    setNull(parameterIndex, java.sql.Types.CLOB);
+                    return;
+                }
+                setInput(parameterIndex, new Clob(agent_, x, length));
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
-            if (x == null) {
-                setNull(parameterIndex, java.sql.Types.CLOB);
-                return;
-            }
-            setInput(parameterIndex, new Clob(agent_, x, length));
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setBlob(int parameterIndex, java.sql.Blob x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setBlob", parameterIndex, x);
+    public void setBlob(int parameterIndex, java.sql.Blob x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setBlob", parameterIndex, x);
+                }
+                setBlobX(parameterIndex, x);
             }
-            setBlobX(parameterIndex, x);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -717,18 +893,25 @@ public class PreparedStatement extends Statement
         parameterIndex = checkSetterPreconditions(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BLOB;
         if (x == null) {
-            setNull(parameterIndex, java.sql.Types.BLOB);
+            setNullX(parameterIndex, java.sql.Types.BLOB);
             return;
         }
         setInput(parameterIndex, x);
     }
 
-    public void setClob(int parameterIndex, java.sql.Clob x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setClob", parameterIndex, x);
+    public void setClob(int parameterIndex, java.sql.Clob x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setClob", parameterIndex, x);
+                }
+                setClobX(parameterIndex, x);
             }
-            setClobX(parameterIndex, x);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -744,95 +927,130 @@ public class PreparedStatement extends Statement
     }
 
 
-    public void setArray(int parameterIndex, java.sql.Array x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setArray", parameterIndex, x);
+    public void setArray(int parameterIndex, java.sql.Array x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setArray", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented");
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented");
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public void setRef(int parameterIndex, java.sql.Ref x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setRef", parameterIndex, x);
+    public void setRef(int parameterIndex, java.sql.Ref x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setRef", parameterIndex, x);
+                }
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented").getSQLException();
             }
-            parameterIndex = checkSetterPreconditions(parameterIndex);
-            throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented");
         }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }            
     }
 
     // The Java compiler uses static binding, so we must use instanceof
     // rather than to rely on separate setObject() methods for
     // each of the Java Object instance types recognized below.
-    public void setObject(int parameterIndex, Object x) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setObject", parameterIndex, x);
-            }
-            super.checkForClosedStatement();
-            if (x instanceof String) {
-                setString(parameterIndex, (String) x);
-            } else if (x instanceof Integer) {
-                setInt(parameterIndex, ((Integer) x).intValue());
-            } else if (x instanceof Double) {
-                setDouble(parameterIndex, ((Double) x).doubleValue());
-            } else if (x instanceof Float) {
-                setFloat(parameterIndex, ((Float) x).floatValue());
-            } else if (x instanceof Boolean) {
-                setBoolean(parameterIndex, ((Boolean) x).booleanValue());
-            } else if (x instanceof Long) {
-                setLong(parameterIndex, ((Long) x).longValue());
-            } else if (x instanceof byte[]) {
-                setBytes(parameterIndex, (byte[]) x);
-            } else if (x instanceof java.math.BigDecimal) {
-                setBigDecimal(parameterIndex, (java.math.BigDecimal) x);
-            } else if (x instanceof java.sql.Date) {
-                setDate(parameterIndex, (java.sql.Date) x);
-            } else if (x instanceof java.sql.Time) {
-                setTime(parameterIndex, (java.sql.Time) x);
-            } else if (x instanceof java.sql.Timestamp) {
-                setTimestamp(parameterIndex, (java.sql.Timestamp) x);
-            } else if (x instanceof java.sql.Blob) {
-                setBlob(parameterIndex, (java.sql.Blob) x);
-            } else if (x instanceof java.sql.Clob) {
-                setClob(parameterIndex, (java.sql.Clob) x);
-            } else if (x instanceof java.sql.Array) {
-                setArray(parameterIndex, (java.sql.Array) x);
-            } else if (x instanceof java.sql.Ref) {
-                setRef(parameterIndex, (java.sql.Ref) x);
-            } else if (x instanceof Short) {
-                setShort(parameterIndex, ((Short) x).shortValue());
-            } else if (x instanceof Byte) {
-                setByte(parameterIndex, ((Byte) x).byteValue());
-            } else {
-                checkSetterPreconditions(parameterIndex);
-                throw new SqlException(agent_.logWriter_, "Invalid data conversion:" +
-                        " Parameter object type is invalid for requested conversion.");
+    public void setObject(int parameterIndex, Object x) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setObject", parameterIndex, x);
+                }
+                super.checkForClosedStatement();
+                if (x instanceof String) {
+                    setString(parameterIndex, (String) x);
+                } else if (x instanceof Integer) {
+                    setInt(parameterIndex, ((Integer) x).intValue());
+                } else if (x instanceof Double) {
+                    setDouble(parameterIndex, ((Double) x).doubleValue());
+                } else if (x instanceof Float) {
+                    setFloat(parameterIndex, ((Float) x).floatValue());
+                } else if (x instanceof Boolean) {
+                    setBoolean(parameterIndex, ((Boolean) x).booleanValue());
+                } else if (x instanceof Long) {
+                    setLong(parameterIndex, ((Long) x).longValue());
+                } else if (x instanceof byte[]) {
+                    setBytes(parameterIndex, (byte[]) x);
+                } else if (x instanceof java.math.BigDecimal) {
+                    setBigDecimal(parameterIndex, (java.math.BigDecimal) x);
+                } else if (x instanceof java.sql.Date) {
+                    setDate(parameterIndex, (java.sql.Date) x);
+                } else if (x instanceof java.sql.Time) {
+                    setTime(parameterIndex, (java.sql.Time) x);
+                } else if (x instanceof java.sql.Timestamp) {
+                    setTimestamp(parameterIndex, (java.sql.Timestamp) x);
+                } else if (x instanceof java.sql.Blob) {
+                    setBlob(parameterIndex, (java.sql.Blob) x);
+                } else if (x instanceof java.sql.Clob) {
+                    setClob(parameterIndex, (java.sql.Clob) x);
+                } else if (x instanceof java.sql.Array) {
+                    setArray(parameterIndex, (java.sql.Array) x);
+                } else if (x instanceof java.sql.Ref) {
+                    setRef(parameterIndex, (java.sql.Ref) x);
+                } else if (x instanceof Short) {
+                    setShort(parameterIndex, ((Short) x).shortValue());
+                } else if (x instanceof Byte) {
+                    setByte(parameterIndex, ((Byte) x).byteValue());
+                } else {
+                    checkSetterPreconditions(parameterIndex);
+                    throw new SqlException(agent_.logWriter_, "Invalid data conversion:" +
+                            " Parameter object type is invalid for requested conversion.");
+                }
             }
         }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }            
     }
 
-    public void setObject(int parameterIndex, Object x, int targetJdbcType) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setObject", parameterIndex, x, targetJdbcType);
+    public void setObject(int parameterIndex, Object x, int targetJdbcType) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setObject", parameterIndex, x, targetJdbcType);
+                }
+                setObjectX(parameterIndex, x, targetJdbcType, 0);
             }
-            setObjectX(parameterIndex, x, targetJdbcType, 0);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     public void setObject(int parameterIndex,
                           Object x,
                           int targetJdbcType,
-                          int scale) throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setObject", parameterIndex, x, targetJdbcType, scale);
+                          int scale) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setObject", parameterIndex, x, targetJdbcType, scale);
+                }
+                setObjectX(parameterIndex, x, targetJdbcType, scale);
             }
-            setObjectX(parameterIndex, x, targetJdbcType, scale);
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -844,7 +1062,7 @@ public class PreparedStatement extends Statement
         checkForValidScale(scale);
 
         if (x == null) {
-            setNull(parameterIndex, targetJdbcType);
+            setNullX(parameterIndex, targetJdbcType);
             return;
         }
 
@@ -865,39 +1083,57 @@ public class PreparedStatement extends Statement
             // checkForvalidScale
             throw new SqlException(agent_.logWriter_, ae.getMessage());
         }
-        setObject(parameterIndex, x);
+        try { 
+            setObject(parameterIndex, x);
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
+        }
     }
 
     // Since parameters are cached as objects in parameters_[],
     // java null may be used to represent SQL null.
-    public void clearParameters() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "clearParameters");
-            }
-            checkForClosedStatement();
-            if (parameterMetaData_ != null) {
-                for (int i = 0; i < parameters_.length; i++) {
-                    parameters_[i] = null;
+    public void clearParameters() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "clearParameters");
                 }
+                checkForClosedStatement();
+                if (parameterMetaData_ != null) {
+                    for (int i = 0; i < parameters_.length; i++) {
+                        parameters_[i] = null;
+                    }
 
-                for (int i = 0; i < parameterSet_.length; i++) {
-                    parameterSet_[i] = false;
+                    for (int i = 0; i < parameterSet_.length; i++) {
+                        parameterSet_[i] = false;
+                    }
                 }
             }
         }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public boolean execute() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "execute");
+    public boolean execute() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "execute");
+                }
+                boolean b = executeX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "execute", b);
+                }
+                return b;
             }
-            boolean b = executeX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "execute", b);
-            }
-            return b;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -909,58 +1145,79 @@ public class PreparedStatement extends Statement
 
     //--------------------------JDBC 2.0-----------------------------
 
-    public void addBatch() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "addBatch");
+    public void addBatch() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "addBatch");
+                }
+                checkForClosedStatement();
+                checkThatAllParametersAreSet();
+
+                // ASSERT: since OUT/INOUT parameters are not allowed, there should
+                //         be no problem in sharing the JDBC Wrapper object instances
+                //         since they will not be modified by the driver.
+
+                // batch up the parameter values -- deep copy req'd
+
+                if (parameterMetaData_ != null) {
+                    Object[] inputsClone = new Object[parameters_.length];
+                    System.arraycopy(parameters_, 0, inputsClone, 0, parameters_.length);
+
+                    batch_.add(inputsClone);
+                } else {
+                    batch_.add(null);
+                }
             }
-            checkForClosedStatement();
-            checkThatAllParametersAreSet();
-
-            // ASSERT: since OUT/INOUT parameters are not allowed, there should
-            //         be no problem in sharing the JDBC Wrapper object instances
-            //         since they will not be modified by the driver.
-
-            // batch up the parameter values -- deep copy req'd
-
-            if (parameterMetaData_ != null) {
-                Object[] inputsClone = new Object[parameters_.length];
-                System.arraycopy(parameters_, 0, inputsClone, 0, parameters_.length);
-
-                batch_.add(inputsClone);
-            } else {
-                batch_.add(null);
-            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     // Batch requires that input types are exact, we perform no input cross conversion for Batch.
     // If so, this is an external semantic, and should go into the release notes
-    public int[] executeBatch() throws SqlException, BatchUpdateException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "executeBatch");
-            }
-            int[] updateCounts = null;
-            updateCounts = executeBatchX(false);
+    public int[] executeBatch() throws SQLException, BatchUpdateException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeBatch");
+                }
+                int[] updateCounts = null;
+                updateCounts = executeBatchX(false);
 
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "executeBatch", updateCounts);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeBatch", updateCounts);
+                }
+                return updateCounts;
             }
-            return updateCounts;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public java.sql.ResultSetMetaData getMetaData() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getMetaData");
+    public java.sql.ResultSetMetaData getMetaData() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getMetaData");
+                }
+                ColumnMetaData resultSetMetaData = getMetaDataX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getMetaData", resultSetMetaData);
+                }
+                return resultSetMetaData;
             }
-            ColumnMetaData resultSetMetaData = getMetaDataX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getMetaData", resultSetMetaData);
-            }
-            return resultSetMetaData;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -971,83 +1228,90 @@ public class PreparedStatement extends Statement
 
     //------------------------- JDBC 3.0 -----------------------------------
 
-    public boolean execute(String sql, int autoGeneratedKeys) throws SqlException {
+    public boolean execute(String sql, int autoGeneratedKeys) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "execute", sql, autoGeneratedKeys);
         }
         throw new SqlException(agent_.logWriter_,
                 "The method java.sql.Statement.execute (String sql, int autoGeneratedKeys) cannot be called on a " +
                 " prepared statement instance." +
-                " Use java.sql.PreparedStatement.execute () with no arguments.");
+                " Use java.sql.PreparedStatement.execute () with no arguments.").getSQLException();
     }
 
-    public boolean execute(String sql, String[] columnNames) throws SqlException {
+    public boolean execute(String sql, String[] columnNames) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "execute", sql, columnNames);
         }
         throw new SqlException(agent_.logWriter_,
                 "The method java.sql.Statement.execute (String sql, String[] columnNames) cannot be called on a " +
                 " prepared statement instance." +
-                " Use java.sql.PreparedStatement.execute () with no arguments.");
+                " Use java.sql.PreparedStatement.execute () with no arguments.").getSQLException();
     }
 
-    public boolean execute(String sql, int[] columnIndexes) throws SqlException {
+    public boolean execute(String sql, int[] columnIndexes) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "execute", sql, columnIndexes);
         }
         throw new SqlException(agent_.logWriter_,
                 "The method java.sql.Statement.execute (String sql, int[] columnIndexes) cannot be called on a " +
                 " prepared statement instance." +
-                " Use java.sql.PreparedStatement.execute () with no arguments.");
+                " Use java.sql.PreparedStatement.execute () with no arguments.").getSQLException();
     }
 
-    public int executeUpdate(String sql, int autoGeneratedKeys) throws SqlException {
+    public int executeUpdate(String sql, int autoGeneratedKeys) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "executeUpdate", autoGeneratedKeys);
         }
         throw new SqlException(agent_.logWriter_,
                 "The method java.sql.Statement.executeUpdate (String sql, int autoGeneratedKeys) cannot be called on a " +
                 " prepared statement instance." +
-                " Use java.sql.PreparedStatement.executeUpdate () with no arguments.");
+                " Use java.sql.PreparedStatement.executeUpdate () with no arguments.").getSQLException();
     }
 
-    public int executeUpdate(String sql, String[] columnNames) throws SqlException {
+    public int executeUpdate(String sql, String[] columnNames) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "executeUpdate", columnNames);
         }
         throw new SqlException(agent_.logWriter_,
                 "The method java.sql.Statement.executeUpdate (String sql, String[] columnNames) cannot be called on a " +
                 " prepared statement instance." +
-                " Use java.sql.PreparedStatement.executeUpdate () with no arguments.");
+                " Use java.sql.PreparedStatement.executeUpdate () with no arguments.").getSQLException();
     }
 
-    public int executeUpdate(String sql, int[] columnIndexes) throws SqlException {
+    public int executeUpdate(String sql, int[] columnIndexes) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "executeUpdate", columnIndexes);
         }
         throw new SqlException(agent_.logWriter_,
                 "The method java.sql.Statement.executeUpdate (String sql, int[] columnIndexes) cannot be called on a " +
                 " prepared statement instance." +
-                " Use java.sql.PreparedStatement.executeUpdate () with no arguments.");
+                " Use java.sql.PreparedStatement.executeUpdate () with no arguments.").getSQLException();
     }
 
-    public void setURL(int parameterIndex, java.net.URL x) throws SqlException {
+    public void setURL(int parameterIndex, java.net.URL x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setURL", parameterIndex, x);
         }
-        throw new SqlException(agent_.logWriter_, "JDBC 3 method called - not yet supported");
+        jdbc3FeatureNotSupported(false);
     }
 
-    public java.sql.ParameterMetaData getParameterMetaData() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getParameterMetaData");
+    public java.sql.ParameterMetaData getParameterMetaData() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getParameterMetaData");
+                }
+                Object parameterMetaData = getParameterMetaDataX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getParameterMetaData", parameterMetaData);
+                }
+                return (java.sql.ParameterMetaData) parameterMetaData;
             }
-            Object parameterMetaData = getParameterMetaDataX();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getParameterMetaData", parameterMetaData);
-            }
-            return (java.sql.ParameterMetaData) parameterMetaData;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
@@ -1263,9 +1527,20 @@ public class PreparedStatement extends Statement
 
             boolean piggybackedAutocommit = super.writeCloseResultSets(true);  // true means permit auto-commits
 
-
-            int numInputColumns = (parameterMetaData_ != null) ? parameterMetaData_.getColumnCount() : 0;
-            boolean outputExpected = (resultSetMetaData_ != null && resultSetMetaData_.getColumnCount() > 0);
+            int numInputColumns;
+            boolean outputExpected;
+            try
+            {
+                numInputColumns = (parameterMetaData_ != null) ? parameterMetaData_.getColumnCount() : 0;
+                outputExpected = (resultSetMetaData_ != null && resultSetMetaData_.getColumnCount() > 0);
+            }
+            catch ( SQLException se )
+            {
+                // Generate a SqlException for this, we don't want to throw
+                // SQLException in this internal method
+                throw new SqlException(agent_.logWriter_, se, se.getMessage(),
+                    se.getSQLState(), se.getErrorCode());
+            }
             boolean chainAutoCommit = false;
             boolean commitSubstituted = false;
             boolean repositionedCursor = false;
@@ -1454,7 +1729,8 @@ public class PreparedStatement extends Statement
             }
     }
 
-    public int[] executeBatchX(boolean supportsQueryBatchRequest) throws SqlException, BatchUpdateException {
+    public int[] executeBatchX(boolean supportsQueryBatchRequest) 
+        throws SqlException, SQLException, BatchUpdateException {
         synchronized (connection_) {
             checkForClosedStatement(); // Per jdbc spec (see Statement.close() javadoc)
             clearWarningsX(); // Per jdbc spec 0.7, also see getWarnings() javadoc
@@ -1468,7 +1744,12 @@ public class PreparedStatement extends Statement
         SqlException chainBreaker = null;
         int batchSize = batch_.size();
         int[] updateCounts = new int[batchSize];
-        int numInputColumns = parameterMetaData_ == null ? 0 : parameterMetaData_.getColumnCount();
+        int numInputColumns;
+        try {
+            numInputColumns = parameterMetaData_ == null ? 0 : parameterMetaData_.getColumnCount();
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
+        }
         Object[] savedInputs = null;  // used to save/restore existing parameters
         boolean timeoutSent = false;
 
@@ -1516,7 +1797,12 @@ public class PreparedStatement extends Statement
             parameters_ = (Object[]) batch_.get(i);
 
             if (sqlMode_ != isCall__) {
-                boolean outputExpected = (resultSetMetaData_ != null && resultSetMetaData_.getColumnCount() > 0);
+                boolean outputExpected;
+                try {
+                    outputExpected = (resultSetMetaData_ != null && resultSetMetaData_.getColumnCount() > 0);
+                } catch ( SQLException se ) {
+                    throw new SqlException(se);
+                }
 
                 writeExecute(section_,
                         parameterMetaData_,
@@ -1717,12 +2003,19 @@ public class PreparedStatement extends Statement
         }
     }
 
-    public void close() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "close");
+    public void close() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "close");
+                }
+                closeX();
             }
-            closeX();
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 

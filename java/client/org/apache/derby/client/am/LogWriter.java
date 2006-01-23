@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
+
 import org.apache.derby.jdbc.ClientDataSource;
 
 public class LogWriter {
@@ -827,6 +829,19 @@ public class LogWriter {
 
     // ---------------------------tracing exceptions and warnings-----------------
 
+    public void traceDiagnosable(SqlException e) {
+        if (traceSuspended()) {
+            return;
+        }
+        if (!loggingEnabled(ClientDataSource.TRACE_DIAGNOSTICS)) {
+            return;
+        }
+        synchronized (printWriter_) {
+            dncprintln("BEGIN TRACE_DIAGNOSTICS");
+            ExceptionFormatter.printTrace(e, printWriter_, "[derby]", true); // true means return tokens only
+            dncprintln("END TRACE_DIAGNOSTICS");
+        }
+    }
     public void traceDiagnosable(java.sql.SQLException e) {
         if (traceSuspended()) {
             return;
@@ -871,7 +886,7 @@ public class LogWriter {
                 dncprintln(header, "Number of parameter columns: " + columnMetaData.getColumnCount());
                 traceColumnMetaData(header, columnMetaData);
                 dncprintln(header, "END TRACE_PARAMETER_META_DATA");
-            } catch (SqlException e) {
+            } catch (SQLException e) {
                 dncprintln(header, "Encountered an SQL exception while trying to trace parameter meta data");
                 dncprintln(header, "END TRACE_PARAMETER_META_DATA");
             }
@@ -893,7 +908,7 @@ public class LogWriter {
                 dncprintln(header, "Number of result set columns: " + columnMetaData.getColumnCount());
                 traceColumnMetaData(header, columnMetaData);
                 dncprintln(header, "END TRACE_RESULT_SET_META_DATA");
-            } catch (SqlException e) {
+            } catch (SQLException e) {
                 dncprintln(header, "Encountered an SQL exception while trying to trace result set meta data");
                 dncprintln(header, "END TRACE_RESULT_SET_META_DATA");
             }
@@ -954,7 +969,7 @@ public class LogWriter {
                 printWriter_.println(" }");
                 printWriter_.flush();
             }
-        } catch (SqlException e) {
+        } catch (SQLException e) {
             dncprintln(header, "Encountered an SQL exception while trying to trace column meta data");
         }
     }
@@ -1023,31 +1038,32 @@ public class LogWriter {
     // ---------------------- tracing connects -----------------------------------
 
     private void traceConnectsResetEntry(ClientDataSource dataSource) {
-        if (traceSuspended()) {
-            return;
-        }
         try {
+            if (traceSuspended()) {
+                return;
+            }
             traceConnectsResetEntry(dataSource.getServerName(),
                     dataSource.getPortNumber(),
                     dataSource.getDatabaseName(),
                     dataSource.getProperties());
-        } catch (java.sql.SQLException e) {
+        } catch ( SqlException se ) {
             dncprintln("Encountered an SQL exception while trying to trace connection reset entry");
         }
     }
 
     private void traceConnectsEntry(ClientDataSource dataSource) {
-        if (traceSuspended()) {
-            return;
-        }
         try {
+            if (traceSuspended()) {
+                return;
+            }
             traceConnectsEntry(dataSource.getServerName(),
                     dataSource.getPortNumber(),
                     dataSource.getDatabaseName(),
                     dataSource.getProperties());
-        } catch (java.sql.SQLException e) {
+        } catch ( SqlException se ) {
             dncprintln("Encountered an SQL exception while trying to trace connection entry");
         }
+        
     }
 
     private void traceConnectsResetEntry(String server,

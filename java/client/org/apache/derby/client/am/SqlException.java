@@ -52,25 +52,53 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
 // 2. What is the format and type of the Locale parameter? If there does, I would really like to know the format of the locale in order to decide the type of the Locale parameter. Even there does not either, the Locale parameter probably still needs to be kept there for future extension, and we need to figure out the format of the locale.
 // 3. What would be the format of the output message? Is this full message text ok or do we only need the explanation message corresponding to an SQL code. This somehow matters whether we need the Buffersize and Linewidth parameters for the stored procedure.
 // 4. What if the invocation of stored procedure failed (due to, eg, connection dropping)? In this case, we probably need to return some client-side message.
-
-public class SqlException extends java.sql.SQLException implements Diagnosable {
+//
+// Note that this class does NOT extend java.sql.SQLException.  This is because
+// in JDBC 4 there will be multiple subclasses of SQLException defined by the
+// spec.  So we can't also extend SQLException without having to create our
+// own mirror hierarchy of subclasses.
+//
+// When Derby is ready to throw an exception to the application, it catches
+// SqlException and converts it to a java.sql.SQLException by calling the
+// method getSQLException.
+//
+// It is also possible that internal routines may call public methods.
+// In these cases, it will need to wrap a java.sql.SQLException inside
+// a Derby SqlException so that the internal method does not have to throw
+// java.sql.SQLException.  Otherwise the chain of dependencies would quickly
+// force the majority of internal methods to throw java.sql.SQLException.
+// You can wrap a java.sql.SQLException inside a SqlException by using
+// the constructor <code>new SqlException(java.sql.SQLException wrapMe)</code)
+//
+public class SqlException extends Exception implements Diagnosable {
     protected static final int DEFAULT_ERRCODE = 99999;
-    java.lang.Throwable throwable_ = null;
     protected Sqlca sqlca_ = null; // for engine generated errors only
     protected String message_ = null;
     private String batchPositionLabel_; // for batched exceptions only
+    protected String sqlstate_ = null;
+    protected int errorcode_ = DEFAULT_ERRCODE;
+    protected String causeString_ = null;
+    protected SqlException nextException_;
+    protected Throwable throwable_;
     
     public static String CLIENT_MESSAGE_RESOURCE_NAME =
         "org.apache.derby.loc.clientmessages";
     
-    // The message utility instance we use to find messages
-    // It's primed with the name of the client message bundle so that
-    // it knows to look there if the message isn't found in the
-    // shared message bundle.
+    
+    /** 
+     *  The message utility instance we use to find messages
+     *  It's primed with the name of the client message bundle so that
+     *  it knows to look there if the message isn't found in the
+     *  shared message bundle.
+     */
     private static MessageUtil msgutil_ = 
         new MessageUtil(CLIENT_MESSAGE_RESOURCE_NAME);
 
-    
+    /** 
+     * The wrapped SQLException, if one exists
+     */
+    protected SQLException wrappedException_;
+  
     //-----------------constructors-----------------------------------------------
     // New constructors that support internationalized messages
     // The message id is wrapped inside a class so that we can distinguish
@@ -130,41 +158,65 @@ public class SqlException extends java.sql.SQLException implements Diagnosable {
         this(logWriter, null, reason, sqlState, errorCode);
     }
 
-    private SqlException(LogWriter logWriter, java.lang.Throwable throwable, 
+    public SqlException(LogWriter logWriter, java.lang.Throwable throwable, 
         String reason, String sqlState, int errorCode ) {
-        super(reason, sqlState, errorCode);
         message_ = reason;
-        throwable_ = throwable;
+        sqlstate_ = sqlState;
+        errorcode_ = errorCode;
 
-        setCause();
+        setThrowable(throwable);
         
         if (logWriter != null) {
             logWriter.traceDiagnosable(this);
         }
         
     }
-        
-    protected void setCause()
+    
+    /**
+     * Set the cause of this exception based on its type and
+     * the current runtime version of Java
+     */
+    protected void setThrowable(Throwable throwable)
     {
-        // Store the throwable correctly depending upon its class
-        // and whether initCause() is available
-        if (throwable_ != null  )
+        throwable_ = throwable;
+        
+        // If the throwable is a SQL exception, use nextException rather
+        // than chained exceptions
+        if ( throwable instanceof SqlException )
         {
-            if ( throwable_ instanceof SQLException )
+            setNextException((SqlException) throwable);
+        }
+        else if ( throwable instanceof SQLException )
+        {
+            setNextException((SQLException) throwable );
+        }
+        else if ( throwable != null )
+        {
+            // Set up a string indicating the cause if the current runtime
+            // doesn't support the initCause() method.  This is then used
+            // by getMessage() when it composes the message string.
+            if (JVMInfo.JDK_ID < JVMInfo.J2SE_14 )
             {
-                setNextException((SQLException)throwable_);
-            }
-            else if ( JVMInfo.JDK_ID >= JVMInfo.J2SE_14 )
-            {
-    			initCause(throwable_);
+                causeString_ = " Caused by exception " + 
+                    throwable.getClass() + ": " + throwable.getMessage();
             }
             else
             {
-                message_ = message_ + " Caused by exception " + 
-                    throwable_.getClass() + ": " + throwable_.getMessage();
-
+                initCause(throwable);
             }
         }
+
+    }
+        
+    /**
+     * Wrap a SQLException in a SqlException.  This is used by internal routines
+     * so the don't have to throw SQLException, which, through the chain of 
+     * dependencies would force more and more internal routines to throw
+     * SQLException
+     */
+    public SqlException(SQLException wrapme)
+    {
+        wrappedException_ = wrapme;
     }
         
     // Constructors for backward-compatibility while we're internationalizng
@@ -211,6 +263,39 @@ public class SqlException extends java.sql.SQLException implements Diagnosable {
 
     //--- End backward-compatibility constructors ----------------------
     
+    
+    /**
+     * Convert this SqlException into a java.sql.SQLException
+     */
+    public SQLException getSQLException()
+    {
+        if ( wrappedException_ != null )
+        {
+            return wrappedException_;
+        }
+                
+        // When we have support for JDBC 4 SQLException subclasses, this is
+        // where we decide which exception to create
+        SQLException sqle = new SQLException(getMessage(), getSQLState(), 
+            getErrorCode());
+
+        // If we're in a runtime that supports chained exceptions, set the cause 
+        // of the SQLException.
+         if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14 )
+        {
+            sqle.initCause(getCause());
+        }
+
+        // Set up the nextException chain
+        if ( nextException_ != null )
+        {
+            // The exception chain gets constructed automatically through 
+            // the beautiful power of recursion
+            sqle.setNextException(nextException_.getSQLException());
+        }
+        
+        return sqle;
+    }    
 
     // Label an exception element in a batched update exception chain.
     // This text will be prepended onto the exceptions message text dynamically
@@ -229,30 +314,87 @@ public class SqlException extends java.sql.SQLException implements Diagnosable {
     }
 
     public String getMessage() {
+        if ( wrappedException_ != null )
+        {
+            return wrappedException_.getMessage();
+        }
+        
         if (sqlca_ != null) {
             message_ = ((Sqlca) sqlca_).getJDBCMessage();
         }
-
-        if (batchPositionLabel_ == null) {
-            return message_;
+        
+        if (batchPositionLabel_ != null) {
+            message_ = batchPositionLabel_ + message_;
         }
-
-        return batchPositionLabel_ + message_;
+        
+        if ( causeString_ != null ) {
+            // Append the string indicating the cause of the exception
+            // (this happens only in JDK13 environments)
+            message_ += causeString_;
+        }
+        
+        return message_;
     }
 
     public String getSQLState() {
+        if ( wrappedException_ != null )
+        {
+            return wrappedException_.getSQLState();
+        }
+        
         if (sqlca_ == null) {
-            return super.getSQLState();
+            return sqlstate_;
         } else {
             return sqlca_.getSqlState();
         }
     }
 
     public int getErrorCode() {
+        if ( wrappedException_ != null )
+        {
+            return wrappedException_.getErrorCode();
+        }
+        
         if (sqlca_ == null) {
-            return super.getErrorCode();
+            return errorcode_;
         } else {
             return sqlca_.getSqlCode();
+        }
+    }
+
+    public SqlException getNextException()
+    {
+        if ( wrappedException_ != null )
+        {
+            return new SqlException(wrappedException_.getNextException());
+        }
+        else
+        {
+            return nextException_;
+        }
+    }
+    
+    public void setNextException(SqlException nextException)
+    {
+        if ( wrappedException_ != null )
+        {
+            wrappedException_.setNextException(nextException.getSQLException());
+        }
+        else
+        {
+            nextException_ = nextException;
+        }        
+    }
+    
+    public void setNextException(SQLException nextException)
+    {
+        if ( wrappedException_ != null )
+        {
+            wrappedException_.setNextException(nextException);
+        }
+        else
+        {
+            nextException_ = new SqlException(nextException);
         }
     }
 

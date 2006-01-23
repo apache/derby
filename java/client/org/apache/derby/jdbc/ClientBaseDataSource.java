@@ -359,7 +359,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     /**
      * Not an external.  Do not document in pubs. Populates member data for this data source given a JNDI reference.
      */
-    public void hydrateFromReference(Reference ref) throws SQLException {
+    public void hydrateFromReference(Reference ref) throws SqlException {
     	
         RefAddr address;
 
@@ -437,7 +437,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     /**
      * Not an external.  Do not document in pubs. Returns all non-transient properties of a ClientBaseDataSource.
      */
-    public Properties getProperties() throws SQLException {
+    public Properties getProperties() throws SqlException {
         Properties properties = new Properties();
 
         Class clz = getClass();

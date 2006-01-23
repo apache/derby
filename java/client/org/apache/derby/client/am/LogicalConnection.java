@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
+
 
 // A simple delegation wrapper handle for a physical connection.
 // All methods are forwarded to the underlying physical connection except for close() and isClosed().
@@ -37,7 +39,11 @@ public class LogicalConnection implements java.sql.Connection {
                              org.apache.derby.client.ClientPooledConnection pooledConnection) throws SqlException {
         physicalConnection_ = physicalConnection;
         pooledConnection_ = pooledConnection;
-        checkForNullPhysicalConnection();
+        try {
+            checkForNullPhysicalConnection();
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
+        }
     }
 
     protected void finalize() throws java.lang.Throwable {
@@ -52,26 +58,33 @@ public class LogicalConnection implements java.sql.Connection {
     // ------------------------ logical connection close -------------------------
     // All methods are simply forwarded to the physical connection, except for close() and isClosed().
 
-    synchronized public void close() throws SqlException {
-        // we also need to loop thru all the logicalStatements and close them
-        if (physicalConnection_ == null) {
-            return;
-        }
-        if (physicalConnection_.agent_.loggingEnabled()) {
-            physicalConnection_.agent_.logWriter_.traceEntry(this, "close");
-        }
-
-        if (physicalConnection_.isClosed()) // connection is closed or has become stale
+    synchronized public void close() throws SQLException {
+        try
         {
-            pooledConnection_.trashConnection(new SqlException(null, "Connection is stale."));
-        } else {
-            physicalConnection_.closeForReuse();
-            if (!physicalConnection_.isGlobalPending_()) {
-                pooledConnection_.recycleConnection();
+            // we also need to loop thru all the logicalStatements and close them
+            if (physicalConnection_ == null) {
+                return;
             }
+            if (physicalConnection_.agent_.loggingEnabled()) {
+                physicalConnection_.agent_.logWriter_.traceEntry(this, "close");
+            }
+
+            if (physicalConnection_.isClosed()) // connection is closed or has become stale
+            {
+                pooledConnection_.trashConnection(new SqlException(null, "Connection is stale."));
+            } else {
+                physicalConnection_.closeForReuse();
+                if (!physicalConnection_.isGlobalPending_()) {
+                    pooledConnection_.recycleConnection();
+                }
+            }
+            physicalConnection_ = null;
+            pooledConnection_.nullLogicalConnection();
         }
-        physicalConnection_ = null;
-        pooledConnection_.nullLogicalConnection();
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     synchronized public void closeWithoutRecyclingToPool() throws SqlException {
@@ -92,7 +105,7 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    public boolean isClosed() throws SqlException {
+    public boolean isClosed() throws SQLException {
         if (physicalConnection_ == null) {
             return true;
         }
@@ -104,200 +117,204 @@ public class LogicalConnection implements java.sql.Connection {
     // this method doesn't wrap in the standard way, because it went out without a throws clause.
     // Unlike all other LogicalConnection methods, if the physical connection is null, it won't throw an exception, but will return false.
 
-    private void checkForNullPhysicalConnection() throws SqlException {
+    private void checkForNullPhysicalConnection() throws SQLException {
         if (physicalConnection_ == null) {
-            throw new SqlException(null, " Attempt to use a closed connection. ");
+            throw new SqlException(null, " Attempt to use a closed connection. ").getSQLException();
         }
     }
 
     // ---------------------- wrapped public entry points ------------------------
     // All methods are forwarded to the physical connection in a standard way
 
-    synchronized public java.sql.Statement createStatement() throws SqlException {
+    synchronized public java.sql.Statement createStatement() throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.createStatement();
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql) throws SqlException {
+    synchronized public java.sql.PreparedStatement prepareStatement(String sql) throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.prepareStatement(sql);
     }
 
     synchronized public PreparedStatement preparePositionedUpdateStatement(String sql, Section querySection) throws SqlException {
-        checkForNullPhysicalConnection();
+        try {
+            checkForNullPhysicalConnection();
+        } catch ( SQLException se ) {
+            throw new SqlException(se);
+        }
         return physicalConnection_.preparePositionedUpdateStatement(sql, querySection);
     }
 
-    synchronized public java.sql.CallableStatement prepareCall(String sql) throws SqlException {
+    synchronized public java.sql.CallableStatement prepareCall(String sql) throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.prepareCall(sql);
     }
 
-    public String nativeSQL(String sql) throws SqlException {
+    public String nativeSQL(String sql) throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.nativeSQL(sql);
     }
 
-    synchronized public void setAutoCommit(boolean autoCommit) throws SqlException {
+    synchronized public void setAutoCommit(boolean autoCommit) throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.setAutoCommit(autoCommit);
     }
 
-    public boolean getAutoCommit() throws SqlException {
+    public boolean getAutoCommit() throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.getAutoCommit();
     }
 
-    synchronized public void commit() throws SqlException {
+    synchronized public void commit() throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.commit();
     }
 
-    synchronized public void rollback() throws SqlException {
+    synchronized public void rollback() throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.rollback();
     }
 
-    synchronized public void setTransactionIsolation(int level) throws SqlException {
+    synchronized public void setTransactionIsolation(int level) throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.setTransactionIsolation(level);
     }
 
-    public int getTransactionIsolation() throws SqlException {
+    public int getTransactionIsolation() throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.getTransactionIsolation();
     }
 
-    public java.sql.SQLWarning getWarnings() throws SqlException {
+    public java.sql.SQLWarning getWarnings() throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.getWarnings();
     }
 
-    synchronized public void clearWarnings() throws SqlException {
+    synchronized public void clearWarnings() throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.clearWarnings();
     }
 
-    public java.sql.DatabaseMetaData getMetaData() throws SqlException {
+    public java.sql.DatabaseMetaData getMetaData() throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.getMetaData();
     }
 
-    synchronized public void setReadOnly(boolean readOnly) throws SqlException {
+    synchronized public void setReadOnly(boolean readOnly) throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.setReadOnly(readOnly);
     }
 
-    public boolean isReadOnly() throws SqlException {
+    public boolean isReadOnly() throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.isReadOnly();
     }
 
-    synchronized public void setCatalog(String catalog) throws SqlException {
+    synchronized public void setCatalog(String catalog) throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.setCatalog(catalog);
     }
 
-    public String getCatalog() throws SqlException {
+    public String getCatalog() throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.getCatalog();
     }
 
     synchronized public java.sql.Statement createStatement(int resultSetType,
-                                                           int resultSetConcurrency) throws SqlException {
+                                                           int resultSetConcurrency) throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.createStatement(resultSetType, resultSetConcurrency);
     }
 
     synchronized public java.sql.PreparedStatement prepareStatement(String sql,
                                                                     int resultSetType,
-                                                                    int resultSetConcurrency) throws SqlException {
+                                                                    int resultSetConcurrency) throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.prepareStatement(sql, resultSetType, resultSetConcurrency);
     }
 
     synchronized public java.sql.CallableStatement prepareCall(String sql,
                                                                int resultSetType,
-                                                               int resultSetConcurrency) throws SqlException {
+                                                               int resultSetConcurrency) throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.prepareCall(sql, resultSetType, resultSetConcurrency);
     }
 
-    public java.util.Map getTypeMap() throws SqlException {
+    public java.util.Map getTypeMap() throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.getTypeMap();
     }
 
-    synchronized public void setTypeMap(java.util.Map map) throws SqlException {
+    synchronized public void setTypeMap(java.util.Map map) throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.setTypeMap(map);
     }
 
     public java.sql.Statement createStatement(int resultSetType, int resultSetConcurrency,
-                                              int resultSetHoldability) throws SqlException {
+                                              int resultSetHoldability) throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
     }
 
     public java.sql.CallableStatement prepareCall(String sql, int resultSetType,
                                                   int resultSetConcurrency,
-                                                  int resultSetHoldability) throws SqlException {
+                                                  int resultSetHoldability) throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
     }
 
     public java.sql.PreparedStatement prepareStatement(String sql, int resultSetType,
                                                        int resultSetConcurrency, int resultSetHoldability)
-            throws SqlException {
+            throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.prepareStatement(sql, resultSetType, resultSetConcurrency,
                 resultSetHoldability);
     }
 
     public java.sql.PreparedStatement prepareStatement(String sql, int autoGeneratedKeys)
-            throws SqlException {
+            throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.prepareStatement(sql, autoGeneratedKeys);
     }
 
     public java.sql.PreparedStatement prepareStatement(String sql, int columnIndexes[])
-            throws SqlException {
+            throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.prepareStatement(sql, columnIndexes);
     }
 
     public java.sql.PreparedStatement prepareStatement(String sql, String columnNames[])
-            throws SqlException {
+            throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.prepareStatement(sql, columnNames);
     }
 
-    public void setHoldability(int holdability) throws SqlException {
+    public void setHoldability(int holdability) throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.setHoldability(holdability);
     }
 
-    public int getHoldability() throws SqlException {
+    public int getHoldability() throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.getHoldability();
     }
 
-    public java.sql.Savepoint setSavepoint() throws SqlException {
+    public java.sql.Savepoint setSavepoint() throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.setSavepoint();
     }
 
-    public java.sql.Savepoint setSavepoint(String name) throws SqlException {
+    public java.sql.Savepoint setSavepoint(String name) throws SQLException {
         checkForNullPhysicalConnection();
         return physicalConnection_.setSavepoint(name);
     }
 
-    public void rollback(java.sql.Savepoint savepoint) throws SqlException {
+    public void rollback(java.sql.Savepoint savepoint) throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.rollback(savepoint);
     }
 
-    public void releaseSavepoint(java.sql.Savepoint savepoint) throws SqlException {
+    public void releaseSavepoint(java.sql.Savepoint savepoint) throws SQLException {
         checkForNullPhysicalConnection();
         physicalConnection_.releaseSavepoint(savepoint);
     }

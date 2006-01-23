@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
+
 // Parameter meta data as used internally by the driver is always a column meta data instance.
 // We will only create instances of this class when getParameterMetaData() is called.
 // This class simply wraps a column meta data instance.
@@ -37,14 +39,14 @@ public class ParameterMetaData implements java.sql.ParameterMetaData {
         columnMetaData_ = columnMetaData;
     }
 
-    public int getParameterCount() throws SqlException {
+    public int getParameterCount() throws SQLException {
         if (escapedProcedureCallWithResult_) {
             return columnMetaData_.columns_++;
         }
         return columnMetaData_.columns_;
     }
 
-    public int getParameterType(int param) throws SqlException {
+    public int getParameterType(int param) throws SQLException {
         if (escapedProcedureCallWithResult_) {
             param--;
             if (param == 0) {
@@ -54,7 +56,7 @@ public class ParameterMetaData implements java.sql.ParameterMetaData {
         return columnMetaData_.getColumnType(param);
     }
 
-    public String getParameterTypeName(int param) throws SqlException {
+    public String getParameterTypeName(int param) throws SQLException {
         if (escapedProcedureCallWithResult_) {
             param--;
             if (param == 0) {
@@ -64,7 +66,7 @@ public class ParameterMetaData implements java.sql.ParameterMetaData {
         return columnMetaData_.getColumnTypeName(param);
     }
 
-    public String getParameterClassName(int param) throws SqlException {
+    public String getParameterClassName(int param) throws SQLException {
         if (escapedProcedureCallWithResult_) {
             param--;
             if (param == 0) {
@@ -74,26 +76,33 @@ public class ParameterMetaData implements java.sql.ParameterMetaData {
         return columnMetaData_.getColumnClassName(param);
     }
 
-    public int getParameterMode(int param) throws SqlException {
-        if (escapedProcedureCallWithResult_) {
-            param--;
-            if (param == 0) {
+    public int getParameterMode(int param) throws SQLException {
+        try
+        {
+            if (escapedProcedureCallWithResult_) {
+                param--;
+                if (param == 0) {
+                    return java.sql.ParameterMetaData.parameterModeOut;
+                }
+            }
+            columnMetaData_.checkForValidColumnIndex(param);
+            if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeUnknown) {
+                return java.sql.ParameterMetaData.parameterModeUnknown;
+            } else if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeIn) {
+                return java.sql.ParameterMetaData.parameterModeIn;
+            } else if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeOut) {
                 return java.sql.ParameterMetaData.parameterModeOut;
+            } else {
+                return java.sql.ParameterMetaData.parameterModeInOut;
             }
         }
-        columnMetaData_.checkForValidColumnIndex(param);
-        if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeUnknown) {
-            return java.sql.ParameterMetaData.parameterModeUnknown;
-        } else if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeIn) {
-            return java.sql.ParameterMetaData.parameterModeIn;
-        } else if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeOut) {
-            return java.sql.ParameterMetaData.parameterModeOut;
-        } else {
-            return java.sql.ParameterMetaData.parameterModeInOut;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    public int isNullable(int param) throws SqlException {
+    public int isNullable(int param) throws SQLException {
         if (escapedProcedureCallWithResult_) {
             param--;
             if (param == 0) {
@@ -103,7 +112,7 @@ public class ParameterMetaData implements java.sql.ParameterMetaData {
         return columnMetaData_.isNullable(param);
     }
 
-    public boolean isSigned(int param) throws SqlException {
+    public boolean isSigned(int param) throws SQLException {
         if (escapedProcedureCallWithResult_) {
             param--;
             if (param == 0) {
@@ -113,7 +122,7 @@ public class ParameterMetaData implements java.sql.ParameterMetaData {
         return columnMetaData_.isSigned(param);
     }
 
-    public int getPrecision(int param) throws SqlException {
+    public int getPrecision(int param) throws SQLException {
         if (escapedProcedureCallWithResult_) {
             param--;
             if (param == 0) {
@@ -123,7 +132,7 @@ public class ParameterMetaData implements java.sql.ParameterMetaData {
         return columnMetaData_.getPrecision(param);
     }
 
-    public int getScale(int param) throws SqlException {
+    public int getScale(int param) throws SQLException {
         if (escapedProcedureCallWithResult_) {
             param--;
             if (param == 0) {

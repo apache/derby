@@ -26,6 +26,7 @@ import javax.sql.PooledConnection;
 
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.LogWriter;
+import org.apache.derby.client.am.SqlException;
 
 /**
  * ClientConnectionPoolDataSource is a factory for PooledConnection objects. An object that implements this interface
@@ -43,28 +44,42 @@ public class ClientConnectionPoolDataSource extends ClientDataSource implements 
 
     // Attempt to establish a physical database connection that can be used as a pooled connection.
     public PooledConnection getPooledConnection() throws SQLException {
-        LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
-        if (dncLogWriter != null) {
-            dncLogWriter.traceEntry(this, "getPooledConnection");
+        try
+        {
+            LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
+            if (dncLogWriter != null) {
+                dncLogWriter.traceEntry(this, "getPooledConnection");
+            }
+            PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, getUser(), getPassword());
+            if (dncLogWriter != null) {
+                dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
+            }
+            return pooledConnection;
         }
-        PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, getUser(), getPassword());
-        if (dncLogWriter != null) {
-            dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return pooledConnection;
     }
 
     // Standard method that establishes the initial physical connection using CPDS properties.
     public PooledConnection getPooledConnection(String user, String password) throws SQLException {
-        LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
-        if (dncLogWriter != null) {
-            dncLogWriter.traceEntry(this, "getPooledConnection", user, "<escaped>");
+        try
+        {
+            LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
+            if (dncLogWriter != null) {
+                dncLogWriter.traceEntry(this, "getPooledConnection", user, "<escaped>");
+            }
+            PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, user, password);
+            if (dncLogWriter != null) {
+                dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
+            }
+            return pooledConnection;
         }
-        PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, user, password);
-        if (dncLogWriter != null) {
-            dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return pooledConnection;
     }
 
     //  method that establishes the initial physical connection

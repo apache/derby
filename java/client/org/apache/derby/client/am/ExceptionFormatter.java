@@ -25,6 +25,81 @@ public class ExceptionFormatter {
     // the middle of parsing an Sqlca reply.
     // Without this, if e.getMessage() fails, we would have infinite recursion
     // when TRACE_DIAGNOSTICS is on  because tracing occurs within the exception constructor.
+    static public void printTrace(SqlException e,
+                                  java.io.PrintWriter printWriter,
+                                  String messageHeader,
+                                  boolean returnTokensOnly) {
+        String header;
+        synchronized (printWriter) {
+            while (e != null) {
+                header = messageHeader + "[" + "SQLException@" + Integer.toHexString(e.hashCode()) + "]";
+                printWriter.println(header + " java.sql.SQLException");
+
+                java.lang.Throwable throwable = null;
+                try {
+                    throwable = ((Diagnosable) e).getThrowable();
+                } catch (java.lang.NoSuchMethodError doNothing) {
+                }
+                if (throwable != null) {
+                    printTrace(throwable, printWriter, header);
+                }
+                Sqlca sqlca = ((Diagnosable) e).getSqlca();
+                if (sqlca != null) {
+                    printTrace(sqlca, printWriter, header);
+                    // JDK stack trace calls e.getMessage(), so we must set some state on the sqlca that says return tokens only.
+                    ((Sqlca) sqlca).returnTokensOnlyInMessageText(returnTokensOnly);
+                }
+
+                printWriter.println(header + " SQL state  = " + e.getSQLState());
+                printWriter.println(header + " Error code = " + String.valueOf(e.getErrorCode()));
+                if (((Diagnosable) e).getSqlca() == null) { // Too much has changed, so escape out here.
+                    printWriter.println(header + " Message    = " + e.getMessage());
+                } else { // This is server-side error.
+                    sqlca = ((Diagnosable) e).getSqlca();
+                    if (returnTokensOnly) {
+                        // print message tokens directly.
+                        printWriter.println(header + " Tokens     = " + sqlca.getSqlErrmc()); // a string containing error tokens only
+                    } else {
+                        // Try to get message text from server.
+                        String message = e.getMessage();
+                        if (!sqlca.messageTextRetrievedContainsTokensOnly_) { // got the message text.
+                            printWriter.println(header + " Message    = " + message);
+                        } else { // got only message tokens.
+                            java.sql.SQLException mysteryException = sqlca.exceptionThrownOnStoredProcInvocation_;
+                            if (mysteryException != null &&
+                                    (mysteryException.getErrorCode() == -440 || mysteryException.getErrorCode() == -444)) {
+                                printWriter.println(header + " Unable to obtain message text from server." +
+                                        " Only message tokens are available." +
+                                        " The stored procedure SYSIBM.SQLCAMESSAGE is not installed on server." +
+                                        " Contact your DBA.");
+                            } else {
+                                printWriter.println(header + " Error occurred while trying to obtain message text from server. " +
+                                        "Only message tokens are available.");
+                            }
+                            printWriter.println(header + " Tokens     = " + message);
+                        }
+                    }
+                }
+
+                printWriter.println(header + " Stack trace follows");
+                e.printStackTrace(printWriter);
+
+                if (e instanceof Diagnosable) {
+                    sqlca = (Sqlca) ((Diagnosable) e).getSqlca();
+                    if (sqlca != null) {
+                        // JDK stack trace calls e.getMessage(), now that it is finished,
+                        // we can reset the state on the sqlca that says return tokens only.
+                        sqlca.returnTokensOnlyInMessageText(false);
+                    }
+                }
+
+                e = e.getNextException();
+            }
+
+            printWriter.flush();
+        }
+    }
+
     static public void printTrace(java.sql.SQLException e,
                                   java.io.PrintWriter printWriter,
                                   String messageHeader,
@@ -46,57 +121,9 @@ public class ExceptionFormatter {
                     printWriter.println(header + " java.sql.SQLException");
                 }
 
-                if (e instanceof Diagnosable) {
-                    java.lang.Throwable throwable = null;
-                    try {
-                        throwable = ((Diagnosable) e).getThrowable();
-                    } catch (java.lang.NoSuchMethodError doNothing) {
-                    }
-                    if (throwable != null) {
-                        printTrace(throwable, printWriter, header);
-                    }
-                    Sqlca sqlca = ((Diagnosable) e).getSqlca();
-                    if (sqlca != null) {
-                        printTrace(sqlca, printWriter, header);
-                        // JDK stack trace calls e.getMessage(), so we must set some state on the sqlca that says return tokens only.
-                        ((Sqlca) sqlca).returnTokensOnlyInMessageText(returnTokensOnly);
-                    }
-                }
-
                 printWriter.println(header + " SQL state  = " + e.getSQLState());
                 printWriter.println(header + " Error code = " + String.valueOf(e.getErrorCode()));
-                if (!(e instanceof Diagnosable)) {
-                    printWriter.println(header + " Message    = " + e.getMessage());
-                } else {
-                    if (((Diagnosable) e).getSqlca() == null) { // Too much has changed, so escape out here.
-                        printWriter.println(header + " Message    = " + e.getMessage());
-                    } else { // This is server-side error.
-                        Sqlca sqlca = (Sqlca) ((Diagnosable) e).getSqlca();
-                        if (returnTokensOnly) {
-                            // print message tokens directly.
-                            printWriter.println(header + " Tokens     = " + sqlca.getSqlErrmc()); // a string containing error tokens only
-                        } else {
-                            // Try to get message text from server.
-                            String message = e.getMessage();
-                            if (!sqlca.messageTextRetrievedContainsTokensOnly_) { // got the message text.
-                                printWriter.println(header + " Message    = " + message);
-                            } else { // got only message tokens.
-                                java.sql.SQLException mysteryException = sqlca.exceptionThrownOnStoredProcInvocation_;
-                                if (mysteryException != null &&
-                                        (mysteryException.getErrorCode() == -440 || mysteryException.getErrorCode() == -444)) {
-                                    printWriter.println(header + " Unable to obtain message text from server." +
-                                            " Only message tokens are available." +
-                                            " The stored procedure SYSIBM.SQLCAMESSAGE is not installed on server." +
-                                            " Contact your DBA.");
-                                } else {
-                                    printWriter.println(header + " Error occurred while trying to obtain message text from server. " +
-                                            "Only message tokens are available.");
-                                }
-                                printWriter.println(header + " Tokens     = " + message);
-                            }
-                        }
-                    }
-                }
+                printWriter.println(header + " Message    = " + e.getMessage());
 
                 if (e instanceof java.sql.DataTruncation) {
                     printWriter.println(header + " Index         = " + ((java.sql.DataTruncation) e).getIndex());
@@ -112,15 +139,6 @@ public class ExceptionFormatter {
 
                 printWriter.println(header + " Stack trace follows");
                 e.printStackTrace(printWriter);
-
-                if (e instanceof Diagnosable) {
-                    Sqlca sqlca = (Sqlca) ((Diagnosable) e).getSqlca();
-                    if (sqlca != null) {
-                        // JDK stack trace calls e.getMessage(), now that it is finished,
-                        // we can reset the state on the sqlca that says return tokens only.
-                        sqlca.returnTokensOnlyInMessageText(false);
-                    }
-                }
 
                 e = e.getNextException();
             }

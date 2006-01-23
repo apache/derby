@@ -135,7 +135,7 @@ public class Section {
         return 0;
     }
 
-    public Section getPositionedUpdateSection() throws java.sql.SQLException {
+    public Section getPositionedUpdateSection() throws SqlException {
         return agent_.sectionManager_.getPositionedUpdateSection(this);
     }
 

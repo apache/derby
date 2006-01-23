@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
+
 // Self-contained utilities.
 // Don't reference any other driver classes, except Configuration, from within this class.
 
@@ -238,6 +240,16 @@ public final class Utils {
     }
 
     // latestException is assumed to be non-null, accumulatedExceptions can be null
+    public static SQLException accumulateSQLException(SQLException latestException,
+                                                      SQLException accumulatedExceptions) {
+        if (accumulatedExceptions == null) {
+            return latestException;
+        } else {
+            accumulatedExceptions.setNextException(latestException);
+            return accumulatedExceptions;
+        }
+    }
+
     public static SqlException accumulateSQLException(SqlException latestException,
                                                       SqlException accumulatedExceptions) {
         if (accumulatedExceptions == null) {

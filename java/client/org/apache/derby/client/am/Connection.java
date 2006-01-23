@@ -22,6 +22,8 @@ package org.apache.derby.client.am;
 
 import org.apache.derby.jdbc.ClientDataSource;
 
+import java.sql.SQLException;
+
 public abstract class Connection implements java.sql.Connection,
         ConnectionCallbackInterface {
     //---------------------navigational members-----------------------------------
@@ -334,31 +336,45 @@ public abstract class Connection implements java.sql.Connection,
 
     // ---------------------------jdbc 1------------------------------------------
 
-    synchronized public java.sql.Statement createStatement() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "createStatement");
+    synchronized public java.sql.Statement createStatement() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "createStatement");
+            }
+            Statement s = createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, resultSetHoldability_);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "createStatement", s);
+            }
+            return s;
         }
-        Statement s = createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, resultSetHoldability_);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "createStatement", s);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return s;
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "prepareStatement", sql);
+    synchronized public java.sql.PreparedStatement prepareStatement(String sql) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "prepareStatement", sql);
+            }
+            PreparedStatement ps = prepareStatementX(sql,
+                    java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                    java.sql.ResultSet.CONCUR_READ_ONLY,
+                    resultSetHoldability_,
+                    java.sql.Statement.NO_GENERATED_KEYS,
+                    null);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "prepareStatement", ps);
+            }
+            return ps;
         }
-        PreparedStatement ps = prepareStatementX(sql,
-                java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                java.sql.ResultSet.CONCUR_READ_ONLY,
-                resultSetHoldability_,
-                java.sql.Statement.NO_GENERATED_KEYS,
-                null);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "prepareStatement", ps);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return ps;
     }
 
     // For internal use only.  Use by updatable result set code.
@@ -379,15 +395,22 @@ public abstract class Connection implements java.sql.Connection,
         return preparedStatement;
     }
 
-    synchronized public java.sql.CallableStatement prepareCall(String sql) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "prepareCall", sql);
+    synchronized public java.sql.CallableStatement prepareCall(String sql) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "prepareCall", sql);
+            }
+            CallableStatement cs = prepareCallX(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, resultSetHoldability_);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "prepareCall", cs);
+            }
+            return cs;
         }
-        CallableStatement cs = prepareCallX(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, resultSetHoldability_);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "prepareCall", cs);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return cs;
     }
 
     synchronized PreparedStatement prepareDynamicCatalogQuery(String sql) throws SqlException {
@@ -398,15 +421,23 @@ public abstract class Connection implements java.sql.Connection,
         return ps;
     }
 
-    public String nativeSQL(String sql) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "nativeSQL", sql);
+    public String nativeSQL(String sql) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "nativeSQL", sql);
+            }
+            String nativeSql = nativeSQLX(sql);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "nativeSQL", nativeSql);
+            }
+            return nativeSql;
         }
-        String nativeSql = nativeSQLX(sql);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "nativeSQL", nativeSql);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return nativeSql;
+
     }
 
     synchronized public String nativeSQLX(String sql) throws SqlException {
@@ -431,54 +462,75 @@ public abstract class Connection implements java.sql.Connection,
     // primary usage is distinction between local and global trans. envs.;
     protected abstract boolean allowLocalCommitRollback_() throws org.apache.derby.client.am.SqlException;
 
-    synchronized public void setAutoCommit(boolean autoCommit) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "setAutoCommit", autoCommit);
-        }
-        checkForClosedConnection();
+    synchronized public void setAutoCommit(boolean autoCommit) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setAutoCommit", autoCommit);
+            }
+            checkForClosedConnection();
 
-        if (! allowLocalCommitRollback_()) {
-            if (autoCommit) { // can't toggle to autocommit mode when between xars.start() and xars.end()
-                throw new SqlException(agent_.logWriter_,
-                        "setAutoCommit(true) invalid during global transaction",
-                        SqlState._2D521, // Spec'ed by PROTOCOL
-                        SqlCode.invalidSetAutoCommitUnderXA);
+            if (! allowLocalCommitRollback_()) {
+                if (autoCommit) { // can't toggle to autocommit mode when between xars.start() and xars.end()
+                    throw new SqlException(agent_.logWriter_,
+                            "setAutoCommit(true) invalid during global transaction",
+                            SqlState._2D521, // Spec'ed by PROTOCOL
+                            SqlCode.invalidSetAutoCommitUnderXA);
+                }
+            } else {
+                if (autoCommit == autoCommit_) {
+                    return; // don't flow a commit if nothing changed.
+                }
+                if (inUnitOfWork_) {
+                    flowCommit(); // we are not between xars.start() and xars.end(), can flow commit
+                }
             }
-        } else {
-            if (autoCommit == autoCommit_) {
-                return; // don't flow a commit if nothing changed.
-            }
-            if (inUnitOfWork_) {
-                flowCommit(); // we are not between xars.start() and xars.end(), can flow commit
-            }
+            autoCommit_ = autoCommit;
         }
-        autoCommit_ = autoCommit;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public boolean getAutoCommit() throws SqlException {
-        checkForClosedConnection();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getAutoCommit", autoCommit_);
+    public boolean getAutoCommit() throws SQLException {
+        try
+        {
+            checkForClosedConnection();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getAutoCommit", autoCommit_);
+            }
+            if (! allowLocalCommitRollback_()) { // autoCommit is always false between xars.start() and xars.end()
+                return false;
+            }
+            return autoCommit_;
         }
-        if (! allowLocalCommitRollback_()) { // autoCommit is always false between xars.start() and xars.end()
-            return false;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return autoCommit_;
     }
 
-    synchronized public void commit() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "commit");
-        }
+    synchronized public void commit() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "commit");
+            }
 
-        // the following XA State check must be in commit instead of commitX since
-        // external application call commit, the SqlException should be thrown
-        // only if an external application calls commit during a Global Transaction,
-        // internal code will call commitX which will ignore the commit request
-        // while in a Global transaction
-        checkForInvalidXAStateOnCommitOrRollback();
-        checkForClosedConnection();
-        flowCommit();
+            // the following XA State check must be in commit instead of commitX since
+            // external application call commit, the SqlException should be thrown
+            // only if an external application calls commit during a Global Transaction,
+            // internal code will call commitX which will ignore the commit request
+            // while in a Global transaction
+            checkForInvalidXAStateOnCommitOrRollback();
+            checkForClosedConnection();
+            flowCommit();
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     private void checkForInvalidXAStateOnCommitOrRollback() throws SqlException {
@@ -572,13 +624,20 @@ public abstract class Connection implements java.sql.Connection,
         }
     }
 
-    synchronized public void rollback() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "rollback");
+    synchronized public void rollback() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "rollback");
+            }
+            checkForInvalidXAStateOnCommitOrRollback();
+            checkForClosedConnection();
+            flowRollback();
         }
-        checkForInvalidXAStateOnCommitOrRollback();
-        checkForClosedConnection();
-        flowRollback();
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     // Even if we're not in a transaction, all open result sets will be closed.
@@ -629,7 +688,7 @@ public abstract class Connection implements java.sql.Connection,
         }
     }
 
-    synchronized public void close() throws SqlException {
+    synchronized public void close() throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "close");
         }
@@ -646,7 +705,7 @@ public abstract class Connection implements java.sql.Connection,
     }
 
     // This is a no-op if the connection is already closed.
-    synchronized public void closeX() throws SqlException {
+    synchronized public void closeX() throws SQLException {
         if (!open_) {
             return;
         }
@@ -655,21 +714,29 @@ public abstract class Connection implements java.sql.Connection,
 
     // Close physical socket or attachment even if connection is marked close.
     // Used by ClientPooledConnection.close().
-    synchronized public void closeResources() throws SqlException {
+    synchronized public void closeResources() throws SQLException {
         if (open_ || (!open_ && availableForReuse_)) {
             availableForReuse_ = false;
             closeResourcesX();
         }
     }
 
-    private void closeResourcesX() throws SqlException {
-        checkForTransactionInProgress();
+    private void closeResourcesX() throws SQLException {
+        try
+        {
+            checkForTransactionInProgress();
+        }
+        catch ( SqlException e )
+        {
+            throw e.getSQLException();
+        }
+        
         resetConnectionAtFirstSql_ = false; // unset indicator of deferred reset
-        SqlException accumulatedExceptions = null;
+        SQLException accumulatedExceptions = null;
         if (setTransactionIsolationStmt != null) {
             try {
                 setTransactionIsolationStmt.close();
-            } catch (SqlException se) {
+            } catch (SQLException se) {
                 accumulatedExceptions = se;
             }
         }
@@ -677,14 +744,16 @@ public abstract class Connection implements java.sql.Connection,
             flowClose();
         } catch (SqlException e) {
             accumulatedExceptions =
-                    Utils.accumulateSQLException(e, accumulatedExceptions);
+                    Utils.accumulateSQLException(
+                        e.getSQLException(), accumulatedExceptions);
         }
 
         markClosed();
         try {
             agent_.close();
         } catch (SqlException e) {
-            throw Utils.accumulateSQLException(e, accumulatedExceptions);
+            throw Utils.accumulateSQLException(e.getSQLException(), 
+                accumulatedExceptions);
         }
     }
 
@@ -794,63 +863,76 @@ public abstract class Connection implements java.sql.Connection,
     private static String DERBY_TRANSACTION_READ_COMMITTED = "CS";
     private static String DERBY_TRANSACTION_READ_UNCOMMITTED = "UR";
 
-    synchronized public void setTransactionIsolation(int level) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "setTransactionIsolation", level);
-        }
-        // Per jdbc spec (see java.sql.Connection.close() javadoc).
-        checkForClosedConnection();
+    synchronized public void setTransactionIsolation(int level) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setTransactionIsolation", level);
+            }
+            // Per jdbc spec (see java.sql.Connection.close() javadoc).
+            checkForClosedConnection();
 
-        // Javadoc for this method:
-        //   If this method is called during a transaction, the result is implementation-defined.
-        //
-        //
-        // REPEATABLE_READ = JDBC: TRANSACTION_SERIALIZABLE, DERBY: RR, PROTOCOL: repeatable read
-        // READ_STABILITY = JDBC: TRANSACTION_REPEATABLE_READ, DERBY: RS, PROTOCOL: All
-        // CURSOR_STABILITY = JDBC: TRANSACTION_READ_COMMITTED, DERBY: CS, PROTOCOL: Cursor stability
-        // UNCOMMITTED_READ = JDBC: TRANSACTION_READ_UNCOMMITTED, DERBY: UR , PROTOCOL: Change
-        // NO_COMMIT = JDBC: TRANSACTION_NONE, DERBY: NC, PROTOCOL: No commit
-        //
-        String levelString = null;
-        switch (level) {
-        case java.sql.Connection.TRANSACTION_REPEATABLE_READ:
-            levelString = DERBY_TRANSACTION_REPEATABLE_READ;
-            break;
-        case java.sql.Connection.TRANSACTION_READ_COMMITTED:
-            levelString = DERBY_TRANSACTION_READ_COMMITTED;
-            break;
-        case java.sql.Connection.TRANSACTION_SERIALIZABLE:
-            levelString = DERBY_TRANSACTION_SERIALIZABLE;
-            break;
-        case java.sql.Connection.TRANSACTION_READ_UNCOMMITTED:
-            levelString = DERBY_TRANSACTION_READ_UNCOMMITTED;
-            break;
-            // Per javadoc:
-            //   Note that Connection.TRANSACTION_NONE cannot be used because it specifies that transactions are not supported.
-        case java.sql.Connection.TRANSACTION_NONE:
-        default:
-            throw new SqlException(agent_.logWriter_,
-                    "Transaction isolation level " + level + " is an invalid argument for java.sql.Connection.setTransactionIsolation()." +
-                    " See Javadoc specification for a list of valid arguments.", "XJ045");
-        }
-        if (setTransactionIsolationStmt == null) {
-            setTransactionIsolationStmt =
-                    createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                            java.sql.ResultSet.CONCUR_READ_ONLY,
-                            resultSetHoldability_);
-        }
-        setTransactionIsolationStmt.executeUpdate("SET CURRENT ISOLATION = " + levelString);
+            // Javadoc for this method:
+            //   If this method is called during a transaction, the result is implementation-defined.
+            //
+            //
+            // REPEATABLE_READ = JDBC: TRANSACTION_SERIALIZABLE, DERBY: RR, PROTOCOL: repeatable read
+            // READ_STABILITY = JDBC: TRANSACTION_REPEATABLE_READ, DERBY: RS, PROTOCOL: All
+            // CURSOR_STABILITY = JDBC: TRANSACTION_READ_COMMITTED, DERBY: CS, PROTOCOL: Cursor stability
+            // UNCOMMITTED_READ = JDBC: TRANSACTION_READ_UNCOMMITTED, DERBY: UR , PROTOCOL: Change
+            // NO_COMMIT = JDBC: TRANSACTION_NONE, DERBY: NC, PROTOCOL: No commit
+            //
+            String levelString = null;
+            switch (level) {
+            case java.sql.Connection.TRANSACTION_REPEATABLE_READ:
+                levelString = DERBY_TRANSACTION_REPEATABLE_READ;
+                break;
+            case java.sql.Connection.TRANSACTION_READ_COMMITTED:
+                levelString = DERBY_TRANSACTION_READ_COMMITTED;
+                break;
+            case java.sql.Connection.TRANSACTION_SERIALIZABLE:
+                levelString = DERBY_TRANSACTION_SERIALIZABLE;
+                break;
+            case java.sql.Connection.TRANSACTION_READ_UNCOMMITTED:
+                levelString = DERBY_TRANSACTION_READ_UNCOMMITTED;
+                break;
+                // Per javadoc:
+                //   Note that Connection.TRANSACTION_NONE cannot be used because it specifies that transactions are not supported.
+            case java.sql.Connection.TRANSACTION_NONE:
+            default:
+                throw new SqlException(agent_.logWriter_,
+                        "Transaction isolation level " + level + " is an invalid argument for java.sql.Connection.setTransactionIsolation()." +
+                        " See Javadoc specification for a list of valid arguments.", "XJ045");
+            }
+            if (setTransactionIsolationStmt == null) {
+                setTransactionIsolationStmt =
+                        createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                                java.sql.ResultSet.CONCUR_READ_ONLY,
+                                resultSetHoldability_);
+            }
+            setTransactionIsolationStmt.executeUpdate("SET CURRENT ISOLATION = " + levelString);
 
-        isolation_ = level;
-
+            isolation_ = level;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public int getTransactionIsolation() throws SqlException {
-        checkForClosedConnection();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getTransactionIsolation", isolation_);
+    public int getTransactionIsolation() throws SQLException {
+        try
+        {
+            checkForClosedConnection();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getTransactionIsolation", isolation_);
+            }
+            return isolation_;
         }
-        return isolation_;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     public java.sql.SQLWarning getWarnings() {
@@ -860,11 +942,18 @@ public abstract class Connection implements java.sql.Connection,
         return warnings_;
     }
 
-    synchronized public void clearWarnings() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "clearWarnings");
+    synchronized public void clearWarnings() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "clearWarnings");
+            }
+            clearWarningsX();
         }
-        clearWarningsX();
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     // An untraced version of clearWarnings()
@@ -878,90 +967,146 @@ public abstract class Connection implements java.sql.Connection,
     //======================================================================
     // Advanced features:
 
-    public java.sql.DatabaseMetaData getMetaData() throws SqlException {
-        checkForClosedConnection();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getMetaData", databaseMetaData_);
+    public java.sql.DatabaseMetaData getMetaData() throws SQLException {
+        try
+        {
+            checkForClosedConnection();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getMetaData", databaseMetaData_);
+            }
+            return databaseMetaData_;
         }
-        return databaseMetaData_;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    synchronized public void setReadOnly(boolean readOnly) throws SqlException {
-        // This is a hint to the driver only, so this request is silently ignored.
-        // PROTOCOL can only flow a set-read-only before the connection is established.
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "setReadOnly", readOnly);
+    synchronized public void setReadOnly(boolean readOnly) throws SQLException {
+        try
+        {
+            // This is a hint to the driver only, so this request is silently ignored.
+            // PROTOCOL can only flow a set-read-only before the connection is established.
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setReadOnly", readOnly);
+            }
+            checkForClosedConnection();
         }
-        checkForClosedConnection();
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public boolean isReadOnly() throws SqlException {
-        checkForClosedConnection();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "isReadOnly", jdbcReadOnly_);
+    public boolean isReadOnly() throws SQLException {
+        try
+        {
+            checkForClosedConnection();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "isReadOnly", jdbcReadOnly_);
+            }
+            return false;
         }
-        return false;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    synchronized public void setCatalog(String catalog) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "setCatalog", catalog);
+    synchronized public void setCatalog(String catalog) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setCatalog", catalog);
+            }
+            checkForClosedConnection();
+            // Per jdbc spec: if the driver does not support catalogs, it will silently ignore this request.
         }
-        checkForClosedConnection();
-        // Per jdbc spec: if the driver does not support catalogs, it will silently ignore this request.
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public String getCatalog() throws SqlException {
-        checkForClosedConnection();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getCatalog", (String) null);
+    public String getCatalog() throws SQLException {
+        try
+        {
+            checkForClosedConnection();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getCatalog", (String) null);
+            }
+            return null;
         }
-        return null;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     //--------------------------JDBC 2.0-----------------------------
 
     synchronized public java.sql.Statement createStatement(int resultSetType,
-                                                           int resultSetConcurrency) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "createStatement", resultSetType, resultSetConcurrency);
+                                                           int resultSetConcurrency) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "createStatement", resultSetType, resultSetConcurrency);
+            }
+            Statement s = createStatementX(resultSetType, resultSetConcurrency, resultSetHoldability_);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "createStatement", s);
+            }
+            return s;
         }
-        Statement s = createStatementX(resultSetType, resultSetConcurrency, resultSetHoldability_);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "createStatement", s);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return s;
     }
 
     synchronized public java.sql.PreparedStatement prepareStatement(String sql,
                                                                     int resultSetType,
-                                                                    int resultSetConcurrency) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "prepareStatement", sql, resultSetType, resultSetConcurrency);
+                                                                    int resultSetConcurrency) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "prepareStatement", sql, resultSetType, resultSetConcurrency);
+            }
+            PreparedStatement ps = prepareStatementX(sql,
+                    resultSetType,
+                    resultSetConcurrency,
+                    resultSetHoldability_,
+                    java.sql.Statement.NO_GENERATED_KEYS,
+                    null);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "prepareStatement", ps);
+            }
+            return ps;
         }
-        PreparedStatement ps = prepareStatementX(sql,
-                resultSetType,
-                resultSetConcurrency,
-                resultSetHoldability_,
-                java.sql.Statement.NO_GENERATED_KEYS,
-                null);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "prepareStatement", ps);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return ps;
     }
 
     synchronized public java.sql.CallableStatement prepareCall(String sql,
                                                                int resultSetType,
-                                                               int resultSetConcurrency) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "prepareCall", sql, resultSetType, resultSetConcurrency);
+                                                               int resultSetConcurrency) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "prepareCall", sql, resultSetType, resultSetConcurrency);
+            }
+            CallableStatement cs = prepareCallX(sql, resultSetType, resultSetConcurrency, resultSetHoldability_);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "prepareCall", cs);
+            }
+            return cs;
         }
-        CallableStatement cs = prepareCallX(sql, resultSetType, resultSetConcurrency, resultSetHoldability_);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "prepareCall", cs);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return cs;
     }
 
     synchronized public CallableStatement prepareMessageProc(String sql) throws SqlException {
@@ -992,83 +1137,125 @@ public abstract class Connection implements java.sql.Connection,
         return resultSetConcurrency;
     }
 
-    public java.util.Map getTypeMap() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "getTypeMap");
+    public java.util.Map getTypeMap() throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getTypeMap");
+            }
+            checkForClosedConnection();
+            java.util.Map map = new java.util.HashMap();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getTypeMap", map);
+            }
+            return map;
         }
-        checkForClosedConnection();
-        java.util.Map map = new java.util.HashMap();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getTypeMap", map);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return map;
     }
 
-    synchronized public void setTypeMap(java.util.Map map) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "setTypeMap", map);
+    synchronized public void setTypeMap(java.util.Map map) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setTypeMap", map);
+            }
+            checkForClosedConnection();
+            throw new SqlException(agent_.logWriter_, "Connection.setTypeMap is not supported");
         }
-        checkForClosedConnection();
-        throw new SqlException(agent_.logWriter_, "Connection.setTypeMap is not supported");
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }        
     }
 
     //--------------------------JDBC 3.0-----------------------------
 
-    synchronized public void setHoldability(int holdability) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "setHoldability", holdability);
+    synchronized public void setHoldability(int holdability) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setHoldability", holdability);
+            }
+            checkForClosedConnection();
+            resultSetHoldability_ = holdability;
         }
-        checkForClosedConnection();
-        resultSetHoldability_ = holdability;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public int getHoldability() throws SqlException {
-        checkForClosedConnection();
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getHoldability", resultSetHoldability_);
+    public int getHoldability() throws SQLException {
+        try
+        {
+            checkForClosedConnection();
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getHoldability", resultSetHoldability_);
+            }
+            return resultSetHoldability_;
         }
-        return resultSetHoldability_;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     public int dncGeneratedSavepointId_;
     // generated name used internally for unnamed savepoints
     public static final String dncGeneratedSavepointNamePrefix__ = "DNC_GENENERATED_NAME_";
 
-    synchronized public java.sql.Savepoint setSavepoint() throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "setSavepoint");
-        }
-        checkForClosedConnection();
-        if (autoCommit_) // Throw exception if auto-commit is on
+    synchronized public java.sql.Savepoint setSavepoint() throws SQLException {
+        try
         {
-            throw new SqlException(agent_.logWriter_, "Cannot set savepoint when in auto-commit mode.");
-        } 
-        // create an un-named savepoint.
-        if ((++dncGeneratedSavepointId_) < 0) {
-            dncGeneratedSavepointId_ = 1; // restart from 1 when overflow.
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setSavepoint");
+            }
+            checkForClosedConnection();
+            if (autoCommit_) // Throw exception if auto-commit is on
+            {
+                throw new SqlException(agent_.logWriter_, "Cannot set savepoint when in auto-commit mode.");
+            } 
+            // create an un-named savepoint.
+            if ((++dncGeneratedSavepointId_) < 0) {
+                dncGeneratedSavepointId_ = 1; // restart from 1 when overflow.
+            }
+            Object s = setSavepointX(new Savepoint(agent_, dncGeneratedSavepointId_));
+            return (java.sql.Savepoint) s;
         }
-        Object s = setSavepointX(new Savepoint(agent_, dncGeneratedSavepointId_));
-        return (java.sql.Savepoint) s;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    synchronized public java.sql.Savepoint setSavepoint(String name) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "setSavepoint", name);
-        }
-        checkForClosedConnection();
-        if (name == null) // Throw exception if savepoint name is null
+    synchronized public java.sql.Savepoint setSavepoint(String name) throws SQLException {
+        try
         {
-            throw new SqlException(agent_.logWriter_, "Named savepoint needs a none-null name.");
-        } else if (autoCommit_) // Throw exception if auto-commit is on
-        {
-            throw new SqlException(agent_.logWriter_, "Cannot set savepoint when in auto-commit mode.");
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setSavepoint", name);
+            }
+            checkForClosedConnection();
+            if (name == null) // Throw exception if savepoint name is null
+            {
+                throw new SqlException(agent_.logWriter_, "Named savepoint needs a none-null name.");
+            } else if (autoCommit_) // Throw exception if auto-commit is on
+            {
+                throw new SqlException(agent_.logWriter_, "Cannot set savepoint when in auto-commit mode.");
+            }
+            // create a named savepoint.
+            Object s = setSavepointX(new Savepoint(agent_, name));
+            return (java.sql.Savepoint) s;
         }
-        // create a named savepoint.
-        Object s = setSavepointX(new Savepoint(agent_, name));
-        return (java.sql.Savepoint) s;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    private Savepoint setSavepointX(Savepoint savepoint) throws SqlException {
+    private Savepoint setSavepointX(Savepoint savepoint) throws SQLException {
         // Construct and flow a savepoint statement to server.
         Statement stmt = null;
         try {
@@ -1078,13 +1265,16 @@ public abstract class Connection implements java.sql.Connection,
             String savepointName;
             try {
                 savepointName = savepoint.getSavepointName();
-            } catch (SqlException e) {
+            } catch (SQLException e) {
                 // generate the name for an un-named savepoint.
                 savepointName = dncGeneratedSavepointNamePrefix__ +
                         savepoint.getSavepointId();
             }
             String sql = "SAVEPOINT \"" + savepointName + "\" ON ROLLBACK RETAIN CURSORS";
             stmt.executeX(sql);
+        } catch ( SqlException se )
+        {
+            throw se.getSQLException();
         } finally {
             if (stmt != null) {
                 try {
@@ -1097,119 +1287,140 @@ public abstract class Connection implements java.sql.Connection,
         return savepoint;
     }
 
-    synchronized public void rollback(java.sql.Savepoint savepoint) throws SqlException {
-        int saveXaState = xaState_;
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "rollback", savepoint);
-        }
-        checkForClosedConnection();
-        if (savepoint == null) // Throw exception if savepoint is null
+    synchronized public void rollback(java.sql.Savepoint savepoint) throws SQLException {
+        try
         {
-            throw new SqlException(agent_.logWriter_, "Cannot rollback to a null savepoint.");
-        } else if (autoCommit_) // Throw exception if auto-commit is on
-        {
-            throw new SqlException(agent_.logWriter_, "Cannot rollback to a savepoint when in auto-commit mode.");
-        } 
-        // Only allow to rollback to a savepoint from the connection that create the savepoint.
-        try {
-            if (this != ((Savepoint) savepoint).agent_.connection_) {
+            int saveXaState = xaState_;
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "rollback", savepoint);
+            }
+            checkForClosedConnection();
+            if (savepoint == null) // Throw exception if savepoint is null
+            {
+                throw new SqlException(agent_.logWriter_, "Cannot rollback to a null savepoint.");
+            } else if (autoCommit_) // Throw exception if auto-commit is on
+            {
+                throw new SqlException(agent_.logWriter_, "Cannot rollback to a savepoint when in auto-commit mode.");
+            } 
+            // Only allow to rollback to a savepoint from the connection that create the savepoint.
+            try {
+                if (this != ((Savepoint) savepoint).agent_.connection_) {
+                    throw new SqlException(agent_.logWriter_,
+                            "Rollback to a savepoint not created by this connection.");
+                }
+            } catch (java.lang.ClassCastException e) { // savepoint is not an instance of am.Savepoint
                 throw new SqlException(agent_.logWriter_,
                         "Rollback to a savepoint not created by this connection.");
             }
-        } catch (java.lang.ClassCastException e) { // savepoint is not an instance of am.Savepoint
-            throw new SqlException(agent_.logWriter_,
-                    "Rollback to a savepoint not created by this connection.");
-        }
 
-        // Construct and flow a savepoint rollback statement to server.
-        Statement stmt = null;
-        try {
-            stmt = createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                    java.sql.ResultSet.CONCUR_READ_ONLY,
-                    resultSetHoldability_);
-            String savepointName;
+            // Construct and flow a savepoint rollback statement to server.
+            Statement stmt = null;
             try {
-                savepointName = ((Savepoint) savepoint).getSavepointName();
-            } catch (SqlException e) {
-                // generate the name for an un-named savepoint.
-                savepointName = dncGeneratedSavepointNamePrefix__ +
-                        ((Savepoint) savepoint).getSavepointId();
-            }
-            String sql = "ROLLBACK TO SAVEPOINT \"" + savepointName + "\"";
-            stmt.executeX(sql);
-        } finally {
-            if (stmt != null) {
+                stmt = createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                        java.sql.ResultSet.CONCUR_READ_ONLY,
+                        resultSetHoldability_);
+                String savepointName;
                 try {
-                    stmt.closeX();
-                } catch (SqlException doNothing) {
+                    savepointName = ((Savepoint) savepoint).getSavepointName();
+                } catch (SQLException e) {
+                    // generate the name for an un-named savepoint.
+                    savepointName = dncGeneratedSavepointNamePrefix__ +
+                            ((Savepoint) savepoint).getSavepointId();
                 }
+                String sql = "ROLLBACK TO SAVEPOINT \"" + savepointName + "\"";
+                stmt.executeX(sql);
+            } finally {
+                if (stmt != null) {
+                    try {
+                        stmt.closeX();
+                    } catch (SqlException doNothing) {
+                    }
+                }
+                xaState_ = saveXaState;
             }
-            xaState_ = saveXaState;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
-    synchronized public void releaseSavepoint(java.sql.Savepoint savepoint) throws SqlException {
-        int saveXaState = xaState_;
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "releaseSavepoint", savepoint);
-        }
-        checkForClosedConnection();
-        if (savepoint == null) // Throw exception if savepoint is null
+    synchronized public void releaseSavepoint(java.sql.Savepoint savepoint) throws SQLException {
+        try
         {
-            throw new SqlException(agent_.logWriter_, "Cannot release a null savepoint.");
-        } else if (autoCommit_) // Throw exception if auto-commit is on
-        {
-            throw new SqlException(agent_.logWriter_, "Cannot release a savepoint when in auto-commit mode.");
-        } 
-        // Only allow to release a savepoint from the connection that create the savepoint.
-        try {
-            if (this != ((Savepoint) savepoint).agent_.connection_) {
+            int saveXaState = xaState_;
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "releaseSavepoint", savepoint);
+            }
+            checkForClosedConnection();
+            if (savepoint == null) // Throw exception if savepoint is null
+            {
+                throw new SqlException(agent_.logWriter_, "Cannot release a null savepoint.");
+            } else if (autoCommit_) // Throw exception if auto-commit is on
+            {
+                throw new SqlException(agent_.logWriter_, "Cannot release a savepoint when in auto-commit mode.");
+            } 
+            // Only allow to release a savepoint from the connection that create the savepoint.
+            try {
+                if (this != ((Savepoint) savepoint).agent_.connection_) {
+                    throw new SqlException(agent_.logWriter_,
+                            "Cannot release a savepoint that was not created by this connection.");
+                }
+            } catch (java.lang.ClassCastException e) { // savepoint is not an instance of am.Savepoint
                 throw new SqlException(agent_.logWriter_,
                         "Cannot release a savepoint that was not created by this connection.");
             }
-        } catch (java.lang.ClassCastException e) { // savepoint is not an instance of am.Savepoint
-            throw new SqlException(agent_.logWriter_,
-                    "Cannot release a savepoint that was not created by this connection.");
-        }
 
-        // Construct and flow a savepoint release statement to server.
-        Statement stmt = null;
-        try {
-            stmt = (Statement) createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                    java.sql.ResultSet.CONCUR_READ_ONLY,
-                    resultSetHoldability_);
-            String savepointName;
+            // Construct and flow a savepoint release statement to server.
+            Statement stmt = null;
             try {
-                savepointName = ((Savepoint) savepoint).getSavepointName();
-            } catch (SqlException e) {
-                // generate the name for an un-named savepoint.
-                savepointName = dncGeneratedSavepointNamePrefix__ +
-                        ((Savepoint) savepoint).getSavepointId();
-            }
-            String sql = "RELEASE SAVEPOINT \"" + savepointName + "\"";
-            stmt.executeX(sql);
-        } finally {
-            if (stmt != null) {
+                stmt = (Statement) createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                        java.sql.ResultSet.CONCUR_READ_ONLY,
+                        resultSetHoldability_);
+                String savepointName;
                 try {
-                    stmt.closeX();
-                } catch (SqlException doNothing) {
+                    savepointName = ((Savepoint) savepoint).getSavepointName();
+                } catch (SQLException e) {
+                    // generate the name for an un-named savepoint.
+                    savepointName = dncGeneratedSavepointNamePrefix__ +
+                            ((Savepoint) savepoint).getSavepointId();
                 }
+                String sql = "RELEASE SAVEPOINT \"" + savepointName + "\"";
+                stmt.executeX(sql);
+            } finally {
+                if (stmt != null) {
+                    try {
+                        stmt.closeX();
+                    } catch (SqlException doNothing) {
+                    }
+                }
+                xaState_ = saveXaState;
             }
-            xaState_ = saveXaState;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
     }
 
     synchronized public java.sql.Statement createStatement(int resultSetType,
                                                            int resultSetConcurrency,
-                                                           int resultSetHoldability) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "createStatement", resultSetType, resultSetConcurrency, resultSetHoldability);
+                                                           int resultSetHoldability) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "createStatement", resultSetType, resultSetConcurrency, resultSetHoldability);
+            }
+            Statement s = createStatementX(resultSetType, resultSetConcurrency, resultSetHoldability);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "createStatement", s);
+            }
+            return s;
         }
-        Statement s = createStatementX(resultSetType, resultSetConcurrency, resultSetHoldability);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "createStatement", s);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return s;
     }
 
     private Statement createStatementX(int resultSetType,
@@ -1236,20 +1447,27 @@ public abstract class Connection implements java.sql.Connection,
     synchronized public java.sql.PreparedStatement prepareStatement(String sql,
                                                                     int resultSetType,
                                                                     int resultSetConcurrency,
-                                                                    int resultSetHoldability) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "prepareStatement", sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+                                                                    int resultSetHoldability) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "prepareStatement", sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+            }
+            PreparedStatement ps = prepareStatementX(sql,
+                    resultSetType,
+                    resultSetConcurrency,
+                    resultSetHoldability,
+                    java.sql.Statement.NO_GENERATED_KEYS,
+                    null);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "prepareStatement", ps);
+            }
+            return ps;
         }
-        PreparedStatement ps = prepareStatementX(sql,
-                resultSetType,
-                resultSetConcurrency,
-                resultSetHoldability,
-                java.sql.Statement.NO_GENERATED_KEYS,
-                null);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "prepareStatement", ps);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return ps;
     }
 
     // used by DBMD
@@ -1283,15 +1501,22 @@ public abstract class Connection implements java.sql.Connection,
     synchronized public java.sql.CallableStatement prepareCall(String sql,
                                                                int resultSetType,
                                                                int resultSetConcurrency,
-                                                               int resultSetHoldability) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "prepareCall", sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+                                                               int resultSetHoldability) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "prepareCall", sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+            }
+            CallableStatement cs = prepareCallX(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "prepareCall", cs);
+            }
+            return cs;
         }
-        CallableStatement cs = prepareCallX(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "prepareCall", cs);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return cs;
     }
 
     private CallableStatement prepareCallX(String sql,
@@ -1315,44 +1540,65 @@ public abstract class Connection implements java.sql.Connection,
         cs.prepare();
     }
 
-    public java.sql.PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "prepareStatement", sql, autoGeneratedKeys);
+    public java.sql.PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "prepareStatement", sql, autoGeneratedKeys);
+            }
+            PreparedStatement ps = prepareStatementX(sql,
+                    java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                    java.sql.ResultSet.CONCUR_READ_ONLY,
+                    resultSetHoldability_,
+                    autoGeneratedKeys,
+                    null);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "prepareStatement", ps);
+            }
+            return ps;
         }
-        PreparedStatement ps = prepareStatementX(sql,
-                java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                java.sql.ResultSet.CONCUR_READ_ONLY,
-                resultSetHoldability_,
-                autoGeneratedKeys,
-                null);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "prepareStatement", ps);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return ps;
     }
 
-    public java.sql.PreparedStatement prepareStatement(String sql, int columnIndexes[]) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "prepareStatement", sql, columnIndexes);
+    public java.sql.PreparedStatement prepareStatement(String sql, int columnIndexes[]) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "prepareStatement", sql, columnIndexes);
+            }
+            checkForClosedConnection();
+            throw new SqlException(agent_.logWriter_, "Driver not capable");
         }
-        checkForClosedConnection();
-        throw new SqlException(agent_.logWriter_, "Driver not capable");
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
-    public java.sql.PreparedStatement prepareStatement(String sql, String columnNames[]) throws SqlException {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "prepareStatement", sql, columnNames);
+    public java.sql.PreparedStatement prepareStatement(String sql, String columnNames[]) throws SQLException {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "prepareStatement", sql, columnNames);
+            }
+            PreparedStatement ps = prepareStatementX(sql,
+                    java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                    java.sql.ResultSet.CONCUR_READ_ONLY,
+                    resultSetHoldability_,
+                    java.sql.Statement.RETURN_GENERATED_KEYS,
+                    columnNames);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "prepareStatement", ps);
+            }
+            return ps;
         }
-        PreparedStatement ps = prepareStatementX(sql,
-                java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                java.sql.ResultSet.CONCUR_READ_ONLY,
-                resultSetHoldability_,
-                java.sql.Statement.RETURN_GENERATED_KEYS,
-                columnNames);
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "prepareStatement", ps);
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-        return ps;
     }
 
 

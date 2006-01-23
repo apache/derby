@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.net;
 
+import java.sql.SQLException;
+
 import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.SqlException;
@@ -197,7 +199,7 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
         }
     }
 
-    synchronized public void close() throws SqlException {
+    synchronized public void close() throws SQLException {
         // call super.close*() to do the close*
         super.close();
         if (open_) {
@@ -208,7 +210,7 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
         }
     }
 
-    synchronized public void closeX() throws SqlException {
+    synchronized public void closeX() throws SQLException {
         // call super.close*() to do the close*
         super.closeX();
         if (open_) {
@@ -230,7 +232,7 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
         }
     }
 
-    synchronized public void closeResources() throws SqlException {
+    synchronized public void closeResources() throws SQLException {
         // call super.close*() to do the close*
         super.closeResources();
         if (open_) {

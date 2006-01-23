@@ -22,6 +22,7 @@ package org.apache.derby.jdbc;
 
 import java.util.Enumeration;
 import java.util.Properties;
+import java.sql.SQLException;
 
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.ResourceUtilities;
@@ -36,7 +37,7 @@ public class ClientDriver implements java.sql.Driver {
 
     private final static int DERBY_REMOTE_PROTOCOL = 1;
 
-    static private SqlException exceptionsOnLoadDriver__ = null;
+    static private SQLException exceptionsOnLoadDriver__ = null;
     // Keep track of the registere driver so that we can deregister it if we're a stored proc.
     static private ClientDriver registeredDriver__ = null;
 
@@ -45,7 +46,8 @@ public class ClientDriver implements java.sql.Driver {
         // The Configuration static clause should execute before the following line does.
         if (Configuration.exceptionsOnLoadResources != null) {
             exceptionsOnLoadDriver__ =
-                    Utils.accumulateSQLException(Configuration.exceptionsOnLoadResources,
+                    Utils.accumulateSQLException(
+                            Configuration.exceptionsOnLoadResources.getSQLException(),
                             exceptionsOnLoadDriver__);
         }
         try {
@@ -54,7 +56,7 @@ public class ClientDriver implements java.sql.Driver {
         } catch (java.sql.SQLException e) {
             // A null log writer is passed, because jdbc 1 sql exceptions are automatically traced
             exceptionsOnLoadDriver__ =
-                    new SqlException(null, "Error occurred while trying to register Dnc driver with JDBC 1 Driver Manager");
+                    new SqlException(null, "Error occurred while trying to register Dnc driver with JDBC 1 Driver Manager").getSQLException();
             exceptionsOnLoadDriver__.setNextException(e);
         }
     }
@@ -64,76 +66,83 @@ public class ClientDriver implements java.sql.Driver {
 
     public java.sql.Connection connect(String url,
                                        java.util.Properties properties) throws java.sql.SQLException {
-        if (exceptionsOnLoadDriver__ != null) {
-            throw exceptionsOnLoadDriver__;
-        }
-
-        if (properties == null) {
-            properties = new java.util.Properties();
-        }
-
-        java.util.StringTokenizer urlTokenizer =
-                new java.util.StringTokenizer(url, "/:= \t\n\r\f", true);
-
-        int protocol = tokenizeProtocol(url, urlTokenizer);
-        if (protocol == 0) {
-            return null; // unrecognized database URL prefix.
-        }
-
-        String slashOrNull = null;
-        if (protocol == DERBY_REMOTE_PROTOCOL) {
-            try {
-                slashOrNull = urlTokenizer.nextToken(":/");
-            } catch (java.util.NoSuchElementException e) {
-                // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
-                throw new SqlException(null, e, "Invalid database url syntax: " + url);
+        try
+        {
+            if (exceptionsOnLoadDriver__ != null) {
+                throw exceptionsOnLoadDriver__;
             }
+
+            if (properties == null) {
+                properties = new java.util.Properties();
+            }
+
+            java.util.StringTokenizer urlTokenizer =
+                    new java.util.StringTokenizer(url, "/:= \t\n\r\f", true);
+
+            int protocol = tokenizeProtocol(url, urlTokenizer);
+            if (protocol == 0) {
+                return null; // unrecognized database URL prefix.
+            }
+
+            String slashOrNull = null;
+            if (protocol == DERBY_REMOTE_PROTOCOL) {
+                try {
+                    slashOrNull = urlTokenizer.nextToken(":/");
+                } catch (java.util.NoSuchElementException e) {
+                    // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
+                    throw new SqlException(null, e, "Invalid database url syntax: " + url);
+                }
+            }
+            String server = tokenizeServerName(urlTokenizer, url);    // "/server"
+            int port = tokenizeOptionalPortNumber(urlTokenizer, url); // "[:port]/"
+            if (port == 0) {
+                port = ClientDataSource.propertyDefault_portNumber;
+            }
+
+            // database is the database name and attributes.  This will be
+            // sent to network server as the databaseName
+            String database = tokenizeDatabase(urlTokenizer, url); // "database"
+            java.util.Properties augmentedProperties = tokenizeURLProperties(url, properties);
+            database = appendDatabaseAttributes(database,augmentedProperties);
+
+            int traceLevel;
+            try {
+                traceLevel = ClientDataSource.getTraceLevel(augmentedProperties);
+            } catch (java.lang.NumberFormatException e) {
+                // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
+                throw new SqlException(null, e, "trouble reading traceLevel connection property");
+            }
+
+            // Jdbc 1 connections will write driver trace info on a
+            // driver-wide basis using the jdbc 1 driver manager log writer.
+            // This log writer may be narrowed to the connection-level
+            // This log writer will be passed to the agent constructor.
+            org.apache.derby.client.am.LogWriter dncLogWriter =
+                    ClientDataSource.computeDncLogWriterForNewConnection(java.sql.DriverManager.getLogWriter(),
+                            ClientDataSource.getTraceDirectory(augmentedProperties),
+                            ClientDataSource.getTraceFile(augmentedProperties),
+                            ClientDataSource.getTraceFileAppend(augmentedProperties),
+                            traceLevel,
+                            "_driver",
+                            traceFileSuffixIndex_++);
+
+            org.apache.derby.client.net.NetConnection conn =
+                    new org.apache.derby.client.net.NetConnection((org.apache.derby.client.net.NetLogWriter) dncLogWriter,
+                            java.sql.DriverManager.getLoginTimeout(),
+                            server,
+                            port,
+                            database,
+                            augmentedProperties);
+
+            if(conn.isConnectionNull())
+                return null;
+
+            return conn;
         }
-        String server = tokenizeServerName(urlTokenizer, url);    // "/server"
-        int port = tokenizeOptionalPortNumber(urlTokenizer, url); // "[:port]/"
-        if (port == 0) {
-            port = ClientDataSource.propertyDefault_portNumber;
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
         }
-
-        // database is the database name and attributes.  This will be
-        // sent to network server as the databaseName
-        String database = tokenizeDatabase(urlTokenizer, url); // "database"
-        java.util.Properties augmentedProperties = tokenizeURLProperties(url, properties);
-        database = appendDatabaseAttributes(database,augmentedProperties);
-
-        int traceLevel;
-        try {
-            traceLevel = ClientDataSource.getTraceLevel(augmentedProperties);
-        } catch (java.lang.NumberFormatException e) {
-            // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
-            throw new SqlException(null, e, "trouble reading traceLevel connection property");
-        }
-
-        // Jdbc 1 connections will write driver trace info on a
-        // driver-wide basis using the jdbc 1 driver manager log writer.
-        // This log writer may be narrowed to the connection-level
-        // This log writer will be passed to the agent constructor.
-        org.apache.derby.client.am.LogWriter dncLogWriter =
-                ClientDataSource.computeDncLogWriterForNewConnection(java.sql.DriverManager.getLogWriter(),
-                        ClientDataSource.getTraceDirectory(augmentedProperties),
-                        ClientDataSource.getTraceFile(augmentedProperties),
-                        ClientDataSource.getTraceFileAppend(augmentedProperties),
-                        traceLevel,
-                        "_driver",
-                        traceFileSuffixIndex_++);
-
-        org.apache.derby.client.net.NetConnection conn =
-                new org.apache.derby.client.net.NetConnection((org.apache.derby.client.net.NetLogWriter) dncLogWriter,
-                        java.sql.DriverManager.getLoginTimeout(),
-                        server,
-                        port,
-                        database,
-                        augmentedProperties);
-        
-        if(conn.isConnectionNull())
-        	return null;
-        
-        return conn;
     }
 
     /**
@@ -161,10 +170,17 @@ public class ClientDriver implements java.sql.Driver {
 	}
 
 	public boolean acceptsURL(String url) throws java.sql.SQLException {
-        java.util.StringTokenizer urlTokenizer = 
-        		new java.util.StringTokenizer(url, "/:=; \t\n\r\f", true);
-        int protocol = tokenizeProtocol(url, urlTokenizer);
-        return protocol != 0;
+        try
+        {
+            java.util.StringTokenizer urlTokenizer = 
+                    new java.util.StringTokenizer(url, "/:=; \t\n\r\f", true);
+            int protocol = tokenizeProtocol(url, urlTokenizer);
+            return protocol != 0;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
     }
 
     public java.sql.DriverPropertyInfo[] getPropertyInfo(String url,

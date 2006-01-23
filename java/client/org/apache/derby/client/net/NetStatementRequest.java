@@ -634,308 +634,296 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     private void buildFDODTA(int numVars,
                              int[][] protocolTypesAndLengths,
                              Object[] inputs) throws SqlException {
-        long dataLength = 0;
-        Object o = null;
+        try
+        {
+            long dataLength = 0;
+            Object o = null;
 
-        markLengthBytes(CodePoint.FDODTA);
-        write1Byte(FdocaConstants.NULL_LID); // write the 1-byte row indicator
+            markLengthBytes(CodePoint.FDODTA);
+            write1Byte(FdocaConstants.NULL_LID); // write the 1-byte row indicator
 
-        // write data for each input column
-        for (int i = 0; i < numVars; i++) {
-            if (inputs[i] == null) {
-                if ((protocolTypesAndLengths[i][0] % 2) == 1) {
-                    write1Byte(FdocaConstants.NULL_DATA);
-                } else {
-                    //bug check
-                }
-            } else {
-                if ((protocolTypesAndLengths[i][0] % 2) == 1) {
-                    write1Byte(FdocaConstants.INDICATOR_NULLABLE);
-                }
-
-                switch (protocolTypesAndLengths[i][0] | 0x01) {  // mask out null indicator
-                case DRDAConstants.DRDA_TYPE_NVARMIX:
-                case DRDAConstants.DRDA_TYPE_NLONGMIX:
-                    // What to do for server that don't understand 1208 (UTF-8)
-                    // check for a promototed type, and use that instead if it exists
-                    o = retrievePromotedParameterIfExists(i);
-                    if (o == null) {
-                        writeSingleorMixedCcsidLDString((String) inputs[i], netAgent_.typdef_.getCcsidMbcEncoding());
-                    } else { // use the promototed object instead
-                        Clob c = (Clob) o;
-                        dataLength = c.length();
-                        setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
-                    }
-                    break;
-
-                case DRDAConstants.DRDA_TYPE_NVARCHAR:
-                case DRDAConstants.DRDA_TYPE_NLONG:
-                    o = retrievePromotedParameterIfExists(i);
-                    if (o == null) {
-
-                    } else { // use the promototed object instead
-                        dataLength = ((Clob) o).length();
-                        setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
-                    }
-                    break;
-
-                case DRDAConstants.DRDA_TYPE_NINTEGER:
-                    writeIntFdocaData(((Integer) inputs[i]).intValue());
-                    break;
-                case DRDAConstants.DRDA_TYPE_NSMALL:
-                    writeShortFdocaData(((Short) inputs[i]).shortValue());
-                    break;
-                case DRDAConstants.DRDA_TYPE_NFLOAT4:
-                    writeFloat(((Float) inputs[i]).floatValue());
-                    break;
-                case DRDAConstants.DRDA_TYPE_NFLOAT8:
-                    writeDouble(((Double) inputs[i]).doubleValue());
-                    break;
-                case DRDAConstants.DRDA_TYPE_NDECIMAL:
-                    writeBigDecimal((java.math.BigDecimal) inputs[i],
-                            (protocolTypesAndLengths[i][1] >> 8) & 0xff, // described precision not actual
-                            protocolTypesAndLengths[i][1] & 0xff); // described scale, not actual
-                    break;
-                case DRDAConstants.DRDA_TYPE_NDATE:
-                    writeDate((java.sql.Date) inputs[i]);
-                    break;
-                case DRDAConstants.DRDA_TYPE_NTIME:
-                    writeTime((java.sql.Time) inputs[i]);
-                    break;
-                case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
-                    writeTimestamp((java.sql.Timestamp) inputs[i]);
-                    break;
-                case DRDAConstants.DRDA_TYPE_NINTEGER8:
-                    writeLongFdocaData(((Long) inputs[i]).longValue());
-                    break;
-                case DRDAConstants.DRDA_TYPE_NVARBYTE:
-                case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
-                    o = retrievePromotedParameterIfExists(i);
-                    if (o == null) {
-                        writeLDBytes((byte[]) inputs[i]);
-                    } else { // use the promototed object instead
-                        Blob b = (Blob) o;
-                        dataLength = b.length();
-                        setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
-                    }
-                    break;
-                case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
-                case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
-                    // check for a promoted Clob
-                    o = retrievePromotedParameterIfExists(i);
-                    if (o == null) {
-                        try {
-                            dataLength = ((java.sql.Clob) inputs[i]).length();
-                        } catch (java.sql.SQLException e) {
-                            if (!(e instanceof org.apache.derby.client.am.SqlException)) {
-                                SqlException toThrow = new SqlException(netAgent_.logWriter_,
-                                        "Error obtaining length of external clob object, exception follows. ");
-                                toThrow.setNextException(e);
-                                throw toThrow;
-                            } else {
-                                throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
-                            }
-                        }
+            // write data for each input column
+            for (int i = 0; i < numVars; i++) {
+                if (inputs[i] == null) {
+                    if ((protocolTypesAndLengths[i][0] % 2) == 1) {
+                        write1Byte(FdocaConstants.NULL_DATA);
                     } else {
-                        dataLength = ((Clob) o).length();
+                        //bug check
                     }
-                    setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
-                    break;
-                case DRDAConstants.DRDA_TYPE_NLOBBYTES:
-                    // check for a promoted Clob
-                    o = retrievePromotedParameterIfExists(i);
-                    if (o == null) {
-                        try {
-                            dataLength = ((java.sql.Blob) inputs[i]).length();
-                        } catch (java.sql.SQLException e) {
-                            if (!(e instanceof org.apache.derby.client.am.SqlException)) {
-                                SqlException toThrow = new SqlException(netAgent_.logWriter_,
-                                        "Error obtaining length of external blob object, exception follows. ");
-                                toThrow.setNextException(e);
-                                throw toThrow;
-                            } else {
+                } else {
+                    if ((protocolTypesAndLengths[i][0] % 2) == 1) {
+                        write1Byte(FdocaConstants.INDICATOR_NULLABLE);
+                    }
+
+                    switch (protocolTypesAndLengths[i][0] | 0x01) {  // mask out null indicator
+                    case DRDAConstants.DRDA_TYPE_NVARMIX:
+                    case DRDAConstants.DRDA_TYPE_NLONGMIX:
+                        // What to do for server that don't understand 1208 (UTF-8)
+                        // check for a promototed type, and use that instead if it exists
+                        o = retrievePromotedParameterIfExists(i);
+                        if (o == null) {
+                            writeSingleorMixedCcsidLDString((String) inputs[i], netAgent_.typdef_.getCcsidMbcEncoding());
+                        } else { // use the promototed object instead
+                            Clob c = (Clob) o;
+                            dataLength = c.length();
+                            setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                        }
+                        break;
+
+                    case DRDAConstants.DRDA_TYPE_NVARCHAR:
+                    case DRDAConstants.DRDA_TYPE_NLONG:
+                        o = retrievePromotedParameterIfExists(i);
+                        if (o == null) {
+
+                        } else { // use the promototed object instead
+                            dataLength = ((Clob) o).length();
+                            setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                        }
+                        break;
+
+                    case DRDAConstants.DRDA_TYPE_NINTEGER:
+                        writeIntFdocaData(((Integer) inputs[i]).intValue());
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NSMALL:
+                        writeShortFdocaData(((Short) inputs[i]).shortValue());
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NFLOAT4:
+                        writeFloat(((Float) inputs[i]).floatValue());
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NFLOAT8:
+                        writeDouble(((Double) inputs[i]).doubleValue());
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NDECIMAL:
+                        writeBigDecimal((java.math.BigDecimal) inputs[i],
+                                (protocolTypesAndLengths[i][1] >> 8) & 0xff, // described precision not actual
+                                protocolTypesAndLengths[i][1] & 0xff); // described scale, not actual
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NDATE:
+                        writeDate((java.sql.Date) inputs[i]);
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NTIME:
+                        writeTime((java.sql.Time) inputs[i]);
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
+                        writeTimestamp((java.sql.Timestamp) inputs[i]);
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NINTEGER8:
+                        writeLongFdocaData(((Long) inputs[i]).longValue());
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NVARBYTE:
+                    case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
+                        o = retrievePromotedParameterIfExists(i);
+                        if (o == null) {
+                            writeLDBytes((byte[]) inputs[i]);
+                        } else { // use the promototed object instead
+                            Blob b = (Blob) o;
+                            dataLength = b.length();
+                            setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                        }
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
+                    case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
+                        // check for a promoted Clob
+                        o = retrievePromotedParameterIfExists(i);
+                        if (o == null) {
+                            try {
+                                dataLength = ((java.sql.Clob) inputs[i]).length();
+                            } catch (java.sql.SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
                             }
+                        } else {
+                            dataLength = ((Clob) o).length();
                         }
-                    } else { // use promoted Blob
-                        dataLength = ((Blob) o).length();
-                    }
-                    setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
-                    break;
-                case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
-                    // check for a promoted Clob
-                    o = retrievePromotedParameterIfExists(i);
-                    if (o == null) {
-                        if (((Clob) inputs[i]).isString()) {
-                            dataLength = ((Clob) inputs[i]).getUTF8Length();
-                        } else // must be a Unicode stream
-                        {
-                            dataLength = ((Clob) inputs[i]).length();
+                        setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NLOBBYTES:
+                        // check for a promoted Clob
+                        o = retrievePromotedParameterIfExists(i);
+                        if (o == null) {
+                            try {
+                                dataLength = ((java.sql.Blob) inputs[i]).length();
+                            } catch (java.sql.SQLException e) {
+                                throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
+                            }
+                        } else { // use promoted Blob
+                            dataLength = ((Blob) o).length();
                         }
-                    } else { // use promoted Clob
-                        dataLength = ((Clob) o).length();
+                        setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
+                        // check for a promoted Clob
+                        o = retrievePromotedParameterIfExists(i);
+                        if (o == null) {
+                            if (((Clob) inputs[i]).isString()) {
+                                dataLength = ((Clob) inputs[i]).getUTF8Length();
+                            } else // must be a Unicode stream
+                            {
+                                dataLength = ((Clob) inputs[i]).length();
+                            }
+                        } else { // use promoted Clob
+                            dataLength = ((Clob) o).length();
+                        }
+                        setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                        break;
+                    default:
+                        throw new SqlException(netAgent_.logWriter_, "unrecognized jdbc type. " +
+                                " type: " + protocolTypesAndLengths[i][0] +
+                                ", columnCount: " + numVars +
+                                ", columnIndex: " + i);
                     }
-                    setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
-                    break;
-                default:
-                    throw new SqlException(netAgent_.logWriter_, "unrecognized jdbc type. " +
-                            " type: " + protocolTypesAndLengths[i][0] +
-                            ", columnCount: " + numVars +
-                            ", columnIndex: " + i);
                 }
             }
+            updateLengthBytes(); // for fdodta
         }
-        updateLengthBytes(); // for fdodta
+        catch ( java.sql.SQLException se )
+        {
+            throw new SqlException(se);
+        }
     }
 
     // preconditions:
     private void buildEXTDTA(ColumnMetaData parameterMetaData,
                              Object[] inputRow,
                              boolean chained) throws SqlException {
-        // build the EXTDTA data, if necessary
-        if (extdtaPositions_ != null) {
-            boolean chainFlag, chainedWithSameCorrelator;
+        try
+        {
+            // build the EXTDTA data, if necessary
+            if (extdtaPositions_ != null) {
+                boolean chainFlag, chainedWithSameCorrelator;
 
-            for (int i = 0; i < extdtaPositions_.size(); i++) {
-                int index = ((Integer) extdtaPositions_.get(i)).intValue();
+                for (int i = 0; i < extdtaPositions_.size(); i++) {
+                    int index = ((Integer) extdtaPositions_.get(i)).intValue();
 
-                // is this the last EXTDTA to be built?
-                if (i != extdtaPositions_.size() - 1) { // no
-                    chainFlag = true;
-                    chainedWithSameCorrelator = true;
-                } else { // yes
-                    chainFlag = chained;
-                    chainedWithSameCorrelator = false;
-                }
-
-                // do we have to write a null byte?
-                boolean writeNullByte = false;
-                if (parameterMetaData.nullable_[index]) {
-                    writeNullByte = true;
-                }
-                // Use the type of the input parameter rather than the input
-                // column if possible.
-                int parameterType = parameterMetaData.clientParamtertype_[index];
-                if (parameterType == 0) {
-                    parameterType = parameterMetaData.types_[index];
-                }
-
-                // the follow types are possible due to promotion to BLOB
-                if (parameterType == Types.BLOB
-                        || parameterType == Types.BINARY
-                        || parameterType == Types.VARBINARY
-                        || parameterType == Types.LONGVARBINARY) {
-                    Blob o = (Blob) retrievePromotedParameterIfExists(index);
-                    java.sql.Blob b = (o == null) ? (java.sql.Blob) inputRow[index] : o;
-                    boolean isExternalBlob = !(b instanceof org.apache.derby.client.am.Blob);
-                    if (isExternalBlob) {
-                        try {
-                            writeScalarStream(chainFlag,
-                                    chainedWithSameCorrelator,
-                                    CodePoint.EXTDTA,
-                                    (int) b.length(),
-                                    b.getBinaryStream(),
-                                    writeNullByte,
-                                    index + 1);
-                        } catch (java.sql.SQLException e) {
-                            if (!(e instanceof org.apache.derby.client.am.SqlException)) {
-                                SqlException toThrow = new SqlException(netAgent_.logWriter_, "Error occurred while streaming from external blob object, exception follows. ");
-                                toThrow.setNextException(e);
-                                throw toThrow;
-                            } else {
-                                throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
-                            }
-                        }
-                    } else if (((Blob) b).isBinaryStream()) {
-                        writeScalarStream(chainFlag,
-                                chainedWithSameCorrelator,
-                                CodePoint.EXTDTA,
-                                (int) ((Blob) b).length(),
-                                ((Blob) b).getBinaryStream(),
-                                writeNullByte,
-                                index + 1);
-                    } else { // must be a binary string
-                        // note: a possible optimization is to use writeScalarLobBytes
-                        //       when the input is small
-                        //   use this: if (b.length () < DssConstants.MAX_DSS_LEN - 6 - 4)
-                        //               writeScalarLobBytes (...)
-                        // Yes, this would avoid having to new up a java.io.ByteArrayInputStream
-                        writeScalarStream(chainFlag,
-                                chainedWithSameCorrelator,
-                                CodePoint.EXTDTA,
-                                (int) ((Blob) b).length(),
-                                ((Blob) b).getBinaryStream(),
-                                writeNullByte,
-                                index + 1);
+                    // is this the last EXTDTA to be built?
+                    if (i != extdtaPositions_.size() - 1) { // no
+                        chainFlag = true;
+                        chainedWithSameCorrelator = true;
+                    } else { // yes
+                        chainFlag = chained;
+                        chainedWithSameCorrelator = false;
                     }
-                }
-                // the follow types are possible due to promotion to CLOB
-                else if (
-                        parameterType == Types.CLOB
-                        || parameterType == Types.CHAR
-                        || parameterType == Types.VARCHAR
-                        || parameterType == Types.LONGVARCHAR) {
-                    Clob o = (Clob) retrievePromotedParameterIfExists(index);
-                    java.sql.Clob c = (o == null) ? (java.sql.Clob) inputRow[index] : o;
-                    boolean isExternalClob = !(c instanceof org.apache.derby.client.am.Clob);
 
-                    if (isExternalClob) {
-                        try {
+                    // do we have to write a null byte?
+                    boolean writeNullByte = false;
+                    if (parameterMetaData.nullable_[index]) {
+                        writeNullByte = true;
+                    }
+                    // Use the type of the input parameter rather than the input
+                    // column if possible.
+                    int parameterType = parameterMetaData.clientParamtertype_[index];
+                    if (parameterType == 0) {
+                        parameterType = parameterMetaData.types_[index];
+                    }
+
+                    // the follow types are possible due to promotion to BLOB
+                    if (parameterType == Types.BLOB
+                            || parameterType == Types.BINARY
+                            || parameterType == Types.VARBINARY
+                            || parameterType == Types.LONGVARBINARY) {
+                        Blob o = (Blob) retrievePromotedParameterIfExists(index);
+                        java.sql.Blob b = (o == null) ? (java.sql.Blob) inputRow[index] : o;
+                        boolean isExternalBlob = !(b instanceof org.apache.derby.client.am.Blob);
+                        if (isExternalBlob) {
+                            try {
+                                writeScalarStream(chainFlag,
+                                        chainedWithSameCorrelator,
+                                        CodePoint.EXTDTA,
+                                        (int) b.length(),
+                                        b.getBinaryStream(),
+                                        writeNullByte,
+                                        index + 1);
+                            } catch (java.sql.SQLException e) {
+                                throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
+                            }
+                        } else if (((Blob) b).isBinaryStream()) {
                             writeScalarStream(chainFlag,
                                     chainedWithSameCorrelator,
                                     CodePoint.EXTDTA,
-                                    (int) c.length(),
-                                    c.getCharacterStream(),
+                                    (int) ((Blob) b).length(),
+                                    ((Blob) b).getBinaryStream(),
                                     writeNullByte,
                                     index + 1);
-                        } catch (java.sql.SQLException e) {
-                            if (!(e instanceof org.apache.derby.client.am.SqlException)) {
-                                SqlException toThrow = new SqlException(netAgent_.logWriter_, "Error occurred while streaming from external clob object, exception follows. ");
-                                toThrow.setNextException(e);
-                                throw toThrow;
-                            } else {
+                        } else { // must be a binary string
+                            // note: a possible optimization is to use writeScalarLobBytes
+                            //       when the input is small
+                            //   use this: if (b.length () < DssConstants.MAX_DSS_LEN - 6 - 4)
+                            //               writeScalarLobBytes (...)
+                            // Yes, this would avoid having to new up a java.io.ByteArrayInputStream
+                            writeScalarStream(chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    (int) ((Blob) b).length(),
+                                    ((Blob) b).getBinaryStream(),
+                                    writeNullByte,
+                                    index + 1);
+                        }
+                    }
+                    // the follow types are possible due to promotion to CLOB
+                    else if (
+                            parameterType == Types.CLOB
+                            || parameterType == Types.CHAR
+                            || parameterType == Types.VARCHAR
+                            || parameterType == Types.LONGVARCHAR) {
+                        Clob o = (Clob) retrievePromotedParameterIfExists(index);
+                        java.sql.Clob c = (o == null) ? (java.sql.Clob) inputRow[index] : o;
+                        boolean isExternalClob = !(c instanceof org.apache.derby.client.am.Clob);
+
+                        if (isExternalClob) {
+                            try {
+                                writeScalarStream(chainFlag,
+                                        chainedWithSameCorrelator,
+                                        CodePoint.EXTDTA,
+                                        (int) c.length(),
+                                        c.getCharacterStream(),
+                                        writeNullByte,
+                                        index + 1);
+                            } catch (java.sql.SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
                             }
+                        } else if (((Clob) c).isCharacterStream()) {
+                            writeScalarStream(chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    (int) ((Clob) c).length(),
+                                    ((Clob) c).getCharacterStream(),
+                                    writeNullByte,
+                                    index + 1);
+                        } else if (((Clob) c).isAsciiStream()) {
+                            writeScalarStream(chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    (int) ((Clob) c).length(),
+                                    ((Clob) c).getAsciiStream(),
+                                    writeNullByte,
+                                    index + 1);
+                        } else if (((Clob) c).isUnicodeStream()) {
+                            writeScalarStream(chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    (int) ((Clob) c).length(),
+                                    ((Clob) c).getUnicodeStream(),
+                                    writeNullByte,
+                                    index + 1);
+                        } else { // must be a String
+                            // note: a possible optimization is to use writeScalarLobBytes
+                            //       when the input is small.
+                            //   use this: if (c.length () < DssConstants.MAX_DSS_LEN - 6 - 4)
+                            //               writeScalarLobBytes (...)
+                            writeScalarStream(chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    (int) ((Clob) c).getUTF8Length(),
+                                    new java.io.ByteArrayInputStream(((Clob) c).getUtf8String()),
+                                    writeNullByte,
+                                    index + 1);
                         }
-                    } else if (((Clob) c).isCharacterStream()) {
-                        writeScalarStream(chainFlag,
-                                chainedWithSameCorrelator,
-                                CodePoint.EXTDTA,
-                                (int) ((Clob) c).length(),
-                                ((Clob) c).getCharacterStream(),
-                                writeNullByte,
-                                index + 1);
-                    } else if (((Clob) c).isAsciiStream()) {
-                        writeScalarStream(chainFlag,
-                                chainedWithSameCorrelator,
-                                CodePoint.EXTDTA,
-                                (int) ((Clob) c).length(),
-                                ((Clob) c).getAsciiStream(),
-                                writeNullByte,
-                                index + 1);
-                    } else if (((Clob) c).isUnicodeStream()) {
-                        writeScalarStream(chainFlag,
-                                chainedWithSameCorrelator,
-                                CodePoint.EXTDTA,
-                                (int) ((Clob) c).length(),
-                                ((Clob) c).getUnicodeStream(),
-                                writeNullByte,
-                                index + 1);
-                    } else { // must be a String
-                        // note: a possible optimization is to use writeScalarLobBytes
-                        //       when the input is small.
-                        //   use this: if (c.length () < DssConstants.MAX_DSS_LEN - 6 - 4)
-                        //               writeScalarLobBytes (...)
-                        writeScalarStream(chainFlag,
-                                chainedWithSameCorrelator,
-                                CodePoint.EXTDTA,
-                                (int) ((Clob) c).getUTF8Length(),
-                                new java.io.ByteArrayInputStream(((Clob) c).getUtf8String()),
-                                writeNullByte,
-                                index + 1);
                     }
                 }
             }
+        }
+        catch ( java.sql.SQLException se )
+        {
+            throw new SqlException(se);
         }
     }
 
@@ -968,300 +956,293 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                                                ColumnMetaData parameterMetaData,
                                                                int[][] lidAndLengths,
                                                                java.util.Hashtable overrideMap) throws SqlException {
-        int numVars = parameterMetaData.columns_;
-        String s = null;
-        if (!promototedParameters_.isEmpty()) {
-            promototedParameters_.clear();
-        }
-
-        for (int i = 0; i < numVars; i++) {
-
-            int jdbcType;
-            // Send the input type unless it is not available.
-            // (e.g an output parameter)
-            jdbcType = parameterMetaData.clientParamtertype_[i];
-            if (jdbcType == 0) {
-                jdbcType = parameterMetaData.types_[i];
+        try
+        {
+            int numVars = parameterMetaData.columns_;
+            String s = null;
+            if (!promototedParameters_.isEmpty()) {
+                promototedParameters_.clear();
             }
 
-            // jdbc semantics - This should happen outside of the build methods
-            // if describe input is not supported, we require the user to at least
-            // call setNull() and provide the type information.  Otherwise, we won't
-            // be able to guess the right PROTOCOL type to send to the server, and an
-            // exception is thrown.
+            for (int i = 0; i < numVars; i++) {
 
-            if (jdbcType == 0) {
-                throw new SqlException(netAgent_.logWriter_, "Invalid JDBC Type for parameter " + i);
-            }
+                int jdbcType;
+                // Send the input type unless it is not available.
+                // (e.g an output parameter)
+                jdbcType = parameterMetaData.clientParamtertype_[i];
+                if (jdbcType == 0) {
+                    jdbcType = parameterMetaData.types_[i];
+                }
 
-            switch (jdbcType) {
-            case java.sql.Types.CHAR:
-            case java.sql.Types.VARCHAR:
-                // lid: PROTOCOL_TYPE_NVARMIX, length override: 32767 (max)
-                // dataFormat: String
-                // this won't work if 1208 is not supported
-                s = (String) inputRow[i];
-                // assumes UTF-8 characters at most 3 bytes long
-                // Flow the String as a VARCHAR
-                if (s == null || s.length() <= 32767 / 3) {
-                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARMIX;
-                    lidAndLengths[i][1] = 32767;
-                } else {
-                    // Flow the data as CLOB data if the data too large to for LONGVARCHAR
-                    java.io.ByteArrayInputStream bais = null;
-                    byte[] ba = null;
-                    try {
-                        ba = s.getBytes("UTF-8");
-                        bais = new java.io.ByteArrayInputStream(ba);
-                        Clob c = new Clob(netAgent_, bais, "UTF-8", ba.length);
-                        // inputRow[i] = c;
+                // jdbc semantics - This should happen outside of the build methods
+                // if describe input is not supported, we require the user to at least
+                // call setNull() and provide the type information.  Otherwise, we won't
+                // be able to guess the right PROTOCOL type to send to the server, and an
+                // exception is thrown.
+
+                if (jdbcType == 0) {
+                    throw new SqlException(netAgent_.logWriter_, "Invalid JDBC Type for parameter " + i);
+                }
+
+                switch (jdbcType) {
+                case java.sql.Types.CHAR:
+                case java.sql.Types.VARCHAR:
+                    // lid: PROTOCOL_TYPE_NVARMIX, length override: 32767 (max)
+                    // dataFormat: String
+                    // this won't work if 1208 is not supported
+                    s = (String) inputRow[i];
+                    // assumes UTF-8 characters at most 3 bytes long
+                    // Flow the String as a VARCHAR
+                    if (s == null || s.length() <= 32767 / 3) {
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARMIX;
+                        lidAndLengths[i][1] = 32767;
+                    } else {
+                        // Flow the data as CLOB data if the data too large to for LONGVARCHAR
+                        java.io.ByteArrayInputStream bais = null;
+                        byte[] ba = null;
+                        try {
+                            ba = s.getBytes("UTF-8");
+                            bais = new java.io.ByteArrayInputStream(ba);
+                            Clob c = new Clob(netAgent_, bais, "UTF-8", ba.length);
+                            // inputRow[i] = c;
+                            // Place the new Lob in the promototedParameter_ collection for
+                            // NetStatementRequest use
+                            promototedParameters_.put(new Integer(i), c);
+
+                            lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
+                            lidAndLengths[i][1] = buildPlaceholderLength(c.length());
+                        } catch (java.io.UnsupportedEncodingException e) {
+                            throw new SqlException(netAgent_.logWriter_, e, "Error in building String parameter: throwable attached");
+                        }
+                    }
+                    break;
+                case java.sql.Types.INTEGER:
+                    // lid: PROTOCOL_TYPE_NINTEGER, length override: 4
+                    // dataFormat: Integer
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NINTEGER;
+                    lidAndLengths[i][1] = 4;
+                    break;
+                case java.sql.Types.BOOLEAN:
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NBOOLEAN;
+                    lidAndLengths[i][1] = 1;
+                    break;
+                case java.sql.Types.SMALLINT:
+                case java.sql.Types.TINYINT:
+                case java.sql.Types.BIT:
+                    // lid: PROTOCOL_TYPE_NSMALL,  length override: 2
+                    // dataFormat: Short
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NSMALL;
+                    lidAndLengths[i][1] = 2;
+                    break;
+                case java.sql.Types.REAL:
+                    // lid: PROTOCOL_TYPE_NFLOAT4, length override: 4
+                    // dataFormat: Float
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NFLOAT4;
+                    lidAndLengths[i][1] = 4;
+                    break;
+                case java.sql.Types.DOUBLE:
+                case java.sql.Types.FLOAT:
+                    // lid: PROTOCOL_TYPE_NFLOAT8, length override: 8
+                    // dataFormat: Double
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NFLOAT8;
+                    lidAndLengths[i][1] = 8;
+                    break;
+                case java.sql.Types.NUMERIC:
+                case java.sql.Types.DECIMAL:
+                    // lid: PROTOCOL_TYPE_NDECIMAL
+                    // dataFormat: java.math.BigDecimal
+                    // input only:
+                    //   if null and describe input - use describe input precision and scale
+                    //   if not null and describe input - calculate precision and actual scale from data
+                    //   if null and no describe input - guess with precision 1 scale 0
+                    //   if not null and no describe input - calculate precision and actual scale from data
+                    // output only:
+                    //   use largest precision/scale based on registered scale from registerOutParameter
+                    // inout:
+                    //   if null - use largest precision/scale based on scale from registerOutParameter
+                    //   if not null - write bigDecimal () pass registered scale so it can pad, you don't even
+                    //      have to look at the actual scale at this level.
+                    /*
+                    if (parameterMetaData.isGuessed) {
+                      java.math.BigDecimal bigDecimal = (java.math.BigDecimal) inputRow[i];
+                      int precision = Utils.computeBigDecimalPrecision (bigDecimal);
+                      lidAndLengths[i][1] = (precision << 8) + // use precision above
+                                          (bigDecimal.scale() << 0);
+                    }
+                    */
+                    // Split this entire method into two parts, the first method is called only once and the inputRow is not passed,!!
+                    // the second method is called for every inputRow and overrides inputDA lengths/scales based upon the acutal data!
+                    // for decimal and blob columns only
+                    int precision = parameterMetaData.sqlPrecision_[i];
+                    int scale = parameterMetaData.sqlScale_[i];
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NDECIMAL;
+                    lidAndLengths[i][1] = (precision << 8) + (scale << 0);
+                    break;
+                case java.sql.Types.DATE:
+                    // for input, output, and inout parameters
+                    // lid: PROTOCOL_TYPE_NDATE, length override: 8
+                    // dataFormat: java.sql.Date
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NDATE;
+                    lidAndLengths[i][1] = 10;
+                    break;
+                case java.sql.Types.TIME:
+                    // for input, output, and inout parameters
+                    // lid: PROTOCOL_TYPE_NTIME, length override: 8
+                    // dataFormat: java.sql.Time
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NTIME;
+                    lidAndLengths[i][1] = 8;
+                    break;
+                case java.sql.Types.TIMESTAMP:
+                    // for input, output, and inout parameters
+                    // lid: PROTOCOL_TYPE_NTIME, length overrid: 26
+                    // dataFormat: java.sql.Timestamp
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NTIMESTAMP;
+                    lidAndLengths[i][1] = 26;
+                    break;
+                case java.sql.Types.BIGINT:
+                    // if SQLAM < 6 this should be mapped to decimal (19,0) in common layer
+                    // if SQLAM >=6, lid: PROTOCOL_TYPE_NINTEGER8, length override: 8
+                    // dataFormat: Long
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NINTEGER8;
+                    lidAndLengths[i][1] = 8;
+                    break;
+                case java.sql.Types.LONGVARCHAR:
+                    // Is this the right thing to do  // should this be 32700
+                    s = (String) inputRow[i];
+                    if (s == null || s.length() <= 32767 / 3) {
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLONGMIX;
+                        lidAndLengths[i][1] = 32767;
+                    } else {
+                        // Flow the data as CLOB data if the data too large to for LONGVARCHAR
+                        java.io.ByteArrayInputStream bais = null;
+                        byte[] ba = null;
+                        try {
+                            ba = s.getBytes("UTF-8");
+                            bais = new java.io.ByteArrayInputStream(ba);
+                            Clob c = new Clob(netAgent_, bais, "UTF-8", ba.length);
+
+                            // inputRow[i] = c;
+                            // Place the new Lob in the promototedParameter_ collection for
+                            // NetStatementRequest use
+                            promototedParameters_.put(new Integer(i), c);
+
+                            lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
+                            lidAndLengths[i][1] = buildPlaceholderLength(c.length());
+                        } catch (java.io.UnsupportedEncodingException e) {
+                            throw new SqlException(netAgent_.logWriter_, e, "Error in building String parameter: throwable attached");
+                        }
+                    }
+                    break;
+                case java.sql.Types.BINARY:
+                case java.sql.Types.VARBINARY:
+                    byte[] ba = (byte[]) inputRow[i];
+                    if (ba == null) {
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARBYTE;
+                        lidAndLengths[i][1] = 32767;
+                    } else if (ba.length <= 32767) {
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARBYTE;
+                        lidAndLengths[i][1] = 32767;
+                    } else {
+                        // Promote to a BLOB. Only reach this path in the absence of describe information.
+                        Blob b = new Blob(ba, netAgent_, 0);
+
+                        // inputRow[i] = b;
                         // Place the new Lob in the promototedParameter_ collection for
                         // NetStatementRequest use
-                        promototedParameters_.put(new Integer(i), c);
+                        promototedParameters_.put(new Integer(i), b);
 
-                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
-                        lidAndLengths[i][1] = buildPlaceholderLength(c.length());
-                    } catch (java.io.UnsupportedEncodingException e) {
-                        throw new SqlException(netAgent_.logWriter_, e, "Error in building String parameter: throwable attached");
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
+                        lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
                     }
-                }
-                break;
-            case java.sql.Types.INTEGER:
-                // lid: PROTOCOL_TYPE_NINTEGER, length override: 4
-                // dataFormat: Integer
-                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NINTEGER;
-                lidAndLengths[i][1] = 4;
-                break;
-            case java.sql.Types.BOOLEAN:
-                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NBOOLEAN;
-                lidAndLengths[i][1] = 1;
-                break;
-            case java.sql.Types.SMALLINT:
-            case java.sql.Types.TINYINT:
-            case java.sql.Types.BIT:
-                // lid: PROTOCOL_TYPE_NSMALL,  length override: 2
-                // dataFormat: Short
-                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NSMALL;
-                lidAndLengths[i][1] = 2;
-                break;
-            case java.sql.Types.REAL:
-                // lid: PROTOCOL_TYPE_NFLOAT4, length override: 4
-                // dataFormat: Float
-                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NFLOAT4;
-                lidAndLengths[i][1] = 4;
-                break;
-            case java.sql.Types.DOUBLE:
-            case java.sql.Types.FLOAT:
-                // lid: PROTOCOL_TYPE_NFLOAT8, length override: 8
-                // dataFormat: Double
-                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NFLOAT8;
-                lidAndLengths[i][1] = 8;
-                break;
-            case java.sql.Types.NUMERIC:
-            case java.sql.Types.DECIMAL:
-                // lid: PROTOCOL_TYPE_NDECIMAL
-                // dataFormat: java.math.BigDecimal
-                // input only:
-                //   if null and describe input - use describe input precision and scale
-                //   if not null and describe input - calculate precision and actual scale from data
-                //   if null and no describe input - guess with precision 1 scale 0
-                //   if not null and no describe input - calculate precision and actual scale from data
-                // output only:
-                //   use largest precision/scale based on registered scale from registerOutParameter
-                // inout:
-                //   if null - use largest precision/scale based on scale from registerOutParameter
-                //   if not null - write bigDecimal () pass registered scale so it can pad, you don't even
-                //      have to look at the actual scale at this level.
-                /*
-                if (parameterMetaData.isGuessed) {
-                  java.math.BigDecimal bigDecimal = (java.math.BigDecimal) inputRow[i];
-                  int precision = Utils.computeBigDecimalPrecision (bigDecimal);
-                  lidAndLengths[i][1] = (precision << 8) + // use precision above
-                                      (bigDecimal.scale() << 0);
-                }
-                */
-                // Split this entire method into two parts, the first method is called only once and the inputRow is not passed,!!
-                // the second method is called for every inputRow and overrides inputDA lengths/scales based upon the acutal data!
-                // for decimal and blob columns only
-                int precision = parameterMetaData.sqlPrecision_[i];
-                int scale = parameterMetaData.sqlScale_[i];
-                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NDECIMAL;
-                lidAndLengths[i][1] = (precision << 8) + (scale << 0);
-                break;
-            case java.sql.Types.DATE:
-                // for input, output, and inout parameters
-                // lid: PROTOCOL_TYPE_NDATE, length override: 8
-                // dataFormat: java.sql.Date
-                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NDATE;
-                lidAndLengths[i][1] = 10;
-                break;
-            case java.sql.Types.TIME:
-                // for input, output, and inout parameters
-                // lid: PROTOCOL_TYPE_NTIME, length override: 8
-                // dataFormat: java.sql.Time
-                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NTIME;
-                lidAndLengths[i][1] = 8;
-                break;
-            case java.sql.Types.TIMESTAMP:
-                // for input, output, and inout parameters
-                // lid: PROTOCOL_TYPE_NTIME, length overrid: 26
-                // dataFormat: java.sql.Timestamp
-                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NTIMESTAMP;
-                lidAndLengths[i][1] = 26;
-                break;
-            case java.sql.Types.BIGINT:
-                // if SQLAM < 6 this should be mapped to decimal (19,0) in common layer
-                // if SQLAM >=6, lid: PROTOCOL_TYPE_NINTEGER8, length override: 8
-                // dataFormat: Long
-                lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NINTEGER8;
-                lidAndLengths[i][1] = 8;
-                break;
-            case java.sql.Types.LONGVARCHAR:
-                // Is this the right thing to do  // should this be 32700
-                s = (String) inputRow[i];
-                if (s == null || s.length() <= 32767 / 3) {
-                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLONGMIX;
-                    lidAndLengths[i][1] = 32767;
-                } else {
-                    // Flow the data as CLOB data if the data too large to for LONGVARCHAR
-                    java.io.ByteArrayInputStream bais = null;
-                    byte[] ba = null;
-                    try {
-                        ba = s.getBytes("UTF-8");
-                        bais = new java.io.ByteArrayInputStream(ba);
-                        Clob c = new Clob(netAgent_, bais, "UTF-8", ba.length);
+                    break;
+                case java.sql.Types.LONGVARBINARY:
+                    ba = (byte[]) inputRow[i];
+                    if (ba == null) {
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLONGVARBYTE;
+                        lidAndLengths[i][1] = 32767;
+                    } else if (ba.length <= 32767) {
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLONGVARBYTE;
+                        lidAndLengths[i][1] = 32767;
+                    } else {
+                        // Promote to a BLOB. Only reach this path in the absensce of describe information.
+                        Blob b = new Blob(ba, netAgent_, 0);
 
-                        // inputRow[i] = c;
+                        // inputRow[i] = b;
                         // Place the new Lob in the promototedParameter_ collection for
                         // NetStatementRequest use
-                        promototedParameters_.put(new Integer(i), c);
+                        promototedParameters_.put(new Integer(i), b);
 
-                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
-                        lidAndLengths[i][1] = buildPlaceholderLength(c.length());
-                    } catch (java.io.UnsupportedEncodingException e) {
-                        throw new SqlException(netAgent_.logWriter_, e, "Error in building String parameter: throwable attached");
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
+                        lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
                     }
-                }
-                break;
-            case java.sql.Types.BINARY:
-            case java.sql.Types.VARBINARY:
-                byte[] ba = (byte[]) inputRow[i];
-                if (ba == null) {
-                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARBYTE;
-                    lidAndLengths[i][1] = 32767;
-                } else if (ba.length <= 32767) {
-                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARBYTE;
-                    lidAndLengths[i][1] = 32767;
-                } else {
-                    // Promote to a BLOB. Only reach this path in the absence of describe information.
-                    Blob b = new Blob(ba, netAgent_, 0);
-
-                    // inputRow[i] = b;
-                    // Place the new Lob in the promototedParameter_ collection for
-                    // NetStatementRequest use
-                    promototedParameters_.put(new Integer(i), b);
-
-                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
-                    lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
-                }
-                break;
-            case java.sql.Types.LONGVARBINARY:
-                ba = (byte[]) inputRow[i];
-                if (ba == null) {
-                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLONGVARBYTE;
-                    lidAndLengths[i][1] = 32767;
-                } else if (ba.length <= 32767) {
-                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLONGVARBYTE;
-                    lidAndLengths[i][1] = 32767;
-                } else {
-                    // Promote to a BLOB. Only reach this path in the absensce of describe information.
-                    Blob b = new Blob(ba, netAgent_, 0);
-
-                    // inputRow[i] = b;
-                    // Place the new Lob in the promototedParameter_ collection for
-                    // NetStatementRequest use
-                    promototedParameters_.put(new Integer(i), b);
-
-                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
-                    lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
-                }
-                break;
-            case java.sql.Types.BLOB:
-                java.sql.Blob b = (java.sql.Blob) inputRow[i];
-                if (b == null) {
-                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
-                    lidAndLengths[i][1] =
-                            buildPlaceholderLength(parameterMetaData.sqlLength_[i]);
-                } else {
-                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
-                    try {
-                        lidAndLengths[i][1] = buildPlaceholderLength(b.length());
-                    } catch (java.sql.SQLException e) {
-                        if (!(e instanceof org.apache.derby.client.am.SqlException)) {
-                            SqlException toThrow =
-                                    new SqlException(netAgent_.logWriter_, "Error obtaining length of external blob object, exception follows. ");
-                            toThrow.setNextException(e);
-                            throw toThrow;
-                        } else {
+                    break;
+                case java.sql.Types.BLOB:
+                    java.sql.Blob b = (java.sql.Blob) inputRow[i];
+                    if (b == null) {
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
+                        lidAndLengths[i][1] =
+                                buildPlaceholderLength(parameterMetaData.sqlLength_[i]);
+                    } else {
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
+                        try {
+                            lidAndLengths[i][1] = buildPlaceholderLength(b.length());
+                        } catch (java.sql.SQLException e) {
                             throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
                         }
                     }
-                }
-                break;
-            case java.sql.Types.CLOB:
-                {
-                    // use columnMeta.singleMixedByteOrDouble_ to decide protocolType
-                    java.sql.Clob c = (java.sql.Clob) inputRow[i];
-                    boolean isExternalClob = !(c instanceof org.apache.derby.client.am.Clob);
-                    long lobLength = 0;
-                    if (c == null) {
-                        lobLength = parameterMetaData.sqlLength_[i];
-                    } else if (isExternalClob) {
-                        try {
-                            lobLength = c.length();
-                        } catch (java.sql.SQLException e) {
-                            if (!(e instanceof org.apache.derby.client.am.SqlException)) {
-                                SqlException toThrow =
-                                        new SqlException(netAgent_.logWriter_, "Error obtaining length of external clob object, exception follows. ");
-                                toThrow.setNextException(e);
-                                throw toThrow;
-                            } else {
+                    break;
+                case java.sql.Types.CLOB:
+                    {
+                        // use columnMeta.singleMixedByteOrDouble_ to decide protocolType
+                        java.sql.Clob c = (java.sql.Clob) inputRow[i];
+                        boolean isExternalClob = !(c instanceof org.apache.derby.client.am.Clob);
+                        long lobLength = 0;
+                        if (c == null) {
+                            lobLength = parameterMetaData.sqlLength_[i];
+                        } else if (isExternalClob) {
+                            try {
+                                lobLength = c.length();
+                            } catch (java.sql.SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of clob object, exception follows. ");
                             }
+                        } else {
+                            lobLength = ((Clob) c).length();
                         }
-                    } else {
-                        lobLength = ((Clob) c).length();
+                        if (c == null) {
+                            lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
+                            lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                        } else if (isExternalClob) {
+                            lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
+                            lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                        } else if (((Clob) c).isCharacterStream()) {
+                            lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
+                            lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                        } else if (((Clob) c).isUnicodeStream()) {
+                            lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
+                            lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                        } else if (((Clob) c).isAsciiStream()) {
+                            lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCSBCS;
+                            lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                        } else if (((Clob) c).isString()) {
+                            lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
+                            lidAndLengths[i][1] = buildPlaceholderLength(((Clob) c).getUTF8Length());
+                        }
                     }
-                    if (c == null) {
-                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
-                        lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
-                    } else if (isExternalClob) {
-                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
-                        lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
-                    } else if (((Clob) c).isCharacterStream()) {
-                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
-                        lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
-                    } else if (((Clob) c).isUnicodeStream()) {
-                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
-                        lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
-                    } else if (((Clob) c).isAsciiStream()) {
-                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCSBCS;
-                        lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
-                    } else if (((Clob) c).isString()) {
-                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
-                        lidAndLengths[i][1] = buildPlaceholderLength(((Clob) c).getUTF8Length());
-                    }
+                    break;
+                default :
+                    throw new SqlException(netAgent_.logWriter_, "unrecognized sql type");
                 }
-                break;
-            default :
-                throw new SqlException(netAgent_.logWriter_, "unrecognized sql type");
-            }
 
-            if (!parameterMetaData.nullable_[i]) {
-                lidAndLengths[i][0]--;
+                if (!parameterMetaData.nullable_[i]) {
+                    lidAndLengths[i][0]--;
+                }
             }
+            return overrideMap;
         }
-        return overrideMap;
+        catch ( java.sql.SQLException se )
+        {
+            throw new SqlException(se);
+        }
     }
 
     private int buildPlaceholderLength(long totalLength) {
