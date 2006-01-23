@@ -310,6 +310,7 @@ public class prepStmt
 			test5172(conn);
 			jira614Test(conn);
 			jira170Test(conn);
+			jira125Test(conn);
 			conn.close();
 			// refresh conn before cleaning up
 			conn = ij.startJBMS();
@@ -787,5 +788,121 @@ public class prepStmt
                 e.printStackTrace();
         }
     }
-}
+	/**
+	 * Jira-125 has to do with proper use of continuation headers 
+	 * for very large reply messages, such as the SQLDARD which is
+	 * returned for a prepared statement with an enormous number of
+	 * parameter markers. This test generates a multi-segment SQLDARD
+	 * response message from the server, to verify that the code in
+	 * DDMWriter.finalizeDSSLength is executed.
+	 *
+	 * Repro for DERBY-125 off-by-one error.  This repro runs in
+	 * two iterations.  The first iteration, we use a table name
+	 * and a column name that are extra long, so that the server-
+	 * side buffer has more data in it.  The second iteration, we
+	 * use simpler names for the table and column, which take up
+	 * less space in the server buffer.  Then, since the server-
+	 * side bytes array was previously used for a larger amount of
+	 * data, then the unused bytes contain old data.  Since we
+	 * intentionally put the "larger amount of data" into the buffer
+	 * during the first iteration, we know what the old data bytes
+	 * are going to be.  Thus, by using specific lengths for the 
+	 * table and column names, we can 'shift' the old data until we
+	 * reach a point where the off-by-one error manifests itself:
+	 * namely, we end up incorrectly leaving a non-zero data byte
+	 * in the last position of the current server buffer, which
+	 * is wrong.
+	 */
 
+    private static void jira125Test(Connection conn)
+        throws Exception
+    {
+		jira125Test_a(conn);
+		jira125Test_b(conn);
+    }
+
+    private static void jira125Test_b(Connection conn)
+	    throws Exception
+    {
+	    Statement stmt = conn.createStatement();
+        PreparedStatement ps ;
+	    try {
+		    stmt.execute("drop table jira125");
+	    } catch (Throwable t) { }
+		try {
+	        stmt.execute("create table jira125 (id integer)");
+			stmt.execute("insert into jira125 values 1, 2, 3");
+		} catch (Throwable t) { }
+        StringBuffer buf = new StringBuffer();
+        buf.append("SELECT id FROM jira125 WHERE id IN ( ");
+
+		// Must have at least 551 columns here, in order to force
+		// server buffer beyond 32k.  NOTE: Changing this number
+		// could cause the test to "pass" even if a regression
+		// occurs--so only change it if needed!
+        int nCols = 556;
+        for (int i = 0; i < nCols; i++) buf.append("?,");
+        buf.append("?)");
+        ps = conn.prepareStatement(buf.toString());
+        // Note that we actually have nCols+1 parameter markers
+        for (int i = 0; i <= nCols; i++) ps.setInt(i+1, 1);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next());
+        System.out.println("Test jira125 successful: " + (nCols + 1) +
+			" parameter markers successfully prepared and executed.");
+    }
+
+    private static void jira125Test_a(Connection conn)
+	    throws Exception
+    {
+	    Statement stmt = conn.createStatement();
+
+		// Build a column name that is 99 characters long;
+		// the length of the column name and the length of
+		// the table name are important to the repro--so
+		// do not change these unless you can confirm that
+		// the new values will behave in the same way.
+		StringBuffer id = new StringBuffer();
+		for (int i = 0; i < 49; i++)
+			id.append("id");
+		id.append("i");
+
+		// Build a table name that is 97 characters long;
+		// the length of the column name and the length of
+		// the table name are important to the repro--so
+		// do not change these unless you can confirm that
+		// the new values will behave in the same way.
+		StringBuffer tabName = new StringBuffer("jira");
+		for (int i = 0; i < 31; i++)
+			tabName.append("125");
+
+	    try {
+		    stmt.execute("drop table " + tabName.toString());
+	    } catch (Throwable t) { }
+		try {
+	        stmt.execute("create table " + tabName.toString() + " (" +
+				id.toString() + " integer)");
+			stmt.execute("insert into " + tabName.toString() + " values 1, 2, 3");
+		} catch (Throwable t) { }
+
+        PreparedStatement ps;
+        StringBuffer buf = new StringBuffer();
+        buf.append("SELECT " + id.toString() + " FROM " +
+			tabName.toString() + " WHERE " + id.toString() + " IN ( ");
+
+		// Must have at least 551 columns here, in order to force
+		// server buffer beyond 32k.  NOTE: Changing this number
+		// could cause the test to "pass" even if a regression
+		// occurs--so only change it if needed!
+        int nCols = 554;
+        for (int i = 0; i < nCols; i++) buf.append("?,");
+        buf.append("?)");
+        ps = conn.prepareStatement(buf.toString());
+        // Note that we actually have nCols+1 parameter markers
+        for (int i = 0; i <= nCols; i++) ps.setInt(i+1, 1);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next());
+        System.out.println("Iteration 1 successful: " + (nCols + 1) +
+			" parameter markers successfully prepared and executed.");
+    }
+}

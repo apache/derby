@@ -1433,6 +1433,54 @@ class DDMWriter
 			ensureLength (shiftSize);
 			offset += shiftSize;
 
+			// Notes on the behavior of the Layer B segmenting loop below:
+			//
+			// We start with the right most chunk. For a 3-segment object we'd
+			// shift 2 segments: shift the first (rightmost) one 4 bytes and 
+			// the second one 2. Note that by 'first' we mean 'first time
+			// through the loop', but that is actually the last segment
+			// of data since we are moving right-to-left. For an object
+			// of K segments we will pass through this loop K-1 times.
+			// The 0th (leftmost) segment is not shifted, as it is
+			// already in the right place. When we are done, we will
+			// have made room in each segment for an additional
+			// 2 bytes for the continuation header. Thus, each
+			// segment K is shifted K*2 bytes to the right.
+			//
+			// Each time through the loop, "dataByte" points to the
+			// last byte in the segment; "dataToShift" is the amount of
+			// data that we need to shift, and "shiftSize" is the
+			// distance that we need to shift it. Since dataByte points
+			// at the last byte, not one byte beyond it (as with the
+			// "offset" variable used elsewhere in DDMWriter), the start
+			// of the segement is actually at (dataByte-dataToShift+1).
+			//
+			// After we have shifted the segment, we move back to the
+			// start of the segment and set the value of the 2-byte DSS
+			// continuation header, which needs to hold the length of
+			// this segment's data, together with the continuation flag
+			// if this is not the rightmost (passOne) segment.
+			//
+			// In general, each segment except the rightmost will contain
+			// 32765 bytes of data, plus the 2-byte header, and its
+			// continuation flag will be set, so the header value will
+			// be 0xFFFF. The rightmost segment will not have the
+			// continuation flag set, so its value may be anything from
+			// 0x0001 to 0x7FFF, depending on the amount of data in that
+			// segment.
+			//
+			// Note that the 0th (leftmost) segment also has a 2-byte
+			// DSS header, which needs to have its continuation flag set.
+			// This is done by resetting the "totalSize" variable below,
+			// at which point that variable no longer holds the total size
+			// of the object, but rather just the length of segment 0. The
+			// total size of the object was written using extended length
+			// bytes by the endDdm() method earlier.
+			//
+			// Additional information about this routine is available in the
+			// bug notes for DERBY-125:
+			// http://issues.apache.org/jira/browse/DERBY-125
+			
 			// mark passOne to help with calculating the length of the final (first or
 			// rightmost) continuation header.
 			boolean passOne = true;
@@ -1441,12 +1489,7 @@ class DDMWriter
 				int dataToShift = bytesRequiringContDssHeader % 32765;
 				if (dataToShift == 0)
 					dataToShift = 32765;
-				// We start with the right most chunk. If we had to copy two
-				// chunks we would shift the first one 4 bytes and then 
-				// the second one
-				// 2 when we come back on the next loop so they would each have
-				// 2 bytes for the continuation header
-				int startOfCopyData = dataByte - dataToShift;
+				int startOfCopyData = dataByte - dataToShift + 1;
 				System.arraycopy(bytes,startOfCopyData, bytes, 
 								 startOfCopyData + shiftSize, dataToShift);
 				dataByte -= dataToShift;
@@ -1462,7 +1505,9 @@ class DDMWriter
 				else
 				{
 					if (twoByteContDssHeader == DssConstants.MAX_DSS_LENGTH)
-				    	twoByteContDssHeader = DssConstants.CONTINUATION_BIT;
+					twoByteContDssHeader = (twoByteContDssHeader |
+						DssConstants.CONTINUATION_BIT);
+
 				}
 
 				// insert the header's length bytes
@@ -1481,7 +1526,9 @@ class DDMWriter
 			while (bytesRequiringContDssHeader > 0);
 
 			// set the continuation dss header flag on for the first header
-			totalSize = DssConstants.CONTINUATION_BIT;
+			totalSize = (DssConstants.MAX_DSS_LENGTH |
+					DssConstants.CONTINUATION_BIT);
+
 
 		}
 
