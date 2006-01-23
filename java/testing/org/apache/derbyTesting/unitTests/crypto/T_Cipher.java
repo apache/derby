@@ -31,9 +31,13 @@ import org.apache.derby.iapi.db.PropertyInfo;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import java.security.AccessController;
 import java.security.Key;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileInputStream;
@@ -97,7 +101,14 @@ public class T_Cipher extends T_Generic
     protected String getProvider()
     {
 	// allow for alternate providers
-	String testProvider = System.getProperty("testEncryptionProvider");
+	String testProvider = 
+		
+    	(String) AccessController.doPrivileged(new PrivilegedAction() {
+		    public Object run()  {
+		    	return System.getProperty("testEncryptionProvider");
+		    }
+	    });
+	
 	if (testProvider != null) 
 		return testProvider;
 	else
@@ -108,19 +119,12 @@ public class T_Cipher extends T_Generic
 	public void runTests() throws T_Fail {
 
 		File testFile = new File("extinout/T_Cipher.data");
-		if (testFile.exists())
-			testFile.delete();
+		deleteFile(testFile);
 
 		String bootPassword = "a secret, don't tell anyone";
 
 		try
 		{
-							
-			//if external input output files dir does not exist ,create one
-			File ifdir = new File("extinout");
-			if(!ifdir.exists())
-				ifdir.mkdirs();
-
 			RandomAccessFile file = new RandomAccessFile(testFile, "rw");
 
 			setupCiphers(bootPassword);
@@ -179,50 +183,6 @@ public class T_Cipher extends T_Generic
 			check(pattern, 1, patternLength/2, file);
 
 			file.close();
-
-			// test streaming
-			File streamFile = new File("extinout/T_CipherStream.data");
-			if (streamFile.exists())
-				streamFile.delete();
-
-			// RESOLVE: defectId 1834
-			if (false)
-			{
-/*				OutputStream enOutputStream =
-					factory.createNewCipherOutputStream(
-						new FileOutputStream(streamFile), factory.ENCRYPT, secretKey, IV);
-
-				int encryptLength = patternLength; // make it a length that is
-												   // not on 8 bytes boundary
-				enOutputStream.write(pattern, 0, encryptLength);
-				enOutputStream.write(pattern, 0, 3); // write a couple of bytes of
-												 // garbage at the end
-				enOutputStream.close();
-				enOutputStream = null;
-
-				InputStream inStream = new FileInputStream(streamFile);
-				byte[] check = new byte[encryptLength + 100];
-				int r = inStream.read(check);
-				inStream.close();
-				REPORT("Stream of " + encryptLength + " is encrypted into " + r + " length");
-				if (byteArrayIdentical(check, pattern, 0, encryptLength))
-					throw T_Fail.testFailMsg("encryption stream did not encrypt");
-
-				InputStream deInputStream =
-					factory.createNewCipherInputStream(
-						new FileInputStream(streamFile), factory.DECRYPT, secretKey, IV);
-
-				int totalRead = 0;
-				while((r = deInputStream.read(check, totalRead, check.length-totalRead)) != -1)
-					totalRead += r;
-
-				if (totalRead != encryptLength)
-					throw T_Fail.testFailMsg("decrypted stream is " + totalRead + " is not the same length");
-				if (byteArrayIdentical(check, pattern, 0, encryptLength) == false)
-					throw T_Fail.testFailMsg("decryption stream did not decrypt");
-				deInputStream.close();
-*/
-			}
 		}
 		catch (StandardException se)
 		{
@@ -647,4 +607,19 @@ public class T_Cipher extends T_Generic
             System.out.println("index " + i + " : " + array[i]);
     }
     */
+	
+	/**
+	 * Delete a file in a Privileged block as these tests are
+	 * run under the embedded engine code.
+	 */
+	private void deleteFile(final File f)
+	{
+	   	AccessController.doPrivileged(new PrivilegedAction() {
+		    public Object run()  {
+		    	if (f.exists())
+		    	    f.delete();
+		    	return null;
+		    }
+	    });
+	}
 }

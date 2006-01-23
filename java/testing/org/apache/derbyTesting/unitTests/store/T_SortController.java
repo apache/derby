@@ -43,6 +43,8 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.types.SQLInteger;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.StringTokenizer;
@@ -66,8 +68,13 @@ public class T_SortController extends T_Generic
 		return AccessFactory.MODULE;
 	}
 
-	private void setSortBufferSize(String buf_length) {
-		System.setProperty("derby.storage.sortBufferMax", buf_length);
+	private void setSortBufferSize(final String buf_length) {
+    	AccessController.doPrivileged(new PrivilegedAction() {
+		    public Object run()  {
+		    	System.setProperty("derby.storage.sortBufferMax", buf_length);
+		    	return null;
+		    }
+	    });
 	}
 
 	/*
