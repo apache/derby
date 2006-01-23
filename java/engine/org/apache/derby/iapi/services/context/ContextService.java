@@ -178,7 +178,13 @@ public final class ContextService //OLD extends Hashtable
 
 		Thread me = Thread.currentThread();
 
-		Object list = threadContextList.get();
+		ThreadLocal tcl = threadContextList;
+		if (tcl == null) {
+			// The context service is already stopped.
+			return null;
+		}
+
+		Object list = tcl.get();
 
 		if (list instanceof ContextManager) {
 			
@@ -213,6 +219,13 @@ public final class ContextService //OLD extends Hashtable
 */	}
 
 	public void resetCurrentContextManager(ContextManager cm) {
+		ThreadLocal tcl = threadContextList;
+
+		if (tcl == null) {
+			// The context service is already stopped.
+			return;
+		}
+
 		if (SanityManager.DEBUG) {
 
 			if (Thread.currentThread() != cm.activeThread) {
@@ -232,8 +245,8 @@ public final class ContextService //OLD extends Hashtable
 			}
 
 			if (cm.activeCount > 0) {
-				if (threadContextList.get() != cm)
-					SanityManager.THROWASSERT("resetCurrentContextManager - invalid thread local " + Thread.currentThread() + " - object " + threadContextList.get());
+				if (tcl.get() != cm)
+					SanityManager.THROWASSERT("resetCurrentContextManager - invalid thread local " + Thread.currentThread() + " - object " + tcl.get());
 
 			}
 		}
@@ -244,7 +257,7 @@ public final class ContextService //OLD extends Hashtable
 			return;
 		}
 
-		java.util.Stack stack = (java.util.Stack) threadContextList.get();
+		java.util.Stack stack = (java.util.Stack) tcl.get();
 
 		Object oldCM = stack.pop();
 
@@ -272,20 +285,27 @@ public final class ContextService //OLD extends Hashtable
 			// all the context managers on the stack
 			// are the same so reduce to a simple count.
 			nextCM.activeCount = stack.size();
-			threadContextList.set(nextCM);
+			tcl.set(nextCM);
 		}
 	}
 
 	private boolean addToThreadList(Thread me, ContextManager associateCM) {
 
-		Object list = threadContextList.get();
+		ThreadLocal tcl = threadContextList;
+
+		if (tcl == null) {
+			// The context service is already stopped.
+			return false;
+		}
+
+		Object list = tcl.get();
 
 		if (associateCM == list)
 			return true;
 
 		if (list == null)
 		{
-			threadContextList.set(associateCM);
+			tcl.set(associateCM);
 			return true;
 		}
 
@@ -295,11 +315,11 @@ public final class ContextService //OLD extends Hashtable
 			if (me == null)
 				me = Thread.currentThread();
 			if (threadsCM.activeThread != me) {
-				threadContextList.set(associateCM);
+				tcl.set(associateCM);
 				return true;
 			}
 			stack = new java.util.Stack();
-			threadContextList.set(stack);
+			tcl.set(stack);
 
 			for (int i = 0; i < threadsCM.activeCount; i++)
 			{
