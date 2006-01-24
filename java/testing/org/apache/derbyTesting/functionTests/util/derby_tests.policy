@@ -58,10 +58,17 @@ grant codeBase "${csinfo.codejar}derby.jar" {
 // Permissions for the network server (derbynet.jar)
 //
 grant codeBase "${csinfo.codejar}derbynet.jar" {
-  permission java.net.SocketPermission "127.0.0.1", "accept";
-  permission java.net.SocketPermission "localhost", "accept";
-  permission java.net.SocketPermission "${csinfo.serverhost}", "accept";
-  permission java.net.SocketPermission "${csinfo.trustedhost}", "accept";
+  
+  // accept is needed for the server accepting connections
+  // connect is needed for ping command (which is in the server jar)
+  permission java.net.SocketPermission "127.0.0.1", "accept,connect";
+  permission java.net.SocketPermission "localhost", "accept,connect";
+  permission java.net.SocketPermission "${csinfo.serverhost}", "accept,connect";
+  permission java.net.SocketPermission "${csinfo.trustedhost}", "accept,connect";
+  
+  // derbynet/NSinSameJVM uses this addres for its serverControl 
+  permission java.net.SocketPermission "0.0.0.0:20000", "connect";
+  
     
   // tracing files default to derby.system.home, derbynet/getCurrentProperties.java 
   permission java.io.FilePermission "${derby.system.home}${/}*", "write";  

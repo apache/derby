@@ -29,8 +29,7 @@ import java.io.PrintWriter;
 public class NSinSameJVM {
 
     private static final int NETWORKSERVER_PORT = 20000;
-	private static final String INVALID_HOSTNAME = "myhost.nowhere.ibm.com";
-    private String databaseFileName = "NSinSameJVMTestDB;create=true";
+   private String databaseFileName = "NSinSameJVMTestDB;create=true";
 
     public NSinSameJVM() {
 
