@@ -939,3 +939,12 @@ select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC
 from sys.syscolumns where COLUMNNAME = 'C11';
 insert into t1(c12) values(3);
 select * from t1;
+
+-- Since RESTART is not a reserved keyword, we should be able to create a table with name RESTART
+create table restart (c11 int);
+select * from restart;
+create table newTable (restart int);
+select * from newTable;
+create table newTable2 (c11 int);
+alter table newTable2 add column RESTART int;
+select * from newTable2;

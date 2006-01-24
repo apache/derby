@@ -12513,7 +12513,8 @@ nonReservedKeyword()  :
 	|	tok = <RENAME>
 	|	tok = <REPEATABLE>
 	|	tok = <REFERENCING>
-        |       tok = <RESET>
+	|	tok = <RESET>
+	|	tok = <RESTART>
 	|	tok = <RESULT>
 	|	tok = <RETAIN>
 	|	tok = <RETURNS>

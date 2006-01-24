@@ -1821,4 +1821,22 @@ C11        |C12
 -----------------------
 1          |1          
 2          |3          
+ij(CONN2)> -- Since RESTART is not a reserved keyword, we should be able to create a table with name RESTART
+create table restart (c11 int);
+0 rows inserted/updated/deleted
+ij(CONN2)> select * from restart;
+C11        
+-----------
+ij(CONN2)> create table newTable (restart int);
+0 rows inserted/updated/deleted
+ij(CONN2)> select * from newTable;
+RESTART    
+-----------
+ij(CONN2)> create table newTable2 (c11 int);
+0 rows inserted/updated/deleted
+ij(CONN2)> alter table newTable2 add column RESTART int;
+0 rows inserted/updated/deleted
+ij(CONN2)> select * from newTable2;
+C11        |RESTART    
+-----------------------
 ij(CONN2)> 
