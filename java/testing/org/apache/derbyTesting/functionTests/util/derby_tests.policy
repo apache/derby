@@ -157,6 +157,9 @@ grant codeBase "${csinfo.codeclasses}" {
   permission java.net.SocketPermission "${csinfo.serverhost}", "accept";
   permission java.net.SocketPermission "${csinfo.trustedhost}", "accept"; 
   
+  // derbynet/NSinSameJVM uses this addres for its serverControl 
+  permission java.net.SocketPermission "0.0.0.0:20000", "connect";
+  
   // Access all files under ${user.dir}to write the test directory structure
   // Also covers extin, extout and extinout locations
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
