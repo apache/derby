@@ -1329,7 +1329,9 @@ public interface SQLState {
 	/*
 		SQL standard 0A - feature not supported
 	*/
-    String NOT_IMPLEMENTED = "0A000.S";
+    String NOT_IMPLEMENTED                                          = "0A000.S";
+    String JDBC2_METHOD_NOT_IMPLEMENTED                             = "0A002.S";
+    String JDBC3_METHOD_NOT_SUPPORTED                               = "0A003.S";
 
 	
 
@@ -1437,8 +1439,6 @@ public interface SQLState {
 
     //following are session severity.
     String DATABASE_NOT_FOUND = "XJ004.C";
-    String LOGIN_FAILED = "08004";
-    String NO_CURRENT_CONNECTION = "08003";
     String MALFORMED_URL = "XJ028.C";
     String BOOT_DATABASE_FAILED = "XJ040.C";
     String CREATE_DATABASE_FAILED = "XJ041.C";
@@ -1450,7 +1450,19 @@ public interface SQLState {
     String NO_HTTP = "X0RQ4.C";
     String NO_SUCH_LISTEN_TYPE = "X0RQ5.S";
 	String INVALID_LISTEN_TYPE = "X0RQ6.S";
-
+    
+    // Connection exceptions - SQL State class 08
+    //following are database severity
+    String NO_CURRENT_CONNECTION = "08003";
+    String LOGIN_FAILED = "08004";
+    // There can be multiple causes for 08003, which according
+    // to SQL2003 spec means "connection does not exist"
+    // We use a suffix to distinguish them.  Because of the suffix
+    // you *must* add a severity code
+    String NOGETCONN_ON_CLOSED_POOLED_CONNECTION = "08003.C.1";
+    // system severity
+    String SHUTDOWN_DATABASE = "08006.D";   
+        
     //the following 2 exceptions are internal and never get seen by the user.
     String CLOSE_REQUEST = "close.C.1"; // no message in messages.properties as it is never printed
 
@@ -1471,8 +1483,6 @@ public interface SQLState {
     String QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET = "01J06";
 
 
-    //following are database severity
-    String SHUTDOWN_DATABASE = "08006.D";
 
     //following are no applicable severity
     String JAVA_EXCEPTION = "XJ001.U";
@@ -1488,13 +1498,10 @@ public interface SQLState {
      * to keep track of the numbers to ensure we don't duplicate the 
      * SQL State
      */
-    String NOGETCONN_ON_CLOSED_POOLED_CONNECTION = "XN001.C";
     String INVALID_BLOB_OFFSET = "XN003.S";
     String WASNULL_INVALID = "XN004.S";
     String INVALID_PARAM_USE_GETINT = "XN005.S";
     String CALENDAR_IS_NULL = "XN006.S";
-    String JDBC2_METHOD_NOT_IMPLEMENTED = "XN007.S";
-    String JDBC3_METHOD_NOT_SUPPORTED = "XN008.S";
     String PARAM_NOT_OUT_OR_INOUT = "XN009.S";
     String RETURN_PARAM_MUST_BE_INT = "XN010.S";
     
