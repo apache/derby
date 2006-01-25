@@ -338,16 +338,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		}
 	}
 
-	public void backup(File backupDir) throws SQLException
-	{
-		try {
-			af.backup(backupDir);
-		} catch (StandardException se) {
-			throw PublicAPI.wrapStandardException(se);
-		}
-	}
-
-
 
     public void backupAndEnableLogArchiveMode(String  backupDir, 
                                               boolean deleteOnlineArchivedLogFiles,
@@ -363,17 +353,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		}
 	}
 
-	public void backupAndEnableLogArchiveMode(File backupDir, 
-											  boolean
-											  deleteOnlineArchivedLogFiles)
-		throws SQLException
-	{
-		try {
-			af.backupAndEnableLogArchiveMode(backupDir, deleteOnlineArchivedLogFiles);
-		} catch (StandardException se) {
-			throw PublicAPI.wrapStandardException(se);
-		}
-	}
 	
 	public void disableLogArchiveMode(boolean deleteOnlineArchivedLogFiles)
 		throws SQLException

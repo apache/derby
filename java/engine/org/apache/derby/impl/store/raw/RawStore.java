@@ -538,11 +538,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	}
 
 
-	public void backup(File backupDir) throws StandardException
-	{
-		backup(backupDir);
-	}
-
 	/*
 	 * Backup the database.
 	 * Online backup copies all the database files (log, seg0  ...Etc) to the
@@ -857,22 +852,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 logFactory.disableLogArchiveMode();
             throw StandardException.plainWrapException(error);
         }
-	}
-
-
-	public void backupAndEnableLogArchiveMode(File backupDir,boolean
-											  deleteOnlineArchivedLogFiles) 
-		throws StandardException
-	{
-		logFactory.enableLogArchiveMode();
-		backup(backupDir);
-		//After successful backup delete the archived log files
-		//that are not necessary to do a roll-forward recovery
-		//from this backup if requested.
-		if(deleteOnlineArchivedLogFiles)
-		{
-			logFactory.deleteOnlineArchivedLogFiles();
-		}
 	}
 
 

@@ -85,18 +85,6 @@ public interface Database
     public void backup(String backupDir, boolean wait) 
         throws SQLException;
 
-	/**
-	 * Backup the database to a backup directory.  See online documentation
-	 * for more detail about how to use this feature.
-	 *
-	 * @param backupDir the directory where the database backup should
-	 *   go.  This directory will be created if not it does not exist.
-	 *
-	 * @exception SQLException Thrown on error
-	 */
-	public void backup(File backupDir) throws SQLException;
-
-
 
     /**
      * Backup the database to a backup directory and enable the log archive
@@ -127,31 +115,6 @@ public interface Database
     boolean wait) 
         throws SQLException;
 
-
-	/**
-	 * Backup the database to a backup directory and enable the log archive
-	 * mode that will keep the archived log files required for roll-forward
-	 * from this version backup.
-     *
-	 * @param backupDir                     The directory name where the 
-     *                                      database backup should go.  This 
-     *                                      directory will be created if it does
-     *                                      not exist.
-     *
-	 * @param deleteOnlineArchivedLogFiles  If true deletes online archived log
-     *                                      files that exist before this backup;
-     *                                      otherwise they will not be deleted. 
-     *
-	 *                                      Deletion will occur only after 
-     *                                      backup is complete.
-     *
-	 * @exception SQLException Thrown on error
-	 */
-	public void backupAndEnableLogArchiveMode(
-    File    backupDir, 
-    boolean deleteOnlineArchivedLogFiles) 
-		throws SQLException;
-	
 
 	/**
 	 * Disables the log archival process, i.e No old log files

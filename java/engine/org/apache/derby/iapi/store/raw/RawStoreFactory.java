@@ -657,17 +657,6 @@ public interface RawStoreFactory extends Corruptable {
     String backupDir, 
     boolean wait) throws StandardException;
 
-	/**
-	  * Backup the database to backupDir.  
-	  * <P>Please see cloudscape on line documentation on backup and restore.
-	  *
-	  * @param backupDir the directory where the backup should be stored.
-	  *
-	  * @exception StandardException Thrown on error
-	  */
-	public void backup(File backupDir) throws StandardException;
-
-
 		
 	/**
 	 * Backup the database to a backup directory and enable the log archive
@@ -695,27 +684,6 @@ public interface RawStoreFactory extends Corruptable {
     boolean wait) 
 		throws StandardException;
 		
-	/**
-	 * Backup the database to a backup directory and enable the log archive
-	 * mode that will keep the archived log files required for roll-forward
-	 * from this version backup.
-	 * @param backupDir                     the directory name where the 
-     *                                      database backup should go.  This 
-     *                                      directory will be created if not it 
-     *                                      does not exist.
-     *
-	 * @param deleteOnlineArchivedLogFiles  If true deletes online archived log
-     *                                      files that exist before this backup,
-     *                                      delete will occur only after backup
-     *                                      is complete.
-     *
-	 * @exception StandardException Thrown on error
-	 */
-	public void backupAndEnableLogArchiveMode(
-    File    backupDir, 
-    boolean deleteOnlineArchivedLogFiles) 
-		throws StandardException;
-	
 	/**
 	 * disables the log archival process, i.e No old log files
 	 * will be kept around for a roll-forward recovery.
