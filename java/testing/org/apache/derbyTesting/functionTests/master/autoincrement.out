@@ -1813,7 +1813,7 @@ ij(CONN2)> select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREM
 from sys.syscolumns where COLUMNNAME = 'C11';
 COLUMNNAME                                                                                                                      |AUTOINCREMENTVALUE  |AUTOINCREMENTSTART  |AUTOINCREMENTINC    
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-C11                                                                                                                             |2                   |1                   |1                   
+C11                                                                                                                             |2                   |2                   |1                   
 ij(CONN2)> insert into t1(c12) values(3);
 1 row inserted/updated/deleted
 ij(CONN2)> select * from t1;

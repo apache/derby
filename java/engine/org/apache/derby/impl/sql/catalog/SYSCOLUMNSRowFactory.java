@@ -281,8 +281,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 			//next value to be generated in the SYSCOLUMNS table
 			ColumnDescriptor  column = (ColumnDescriptor)td;
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTVALUE, new SQLLongint(autoincStart));
-			row.setColumn(SYSCOLUMNS_AUTOINCREMENTSTART, new SQLLongint(
-					column.getTableDescriptor().getColumnDescriptor(colName).getAutoincStart()));
+			row.setColumn(SYSCOLUMNS_AUTOINCREMENTSTART, new SQLLongint(autoincStart));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC, new SQLLongint(
 					column.getTableDescriptor().getColumnDescriptor(colName).getAutoincInc()));
 		}
