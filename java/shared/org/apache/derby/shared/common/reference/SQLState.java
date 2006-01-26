@@ -1330,8 +1330,7 @@ public interface SQLState {
 		SQL standard 0A - feature not supported
 	*/
     String NOT_IMPLEMENTED                                          = "0A000.S";
-    String JDBC2_METHOD_NOT_IMPLEMENTED                             = "0A002.S";
-    String JDBC3_METHOD_NOT_SUPPORTED                               = "0A003.S";
+    String JDBC_METHOD_NOT_IMPLEMENTED                              = "0AX01.S";
 
 	
 

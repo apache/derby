@@ -915,7 +915,7 @@ public class CallableStatement extends PreparedStatement
                 java.sql.Array result = wasNullX() ? null : singletonRowData_.getArray(parameterIndex);
                 if (true) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
+                        new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
                 }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getArray", result);
@@ -947,7 +947,7 @@ public class CallableStatement extends PreparedStatement
                 java.sql.Ref result = wasNullX() ? null : singletonRowData_.getRef(parameterIndex);
                 if (true) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
+                        new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
                 }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getRef", result);
@@ -1007,7 +1007,7 @@ public class CallableStatement extends PreparedStatement
                 checkGetterPreconditions(parameterIndex);
                 if (true) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.JDBC2_METHOD_NOT_IMPLEMENTED));
+                        new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
                 }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getObject", result);
@@ -1027,112 +1027,112 @@ public class CallableStatement extends PreparedStatement
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterName, sqlType);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void registerOutParameter(String parameterName, int sqlType, int scale) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterName, sqlType, scale);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void registerOutParameter(String parameterName, int sqlType, String typeName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterName, sqlType, typeName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.net.URL getURL(int parameterIndex) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getURL", parameterIndex);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setURL(String parameterName, java.net.URL x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setURL", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setNull(String parameterName, int sqlType) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setNull", parameterName, sqlType);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setBoolean(String parameterName, boolean x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBoolean", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setByte(String parameterName, byte x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setByte", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setShort(String parameterName, short x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setShort", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setInt(String parameterName, int x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setInt", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setLong(String parameterName, long x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setLong", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setFloat(String parameterName, float x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setFloat", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setDouble(String parameterName, double x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setDouble", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setBigDecimal(String parameterName, java.math.BigDecimal x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBigDecimal", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setString(String parameterName, String x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setString", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setBytes(String parameterName, byte x[]) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBytes", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setDate(String parameterName, java.sql.Date x) throws SQLException {
@@ -1145,245 +1145,245 @@ public class CallableStatement extends PreparedStatement
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTime", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setTimestamp(String parameterName, java.sql.Timestamp x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTimestamp", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setAsciiStream(String parameterName, java.io.InputStream x, int length) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterName, x, length);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setBinaryStream(String parameterName, java.io.InputStream x, int length) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterName, x, length);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setObject(String parameterName, Object x, int targetSqlType, int scale) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setObject", parameterName, x, targetSqlType, scale);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setObject(String parameterName, Object x, int targetSqlType) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setObject", parameterName, x, targetSqlType);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setObject(String parameterName, Object x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setObject", parameterName, x);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setCharacterStream(String parameterName, java.io.Reader reader, int length) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterName, reader, length);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setDate(String parameterName, java.sql.Date x, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setDate", parameterName, x, calendar);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setTime(String parameterName, java.sql.Time x, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTime", parameterName, x, calendar);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setTimestamp(String parameterName, java.sql.Timestamp x, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTimestamp", parameterName, x, calendar);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public void setNull(String parameterName, int sqlType, String typeName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setNull", parameterName, sqlType, typeName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public String getString(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getString", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public boolean getBoolean(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBoolean", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public byte getByte(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getByte", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public short getShort(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getShort", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public int getInt(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getInt", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public long getLong(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getLong", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public float getFloat(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getFloat", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public double getDouble(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getDouble", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public byte[] getBytes(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBytes", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.sql.Date getDate(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getDate", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.sql.Time getTime(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTime", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.sql.Timestamp getTimestamp(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTimestamp", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public Object getObject(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getObject", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.math.BigDecimal getBigDecimal(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBigDecimal", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public Object getObject(String parameterName, java.util.Map map) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getObject", parameterName, map);
             }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.sql.Ref getRef(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getRef", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.sql.Blob getBlob(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBlob", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.sql.Clob getClob(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getClob", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.sql.Array getArray(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getArray", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.sql.Date getDate(String parameterName, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getDate", parameterName, calendar);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.sql.Time getTime(String parameterName, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTime", parameterName, calendar);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.sql.Timestamp getTimestamp(String parameterName, java.util.Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTimestamp", parameterName, calendar);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     public java.net.URL getURL(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getURL", parameterName);
         }
-        throw jdbc3MethodNotSupported();
+        throw jdbcMethodNotImplemented();
     }
 
     //----------------------------helper methods----------------------------------
@@ -1428,7 +1428,7 @@ public class CallableStatement extends PreparedStatement
         }
     }
     
-    private SQLException jdbc3MethodNotSupported() throws SQLException
+    private SQLException jdbcMethodNotImplemented() throws SQLException
     {
         try
         {
@@ -1439,7 +1439,7 @@ public class CallableStatement extends PreparedStatement
             throw se.getSQLException();
         }
         return new SqlException(agent_.logWriter_, 
-            new MessageId(SQLState.JDBC3_METHOD_NOT_SUPPORTED)).getSQLException();
+            new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED)).getSQLException();
     }
 }
 
