@@ -34,6 +34,7 @@ import java.sql.SQLWarning;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 import java.math.BigDecimal;
@@ -48,6 +49,15 @@ import java.sql.Timestamp;
   This tests JDBC 2.0 updateable resutlset - deleteRow, updateRow api
  */
 public class updatableResultSet { 
+	
+	private static boolean HAVE_BIG_DECIMAL;
+	
+	static{
+		if(BigDecimalHandler.representation != BigDecimalHandler.BIGDECIMAL_REPRESENTATION)
+			HAVE_BIG_DECIMAL = false;
+		else
+			HAVE_BIG_DECIMAL = true;
+	}
 
 	private static Connection conn;
 	private static DatabaseMetaData dbmt;
@@ -1534,9 +1544,11 @@ public class updatableResultSet {
 									rs.updateLong(ColumnNames[0], rs1.getLong(updateXXXName));
 						} else if (updateXXXName == 4){ //update column with updateBigDecimal methods
 								if (indexOrName == 1) //test by passing column position
-									rs.updateBigDecimal(1, rs1.getBigDecimal(updateXXXName));
+									BigDecimalHandler.updateBigDecimalString(rs, 1, 
+											BigDecimalHandler.getBigDecimalString(rs1, updateXXXName));
 								else //test by passing column name
-									rs.updateBigDecimal(ColumnNames[0], rs1.getBigDecimal(updateXXXName));
+									BigDecimalHandler.updateBigDecimalString(rs, ColumnNames[0], 
+											BigDecimalHandler.getBigDecimalString(rs1, updateXXXName));
 						} else if (updateXXXName == 5){ //update column with updateFloat methods
 								if (indexOrName == 1) //test by passing column position
 									rs.updateFloat(1, rs1.getFloat(updateXXXName));
@@ -1652,6 +1664,8 @@ public class updatableResultSet {
 				System.out.println("Next datatype to test is " + allSQLTypes[sqlType-1]);
 				for (int updateXXXName = 1;  updateXXXName <= allUpdateXXXNames.length; updateXXXName++) {
 					checkAgainstColumn = updateXXXName;
+					if(!HAVE_BIG_DECIMAL && (updateXXXName == 4))
+						continue;
 					System.out.println("  Testing " + allUpdateXXXNames[updateXXXName-1] + " on SQL type " + allSQLTypes[sqlType-1]);
 					for (int indexOrName = 1; indexOrName <= 2; indexOrName++) {
 						if (indexOrName == 1) //test by passing column position
@@ -1679,10 +1693,12 @@ public class updatableResultSet {
 								else //test by passing column name
 									rs.updateLong(ColumnNames[sqlType-1], rs1.getLong(updateXXXName));
 							} else if (updateXXXName == 4){ //update column with updateBigDecimal methods
-								if (indexOrName == 1) //test by passing column position
-									rs.updateBigDecimal(sqlType, rs1.getBigDecimal(updateXXXName));
-								else //test by passing column name
-									rs.updateBigDecimal(ColumnNames[sqlType-1], rs1.getBigDecimal(updateXXXName));
+								if(HAVE_BIG_DECIMAL) {
+									if (indexOrName == 1) //test by passing column position
+										rs.updateBigDecimal(sqlType, rs1.getBigDecimal(updateXXXName));
+									else //test by passing column name
+										rs.updateBigDecimal(ColumnNames[sqlType-1], rs1.getBigDecimal(updateXXXName));
+								}
 							} else if (updateXXXName == 5){ //update column with updateFloat methods
 								if (indexOrName == 1) //test by passing column position
 									rs.updateFloat(sqlType, rs1.getFloat(updateXXXName));
@@ -1820,6 +1836,8 @@ public class updatableResultSet {
 				conn.rollback();
 				System.out.println("Next datatype to test is " + allSQLTypes[sqlType-1]);
 				for (int updateXXXName = 1;  updateXXXName <= allUpdateXXXNames.length; updateXXXName++) {
+					if(!HAVE_BIG_DECIMAL && (updateXXXName == 4))
+						continue;
 					for (int indexOrName = 1; indexOrName <= 2; indexOrName++) {
 						if (indexOrName == 1) //test by passing column position
 							displayString = "  updateObject with column position &";
@@ -1849,11 +1867,13 @@ public class updatableResultSet {
 								else //test by passing column name
 									rs.updateObject(ColumnNames[sqlType-1], new Long(rs1.getLong(updateXXXName)));
 							} else if (updateXXXName == 4){ //updateObject using BigDecimal object
-								System.out.println(displayString + " BigDecimal object as parameters");
-								if (indexOrName == 1) //test by passing column position
-									rs.updateObject(sqlType, rs1.getBigDecimal(updateXXXName));
-								else //test by passing column name
-									rs.updateObject(ColumnNames[sqlType-1], rs1.getBigDecimal(updateXXXName));
+								if(HAVE_BIG_DECIMAL) {
+									System.out.println(displayString + " BigDecimal object as parameters");
+									if (indexOrName == 1) //test by passing column position
+										rs.updateObject(sqlType, rs1.getBigDecimal(updateXXXName));
+									else //test by passing column name
+										rs.updateObject(ColumnNames[sqlType-1],rs1.getBigDecimal(updateXXXName));
+								}
 							} else if (updateXXXName == 5){ //updateObject using Float object
 								System.out.println(displayString + " Float object as parameters");
 								if (indexOrName == 1) //test by passing column position
@@ -1959,6 +1979,8 @@ public class updatableResultSet {
 									System.out.println("FAILURE : We shouldn't reach here. The test should have failed earlier on updateXXX or updateRow call");
 									return;
 								}
+								if(!HAVE_BIG_DECIMAL && (updateXXXName == 4))
+									continue;
 								if (verifyData(sqlType,updateXXXName, "AllDataTypesNewValuesData") == false)
 								{
 									System.out.println("Test failed");
@@ -2023,12 +2045,14 @@ public class updatableResultSet {
 				return;
 
 			System.out.println("  updateBigDecimal and then cancelRowUpdates");
-			BigDecimal bd = rs.getBigDecimal(4);
-			rs.updateBigDecimal(4, rs1.getBigDecimal(4));
-			if(rs.getBigDecimal(4).compareTo(rs1.getBigDecimal(4)) != 0)
+			String bdString = BigDecimalHandler.getBigDecimalString(rs, 4);
+			BigDecimalHandler.updateBigDecimalString(rs, 4, 
+					BigDecimalHandler.getBigDecimalString(rs1, 4));
+			if(!BigDecimalHandler.getBigDecimalString(rs,4)
+					.equals(BigDecimalHandler.getBigDecimalString(rs1, 4)))
 				return;
 			rs.cancelRowUpdates();
-			if(rs.getBigDecimal(4).compareTo(bd) != 0)
+			if(!BigDecimalHandler.getBigDecimalString(rs, 4).equals(bdString))
 				return;
 
 			System.out.println("  updateFloat and then cancelRowUpdates");
@@ -2485,7 +2509,8 @@ public class updatableResultSet {
 			if(rs.getLong(sqlType) != rs1.getLong(updateXXXName)) {
 				return(false); }
 		else if (sqlType == 4)  //verify update made to DECIMAL column with updateXXX methods
-			if(rs.getBigDecimal(sqlType) != rs1.getBigDecimal(updateXXXName)) {
+			if(BigDecimalHandler.getBigDecimalString(rs, sqlType) != 
+				BigDecimalHandler.getBigDecimalString(rs1, updateXXXName)) {
 				return(false); }
 		else if (sqlType == 5)  //verify update made to REAL column with updateXXX methods
 			if(rs.getFloat(sqlType) != rs1.getFloat(updateXXXName)) {

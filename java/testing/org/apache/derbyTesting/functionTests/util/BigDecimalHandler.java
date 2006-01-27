@@ -191,6 +191,50 @@ public class BigDecimalHandler {
 		return objectString;
 	}
 	
+	/** This method is a wrapper for ResultSet method 
+	 * updateBigDecimal(int columnIndex, BigDecimal x)
+	 * @param rs ResultSet
+	 * @param columnIndex Column Index
+	 * @param bdString String to be used in updateXXX method
+	 * @throws SQLException
+	 */
+	public static void updateBigDecimalString(ResultSet rs, int columnIndex, String bdString) throws SQLException{
+				
+		switch(representation){
+			case BIGDECIMAL_REPRESENTATION:
+				BigDecimal bd = (bdString == null) ? null : new BigDecimal(bdString);
+				rs.updateBigDecimal(columnIndex, bd);
+				break;
+			case STRING_REPRESENTATION:
+				rs.updateString(columnIndex, bdString);
+				break;
+			default:	
+				new Exception("Failed: Invalid Big Decimal representation").printStackTrace();
+		}
+	}
+	
+	/** This method is a wrapper for ResultSet method 
+	 * updateBigDecimal(String columnName, BigDecimal x)
+	 * @param rs ResultSet
+	 * @param columnName Column Name
+	 * @param bdString String to be used in updateXXX method
+	 * @throws SQLException
+	 */
+	public static void updateBigDecimalString(ResultSet rs, String columnName,String bdString) throws SQLException{
+				
+		switch(representation){
+			case BIGDECIMAL_REPRESENTATION:
+				BigDecimal bd = (bdString == null) ? null : new BigDecimal(bdString);
+				rs.updateBigDecimal(columnName, bd);
+				break;
+			case STRING_REPRESENTATION:
+				rs.updateString(columnName, bdString);
+				break;
+			default:	
+				new Exception("Failed: Invalid Big Decimal representation").printStackTrace();
+		}
+	}
+
 	/** This method is a wrapper for the CallableStatement method getBigDecimal(int parameterIndex).
 	 * The wrapper method needs the parameterType as an input since ParameterMetaData is not available in JSR169.
 	 * 
@@ -231,7 +275,8 @@ public class BigDecimalHandler {
 		
 		switch(representation){
 			case BIGDECIMAL_REPRESENTATION:
-				ps.setBigDecimal(parameterIndex,new BigDecimal(bdString));
+				BigDecimal bd = (bdString == null) ? null : new BigDecimal(bdString);
+				ps.setBigDecimal(parameterIndex, bd);
 				break;
 			case STRING_REPRESENTATION:
 				//setString is used since setBigDecimal is not available in JSR169
@@ -255,7 +300,8 @@ public class BigDecimalHandler {
 		
 		switch(representation){
 			case BIGDECIMAL_REPRESENTATION:
-				ps.setObject(parameterIndex,new BigDecimal(objectString));
+				BigDecimal bd = (objectString == null) ? null : new BigDecimal(objectString);
+				ps.setObject(parameterIndex,bd);
 				break;
 			case STRING_REPRESENTATION:
 				ps.setObject(parameterIndex,objectString);

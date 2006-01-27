@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
 
 
 import java.sql.*;
@@ -29,7 +30,16 @@ import java.math.*;
 import java.io.*;
 
 public class parameterMapping {
-
+	
+	private static boolean HAVE_BIG_DECIMAL;
+	
+	static{
+		if(BigDecimalHandler.representation != BigDecimalHandler.BIGDECIMAL_REPRESENTATION)
+			HAVE_BIG_DECIMAL = false;
+		else
+			HAVE_BIG_DECIMAL = true;
+	}
+	
 	private static int[] jdbcTypes =
 	{
 		Types.TINYINT,
@@ -84,31 +94,62 @@ public class parameterMapping {
 
 	};
 
-	private static Class[] B3_GET_OBJECT =
-	{
-		java.lang.Integer.class, // Types.TINYINT,
-		java.lang.Integer.class, // Types.SMALLINT,
-		java.lang.Integer.class, // Types.INTEGER,
-		java.lang.Long.class, // Types.BIGINT,
-		java.lang.Float.class, // Types.REAL,
-		java.lang.Double.class, // Types.FLOAT,
-		java.lang.Double.class, // Types.DOUBLE,
-		java.math.BigDecimal.class, // Types.DECIMAL,
-		java.math.BigDecimal.class, // Types.NUMERIC,
-		java.lang.Boolean.class, // Types.BIT,
-		java.lang.Boolean.class, // Types.BOOLEAN
-		java.lang.String.class, // Types.CHAR,
-		java.lang.String.class, // Types.VARCHAR,
-		java.lang.String.class, // Types.LONGVARCHAR,
-		byte[].class, // Types.NULL, //Types.BINARY,
-		byte[].class, // Types.VARBINARY,
-		byte[].class, // Types.LONGVARBINARY,
-		java.sql.Date.class, // Types.DATE,
-		java.sql.Time.class, // Types.TIME,
-		java.sql.Timestamp.class, // Types.TIMESTAMP,
-		java.sql.Clob.class, // Types.CLOB,
-		java.sql.Blob.class, // Types.BLOB,
-	};
+	private static Class[] B3_GET_OBJECT;
+	
+	static{
+		if(HAVE_BIG_DECIMAL){
+			B3_GET_OBJECT = new Class[] {
+							java.lang.Integer.class, // Types.TINYINT,
+							java.lang.Integer.class, // Types.SMALLINT,
+							java.lang.Integer.class, // Types.INTEGER,
+							java.lang.Long.class, // Types.BIGINT,
+							java.lang.Float.class, // Types.REAL,
+							java.lang.Double.class, // Types.FLOAT,
+							java.lang.Double.class, // Types.DOUBLE,
+							java.math.BigDecimal.class, // Types.DECIMAL,
+							java.math.BigDecimal.class, // Types.NUMERIC,
+							java.lang.Boolean.class, // Types.BIT,
+							java.lang.Boolean.class, // Types.BOOLEAN
+							java.lang.String.class, // Types.CHAR,
+							java.lang.String.class, // Types.VARCHAR,
+							java.lang.String.class, // Types.LONGVARCHAR,
+							byte[].class, // Types.NULL, //Types.BINARY,
+							byte[].class, // Types.VARBINARY,
+							byte[].class, // Types.LONGVARBINARY,
+							java.sql.Date.class, // Types.DATE,
+							java.sql.Time.class, // Types.TIME,
+							java.sql.Timestamp.class, // Types.TIMESTAMP,
+							java.sql.Clob.class, // Types.CLOB,
+							java.sql.Blob.class, // Types.BLOB,
+			};
+		}
+		else {
+			B3_GET_OBJECT = new Class[] {
+					java.lang.Integer.class, // Types.TINYINT,
+					java.lang.Integer.class, // Types.SMALLINT,
+					java.lang.Integer.class, // Types.INTEGER,
+					java.lang.Long.class, // Types.BIGINT,
+					java.lang.Float.class, // Types.REAL,
+					java.lang.Double.class, // Types.FLOAT,
+					java.lang.Double.class, // Types.DOUBLE,
+					java.lang.String.class, // Types.DECIMAL,
+					java.lang.String.class, // Types.NUMERIC,
+					java.lang.Boolean.class, // Types.BIT,
+					java.lang.Boolean.class, // Types.BOOLEAN
+					java.lang.String.class, // Types.CHAR,
+					java.lang.String.class, // Types.VARCHAR,
+					java.lang.String.class, // Types.LONGVARCHAR,
+					byte[].class, // Types.NULL, //Types.BINARY,
+					byte[].class, // Types.VARBINARY,
+					byte[].class, // Types.LONGVARBINARY,
+					java.sql.Date.class, // Types.DATE,
+					java.sql.Time.class, // Types.TIME,
+					java.sql.Timestamp.class, // Types.TIMESTAMP,
+					java.sql.Clob.class, // Types.CLOB,
+					java.sql.Blob.class, // Types.BLOB,
+			};
+		}
+	}
 
 
 
@@ -424,16 +465,28 @@ public class parameterMapping {
 					 s.execute("DROP PROCEDURE PMP.TYPE_AS");
 				 }catch (SQLException seq) {
 				 }
-				 String procSQL = "CREATE PROCEDURE PMP.TYPE_AS(" +
-					   "IN P1 " + SQLTypes[type] + 
+				 String procSQL;
+				 if(HAVE_BIG_DECIMAL) {
+				 	procSQL = "CREATE PROCEDURE PMP.TYPE_AS(" +
+							"IN P1 " + SQLTypes[type] + 
 					 ", INOUT P2 " + SQLTypes[type] +
 					 ", OUT P3 " + SQLTypes[type] +
 					 ") LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL " +
 					 " EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'";
-
-				 System.out.println(procSQL);
+				 } else {
+				 	procSQL = "CREATE PROCEDURE PMP.TYPE_AS(" +
+							"IN P1 " + SQLTypes[type] + 
+					 ", INOUT P2 " + SQLTypes[type] +
+					 ", OUT P3 " + SQLTypes[type] +
+					 ") LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL " +
+					 " EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.SimpleProcedureTest.pmap'";
+				 }
+				 
 				 try {
-					s.execute(procSQL);
+				 	if (!HAVE_BIG_DECIMAL && SQLTypes[type].equals("DECIMAL(10,5)"))
+				 		continue;
+				 	System.out.println(procSQL);
+				 	s.execute(procSQL);
 				 } catch (SQLException sqle) {
 					 System.out.println(sqle.getSQLState() + ":" + sqle.getMessage());
 					 continue;
@@ -620,23 +673,24 @@ public class parameterMapping {
 		judge_getXXX(worked, sqleResult, 5, type);
 		}
 
-		{
-		System.out.print("  getBigDecimal=");
-		ResultSet rs = ps.executeQuery();
-		rs.next();
-		boolean worked;
-		SQLException sqleResult = null;;
-		try {
-			System.out.print(rs.getBigDecimal(1));
-			System.out.print(" was null " + rs.wasNull());
-			worked = true;
-
-		} catch (SQLException sqle) {
-			sqleResult = sqle;
-			worked = false;
-		}
-		rs.close();
-		judge_getXXX(worked, sqleResult, 6, type);
+		
+		if(HAVE_BIG_DECIMAL) {
+			System.out.print("  getBigDecimal=");
+			ResultSet rs = ps.executeQuery();
+			rs.next();
+			boolean worked;
+			SQLException sqleResult = null;;
+			try {
+				System.out.print(rs.getBigDecimal(1));
+				System.out.print(" was null " + rs.wasNull());
+				worked = true;
+	
+			} catch (SQLException sqle) {
+				sqleResult = sqle;
+				worked = false;
+			}
+			rs.close();
+			judge_getXXX(worked, sqleResult, 6, type);
 		}
 
 		{
@@ -917,13 +971,16 @@ public class parameterMapping {
 			System.out.print(is == null ? "null" : "data");
 			System.out.print(" was null " + rs.wasNull());
 			worked = true;
-
+		} catch (NoSuchMethodError e){
+			worked = true;
+			System.out.println("ResultSet.getUnicodeStream not present - correct for JSR169");
 		} catch (SQLException sqle) {
 			sqleResult = sqle;
 			worked = false;
 		}
 		rs.close();
-		judge_getXXX(worked, sqleResult, 18, type);
+		if(TestUtil.HAVE_DRIVER_CLASS)
+			judge_getXXX(worked, sqleResult, 18, type);
 		}
 
 		// Check to see getObject returns the correct type
@@ -933,28 +990,33 @@ public class parameterMapping {
 		rs.next();
 		SQLException sqleResult = null;;
 		try {
-			Object o = rs.getObject(1);
-
-			Class cgo = B3_GET_OBJECT[type];
-
-			String cname;
-			if (cgo.equals(byte[].class))
-				cname = "byte[]";
-			else
-				cname = cgo.getName();
-
+			
 			String msg;
-			if (o == null)
-			{
-				msg = "null";
-			}
-			else if (cgo.isInstance(o))
-			{
-				msg = "CORRECT :" + cgo.getName();
-			}
-			else
-			{
-				msg = "FAIL NOT :" + cgo.getName() + " is " + o.getClass().getName();
+			if(!SQLTypes[type].equals("DECIMAL(10,5)") || HAVE_BIG_DECIMAL) {
+				Object o = rs.getObject(1);
+	
+				Class cgo = B3_GET_OBJECT[type];
+	
+				String cname;
+				if (cgo.equals(byte[].class))
+					cname = "byte[]";
+				else
+					cname = cgo.getName();
+	
+				if (o == null)
+				{
+					msg = "null";
+				}
+				else if (cgo.isInstance(o))
+				{
+					msg = "CORRECT :" + cgo.getName();
+				}
+				else
+				{
+					msg = "FAIL NOT :" + cgo.getName() + " is " + o.getClass().getName();
+				}
+			} else {
+				msg = "ResultSet.getObject not called for DECIMAL type for JSR169";
 			}
 
 			System.out.print(msg);
@@ -1357,6 +1419,7 @@ public class parameterMapping {
 		}
 
 
+		if(HAVE_BIG_DECIMAL){
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -1443,7 +1506,8 @@ public class parameterMapping {
 		}
 		judge_setXXX(worked, sqleResult, 6, type);
 		}
-
+		}
+		
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
 
@@ -2415,17 +2479,24 @@ public class parameterMapping {
 				data[4] = (byte) 0x00;
 				data[5] = (byte) 0x32;
 
-			psi.setUnicodeStream(1, new java.io.ByteArrayInputStream(data), 6);
-			psi.executeUpdate();
-			getValidValue(psq, jdbcTypes[type]);
-
+			try{
+				psi.setUnicodeStream(1, new java.io.ByteArrayInputStream(data), 6);
+			} catch (NoSuchMethodError e){
+				System.out.println("ResultSet.setUnicodeStream not present - correct for JSR169");
+			}
+			
+			if(TestUtil.HAVE_DRIVER_CLASS){
+				psi.executeUpdate();
+				getValidValue(psq, jdbcTypes[type]);
+			}
 			worked = true;
 
 		} catch (SQLException sqle) {
 			sqleResult = sqle;
 			worked = false;
 		}
-		judge_setXXX(worked, sqleResult, 14, type);
+		if(TestUtil.HAVE_DRIVER_CLASS)
+			judge_setXXX(worked, sqleResult, 14, type);
 		}	
 		{
 		s.execute("DELETE FROM PM.TYPE_AS");
@@ -2434,17 +2505,24 @@ public class parameterMapping {
 		boolean worked;
 		try {
 			System.out.print("  setUnicodeStream(null) ");
-			psi.setUnicodeStream(1, null, 0);
-			psi.executeUpdate();
-			getValidValue(psq, jdbcTypes[type]);
-
+			try{
+				psi.setUnicodeStream(1, null, 0);
+			} catch (NoSuchMethodError e){
+				System.out.println("ResultSet.setUnicodeStream not present - correct for JSR169");
+			}
+			
+			if(TestUtil.HAVE_DRIVER_CLASS){
+				psi.executeUpdate();
+				getValidValue(psq, jdbcTypes[type]);
+			}
 			worked = true;
 
 		} catch (SQLException sqle) {
 			sqleResult = sqle;
 			worked = false;
 		}
-		judge_setXXX(worked, sqleResult, 14, type);
+		if(TestUtil.HAVE_DRIVER_CLASS)
+			judge_setXXX(worked, sqleResult, 14, type);
 		}
 
 
@@ -2492,7 +2570,8 @@ public class parameterMapping {
 		}
 
 		setXXX_setObject(s, psi, psq, type, "46", "java.lang.String", 0, executeBatchTests);
-		setXXX_setObject(s, psi, psq, type, BigDecimal.valueOf(72L), "java.math.BigDecimal", 1, executeBatchTests);
+		if(HAVE_BIG_DECIMAL)
+			setXXX_setObject(s, psi, psq, type, BigDecimal.valueOf(72L), "java.math.BigDecimal", 1, executeBatchTests);
 		setXXX_setObject(s, psi, psq, type, Boolean.TRUE, "java.lang.Boolean", 2, executeBatchTests);
 		setXXX_setObject(s, psi, psq, type, new Integer(74), "java.lang.Integer", 3, executeBatchTests);
 		setXXX_setObject(s, psi, psq, type, new Long(79), "java.lang.Long", 4, executeBatchTests);
@@ -2629,7 +2708,7 @@ public class parameterMapping {
 			ps.setDouble(param, 32.0);
 			return true;
 		case Types.DECIMAL:
-			ps.setBigDecimal(param, new BigDecimal(32.0));
+			BigDecimalHandler.setBigDecimalString(ps, param, "32.0");
 			return true;
 		case Types.CHAR:
 		case Types.VARCHAR:
@@ -2700,7 +2779,7 @@ public class parameterMapping {
 			System.out.print("getDouble=" + rs.getDouble(1) + " was null " + rs.wasNull());
 			return true;
 		case Types.DECIMAL:
-			System.out.print("getBigDecimal=" + rs.getBigDecimal(1) + " was null " + rs.wasNull());
+			System.out.print("getBigDecimal=" + BigDecimalHandler.getBigDecimalString(rs,1) + " was null " + rs.wasNull());
 			return true;
 		case Types.CHAR:
 		case Types.VARCHAR:
@@ -2821,7 +2900,7 @@ public class parameterMapping {
 			System.out.print("cs.getDouble=" + cs.getDouble(param) + " was null " + cs.wasNull());
 			return true;
 		case Types.DECIMAL:
-			System.out.print("cs.getBigDecimal=" + cs.getBigDecimal(param) + " was null " + cs.wasNull());
+			System.out.print("cs.getBigDecimal=" + BigDecimalHandler.getBigDecimalString(cs,param,jdbcType) + " was null " + cs.wasNull());
 			return true;
 		case Types.CHAR:
 		case Types.VARCHAR:
