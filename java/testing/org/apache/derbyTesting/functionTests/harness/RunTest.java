@@ -2409,9 +2409,11 @@ clp.list(System.out);
         }
         
         ps.close();
-        
-        if (installedSecurityManager)
+         if (installedSecurityManager)
+        {
         	System.setSecurityManager(null);
+        	
+        }
         // Reset System.out and System.err
         System.setOut(stdout);
         System.setErr(stderr);
@@ -2479,16 +2481,18 @@ clp.list(System.out);
      */
     private static boolean installSecurityManager() throws ClassNotFoundException, IOException
     {
+    	// SecurityManager not currently work with j9 and useProcess=false
+    	// need to disable to allow tests to run.
+    	if (jvmName.startsWith("j9"))
+    		return false;
+    	
     	boolean installedSecurityManager = false;
     	// Set up the SecurityManager in this JVM for this test.
     	boolean haveSecurityManagerAlready = System.getSecurityManager() != null;
         if (runWithoutSecurityManager)
         {
-        	// Test doesn't run with a SecurityManager but there's
-        	// a chance that a previous test will have installed one.
-        	// Currently when running with useProcess=false we install
-        	// the SecurityManager on the first test that requires it
-        	// and leave it there.
+        	// Test doesn't run with a SecurityManager,
+        	// print a warning if one is there already.
         	if (haveSecurityManagerAlready)
         		System.out.println(
         				"noSecurityManager=true,useProcess=false but SecurityManager installed by previous test");
