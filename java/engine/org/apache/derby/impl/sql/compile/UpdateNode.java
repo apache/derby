@@ -771,8 +771,7 @@ public final class UpdateNode extends DMLModStatementNode
 
 		/*
 		** Generate the update result set, giving it either the original
-		** source or the normalize result set, the constant action,
-		** and "this".
+		** source or the normalize result set, the constant action.
 		*/
 
 		acb.pushGetResultSetFactoryExpression(mb);
@@ -781,8 +780,7 @@ public final class UpdateNode extends DMLModStatementNode
         if( null != targetVTI)
         {
 			targetVTI.assignCostEstimate(resultSet.getNewCostEstimate());
-            acb.pushThisAsActivation(mb); // arg 2
-            mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUpdateVTIResultSet", ClassName.ResultSet, 2);
+            mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUpdateVTIResultSet", ClassName.ResultSet, 1);
 		}
         else
         {

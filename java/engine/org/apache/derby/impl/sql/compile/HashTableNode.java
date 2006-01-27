@@ -270,22 +270,21 @@ public class HashTableNode extends SingleChildResultSetNode
 
 		/* Generate the HashTableResultSet:
 		 *	arg1: childExpress - Expression for childResultSet
-		 *  arg2: Activation
-		 *  arg3: searchExpress - Expression for single table predicates
-		 *	arg4	: equijoinExpress - Qualifier[] for hash table look up
-		 *  arg5: projectExpress - Expression for projection, if any
-		 *  arg6: resultSetNumber
-		 *  arg7: mapArrayItem - item # for mapping of source columns
-		 *  arg8: reuseResult - whether or not the result row can be reused
+		 *  arg2: searchExpress - Expression for single table predicates
+		 *	arg3	: equijoinExpress - Qualifier[] for hash table look up
+		 *  arg4: projectExpress - Expression for projection, if any
+		 *  arg5: resultSetNumber
+		 *  arg6: mapArrayItem - item # for mapping of source columns
+		 *  arg7: reuseResult - whether or not the result row can be reused
 		 *						(ie, will it always be the same)
-		 *	arg9: hashKeyItem - item # for int[] of hash column #s
-		 *	arg10: removeDuplicates - don't remove duplicates in hash table (for now)
-		 *	arg11: maxInMemoryRowCount - max row size for in-memory hash table
-		 *	arg12: initialCapacity - initialCapacity for java.util.Hashtable
-		 *	arg13	: loadFactor - loadFactor for java.util.Hashtable
-		 *  arg14: estimated row count
-		 *  arg15: estimated cost
-		 *  arg16: close method
+		 *	arg8: hashKeyItem - item # for int[] of hash column #s
+		 *	arg9: removeDuplicates - don't remove duplicates in hash table (for now)
+		 *	arg10: maxInMemoryRowCount - max row size for in-memory hash table
+		 *	arg11: initialCapacity - initialCapacity for java.util.Hashtable
+		 *	arg12	: loadFactor - loadFactor for java.util.Hashtable
+		 *  arg13: estimated row count
+		 *  arg14: estimated cost
+		 *  arg15: close method
 		 */
 
 		acb.pushGetResultSetFactoryExpression(mb);
@@ -327,7 +326,6 @@ public class HashTableNode extends SingleChildResultSetNode
 		{
 			costEstimate = childResult.getCostEstimate();
 		}
-		acb.pushThisAsActivation(mb);
 
 		// if there is no searchClause, we just want to pass null.
 		if (searchClause == null)
@@ -412,7 +410,7 @@ public class HashTableNode extends SingleChildResultSetNode
 		mb.push(costEstimate.getEstimatedCost());
 		closeMethodArgument(acb, mb);
 
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getHashTableResultSet", ClassName.NoPutResultSet, 16);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getHashTableResultSet", ClassName.NoPutResultSet, 15);
 	}
 
 	/**

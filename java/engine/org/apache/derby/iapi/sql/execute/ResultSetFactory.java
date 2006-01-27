@@ -209,12 +209,10 @@ public interface ResultSetFactory {
      * @param source the result set from which to take rows to be 
      *               updated in the target table.
      * @param vtiRS the updateable result set for the VTI
-     * @param activation the activation for this result set
      * @return the update operation as a result set.
      * @exception StandardException thrown on error
 	 */
-	public ResultSet getUpdateVTIResultSet(NoPutResultSet source,
-                                           Activation activation)
+	public ResultSet getUpdateVTIResultSet(NoPutResultSet source)
         throws StandardException;
 
 	/**
@@ -321,10 +319,6 @@ public interface ResultSetFactory {
 
 		@param source the result set from which to take rows to be 
 			filtered by this operation.
-		@param activation the activation for this result set,
-			against whcih the restriction and projection are performed
-			and to which current rows must be assigned for the
-			projection and restriction to be performed.
 		@param singleTableRestriction restriction, if any, applied to
 			input of hash table.
 		@param equijoinQualifiers Qualifier[] for look up into hash table
@@ -352,7 +346,7 @@ public interface ResultSetFactory {
 			result set
 	 */
 	public NoPutResultSet getHashTableResultSet(NoPutResultSet source,
-		Activation activation, GeneratedMethod singleTableRestriction, 
+		GeneratedMethod singleTableRestriction, 
 		Qualifier[][] equijoinQualifiers,
 		GeneratedMethod projection, int resultSetNumber,
 		int mapRefItem,
@@ -382,8 +376,6 @@ public interface ResultSetFactory {
 		@param distinct true if distinct SELECT list
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param orderItem entry in preparedStatement's savedObjects for order
-		@param activation the activation for this result set,
-			against which the sort-unique is performed.
 		@param rowAllocator a reference to a method in the activation
 			that generates rows of the right size and shape for the source
 		@param rowSize the size of the row that is allocated by rowAllocator.
@@ -402,7 +394,6 @@ public interface ResultSetFactory {
 		boolean distinct, 
 		boolean isInSortedOrder,
 		int orderItem,
-		Activation activation, 
 		GeneratedMethod rowAllocator, 
 		int rowSize,
 		int resultSetNumber, 
@@ -420,8 +411,6 @@ public interface ResultSetFactory {
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param aggregateItem entry in preparedStatement's savedObjects for aggregates
 		@param orderingItem		Ignored to allow same signature as getDistinctScalarAggregateResultSet
-		@param activation the activation for this result set,
-			against which the sort-unique is performed.
 		@param rowAllocator a reference to a method in the activation
 			that generates rows of the right size and shape for the source
 		@param rowSize			Ignored to allow same signature as getDistinctScalarAggregateResultSet
@@ -439,7 +428,6 @@ public interface ResultSetFactory {
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderingItem,
-		Activation activation, 
 		GeneratedMethod rowAllocator, 
 		int rowSize,
 		int resultSetNumber, 
@@ -459,8 +447,6 @@ public interface ResultSetFactory {
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param aggregateItem entry in preparedStatement's savedObjects for aggregates
 		@param orderItem entry in preparedStatement's savedObjects for order
-		@param activation the activation for this result set,
-			against which the sort-unique is performed.
 		@param rowAllocator a reference to a method in the activation
 			that generates rows of the right size and shape for the source
 		@param rowSize the size of the row that is allocated by rowAllocator.
@@ -480,7 +466,6 @@ public interface ResultSetFactory {
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderingItem,
-		Activation activation, 
 		GeneratedMethod rowAllocator, 
 		int rowSize,
 		int resultSetNumber, 
@@ -499,8 +484,6 @@ public interface ResultSetFactory {
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param aggregateItem entry in preparedStatement's savedObjects for aggregates
 		@param orderingItem		Ignored to allow same signature as getDistinctScalarAggregateResultSet
-		@param activation the activation for this result set,
-			against which the sort-unique is performed.
 		@param rowAllocator a reference to a method in the activation
 			that generates rows of the right size and shape for the source
 		@param rowSize			Ignored to allow same signature as getDistinctScalarAggregateResultSet
@@ -517,7 +500,6 @@ public interface ResultSetFactory {
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderingItem,
-		Activation activation, 
 		GeneratedMethod rowAllocator, 
 		int rowSize,
 		int resultSetNumber, 
@@ -536,8 +518,6 @@ public interface ResultSetFactory {
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param aggregateItem entry in preparedStatement's savedObjects for aggregates
 		@param orderItem entry in preparedStatement's savedObjects for order
-		@param activation the activation for this result set,
-			against which the sort-unique is performed.
 		@param rowAllocator a reference to a method in the activation
 			that generates rows of the right size and shape for the source
 		@param rowSize the size of the row that is allocated by rowAllocator.
@@ -556,7 +536,6 @@ public interface ResultSetFactory {
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderingItem,
-		Activation activation, 
 		GeneratedMethod rowAllocator, 
 		int rowSize,
 		int resultSetNumber, 
@@ -704,10 +683,10 @@ public interface ResultSetFactory {
 		The rows are put into the hash table on the 1st open.
 		<p>
 
-		@param conglomId the conglomerate of the table to be scanned.
-		@param scociItem The saved item for the static conglomerate info.
 		@param activation the activation for this result set,
 			which provides the context for the row allocation operation.
+		@param conglomId the conglomerate of the table to be scanned.
+		@param scociItem The saved item for the static conglomerate info.
 		@param resultRowAllocator a reference to a method in the activation
 			that creates a holder for the rows from the scan.
 			<verbatim>
@@ -761,9 +740,9 @@ public interface ResultSetFactory {
 			result set
 	 */
 	NoPutResultSet getHashScanResultSet(
+			                    Activation activation,
 								long conglomId,
-								int scociItem,
-								Activation activation,
+								int scociItem,						
 								GeneratedMethod resultRowAllocator,
 								int resultSetNumber,
 								GeneratedMethod startKeyGetter,
@@ -797,10 +776,10 @@ public interface ResultSetFactory {
 		the scan.
 		<p>
 
-		@param conglomId the conglomerate of the table to be scanned.
-		@param scociItem The saved item for the static conglomerate info.
 		@param activation the activation for this result set,
 			which provides the context for the row allocation operation.
+		@param conglomId the conglomerate of the table to be scanned.
+		@param scociItem The saved item for the static conglomerate info.
 		@param resultRowAllocator a reference to a method in the activation
 			that creates a holder for the rows from the scan.
 			<verbatim>
@@ -829,9 +808,9 @@ public interface ResultSetFactory {
 			result set
 	 */
 	NoPutResultSet getDistinctScanResultSet(
+			                    Activation activation,
 								long conglomId,
-								int scociItem,
-								Activation activation,
+								int scociItem,			
 								GeneratedMethod resultRowAllocator,
 								int resultSetNumber,
 								int hashKeyColumn,
@@ -913,9 +892,9 @@ public interface ResultSetFactory {
 			result set
 	 */
 	NoPutResultSet getTableScanResultSet(
+			                    Activation activation,
 								long conglomId,
 								int scociItem,
-								Activation activation,
 								GeneratedMethod resultRowAllocator,
 								int resultSetNumber,
 								GeneratedMethod startKeyGetter,
@@ -1006,9 +985,9 @@ public interface ResultSetFactory {
 			result set
 	 */
 	NoPutResultSet getBulkTableScanResultSet(
+			                    Activation activation,
 								long conglomId,
 								int scociItem,
-								Activation activation,
 								GeneratedMethod resultRowAllocator,
 								int resultSetNumber,
 								GeneratedMethod startKeyGetter,
@@ -1041,8 +1020,6 @@ public interface ResultSetFactory {
 
 	    @param conglomId	Conglomerate # for the heap.
 		@param scociItem The saved item for the static conglomerate info.
-		@param activation the activation for this result set,
-			which provides the context for the row allocation operation.
 		@param source	the source result set, which is expected to provide
 						rows from an index conglomerate
 		@param resultRowAllocator a reference to a method in the activation
@@ -1074,7 +1051,6 @@ public interface ResultSetFactory {
 	public NoPutResultSet getIndexRowToBaseRowResultSet(
 								long conglomId,
 								int scoci,
-								Activation a,
 								NoPutResultSet source,
 								GeneratedMethod resultRowAllocator,
 								int resultSetNumber,
@@ -1103,8 +1079,6 @@ public interface ResultSetFactory {
 		@param leftNumCols		Number of columns in the leftResultSet
 		@param rightResultSet	Inner ResultSet for join.
 		@param rightNumCols		Number of columns in the rightResultSet
-		@param activation the activation for this result set,
-			which provides the context for the row allocation operation.
 		@param joinClause a reference to a method in the activation
 			that is applied to the activation's "current row" field
 			to determine whether the joinClause is satisfied or not.
@@ -1130,7 +1104,6 @@ public interface ResultSetFactory {
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
-								   Activation activation, 
 								   GeneratedMethod joinClause,
 								   int resultSetNumber,
 								   boolean oneRowRightSide,
@@ -1148,8 +1121,6 @@ public interface ResultSetFactory {
 		@param leftNumCols		Number of columns in the leftResultSet
 		@param rightResultSet	Inner ResultSet for join.
 		@param rightNumCols		Number of columns in the rightResultSet
-		@param activation the activation for this result set,
-			which provides the context for the row allocation operation.
 		@param joinClause a reference to a method in the activation
 			that is applied to the activation's "current row" field
 			to determine whether the joinClause is satisfied or not.
@@ -1175,7 +1146,6 @@ public interface ResultSetFactory {
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
-								   Activation activation, 
 								   GeneratedMethod joinClause,
 								   int resultSetNumber,
 								   boolean oneRowRightSide,
@@ -1201,8 +1171,6 @@ public interface ResultSetFactory {
 		@param leftNumCols		Number of columns in the leftResultSet
 		@param rightResultSet	Inner ResultSet for join.
 		@param rightNumCols		Number of columns in the rightResultSet
-		@param activation the activation for this result set,
-			which provides the context for the row allocation operation.
 		@param joinClause a reference to a method in the activation
 			that is applied to the activation's "current row" field
 			to determine whether the joinClause is satisfied or not.
@@ -1231,7 +1199,6 @@ public interface ResultSetFactory {
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
-								   Activation activation, 
 								   GeneratedMethod joinClause,
 								   int resultSetNumber,
 								   GeneratedMethod emptyRowFun,
@@ -1251,8 +1218,6 @@ public interface ResultSetFactory {
 		@param leftNumCols		Number of columns in the leftResultSet
 		@param rightResultSet	Inner ResultSet for join.
 		@param rightNumCols		Number of columns in the rightResultSet
-		@param activation the activation for this result set,
-			which provides the context for the row allocation operation.
 		@param joinClause a reference to a method in the activation
 			that is applied to the activation's "current row" field
 			to determine whether the joinClause is satisfied or not.
@@ -1281,7 +1246,6 @@ public interface ResultSetFactory {
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
-								   Activation activation, 
 								   GeneratedMethod joinClause,
 								   int resultSetNumber,
 								   GeneratedMethod emptyRowFun,
@@ -1516,10 +1480,10 @@ public interface ResultSetFactory {
 		on the scan of its parent table and if the row being deleted
 		on parent table has a reference in the dependent table.
 
-		@param conglomId the conglomerate of the table to be scanned.
-		@param scociItem The saved item for the static conglomerate info.
 		@param activation the activation for this result set,
 			which provides the context for the row allocation operation.
+		@param conglomId the conglomerate of the table to be scanned.
+		@param scociItem The saved item for the static conglomerate info.
 		@param resultRowAllocator a reference to a method in the activation
 			that creates a holder for the result row of the scan.  May
 			be a partial row.
@@ -1577,9 +1541,9 @@ public interface ResultSetFactory {
 			result set
 	 */
 	public NoPutResultSet getRaDependentTableScanResultSet(
+			                        Activation activation,
 									long conglomId,
-									int scociItem,
-									Activation activation,
+									int scociItem,							
 									GeneratedMethod resultRowAllocator,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,

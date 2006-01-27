@@ -1576,7 +1576,6 @@ public class JoinNode extends TableOperatorNode
 		mb.push(leftResultSet.resultColumns.size()); // arg 2
 		rightResultSet.generate(acb, mb); // arg 3
 		mb.push(rightResultSet.resultColumns.size()); // arg 4
-		acb.pushThisAsActivation(mb); // arg 5
 
 		// Get the cost estimate if we don't have one yet
 		if (costEstimate == null)
@@ -1608,7 +1607,7 @@ public class JoinNode extends TableOperatorNode
 		// if there is no join clause, we just pass a null Expression.
 		if (joinClause == null)
 		{
-		   	mb.pushNull(ClassName.GeneratedMethod); // arg 6
+		   	mb.pushNull(ClassName.GeneratedMethod); // arg 5
 		}
 		else
 		{
@@ -1635,10 +1634,10 @@ public class JoinNode extends TableOperatorNode
 			//	ActivationClass.userExprFun
 			// which is the static field that "points" to the userExprFun
 			// that evaluates the where clause.
-   			acb.pushMethodReference(mb, userExprFun); // arg 6
+   			acb.pushMethodReference(mb, userExprFun); // arg 5
 		}
 
-		mb.push(resultSetNumber); // arg 7
+		mb.push(resultSetNumber); // arg 6
 
 		addOuterJoinArguments(acb, mb);
 
@@ -1679,7 +1678,7 @@ public class JoinNode extends TableOperatorNode
 	 */
 	protected int getNumJoinArguments()
 	{
-		return 13;
+		return 12;
 	}
 
 	/**
