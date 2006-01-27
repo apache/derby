@@ -289,10 +289,29 @@ class DDMWriter
 	 * Copy Data to End
 	 * Create a buffer and copy from the position given to the end of data
 	 *
+	 * Note that the position given is treated as relative to the
+	 * current DSS, for there may be other DSS blocks (chained, presumably)
+	 * which are sitting unwritten in the buffer. The caller doesn't
+	 * know this, though, and works only with the current DSS.
+	 *
+	 * getDSSLength, copyDSSDataToEnd, and truncateDSS work together to
+	 * provide a sub-protocol for DRDAConnThread to use in its
+	 * implementation of the LMTBLKPRC protocol. They enable the caller
+	 * to determine when it has written too much data into the current
+	 * DSS, to reclaim the extra data that won't fit, and to truncate
+	 * that extra data once it has been reclaimed and stored elsewhere.
+	 * Note that this support only works for the current DSS. Earlier,
+	 * chained DSS blocks cannot be accessed using these methods. For
+	 * additional background information, the interested reader should
+	 * investigate bugs DERBY-491 and 492 at:
+	 * http://issues.apache.org/jira/browse/DERBY-491 and
+	 * http://issues.apache.org/jira/browse/DERBY-492
+	 *
 	 * @param start
 	 */
-	protected byte [] copyDataToEnd(int start)
+	protected byte [] copyDSSDataToEnd(int start)
 	{
+		start = start + dssLengthLocation;
 		int length = offset - start;
 		byte [] temp = new byte[length];
 		System.arraycopy(bytes,start,temp,0,length);
@@ -399,26 +418,31 @@ class DDMWriter
 
 	}
 
-	/**
-	 * Get offset
-	 *
-	 * @return offset into the buffer
-	 */
-	protected int getOffset()
-	{
-		return offset;
-	}
-
-	/**
-	 * Set offset
-	 *
-	 * @param value new offset value
-	 */
-	protected void setOffset(int value)
-	{
-		offset = value;
-	}
-
+    /**
+     * Get the length of the current DSS block we're working on. This is
+     * used by the LMTBLKPRC protocol, which does its own conversational
+     * blocking protocol above the layer of the DRDA blocking. The LMTBLKPRC
+     * implementation (in DRDAConnThread) needs to be able to truncate a
+     * DSS block when splitting a QRYDTA response.
+     *
+     * @return current DSS block length
+    */
+    protected int getDSSLength()
+    {
+        return offset - dssLengthLocation;
+    }
+ 
+    /**
+     * Truncate the current DSS. Before making this call, you should ensure
+     * that you have copied the data to be truncated somewhere else, by
+     * calling copyDSSDataToEnd
+     *
+     * @param desired DSS length
+    */
+    protected void truncateDSS(int value)
+    {
+        offset = dssLengthLocation + value;
+    }
 
 
 	// Write routines
@@ -1898,7 +1922,7 @@ class DDMWriter
 	{
 
 		lastDSSBeforeMark = prevHdrLocation;
-		return getOffset();
+		return offset;
 
 	}
 
@@ -1917,7 +1941,7 @@ class DDMWriter
 	{
 
 		// Logical clear.
-		setOffset(mark);
+		offset = mark;
 
 		// Because we've just cleared out the most recently-
 		// written DSSes, we have to make sure the next thing

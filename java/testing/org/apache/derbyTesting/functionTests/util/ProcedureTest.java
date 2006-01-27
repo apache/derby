@@ -628,5 +628,46 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 
         conn.close();
      }
+
+     // Procedure used by the test for bug JIRA-491. The client side part
+     // of this test is in lang/procedure.java
+
+	public static void BIG_COL_491 (int i, ResultSet [] rs1, ResultSet [] rs2)
+		throws SQLException
+	{
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		Statement st1 = conn.createStatement();
+		rs1[0] = st1.executeQuery(
+			"select int1, varchar32k from jira491 where int1 < " + i + " order by 1");
+
+		Statement st2 = conn.createStatement();
+		rs2[0] = st2.executeQuery(
+			"select int1, varchar32k from jira491 where int1 > " + i + " order by 1");
+	}
+
+    // Procedure used by the test for bug JIRA-492. The client side part of
+    // this test is in lang/procedure.java
+
+	public static void LOTS_O_COLS_492(ResultSet [] rs)
+        throws SQLException
+    {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		Statement st1 = conn.createStatement();
+
+		StringBuffer query = new StringBuffer("SELECT ");
+        for (int i = 0; i < 100; i++)
+        {
+            int cno = 1000 + (i * 10);
+            if (i > 0) query.append(", ");
+            query.append("id AS col").append(cno).append(", nsi as col").
+                append(cno+1).append(", ni AS col").append(cno+2).
+                append(", nbi AS col").append(cno+3).append(", nd AS col").
+                append(cno+4).append(", nr AS col").append(cno+5).
+                append(", ndo AS col").append(cno+6).append(" ");
+        }
+		query.append("FROM jira492 a WHERE a.id = 0");
+
+		rs[0] = st1.executeQuery(query.toString());
+	}
 }
 

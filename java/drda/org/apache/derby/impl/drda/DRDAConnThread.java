@@ -5738,7 +5738,7 @@ public class DRDAConnThread extends Thread {
 
 		// check for remaining space in current query block
 		// Need to mod with blksize so remaining doesn't go negative. 4868
-		int remaining = blksize - (writer.getOffset()  % blksize) - (3 + 
+		int remaining = blksize - (writer.getDSSLength()  % blksize) - (3 + 
 				FdocaConstants.SQLCADTA_SQLDTARD_RLO_SIZE);
 
 
@@ -5985,7 +5985,7 @@ public class DRDAConnThread extends Thread {
 	{
 		boolean getMoreData = true;
 		boolean sentExtData = false;
-		int startOffset = writer.getOffset();
+		int startLength = 0;
 		writer.createDssObject();
 
 		if (SanityManager.DEBUG) 
@@ -6026,12 +6026,12 @@ public class DRDAConnThread extends Thread {
 			// It would get split up but it is not very efficient.
 			if (getMoreData == true)
 			{
-				int endOffset = writer.getOffset();
-				int rowsize = endOffset- startOffset;
-				if ((stmt.getBlksize() - endOffset ) < rowsize)
+				int endLength = writer.getDSSLength();
+				int rowsize = endLength - startLength;
+				if ((stmt.getBlksize() - endLength ) < rowsize)
 					getMoreData = false;
 
-				startOffset = endOffset;
+				startLength = endLength;
 			}
 
 		}
@@ -6255,7 +6255,7 @@ public class DRDAConnThread extends Thread {
 				}
 			}
 			// does all this fit in one QRYDTA
-			if (writer.getOffset() >= blksize)
+			if (writer.getDSSLength() >= blksize)
 			{
 				splitQRYDTA(stmt, blksize);
 				return false;
@@ -6300,6 +6300,17 @@ public class DRDAConnThread extends Thread {
 	 * set. At some later point, when the client returns with a CNTQRY,
 	 * we will call processLeftoverQRYDTA to handle that data.
 	 *
+	 * The interaction between DRDAConnThread and DDMWriter is rather
+	 * complicated here. This routine gets called because DRDAConnThread
+	 * realizes that it has constructed a QRYDTA message which is too
+	 * large. At that point, we need to reclaim the "extra" data and
+	 * hold on to it. To aid us in that processing, DDMWriter provides
+	 * the routines getDSSLength, copyDSSDataToEnd, and truncateDSS.
+	 * For some additional detail on this complex sub-protocol, the
+	 * interested reader should study bug DERBY-491 and 492 at:
+	 * http://issues.apache.org/jira/browse/DERBY-491 and
+	 * http://issues.apache.org/jira/browse/DERBY-492
+	 *
 	 * @param stmt DRDA statment
 	 * @param blksize size of query block
 	 * 
@@ -6310,9 +6321,9 @@ public class DRDAConnThread extends Thread {
 			DRDAProtocolException
 	{
 		// make copy of extra data
-		byte [] temp = writer.copyDataToEnd(blksize);
+		byte [] temp = writer.copyDSSDataToEnd(blksize);
 		// truncate to end of blocksize
-		writer.setOffset(blksize);
+		writer.truncateDSS(blksize);
 		if (temp.length == 0)
 			agentError("LMTBLKPRC violation: splitQRYDTA was " +
 				"called to split a QRYDTA block, but the " +
@@ -6423,7 +6434,7 @@ public class DRDAConnThread extends Thread {
                 
 		writer.writeByte(CodePoint.NULLDATA);
 		// does all this fit in one QRYDTA
-		if (writer.getOffset() >= blksize)
+		if (writer.getDSSLength() >= blksize)
 		{
 			splitQRYDTA(stmt, blksize);
 		}
