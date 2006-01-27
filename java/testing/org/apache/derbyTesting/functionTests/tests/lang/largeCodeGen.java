@@ -99,6 +99,7 @@ public class largeCodeGen
 	 */
 	private static void testLogicalOperators(Connection con)  throws SQLException {
 		 
+		// svn 372388 trunk - passed @ 400
 		 for (int count = 200; count <= 10000 ; count += 100)
 		 {
 			 // keep testing until it fails with linkage error
@@ -138,6 +139,7 @@ public class largeCodeGen
 	private static void testInClause(Connection con)  throws SQLException {
 	  
 		// DERBY-739 raised number of parameters from 2700 to 3400
+        // svn 372388 trunk - passed @ 3400
 		 for (int count = 3300; count <= 10000 ; count += 100)
 		 {
 			 // keep testing until it fails.
@@ -194,7 +196,7 @@ public class largeCodeGen
 		//System.out.println(createViewString);
 		stmt.executeUpdate(createView.toString());
 		
-		
+		// svn 372388 trunk - passed @ 900
 		for (int count = 800; count <= 10000; count += 100)
 		{
 			// keep testing until it fails
@@ -229,17 +231,21 @@ public class largeCodeGen
 		String selectSQL = selectSQLBuffer.toString();
 		//System.out.println(selectSQL);
         PreparedStatement pstmt = con.prepareStatement(selectSQL);
-        ResultSet rs = pstmt.executeQuery();
-		int numRowsExpected = (numUnions/100 * 100);
-		int numRows = 0;
-		while (rs.next())
-		{
-			numRows++;
-			if ((numRows % 100) == 0)
-			checkRowData(rs);
-		}
-		System.out.println("PASS: " + testName + " Row data check ok");
-        con.commit();
+        System.out.println("PASS: PREPARE: " + testName);
+        if (largeCodeGen.TEST_QUERY_EXECUTION)
+        {
+	        ResultSet rs = pstmt.executeQuery();
+			int numRowsExpected = (numUnions/100 * 100);
+			int numRows = 0;
+			while (rs.next())
+			{
+				numRows++;
+				if ((numRows % 100) == 0)
+				checkRowData(rs);
+			}
+			System.out.println("PASS: EXECUTE " + testName + " Row data check ok");
+	        con.commit();
+        }
         pstmt.close();
         return false;
      
