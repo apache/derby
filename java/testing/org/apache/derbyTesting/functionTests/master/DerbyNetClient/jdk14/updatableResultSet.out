@@ -1,6 +1,6 @@
 Start testing delete and update using JDBC2.0 updateable resultset apis
 Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset
-WARNING (no SQLState): Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
+WARNING 01X03: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
 requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
 Make sure that we got CONCUR_READ_ONLY? true
@@ -13,8 +13,7 @@ Got expected exception This method cannot be invoked while the cursor is on the 
 SQL State : null
 Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
-WARNING (no SQLState): Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
-WARNING (no SQLState): Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
+WARNING 01X02: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
 requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
 Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true

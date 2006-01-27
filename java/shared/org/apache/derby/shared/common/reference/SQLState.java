@@ -648,6 +648,14 @@ public interface SQLState {
 	// 0100C is not returned for procedures written in Java, from the SQL2003 spec.
 	String LANG_DYNAMIC_RESULTS_RETURNED							   = "0100C";
 	String LANG_TOO_MANY_DYNAMIC_RESULTS_RETURNED					   = "0100E";
+    
+    // Warnings from the network client
+    String INVALID_RESULTSET_TYPE                                      = "01X00";
+    String INVALID_RESULTSET_CONCURRENCY                               = "01X01";
+    String SCROLL_SENSITIVE_NOT_SUPPORTED                              = "01X02";
+    String INSENSITIVE_UPDATABLE_NOT_SUPPORTED                         = "01X03";
+    String UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER                   = "01X04";
+    String NUMBER_OF_ROWS_TOO_LARGE_FOR_INT                            = "01X05";
 
 
 	// TRANSACTION severity language errors. These are in the range:
@@ -1497,12 +1505,12 @@ public interface SQLState {
      * to keep track of the numbers to ensure we don't duplicate the 
      * SQL State
      */
-    String INVALID_BLOB_OFFSET = "XN003.S";
-    String WASNULL_INVALID = "XN004.S";
-    String INVALID_PARAM_USE_GETINT = "XN005.S";
-    String CALENDAR_IS_NULL = "XN006.S";
-    String PARAM_NOT_OUT_OR_INOUT = "XN009.S";
-    String RETURN_PARAM_MUST_BE_INT = "XN010.S";
+    String INVALID_BLOB_OFFSET                                      = "XN003.S";
+    String WASNULL_INVALID                                          = "XN004.S";
+    String INVALID_PARAM_USE_GETINT                                 = "XN005.S";
+    String CALENDAR_IS_NULL                                         = "XN006.S";
+    String PARAM_NOT_OUT_OR_INOUT                                   = "XN009.S";
+    String RETURN_PARAM_MUST_BE_INT                                 = "XN010.S";
     
 	/*
 	** org.apache.derby.database.UserUtility

@@ -21,6 +21,7 @@
 package org.apache.derby.client.am;
 
 import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
 
@@ -939,7 +940,7 @@ public abstract class Connection implements java.sql.Connection,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getWarnings", warnings_);
         }
-        return warnings_;
+        return warnings_ == null ? null : warnings_.getSQLWarning();
     }
 
     synchronized public void clearWarnings() throws SQLException {
@@ -1120,7 +1121,8 @@ public abstract class Connection implements java.sql.Connection,
     // issue a warning rather than to throw an exception.
     private int downgradeResultSetType(int resultSetType) {
         if (resultSetType == java.sql.ResultSet.TYPE_SCROLL_SENSITIVE) {
-            accumulateWarning(new SqlWarning(agent_.logWriter_, "Scroll sensitive result sets are not supported by server; remapping to forward-only cursor"));
+            accumulateWarning(new SqlWarning(agent_.logWriter_, 
+                new MessageId(SQLState.SCROLL_SENSITIVE_NOT_SUPPORTED)));
             return java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE;
         }
         return resultSetType;
@@ -1131,7 +1133,8 @@ public abstract class Connection implements java.sql.Connection,
     private int downgradeResultSetConcurrency(int resultSetConcurrency, int resultSetType) {
         if (resultSetConcurrency == java.sql.ResultSet.CONCUR_UPDATABLE &&
                 resultSetType == java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE) {
-            accumulateWarning(new SqlWarning(agent_.logWriter_, "Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor"));
+            accumulateWarning(new SqlWarning(agent_.logWriter_, 
+                new MessageId(SQLState.INSENSITIVE_UPDATABLE_NOT_SUPPORTED)));
             return java.sql.ResultSet.CONCUR_READ_ONLY;
         }
         return resultSetConcurrency;

@@ -644,7 +644,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getWarnings", warnings_);
         }
-        return warnings_;
+        return warnings_ == null ? null : warnings_.getSQLWarning();
     }
 
     public void clearWarnings() throws SQLException {
@@ -2032,7 +2032,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         if (warnings_ == null) {
             warnings_ = e;
         } else {
-            warnings_.setNextException(e);
+            warnings_.setNextWarning(e);
         }
     }
 

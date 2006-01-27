@@ -1,6 +1,6 @@
 Start testing delete and update using JDBC2.0 updateable resultset apis
 Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset
-WARNING (no SQLState): Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
+WARNING 01X03: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
 requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
 Make sure that we got CONCUR_READ_ONLY? true
@@ -13,8 +13,7 @@ Got expected exception This method cannot be invoked while the cursor is on the 
 SQL State : null
 Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
-WARNING (no SQLState): Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
-WARNING (no SQLState): Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
+WARNING 01X02: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
 requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
 Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
@@ -645,9 +644,9 @@ Next datatype to test is SMALLINT
     Using column name as first parameter to updateDouble
   Testing updateString on SQL type SMALLINT
     Using column position as first parameter to updateString
-      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
     Using column name as first parameter to updateString
-      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
   Testing updateAsciiStream on SQL type SMALLINT
     Using column position as first parameter to updateAsciiStream
       Got expected exception : Illegal Conversion
@@ -725,9 +724,9 @@ Next datatype to test is INTEGER
     Using column name as first parameter to updateDouble
   Testing updateString on SQL type INTEGER
     Using column position as first parameter to updateString
-      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
     Using column name as first parameter to updateString
-      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
   Testing updateAsciiStream on SQL type INTEGER
     Using column position as first parameter to updateAsciiStream
       Got expected exception : Illegal Conversion
@@ -805,9 +804,9 @@ Next datatype to test is BIGINT
     Using column name as first parameter to updateDouble
   Testing updateString on SQL type BIGINT
     Using column position as first parameter to updateString
-      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
     Using column name as first parameter to updateString
-      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
   Testing updateAsciiStream on SQL type BIGINT
     Using column position as first parameter to updateAsciiStream
       Got expected exception : Illegal Conversion
@@ -885,9 +884,9 @@ Next datatype to test is DECIMAL(10,5)
     Using column name as first parameter to updateDouble
   Testing updateString on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateString
-      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992  
     Using column name as first parameter to updateString
-      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992  
   Testing updateAsciiStream on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateAsciiStream
       Got expected exception : Illegal Conversion
@@ -2053,9 +2052,9 @@ Next datatype to test is SMALLINT
   updateObject with column position & Double object as parameters
   updateObject with column name & Double object as parameters
   updateObject with column position & String object as parameters
-    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
   updateObject with column name & String object as parameters
-    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
   updateObject with column position & bytes[] array as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
@@ -2092,9 +2091,9 @@ Next datatype to test is INTEGER
   updateObject with column position & Double object as parameters
   updateObject with column name & Double object as parameters
   updateObject with column position & String object as parameters
-    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
   updateObject with column name & String object as parameters
-    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
   updateObject with column position & bytes[] array as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
@@ -2131,9 +2130,9 @@ Next datatype to test is BIGINT
   updateObject with column position & Double object as parameters
   updateObject with column name & Double object as parameters
   updateObject with column position & String object as parameters
-    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
   updateObject with column name & String object as parameters
-    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992                                                        
   updateObject with column position & bytes[] array as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters
@@ -2170,9 +2169,9 @@ Next datatype to test is DECIMAL(10,5)
   updateObject with column position & Double object as parameters
   updateObject with column name & Double object as parameters
   updateObject with column position & String object as parameters
-    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992  
   updateObject with column name & String object as parameters
-    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion. Caused by exception class java.lang.NumberFormatException: 1992  
   updateObject with column position & bytes[] array as parameters
     Got expected exception : Illegal Conversion
   updateObject with column name & bytes[] array as parameters

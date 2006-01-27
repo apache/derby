@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 public abstract class Sqlca {
     transient protected Connection connection_;
     java.sql.SQLException exceptionThrownOnStoredProcInvocation_;
@@ -280,18 +282,12 @@ public abstract class Sqlca {
             current = current.copyAsUnchainedSQLException(agent_.logWriter_);
             if (current.getErrorCode() == -440) {
                 SqlWarning warningForStoredProcFailure = new SqlWarning(agent_.logWriter_,
-                        " Unable to obtain message text from server." +
-                        " See chained exception." +
-                        " The stored procedure SYSIBM.SQLCAMESSAGE is not installed on server." +
-                        " Contact your DBA.");
+                    new MessageId(SQLState.UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER));
                 warningForStoredProcFailure.setNextException(current.getSQLException());
                 connection_.accumulate440WarningForMessageProcFailure(warningForStoredProcFailure);
             } else if (current.getErrorCode() == -444) {
                 SqlWarning warningForStoredProcFailure = new SqlWarning(agent_.logWriter_,
-                        " Unable to obtain message text from server." +
-                        " See chained exception." +
-                        " The stored procedure SYSIBM.SQLCAMESSAGE cannot be accessed on the server." +
-                        " Contact your DBA.");
+                    new MessageId(SQLState.UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER));
                 warningForStoredProcFailure.setNextException(current.getSQLException());
                 connection_.accumulate444WarningForMessageProcFailure(warningForStoredProcFailure);
             } else {

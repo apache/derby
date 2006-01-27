@@ -22,6 +22,7 @@ package org.apache.derby.client.am;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public abstract class ResultSet implements java.sql.ResultSet,
         ResultSetCallbackInterface,
@@ -221,10 +222,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // TYPE_SCROLL_INSENSITIVE = 1004
         // TYPE_SCROLL_SENSITIVE = 1005
         if (resultSetType_ < statement_.resultSetType_) {
-            statement_.accumulateWarning
-                    (new SqlWarning(agent_.logWriter_, "Unable to open resultSet type " +
-                    statement_.resultSetType_ + "." +
-                    " ResultSet type " + resultSetType_ + " opened."));
+            statement_.accumulateWarning(
+                new SqlWarning(
+                    agent_.logWriter_, 
+                    new MessageId(SQLState.INVALID_RESULTSET_TYPE),
+                        new Integer(statement_.resultSetType_),
+                        new Integer(resultSetType_)));
         }
 
         // Only set the warning if actual resultSetConcurrency returned by the server is
@@ -232,10 +235,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // CONCUR_READ_ONLY = 1007
         // CONCUR_UPDATABLE = 1008
         if (resultSetConcurrency_ < statement_.resultSetConcurrency_) {
-            statement_.accumulateWarning
-                    (new SqlWarning(agent_.logWriter_, "Unable to open ResultSet with concurrency  " +
-                    statement_.resultSetConcurrency_ + "." +
-                    " ResultSet concurrency " + resultSetConcurrency_ + " is used."));
+            statement_.accumulateWarning(
+                new SqlWarning(
+                    agent_.logWriter_,
+                    new MessageId(SQLState.INVALID_RESULTSET_CONCURRENCY),
+                        new Integer(resultSetConcurrency_),
+                        new Integer(statement_.resultSetConcurrency_)));
+                
         }
 
         listenToUnitOfWork();
@@ -1773,7 +1779,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getWarnings", warnings_);
         }
-        return warnings_;
+        return warnings_ == null ? null : warnings_.getSQLWarning();
     }
 
     public final void clearWarnings() throws SQLException {
@@ -2234,7 +2240,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
         }
         if (row > Integer.MAX_VALUE) {
-            this.accumulateWarning(new SqlWarning(agent_.logWriter_, "Value too large to fit in an int."));
+            this.accumulateWarning(new SqlWarning(agent_.logWriter_, 
+                new MessageId(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT),
+                new Long(row)));
         }
         return (int) row;
     }

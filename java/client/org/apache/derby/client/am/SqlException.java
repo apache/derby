@@ -21,6 +21,7 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLException;
+import java.util.TreeMap;
 
 import org.apache.derby.client.resources.ResourceKeys;
 import org.apache.derby.shared.common.info.JVMInfo;
@@ -273,7 +274,7 @@ public class SqlException extends Exception implements Diagnosable {
         {
             return wrappedException_;
         }
-                
+                        
         // When we have support for JDBC 4 SQLException subclasses, this is
         // where we decide which exception to create
         SQLException sqle = new SQLException(getMessage(), getSQLState(), 
@@ -387,14 +388,19 @@ public class SqlException extends Exception implements Diagnosable {
     }
     
     public void setNextException(SQLException nextException)
-    {
+    {	
         if ( wrappedException_ != null )
         {
             wrappedException_.setNextException(nextException);
         }
         else
         {
-            nextException_ = new SqlException(nextException);
+            // Add this exception to the end of the chain
+            SqlException theEnd = this;
+            while (theEnd.nextException_ != null) {
+                theEnd = theEnd.nextException_;
+            }
+            theEnd.nextException_ = new SqlException(nextException);
         }
     }
 

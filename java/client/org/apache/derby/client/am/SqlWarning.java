@@ -2,7 +2,8 @@
 
    Derby - Class org.apache.derby.client.am.SqlWarning
 
-   Copyright (c) 2001, 2005 The Apache Software Foundation or its licensors, where applicable.
+   Copyright (c) 2006 The Apache Software Foundation or its licensors, 
+   where applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,144 +21,106 @@
 
 package org.apache.derby.client.am;
 
-import org.apache.derby.client.resources.ResourceKeys;
+import java.sql.SQLWarning;
+import org.apache.derby.shared.common.info.JVMInfo;
 
-// Not yet done:
-//   Assign an ErrorKey, ResourceKey, and Resource for each throw statement.
-//   Save for future pass to avoid maintenance during development.
+/**
+ * This represents a warning versus a full exception.  As with
+ * SqlException, this is an internal representation of java.sql.SQLWarning.
+ *
+ * Public JDBC methods need to convert an internal SqlWarning to a SQLWarning
+ * using <code>getSQLWarning()</code>
+ */
+public class SqlWarning extends SqlException implements Diagnosable {
 
-// Until the "Error Cycle" pass is complete.
-// Use the temporary constructors at the bottom.
-
-public class SqlWarning extends java.sql.SQLWarning implements Diagnosable {
-    private java.lang.Throwable throwable_ = null;
-    protected Sqlca sqlca_ = null; // for engine generated errors only
-
-    //-----------------constructors-----------------------------------------------
-
-    public SqlWarning(LogWriter logWriter, ErrorKey errorKey) {
-        super(ResourceUtilities.getResource(ResourceKeys.driverOriginationIndicator) +
-                ResourceUtilities.getResource(errorKey.getResourceKey()),
-                errorKey.getSQLState(),
-                errorKey.getErrorCode());
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
+    protected SqlWarning nextWarning_;
+    
+    public SqlWarning(LogWriter logwriter, 
+        MessageId msgid, Object[] args, Throwable cause)
+    {
+        super(logwriter, msgid, args, cause);
+    }
+    
+    public SqlWarning(LogWriter logwriter, MessageId msgid, Object[] args)
+    {
+        this(logwriter, msgid, args, null);
+    }
+    
+    public SqlWarning (LogWriter logwriter, MessageId msgid)
+    {
+        super(logwriter, msgid);
+    }
+    
+    public SqlWarning(LogWriter logwriter, MessageId msgid, Object arg1)
+    {
+        super(logwriter, msgid, arg1);
+    }
+    
+    public SqlWarning(LogWriter logwriter,
+        MessageId msgid, Object arg1, Object arg2)
+    {
+        super(logwriter, msgid, arg1, arg2);
+    }
+    
+    public SqlWarning(LogWriter logwriter,
+        MessageId msgid, Object arg1, Object arg2, Object arg3)
+    {
+        super(logwriter, msgid, arg1, arg2, arg3);
+    }
+    
+    public SqlWarning(LogWriter logWriter, Sqlca sqlca)
+    {
+        super(logWriter, sqlca);
+    }
+    
+    public void setNextWarning(SqlWarning warning)
+    {
+        // Add this warning to the end of the chain
+        SqlWarning theEnd = this;
+        while (theEnd.nextWarning_ != null) {
+            theEnd = theEnd.nextWarning_;
         }
+        theEnd.nextWarning_ = warning;
     }
+    
+    public SqlWarning getNextWarning()
+    {
+        return nextWarning_;
+    }
+    
+    /**
+     * Get the java.sql.SQLWarning for this SqlWarning
+     */
+    public SQLWarning getSQLWarning()
+    {
+        SQLWarning sqlw = new SQLWarning(getMessage(), getSQLState(), 
+            getErrorCode());
 
-    public SqlWarning(LogWriter logWriter, ErrorKey errorKey, Object[] args) {
-        super(ResourceUtilities.getResource(ResourceKeys.driverOriginationIndicator) +
-                ResourceUtilities.getResource(errorKey.getResourceKey(), args),
-                errorKey.getSQLState(),
-                errorKey.getErrorCode());
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
+        // If we're in a runtime that supports chained exceptions, set the cause 
+        // of the SQLException.
+         if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14 )
+        {
+            sqlw.initCause(getCause());
         }
-    }
 
-    public SqlWarning(LogWriter logWriter, ErrorKey errorKey, Object arg) {
-        this(logWriter, errorKey, new Object[]{arg});
-    }
-
-    public SqlWarning(LogWriter logWriter, Sqlca sqlca) {
-        super();
-        sqlca_ = sqlca;
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
+        // Set up the nextException chain
+        if ( nextWarning_ != null )
+        {
+            // The exception chain gets constructed automatically through 
+            // the beautiful power of recursion
+            //
+            // We have to use the right method to convert the next exception
+            // depending upon its type.  Luckily with all the other subclasses
+            // of SQLException we don't have to make our own matching 
+            // subclasses because 
+            sqlw.setNextException(
+                nextException_ instanceof SqlWarning ?
+                    ((SqlWarning)nextException_).getSQLWarning() :
+                    nextException_.getSQLException());
         }
-    }
-
-    // Temporary constructor until all error keys are defined.
-    public SqlWarning(LogWriter logWriter) {
-        super();
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    // Temporary constructor until all error keys are defined.
-    public SqlWarning(LogWriter logWriter, String text) {
-        super(text);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    // Temporary constructor until all error keys are defined.
-    public SqlWarning(LogWriter logWriter, java.lang.Throwable throwable, String text) {
-        super(text);
-        throwable_ = throwable;
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    // Temporary constructor until all error keys are defined.
-    public SqlWarning(LogWriter logWriter, String text, SqlState sqlState) {
-        super(text, sqlState.getState());
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    // Temporary constructor until all error keys are defined, for subsystem use only
-    public SqlWarning(LogWriter logWriter, String text, String sqlState) {
-        super(text, sqlState);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    // Temporary constructor until all error keys are defined.
-    public SqlWarning(LogWriter logWriter, String text, SqlState sqlState, SqlCode errorCode) {
-        super(text, sqlState.getState(), errorCode.getCode());
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    // Temporary constructor until all error keys are defined, for subsystem use only.
-    public SqlWarning(LogWriter logWriter, String text, String sqlState, int errorCode) {
-        super(text, sqlState, errorCode);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    public java.lang.Throwable getThrowable() {
-        return throwable_;
-    }
-
-    public Sqlca getSqlca() {
-        return sqlca_;
-    }
-
-    public String getMessage() {
-        if (sqlca_ == null) {
-            return super.getMessage();
-        } else {
-            return ((Sqlca) sqlca_).getJDBCMessage();
-        }
-    }
-
-    public String getSQLState() {
-        if (sqlca_ == null) {
-            return super.getSQLState();
-        } else {
-            return sqlca_.getSqlState();
-        }
-    }
-
-    public int getErrorCode() {
-        if (sqlca_ == null) {
-            return super.getErrorCode();
-        } else {
-            return sqlca_.getSqlCode();
-        }
-    }
-
-    public void printTrace(java.io.PrintWriter printWriter, String header) {
-        ExceptionFormatter.printTrace(this, printWriter, header);
+        
+        return sqlw;
+        
     }
 }
 

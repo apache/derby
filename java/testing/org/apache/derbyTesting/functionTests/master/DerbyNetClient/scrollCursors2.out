@@ -10,16 +10,14 @@ This method should only be called on ResultSet objects that are scrollable(type 
 This method should only be called on ResultSet objects that are scrollable(type TYPE_SCROLL_SENSITIVE or TYPE_SCROLL_INSENSITIVE)
 This method should only be called on ResultSet objects that are scrollable(type TYPE_SCROLL_SENSITIVE or TYPE_SCROLL_INSENSITIVE)
 This method should only be called on ResultSet objects that are scrollable(type TYPE_SCROLL_SENSITIVE or TYPE_SCROLL_INSENSITIVE)
-warning = org.apache.derby.client.am.SqlWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
-warning = org.apache.derby.client.am.SqlWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
-warning = org.apache.derby.client.am.SqlWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
-warning = org.apache.derby.client.am.SqlWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
-warning = org.apache.derby.client.am.SqlWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
+warning = java.sql.SQLWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
+warning = java.sql.SQLWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
+warning = java.sql.SQLWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
+warning = java.sql.SQLWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
 Invalid maxRows value: -1
 Invalid fetch size -5
-warning = org.apache.derby.client.am.SqlWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
-warning = org.apache.derby.client.am.SqlWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
-warning = org.apache.derby.client.am.SqlWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
-warning = org.apache.derby.client.am.SqlWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
-PASS
+warning = java.sql.SQLWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
+warning = java.sql.SQLWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
+warningCount expected to be 2, not 1
+warning = java.sql.SQLWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
 Test scrollCursors2 finished
