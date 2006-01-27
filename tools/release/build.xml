@@ -19,6 +19,7 @@
   <!-- Release and version info -->
   <property file="${properties.dir}/release.properties"/>
   <property file="${properties.dir}/packaging.properties"/>
+  <property name="release.dir" value="${basedir}/tools/release"/>
 
 <!-- Targets -->
 
