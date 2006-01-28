@@ -91,3 +91,31 @@ select * from t1 where vc='pe';
 
 -- clean up
 drop table t1;
+
+-- DERBY-882
+-- ALTER TABLE to increase size of varchar could convert a non-null column to nullable
+-- before fix for DERBY-882
+
+create table a (id integer not null, name varchar(20) not null, primary key(name)); 
+insert into a values (1, 'abc'); 
+-- Should fail
+insert into a values (2, null); 
+alter table a alter name set data type varchar(50);
+insert into a values (3, 'hijk'); 
+-- Used to pass before the fix
+insert into a values (4, null);
+select * from a; 
+
+drop table a;
+
+-- Now test the otherway, nullable column to start with
+create table a (id integer not null, name varchar(20)); 
+insert into a values (1, 'abc'); 
+insert into a values (2, null); 
+alter table a alter name set data type varchar(50);
+insert into a values (3, 'hijk'); 
+insert into a values (4, null);
+select * from a; 
+
+drop table a;
+

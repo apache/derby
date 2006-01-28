@@ -126,32 +126,78 @@ insert into t1 values ('pe','pe', x'01');
 ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'UQ' defined on 'T1'.
 ij> -- do some selects to ensure consistency of data.
 select * from t1 where vc='pe';
-VC  |NVC |BV  
---------------
-pe  |p   |01  
-pe  |pe  |01  
-pe  |pe  |1000
+VC|N&|BV  
+----------
+pe|p |01  
+pe|pe|01  
+pe|pe|1000
 ij> select * from t1 where vc='pe';
-VC  |NVC |BV  
---------------
-pe  |p   |01  
-pe  |pe  |01  
-pe  |pe  |1000
+VC|N&|BV  
+----------
+pe|p |01  
+pe|pe|01  
+pe|pe|1000
 ij> alter table t1 alter vc set data type varchar(3);
 0 rows inserted/updated/deleted
 ij> select * from t1 where vc='pe';
-VC  |NVC |BV  
---------------
-pe  |p   |01  
-pe  |pe  |01  
-pe  |pe  |1000
+VC |N&|BV  
+-----------
+pe |p |01  
+pe |pe|01  
+pe |pe|1000
 ij> select * from t1 where vc='pe';
-VC  |NVC |BV  
---------------
-pe  |p   |01  
-pe  |pe  |01  
-pe  |pe  |1000
+VC |N&|BV  
+-----------
+pe |p |01  
+pe |pe|01  
+pe |pe|1000
 ij> -- clean up
 drop table t1;
+0 rows inserted/updated/deleted
+ij> -- DERBY-882
+-- ALTER TABLE to increase size of varchar could convert a non-null column to nullable
+-- before fix for DERBY-882
+create table a (id integer not null, name varchar(20) not null, primary key(name));
+0 rows inserted/updated/deleted
+ij> insert into a values (1, 'abc');
+1 row inserted/updated/deleted
+ij> -- Should fail
+insert into a values (2, null);
+ERROR 23502: Column 'NAME'  cannot accept a NULL value.
+ij> alter table a alter name set data type varchar(50);
+0 rows inserted/updated/deleted
+ij> insert into a values (3, 'hijk');
+1 row inserted/updated/deleted
+ij> -- Used to pass before the fix
+insert into a values (4, null);
+ERROR 23502: Column 'NAME'  cannot accept a NULL value.
+ij> select * from a;
+ID         |NAME                                              
+--------------------------------------------------------------
+1          |abc                                               
+3          |hijk                                              
+ij> drop table a;
+0 rows inserted/updated/deleted
+ij> -- Now test the otherway, nullable column to start with
+create table a (id integer not null, name varchar(20));
+0 rows inserted/updated/deleted
+ij> insert into a values (1, 'abc');
+1 row inserted/updated/deleted
+ij> insert into a values (2, null);
+1 row inserted/updated/deleted
+ij> alter table a alter name set data type varchar(50);
+0 rows inserted/updated/deleted
+ij> insert into a values (3, 'hijk');
+1 row inserted/updated/deleted
+ij> insert into a values (4, null);
+1 row inserted/updated/deleted
+ij> select * from a;
+ID         |NAME                                              
+--------------------------------------------------------------
+1          |abc                                               
+2          |NULL                                              
+3          |hijk                                              
+4          |NULL                                              
+ij> drop table a;
 0 rows inserted/updated/deleted
 ij> 
