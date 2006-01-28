@@ -35,6 +35,7 @@ import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -93,7 +94,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	{
 		ColumnDescriptor cd;
 		TypeDescriptor oldType;
-		TypeDescriptor newType = dataTypeServices;
+		DataTypeDescriptor newType = dataTypeServices;
 		TypeId oldTypeId;
 		TypeId newTypeId;
 
@@ -110,6 +111,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 		oldType = cd.getType();
 		oldTypeId = cd.getType().getTypeId();
 		newTypeId = dataTypeServices.getTypeId();
+		newType.setNullability(oldType.isNullable());
 
 		// can't change types yet.
 		if (!(oldTypeId.equals(newTypeId)))
