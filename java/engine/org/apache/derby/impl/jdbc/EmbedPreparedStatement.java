@@ -709,26 +709,40 @@ public abstract class EmbedPreparedStatement
 		default:
 			throw dataTypeConversion(parameterIndex, "java.io.InputStream");
 		}
-        if (length < 0) //we are doing the check here and not in setBinaryStreamInternal becuase setBlob needs to pass -1 for length.
-            throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
 
     	setBinaryStreamInternal(parameterIndex, x, length);
 	}
 
     protected void setBinaryStreamInternal(int parameterIndex, InputStream x,
-				int length)
+				long length)
 	    throws SQLException
 	{
+
+        if ( length < 0 ) 
+            throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
+        
 		checkStatus();
 		int jdbcTypeId = getParameterJDBCType(parameterIndex);
 		if (x == null) {
 			setNull(parameterIndex, jdbcTypeId);
            	return;
 		}
+        
+        // max number of bytes that can be set to be inserted 
+        // in Derby is 2Gb-1 (ie Integer.MAX_VALUE). 
+        // (e.g into a blob column).
+        // For now, we cast the length from long to int as a result.
+        // If we ever decide to increase these limits for lets say blobs, 
+        // in that case the cast to int would not be appropriate.
+        if ( length > Integer.MAX_VALUE ) {
+            throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
+               getEmbedParameterSetMetaData().getParameterTypeName(
+                   parameterIndex));
+        }
 
-		try {
+        try {
 
-			getParms().getParameterForSet(parameterIndex - 1).setValue(new RawToBinaryFormatStream(x, length), length);
+			getParms().getParameterForSet(parameterIndex - 1).setValue(new RawToBinaryFormatStream(x, (int)length), (int)length);
 
 		} catch (StandardException t) {
 			throw EmbedResultSet.noStateChangeException(t);
@@ -1165,7 +1179,14 @@ public abstract class EmbedPreparedStatement
 		if (x == null)
 			setNull(i, Types.BLOB);
 		else
- 			setBinaryStreamInternal(i, x.getBinaryStream(), -1);
+        {
+            // Note, x.length() needs to be called before retrieving the
+            // stream using x.getBinaryStream() because EmbedBlob.length()
+            // will read from the stream and drain some part of the stream 
+            // Hence the need to declare this local variable - streamLength
+            long streamLength = x.length();
+            setBinaryStreamInternal(i, x.getBinaryStream(), streamLength);
+        }
 	}
 
     /**

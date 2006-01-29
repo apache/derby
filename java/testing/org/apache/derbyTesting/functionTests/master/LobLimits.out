@@ -92,6 +92,14 @@ START BlobTest #3 - SELECT BLOB of size = 2147483647
 Matched rows selected with blob of size(2147483647) =1
 ========================================
 ========================================
+START BlobTest #4 - select and then update blob of size= 2147483647 - Uses getBlob api
+Rows Updated = 1
+========================================
+========================================
+START BlobTest #4.1 - select and then insert blob of size= 2147483647 - Uses getBlob api to do select and setBlob for insert
+Rows Updated = 1
+========================================
+========================================
 START BlobTest #5.1 insert Blob of size = 104857600
  Rows inserted with blob of size (104857600) =1
 ========================================
@@ -99,5 +107,15 @@ START BlobTest #5.1 insert Blob of size = 104857600
 START BlobTest #5.2  - SELECT BLOB of size = 104857600
 Matched rows selected with blob of size(104857600) =1
 ========================================
+========================================
+START BlobTest #6 - select and then update blob of size= 104857600 - Uses getBlob and setBlob  api
+Rows Updated = 1
+========================================
 Rows deleted =1
-Rows deleted =2
+Rows deleted =3
+========================================
+START BlobTest #7 (setBlob with 4Gb blobinsertBlob of size = 4294967296
+ Rows inserted with blob of size (4294967296) =0
+========================================
+DERBY DOES NOT SUPPORT INSERT OF 4GB BLOB 
+EXPECTED SQL Exception: (22003) The resulting value is outside the range for the data type BLOB.

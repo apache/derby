@@ -229,10 +229,13 @@ public class LobLimits {
            
            // now do a select of one of the 2gb rows and update another 2g row 
            // using the setBlob api, updated blob is of length 2gb
-           // setBlob,materializes, so disable testfor now.
-           // Bug entry -DERBY-599
-           //selectUpdateBlob("BlobTest #4",conn,selectBlob,_2GB,0,1,1);
-           
+           // Fix for Bug entry -DERBY-599[setBlob should not materialize blob
+           // into memory]
+           selectUpdateBlob("BlobTest #4",conn,selectBlob,_2GB,0,1,1);
+           // select row from blobtbl and then do insert into the blobtbl
+           // using setBlob
+           selectInsertBlob("BlobTest #4.1",conn,selectBlob,insertBlob,_2GB,0,3,1);
+                              
            // Test - generate random data, write to a file, use it to insert
            // data into blob and then read back and compare if all is ok
            // currently in fvt ( derbyall), tests check for substrings etc and 
@@ -255,10 +258,11 @@ public class LobLimits {
                    _100MB, DATAFILE);
            selectBlob2("BlobTest #5.2 ", conn, selectBlob2, _100MB, 0, 1,
                    DATAFILE);
+           
+           
            // update the 2gb row in blobtbl with the 100mb data and compare if the update
-           // went ok. wont work now, test disabled currently
-           // till DERBY599 is fixed
-           //selectUpdateBlob2("BlobTest #6",conn,selectBlob2,selectBlob,_100MB,0,1,1,DATAFILE);
+           // went ok. 
+           selectUpdateBlob2("BlobTest #6",conn,selectBlob2,selectBlob,_100MB,0,1,1,DATAFILE);
                        
            deleteTable(conn, deleteBlob2, 1);
            
@@ -268,9 +272,23 @@ public class LobLimits {
        }
 
        conn.commit();
+       
+       deleteTable(conn, deleteBlob, 3);
 
-       deleteTable(conn, deleteBlob, 2);
+       // Negative Test, use setBlob api to insert a 4GB blob.
+       long _4GB =  4*1024*1024*(1024L);
+       BlobImpl _4GbBlob = new BlobImpl(new RandomByteStream(new java.util.Random(),_4GB),_4GB);
 
+       try
+       {
+           insertBlob_SetBlob("BlobTest #7 (setBlob with 4Gb blob",conn,insertBlob,_4GbBlob,
+                   _4GB,0,1,0);
+       }
+       catch(SQLException sqle)
+       {
+           System.out.println("DERBY DOES NOT SUPPORT INSERT OF 4GB BLOB ");
+           expectedException(sqle);
+       }
        // ADD  NEW TESTS HERE
    }
 
@@ -455,6 +473,60 @@ public class LobLimits {
        System.out.println("========================================");
 
    }
+
+   /**
+    * insert blob, using a setBlob api.
+    * @param bloblen
+    *            length of blob to insert
+    * @param blob
+    *            blob to insert
+    * @param start
+    *            start id value for insert
+    * @param rows
+    *            insert rows number of rows
+    * @param expectedRows
+    *            rows expected to be inserted
+    */
+    private static void insertBlob_SetBlob(String testId, Connection conn,
+            PreparedStatement ps, java.sql.Blob blob, long bloblen, int start,
+            int rows, int expectedRows) throws SQLException {
+        System.out.println("========================================");
+        System.out.println("START " + testId + "insertBlob of size = "
+                + bloblen);
+        long ST = 0;
+        if (trace)
+            ST = System.currentTimeMillis();
+        int count = 0;
+
+        try {
+            
+            for (int i = start; i < start + rows; i++) {
+                ps.setInt(1, i);
+                ps.setInt(2, 0);
+                ps.setLong(3, bloblen);
+                ps.setBlob(4, blob);
+                count += ps.executeUpdate();
+            }
+            conn.commit();
+            if (trace) {
+                System.out.println("Insert Blob (" + bloblen + ")" + " rows= "
+                        + count + " = "
+                        + (long) (System.currentTimeMillis() - ST));
+
+            }
+        } catch (SQLException e) {
+            verifyTest(count, expectedRows,
+                    " Rows inserted with blob of size (" + bloblen + ") =");
+            System.out.println("========================================");
+            throw e;
+        }
+
+        verifyTest(count, expectedRows,
+                " Rows inserted with blob of size (" + bloblen + ") =");
+        System.out.println("========================================");
+
+    }
+
 
    /**
     * select from blob table (BLOBTBL)
@@ -654,6 +726,63 @@ public class LobLimits {
        psUpd.close();
        System.out.println("========================================");
    }
+
+   /**
+    * Basically this test will do an insert using setBlob api -
+    * select row from blobtbl and then insert a row in blobtbl 
+    * and verify updated data in blobtbl
+    * @param    ps  select statement from which blob is retrieved
+    * @param    bloblen updating value is of length bloblen
+    * @param    id  id of the row retrieved, for the update
+    * @param    insertId  id of the row that is inserted
+    * @param    expectedRows    to be updated
+    */
+   private static void selectInsertBlob(String testId, Connection conn,
+           PreparedStatement ps,PreparedStatement ins, int bloblen, int id, int insertId,
+           int expectedRows) throws Exception {
+       System.out.println("========================================");
+       System.out.println("START " + testId + " - select and then insert blob of size= "
+               + bloblen + " - Uses getBlob api to do select and setBlob for insert");
+
+       ResultSet rs = null;
+
+       ps.setInt(1, id);
+       rs = ps.executeQuery();
+       rs.next();
+       Blob value = rs.getBlob(1);
+       long l = value.length();
+       long dlen = rs.getLong(2);
+       if (dlen != l) {
+           System.out
+                   .println("FAIL - MISMATCH LENGTHS GOT " + l + " expected "
+                           + dlen + " for row in BLOBTBL with ID=" + id);
+       }
+       
+       ins.setInt(1,insertId);
+       ins.setInt(2,0);
+       ins.setLong(3,l);
+       ins.setBlob(4,value);
+       
+       System.out.println("Rows Updated = " + ins.executeUpdate());
+       conn.commit();
+
+       // now select and verify that update went through ok.
+       ps.setInt(1, insertId);
+       ResultSet rs2 = ps.executeQuery();
+       rs2.next();
+       Blob insertedValue = rs2.getBlob(1);
+
+       if(insertedValue.length() != l)
+           System.out.println("FAIL - Retrieving the updated blob length does not match "+
+                   "expected length = "+l +" found = "+ insertedValue.length());
+
+       // close resultsets
+       conn.commit();
+       rs.close();
+       rs2.close();
+       System.out.println("========================================");
+   }
+
 
    /**
     * Basically this test will do an update using setBinaryStream api and verifies the
@@ -1171,11 +1300,11 @@ public class LobLimits {
  * Class to generate random byte data
  */
 class RandomByteStream extends java.io.InputStream {
-   private int length;
+   private long length;
 
    private java.util.Random dpr;
 
-   RandomByteStream(java.util.Random dpr, int length) {
+   RandomByteStream(java.util.Random dpr, long length) {
        this.length = length;
        this.dpr = dpr;
 
@@ -1195,7 +1324,7 @@ class RandomByteStream extends java.io.InputStream {
            return -1;
 
        if (len > length)
-           len = length;
+           len = (int)length;
 
        for (int i = 0; i < len; i++) {
            // chop off bits and return a +ve byte value.
@@ -1344,3 +1473,84 @@ class RandomCharReader extends java.io.Reader {
 
    }
 }
+
+/***
+ * Class to simulate a 4Gb blob impl in order to test if Derby
+ * handles such large blobs correctly. The main methods here are
+ * only the length() and the getBinaryStream(). Rest are just
+ * placeholders/dummy methods in order to implement the java.sql.Blob
+ * interface
+ * ----
+ * Derby throws an error if the blob length exceeds the max range of
+ * int. 
+ */
+class BlobImpl implements java.sql.Blob
+{
+    long length;
+    InputStream myStream;
+    
+    public BlobImpl(InputStream is, long length)
+    {
+        this.myStream = is;
+        this.length = length;
+    }
+    public InputStream getBinaryStream()
+    throws SQLException
+    {
+        return myStream;
+    }
+    
+    public byte[] getBytes()
+    throws SQLException
+    {
+        throw new SQLException("Not implemented"); 
+    }
+    public long length()
+    throws SQLException
+    {
+        return length;
+    }
+    
+    public long position(Blob pattern,long start)
+    throws SQLException
+    {
+        throw new SQLException("Not implemented"); 
+    }
+    
+    public long position(byte[] pattern,long start)
+    throws SQLException
+    {
+        throw new SQLException("Not implemented"); 
+    }
+    public OutputStream setBinaryStream(long pos)
+    throws SQLException
+    
+    {
+        throw new SQLException("Not implemented"); 
+    }
+    
+    public int setBytes(long pos,byte[] bytes)
+    throws SQLException
+    {
+        throw new SQLException("Not implemented"); 
+    }
+    public int setBytes(long pos,byte[] bytes,int offset,int len)
+    throws SQLException
+    {
+        throw new SQLException("Not implemented"); 
+    }
+    
+    public void truncate(long len)
+    throws SQLException
+    {
+        throw new SQLException("Not implemented"); 
+    }
+    
+    public byte[] getBytes(long pos, int length)
+    throws SQLException
+    {
+        throw new SQLException("Not implemented"); 
+    }
+    
+}
+
