@@ -30,8 +30,6 @@ final class ClientThread extends Thread {
 	ServerSocket serverSocket;
 	private int timeSlice;
 	private int connNum;
-	private String traceDir;
-	private boolean traceAll;
 
 		ClientThread (NetworkServerControlImpl nsi, ServerSocket ss) {
 
@@ -42,8 +40,6 @@ final class ClientThread extends Thread {
 			parent=nsi;
 			serverSocket=ss;
 			timeSlice=nsi.getTimeSlice();
-			traceDir=parent.getTraceDirectory();
-			traceAll=parent.getTraceAll();
 		}
 			
 		public void run() 
@@ -87,8 +83,14 @@ final class ClientThread extends Thread {
 							Integer.toString(connNum));
 
 				//create a new Session for this session
+				// Note that we always re-fetch the tracing
+				// configuration from the parent, because it
+				// may have changed (there are administrative
+				// commands which allow dynamic tracing
+				// reconfiguration).
 				clientSession = new Session(connNum, clientSocket, 
-					traceDir, traceAll);
+					parent.getTraceDirectory(),
+					parent.getTraceAll());
 
 				//add to Session list
 				parent.addToSessionTable(new Integer(connNum), clientSession);
