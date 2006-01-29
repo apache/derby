@@ -1351,11 +1351,18 @@ abstract class FileContainer
 			return;
         }
 
+        
         // make sure we don't execute redo recovery on any page
         // which is getting truncated.  At this point we have an exclusive
         // table lock on the table, so after checkpoint no page change
         // can happen between checkpoint log record and compress of space.
         dataFactory.getRawStoreFactory().checkpoint();
+
+        // block the backup, If backup is already in progress wait 
+        // for the backup to finish. Otherwise restore from the backup
+        // can start recovery at different checkpoint and possibly
+        // do redo on pages that are going to get truncated.
+        ntt.blockBackup(true);
 
 		try
 		{
@@ -2798,13 +2805,18 @@ abstract class FileContainer
 
 	/** 
 	 *  Get a latched page to write to the backup. Page Latch is necessary to 
-	 *  to prevent modification to the page when it is being backedup.
+	 *  prevent modification to the page when it is being written to the backup.
 	 *  Backup process relies on latches to get consistent snap
 	 *  shot of the page , user level table/page/row locks are NOT 
 	 *  acquired  by the online backup mechanism.
-	 *	@exception StandardException Cloudscape Standard error policy
+     *
+     *  @param handle the container handle used to latch the page
+     *  @param pageNumber the page number of the page to get
+     *  @return the latched page
+	 *	@exception StandardException Standard Derby error policy
 	 */
-	protected BasePage getPageForBackup(BaseContainerHandle handle, long pageNumber) 
+	protected BasePage getPageForBackup(BaseContainerHandle handle, 
+                                        long pageNumber) 
 		throws StandardException 
 	{
 		PageKey pageKey = new PageKey(identity, pageNumber);
@@ -2980,15 +2992,14 @@ abstract class FileContainer
 
 		@exception StandardException Standard Cloudscape error policy
 	 */
-	protected byte[] encryptPage(byte[] pageData, int pageSize)
-		 throws StandardException
+	protected byte[] encryptPage(byte[] pageData, 
+                                 int pageSize, 
+                                 byte[] encryptionBuffer)
+        throws StandardException
 	{
 		// because all our page header looks identical, move the
 		// checksum to the front so that it will hopefully encrypt
 		// differently from page to page
-
-		if (encryptionBuffer == null || encryptionBuffer.length < pageSize)
-			encryptionBuffer = new byte[pageSize];
 
 		System.arraycopy(pageData, pageSize-8, encryptionBuffer, 0, 8);
 		System.arraycopy(pageData, 0, encryptionBuffer, 8, pageSize-8);
@@ -3003,6 +3014,21 @@ abstract class FileContainer
 		return encryptionBuffer;
 	}
 
+
+    /** 
+     * Get encryption buffer.
+     *  MT - not safe, call within synchronized block and only use the
+     *  returned byte array withing synchronized block. 
+     * @return byte array to be used for encryping a page.
+     */
+    protected byte[] getEncryptionBuffer() {
+
+        if (encryptionBuffer == null || encryptionBuffer.length < pageSize)
+			encryptionBuffer = new byte[pageSize];
+        return encryptionBuffer;
+    }
+    
+    
 
 	/*
 	 * page preallocation
@@ -3211,9 +3237,13 @@ abstract class FileContainer
 
 
 	/**
-	   backup the container.
-	   @exception StandardException Standard Cloudscape error policy 
-	*/
-	protected abstract void backupContainer(BaseContainerHandle handle,	String backupLocation)
+     * backup the container.
+     * 
+     * @param handle the container handle.
+     * @param backupLocation location of the backup container. 
+     * @exception StandardException Standard Derby error policy 
+     */
+	protected abstract void backupContainer(BaseContainerHandle handle,	
+                                            String backupLocation)
 	    throws StandardException;
 }

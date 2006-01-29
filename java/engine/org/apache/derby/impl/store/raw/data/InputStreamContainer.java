@@ -236,15 +236,18 @@ final class InputStreamContainer extends FileContainer  {
 
 		
 	/**
-	   backup the container.
-	   @exception StandardException Standard Cloudscape error policy 
-	*/
+     * Backup the container.
+     * There is no support to backup this type of containers. It may not be any
+     * real use for users because users can simply  make copies of the read only 
+     * database in Zip files easily using OS utilities.
+     * 
+     * @exception StandardException Standard Derby error policy 
+     */
 	protected void backupContainer(BaseContainerHandle handle,	String backupLocation)
 	    throws StandardException
 	{
-		// Nothing to do; No one would want to do a  backup of a readonly datbase. 
-		// RESOLVE: make sure some where this case is handled and 
-		// users sees a right error message.
+        throw StandardException.newException(
+                SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
 	}
 
 }

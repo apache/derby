@@ -148,3 +148,5 @@ onlineBackupTest2.sql
 onlineBackupTest2_app.properties
 OnlineBackupTest3_app.properties
 obtest_customer.jar
+onlineBackupTest4.sql
+onlineBackupTest4_app.properties

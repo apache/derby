@@ -260,9 +260,8 @@ public interface LogFactory extends Corruptable {
 	 * to bring the database to the consistent state on restore. 
 	 * copies the log control information , active log files to the given 
 	 * backup directory and marks that backup is in progress.
-	 @param toDir - location where the log files should be copied to.
-	 @return true if log files copy is  successful
-	 @exception StandardException - encounter exception while doing checkpoint.
+     * @param toDir - location where the log files should be copied to.
+     * @exception StandardException Standard Derby error policy
 	*/
 	public void startLogBackup(File toDir) throws StandardException;
 
@@ -270,9 +269,8 @@ public interface LogFactory extends Corruptable {
 	/*
 	 * copy all the log files that has to go into the backup directory
 	 * and mark that backup has come to an end. 
-	 @param toDir - location where the log files should be copied to.
-	 @return true if log files copy is  successful
-	 @exception StandardException - encounter exception while doing checkpoint.
+     * @param toDir - location where the log files should be copied to.
+     * @exception StandardException Standard Derby error policy
 	*/
 	public void endLogBackup(File toDir) throws StandardException;
 

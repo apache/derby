@@ -394,7 +394,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     // disable syncing of log file when running in derby.system.durability=test
     private boolean logNotSynced = false;
 
-	private boolean logArchived = false;
+	private volatile boolean logArchived = false;
 	private boolean logSwitchRequired = false;
 
 	/** DEBUG test only */
@@ -459,6 +459,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	 */
 	private boolean isWriteSynced = false;
 
+    
+    // log file that is yet to be copied to backup, updates to this variable 
+    // needs to visible  checkpoint thread. 
+	private volatile long firstLogFileToBackup ; 
+    // It is set to true when  online backup is in progress,  updates to 
+    // this variable needs to visible to checkpoint thread. 
+    private volatile boolean backupInProgress = false; 
+   
 
 	/**
 		MT- not needed for constructor
@@ -2052,9 +2060,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		if ((firstLogNeeded = getFirstLogNeeded(checkpoint))==-1)
 			return;
 		
-		// when  backup is in progress, logfiles should not be deleted 
-		// if they are yet to be backedup, eventhough they are not required
-		// for crash recovery.
+		// when  backup is in progress, Any that are yet to be copied to the
+		// backup should not be deleted,  even if they are
+        // not required  for crash recovery.
 		firstLogNeeded = (backupInProgress ? firstLogFileToBackup : firstLogNeeded);
 		oldFirstLog = firstLogFileNumber;
 		firstLogFileNumber = firstLogNeeded;
@@ -3175,7 +3183,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		StorageFile logDir;
 		//find the first  log file number that is  useful
 		long firstLogNeeded = getFirstLogNeeded(currentCheckpoint);
-		if (firstLogNeeded == -1)
+        
+        		
+		// when  backup is in progress, Any that are yet to be copied to the
+		// backup should not be deleted,  even if they are
+        // not required  for crash recovery.
+		firstLogNeeded = (backupInProgress ? firstLogFileToBackup : firstLogNeeded);
+		
+        if (firstLogNeeded == -1)
 			return;
 		try{
 			logDir = getLogDirectory();
@@ -4352,10 +4367,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		}
 	}
 
-	//disable the log archive mode
+	// disable the log archive mode
 	public void disableLogArchiveMode() throws StandardException
 	{
-		logArchived = false;
 		AccessFactory af = 
             (AccessFactory)Monitor.getServiceModule(this, AccessFactory.MODULE);
 		if (af != null)
@@ -4364,6 +4378,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			tc = af.getTransaction(ContextService.getFactory().getCurrentContextManager());
 			tc.setProperty(Property.LOG_ARCHIVE_MODE , "false", true);
 		}
+        logArchived = false;
 	}
 
 	//delete the online archived log files
@@ -4373,9 +4388,6 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	}
 
 
-	private long firstLogFileToBackup ; //log file that is yet to be backedup
-	private boolean backupInProgress = false; // true if the online backup is in progress
-
 	/*
 	 * start the transaction log backup, transaction log is  is required
 	 * to bring the database to the consistent state on restore. 
@@ -4384,20 +4396,25 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	 * should be kept around until they are copied into the backup,
 	 * even if there are checkpoints when backup is in progress. 
 	 *
-	 * copy the control files to the backup and find first log file 
+	 * copy the log control files to the backup (the checkpoint recorded in the
+     * control files is the backup checkpoint), Restore will use the checkpoint 
+     * info in these control files to perform recovery to bring 
+	 * the database to the consistent state.  and find first log file 
 	 * that need to be copied into the backup to bring the database
 	 * to the consistent state on restore. 
 	 * 
-	 * Log files are copied after all the data files are backed up.
+     * In the end, existing log files that are needed to recover from the backup 
+     * checkpoint are copied into the backup, any log that gets generated after
+     * this call are copied into the backup after all the all the information 
+     * in the data containers is  written to the backup, when endLogBackup() 
+     * is called.
+	 *
+     * @param toDir - location where the log files should be copied to.
+     * @exception StandardException Standard Derby error policy
 	 *
 	 */
 	public void startLogBackup(File toDir) throws StandardException
 	{
-		
-		// copy the checkpoint information into the backup, 
-		// and find the first log file that needs to be be backedup.
-		// Restore will use this checkpoint to perform recovery to bring 
-		// the database to the consistent state.
 		
 		// synchronization is necessary to make sure NO parallel 
 		// checkpoint happens when the current checkpoint information 
@@ -4451,8 +4468,11 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 	/*
 	 * copy the log files into the given backup location
+     * @param toDir - location where the log files should be copied to.
+     * @param lastLogFileToBackup - last log file that needs to be copied.
 	 **/
-	private void backupLogFiles(File toDir, long lastLogFileToBackup) throws StandardException
+	private void backupLogFiles(File toDir, long lastLogFileToBackup) 
+        throws StandardException
 	{
 
 		while(firstLogFileToBackup <= lastLogFileToBackup)
@@ -4471,6 +4491,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	/*
 	 * copy all the log files that has to go into  the backup
 	 * and mark that backup is compeleted. 
+     *
+     * @param toDir - location where the log files should be copied to.
+     * @exception StandardException Standard Derby error policy
 	 */
 	public void endLogBackup(File toDir) throws StandardException
 	{

@@ -98,8 +98,16 @@ import java.security.PrivilegedExceptionAction;
 public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction
 {
 	private static final String BACKUP_HISTORY = "BACKUP.HISTORY";
+    
+    // files that should not be copied into the backup using simple 
+    // directory copy or not needed in the backup at all. 
 	private static final String[] BACKUP_FILTER =
-	{ DataFactory.TEMP_SEGMENT_NAME, DataFactory.DB_LOCKFILE_NAME, DataFactory.DB_EX_LOCKFILE_NAME, LogFactory.LOG_DIRECTORY_NAME, "seg0" };
+	{ DataFactory.TEMP_SEGMENT_NAME,    // not required to be in the backup
+      DataFactory.DB_LOCKFILE_NAME,     // not required to be in the backup
+      DataFactory.DB_EX_LOCKFILE_NAME,  // not required to be in the backup
+      LogFactory.LOG_DIRECTORY_NAME,    // written to the backup using log factory
+      "seg0"                            // written to the backup using data factory
+    };
 
 	protected TransactionFactory	xactFactory;
 	protected DataFactory			dataFactory;
@@ -471,7 +479,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
     /**
      * Backup the database to a backup directory.
-     * 
+     *
      * @param backupDir the name of the directory where the backup should be
      *                  stored. This directory will be created if it 
      *                  does not exist.
@@ -547,11 +555,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * Transaction log is also backed up, this is used to bring the database to 
      * the consistent state on restore.
 	 * 
-	 * TODO : make sure no parallel backup/disabling log archive mode occurs.
+     * <P> MT- only one thread  is allowed to perform backup at any given time. 
+     *  Synchronized on this. Parallel backups are not supported. 
 	 */
-	public synchronized void backup(
-    Transaction t, 
-    File        backupDir) 
+	public synchronized void backup(Transaction t, 
+                                    File backupDir) 
         throws StandardException
 	{
         if (!privExists(backupDir))
@@ -631,8 +639,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			}
 
 
-			// copy everything from the dataDirectory to the
-			// backup directory (except temp files, log , seg0 (see BACKUP_FILTER)
+            // copy the files that does not need any special handling and are 
+            // needed to be in the database directory to the backup directory. 
+            // See BACKUP_FILTER for all the files that are not copied 
+            // to the database directory by the call below. After this copy 
+            // information from log(transaction log), seg0(data segment)   has 
+            // to be copied into the backup from the database.
 			
             if (!privCopyDirectory(dbase, backupcopy, (byte[])null, BACKUP_FILTER))
             {
@@ -855,14 +867,24 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	}
 
 
-	public synchronized void disableLogArchiveMode(boolean deleteOnlineArchivedLogFiles)
+    /*
+     * Disable the log archive mode and delete the archived log files 
+     * if requested. 
+     *
+     * @param deleteOnlineArchivedLogFiles  
+     *              If true deletes online archived 
+     *              log files that exist before this backup, delete 
+     *              will occur  only after the backup is  complete.
+     * @exception StandardException thrown on error.
+     */
+	public void disableLogArchiveMode(boolean deleteOnlineArchivedLogFiles)
 		throws StandardException
 	{
 		logFactory.disableLogArchiveMode();
 		if(deleteOnlineArchivedLogFiles)
 		{
-			logFactory.deleteOnlineArchivedLogFiles();
-		}
+            logFactory.deleteOnlineArchivedLogFiles();
+        }
 	}
 
 	

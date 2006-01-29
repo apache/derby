@@ -502,7 +502,7 @@ public interface SQLState {
 	String FILE_IO_GARBLED                                      = "XSDFD.S";
 	String FILE_UNEXPECTED_EXCEPTION                            = "XSDFF.S";
 	String FILE_ILLEGAL_ENCRYPTED_PAGE_SIZE                     = "XSDFG.S";
-
+    String BACKUP_FILE_IO_ERROR                                 = "XSDFH.S";
 	/*
 	** RawStore - Data.FSLDemo transaction exceptions
 	*/

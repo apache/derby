@@ -357,24 +357,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 			if (getCommittedDropState())
 				return;
 
-			if (pageNumber == FIRST_ALLOC_PAGE_NUMBER)
-			{
-				// write header into the alloc page array regardless of dirty
-				// bit because the alloc page have zero'ed out the borrowed
-				// space
-				writeHeader(pageData);
-
-				if (SanityManager.DEBUG) {
-					if (FormatIdUtil.readFormatIdInteger(pageData) != AllocPage.FORMAT_NUMBER)
-						SanityManager.THROWASSERT(
-							"expect " +
-							AllocPage.FORMAT_NUMBER +
-							"got " +
-							FormatIdUtil.readFormatIdInteger(pageData));
-				}
-
-			}
-
 		///////////////////////////////////////////////////
 		//
 		// RESOLVE: right now, no logical -> physical mapping.
@@ -398,19 +380,21 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 				if (fileData.getFilePointer() != pageOffset)
 					padFile(fileData, pageOffset);
 
-				byte[] dataToWrite;
-
-				if (dataFactory.databaseEncrypted() 
+                byte [] encryptionBuf = null; 
+                if (dataFactory.databaseEncrypted() 
 					&& pageNumber != FIRST_ALLOC_PAGE_NUMBER)
 				{
 					// We cannot encrypt the page in place because pageData is
 					// still being accessed as clear text.  The encryption
 					// buffer is shared by all who access this container and can
 					// only be used within the synchronized block.
-					dataToWrite = encryptPage(pageData, pageSize);
-				} else {
-					dataToWrite = pageData;
-				}
+
+                    encryptionBuf = getEncryptionBuffer();
+                }
+
+				byte[] dataToWrite = updatePageArray(pageNumber, 
+                                                     pageData, 
+                                                     encryptionBuf);
 
 				dataFactory.writeInProgress();
 				try
@@ -470,6 +454,49 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		}
 
 	}
+
+    /**
+     * Update the page array with container header if the page is a first alloc
+     * page and encrypt the page data if the database is encrypted.  
+     * @param pageNumber the page number of the page
+     * @param pageData  byte array that has the actual page data.
+     * @param encryptionBuf buffer that is used to store encryted version of the
+     * page.
+     * @return byte array of the the page data as it should be on the disk.
+     */
+    private byte[] updatePageArray(long pageNumber, 
+                                   byte[] pageData, 
+                                   byte[] encryptionBuf) 
+        throws StandardException, IOException
+    {
+        if (pageNumber == FIRST_ALLOC_PAGE_NUMBER)
+        {
+            // write header into the alloc page array regardless of dirty
+            // bit because the alloc page have zero'ed out the borrowed
+            // space
+            writeHeader(pageData);
+
+            if (SanityManager.DEBUG) {
+                if (FormatIdUtil.readFormatIdInteger(pageData) != AllocPage.FORMAT_NUMBER)
+                    SanityManager.THROWASSERT(
+                            "expect " +
+                            AllocPage.FORMAT_NUMBER +
+                            "got " +
+                            FormatIdUtil.readFormatIdInteger(pageData));
+            }
+
+            return pageData;
+
+        } else 
+        {
+            if (dataFactory.databaseEncrypted()) 
+           {
+                return encryptPage(pageData, pageSize, encryptionBuf);
+            } else
+                return pageData;
+        }
+    }
+
 
 	/**
 		Pad the file upto the passed in page offset.
@@ -672,19 +699,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
         synchronized(this)
         {
-			// wait until the thread that is doing the backup completes it
-			// before truncting the container. 
-			while(inBackup)
-			{
-				try	{
-					wait();
-				}
-				catch (InterruptedException ie)
-				{
-					throw StandardException.interrupt(ie);
-				}	
-			}
-
             boolean inwrite = false;
             try
             {
@@ -986,10 +1000,13 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 
 		
-	/**
-	   backup the  container.
-	   @exception StandardException Standard Cloudscape error policy 
-	*/
+    /**
+     * Backup the  container.
+     * 
+     * @param handle the container handle.
+     * @param backupLocation location of the backup container. 
+     * @exception StandardException Standard Derby error policy 
+     */
 	protected void backupContainer(BaseContainerHandle handle,	String backupLocation)
 	    throws StandardException 
 	{
@@ -1008,203 +1025,203 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         }
 	}
 
-	/**
-	 * Backup the  container.
-	 *
-	 * The container is backed up by reading all the pages through the page cache,
-	 * and then writing to the backup container if it not a committed drop
-	 * container. If the container is commited dropped one, stub is copied
-	 * to the backup using simple file copy. 
-	 *
-	 * MT scenarios:
-	 * 1) Remove and backup running in parallel thread:
-	 * The trickey case is if a request to remove the container(because of a
-	 * commited drop) comes when the conatiner backup is in progress. 
+
+    /**
+     * Backup the  container.
+     *
+     * The container is written to the backup by reading  the pages
+     * through the page cache, and then writing into the backup container.
+     * If the container is dropped(commitetd drop), only container stub is
+     * copied to the  backup using simple file copy. 
+     * 
+     * MT - 
+     * At any given time only one backup thread is allowed, but when backup in 
+     * progress DML/DDL operations can run in parallel. Pages are latched while 
+     * writing them to the backup to avoid copying partial changes to the pages.
+     * Online backup does not acquire any user level locks , so users can drop
+     * tables when backup is in progress. So it is possible that Container 
+     * Removal request can come in when container backup is in progress.  
 	 * This case is handled by using the synchronization on this object monitor 
-	 * and using inRemove and inBackup flags.  Basic idea is to give 
-	 * preference to remove by stopping the backup of the container temporarily,
-	 * when  the remove container is requested by another thread. Generally,  it takes
-	 * more  time to backup a regular container than the stub becuase 
-	 * stub is just one page. After each page copy, a check is made to find 
-	 * if a remove is requested and if it is then backup of the container is
-	 * aborted and the backup thread puts itself into the wait state until
+	 * and using inRemove and inBackup flags. Conatiner removal checks if backup
+     * is in progress and wait for the backup to yield to continue the removal. 
+     * Basic idea is to give preference to remove by stopping the backup of the 
+     * container temporarily,  when the remove container is requested by another 
+     * thread. Generally, it takes more  time to backup a regular container than 
+     * the stub becuase  stub is just one page. After each page copy, a check is
+     * made to find  if a remove is requested and if it is then backup of the 
+     * container is aborted and the backup thread puts itself into the wait state until
 	 * remove  request thread notifies that the remove is complete. When 
-	 * remove request compeletes stub is copies into the backup.
+	 * remove request compeletes stub is copied into the backup.
 	 * 
-	 * 2) Truncate and backup running in parallel:
-	 * Truncate will wait if the backup is in progress. Truncate does not
-	 * release the montitor until it is complete , backup can not start 
-	 * until it acquires, so if truncate is running, it has to release
-	 * the monitor before backup can proceed.
-	 * 
- 	 * @exception StandardException Standard Cloudscape error policy 
-	*/
-	private void privBackupContainer(BaseContainerHandle handle,	String backupLocation)
-	    throws StandardException 
-	{
-		boolean done = true;
-		File backupFile = null;
-		RandomAccessFile backupRaf = null;
-		boolean isStub = false;
-		do {
-			try {
+     * Compress is blocked when backup is in progesss, so truncation of the
+     * container can not happen when backup is in progess. No need to
+     * synchronize backup of the container with truncation. 
+     * 
+     * 
+     * @param handle the container handle.
+     * @param backupLocation location of the backup container. 
+     * @exception StandardException Derby Standard error policy
+     *
+     */
+    private void privBackupContainer(BaseContainerHandle handle,	
+                                     String backupLocation)
+        throws StandardException 
+    {
+        boolean backupCompleted = false;
+        File backupFile = null;
+        RandomAccessFile backupRaf = null;
+        boolean isStub = false;
+        BasePage page = null; 
 
-				synchronized (this) {
-					// wait if some one is removing the container because of a drop.
-					while (inRemove)
-					{
-						try	{
-							wait();
-						}
-						catch (InterruptedException ie)
-						{
-							throw StandardException.interrupt(ie);
-						}	
-					}
+        while(!backupCompleted) {
+            try {
 
-					if (getCommittedDropState())
-						isStub = true;
-					inBackup = true;
-				}
+                synchronized (this) {
+                    // wait if some one is removing the 
+                    // container because of a drop.
+                    while (inRemove)
+                    {
+                        try	{
+                            wait();
+                        }
+                        catch (InterruptedException ie)
+                        {
+                            throw StandardException.interrupt(ie);
+                        }	
+                    }
+
+                    if (getCommittedDropState())
+                        isStub = true;
+                    inBackup = true;
+                }
 			
-				// create container at the backup location.
-				if (isStub) {
-					// get the stub ( it is a committted drop table container )
-					StorageFile file = privGetFileName((ContainerKey)getIdentity(), true, false, true);
-					backupFile = new File(backupLocation, file.getName());
+                // create container at the backup location.
+                if (isStub) {
+                    // get the stub ( it is a committted drop table container )
+                    StorageFile file = privGetFileName((ContainerKey)getIdentity(), 
+                                                       true, false, true);
+                    backupFile = new File(backupLocation, file.getName());
 
 					// directly copy the stub to the backup 
-					if(!FileUtil.copyFile(dataFactory.getStorageFactory(), file, backupFile))
-					{
-						throw StandardException.newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
-															 file, backupFile);
-					}
-				} else {
-					// regular container file 
-					StorageFile file = privGetFileName((ContainerKey)getIdentity(), false, false, true);
-					try{
-						backupFile = new File(backupLocation , file.getName());
-						backupRaf = new RandomAccessFile(backupFile,  "rw");
-					} catch (IOException ioe) {
-						throw StandardException.newException( SQLState.FILE_CREATE, ioe, backupFile);
-					}
+					if(!FileUtil.copyFile(dataFactory.getStorageFactory(), 
+                                          file, backupFile))
+                    {
+                        throw StandardException.newException(
+                                              SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                                              file, backupFile);
+                    }
+                }else {
+                    // regular container file 
+                    StorageFile file = privGetFileName((ContainerKey)getIdentity(), 
+                                                       false, false, true);
+                    backupFile = new File(backupLocation , file.getName());
+                    backupRaf = new RandomAccessFile(backupFile,  "rw");
 
-					// copy all the pages of the container from the database to the
-					// backup location by reading through the pahe cache.
-				
-					long lastPageNumber= getLastPageNumber(handle);
-					for (long pageNumber = FIRST_ALLOC_PAGE_NUMBER; 
-						 pageNumber <= lastPageNumber; pageNumber++) {
-						BasePage page = getPageForBackup(handle, pageNumber);
-						byte[] pageData = page.getPageArray();
-						writeToBackup(backupRaf, pageNumber, pageData);
-						// unlatch releases page from cache, see StoredPage.releaseExclusive()
-						page.unlatch();
+					// copy all the pages of the container from the database 
+                    // to the backup location by reading through the page cache.
+                    
+                    long lastPageNumber= getLastPageNumber(handle);
 
-						// check if some one wants to commit drop the table while
-						// being backedup. If so, abort the backup and restart it 
-						// once the drop is complete.
+                    byte[] encryptionBuf = null;
+                    if (dataFactory.databaseEncrypted()) {
+                        // Backup uses seperate encryption buffer to encrypt the
+                        // page instead of encryption buffer used by the regular conatiner
+                        // writes. Otherwise writes to the backup 
+                        // has to be synchronized with regualar database writes
+                        // because backup can run in parallel to container
+                        // writes.
+                        encryptionBuf = new byte[pageSize];
+                    }
+
+                    for (long pageNumber = FIRST_ALLOC_PAGE_NUMBER; 
+                         pageNumber <= lastPageNumber; pageNumber++) {
+                        page = getPageForBackup(handle, pageNumber);
+                        
+                        // update the page array before writing to the disk 
+                        // with container header and encrypt it if the database 
+                        // is encrypted. 
+                        
+                        byte[] dataToWrite = updatePageArray(pageNumber, 
+                                                             page.getPageArray(), 
+                                                             encryptionBuf);
+                        backupRaf.write(dataToWrite, 0, pageSize);
+
+                        // unlatch releases page from cache, see 
+                        // StoredPage.releaseExclusive()
+                        page.unlatch();
+                        page = null;
+
+                        // check if some one wants to commit drop the table while
+                        // conatiner is being written to the backup. If so,
+                        // abort  the backup and restart it once the drop 
+                        // is complete.
 
 						synchronized (this)
 						{
 							if (inRemove) {
-								done = false;
-								break;
+								break; 
 							}
 						}
 					}
 				}	
-			} finally {
-				synchronized (this) {
-					inBackup = false;
-					notifyAll();
-				}
-			
-				// if backup of container is not complete, remove the container
-				// from the backup.
-				if (!done && backupFile != null) {
-					if (backupRaf != null) {
+
+                // sync and close the backup conatiner. Incase of a stub, 
+                // it is already synced and closed while doing the copy.
+                if(!isStub) {
+                    backupRaf.getFD().sync();
+                    backupRaf.close();
+                    backupRaf = null;
+                }
+                
+                // backup of the conatiner is complete. 
+                backupCompleted = true;
+
+            }catch (IOException ioe) {
+                throw StandardException.newException(
+                                                SQLState.BACKUP_FILE_IO_ERROR, 
+                                                ioe, 
+                                                backupFile);
+            } finally {
+                synchronized (this) {
+                    inBackup = false;
+                    notifyAll();
+                }
+
+                if (page != null) {
+                    page.unlatch();
+                    page = null;
+                }
+
+                // if backup of container is not complete, close the file
+                // handles and  remove the container file from the backup 
+                // if it exists
+                if (!backupCompleted && backupFile != null) 
+                {
+                    if (backupRaf != null) 
+                    {
 						try {
-							backupRaf.close();
-							backupRaf = null;
-						} catch (IOException ioe){};
-					
-					}
-					if(backupFile.exists())
-						if (!backupFile.delete())
-							throw StandardException.newException(SQLState.UNABLE_TO_DELETE_FILE, 
-																 backupFile);
-				} else {
-					// close the backup conatiner.
-					// incase of a stub, it is already closed 
-					// while doing the copy.
-					if(!isStub) {
-						if (backupRaf != null) {
-							try {
-								backupRaf.getFD().sync();
-								backupRaf.close();
-							} catch (IOException ioe) {
-							} finally {
-								backupRaf = null;
-							}
-						}	
-					}
-				}
-			}
-	
-		} while (!done);
-	}
+                            backupRaf.close();
+                            backupRaf = null;
+                        } catch (IOException ioe){
+                            throw StandardException.newException(
+                                            SQLState.BACKUP_FILE_IO_ERROR, 
+                                            ioe, 
+                                            backupFile);
+                        }
+                    }
 
+                    if(backupFile.exists()) 
+                    {
+                        if (!backupFile.delete())
+                            throw StandardException.newException(
+                                                SQLState.UNABLE_TO_DELETE_FILE, 
+                                                backupFile);
+                    }
+                } 
+            }
+        }
+    }
 
-	// write the page to the backup location.
-	private  void writeToBackup(RandomAccessFile backupRaf, long pageNumber, byte[] pageData) 
-		throws StandardException
-	{
-		byte[] dataToWrite;
-		
-		try {
-			if (pageNumber == FIRST_ALLOC_PAGE_NUMBER)
-			{
-				// write header into the alloc page array regardless of dirty
-				// bit because the alloc page have zero'ed out the borrowed
-				// space
-				writeHeader(pageData);
-
-				if (SanityManager.DEBUG) {
-					if (FormatIdUtil.readFormatIdInteger(pageData) != AllocPage.FORMAT_NUMBER)
-						SanityManager.THROWASSERT(
-                          "expect " +
-                          AllocPage.FORMAT_NUMBER +
-                          "got " +
-                          FormatIdUtil.readFormatIdInteger(pageData));
-				}
-
-			}
-
-			if (dataFactory.databaseEncrypted() 
-				&& pageNumber != FIRST_ALLOC_PAGE_NUMBER)
-			{
-				// We cannot encrypt the page in place because pageData is
-				// still being accessed as clear text.  The encryption
-				// buffer is shared by all who access this container and can
-				// only be used within the synchronized block.
-				dataToWrite = encryptPage(pageData, pageSize);
-			} else {
-				dataToWrite = pageData;
-			}
-			
-			long pageOffset = pageNumber * pageSize;
-			backupRaf.seek(pageOffset);
-			backupRaf.write(dataToWrite, 0, pageSize);
-
-		} catch (IOException ioe) {
-			// page cannot be written to the backup
-			throw StandardException.newException(
-                    SQLState.FILE_WRITE_PAGE_EXCEPTION, 
-                    ioe, getIdentity() + ":" + pageNumber);
-		}
-	}
-	
 
      // PrivilegedExceptionAction method
      public Object run() throws StandardException

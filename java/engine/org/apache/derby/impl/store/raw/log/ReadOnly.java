@@ -322,13 +322,10 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 
 		
 	/*
-	 * start the transaction log backup, the transaction log is  is required
-	 * to bring the database to the consistent state on restore. 
-	 * copies the log control information , active log files to the given 
-	 * backup directory and marks that backup is in progress.
-	 @param toDir - location where the log files should be copied to.
-	 @return true if log files copy is  successful
-	 @exception StandardException - encounter exception while doing checkpoint.
+	 * There are no log files to backup for  read  only databases, nothing to be
+     * done here. 
+     * @param toDir - location where the log files should be copied to.
+     * @exception StandardException Standard Derby error policy
 	*/
 	public void startLogBackup(File toDir) throws StandardException
 	{
@@ -336,12 +333,12 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 	}
 
 	
-	/*
-	 * copy all the log files that has to go into the backup directory
-	 * and mark that backup has come to an end. 
-	 @param toDir - location where the log files should be copied to.
-	 @return true if log files copy is  successful
-	 @exception StandardException - encounter exception while doing checkpoint.
+	/* 
+     * There are no log files to backup for read only databases, 
+     * nothing to be done here. 
+     *
+     * @param toDir - location where the log files should be copied to.
+     * @exception StandardException Standard Derby error policy
 	*/
 	public void endLogBackup(File toDir) throws StandardException
 	{
@@ -350,8 +347,8 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 
 	
 	/*
-	 * Abort any activity related to backup in the log factory.
-	 * Backup is not in progress any more, it failed for some reason.
+     * Log backup is not started for for read only databases, no work to do
+     * here.
 	 **/
 	public void abortLogBackup()
 	{
