@@ -631,12 +631,14 @@ RADIANS
 NULL     
 0.011    
 0.023    
-ij> select cast (LN(d) as DECIMAL(6,3)) AS LN FROM SYSFUN_MATH_TEST;
-LN       
----------
-NULL     
--0.400   
-0.292    
+ij> select cast (LN(d) as DECIMAL(6,3)) AS LN,
+       cast (LOG(d) as DECIMAL(6,3)) AS LOG
+                       FROM SYSFUN_MATH_TEST;
+LN       |LOG      
+-------------------
+NULL     |NULL     
+-0.400   |-0.400   
+0.292    |0.292    
 ij> select cast (EXP(d) as DECIMAL(6,3)) AS EXP FROM SYSFUN_MATH_TEST;
 EXP      
 ---------

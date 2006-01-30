@@ -285,7 +285,9 @@ select cast (TAN(d) as DECIMAL(6,3)) AS TAN FROM SYSFUN_MATH_TEST;
 select cast (DEGREES(d) as DECIMAL(6,3)) AS DEGREES FROM SYSFUN_MATH_TEST;
 select cast (RADIANS(d) as DECIMAL(6,3)) AS RADIANS FROM SYSFUN_MATH_TEST;
 
-select cast (LN(d) as DECIMAL(6,3)) AS LN FROM SYSFUN_MATH_TEST;
+select cast (LN(d) as DECIMAL(6,3)) AS LN,
+       cast (LOG(d) as DECIMAL(6,3)) AS LOG
+                       FROM SYSFUN_MATH_TEST;
 select cast (EXP(d) as DECIMAL(6,3)) AS EXP FROM SYSFUN_MATH_TEST;
 
 select cast (CEIL(d) as DECIMAL(6,3)) AS CEIL FROM SYSFUN_MATH_TEST;

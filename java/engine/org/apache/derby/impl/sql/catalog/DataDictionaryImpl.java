@@ -201,19 +201,20 @@ public final class	DataDictionaryImpl
 	*
 	*/
 	private static final String[][] SYSFUN_FUNCTIONS = {
-			{"ACOS", "DOUBLE", "java.lang.Math", "acos(double)", "DOUBLE"},
-			{"ASIN", "DOUBLE", "java.lang.Math", "asin(double)", "DOUBLE"},
-			{"ATAN", "DOUBLE", "java.lang.Math", "atan(double)", "DOUBLE"},
-			{"COS", "DOUBLE", "java.lang.Math", "cos(double)", "DOUBLE"},
-			{"SIN", "DOUBLE", "java.lang.Math", "sin(double)", "DOUBLE"},
-			{"TAN", "DOUBLE", "java.lang.Math", "tan(double)", "DOUBLE"},
-			{"DEGREES", "DOUBLE", "java.lang.Math", "toDegrees(double)", "DOUBLE"},
-			{"RADIANS", "DOUBLE", "java.lang.Math", "toRadians(double)", "DOUBLE"},
-			{"LN", "DOUBLE", "java.lang.Math", "log(double)", "DOUBLE"},
-			{"EXP", "DOUBLE", "java.lang.Math", "exp(double)", "DOUBLE"},
-			{"CEIL", "DOUBLE", "java.lang.Math", "ceil(double)", "DOUBLE"},
-			{"CEILING", "DOUBLE", "java.lang.Math", "ceil(double)", "DOUBLE"},
-			{"FLOOR", "DOUBLE", "java.lang.Math", "floor(double)", "DOUBLE"},			
+			{"ACOS", "DOUBLE", "java.lang.StrictMath", "acos(double)", "DOUBLE"},
+			{"ASIN", "DOUBLE", "java.lang.StrictMath", "asin(double)", "DOUBLE"},
+			{"ATAN", "DOUBLE", "java.lang.StrictMath", "atan(double)", "DOUBLE"},
+			{"COS", "DOUBLE", "java.lang.StrictMath", "cos(double)", "DOUBLE"},
+			{"SIN", "DOUBLE", "java.lang.StrictMath", "sin(double)", "DOUBLE"},
+			{"TAN", "DOUBLE", "java.lang.StrictMath", "tan(double)", "DOUBLE"},
+			{"DEGREES", "DOUBLE", "java.lang.StrictMath", "toDegrees(double)", "DOUBLE"},
+			{"RADIANS", "DOUBLE", "java.lang.StrictMath", "toRadians(double)", "DOUBLE"},
+			{"LN", "DOUBLE", "java.lang.StrictMath", "log(double)", "DOUBLE"},
+			{"LOG", "DOUBLE", "java.lang.StrictMath", "log(double)", "DOUBLE"}, // Same as LN
+			{"EXP", "DOUBLE", "java.lang.StrictMath", "exp(double)", "DOUBLE"},
+			{"CEIL", "DOUBLE", "java.lang.StrictMath", "ceil(double)", "DOUBLE"},
+			{"CEILING", "DOUBLE", "java.lang.StrictMath", "ceil(double)", "DOUBLE"}, // Same as CEIL
+			{"FLOOR", "DOUBLE", "java.lang.StrictMath", "floor(double)", "DOUBLE"},			
 	};
 	
 	/**
