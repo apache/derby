@@ -19,6 +19,8 @@
  */
 
 package org.apache.derby.client;
+
+import java.sql.SQLException;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.jdbc.ClientDataSource;
 import javax.sql.StatementEventListener;
@@ -28,7 +30,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
     public ClientPooledConnection40(ClientDataSource ds,
         org.apache.derby.client.am.LogWriter logWriter,
         String user,
-        String password) throws SqlException {
+        String password) throws SQLException {
         super(ds,logWriter,user,password);
         
     }
@@ -38,13 +40,13 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
         org.apache.derby.client.am.LogWriter logWriter,
         String user,
         String password,
-        int rmId) throws SqlException {
+        int rmId) throws SQLException {
         super(ds,logWriter,user,password,rmId);
         
     }
     
     public ClientPooledConnection40(ClientDataSource ds,
-        org.apache.derby.client.am.LogWriter logWriter) throws SqlException {
+        org.apache.derby.client.am.LogWriter logWriter) throws SQLException {
         super(ds,logWriter);
     }
     

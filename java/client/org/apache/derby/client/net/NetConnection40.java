@@ -20,6 +20,7 @@
 
 package org.apache.derby.client.net;
 
+import org.apache.derby.client.am.SqlException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
 import java.sql.Blob;
@@ -41,13 +42,13 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 
     public NetConnection40(NetLogWriter netLogWriter,
                          String databaseName,
-                         java.util.Properties properties) throws SQLException {
+                         java.util.Properties properties) throws SqlException {
 	super(netLogWriter,databaseName,properties);
     }
     public NetConnection40(NetLogWriter netLogWriter,
                          org.apache.derby.jdbc.ClientDataSource dataSource,
                          String user,
-                         String password) throws SQLException {
+                         String password) throws SqlException {
 	super(netLogWriter,dataSource,user,password);
     }
      public NetConnection40(NetLogWriter netLogWriter,
@@ -55,7 +56,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
                          String serverName,
                          int portNumber,
                          String databaseName,
-                         java.util.Properties properties) throws SQLException{
+                         java.util.Properties properties) throws SqlException{
 	super(netLogWriter,driverManagerLoginTimeout,serverName,portNumber,databaseName,properties);
      }
      public NetConnection40(NetLogWriter netLogWriter,
@@ -63,14 +64,14 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
                          String password,
                          org.apache.derby.jdbc.ClientDataSource dataSource,
                          int rmId,
-                         boolean isXAConn) throws SQLException{
+                         boolean isXAConn) throws SqlException{
 	super(netLogWriter,user,password,dataSource,rmId,isXAConn);
     }
     public NetConnection40(NetLogWriter netLogWriter,
                          String ipaddr,
                          int portNumber,
                          org.apache.derby.jdbc.ClientDataSource dataSource,
-                         boolean isXAConn) throws SQLException{
+                         boolean isXAConn) throws SqlException{
         super(netLogWriter,ipaddr,portNumber,dataSource,isXAConn);
     }
     

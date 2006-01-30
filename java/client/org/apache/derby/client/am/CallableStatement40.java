@@ -38,7 +38,7 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
     public CallableStatement40(Agent agent,
         Connection connection,
         String sql,
-        int type, int concurrency, int holdability) throws SQLException {
+        int type, int concurrency, int holdability) throws SqlException {
         super(agent, connection, sql, type, concurrency, holdability);
         ps = new PreparedStatement40(agent, connection, sql, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, null);
     }

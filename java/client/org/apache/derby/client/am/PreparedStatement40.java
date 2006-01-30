@@ -33,7 +33,7 @@ public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedSt
     public PreparedStatement40(Agent agent,
         Connection connection,
         String sql,
-        Section section) throws SQLException {
+        Section section) throws SqlException {
         super(agent, connection,sql,section);
     }
     
