@@ -66,7 +66,6 @@ import java.util.Vector;
  */
 public class CallStatementNode extends DMLStatementNode
 {
-	private String		methodName;
 	private ValueNode	methodCall;
 
 	/* Need to track any subqueries under the methodCall */
@@ -78,16 +77,13 @@ public class CallStatementNode extends DMLStatementNode
 	/**
 	 * Initializer for a CallStatementNode.
 	 *
-	 * @param methodName		The method name
 	 * @param methodCall		The expression to "call"
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void init(Object methodName, Object methodCall)
-		throws StandardException
+	public void init(Object methodCall)
 	{
-		init(null);
-		this.methodName = (String) methodName;
+		super.init(null);
 		this.methodCall = (ValueNode) methodCall;
 		((JavaToSQLValueNode)methodCall).getJavaValueNode().markForCallStatement();
 	}
@@ -103,7 +99,7 @@ public class CallStatementNode extends DMLStatementNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "methodName: " + methodName + "\n" +
+			return "CALL " + methodCall.toString() + "\n" +
 				super.toString();
 		}
 		else
@@ -325,26 +321,6 @@ public class CallStatementNode extends DMLStatementNode
 		}
 
 		return returnNode;
-	}
-
-	/////////////////////////////////////////////////////////////////////
-	//
-	//	ACCESSORS
-	//
-	/////////////////////////////////////////////////////////////////////
-
-	/**
-	  *	Get the method call node.
-	  *
-	  *	@return	the method call node.
-	  */
-	public	MethodCallNode	getMethodCallNode()
-	{
-		JavaToSQLValueNode	jnode = (JavaToSQLValueNode) methodCall;
-
-		MethodCallNode		mnode = (MethodCallNode) jnode.getJavaValueNode();
-
-		return mnode;
 	}
 }
 

@@ -3283,7 +3283,6 @@ QueryTreeNode
 bareCallStatement() throws StandardException :
 {
 	ParameterNode		returnParam = null;
-	String				methodName = null;
 	ValueNode			value = null;
 	ResultSetNode		resultSetNode = null;
 }
@@ -3299,7 +3298,6 @@ bareCallStatement() throws StandardException :
 		QueryTreeNode callStatement =
 									(QueryTreeNode) nodeFactory.getNode(
 												C_NodeTypes.CALL_STATEMENT_NODE,
-												methodName,
 												value,
 												getContextManager());
 
