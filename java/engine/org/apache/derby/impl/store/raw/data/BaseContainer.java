@@ -826,7 +826,7 @@ abstract class BaseContainer implements Lockable {
      * Backup the container to the specified path.
      * 
      * @param handle the container handle.
-     * @param backupConatainerPath  location of the backup container. 
+     * @param backupContainerPath  location of the backup container. 
      * @exception StandardException Standard Derby error policy 
      */
 	protected abstract void  backupContainer(BaseContainerHandle handle, 

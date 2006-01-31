@@ -974,7 +974,7 @@ public class BaseContainerHandle extends Observable
 
 	/**
      * Backup the container to the specified path.
-     * @param backupConatainerPath  location of the backup container.
+     * @param backupContainerPath  location of the backup container.
 	 *  @exception StandardException	Standard Derby error policy
      */
 	public void backupContainer(String backupContainerPath) throws StandardException 
