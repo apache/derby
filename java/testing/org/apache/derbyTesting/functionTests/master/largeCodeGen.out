@@ -1,0 +1,13 @@
+PASS: Logical operators with 200 parameters
+PASS: Logical operators with 300 parameters
+PASS: Logical operators with 400 parameters
+FAILED QUERY: Logical operators with 500 parameters.
+PASS: IN clause with 3300 parameters
+PASS: IN clause with 3400 parameters
+FAILED QUERY: IN clause with 3500 parameters.
+PASS: PREPARE: SELECT with 800 unions
+PASS: EXECUTE SELECT with 800 unions Row data check ok
+PASS: PREPARE: SELECT with 900 unions
+PASS: EXECUTE SELECT with 900 unions Row data check ok
+FAILED QUERY: SELECT with 1000 unions.
+FAILED QUERY: SELECT with 10000 unions.

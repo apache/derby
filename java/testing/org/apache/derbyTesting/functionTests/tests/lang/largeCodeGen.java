@@ -17,6 +17,7 @@ import org.apache.derby.tools.ij;
 public class largeCodeGen
 {
 	private static boolean TEST_QUERY_EXECUTION = true;
+	private static boolean PRINT_FAILURE_EXCEPTION = false;
 	
     public static void main(String argv[]) 
        throws Exception
@@ -282,11 +283,11 @@ public class largeCodeGen
 	 */
 	private static void reportFailure(String testName, Exception e)
 	{
-		System.out.print("FAILED QUERY: " + testName +". ");
+		System.out.println("FAILED QUERY: " + testName +".");
 		if (e instanceof SQLException)
 		{
 			SQLException se = (SQLException) e;
-			while (se != null)
+			while (se != null  && PRINT_FAILURE_EXCEPTION)
 			{
 				se.printStackTrace(System.out);
 				se = se.getNextException();
