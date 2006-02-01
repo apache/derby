@@ -3853,11 +3853,18 @@ public class DRDAConnThread extends Thread {
 	 */
 	private void parseSQLDTA_work(DRDAStatement stmt) throws DRDAProtocolException,SQLException
 	{
+		String strVal;
 		PreparedStatement ps = stmt.getPreparedStatement();
-        final boolean haveParams = (stmt.getNumParams() > 0);
-        
+		int codePoint;
+		EmbedParameterSetMetaData pmeta = null;
+		Vector paramDrdaTypes = new Vector();
+		Vector paramLens = new Vector();
+		ArrayList paramExtPositions = null;
+		int numVars = 0;
+		boolean rtnParam = false;
+
 		reader.markCollection();		
-        int codePoint = reader.getCodePoint();
+		codePoint = reader.getCodePoint();
 		while (codePoint != -1)
 		{
 				switch (codePoint)
@@ -3874,44 +3881,21 @@ public class DRDAConnThread extends Thread {
 						reader.readByte();		// id
 						for (int j = 0; j < numVarsInGrp; j++)
 						{
-                            final byte drdaType = reader.readByte();
+							paramDrdaTypes.addElement(new Byte(reader.readByte()));
 							if (SanityManager.DEBUG) 
 								trace("drdaType is: "+ "0x" +
-                                         Integer.toHexString(drdaType));
-
-                            final int drdaLength = reader.readNetworkShort();
+       								  Integer.toHexString(((Byte ) paramDrdaTypes.lastElement()).byteValue()));
+							int drdaLength = reader.readNetworkShort();
 							if (SanityManager.DEBUG) 
 								trace("drdaLength is: "+drdaLength);
-
-                            if (!haveParams) {
-                                stmt.addParam(drdaType, drdaLength);
-                                continue;
-                            }
-                            final DRDAStatement.CliParam cp = 
-                                stmt.getCliParam(j);
-                            if (cp.drdaType != drdaType || 
-                                cp.drdaLength != drdaLength) {
-                                if (SanityManager.DEBUG) {
-                                    trace(ps+" param " +j+
-                                          " type: "+ 
-                                          drdaTypeName(cp.drdaType)+ 
-                                          "->"+drdaTypeName(drdaType)+ 
-                                          " length: "+ 
-                                          cp.drdaLength+"->"+drdaLength);
-                                }
-                                // Trust that this is OK...
-                                cp.drdaType = drdaType;
-                                cp.drdaLength = drdaLength;
-                            }
-                        }
-                    } // while (reader 
-                        
+							paramLens.addElement(new Integer(drdaLength));
+						}
+					}
+					numVars = paramDrdaTypes.size();
+					if (SanityManager.DEBUG)
+						trace("numVars = " + numVars);
 					if (ps == null)		// it is a CallableStatement under construction
 					{
-                        final int numVars = stmt.getNumParams();
-                        if (SanityManager.DEBUG)
-                            trace("numVars = " + numVars);
-
 						String marks = "(?";	// construct parameter marks
 						for (int i = 1; i < numVars; i++)
 							marks += ", ?";
@@ -3943,22 +3927,23 @@ public class DRDAConnThread extends Thread {
 								// The first exception is the most likely suspect
 								throw se;
 							}
+							rtnParam = true;
 						}
 						ps = cs;
 						stmt.ps = ps;
 					}
 
+					pmeta = stmt.getParameterMetaData();
+
 					reader.readBytes(6);	// descriptor footer
 					break;
 				// optional
 				case CodePoint.FDODTA:
-                    EmbedParameterSetMetaData pmeta = stmt.getParameterMetaData();
 					reader.readByte();	// row indicator
-                    final int numVars = stmt.getNumParams();
 					for (int i = 0; i < numVars; i++)
 					{
-                        final DRDAStatement.CliParam cp = stmt.getCliParam(i);
-                        if ((cp.drdaType & 0x1) == 0x1) // nullable
+					
+						if ((((Byte)paramDrdaTypes.elementAt(i)).byteValue() & 0x1) == 0x1)	// nullable
 						{
 							int nullData = reader.readUnsignedByte();
 							if ((nullData & 0xFF) == FdocaConstants.NULL_DATA)
@@ -3975,8 +3960,15 @@ public class DRDAConnThread extends Thread {
 						}
 
 						// not null, read and set it
-                        readAndSetParams(i, stmt, cp, pmeta);
+						paramExtPositions = readAndSetParams(i, stmt,
+															 ((Byte)paramDrdaTypes.elementAt(i)).byteValue(),
+															 pmeta,
+															 paramExtPositions,
+															 ((Integer)(paramLens.elementAt(i))).intValue());
 					}
+					stmt.cliParamExtPositions = paramExtPositions;
+					stmt.cliParamDrdaTypes = paramDrdaTypes;
+					stmt.cliParamLens = paramLens;	
 					break;
 				case CodePoint.EXTDTA:
 					readAndSetAllExtParams(stmt);
@@ -3987,6 +3979,8 @@ public class DRDAConnThread extends Thread {
 			}
 				codePoint = reader.getCodePoint();
 		}
+
+
 	}
 
 	private int getByteOrder()
@@ -3998,21 +3992,25 @@ public class DRDAConnThread extends Thread {
 	/**
 	 * Read different types of input parameters and set them in PreparedStatement
 	 * @param i			index of the parameter
-     * @param stmt      drda statement
-     * @param cp        CliParam object for parameter i
+	 * @param stmt       drda statement
+	 * @param drdaType	drda type of the parameter
 	 * @param pmeta		parameter meta data
+	 * @param paramExtPositions  ArrayList of parameters with extdta
+	 * @param paramLenNumBytes Number of bytes for encoding LOB Length
 	 *
+	 * @return updated paramExtPositions
 	 * @throws DRDAProtocolException
      * @throws SQLException
 	 */
-    private void readAndSetParams(int i, DRDAStatement stmt, 
-                                  DRDAStatement.CliParam cp,
-                                  EmbedParameterSetMetaData pmeta)
+	private ArrayList readAndSetParams(int i, DRDAStatement stmt, int
+									   drdaType, EmbedParameterSetMetaData pmeta,
+									   ArrayList paramExtPositions,
+									   int paramLenNumBytes)
 				throws DRDAProtocolException, SQLException
 	{
 		PreparedStatement ps = stmt.getPreparedStatement();
 		// mask out null indicator
-        int drdaType = ((cp.drdaType | 0x01) & 0x000000ff);
+		drdaType = ((drdaType | 0x01) & 0x000000ff);
 
 		if (ps instanceof CallableStatement)
 		{
@@ -4071,8 +4069,8 @@ public class DRDAConnThread extends Thread {
 			}
 			case DRDAConstants.DRDA_TYPE_NDECIMAL:
 			{
-                int precision = (cp.drdaLength >> 8) & 0xff;
-                int scale = cp.drdaLength & 0xff;
+				int precision = (paramLenNumBytes >> 8) & 0xff;
+				int scale = paramLenNumBytes & 0xff;
 				BigDecimal paramVal = reader.readBigDecimal(precision, scale);
 				if (SanityManager.DEBUG)
 					trace("ndecimal parameter value is: "+paramVal);
@@ -4170,10 +4168,12 @@ public class DRDAConnThread extends Thread {
 			case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
 			case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
 			 {
-                 long length = readLobLength(cp.drdaLength);
+				 long length = readLobLength(paramLenNumBytes);
 				 if (length != 0) //can be -1 for CLI if "data at exec" mode, see clifp/exec test
 				 {
-                     cp.isExt = true;
+					if (paramExtPositions == null)
+						 paramExtPositions = new ArrayList();
+				 	paramExtPositions.add(new Integer(i));
 				 }
 				 else   /* empty */
 				 {
@@ -4192,6 +4192,7 @@ public class DRDAConnThread extends Thread {
 				ps.setObject(i+1, paramVal);
 			}
 		}
+		return paramExtPositions;
 	}
 
 	private long readLobLength(int extLenIndicator) 
@@ -4220,20 +4221,21 @@ public class DRDAConnThread extends Thread {
 	private void readAndSetAllExtParams(DRDAStatement stmt) 
 		throws SQLException, DRDAProtocolException
 	{
-        int extCount = 0;
-        final int end = stmt.getNumParams();
-        for (int i = 0; i < end; i++) {
-            final DRDAStatement.CliParam cp = stmt.getCliParam(i);
-            if (cp.isExt == false) continue;
-            
-            // Each extdta in it's own dss, except the first
-            if (extCount > 0) {
-                correlationID = reader.readDssHeader();
-                reader.readLengthAndCodePoint();
-            }
-            ++extCount;
-            readAndSetExtParam(i, stmt, cp.drdaType, cp.drdaLength);
-        }
+		int numExt = stmt.cliParamExtPositions.size();
+		for (int i = 0; i < stmt.cliParamExtPositions.size(); i++)
+					{
+						int paramPos = ((Integer) (stmt.cliParamExtPositions).get(i)).intValue();
+						readAndSetExtParam(paramPos,
+										   stmt,
+										   ((Byte)stmt.cliParamDrdaTypes.elementAt(paramPos)).intValue(),((Integer)(stmt.cliParamLens.elementAt(paramPos))).intValue());
+						// Each extdta in it's own dss
+						if (i < numExt -1)
+						{
+							correlationID = reader.readDssHeader();
+							int codePoint = reader.readLengthAndCodePoint();
+						}
+					}
+
 	}
 	
 
@@ -7554,298 +7556,4 @@ public class DRDAConnThread extends Thread {
 
 	}
 
-    /**
-     * Get a the name of the int constant representing a drdaType value. 
-     * This is useful for debugging.  
-     * 
-     * @param drdaType  the drdaType value
-     * @return a string containing the constant name and the value in hex
-     */
-    public static String drdaTypeName(int drdaType) {
-        switch (drdaType) {
-        case DRDAConstants.DRDA_TYPE_INTEGER:
-            return "DRDA_TYPE_INTEGER (0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NINTEGER:
-            return "DRDA_TYPE_NINTEGER(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_SMALL:
-            return "DRDA_TYPE_SMALL(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NSMALL:
-            return "DRDA_TYPE_NSMALL(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_1BYTE_INT:
-            return "DRDA_TYPE_1BYTE_INT(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_N1BYTE_INT:
-            return "DRDA_TYPE_N1BYTE_INT(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_FLOAT16:
-            return "DRDA_TYPE_FLOAT16(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NFLOAT16:
-            return "DRDA_TYPE_NFLOAT16(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_FLOAT8:
-            return "DRDA_TYPE_FLOAT8(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NFLOAT8:
-            return "DRDA_TYPE_NFLOAT8(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_FLOAT4:
-            return "DRDA_TYPE_FLOAT4(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NFLOAT4:
-            return "DRDA_TYPE_NFLOAT4(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_DECIMAL:
-            return "DRDA_TYPE_DECIMAL(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NDECIMAL:
-            return "DRDA_TYPE_NDECIMAL(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_ZDECIMAL:
-            return "DRDA_TYPE_ZDECIMAL(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NZDECIMAL:
-            return "DRDA_TYPE_NZDECIMAL(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NUMERIC_CHAR:
-            return "DRDA_TYPE_NUMERIC_CHAR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NNUMERIC_CHAR:
-            return "DRDA_TYPE_NNUMERIC_CHAR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_RSET_LOC:
-            return "DRDA_TYPE_RSET_LOC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NRSET_LOC:
-            return "DRDA_TYPE_NRSET_LOC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_INTEGER8:
-            return "DRDA_TYPE_INTEGER8(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NINTEGER8:
-            return "DRDA_TYPE_NINTEGER8(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LOBLOC:
-            return "DRDA_TYPE_LOBLOC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLOBLOC:
-            return "DRDA_TYPE_NLOBLOC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_CLOBLOC:
-            return "DRDA_TYPE_CLOBLOC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NCLOBLOC:
-            return "DRDA_TYPE_NCLOBLOC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_DBCSCLOBLOC:
-            return "DRDA_TYPE_DBCSCLOBLOC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NDBCSCLOBLOC:
-            return "DRDA_TYPE_NDBCSCLOBLOC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_ROWID:
-            return "DRDA_TYPE_ROWID(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NROWID:
-            return "DRDA_TYPE_NROWID(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_DATE:
-            return "DRDA_TYPE_DATE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NDATE:
-            return "DRDA_TYPE_NDATE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_TIME:
-            return "DRDA_TYPE_TIME(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NTIME:
-            return "DRDA_TYPE_NTIME(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_TIMESTAMP:
-            return "DRDA_TYPE_TIMESTAMP(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
-            return "DRDA_TYPE_NTIMESTAMP(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_FIXBYTE:
-            return "DRDA_TYPE_FIXBYTE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NFIXBYTE:
-            return "DRDA_TYPE_NFIXBYTE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_VARBYTE:
-            return "DRDA_TYPE_VARBYTE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NVARBYTE:
-            return "DRDA_TYPE_NVARBYTE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LONGVARBYTE:
-            return "DRDA_TYPE_LONGVARBYTE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
-            return "DRDA_TYPE_NLONGVARBYTE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NTERMBYTE:
-            return "DRDA_TYPE_NTERMBYTE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NNTERMBYTE:
-            return "DRDA_TYPE_NNTERMBYTE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_CSTR:
-            return "DRDA_TYPE_CSTR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NCSTR:
-            return "DRDA_TYPE_NCSTR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_CHAR:
-            return "DRDA_TYPE_CHAR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NCHAR:
-            return "DRDA_TYPE_NCHAR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_VARCHAR:
-            return "DRDA_TYPE_VARCHAR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NVARCHAR:
-            return "DRDA_TYPE_NVARCHAR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LONG:
-            return "DRDA_TYPE_LONG(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLONG:
-            return "DRDA_TYPE_NLONG(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_GRAPHIC:
-            return "DRDA_TYPE_GRAPHIC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NGRAPHIC:
-            return "DRDA_TYPE_NGRAPHIC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_VARGRAPH:
-            return "DRDA_TYPE_VARGRAPH(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NVARGRAPH:
-            return "DRDA_TYPE_NVARGRAPH(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LONGRAPH:
-            return "DRDA_TYPE_LONGRAPH(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLONGRAPH:
-            return "DRDA_TYPE_NLONGRAPH(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_MIX:
-            return "DRDA_TYPE_MIX(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NMIX:
-            return "DRDA_TYPE_NMIX(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_VARMIX:
-            return "DRDA_TYPE_VARMIX(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NVARMIX:
-            return "DRDA_TYPE_NVARMIX(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LONGMIX:
-            return "DRDA_TYPE_LONGMIX(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLONGMIX:
-            return "DRDA_TYPE_NLONGMIX(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_CSTRMIX:
-            return "DRDA_TYPE_CSTRMIX(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NCSTRMIX:
-            return "DRDA_TYPE_NCSTRMIX(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_PSCLBYTE:
-            return "DRDA_TYPE_PSCLBYTE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NPSCLBYTE:
-            return "DRDA_TYPE_NPSCLBYTE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LSTR:
-            return "DRDA_TYPE_LSTR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLSTR:
-            return "DRDA_TYPE_NLSTR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LSTRMIX:
-            return "DRDA_TYPE_LSTRMIX(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLSTRMIX:
-            return "DRDA_TYPE_NLSTRMIX(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_SDATALINK:
-            return "DRDA_TYPE_SDATALINK(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NSDATALINK:
-            return "DRDA_TYPE_NSDATALINK(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_MDATALINK:
-            return "DRDA_TYPE_MDATALINK(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NMDATALINK:
-            return "DRDA_TYPE_NMDATALINK(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LOBBYTES:
-            return "DRDA_TYPE_LOBBYTES(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLOBBYTES:
-            return "DRDA_TYPE_NLOBBYTES(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LOBCSBCS:
-            return "DRDA_TYPE_LOBCSBCS(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
-            return "DRDA_TYPE_NLOBCSBCS(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LOBCDBCS:
-            return "DRDA_TYPE_LOBCDBCS(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
-            return "DRDA_TYPE_NLOBCDBCS(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_LOBCMIXED:
-            return "DRDA_TYPE_LOBCMIXED(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
-            return "DRDA_TYPE_NLOBCMIXED(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_BOOLEAN:
-            return "DRDA_TYPE_BOOLEAN(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DRDA_TYPE_NBOOLEAN:
-            return "DRDA_TYPE_NBOOLEAN(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_DATE:
-            return "DB2_SQLTYPE_DATE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NDATE:
-            return "DB2_SQLTYPE_NDATE(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_TIME:
-            return "DB2_SQLTYPE_TIME(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NTIME:
-            return "DB2_SQLTYPE_NTIME(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_TIMESTAMP:
-            return "DB2_SQLTYPE_TIMESTAMP(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NTIMESTAMP:
-            return "DB2_SQLTYPE_NTIMESTAMP(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_DATALINK:
-            return "DB2_SQLTYPE_DATALINK(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NDATALINK:
-            return "DB2_SQLTYPE_NDATALINK(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_BLOB:
-            return "DB2_SQLTYPE_BLOB(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NBLOB:
-            return "DB2_SQLTYPE_NBLOB(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_CLOB:
-            return "DB2_SQLTYPE_CLOB(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NCLOB:
-            return "DB2_SQLTYPE_NCLOB(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_DBCLOB:
-            return "DB2_SQLTYPE_DBCLOB(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NDBCLOB:
-            return "DB2_SQLTYPE_NDBCLOB(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_VARCHAR:
-            return "DB2_SQLTYPE_VARCHAR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NVARCHAR:
-            return "DB2_SQLTYPE_NVARCHAR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_CHAR:
-            return "DB2_SQLTYPE_CHAR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NCHAR:
-            return "DB2_SQLTYPE_NCHAR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_LONG:
-            return "DB2_SQLTYPE_LONG(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NLONG:
-            return "DB2_SQLTYPE_NLONG(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_CSTR:
-            return "DB2_SQLTYPE_CSTR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NCSTR:
-            return "DB2_SQLTYPE_NCSTR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_VARGRAPH:
-            return "DB2_SQLTYPE_VARGRAPH(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NVARGRAPH:
-            return "DB2_SQLTYPE_NVARGRAPH(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_GRAPHIC:
-            return "DB2_SQLTYPE_GRAPHIC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NGRAPHIC:
-            return "DB2_SQLTYPE_NGRAPHIC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_LONGRAPH:
-            return "DB2_SQLTYPE_LONGRAPH(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NLONGRAPH:
-            return "DB2_SQLTYPE_NLONGRAPH(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_LSTR:
-            return "DB2_SQLTYPE_LSTR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NLSTR:
-            return "DB2_SQLTYPE_NLSTR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_FLOAT:
-            return "DB2_SQLTYPE_FLOAT(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NFLOAT:
-            return "DB2_SQLTYPE_NFLOAT(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_DECIMAL:
-            return "DB2_SQLTYPE_DECIMAL(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NDECIMAL:
-            return "DB2_SQLTYPE_NDECIMAL(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_ZONED:
-            return "DB2_SQLTYPE_ZONED(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NZONED:
-            return "DB2_SQLTYPE_NZONED(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_BIGINT:
-            return "DB2_SQLTYPE_BIGINT(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NBIGINT:
-            return "DB2_SQLTYPE_NBIGINT(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_INTEGER:
-            return "DB2_SQLTYPE_INTEGER(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NINTEGER:
-            return "DB2_SQLTYPE_NINTEGER(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_SMALL:
-            return "DB2_SQLTYPE_SMALL(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NSMALL:
-            return "DB2_SQLTYPE_NSMALL(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NUMERIC:
-            return "DB2_SQLTYPE_NUMERIC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NNUMERIC:
-            return "DB2_SQLTYPE_NNUMERIC(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_ROWID:
-            return "DB2_SQLTYPE_ROWID(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NROWID:
-            return "DB2_SQLTYPE_NROWID(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_BLOB_LOCATOR:
-            return "DB2_SQLTYPE_BLOB_LOCATOR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NBLOB_LOCATOR:
-            return "DB2_SQLTYPE_NBLOB_LOCATOR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_CLOB_LOCATOR:
-            return "DB2_SQLTYPE_CLOB_LOCATOR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NCLOB_LOCATOR:
-            return "DB2_SQLTYPE_NCLOB_LOCATOR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_DBCLOB_LOCATOR:
-            return "DB2_SQLTYPE_DBCLOB_LOCATOR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NDBCLOB_LOCATOR:
-            return "DB2_SQLTYPE_NDBCLOB_LOCATOR(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_BOOLEAN:
-            return "DB2_SQLTYPE_BOOLEAN(0x" + Integer.toHexString(drdaType) + ")";
-        case DRDAConstants.DB2_SQLTYPE_NBOOLEAN:
-            return "DB2_SQLTYPE_NBOOLEAN(0x" + Integer.toHexString(drdaType) + ")";
-
-        default:
-            return "DRDA_TYPE_UNKNOWN(0x" + Integer.toHexString(drdaType) + ")";
-        }
-    }
 }

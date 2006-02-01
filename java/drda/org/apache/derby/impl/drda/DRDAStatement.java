@@ -90,19 +90,9 @@ class DRDAStatement
 	private int numResultSets = 0;  
 
 	// State for parameter data
-    protected static final class CliParam {
-        public CliParam(byte drdaType, int drdaLength) { 
-            this.drdaType = drdaType; 
-            this.drdaLength = drdaLength; 
-        }
-        public byte drdaType;
-        public int  drdaLength;
-        public boolean isExt = false;
-    }
-    private ArrayList cliParams_ = new ArrayList();
-    protected final CliParam getCliParam(int i) { 
-        return (CliParam) cliParams_.get(i); 
-    }
+	protected  Vector cliParamDrdaTypes = new Vector();
+	protected Vector cliParamLens = new Vector();
+	protected ArrayList cliParamExtPositions = null;
 
 	// Query options  sent on EXCSQLSTT
 	// These the default for ResultSets created for this statement.
@@ -992,7 +982,10 @@ class DRDAStatement
 		outputExpected = false;
 		isCall = false;
 		explicitlyPrepared = false;
-        cliParams_.clear();
+		cliParamDrdaTypes = null;
+		cliParamLens = null;
+		cliParamExtPositions = null;
+
 	}	
 
 	/**
@@ -1068,26 +1061,8 @@ class DRDAStatement
 		
 	}
 
+	
 	/**
-     * Add a parameter. 
-     *
-     * @param drdaType - parameter type
-     * @param drdaLength - parameter length
-     */
-    protected void addParam(byte drdaType, int drdaLength)
-    {
-        cliParams_.add(new CliParam(drdaType, drdaLength));
-    }
-
-    /**
-     * Reset the cliParams ArrayList.
-     *
-     */
-    protected void resetParams() { 
-        cliParams_.clear();
-    }
-        
-    /**
 	 * get parameter DRDAType
 	 *
 	 * @param index - starting with 1
@@ -1095,33 +1070,33 @@ class DRDAStatement
 	 */
 	protected int getParamDRDAType(int index)
 	{
-        return getCliParam(index-1).drdaType;
+		
+		return ((Byte)cliParamDrdaTypes.get(index -1)).intValue();
 	}
 
 
 	/**
-     * set param DRDAType. Assumes that index is a valid index.
+	 * set param  DRDAType
 	 *
 	 * @param index - starting with 1
 	 * @param type
 	 */
-     protected  void setParamDRDAType(int index, byte type)
-     {
-        getCliParam(index-1).drdaType = type;
-     }
-
+	protected  void setParamDRDAType(int index, byte type)
+	{
+		cliParamDrdaTypes.addElement(new Byte(type));
+		
+	}
 	/**
 	 * returns drda length of parameter as sent by client.
-     * @param index - starting with 1
+	 * @param index
 	 * @return data length
 
 	 */
 
 	protected int getParamLen(int index)
 	{
-        return getCliParam(index-1).drdaLength;
+		return ((Integer) cliParamLens.elementAt(index -1)).intValue();
 	}
-
 	/**
 	 *  get parameter precision or DB2 max (31)
 	 *
@@ -1169,7 +1144,7 @@ class DRDAStatement
 	 */
 	protected void  setParamLen(int index, int value)
 	{
-        getCliParam(index-1).drdaLength = value;
+		cliParamLens.add(index -1, new Integer(value));
 	}
 
 	/**
@@ -1177,11 +1152,14 @@ class DRDAStatement
 	 * 
 	 * @return number of parameters
 	 */
-     protected int getNumParams()
-    {
-        return cliParams_.size();
-    }
-    
+	protected int getNumParams()
+	{
+		if (cliParamDrdaTypes != null)
+			return cliParamDrdaTypes.size();
+		else
+			return 0;
+	}
+	   
 	/** 
 	 * get the number of result set columns for the current resultSet
 	 * 
@@ -1657,3 +1635,13 @@ class DRDAStatement
 		return currentDrdaRs.isRSCloseImplicit();
 	}
 }
+
+
+
+
+
+
+
+
+
+
