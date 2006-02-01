@@ -23,6 +23,7 @@ package org.apache.derby.client.am;
 import java.sql.SQLException;
 
 import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class LogWriter {
     protected java.io.PrintWriter printWriter_;
@@ -1207,7 +1208,10 @@ public class LogWriter {
                     new java.io.PrintWriter(new java.io.BufferedOutputStream(new java.io.FileOutputStream(fileCanonicalPath, fileAppend), 4096), true);
             return printWriter;
         } catch (java.io.IOException e) {
-            throw new SqlException(null, "Unable to open file " + fileName);
+            throw new SqlException(null, 
+                new MessageId(SQLState.UNABLE_TO_OPEN_FILE),
+                new Object[] { fileName, e.getMessage() },
+                e);
         }
     }
 

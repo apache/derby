@@ -19,6 +19,7 @@
 */
 
 package org.apache.derby.client.am;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
 
@@ -95,7 +96,8 @@ public class LogicalConnection implements java.sql.Connection {
         try {
             if (physicalConnection_.isClosed()) // connection is closed or has become stale
             {
-                throw new SqlException(null, "Connection is stale."); // no call to trashConnection()
+                throw new SqlException(null, 
+                    new MessageId(SQLState.NO_CURRENT_CONNECTION)); // no call to trashConnection()
             } else {
                 ; // no call to recycleConnection()
             }
@@ -119,7 +121,9 @@ public class LogicalConnection implements java.sql.Connection {
 
     private void checkForNullPhysicalConnection() throws SQLException {
         if (physicalConnection_ == null) {
-            throw new SqlException(null, " Attempt to use a closed connection. ").getSQLException();
+            SqlException se = new SqlException(null, 
+                new MessageId(SQLState.NO_CURRENT_CONNECTION));
+            throw se.getSQLException();
         }
     }
 

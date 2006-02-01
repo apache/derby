@@ -740,12 +740,12 @@ START: blobTest94
 shortBlob length after commit is 26
 blobTest94 finished
 START: blobTest95
-EXPECTED SQLSTATE(null): Lob method called after connection was closed
-EXPECTED SQLSTATE(null): Lob method called after connection was closed
-EXPECTED SQLSTATE(null): Lob method called after connection was closed
-EXPECTED SQLSTATE(null): Lob method called after connection was closed
-EXPECTED SQLSTATE(null): Lob method called after connection was closed
-EXPECTED SQLSTATE(null): Lob method called after connection was closed
+EXPECTED SQLSTATE(08003): Lob method called after connection was closed
+EXPECTED SQLSTATE(08003): Lob method called after connection was closed
+EXPECTED SQLSTATE(08003): Lob method called after connection was closed
+EXPECTED SQLSTATE(08003): Lob method called after connection was closed
+EXPECTED SQLSTATE(08003): Lob method called after connection was closed
+EXPECTED SQLSTATE(08003): Lob method called after connection was closed
 blobTest95 finished
 START: blobTest96
 blobTest96 finished

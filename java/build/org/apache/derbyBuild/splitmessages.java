@@ -24,6 +24,7 @@ import java.io.*;
 import java.util.*;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class splitmessages {
 	/**
@@ -48,9 +49,8 @@ public class splitmessages {
      */
     static void initClientMessageIds()
     {
-        // right now, no message ids that don't start with "XJ",
-        // so nothing to do here.  Once we have some that don't
-        // start with XJ, add here using clientMessageIds.add()
+        // Add message ids that don't start with XJ here
+        clientMessageIds.add(SQLState.NO_CURRENT_CONNECTION);
     }
 
 	public static void main(String[] args) throws Exception {

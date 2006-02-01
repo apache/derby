@@ -1467,6 +1467,7 @@ public interface SQLState {
     // We use a suffix to distinguish them.  Because of the suffix
     // you *must* add a severity code
     String NOGETCONN_ON_CLOSED_POOLED_CONNECTION = "08003.C.1";
+    String LOB_METHOD_ON_CLOSED_CONNECTION = "08003.C.2";
     // system severity
     String SHUTDOWN_DATABASE = "08006.D";   
         
@@ -1511,6 +1512,8 @@ public interface SQLState {
     String CALENDAR_IS_NULL                                         = "XN006.S";
     String PARAM_NOT_OUT_OR_INOUT                                   = "XN009.S";
     String RETURN_PARAM_MUST_BE_INT                                 = "XN010.S";
+    
+    String UNABLE_TO_OPEN_FILE = "XN151.S";
     
 	/*
 	** org.apache.derby.database.UserUtility

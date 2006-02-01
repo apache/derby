@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 public abstract class Lob implements UnitOfWorkListener {
     // The following flags specify the data type(s) a LOB instance currently contains
     public static final int STRING = 2;
@@ -84,7 +86,8 @@ public abstract class Lob implements UnitOfWorkListener {
     void checkForClosedConnection() throws SqlException {
         if (agent_.connection_.isClosedX()) {
             agent_.checkForDeferredExceptions();
-            throw new SqlException(agent_.logWriter_, "Lob method called after connection was closed");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.LOB_METHOD_ON_CLOSED_CONNECTION));
         } else {
             agent_.checkForDeferredExceptions();
         }
