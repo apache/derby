@@ -619,8 +619,6 @@ public class SystemProcedures  {
      *     SYSCS_UTIL.SYSCS_COMPRESS_TABLE
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      * @param schema        schema name of the table to compress.  Must be
      *                      non-null, no default is used.
      * @param tablename     table name of the table to compress.  Must be

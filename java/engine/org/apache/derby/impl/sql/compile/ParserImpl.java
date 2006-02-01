@@ -117,11 +117,9 @@ public class ParserImpl implements Parser
 	 * Parse a statement and return a query tree.  Implements the Parser
 	 * interface
 	 *
-	 * @param statementSQLTextThe	Statement to parse
+	 * @param statementSQLText	Statement to parse
 	 * @param paramDefaults	parameter defaults. Passed around as an array
 	 *                      of objects, but is really an array of StorableDataValues
-	 * @param topLevel	true if this is a top level statement, false if not (as in
-	 *                            create/copy publication target ddl)*
 	 * @return	A QueryTree representing the parsed statement
 	 *
 	 * @exception StandardException	Thrown on error

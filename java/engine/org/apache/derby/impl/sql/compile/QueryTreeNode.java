@@ -98,8 +98,6 @@ public abstract class QueryTreeNode implements Visitable
 	 * Set the ContextManager for this node.
 	 * 
 	 * @param cm	The ContextManager.
-	 *
-	 * @return Nothing.
 	 */
 	public void setContextManager(ContextManager cm)
 	{
@@ -211,7 +209,7 @@ public abstract class QueryTreeNode implements Visitable
 	 * Sets the beginning offset of the SQL substring which this
 	 * query node represents.
 	 *
-	 * @param	The beginning offset of the SQL substring.
+	 * @param	beginOffset	The beginning offset of the SQL substring.
 	 *
 	 */
     public	void	setBeginOffset( int beginOffset )
@@ -232,7 +230,7 @@ public abstract class QueryTreeNode implements Visitable
 	 * Sets the ending offset of the SQL substring which this
 	 * query node represents.
 	 *
-	 * @param	The ending offset of the SQL substring.
+	 * @param	endOffset	The ending offset of the SQL substring.
 	 *
 	 */
 	public	void	setEndOffset( int endOffset )
@@ -321,8 +319,6 @@ public abstract class QueryTreeNode implements Visitable
 	 * Print this tree for debugging purposes.  This recurses through
 	 * all the sub-nodes and prints them indented by their depth in
 	 * the tree.
-	 *
-	 * @return	Nothing
 	 */
 
 	public void treePrint()
@@ -343,8 +339,6 @@ public abstract class QueryTreeNode implements Visitable
 	 *
 	 * @param depth		The depth of this node in the tree, thus,
 	 *			the amount to indent it when printing it.
-	 *
-	 * @return	Nothing
 	 */
 
 	public void treePrint(int depth)
@@ -361,8 +355,6 @@ public abstract class QueryTreeNode implements Visitable
 	 * Print a String for debugging
 	 *
 	 * @param outputString	The String to print
-	 *
-	 * @return	Nothing
 	 */
 
 	public static void debugPrint(String outputString)
@@ -374,8 +366,6 @@ public abstract class QueryTreeNode implements Visitable
 
 	/**
 	 * Flush the debug stream out
-	 *
-	 * @return	Nothing
 	 */
 	protected static void debugFlush()
 	{
@@ -407,8 +397,6 @@ public abstract class QueryTreeNode implements Visitable
 	 * wouldn't get to the right super-class.
 	 *
 	 * @param depth		The depth to indent the sub-nodes
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -444,8 +432,6 @@ public abstract class QueryTreeNode implements Visitable
 	 * @param depth		The depth of indentation to use when printing
 	 *			the label
 	 * @param label		The String to print
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printLabel(int depth, String label)
@@ -675,8 +661,6 @@ public abstract class QueryTreeNode implements Visitable
 	 * Set the node type for this node.
 	 *
 	 * @param nodeType The node type.
-	 *
-	 * @return Nothing.
 	 */
 	public void setNodeType(int nodeType)
 	{
@@ -787,7 +771,7 @@ public abstract class QueryTreeNode implements Visitable
 	 * Parse some query text and return a parse tree.
 	 *
 	 * @param compilerContext	The CompilerContext to use
-	 * @param createViewText	Query text to parse.
+	 * @param queryText	Query text to parse.
 	 * @param paramDefaults		array of parameter defaults used to
 	 *							initialize parameter nodes, and ultimately
 	 *							for the optimization of statements with
@@ -1576,8 +1560,6 @@ public abstract class QueryTreeNode implements Visitable
 	/**
 	 * set the Information gathered from the parent table that is 
 	 * required to peform a referential action on dependent table.
-	 *
-	 * @return Nothing.
 	 */
 	public void setRefActionInfo(long fkIndexConglomId, 
 								 int[]fkColArray, 

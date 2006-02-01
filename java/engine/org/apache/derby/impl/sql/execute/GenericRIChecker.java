@@ -59,7 +59,7 @@ public abstract class GenericRIChecker
 
 	/**
 	 * @param tc		the xact controller
-	 * @param fkInfo	the foreign key information 
+	 * @param fkinfo	the foreign key information 
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */

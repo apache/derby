@@ -125,8 +125,7 @@ public class HasCorrelatedCRsVisitor implements Visitor
 	/**
 	 * Shortcut to set if hasCorrelatedCRs
 	 *
-	 *	@param	true/false
-	 *	@return	nothing
+	 *	@param	value	true/false
 	 */
 	public void setHasCorrelatedCRs(boolean value)
 	{

@@ -101,7 +101,7 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 * @param tc the xact controller
 	 * @param properties the properties of the original table.  Used
 	 *		to help the store use optimal page size, etc.
-	 * @param the result description.  Relevant for the getResultDescription
+	 * @param resultDescription the result description.  Relevant for the getResultDescription
 	 * 		call on the result set returned by getResultSet.  May be null
 	 */
 	public TemporaryRowHolderImpl
@@ -121,7 +121,7 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 * @param tc the xact controller
 	 * @param properties the properties of the original table.  Used
 	 *		to help the store use optimal page size, etc.
-	 * @param the result description.  Relevant for the getResultDescription
+	 * @param resultDescription the result description.  Relevant for the getResultDescription
 	 * 		call on the result set returned by getResultSet.  May be null
 	 * @param isUniqueStream - true , if it has to be temporary row holder unique stream
 	 */
@@ -143,9 +143,9 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 * @param tc the xact controller
 	 * @param properties the properties of the original table.  Used
 	 *		to help the store use optimal page size, etc.
-	 * @param the result description.  Relevant for the getResultDescription
+	 * @param resultDescription the result description.  Relevant for the getResultDescription
 	 * 		call on the result set returned by getResultSet.  May be null
-	 * @param spillToConglomSize on an attempt to insert
+	 * @param overflowToConglomThreshold on an attempt to insert
 	 * 		this number of rows, the rows will be put
  	 *		into a temporary conglomerate.
 	 */
@@ -213,8 +213,7 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	/**
 	 * Insert a row
 	 *
-	 * @param ef	ExecutionFactory to use for cloning.
-	 * @param row the row to insert 
+	 * @param inputRow the row to insert 
 	 *
 	 * @exception StandardException on error
  	 */

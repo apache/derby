@@ -603,11 +603,6 @@ public class AllocExtent implements Externalizable
      *    the abort took place.  W
      * 2) 
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
-     * @param param1 param1 does this.
-     * @param param2 param2 does this.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
     protected void undoCompressPages(

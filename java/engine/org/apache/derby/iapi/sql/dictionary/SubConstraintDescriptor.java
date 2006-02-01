@@ -55,7 +55,7 @@ public abstract class SubConstraintDescriptor extends TupleDescriptor
 	/**
 	 * Constructor for a SubConstraintDescriptorImpl
 	 *
-	 * @param constraintID		The UUID of the constraint.
+	 * @param constraintId		The UUID of the constraint.
 	 */
 
 	SubConstraintDescriptor(UUID constraintId)
@@ -67,7 +67,6 @@ public abstract class SubConstraintDescriptor extends TupleDescriptor
 	 * Sets the UUID of the constraint.
 	 *
 	 * @param constraintId	The constraint Id.
-	 * @return	Nothing.
 	 */
 	public void	setConstraintId(UUID constraintId)
 	{
@@ -96,7 +95,6 @@ public abstract class SubConstraintDescriptor extends TupleDescriptor
 	 * table that the constraint is on.
 	 *
 	 * @param td	The TableDescriptor.
-	 * @return	Nothing.
 	 */
 	public void	setTableDescriptor(TableDescriptor td)
 	{

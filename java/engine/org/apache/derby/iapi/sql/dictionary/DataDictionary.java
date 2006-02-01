@@ -400,7 +400,7 @@ public interface DataDictionary
 	 * the schema, on the assumption that there cannot
 	 * be any other objects in a schema w/o a table.
 	 *
-	 * @param schema descriptor
+	 * @param sd schema descriptor
 	 *
 	 * @return true/false
 	 *
@@ -450,15 +450,12 @@ public interface DataDictionary
 	/**
 	 * Drop the table descriptor.
 	 *
-	 * @param descriptor	The table descriptor to drop
+	 * @param td	The table descriptor to drop
 	 * @param schema		A descriptor for the schema the table
 	 *						is a part of.  If this parameter is
 	 *						NULL, then the table is part of the
 	 *						current (default) schema
 	 * @param tc			TransactionController for the transaction
-	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	dropTableDescriptor(TableDescriptor td, SchemaDescriptor schema,
@@ -472,8 +469,6 @@ public interface DataDictionary
 	 * @param schema			The SchemaDescriptor for the table
 	 * @param lockGranularity	The new lockGranularity
 	 * @param tc				The TransactionController to use.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -603,7 +598,7 @@ public interface DataDictionary
 	 * is already loaded up, it is retuned without further
 	 * ado.
 	 *
-	 * @param table			The table descriptor.
+	 * @param td			The table descriptor.
 	 *
 	 * @return The ConstraintDescriptorList for the table
 	 *
@@ -655,7 +650,7 @@ public interface DataDictionary
 	 * Get the constraint descriptor given a table and the UUID String
 	 * of the backing index.
 	 *
-	 * @param table			The table descriptor.
+	 * @param td			The table descriptor.
 	 * @param uuid			The UUID  for the backing index.
 	 *
 	 * @return The ConstraintDescriptor for the constraint.
@@ -671,7 +666,7 @@ public interface DataDictionary
 	 * Get the constraint descriptor given a table and the UUID String
 	 * of the constraint
 	 *
-	 * @param table			The table descriptor.
+	 * @param td			The table descriptor.
 	 * @param uuid			The UUID for the constraint
 	 *
 	 * @return The ConstraintDescriptor for the constraint.
@@ -688,7 +683,7 @@ public interface DataDictionary
 	/** 
 	 * Get the constraint descriptor given a TableDescriptor and the constraint name.
 	 *
-	 * @param table				The table descriptor.
+	 * @param td				The table descriptor.
 	 * @param sd				The schema descriptor for the constraint
 	 * @param constraintName	The constraint name.
 	 * @param forUpdate			Whether or not access is for update
@@ -737,8 +732,6 @@ public interface DataDictionary
 	 *
 	 * @param descriptor	The descriptor to add
 	 * @param tc			The transaction controller
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -793,7 +786,6 @@ public interface DataDictionary
 	 *								1 based.  May be null (all cols).
 	 * @param tc					The TransactionController to use
 	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -882,8 +874,6 @@ public interface DataDictionary
 	 * @param tc			The transaction controller
 	 * @param wait			To wait for lock or not
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	addSPSDescriptor
@@ -897,7 +887,7 @@ public interface DataDictionary
 	 * Updates SYS.SYSSTATEMENTS with the info from the
 	 * SPSD. 
 	 *
-	 * @param descriptor	The descriptor to add
+	 * @param spsd	The descriptor to add
 	 * @param tc			The transaction controller
 	 * @param recompile		whether to recompile or invalidate
 	 * @param updateSYSCOLUMNS indicate whether syscolumns needs to be updated
@@ -906,8 +896,6 @@ public interface DataDictionary
 	 * @param firstCompilation  first time SPS is getting compiled.
 	 * when we using a nested user xaction - we want to timeout right away if
 	 * the parent holds the lock.  (bug 4821)
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -985,7 +973,7 @@ public interface DataDictionary
 	 * is already loaded up, it is retuned without further
 	 * ado.
 	 *
-	 * @param table			The table descriptor.
+	 * @param td			The table descriptor.
 	 *
 	 * @return The ConstraintDescriptorList for the table
 	 *
@@ -1005,8 +993,6 @@ public interface DataDictionary
 	 * @param colsToSet 			Array of ints of columns to be modified,
 	 *								1 based.  May be null (all cols).
 	 * @param tc					The TransactionController to use
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -1171,7 +1157,7 @@ public interface DataDictionary
 	/**
 	 * Drops all conglomerates associated with a table.
 	 *
-	 * @param table		The TableDescriptor of the table 
+	 * @param td		The TableDescriptor of the table 
 	 * @param tc		TransactionController for the transaction
 	 *
 	 * @exception StandardException		Thrown on failure
@@ -1194,8 +1180,6 @@ public interface DataDictionary
 	 * @param conglomerateNumber	The new conglomerate number
 	 * @param tc					The TransactionController to use
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	public void updateConglomerateDescriptor(ConglomerateDescriptor[] cds,
@@ -1212,8 +1196,6 @@ public interface DataDictionary
 	 * @param cd					The ConglomerateDescriptor
 	 * @param conglomerateNumber	The new conglomerate number
 	 * @param tc					The TransactionController to use
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -1239,7 +1221,7 @@ public interface DataDictionary
 	/**
 	 * Gets a list of the dependency descriptors for the given provider's id.
 	 *
-	 * @param dependentID		The ID of the provider we're interested in
+	 * @param providerID		The ID of the provider we're interested in
 	 *
 	 * @return	List			Returns a list of DependencyDescriptors. 
 	 *							Returns an empty List if no stored dependencies for the
@@ -1268,8 +1250,6 @@ public interface DataDictionary
 	 * @param dd	The DependencyDescriptor.
 	 * @param tc	TransactionController for the transaction
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	public void dropStoredDependency(DependencyDescriptor dd,
@@ -1282,8 +1262,6 @@ public interface DataDictionary
 	 * 
 	 * @param dependentsUUID	Dependent's uuid
 	 * @param tc				TransactionController for the transaction
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -1315,7 +1293,7 @@ public interface DataDictionary
 	 * Get a AliasDescriptor by alias name and name space.
 	 * NOTE: caller responsible for handling no match.
 	 *
-	   @param schemaId		schema identifier
+	   @param schemaID		schema identifier
 	 * @param aliasName		The alias name.
 	 * @param nameSpace		The alias name space.
 	 *
@@ -1338,8 +1316,6 @@ public interface DataDictionary
 	 * @param ad	The AliasDescriptor to drop
 	 * @param tc	The TransactionController
 	 *
-	 * @return	Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 
@@ -1351,8 +1327,6 @@ public interface DataDictionary
 	 * Get core catalog info.
 	 *
 	 * @param coreNum	The index into coreInfo[].
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1375,8 +1349,8 @@ public interface DataDictionary
 	 * Get a FileInfoDescriptor given its SQL name and
 	 * schema name.  
 	 *
-	 * @param SQLName	the FileInfoDescriptor SQLname.
 	 * @param sd        the schema that holds the FileInfoDescriptor.
+	 * @param name		SQL name of file.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -1442,7 +1416,7 @@ public interface DataDictionary
 	 * autoincrement column.
 	 * 
 	 * @param tc		 Transaction Controller to use.
-	 * @param td		 Table Descriptor
+	 * @param tableUUID		 Table Descriptor
 	 * @param columnName Name of the column.
 	 * @param aiValue	 Value to write to SYSCOLUMNS.
 	 * @param incrementNeeded Whether we should increment the value passed in by

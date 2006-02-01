@@ -46,11 +46,7 @@ public final class NumericConstantNode extends ConstantNode
 	/**
 	 * Initializer for a typed null node
 	 *
-	 * @param arg1	The TypeId for the type of node
-	 *
-	 * - OR -
-	 *
-	 * @param arg1	An object containing the value of the constant.
+	 * @param arg1	The TypeId for the type of node OR An object containing the value of the constant.
 	 *
 	 * @exception StandardException
 	 */
@@ -215,8 +211,6 @@ public final class NumericConstantNode extends ConstantNode
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the expression will go into
-	 *
-	 * @return		The compiled Expression, 
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

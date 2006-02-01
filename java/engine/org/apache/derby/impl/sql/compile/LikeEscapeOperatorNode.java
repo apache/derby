@@ -438,8 +438,6 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 	/**
 	 * Bind this operator
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 

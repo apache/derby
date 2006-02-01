@@ -38,7 +38,7 @@ final class TableKey
 	/**
 	 * Constructor for when you have both the table and schema names.
 	 *
-	 * @param schemaId		The UUID of the schema being referecned
+	 * @param schemaUUID		The UUID of the schema being referecned
 	 * @param tableName		The name of the table being referenced	 
 	 */
 	TableKey(UUID schemaUUID, String tableName)

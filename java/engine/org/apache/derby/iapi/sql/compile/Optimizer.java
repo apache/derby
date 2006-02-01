@@ -173,8 +173,6 @@ public interface Optimizer {
 	 * Caller is responsible for pushing all predicates which can be evaluated 
 	 * prior to costing.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void costPermutation() throws StandardException;
@@ -192,7 +190,6 @@ public interface Optimizer {
 	 * @param predList		The OptimizablePredicateList to apply
 	 * @param outerCost		The cost of the tables outer to the one being
 	 *						optimizer - tells how many outer rows there are.
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -217,7 +214,6 @@ public interface Optimizer {
 	 * @param estimatedCost	The estimated cost of the given optimizable
 	 * @param outerCost		The cost of the tables outer to the one being
 	 *						optimizer - tells how many outer rows there are.
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

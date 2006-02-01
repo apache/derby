@@ -191,7 +191,7 @@ public class ConglomerateDescriptorList extends ArrayList
 	 * conglomerate descriptor list.  If the descriptor
 	 * is not found, no errors are issued.
 	 *
-	 * @param tableId table uuid, ignored
+	 * @param tableID table uuid, ignored
 	 * @param cgDesc the conglomerate
 	 *
 	 * @exception   StandardException thrown on failure
@@ -217,8 +217,7 @@ public class ConglomerateDescriptorList extends ArrayList
 	 * conglomerate descriptor list.  If the descriptor
 	 * is not found, no errors are issued.
 	 *
-	 * @param tableId table uuid, ignored
-	 * @param cgDesc the conglomerate
+	 * @param conglomerateID table uuid, ignored
 	 *
 	 * @exception   StandardException thrown on failure
 	 */

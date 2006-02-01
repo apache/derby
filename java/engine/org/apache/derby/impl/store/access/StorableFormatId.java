@@ -229,8 +229,6 @@ public class StorableFormatId extends DataType
 	 * @param isNullable	Whether or not the column is nullable
 	 *						(No need to call wasNull() if not)
 	 * 
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 * @exception SQLException		Error accessing the result set
      *
@@ -250,8 +248,6 @@ public class StorableFormatId extends DataType
 	 * Set the value of this DataValueDescriptor from another.
 	 *
 	 * @param theValue	The Date value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
      * @see org.apache.derby.iapi.types.DataValueDescriptor#setValue
 	 */

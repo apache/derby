@@ -31,9 +31,6 @@ public interface RefDataValue extends DataValueDescriptor
 	 *
 	 * @param theValue	Contains the boolean value to set this RefDataValue
 	 *					to.  Null means set this RefDataValue to null.
-	 *
-	 * @return	This RefDataValue
-	 *
 	 */
 	public void setValue(RowLocation theValue);
 }

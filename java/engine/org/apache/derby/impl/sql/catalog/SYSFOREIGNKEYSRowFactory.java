@@ -128,9 +128,6 @@ public class SYSFOREIGNKEYSRowFactory extends CatalogRowFactory
   /**
 	 * Make a SYSFOREIGNKEYS row
 	 *
-	 * @param emptyRow		Make an empty row if this parameter is true
-	 * @param cd			Constraint descriptor
-	 *
 	 * @return	Row suitable for inserting into SYSFOREIGNKEYS.
 	 *
 	 * @exception   StandardException thrown on failure

@@ -270,9 +270,6 @@ public class BTreeMaxScan extends BTreeScan
      * to return.
      * <p>
      *
-	 * @return The leaf page containing the start position, or null if no
-     *         start position is found.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
     protected void positionAtStartPosition(

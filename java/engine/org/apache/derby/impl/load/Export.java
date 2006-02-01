@@ -83,8 +83,8 @@ public class Export extends ExportAbstract{
 	 * @param schemaName	schema name of the table data is being exported from
 	 * @param tableName     Name of the Table from which  data has to be exported.
 	 * @param outputFileName Name of the file to  which data has to be exported.
-	 * @param colDelimiter  Delimiter that seperates columns in the output file
-	 * @param characterDelimiter  Delimiter that is used to quoate non-numeric types
+	 * @param columnDelimeter  Delimiter that seperates columns in the output file
+	 * @param characterDelimeter  Delimiter that is used to quoate non-numeric types
 	 * @param codeset           Codeset that should be used to write  the data to  the file
  	 * @exception SQL Exception on errors
 	 */
@@ -109,8 +109,8 @@ public class Export extends ExportAbstract{
 	 * @param con	 The Cloudscape database connection URL for the database containing the table
 	 * @param selectStatement    select query that is used to export the data
 	 * @param outputFileName Name of the file to  which data has to be exported.
-	 * @param colDelimiter  Delimiter that seperates columns in the output file
-	 * @param characterDelimiter  Delimiter that is used to quiote non-numeric types
+	 * @param columnDelimeter  Delimiter that seperates columns in the output file
+	 * @param characterDelimeter  Delimiter that is used to quiote non-numeric types
 	 * @param codeset           Codeset that should be used to write  the data to  the file
  	 * @exception SQL Exception on errors
 	 */

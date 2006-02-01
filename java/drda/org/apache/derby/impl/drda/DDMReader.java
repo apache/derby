@@ -1299,8 +1299,6 @@ class DDMReader
 
 	/**
 	 * Read string value
-	 * @param length  - length of string to read
-	 * @return value
 	 *
 	 * @exception DRDProtocolException
 	 */

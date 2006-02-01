@@ -133,8 +133,6 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 	/**
 	 * Bind a ? parameter operand of the XXX_length function.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 

@@ -239,8 +239,6 @@ public class BasicDependencyManager implements DependencyManager {
 	 * @param action	The action causing the invalidate
 	 * @param lcc		Language connection context
 	 *
-	 * @return		array of locked dependents (to be unlocked by caller later)
-	 *
 	 * @exception StandardException		Thrown on error.
 	 */
 	private void coreInvalidateFor(Provider p, int action, LanguageConnectionContext lcc)
@@ -419,7 +417,6 @@ public class BasicDependencyManager implements DependencyManager {
 		stored; the delete is finalized at the next commit.
 
 		@param d the dependent
-		@param p the provider
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -674,7 +671,6 @@ public class BasicDependencyManager implements DependencyManager {
 	 * @see DependencyManager#clearColumnInfoInProviders
 	 *
 	 * @param pl		provider list
-	 * @return void
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -729,7 +725,7 @@ public class BasicDependencyManager implements DependencyManager {
 	 * need to internationalize, which is causing the invokation
 	 * of the Dependency Manager.
 	 *
-	 * @param int		The action
+	 * @param action		The action
 	 *
 	 * @return String	The String representation
 	 */

@@ -44,7 +44,6 @@ public class ReplaceAggregatesWithCRVisitor implements Visitor
 	 *
 	 * @param rcl the result column list
 	 * @param tableNumber	The tableNumber for the new CRs
-	 * @param nodeToSkip don't examine anything below nodeToSkip
 	 */
 	public ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, int tableNumber)
 	{

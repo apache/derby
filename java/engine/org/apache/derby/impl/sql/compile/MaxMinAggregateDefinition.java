@@ -59,8 +59,7 @@ public class MaxMinAggregateDefinition
 	 * a sum user data types.  One option would be to run
 	 * sum on anything that implements divide().  
 	 *
-	 * @param the input type, either a user type or a java.lang object
-	 * @param implementsInterface	the interface it implements
+	 * @param inputType	the input type, either a user type or a java.lang object
 	 *
 	 * @return the output Class (null if cannot operate on
 	 *	value expression of this type.

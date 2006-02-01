@@ -100,8 +100,6 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @param isNullable	The nullability of this new node
 	 * @param maximumWidth	The maximum width of this new node
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException
 	 */
 
@@ -232,8 +230,6 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @param dataTypeServices	The DataTypeServices to set in this
 	 *				ValueNode
-	 *
-	 * @return	Nothing
 	 */
 
 	public void setType(DataTypeDescriptor dataTypeServices) throws StandardException
@@ -280,8 +276,6 @@ public abstract class ValueNode extends QueryTreeNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -293,8 +287,6 @@ public abstract class ValueNode extends QueryTreeNode
 	 * were generated from it).  This will help us with ensure that the
 	 * predicate does not get calculated into the selectivity multiple
 	 * times.
-	 *
-	 * @return Nothing.
 	 */
 	void setTransformed()
 	{
@@ -1029,8 +1021,6 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @param resultColTable True if tableNumber is the table containing result
 	 * 						columns
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException			Thrown on error
 	 * 
 	 */
@@ -1107,7 +1097,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * Generate code for this calculation.  This is a place-holder method -
 	 * it should not be called.
 	 *
-	 * @param ecb	The ExpressionClassBuilder for the class being built
+	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the expression will go into
 	 *
 	 *

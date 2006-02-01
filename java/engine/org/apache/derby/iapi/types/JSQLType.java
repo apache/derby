@@ -316,7 +316,7 @@ public final class JSQLType implements Formatable
 	/**
 	  *	Gets the name of the java wrapper class corresponding to a primitive.
 	  *
-	  *	@param	BOOLEAN, INT, ... etc.
+	  *	@param	primitive	BOOLEAN, INT, ... etc.
 	  *
 	  *	@return	name of the java wrapper class corresponding to the primitive
 	  */

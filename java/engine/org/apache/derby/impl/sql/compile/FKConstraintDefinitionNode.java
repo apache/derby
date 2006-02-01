@@ -74,7 +74,7 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 	 * Bind this constraint definition.  Figure out some
 	 * information about the table we are binding against.
 	 *
-	 * @param DataDictionary the dd
+	 * @param dd DataDictionary
 	 * 
 	 * @exception StandardException on error
 	 */

@@ -183,7 +183,7 @@ public abstract class IdUtil
 	  Read an id from the StringReader provided.
 
 
-	  @parm nomrlaize true means return ids in nomral form, false means
+	  @param normalize true means return ids in nomral form, false means
 	        return them as they were entered.
 
 	  <P>
@@ -389,7 +389,7 @@ public abstract class IdUtil
 	/**
 	  Parse an idList. 
 
-	  @parm nomralize true means return ids in nomral form, false means
+	  @param normalize true means return ids in nomral form, false means
 	        return them as they were entered.
 
 	  @exception StandardException Oops
@@ -557,7 +557,7 @@ public abstract class IdUtil
 	/**
 	  Return true if the id provided is on the list provided.
 	  @param id an id in normal form
-	  @list a list of ids in external form.
+	  @param	list a list of ids in external form.
 	  @exception StandardException oops.
 	  */
 	public static boolean idOnList(String id, String list)

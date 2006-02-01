@@ -74,8 +74,6 @@ public class GroupByColumn extends OrderedColumn
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -116,8 +114,6 @@ public class GroupByColumn extends OrderedColumn
 	 * Set the ColumnReference for this GroupByColumn.
 	 *
 	 * @param colRef	The new ColumnReference for this node.
-	 *
-	 * @return Nothing.
 	 */
 	public void setColumnReference(ColumnReference colRef)
 	{
@@ -154,8 +150,6 @@ public class GroupByColumn extends OrderedColumn
 	 *							SubqueryNodes.
 	 * @param aggregateVector	The aggregate vector we build as we hit 
 	 *							AggregateNodes.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException	Thrown on error
 	 */

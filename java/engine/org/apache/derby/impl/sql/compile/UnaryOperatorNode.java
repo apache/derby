@@ -114,12 +114,13 @@ public class UnaryOperatorNode extends ValueNode
 	private Object [] additionalArgs;
 
 	/**
-	 * Initializer for a UnaryOperatorNode
+	 * Initializer for a UnaryOperatorNode.
 	 *
+	 * <ul>
 	 * @param operand	The operand of the node
 	 * @param operatorOrOpType	Either 1) the name of the operator,
 	 *  OR 2) an Integer holding the operatorType for this operator.
-	 * @param methodNameOrParams	Either 1) name of the method
+	 * @param methodNameOrAddedArgs	Either 1) name of the method
 	 *  to call for this operator, or 2) an array of Objects
 	 *  from which primitive method parameters can be
 	 *  retrieved.
@@ -173,8 +174,6 @@ public class UnaryOperatorNode extends ValueNode
 	 * Set the operator.
 	 *
 	 * @param operator	The operator.
-	 *
-	 * @return Nothing.
 	 */
 	void setOperator(String operator)
 	{
@@ -196,8 +195,6 @@ public class UnaryOperatorNode extends ValueNode
 	 * Set the methodName.
 	 *
 	 * @param methodName	The methodName.
-	 *
-	 * @return Nothing.
 	 */
 	void setMethodName(String methodName)
 	{
@@ -231,8 +228,6 @@ public class UnaryOperatorNode extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -285,8 +280,6 @@ public class UnaryOperatorNode extends ValueNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -592,8 +585,6 @@ public class UnaryOperatorNode extends ValueNode
 	 *
 	 *	We throw an exception if the parameter doesn't have a datatype
 	 *	assigned to it yet.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown if ?  parameter doesn't
 	 *									have a type bound to it yet.

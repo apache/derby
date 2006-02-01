@@ -58,8 +58,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -81,8 +79,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -101,8 +97,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @param valueNode	A ValueNode to add to the list
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -119,8 +113,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *				expression is in, for binding columns.
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
 	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -147,8 +139,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * which is not a system built-in type.
 	 * This is useful when doing comparisons, built-in functions, etc. on
 	 * java types which have a direct mapping to system built-in types.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException	Thrown on error
 	 */
@@ -310,8 +300,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @param leftOperand	The left side of the expression
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void comparable(ValueNode leftOperand) throws StandardException
@@ -427,7 +415,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * (All values are assumed to be constants.)
 	 *
 	 * @param judgeODV  In case of type not exactly matching, the judging type.
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -477,8 +464,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @param descriptor	The DataTypeServices to set for the parameters
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void setParameterDescriptor(DataTypeDescriptor descriptor)
@@ -505,8 +490,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * @param	outerFromList		FromList from outer query block
 	 * @param	outerSubqueryList	SubqueryList from outer query block
 	 * @param	outerPredicateList	PredicateList from outer query block
-	 *
-	 * @return	Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

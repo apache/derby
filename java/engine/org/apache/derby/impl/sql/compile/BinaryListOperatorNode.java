@@ -103,8 +103,6 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -131,8 +129,6 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -212,8 +208,6 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * for this node.  This method is useful both during binding and
 	 * when we generate nodes within the language module outside of the parser.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindComparisonOperator()
@@ -271,8 +265,6 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * Set the leftOperand to the specified ValueNode
 	 *
 	 * @param newLeftOperand	The new leftOperand
-	 *
-	 * @return None.
 	 */
 	public void setLeftOperand(ValueNode newLeftOperand)
 	{
@@ -294,7 +286,6 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @param newRightOperandList	The new rightOperandList
 	 *
-	 * @return None.
 	 */
 	public void setRightOperandList(ValueNodeList newRightOperandList)
 	{

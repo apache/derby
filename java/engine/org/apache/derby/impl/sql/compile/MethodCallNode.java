@@ -153,8 +153,6 @@ abstract class MethodCallNode extends JavaValueNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -177,8 +175,6 @@ abstract class MethodCallNode extends JavaValueNode
 	 * to a static method call node.)
 	 *
 	 * @param methodParms		JavaValueNode[]
-	 *
-	 * @return	Nothing
 	 */
 
 	public void addParms(JavaValueNode[] methodParms)
@@ -190,8 +186,6 @@ abstract class MethodCallNode extends JavaValueNode
 	 * Add the parameter list
 	 *
 	 * @param parameterList		A Vector of the parameters
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -243,8 +237,6 @@ abstract class MethodCallNode extends JavaValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -297,8 +289,6 @@ abstract class MethodCallNode extends JavaValueNode
 	 *				expression is in, for binding columns.
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
 	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
-	 *
-	 * @return	this
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -363,8 +353,6 @@ abstract class MethodCallNode extends JavaValueNode
 	 * @param parmTypeNames		Type names for parameters as object types
 	 * @param primParmTypeNames	Type names for parameters as primitive types
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	void throwNoMethodFound(String receiverTypeName,
@@ -403,8 +391,6 @@ abstract class MethodCallNode extends JavaValueNode
 	 * @param	outerFromList		FromList from outer query block
 	 * @param	outerSubqueryList	SubqueryList from outer query block
 	 * @param	outerPredicateList	PredicateList from outer query block
-	 *
-	 * @return	Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -610,8 +596,6 @@ abstract class MethodCallNode extends JavaValueNode
 	 * @param mb the method the expression will go into
 	 * @param parameterNumber	Identifies which parameter to generate. 0 based.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -630,8 +614,6 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @param parmTypeNames	String[] with the java type names for the parameters
 	 *        as declared by the method
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -870,7 +852,6 @@ abstract class MethodCallNode extends JavaValueNode
 	 * Parse the user supplied signature for a method and validate
 	 * it, need to match the number of parameters passed in and match
 	 * the valid types for the parameter.
-	 * @param signature complete external name with signature
 	 * @param offset Character offset of first paren
 	 * @param hasDynamicResultSets Can ResultSet[] parameters be specified.
 	 * @return The valid array of types for resolution.

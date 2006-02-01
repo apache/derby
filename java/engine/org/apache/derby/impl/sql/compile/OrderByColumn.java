@@ -258,8 +258,6 @@ public class OrderByColumn extends OrderedColumn {
 	 * We need them to point to the RCL under that one.  This is useful
 	 * when combining sorts where we need to reorder the sorting
 	 * columns.
-	 *
-	 * @return Nothing.
 	 */
 	void resetToSourceRC()
 	{

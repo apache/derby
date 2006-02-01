@@ -808,7 +808,7 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 	    Please note, this process of verifying the key  does not provide any added security but only is 
 	    intended to allow to fail gracefully if a wrong encryption key is used
 
-	    @return StandardException is thrown if there are any problems during the process of verification
+	    StandardException is thrown if there are any problems during the process of verification
 	    		of the encryption key or if there is any mismatch of the encryption key.
 
 	 */

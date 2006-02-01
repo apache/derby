@@ -182,8 +182,6 @@ public abstract class TableOperatorNode extends FromTable
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -254,8 +252,6 @@ public abstract class TableOperatorNode extends FromTable
 	 * Set the (query block) level (0-based) for this FromTable.
 	 *
 	 * @param level		The query block level for this FromTable.
-	 *
-	 * @return Nothing
 	 */
 	public void setLevel(int level)
 	{
@@ -287,8 +283,6 @@ public abstract class TableOperatorNode extends FromTable
 	 * since some trees get created left deep and others right deep.)
 	 *
 	 * @param nestedInParens	Whether or not this node is nested in parens.
-	 *
-	 * @return Nothing.
 	 */
 	public void setNestedInParens(boolean nestedInParens)
 	{
@@ -364,8 +358,6 @@ public abstract class TableOperatorNode extends FromTable
 	 * binding the sub-expressions, as well as figuring out what the
 	 * return type is for each expression.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -392,8 +384,6 @@ public abstract class TableOperatorNode extends FromTable
 	 * This is done for SELECT statements.  For TableOperatorNodes, we
 	 * simply pass the check through to the left and right children.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown if a ? parameter found
 	 *									directly under a ResultColumn
 	 */
@@ -410,8 +400,6 @@ public abstract class TableOperatorNode extends FromTable
 	 * each expression.
 	 *
 	 * @param fromListParam		FromList to use/append to.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -440,8 +428,6 @@ public abstract class TableOperatorNode extends FromTable
 	 * live under them.
 	 *
 	 * @param fromListParam		FromList to use/append to.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -475,8 +461,6 @@ public abstract class TableOperatorNode extends FromTable
 	 *					by name, not position.
 	 * @param statement			Calling DMLStatementNode (Insert or Update)
 	 * @param fromListParam		FromList to use/append to.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -807,8 +791,6 @@ public abstract class TableOperatorNode extends FromTable
 	 * This is useful when flattening a subquery.
 	 *
 	 * @param decrement	The amount to decrement by.
-	 *
-	 * @return Nothing;
 	 */
 	void decrementLevel(int decrement)
 	{
@@ -835,8 +817,6 @@ public abstract class TableOperatorNode extends FromTable
 	 * Notify the underlying result set tree that the result is
 	 * ordering dependent.  (For example, no bulk fetch on an index
 	 * if under an IndexRowToBaseRow.)
-	 *
-	 * @return Nothing.
 	 */
 	void markOrderingDependent()
 	{

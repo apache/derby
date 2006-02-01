@@ -76,7 +76,8 @@ public interface Statement
 	 * For generating a storable prepared statement (which
 	 * has some extensions over a standard prepared statement).
 	 *
-	 * @param 	compSchema			the compilation schema to use
+	 * @param 	lcc					Compiler state variable.
+	 * @param 	ps					Prepared statement
 	 * @param	paramDefaults		Default parameter values to use for
 	 *								optimization
 	 * @param	spsSchema schema of the stored prepared statement

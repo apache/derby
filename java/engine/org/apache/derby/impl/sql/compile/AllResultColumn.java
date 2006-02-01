@@ -42,8 +42,6 @@ public class AllResultColumn extends ResultColumn
 	 * This initializer is for use in the parser for a "*".
 	 * 
 	 * @param tableName	Dot expression qualifying "*"
-	 *
-	 * @return	The newly constructed AllResultColumn
 	 */
 	public void init(Object tableName)
 	{

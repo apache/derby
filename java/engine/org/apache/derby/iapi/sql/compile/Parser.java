@@ -50,7 +50,7 @@ public interface Parser
 	 * No binding will have taken place, and no decisions will have been
 	 * made regarding processing strategy.
 	 *
-	 * @param statement	The Statement to parse.
+	 * @param statementSQLText	The Statement to parse.
 	 * @param paramDefaults	Parameter defaults
 	 * @return	A new QueryTree representing the syntax of the Statement
 	 *

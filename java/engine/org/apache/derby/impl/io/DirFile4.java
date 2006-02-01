@@ -60,7 +60,7 @@ class DirFile4 extends DirFile
     /**
      * Construct a DirFile from a directory name and a file name.
      *
-     * @param directory The directory part of the path name.
+     * @param directoryName The directory part of the path name.
      * @param fileName The name of the file within the directory.
      */
     DirFile4( String directoryName, String fileName, boolean rwsOK)
@@ -72,7 +72,7 @@ class DirFile4 extends DirFile
     /**
      * Construct a DirFile from a directory name and a file name.
      *
-     * @param directory The directory part of the path name.
+     * @param directoryName The directory part of the path name.
      * @param fileName The name of the file within the directory.
      */
     DirFile4( DirFile directoryName, String fileName, boolean rwsOK)
@@ -224,7 +224,6 @@ class DirFile4 extends DirFile
     /**
      * Get a random access (read/write) file.
      *
-     * @param name The name of the file.
      * @param mode "r", "rw", "rws", or "rwd". The "rws" and "rwd" modes specify
      *             that the data is to be written to persistent store, consistent with the
      *             java.io.RandomAccessFile class ("synchronized" with the persistent

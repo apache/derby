@@ -51,7 +51,7 @@ public class SubCheckConstraintDescriptor extends SubConstraintDescriptor
 	/**
 	 * Constructor for a SubCheckConstraintDescriptor
 	 *
-	 * @param constraintID		The UUID of the constraint.
+	 * @param constraintId		The UUID of the constraint.
 	 * @param constraintText	The text of the constraint definition.
 	 * @param referencedColumns	The columns referenced by the check constraint
 	 */

@@ -208,7 +208,6 @@ public interface ResultSetFactory {
 	/**
      * @param source the result set from which to take rows to be 
      *               updated in the target table.
-     * @param vtiRS the updateable result set for the VTI
      * @return the update operation as a result set.
      * @exception StandardException thrown on error
 	 */
@@ -303,7 +302,7 @@ public interface ResultSetFactory {
 		GeneratedMethod projection, int resultSetNumber,
 		GeneratedMethod constantRestriction,
 		int mapArrayItem,
-		boolean resuseResult,
+		boolean reuseResult,
 		boolean doesProjection,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost,
@@ -330,7 +329,7 @@ public interface ResultSetFactory {
 				ExecRow projection() throws StandardException;
 			</verbatim>
 		@param resultSetNumber	The resultSetNumber for the ResultSet
-		@param mapArrayItem	Item # for mapping of source to target columns
+		@param mapRefItem	Item # for mapping of source to target columns
 		@param reuseResult	Whether or not to reuse the result row.
 		@param keyColItem	Item for hash key column array
 		@param removeDuplicates	Whether or not to remove duplicates when building the hash table
@@ -446,7 +445,7 @@ public interface ResultSetFactory {
 			filtered by this operation.
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param aggregateItem entry in preparedStatement's savedObjects for aggregates
-		@param orderItem entry in preparedStatement's savedObjects for order
+		@param orderingItem entry in preparedStatement's savedObjects for order
 		@param rowAllocator a reference to a method in the activation
 			that generates rows of the right size and shape for the source
 		@param rowSize the size of the row that is allocated by rowAllocator.
@@ -517,7 +516,7 @@ public interface ResultSetFactory {
 			filtered by this operation.
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param aggregateItem entry in preparedStatement's savedObjects for aggregates
-		@param orderItem entry in preparedStatement's savedObjects for order
+		@param orderingItem entry in preparedStatement's savedObjects for order
 		@param rowAllocator a reference to a method in the activation
 			that generates rows of the right size and shape for the source
 		@param rowSize the size of the row that is allocated by rowAllocator.
@@ -1019,7 +1018,7 @@ public interface ResultSetFactory {
 		<p>
 
 	    @param conglomId	Conglomerate # for the heap.
-		@param scociItem The saved item for the static conglomerate info.
+		@param scoci The saved item for the static conglomerate info.
 		@param source	the source result set, which is expected to provide
 						rows from an index conglomerate
 		@param resultRowAllocator a reference to a method in the activation
@@ -1355,8 +1354,6 @@ public interface ResultSetFactory {
 	 * @param source1	The first ResultSet whose rows go into the union
 	 * @param source2	The second ResultSet whose rows go into the
 	 *			union
-	 *	@param activation the activation for this result set,
-	 *		which provides the context for normalization.
 	 *	@param resultSetNumber	The resultSetNumber for the ResultSet
 	 *	@param closeCleanup	any cleanup the activation needs to do on close.
 	 *	@param optimizerEstimatedRowCount	Estimated total # of rows by

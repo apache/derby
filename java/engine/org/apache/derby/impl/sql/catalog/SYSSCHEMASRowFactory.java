@@ -116,9 +116,6 @@ public class SYSSCHEMASRowFactory extends CatalogRowFactory
   /**
 	 * Make a SYSSCHEMAS row
 	 *
-	 * @param emptyRow			Make an empty row if this parameter is true
-	 * @param schemaDescriptor	In-memory tuple to be converted to a disk row.
-	 *
 	 * @return	Row suitable for inserting into SYSSCHEMAS.
 	 *
 	 * @exception   StandardException thrown on failure

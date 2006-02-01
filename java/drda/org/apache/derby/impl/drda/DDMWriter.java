@@ -437,7 +437,7 @@ class DDMWriter
      * that you have copied the data to be truncated somewhere else, by
      * calling copyDSSDataToEnd
      *
-     * @param desired DSS length
+     * @param value DSS length
     */
     protected void truncateDSS(int value)
     {

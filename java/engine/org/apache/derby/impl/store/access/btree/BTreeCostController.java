@@ -182,8 +182,6 @@ public class BTreeCostController extends OpenBTree
      * Save initialize parameters away, and open the underlying container.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      * @param xact_manager access manager transaction.
      * @param rawtran      Raw store transaction.
      *

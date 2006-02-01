@@ -142,7 +142,7 @@ public final class ClassInspector
 	 * Get the Java name of the return type from a Member representing
 	 * a method or the type of a Member representing a field.
 	 *
-	 * @param method		A Member representing the method for
+	 * @param member		A Member representing the method for
 	 *						which we want the return type.
 	 *
 	 * @return	A Java-language-style string describing the return type of
@@ -191,7 +191,7 @@ public final class ClassInspector
 	 mixed "object" and "primitive" types in the second pass.  This is
 	 eventually handled in classConvertableFromTo.
 	 *
-	 * @param receiverTypes	The class name of the receiver
+	 * @param receiverType	The class name of the receiver
 	 * @param methodName	The name of the method
 	 * @param parmTypes		An array of class names representing the
 	 *						parameter types.  Pass a zero-element array if
@@ -407,7 +407,7 @@ public final class ClassInspector
 	 * A untyped null paramter is indicated by passing in an empty string ("")
 	 * as its class name. 
 	 *
-	 * @param receiverTypes	The class name of the receiver
+	 * @param receiverType	The class name of the receiver
 	 * @param parmTypes		An array of class names representing the
 	 *						parameter types.  Pass a zero-element array if
 	 *						there are no parameters.
@@ -541,7 +541,7 @@ public final class ClassInspector
 	 *  @param primParamClasses	primitive type classes or null
 	 *  @param isParam			isParam (for ?) array
 	 *  @param staticMethod		static method or not
-	 *  @param Member[] methods	method stack
+	 *  @param methods			method stack
 	 *  @return	the matched method
 	 *
 	 **/
@@ -1057,7 +1057,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 	 * Translate a JVM-style type descriptor to a Java-language-style type
 	 * name.
 	 *
-	 * @param vmTypeName		The String that contains the JVM type name
+	 * @param clazz		The String that contains the JVM type name
 	 *
 	 * @return	The Java-language-style type name
 	 */

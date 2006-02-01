@@ -272,7 +272,7 @@ public class EmbedConnection implements java.sql.Connection
       using the version backup and any active and archived log files.
 	  </OL>
 
-	  @param a the attribute set.
+	  @param p the attribute set.
 
 	  @exception SQLException Ooops.
 	  */

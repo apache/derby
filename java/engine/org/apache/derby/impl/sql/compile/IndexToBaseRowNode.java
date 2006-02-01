@@ -142,9 +142,6 @@ public class IndexToBaseRowNode extends FromTable
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb the method  for the method to be built
 	 *
-	 * @return	A compiled Expression that returns a ResultSet that
-	 *			gets a base from from an index row.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void generate(ActivationClassBuilder acb,
@@ -332,8 +329,6 @@ public class IndexToBaseRowNode extends FromTable
 	 * Notify the underlying result set tree that the result is
 	 * ordering dependent.  (For example, no bulk fetch on an index
 	 * if under an IndexRowToBaseRow.)
-	 *
-	 * @return Nothing.
 	 */
 	void markOrderingDependent()
 	{

@@ -112,8 +112,6 @@ public class GroupByList extends OrderedColumnList
 	 * @param select		The SelectNode
 	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindGroupByColumns(SelectNode select,
@@ -236,8 +234,6 @@ public class GroupByList extends OrderedColumnList
 	/**
 	 * Check the uniqueness of the column names within a GROUP BY list.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void verifyUniqueGroupingColumns() throws StandardException
@@ -277,8 +273,6 @@ public class GroupByList extends OrderedColumnList
 	 *		 ResultColumns as the GroupByColumns in this list.
 	 *
 	 * @param selectNode	The SelectNode whose RCL we add to.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -358,8 +352,6 @@ public class GroupByList extends OrderedColumnList
 	/**
 	 * Remap all ColumnReferences in this tree to be clones of the
 	 * underlying expression.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException			Thrown on error
 	 */

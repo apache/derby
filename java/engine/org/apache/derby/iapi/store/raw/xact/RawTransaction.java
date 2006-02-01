@@ -110,7 +110,6 @@ public abstract class RawTransaction extends Observable implements Transaction {
 		@param undoInstant	the LogInstant of the Loggable Operation this 
 							compensation operation is going to roll back
 		@param in			optional data for the rollback operation
-		@param dataLengt	optional data length
 
 		@see Compensation
 

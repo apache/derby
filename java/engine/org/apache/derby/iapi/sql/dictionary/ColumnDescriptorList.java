@@ -40,7 +40,7 @@ public class ColumnDescriptorList extends ArrayList
 	/**
 	 * Add the column.  Currently, the table id is ignored.
 	 *
-	 * @param tableId the table id (ignored)
+	 * @param tableID the table id (ignored)
 	 * @param column the column to add
 	 */	
 	public void add(UUID tableID, ColumnDescriptor column)
@@ -60,7 +60,7 @@ public class ColumnDescriptorList extends ArrayList
 	/**
 	 * Get the column descriptor
 	 *
-	 * @param tableId the table id (ignored)
+	 * @param tableID the table id (ignored)
 	 * @param columnName the column get
 	 *
 	 * @return the column descriptor if found
@@ -88,8 +88,8 @@ public class ColumnDescriptorList extends ArrayList
 	/**
 	 * Get the column descriptor
 	 *
-	 * @param tableId the table id (ignored)
-	 * @param columnId the column id
+	 * @param tableID the table id (ignored)
+	 * @param columnID the column id
 	 *
 	 * @return the column descriptor if found
 	 */	

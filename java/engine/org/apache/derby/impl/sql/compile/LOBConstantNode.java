@@ -38,15 +38,20 @@ import java.sql.Types;
 public final class LOBConstantNode extends ConstantNode
 {
 	/**
-	 * Initializer for a LOBConstantNode.
+	 * Initializer for a LOBConstantNode. Parameters are:
 	 *
-	 * @param arg1	The TypeId for the type of the node, or a string?
+	 * <ul>
+	 * <li>arg1	The TypeId for the type of the node, or a string?</li>
+	 * </ul>
 	 *
-	 * - OR *
+	 * <p>
+	 * - OR -
+	 * </p>
 	 *
-	 * @param arg1	A String containing the value of the constant
-	 * @param arg2	The factory to get the TypeId
-	 *			and DataTypeServices factories from.
+	 * <ul>
+	 * <li>arg1	A String containing the value of the constant</li>
+	 * <li>arg2	The factory to get the TypeId and DataTypeServices factories from.</li>
+	 * </ul>
 	 *
 	 * @exception StandardException
 	 */
@@ -151,8 +156,6 @@ public final class LOBConstantNode extends ConstantNode
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the code to place the code
-	 *
-	 * @return		The compiled Expression, 
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

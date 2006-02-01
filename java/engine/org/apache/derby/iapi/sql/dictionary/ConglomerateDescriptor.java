@@ -70,7 +70,7 @@ public class ConglomerateDescriptor extends TupleDescriptor
 	 * @param name			The name of the conglomerate, if any
 	 * @param indexable		TRUE means the conglomerate is indexable,
 	 *				FALSE means it isn't
-	 * @param indexDescriptor	The descriptor of the index if it's not a
+	 * @param indexRowGenerator	The descriptor of the index if it's not a
 	 *							heap
 	 * @param forConstraint		TRUE means the conglomerate is an index backing up
 	 *							a constraint, FALSE means it isn't
@@ -120,8 +120,6 @@ public class ConglomerateDescriptor extends TupleDescriptor
 	 * This is useful when swapping conglomerates, like for bulkInsert.
 	 *
 	 * @param conglomerateNumber	The new conglomerate number.
-	 *
-	 * @return Nothing.
 	 */
 	public void setConglomerateNumber(long conglomerateNumber)
 	{
@@ -215,8 +213,6 @@ public class ConglomerateDescriptor extends TupleDescriptor
 	 * This is useful for tracing the optimizer.
 	 *
 	 * @param columnNames	0-based array of column names.
-	 *
-	 * @return Nothing.
 	 */
 	public void setColumnNames(String[] columnNames)
 	{

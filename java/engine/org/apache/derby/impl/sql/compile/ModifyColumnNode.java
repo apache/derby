@@ -84,7 +84,6 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	 * 1. the column type is either varchar, ....
 	 * 2. is the same type after the alter.
 	 * 3. length is greater than the old length.
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -254,8 +253,6 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	 *
 	 * @param dd		The DataDictionary.
 	 * @param td		The TableDescriptor.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

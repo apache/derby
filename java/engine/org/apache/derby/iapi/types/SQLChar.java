@@ -510,7 +510,6 @@ public class SQLChar
 		not the length of the string. Following the length, each character 
 		of the string is output, in sequence, using the UTF-8 encoding 
 		for the character. 
-		@param      str   a string to be written.
 		@exception  IOException  if an I/O error occurs.
 		@since      JDK1.0
 
@@ -616,7 +615,6 @@ public class SQLChar
      * stream is detected, or an exception is thrown. 
      *
      * @param      in   a data input stream.
-     * @return     a Unicode string.
      * @exception  EOFException            if the input stream reaches the end
      *               before all the bytes.
      * @exception  IOException             if an I/O error occurs.
@@ -1202,8 +1200,6 @@ readingLoop:
 	 * 
 	 * @exception StandardException
 	 *                thrown on failure
-	 * 
-	 * @return me
 	 */
 	public void setObjectForCast(Object theValue, boolean instanceOfResultType,
 			String resultTypeClassName) throws StandardException {
@@ -1232,10 +1228,7 @@ readingLoop:
 	 *
 	 * @param desiredType	The type to normalize the source column to
 	 * @param source		The value to normalize
-	 * @param cachedDest	DataValueDescriptor, if non-null, to hold result
-	 *						(Reuse if normalizing multiple rows)
 	 *
-	 * @return	The normalized SQLChar
 	 *
 	 * @exception StandardException				Thrown for null into
 	 *											non-nullable column, and for
@@ -1340,7 +1333,6 @@ readingLoop:
 	 * @param desiredWidth	the desired length
 	 * @param desiredScale	the desired scale (ignored)
 	 * @param errorOnTrunc	throw an error on truncation
-	 * @return this with the new width
 	 *
 	 * @exception StandardException		Thrown when errorOnTrunc
 	 *		is true and when a shrink will truncate non-white
@@ -1668,7 +1660,6 @@ readingLoop:
 	/**
 	 * This method implements the like function for char (with no escape value).
 	 *
-	 * @param value			The value to evaluate
 	 * @param pattern		The pattern to use
 	 *
 	 * @return	A SQL boolean value telling whether the first operand is

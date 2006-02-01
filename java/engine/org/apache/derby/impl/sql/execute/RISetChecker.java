@@ -38,7 +38,7 @@ public class RISetChecker
 
 	/**
 	 * @param tc		the xact controller
-	 * @param fkInfo[]	the foreign key information 
+	 * @param fkInfo	the foreign key information 
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -125,7 +125,7 @@ public class RISetChecker
 	/**
 	 * Execute the specific RI check on the passed in row.
 	 *
-	 * @param fkIndex	index into fkInfo
+	 * @param index	index into fkInfo
 	 * @param row		the row to check
 	 *
 	 * @exception StandardException on unexpected error, or

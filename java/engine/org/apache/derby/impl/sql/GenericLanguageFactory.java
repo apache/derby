@@ -79,8 +79,6 @@ public class GenericLanguageFactory implements LanguageFactory, ModuleControl
 
 	/**
 	 * Stop this module.  In this case, nothing needs to be done.
-	 *
-	 * @return	Nothing
 	 */
 
 	public void stop() {

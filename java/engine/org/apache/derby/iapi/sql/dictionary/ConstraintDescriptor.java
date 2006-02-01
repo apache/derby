@@ -81,7 +81,6 @@ public abstract class ConstraintDescriptor
 	 * @param deferrable		If the constraint can be deferred.
 	 * @param initiallyDeferred If the constraint starts life deferred.
 	 * @param referencedColumns columns that the constraint references
-	 * @param checkConstraint	the expression for a check constraint.
 	 * @param constraintId		UUID of constraint
 	 * @param schemaDesc		SchemaDescriptor
 	 */
@@ -125,7 +124,6 @@ public abstract class ConstraintDescriptor
 	 * Sets the UUID of the constraint.
 	 *
 	 * @param constraintId	The constraint Id.
-	 * @return	Nothing.
 	 */
 	public void	setConstraintId(UUID constraintId)
 	{
@@ -306,7 +304,7 @@ public abstract class ConstraintDescriptor
 	 * Does this constraint need to fire on this type of
 	 * DML?
 	 *
-	 * @param dmlType	the type of DML 
+	 * @param stmtType	the type of DML 
 	 * (StatementType.INSERT|StatementType.UPDATE|StatementType.DELETE)
 	 * @param modifiedCols	the columns modified, or null for all
 	 *
@@ -403,7 +401,7 @@ public abstract class ConstraintDescriptor
 
 	/**
 	 * Does a column intersect with our referenced columns
-	 * @param int ColumnNumber
+	 * @param columnArray columns to check
 	 * 
 	 * Note-- this is not a static method.
 	 */
@@ -420,7 +418,7 @@ public abstract class ConstraintDescriptor
 	 * @param otherColumns the columns to compare. If
 	 *	null, asssumed to mean all columns
 	 *
-	 * @param the columns referenced by the caller
+	 * @param referencedColumns the columns referenced by the caller
 	 *
 	 * @return true/false
 	 */

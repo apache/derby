@@ -46,7 +46,7 @@ class SavepointConstantAction extends DDLConstantAction
 	 *	Make the ConstantAction for a set savepoint, rollback or release statement.
 	 *
 	 *  @param savepointName	Name of the savepoint.
-	 *  @param statementType	set savepoint, rollback savepoint or release savepoint
+	 *  @param savepointStatementType	set savepoint, rollback savepoint or release savepoint
 	 */
 	SavepointConstantAction(
 								String			savepointName,

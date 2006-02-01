@@ -200,8 +200,6 @@ public class IsNode extends BinaryLogicalOperatorNode
 	 * @param acb	The ExpressionClassBuilder for the class we're generating
 	 * @param mb the method  the expression will go into
 	 *
-	 * @return	An Expression to evaluate this logical binary operator
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 

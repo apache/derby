@@ -84,15 +84,20 @@ public class UserTypeConstantNode extends ConstantNode {
 
 	/**
 	 * Initializer for a typed null node
-	 * or a date, time, or timestamp value
+	 * or a date, time, or timestamp value. Parameters may be:
 	 *
-	 * @param arg1	The TypeId for the type of the node
-	 * @param arg2	The factory to get the TypeId
-	 *			and DataTypeServices factories from.
+	 * <ul>
+	 * <li>arg1	The TypeId for the type of the node</li>
+	 * <li>arg2	The factory to get the TypeId and DataTypeServices factories from.</li>
+	 * </ul>
 	 *
+	 * <p>
 	 * - OR -
+	 * </p>
 	 *
-	 * @param arg1 the date, time, or timestamp value
+	 * <ul>
+	 * <li>arg1 the date, time, or timestamp value</li>
+	 * </ul>
 	 *
 	 * @exception StandardException thrown on failure
 	 */
@@ -221,7 +226,7 @@ public class UserTypeConstantNode extends ConstantNode {
 	/**
 	 * Sets the object value of this user defined type
 	 *
-	 * @param	the value of this constant. can't use setValue() for this.
+	 * @param	newValue	the value of this constant. can't use setValue() for this.
 	 */
     public	void	setObjectValue( Object newValue ) { value = newValue; }
 
@@ -347,8 +352,6 @@ public class UserTypeConstantNode extends ConstantNode {
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the expression will go into
-	 *
-	 * @return		The compiled Expression, 
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

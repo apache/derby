@@ -146,9 +146,6 @@ public class GenericStorablePreparedStatement
 	/**
 	 * Load up the class from the saved bytes.
 	 *
-	 * @return the generated class, or null if we
-	 *	 don't have the byte code
-	 *
 	 * @exception StandardException on error
 	 */
 	public void loadGeneratedClass()

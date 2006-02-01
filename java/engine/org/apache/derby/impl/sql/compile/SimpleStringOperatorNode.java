@@ -132,8 +132,6 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 	/**
 	 * Bind a ? parameter operand of the upper/lower function.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 

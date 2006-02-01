@@ -63,8 +63,6 @@ class BinaryOrderableWrapper implements Storable
      * Longer descrption of routine.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      * @param ref_object    The object that this object is wrapping (ie. being
      *                      read from disk)
      * @param other_object  The object to compare ref_object to.

@@ -59,8 +59,6 @@ public interface TabInfo
 	 * Set the heap conglomerate for the TabInfo.
 	 *
 	 * @param heapConglomerate	The new heap conglomerate.
-	 *
-	 * @return Nothing.
 	 */
 	public void setHeapConglomerate(long heapConglomerate);
 
@@ -76,8 +74,6 @@ public interface TabInfo
 	 *
 	 * @param index				Index number for index for table
 	 * @param indexConglomerate	The conglomerate for that index
-	 *
-	 * @return Nothing
 	 */
 	public void setIndexConglomerate(int index, long indexConglomerate);
 
@@ -86,8 +82,6 @@ public interface TabInfo
 	 *
 	 * @param cd	The ConglomerateDescriptor for one of the index
 	 *				for this table.
-	 *
-	 * @return Nothing
 	 */
 	public void setIndexConglomerate(ConglomerateDescriptor cd);
 
@@ -153,8 +147,6 @@ public interface TabInfo
 	 *
 	 * @param indexNumber	The index number.
 	 * @param irg			The IndexRowGenerator for the specified index number.
-	 *
-	 * @return Nothing.
 	 */
 	public void setIndexRowGenerator(int indexNumber, IndexRowGenerator irg);
 
@@ -184,9 +176,8 @@ public interface TabInfo
 	 *
 	 * @param indexNumber	The index number
 	 * @param colNumber		The column number within the index
-	 * @param baseColPos	The base column position for the column.
+	 * @param baseColumnPosition	The base column position for the column.
 	 *
-	 * @return Nothing.
 	 */
 	public void setBaseColumnPosition(int indexNumber, int colNumber,
 									  int baseColumnPosition);
@@ -235,7 +226,7 @@ public interface TabInfo
 	 * Inserts a base row into a catalog and inserts all the corresponding
 	 * index rows.
 	 *
-	 * @param	row			row to insert
+	 * @param	r			row to insert
 	 * @param	tc			transaction controller
 	 * @return	The row location for the inserted row.
 	 * @exception StandardException		Thrown on failure

@@ -190,8 +190,6 @@ public class SelectNode extends ResultSetNode
 
 	/**
 	 * Mark this SelectNode as being generated for a GROUP BY clause.
-	 *
-	 * @return Nothing.
 	 */
 	public void markAsForGroupByClause()
 	{
@@ -210,8 +208,6 @@ public class SelectNode extends ResultSetNode
 
 	/**
 	 * Mark this SelectNode as being generated for a HAVING clause.
-	 *
-	 * @return Nothing.
 	 */
 	public void markAsForHavingClause()
 	{
@@ -223,8 +219,6 @@ public class SelectNode extends ResultSetNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -489,8 +483,6 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindExpressions(FromList fromListParam)
@@ -649,8 +641,6 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindExpressionsWithTables(FromList fromListParam)
@@ -666,8 +656,6 @@ public class SelectNode extends ResultSetNode
 	 * for each expression.  This is useful for EXISTS subqueries, where we
 	 * need to validate the target list before blowing it away and replacing
 	 * it with a SELECT true.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -687,8 +675,6 @@ public class SelectNode extends ResultSetNode
 	 * live under them.
 	 *
 	 * @param fromListParam		FromList to use/append to.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -740,8 +726,6 @@ public class SelectNode extends ResultSetNode
 	 * @param statement			Calling DMLStatementNode (Insert or Update)
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -773,8 +757,6 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @param predicate	The predicate that we attempt to push
 	 *
-	 * @return	None
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	void pushExpressionsIntoSelect(Predicate predicate)
@@ -790,8 +772,6 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @param outerFromList	The FromList from the outer query block(s)
 	 * @param subqueryType	The subquery type
-	 *
-	 * @return	None
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -864,8 +844,6 @@ public class SelectNode extends ResultSetNode
 	 * Check for (and reject) ? parameters directly under the ResultColumns.
 	 * This is done for SELECT statements.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown if a ? parameter found
 	 *									directly under a ResultColumn
 	 */
@@ -883,8 +861,6 @@ public class SelectNode extends ResultSetNode
 	 * consider sort avoidance.
 	 *
 	 * @param orderByList	The order by list
-	 *
-	 * @return Nothing.
 	 */
 	void pushOrderByList(OrderByList orderByList)
 	{
@@ -1151,8 +1127,6 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @param numTables		The number of tables in the query
 	 *
-	 * @return None.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	private void performTransitiveClosure(int numTables)
@@ -1166,8 +1140,6 @@ public class SelectNode extends ResultSetNode
 	}
 
 	/** Put the expression trees in conjunctive normal form 
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1883,8 +1855,6 @@ public class SelectNode extends ResultSetNode
 	 * This is useful when flattening a subquery.
 	 *
 	 * @param decrement	The amount to decrement by.
-	 *
-	 * @return Nothing;
 	 */
 	void decrementLevel(int decrement)
 	{

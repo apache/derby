@@ -69,7 +69,7 @@ public class FormatableArrayHolder implements Formatable
 	 * Construct a FormatableArrayHolder using the input
 	 * array.
 	 *
-	 * @array the array to hold
+	 * @param array the array to hold
 	 */
 	public FormatableArrayHolder(Object[] array)
 	{
@@ -85,7 +85,7 @@ public class FormatableArrayHolder implements Formatable
 	/**
 	 * Set the held array to the input array.
 	 *
-	 * @array the array to hold
+	 * @param array the array to hold
 	 */
 	public void setArray(Object[] array)
 	{

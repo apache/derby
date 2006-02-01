@@ -839,8 +839,6 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -1048,7 +1046,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * Optimize this ProjectRestrictNode.  
 	 *
 	 * @param dataDictionary	The DataDictionary to use for optimization
-	 * @param predicateList		The PredicateList to optimize.  This should
+	 * @param predicates		The PredicateList to optimize.  This should
 	 *							be a join predicate.
 	 * @param outerRows			The number of outer joining rows
 	 *
@@ -1159,7 +1157,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	/**
 	 * General logic shared by Core compilation.
 	 *
-	 * @param ecb	The ExpressionClassBuilder for the class being built
+	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the expression will go into
 	 *
 	 *
@@ -1176,10 +1174,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	/**
 	 * Logic shared by generate() and generateResultSet().
 	 *
-	 * @param ecb	The ExpressionClassBuilder for the class being built
+	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the expression will go into
-	 *
-	 * @return		The compiled Expression
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1643,8 +1639,6 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 
 	/**
 	 * Mark the underlying scan as a distinct scan.
-	 *
-	 * @return Nothing.
 	 */
 	void markForDistinctScan()
 	{
@@ -1688,8 +1682,6 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	/**
 	 * set the Information gathered from the parent table that is 
 	 * required to peform a referential action on dependent table.
-	 *
-	 * @return Nothing.
 	 */
 	public void setRefActionInfo(long fkIndexConglomId, 
 								 int[]fkColArray, 

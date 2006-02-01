@@ -274,8 +274,6 @@ public class SanityManager {
 	 * so that they can be compiled out completely.
 	 *
 	 * @param flag	The name of the debug flag to set to true
-	 *
-	 * @return	Nothing
 	 */
 	public static final void DEBUG_SET(String flag) {
 		if (DEBUG) {
@@ -298,8 +296,6 @@ public class SanityManager {
 	 * so that they can be compiled out completely.
 	 *
 	 * @param flag	The name of the debug flag to set to false
-	 *
-	 * @return	Nothing
 	 */
 	public static final void DEBUG_CLEAR(String flag) {
 		if (DEBUG) {

@@ -104,8 +104,6 @@ public interface ResultSet
 	 * that doesn't return rows, this is the call that will
 	 * cause all the work to be done.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	void	open() throws StandardException;
@@ -238,16 +236,12 @@ public interface ResultSet
 	 * (until the next open() call), so it can free up the resources
 	 * associated with the ResultSet.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error.
 	 */
 	void	close() throws StandardException;
 
 	/**
 	 * Tells the system to clean up on an error.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
@@ -267,7 +261,6 @@ public interface ResultSet
 	 * in particular, no more calls to open().
 	 * Will close the result set if it is not already closed.
 	 *
-	 * @return	Nothing
 	 * @exception StandardException	on error
 	 */
 	void	finish() throws StandardException;

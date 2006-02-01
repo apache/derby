@@ -126,9 +126,6 @@ public interface Transaction {
 
 		@param policy The lock policy to use, if null then then a no locking 
         policy will be installed as the default.
-
-		@return true if a new locking policy was installed as the default, false
-		of a matching policy could not be found.
 	*/
 
 	public void setDefaultLockingPolicy(LockingPolicy policy);
@@ -562,7 +559,6 @@ public interface Transaction {
      * RESOLVE - how do we map to the "right" XAExceptions.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
      *
      * @param onePhase If true, the resource manager should use a one-phase
      *                 commit protocol to commit the work done on behalf of 

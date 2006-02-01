@@ -865,8 +865,6 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 * keyed on positionInSource.
 	 *
 	 * @param sourceRow	The row to add.
-	 *
-	 * @return Nothing.
 	 */
 	private void addRowToHashTable(ExecRow sourceRow)
 		throws StandardException

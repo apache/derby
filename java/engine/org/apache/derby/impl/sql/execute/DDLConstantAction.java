@@ -164,8 +164,6 @@ public abstract class DDLConstantAction extends GenericConstantAction
 	 * @param heapConglomerateNumber	The conglomerate number for the heap.
 	 * @param exclusiveMode				Whether or not to lock the table in exclusive mode.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException if schema is system schema
 	 */
 	final void lockTableForDDL(TransactionController tc,

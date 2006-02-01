@@ -596,8 +596,6 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindResultColumns(FromList fromListParam)
@@ -644,8 +642,6 @@ public class JoinNode extends TableOperatorNode
 	 * @param statement			Calling DMLStatementNode (Insert or Update)
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -679,8 +675,6 @@ public class JoinNode extends TableOperatorNode
 	/**
 	 * Build the RCL for this node.  We propagate the RCLs up from the
 	 * children and splice them to form this node's RCL.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1041,8 +1035,6 @@ public class JoinNode extends TableOperatorNode
     }
     
 	/** Put the expression trees in conjunctive normal form 
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1497,8 +1489,6 @@ public class JoinNode extends TableOperatorNode
 	 * @param joinClause	The join clause, if any
 	 * @param subquerys		The list of subqueries in the join clause, if any
 	 *
-	 * @return Expression	The generated Expression
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	protected void generateCore(ActivationClassBuilder acb,
@@ -1702,7 +1692,7 @@ public class JoinNode extends TableOperatorNode
 	/** 
 	 * Convert the joinType to a string.
 	 *
-	 * @param int			The joinType as an int.
+	 * @param joinType			The joinType as an int.
 	 *
 	 * @return String		The joinType as a String.
 	 */
@@ -1775,8 +1765,6 @@ public class JoinNode extends TableOperatorNode
 
 	/**
 	 * Mark this node and its children as not being a flattenable join.
-	 *
-	 * @return Nothing.
 	 */
 	void notFlattenableJoin()
 	{
@@ -1823,8 +1811,6 @@ public class JoinNode extends TableOperatorNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)

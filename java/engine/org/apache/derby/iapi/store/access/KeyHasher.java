@@ -40,8 +40,6 @@ public class KeyHasher
 	 *
 	 * @param index		The specified index
 	 * @param object	The specified object.
-	 *
-	 * @return	Nothing.
 	 */
 	public void setObject(int index, Object object)
 	{

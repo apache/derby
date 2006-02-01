@@ -139,9 +139,6 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 	/**
 	 * Make a SYSTRIGGERS row. 
 	 * 
-	 * @param emptyRow			Make an empty row if this parameter is true
-	 * @param triggerDescriptor	In-memory tuple to be converted to a disk row.
-	 *
 	 * @return	Row suitable for inserting into SYSTRIGGERS.
 	 *
 	 * @exception   StandardException thrown on failure

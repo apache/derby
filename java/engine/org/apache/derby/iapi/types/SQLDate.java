@@ -403,8 +403,6 @@ public final class SQLDate extends DataType
      * @param isJdbcEscape if true then only the JDBC date escape syntax is allowed
      * @param localeFinder
      *
-     * @return the internal DataValueDescriptor for the value
-     *
      * @exception Standard exception if the syntax is invalid or the value is out of range.
      */
     public SQLDate( String dateStr, boolean isJdbcEscape, LocaleFinder localeFinder)
@@ -425,8 +423,6 @@ public final class SQLDate extends DataType
      * @param dateStr
      * @param isJdbcEscape if true then only the JDBC date escape syntax is allowed
      * @param localeFinder
-     *
-     * @return the internal DataValueDescriptor for the value
      *
      * @exception Standard exception if the syntax is invalid or the value is out of range.
      */
@@ -783,7 +779,7 @@ public final class SQLDate extends DataType
 	 *		year << 16 + month << 8 + date
 	 *	Use this function will help to remember to add 1 to month
 	 *  which is 0 based in the Calendar class
-	 *	@param value	the Calendar 
+	 *	@param cal	the Calendar 
 	 *	@return 		the encodedDate
      *
      *  @exception StandardException if the value is out of the DB2 date range

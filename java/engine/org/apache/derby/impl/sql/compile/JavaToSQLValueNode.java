@@ -66,8 +66,6 @@ public class JavaToSQLValueNode extends ValueNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -109,9 +107,6 @@ public class JavaToSQLValueNode extends ValueNode
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class we're generating
 	 * @param mb the method  the expression will go into
-	 *
-	 * @return	An expression to convert a value from the Java domain to
-	 *			the SQL domain.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -197,8 +192,6 @@ public class JavaToSQLValueNode extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)

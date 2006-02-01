@@ -60,7 +60,7 @@ public abstract class IndexConstantAction extends DDLSingleTableConstantAction
 	 *	@param	tableId				The table uuid
 	 *	@param	indexName			Index name.
 	 *	@param	tableName			The table name
-	 *	@param	sd					Schema that index lives in.
+	 *	@param	schemaName					Schema that index lives in.
 	 *
 	 */
 	protected	IndexConstantAction(
@@ -94,8 +94,6 @@ public abstract class IndexConstantAction extends DDLSingleTableConstantAction
 	 * Useful for unnamed constraints which have a backing index.
 	 *
 	 * @param indexName		The (generated) index name.
-	 *
-	 * @return Nothing.
 	 */
 	public void setIndexName(String indexName)
 	{

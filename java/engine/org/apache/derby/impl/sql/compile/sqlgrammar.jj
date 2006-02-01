@@ -309,7 +309,7 @@ public class SQLParser
 		Typically used for CREATE statements at the parser level. Called usually just
 		before the node is created, or can be called in just a partial syntax fragment
 		
-		@param majorVersion Data Dictionary major version (DataDictionary.DD_ constant)
+		@param version Data Dictionary major version (DataDictionary.DD_ constant)
 		@param feature SQL Feature name, for error text.
 	*/
 	private void checkVersion(int version, String feature) throws StandardException
@@ -592,7 +592,6 @@ public class SQLParser
 	 * Set all the ParameterNodes to point to the array of
 	 * parameter descriptors.
 	 * 
-	 * @return Nothing
 	 *	@exception	StandardException
 	 */
 	 private void setUpAndLinkParameters()
@@ -1370,8 +1369,6 @@ public class SQLParser
 	/**
 	 * Determine whether the next sequence of tokens is a class name
 	 *
-	 * @param startToken	Token to look for class name at
-	 *
 	 * @return	TRUE iff the next set of tokens is the java class name
 	 */
 	boolean javaClassFollows()
@@ -1697,7 +1694,7 @@ public class SQLParser
         to a procedure or function defintion.
         
         @param required int array of require clauses
-        @param the array of declared clauses.
+        @param  clauses the array of declared clauses.
     */
     void checkRequiredRoutineClause(int[] required, Object[] clauses)
         throws StandardException

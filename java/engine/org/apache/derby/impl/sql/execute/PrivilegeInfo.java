@@ -55,8 +55,6 @@ public abstract class PrivilegeInfo
 	 * @param objectDescriptor
 	 * @param sd
 	 *
-	 * @return true iff the user is the owner of the schema
-	 *
 	 * @exception StandardException if user does not own the object
 	 */
 	protected void checkOwnership( String user,

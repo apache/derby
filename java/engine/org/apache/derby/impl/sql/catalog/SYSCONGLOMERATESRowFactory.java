@@ -119,10 +119,6 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
   /**
 	 * Make a SYSCONGLOMERATES row
 	 *
-	 * @param emptyRow	Make an empty row if this parameter is true
-	 * @param sd		Schema Descriptor
-	 * @param conglomerate	conglomerate descriptor
-	 *
 	 * @return	Row suitable for inserting into SYSCONGLOMERATES.
 	 *
 	 * @exception   StandardException thrown on failure

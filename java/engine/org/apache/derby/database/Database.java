@@ -152,8 +152,6 @@ public interface Database
 	 * Checkpoints the database, that is, flushes all dirty data to disk.
 	 * Records a checkpoint in the transaction log, if there is a log.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception SQLException Thrown on error
 	 */
 	public void checkpoint() throws SQLException;

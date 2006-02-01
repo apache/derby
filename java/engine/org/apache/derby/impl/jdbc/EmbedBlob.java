@@ -248,7 +248,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
    * value that this <code>Blob</code> object designates.  The byte
    * array contains up to <code>length</code> consecutive bytes
    * starting at position <code>pos</code>.
-   * @param pos the ordinal position of the first byte in the
+   * @param startPos the ordinal position of the first byte in the
    * <code>BLOB</code> value to be extracted; the first byte is at
    * position 1
    * @param length is the number of consecutive bytes to be copied

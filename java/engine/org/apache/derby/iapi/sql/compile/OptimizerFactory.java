@@ -45,8 +45,7 @@ public interface OptimizerFactory {
 	 * connection may have multiple instances of that optimizer
 	 * at a given time.
 	 *
-	 * @param ofc the optimizer context for the current connection
-	 * @param optimizable	The list of Optimizables to optimize.
+	 * @param optimizableList	The list of Optimizables to optimize.
 	 * @param predicateList	The list of unassigned OptimizablePredicates.
 	 * @param dDictionary	The DataDictionary to use.
 	 * @param requiredRowOrdering	The required ordering of the rows to

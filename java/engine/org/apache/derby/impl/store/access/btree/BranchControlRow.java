@@ -147,9 +147,6 @@ public class BranchControlRow extends ControlRow
     /**
      * Perform page specific initialization.
      * <p>
-     *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      **/
     protected final void ControlRowInit()
     {

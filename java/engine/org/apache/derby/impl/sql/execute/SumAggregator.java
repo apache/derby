@@ -41,7 +41,6 @@ public  class SumAggregator
 	 * Accumulate
  	 *
 	 * @param addend	value to be added in
-	 * @param ga		the generic aggregator that is calling me
 	 *
 	 * @exception StandardException on error
 	 *

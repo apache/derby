@@ -292,8 +292,6 @@ extends BasicNoPutResultSetImpl
 	 * qualifiers is reopened.)
 	 *
 	 * @param qualifiers	The Qualifiers to clear
-	 *
-	 * @return Nothing.
 	 */
 	protected void clearOrderableCache(Qualifier[][] qualifiers) throws StandardException
 	{
@@ -326,8 +324,6 @@ extends BasicNoPutResultSetImpl
 	 * Set the GeneratedMethod for enforcing check constraints
 	 * 
 	 * @param checkGM	The GeneratedMethod for enforcing any check constraints.
-	 *
-	 * @return Nothing.
 	 */
 	protected void setCheckConstraints(GeneratedMethod checkGM)
 	{
@@ -338,8 +334,6 @@ extends BasicNoPutResultSetImpl
 	 * Set the heap conglomerate number (used in enforcing check constraints)
 	 * 
 	 * @param heapConglomerate	The heap conglomerate number.
-	 *
-	 * @return Nothing.
 	 */
 	protected void setHeapConglomerate(long heapConglomerate)
 	{

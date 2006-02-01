@@ -123,7 +123,6 @@ public class InternalTriggerExecutionContext implements TriggerExecutionContext,
 	 * you are.
 	 *
 	 * @param lcc	the lcc
-	 * @param jdbcFactory	the jdbc factory
 	 * @param statementText	the text of the statement that caused the
 	 *		trigger to fire.  may be null if we are replicating
 	 * @param changedColIds	the list of columns that changed.  Null

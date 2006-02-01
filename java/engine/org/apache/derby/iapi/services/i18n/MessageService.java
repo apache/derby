@@ -113,7 +113,7 @@ public final class MessageService {
 	  @param sqlerrmc	sql error message tokens, variable part of error message (ie.,
 						arguments) plus messageId, separated by separator.
 	  @param sqlerrp	not used
-	  @param errd0-5	not used
+	  @param errd0		not used
 	  @param warn		not used
 	  @param sqlState	5-char sql state
 	  @param file		not used

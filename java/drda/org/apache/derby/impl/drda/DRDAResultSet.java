@@ -330,8 +330,6 @@ class DRDAResultSet
 
 	/**
 	 * Set the extData Objects
-	 *
-	 *  @return ArrayList with extdta
 	 */
 	protected void  setExtDtaObjects(ArrayList a)
 	{

@@ -1199,10 +1199,6 @@ public abstract class GenericScanController
      *           interface.
      *
      *
-	 * @return boolean indicating that the fetch set succeeded.  If it failed
-     *                 Hashtable.clear() will be called leaving an empty 
-     *                 table.
-     *
      * @param max_rowcnt        The maximum number of rows to insert into the 
      *                          Hash table.  Pass in -1 if there is no maximum.
      * @param key_column_numbers The column numbers of the columns in the

@@ -61,8 +61,8 @@ class ColumnInfo {
 	 * @param conn  - connection to use for metadata queries
 	 * @param sName - table's schema
 	 * @param tName - table Name
-	 * @param columnList - comma seperared insert statement column list 
-	 * @param  vtiColumnIndex - Indexes in the file
+	 * @param insertColumnList - comma seperared insert statement column list 
+	 * @param  vtiColumnIndexes - Indexes in the file
 	 * @param  vtiColumnPrefix - Prefix to use to generate column names to select from VTI
 	 * @exception Exception on error 
 	 */

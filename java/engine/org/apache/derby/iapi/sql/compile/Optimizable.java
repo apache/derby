@@ -135,7 +135,7 @@ public interface Optimizable {
 	/**
 	 * Push an OptimizablePredicate down, if this node accepts it.
 	 *
-	 * @param optPred	OptimizablePredicate to push down.
+	 * @param optimizablePredicate	OptimizablePredicate to push down.
 	 *
 	 * @return Whether or not the predicate was pushed down.
 	 *
@@ -192,8 +192,6 @@ public interface Optimizable {
 	 * Set the Properties list for this optimizalbe.
 	 *
 	 * @param tableProperties The Properties list for this optimizable.
-	 *
-	 * @return Nothing.
 	 */
 	public void setProperties(Properties tableProperties);
 
@@ -202,7 +200,6 @@ public interface Optimizable {
 	 *
 	 * @param dDictionary	The DataDictionary  to use.
 	 *
-	 * @return Nothing.
 	 * @exception StandardException		Thrown on error
 	 */
 	public void verifyProperties(DataDictionary dDictionary) throws StandardException;
@@ -398,8 +395,6 @@ public interface Optimizable {
 	 * Init the access paths for this optimizable.
 	 *
 	 * @param optimizer The optimizer being used.
-	 *
-	 * @return Nothing.
 	 */
 	public void initAccessPaths(Optimizer optimizer);
 

@@ -75,7 +75,7 @@ public interface Property {
 	String LOG_SEVERITY_LEVEL = "derby.stream.error.logSeverityLevel";
 
         /**
-		derby.stream.error.file=<absolute or relative error log filename>
+		derby.stream.error.file=<b>absolute or relative error log filename</b>
 		Takes precendence over derby.stream.error.method.
 		Takes precendence over derby.stream.error.field
 	*/

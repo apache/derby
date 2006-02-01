@@ -133,8 +133,6 @@ public class PropertyUtil {
      * Copy a set of properties from one Property to another.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      * @param src_prop  Source set of properties to copy from.
      * @param dest_prop Dest Properties to copy into.
      *
@@ -167,11 +165,10 @@ public class PropertyUtil {
 	 * remaining characters on the line become part of the associated
 	 * element string."
 	 *
-	 * @iStr: An input stream from which the new properties are to be
+	 * @param	iStr An input stream from which the new properties are to be
 	 *  loaded (should already be initialized).
-	 * @param prop: A set of properties to which the properties from
+	 * @param prop A set of properties to which the properties from
 	 *  iStr will be added (should already be initialized).
-	 * @return A final properties set consisting of 'prop' plus all
 	 * properties loaded from 'iStr' (with the extra whitespace (if any)
 	 *  removed from all values), will be returned via the parameter.
 	 *

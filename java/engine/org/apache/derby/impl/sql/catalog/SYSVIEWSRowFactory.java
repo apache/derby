@@ -116,9 +116,6 @@ public class SYSVIEWSRowFactory extends CatalogRowFactory
   /**
 	 * Make a SYSVIEWS row
 	 *
-	 * @param emptyRow		Make an empty row if this parameter is true
-	 * @param vd			View descriptor
-	 *
 	 * @return	Row suitable for inserting into SYSVIEWS.
 	 *
 	 * @exception   StandardException thrown on failure

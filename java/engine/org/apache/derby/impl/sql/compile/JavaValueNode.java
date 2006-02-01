@@ -180,8 +180,6 @@ abstract class JavaValueNode extends QueryTreeNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -251,8 +249,6 @@ abstract class JavaValueNode extends QueryTreeNode
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb the method  the expression will go into
 	 *
-	 * @return		The compiled Expression
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -315,10 +311,8 @@ abstract class JavaValueNode extends QueryTreeNode
 	 * General logic shared by Core compilation and by the Replication Filter
 	 * compiler. Every child of ValueNode must implement one of these methods.
 	 *
-	 * @param ecb	The ExpressionClassBuilder for the class being built
+	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb the method the expression will go into
-	 *
-	 * @return		The compiled Expression
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

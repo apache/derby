@@ -88,8 +88,6 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 * binding and when we generate nodes within the language module outside 
 	 * of the parser.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindComparisonOperator()

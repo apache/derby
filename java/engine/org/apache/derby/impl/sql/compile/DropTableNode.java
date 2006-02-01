@@ -59,7 +59,7 @@ public class DropTableNode extends DDLStatementNode
 	/**
 	 * Intializer for a DropTableNode
 	 *
-	 * @param objectName	The name of the object being dropped
+	 * @param dropObjectName	The name of the object being dropped
 	 * @param dropBehavior		Drop behavior (RESTRICT | CASCADE)
 	 *
 	 */

@@ -1038,7 +1038,6 @@ private static char[] decodeArray = {'0', '1', '2', '3', '4', '5', '6', '7',
 	 * Bitwise OR this Bit with another Bit.
 	 *
 	 * @param otherBit the other Bit
-	 * @see Bit#or
 	 */
 	public void or(FormatableBitSet otherBit)
 	{
@@ -1081,7 +1080,6 @@ private static char[] decodeArray = {'0', '1', '2', '3', '4', '5', '6', '7',
 	 * Bitwise AND this Bit with another Bit.
 	 *
 	 * @param otherBit the other Bit
-	 * @see Bit#or
 	 */
 	public void and(FormatableBitSet otherBit)
 	{

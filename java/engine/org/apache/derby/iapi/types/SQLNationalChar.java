@@ -255,10 +255,6 @@ public class SQLNationalChar
 	 *
 	 * @param desiredType	The type to normalize the source column to
 	 * @param source		The value to normalize
-	 * @param cachedDest	DataValueDescriptor, if non-null, to hold result
-	 *						(Reuse if normalizing multiple rows)
-	 *
-	 * @return	The normalized SQLChar
 	 *
 	 * @exception StandardException				Thrown for null into
 	 *											non-nullable column, and for

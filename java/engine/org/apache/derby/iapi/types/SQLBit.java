@@ -184,7 +184,6 @@ public class SQLBit
 	 * @param desiredWidth	the desired length	
 	 * @param desiredScale	the desired scale (ignored)	
 	 * @param errorOnTrunc	throw error on truncation
-	 * @return this with the target width
 	 *
 	 * @exception StandardException		Thrown on non-zero truncation
 	 *		if errorOnTrunc is true	

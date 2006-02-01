@@ -55,7 +55,7 @@ class LockTableConstantAction extends GenericConstantAction
 	/**
 	 * Make the ConstantAction for a LOCK TABLE statement.
 	 *
-	 *  @param fulltableName		Full name of the table.
+	 *  @param fullTableName		Full name of the table.
 	 *  @param conglomerateNumber	Conglomerate number for the heap
 	 *  @param exclusiveMode		Whether or not to get an exclusive lock.
 	 */

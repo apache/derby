@@ -59,8 +59,6 @@ public interface ExecIndexRow extends ExecRow  {
 
 	/**
 	 * Turn the ExecRow into an ExecIndexRow.
-	 *
-	 * @return Nothing.
 	 */
 	public void execRowToExecIndexRow(ExecRow valueRow);
 }

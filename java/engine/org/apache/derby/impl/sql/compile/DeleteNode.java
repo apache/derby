@@ -110,7 +110,7 @@ public class DeleteNode extends DMLModStatementNode
 	 * Initializer for a DeleteNode.
 	 *
 	 * @param targetTableName	The name of the table to delete from
-	 * @param queryExpresssion	The query expression that will generate
+	 * @param queryExpression	The query expression that will generate
 	 *				the rows to delete from the given table
 	 */
 

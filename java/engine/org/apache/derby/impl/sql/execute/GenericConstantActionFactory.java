@@ -127,7 +127,6 @@ public class GenericConstantActionFactory
 	 *	@param compressTable	Whether or not this is a compress table
 	 *	@param behavior			drop behavior of dropping column
 	 *	@param sequential	If compress table/drop column, whether or not sequential
-	 *	@param compressTable	Whether or not this is a truncate table
 	 */
 	public	ConstantAction	getAlterTableConstantAction
 	(
@@ -163,12 +162,9 @@ public class GenericConstantActionFactory
 	 *  @param columnNames		String[] for column names
 	 *  @param indexAction		IndexConstantAction for constraint (if necessary)
 	 *  @param constraintText	Text for check constraint
-	 *  RESOLVE - the next parameter should go away once we use UUIDs
-	 *			  (Generated constraint names will be based off of uuids)
-	 *	@param constraintId		UUID of constraint. null => we should generate one.
 	 *	@param enabled			Should the constraint be created as enabled 
 	 *							(enabled == true), or disabled (enabled == false).
-	 *	@param ConstraintInfo	The referenced constraint, if a foreign key constraint
+	 *	@param otherConstraint	The referenced constraint, if a foreign key constraint
 	 *  @param providerInfo Information on all the Providers
 	 */
 	public	CreateConstraintConstantAction	getCreateConstraintConstantAction
@@ -238,9 +234,6 @@ public class GenericConstantActionFactory
 	 *  @param aliasName		Name of alias.
 	 *  @param schemaName		Alias's schema. 
 	 *  @param javaClassName	Name of java class.
-	 *  @param methodName		Name of method.
-	 *  @param targetClassName	Name of java class at Target database.
-	 *  @param targetMethodName	Name of method at Target database.
 	 *  @param aliasType		The alias type
 	 */
 	public	ConstantAction	getCreateAliasConstantAction
@@ -260,9 +253,6 @@ public class GenericConstantActionFactory
 	 *
 	 *  @param schemaName	Name of table.
 	 *  @param aid			Authorizaton id
-	 *  @param schemaId		ID of table. If null, we allocate one.
-	 *	@param setToDefault	if true, set the default schema to
-	 *			the new schema once it is created.
 	 */
 	public	ConstantAction	getCreateSchemaConstantAction
 	(
@@ -321,7 +311,7 @@ public class GenericConstantActionFactory
 	/**
 	 *	Make the ConstantAction for a CREATE VIEW statement.
 	 *
-	 *  @param sd			descriptor for the schema that table lives in.
+	 *  @param schemaName	Name of the schema that table lives in.
 	 *  @param tableName	Name of table.
 	 *  @param tableType	Type of table (e.g., BASE).
 	 *	@param viewText		Text of query expression for view definition
@@ -365,9 +355,6 @@ public class GenericConstantActionFactory
 	 *  @param tableID				table id
 	 *	@param lockMode				The lock mode to use
 	 *								  (row or table, see TransactionController)
-	 *  @param deleteUndoable   	undoable for the delete
-	 *  @param endRowsUndoable  	undoable for the end rows token
-	 *  @param endStatementUndoable undoable for the end statement token
 	 *  @param keySignature     	signature for the key(null for source)
 	 *  @param keyPositions     	positions of primary key columns in base row
 	 *  @param keyConglomId  		conglomerate id for the key
@@ -534,7 +521,7 @@ public class GenericConstantActionFactory
 	 *	@param	fullTableName		Fully qualified table name
 	 *	@param	tableName			Table name.
 	 *	@param	sd					Schema that table lives in.
-	 *  @param  conglomerateNubmer	Conglomerate number for heap
+	 *  @param  conglomerateNumber	Conglomerate number for heap
 	 *  @param  tableId				UUID for table
 	 *  @param  behavior			drop behavior, CASCADE, RESTRICT or DEFAULT
 	 *
@@ -605,7 +592,6 @@ public class GenericConstantActionFactory
 	 *	Make the ConstantAction for a Replicated INSERT statement.
 	 *
 	 *  @param conglomId		Conglomerate ID.
-	 *  @param tableType		type of this table
 	 *  @param heapSCOCI		StaticCompiledOpenConglomInfo for target heap.
 	 *  @param irgs				Index descriptors
 	 *  @param indexCIDS		Conglomerate IDs of indices
@@ -619,7 +605,6 @@ public class GenericConstantActionFactory
 	 *	@param fkInfo			Array of structures containing foreign key info, 
 	 *							if any (may be null)
 	 *	@param triggerInfo		Array of structures containing trigger info, 
-	 *  @param baseRowReadList      Map of columns read in.  1 based.
      *  @param streamStorableHeapColIds Null for non rep. (0 based)
 	 *							if any (may be null)
 	 *  @param indexedCols		boolean[] of which (0-based) columns are indexed.
@@ -763,15 +748,10 @@ public class GenericConstantActionFactory
 	 *  @param tableIsPublished		true if table is published, false otherwise
 	 *	@param changedColumnIds		Array of ids of changes columns
 	 *  @param keyPositions     	positions of primary key columns in base row
-	 *  @param updateUndoable		an update token
-	 *  @param endRowsUndoable		an end rows token
-	 *  @param endStatementUndoable an end statement token
 	 *	@param fkInfo				Array of structures containing foreign key info, 
 	 *								if any (may be null)
 	 *	@param triggerInfo			Array of structures containing trigger info, 
 	 *  @param baseRowReadList      Map of columns read in.  1 based.
-     *  @param streamStorableHeapColIds Null for non rep. (0 based)
-	 *								if any (may be null)
 	 *  @param baseRowReadMap		map of columns to be selected from the base row
 	 *								(partial row). 1 based.
      *  @param streamStorableHeapColIds Null for non rep. (0 based)
@@ -838,7 +818,7 @@ public class GenericConstantActionFactory
 	 *                              (null means create one)
 	 *	@param	schemaName			The SchemaName for the jar file.
 	 *	@param	sqlName			    The sqlName for the jar file.
-	 *  @param  fileName            The name of the file that holds the jar.
+	 *  @param  externalPath            The name of the file that holds the jar.
 	 *  @exception StandardException Ooops
 	 */
 	public	ConstantAction getAddJarConstantAction(UUID id,
@@ -857,7 +837,7 @@ public class GenericConstantActionFactory
 	 *                              (Ignored if null)
 	 *	@param	schemaName			The SchemaName for the jar file.
 	 *	@param	sqlName			    The sqlName for the jar file.
-	 *  @param  fileName            The name of the file that holds the new jar.
+	 *  @param  externalPath            The name of the file that holds the new jar.
 	 *  @exception StandardException Ooops
 	 */
 	public	ConstantAction getReplaceJarConstantAction(UUID id,
@@ -897,7 +877,7 @@ public class GenericConstantActionFactory
 	/**
 	 *	Make the ConstantAction for a CREATE TRIGGER statement.
 	 *
-	 * @param triggerSd		descriptor for the schema that trigger lives in.
+	 * @param triggerSchemaName		Name of the schema that trigger lives in.
 	 * @param triggerName	Name of trigger
 	 * @param eventMask		TriggerDescriptor.TRIGGER_EVENT_XXXX
 	 * @param isBefore		is this a before (as opposed to after) trigger 
@@ -1022,7 +1002,6 @@ public class GenericConstantActionFactory
 	 *
 	 * @param privileges The list of privileges to be granted
 	 * @param grantees The list of grantees
-	 * @param withGrantOption true if WITH GRANT OPTION, false if not.
 	 */
 	public ConstantAction getGrantConstantAction( PrivilegeInfo privileges,
 								List grantees)
@@ -1035,7 +1014,6 @@ public class GenericConstantActionFactory
 	 * 
 	 * @param privileges The list of privileges to be revokeed
 	 * @param grantees The list of grantees
-	 * @param withGrantOption true if WITH GRANT OPTION, false if not.
 	 */
 	public ConstantAction getRevokeConstantAction( PrivilegeInfo privileges,
 								List grantees)

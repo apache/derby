@@ -35,8 +35,6 @@ public interface AccessPath {
 	 * Set the conglomerate descriptor for this access path.
 	 *
 	 * @param cd	A ConglomerateDescriptor
-	 *
-	 * @return Nothing.
 	 */
 	void setConglomerateDescriptor(ConglomerateDescriptor cd);
 
@@ -60,8 +58,6 @@ public interface AccessPath {
 
 	/**
 	 * Set whether or not to consider a covering index scan on the optimizable.
-	 *
-	 * @return Nothing.
 	 */
 	public void setCoveringIndexScan(boolean coveringIndexScan);
 
@@ -77,8 +73,6 @@ public interface AccessPath {
 	/**
 	 * Set whether or not to consider a non-matching index scan on this
 	 * AccessPath. 
-	 *
-	 * @return Nothing.
 	 */
 	public void setNonMatchingIndexScan(boolean nonMatchingIndexScan);
 

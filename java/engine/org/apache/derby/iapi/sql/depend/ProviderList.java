@@ -33,8 +33,6 @@ public class ProviderList extends Hashtable
 	 * Add a Provider to the list.
 	 *
 	 * @param prov	The Provider to add to the list.
-	 *
-	 * @return Nothing.
 	 */
 	public void addProvider(Provider prov)
 	{

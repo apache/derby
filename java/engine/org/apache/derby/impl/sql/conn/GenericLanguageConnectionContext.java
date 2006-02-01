@@ -1902,7 +1902,7 @@ public class GenericLanguageConnectionContext
 	 * Push a StatementContext on the context stack.
 	 *
 	 * @param isAtomic whether this statement is atomic or not
-	 * @param isForReadonly whether this statement is for a read only resultset
+	 * @param isForReadOnly whether this statement is for a read only resultset
 	 * @param stmtText the text of the statement.  Needed for any language
 	 * 	statement (currently, for any statement that can cause a trigger
 	 * 	to fire).  Please set this unless you are some funky jdbc setXXX

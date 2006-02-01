@@ -108,8 +108,6 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	 *	We throw an exception if the parameter doesn't have a datatype
 	 *	assigned to it yet.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown if ?  parameter doesn't
 	 *									have a type bound to it yet.
 	 *									? parameter where it isn't allowed.

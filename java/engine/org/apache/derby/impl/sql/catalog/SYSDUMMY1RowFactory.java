@@ -85,9 +85,6 @@ public class SYSDUMMY1RowFactory extends CatalogRowFactory
   /**
 	 * Make a SYSDUMMY1 row
 	 *
-	 * @param emptyRow	Make an empty row if this parameter is true
-	 * @param statDescriptor Descriptor from which to create the
-	 * statistic. 
 	 *
 	 * @return	Row suitable for inserting into SYSSTATISTICS.
 	 *

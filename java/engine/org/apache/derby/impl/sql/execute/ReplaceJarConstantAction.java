@@ -50,7 +50,7 @@ class ReplaceJarConstantAction extends DDLConstantAction
 	 *	@param	id					The id for the jar file
 	 *	@param	schemaName			The SchemaName for the jar file.
 	 *	@param	sqlName			    The sqlName for the jar file.
-	 *  @param  fileName            The name of the file that holds the jar.
+	 *  @param  externalPath            The name of the file that holds the jar.
 	 */
 	ReplaceJarConstantAction(UUID id,
 									String schemaName,

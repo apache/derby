@@ -79,8 +79,6 @@ public interface ParameterValueSet
 	 * thrown if the caller tries to execute a PreparedStatement when one
 	 * or more parameters is uninitialized (i.e. has not had
 	 * setParameterValue() called on it.
-	 *
-	 * @return	Nothing
 	 */
 	void	clearParameters();
 
@@ -114,7 +112,6 @@ public interface ParameterValueSet
 	/**
 		Set the value of this user defined parameter to the passed in Object.
 		
-		  @return	The parameter at the given position.
 		  @exception StandardException		Thrown on error
 	*/
 	void setParameterAsObject(int parameterIndex, Object value) throws StandardException;

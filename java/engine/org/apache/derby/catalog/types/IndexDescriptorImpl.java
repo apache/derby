@@ -29,12 +29,13 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;
 import org.apache.derby.iapi.services.io.FormatableIntHolder;
+import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.IOException;
 
-/** @see IndexRowGenerator */
+/** @see org.apache.derby.iapi.sql.dictionary.IndexRowGenerator */
 public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 {
 	/********************************************************

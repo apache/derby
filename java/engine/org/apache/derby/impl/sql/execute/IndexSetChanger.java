@@ -295,8 +295,6 @@ public class IndexSetChanger
 	 * all of the underlying index changers.
 	 *
 	 * @param baseCC	The heap's ConglomerateController.
-	 *
-	 * @return Nothing.
 	 */
 	public void setBaseCC(ConglomerateController baseCC)
 	{

@@ -304,7 +304,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 	 * a fk, and stmt is delete or bulk insert replace, 
 	 * or stmt is update and columns intersect.
 	 *
-	 * @param dmlType	the type of DML 
+	 * @param stmtType	the type of DML 
 	 * (StatementType.INSERT|StatementType.UPDATE|StatementType.DELETE)
 	 * @param modifiedCols	the columns modified, or null for all
 	 *

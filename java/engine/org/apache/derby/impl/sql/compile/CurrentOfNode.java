@@ -271,9 +271,6 @@ public final class CurrentOfNode extends FromTable {
 	 * each expression.
 	 *
 	 * @param fromListParam		FromList to use/append to.
-	 *
-	 * @return	Nothing
-	 *
 	 */
 	public void bindExpressions(FromList fromListParam)
 	{
@@ -411,9 +408,6 @@ public final class CurrentOfNode extends FromTable {
 	 * Optimize this CurrentOfNode.  Nothing to do.
 	 *
 	 * @param dataDictionary	The DataDictionary to use for optimization
-	 * @param predicate		The predicate to optimize.  This should
-	 *				be a single-table predicate with the table
-	 *				the same as the table in this FromTable.
 	 * @param predicateList		The PredicateList to optimize.  This should
 	 *				be a single-table predicate with the table
 	 *				the same as the table in this FromTable.
@@ -456,9 +450,6 @@ public final class CurrentOfNode extends FromTable {
 	 *
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb	The execute() method to be built
-	 *
-	 * @return		A compiled Expression that returns a ResultSet that
-	 *				scans the table.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

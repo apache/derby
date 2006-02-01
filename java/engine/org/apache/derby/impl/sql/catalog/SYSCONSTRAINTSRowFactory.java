@@ -132,9 +132,6 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
   /**
 	 * Make a SYSCONTRAINTS row
 	 *
-	 * @param emptyRow	Make an empty row if this parameter is true
-	 * @param constraint	constraint descriptor
-	 *
 	 * @return	Row suitable for inserting into SYSCONTRAINTS.
 	 *
 	 * @exception   StandardException thrown on failure

@@ -443,7 +443,7 @@ public interface DataValueFactory
         public DateTimeDataValue getTimeValue( String timeStr, boolean isJdbcEscape) throws StandardException;
 
         /**
-         * @param timeStr A time in string format.
+         * @param timestampStr A time in string format.
          * @param isJdbcEscape If true then the time must be in the JDBC time escape format, otherwise it must
          *                     be in the DB2 time format.
          * @return An internal timestamp

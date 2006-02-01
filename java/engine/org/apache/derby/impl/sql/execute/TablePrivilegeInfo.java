@@ -60,8 +60,6 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 	
 	/**
 	 * @param actionAllowed actionAllowed[action] is true if action is in the privilege set.
-	 * @param columnNames columnNames[action] is the list of columns associated with the action, null if
-	 *					the privilege applies to all columns.
 	 */
 	public TablePrivilegeInfo( TableDescriptor td,
 							   boolean[] actionAllowed,

@@ -50,8 +50,6 @@ public interface NoPutResultSet extends ResultSet, RowLocationRetRowSource
 	/**
 	 * Mark the ResultSet as the topmost one in the ResultSet tree.
 	 * Useful for closing down the ResultSet on an error.
-	 *
-	 * @return Nothing.
 	 */
 	public void markAsTopResultSet();
 
@@ -121,18 +119,12 @@ public interface NoPutResultSet extends ResultSet, RowLocationRetRowSource
 	 * TargetResultSet.  This is useful when doing bulk insert.
 	 *
 	 * @param trs	The TargetResultSet.
-	 *
-	 * @return Nothing.
 	 */
 	public void setTargetResultSet(TargetResultSet trs);
 
 	/**
 	 * Set whether or not the NPRS need the row location when acting
 	 * as a row source.  (The target result set determines this.)
-	 * 
-	 * @param boolean needsRowLocation
-	 *
-	 * @return Nothing.
 	 */
 	public void setNeedsRowLocation(boolean needsRowLocation);
 

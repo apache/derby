@@ -52,8 +52,6 @@ public interface OptimizableList {
 	 *
 	 *  @param n				"index" (0 based) into the list.
 	 *  @param optimizable		New nth Optimizable.
-	 *
-	 *  @return Nothing.
 	 */
 	public void setOptimizable(int n, Optimizable optimizable);
 
@@ -62,7 +60,6 @@ public interface OptimizableList {
 	 *
 	 * @param dDictionary	The DataDictionary to use.
 	 *
-	 * @return Nothing.
 	 * @exception StandardException		Thrown on error
 	 */
 	public void verifyProperties(DataDictionary dDictionary) throws StandardException;
@@ -105,8 +102,6 @@ public interface OptimizableList {
 	 * Init the access paths for these optimizables.
 	 *
 	 * @param optimizer The optimizer being used.
-	 *
-	 * @return Nothing.
 	 */
 	public void initAccessPaths(Optimizer optimizer);
 }

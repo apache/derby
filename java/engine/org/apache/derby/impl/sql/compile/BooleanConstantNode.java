@@ -46,13 +46,7 @@ public final class BooleanConstantNode extends ConstantNode
 	/**
 	 * Initializer for a BooleanConstantNode.
 	 *
-	 * @param arg1	A boolean containing the value of the constant
-	 * @param arg1	The factory to get the TypeId
-	 *			and DataTypeServices factories from.
-	 *
-	 * - OR -
-	 *
-	 * @param arg1	The TypeId for the type of the node
+	 * @param arg1	A boolean containing the value of the constant OR The TypeId for the type of the node
 	 *
 	 * @exception StandardException
 	 */

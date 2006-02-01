@@ -157,8 +157,6 @@ public class TernaryOperatorNode extends ValueNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -176,8 +174,6 @@ public class TernaryOperatorNode extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -369,8 +365,6 @@ public class TernaryOperatorNode extends ValueNode
 	 * Set the leftOperand to the specified ValueNode
 	 *
 	 * @param newLeftOperand	The new leftOperand
-	 *
-	 * @return None.
 	 */
 	public void setLeftOperand(ValueNode newLeftOperand)
 	{
@@ -391,8 +385,6 @@ public class TernaryOperatorNode extends ValueNode
 	 * Set the rightOperand to the specified ValueNode
 	 *
 	 * @param newRightOperand	The new rightOperand
-	 *
-	 * @return None.
 	 */
 	public void setRightOperand(ValueNode newRightOperand)
 	{

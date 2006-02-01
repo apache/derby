@@ -127,8 +127,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -199,8 +197,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * Assign the next resultSetNumber to the resultSetNumber in this ResultSetNode. 
 	 * Expected to be done during generate().
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -252,8 +248,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindExpressions(FromList fromListParam)
@@ -272,8 +266,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindExpressionsWithTables(FromList fromListParam)
@@ -291,8 +283,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * for each expression.  This is useful for EXISTS subqueries, where we
 	 * need to validate the target list before blowing it away and replacing
 	 * it with a SELECT true.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -470,8 +460,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @param outerFromList	The FromList from the outer query block(s)
 	 * @param subqueryType	The subquery type
 	 *
-	 * @return	None
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
@@ -538,8 +526,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * already the correct boolean constant.
 	 * 
 	 * @param onlyConvertAlls	Boolean, whether or not to just convert *'s
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -614,8 +600,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -648,8 +632,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *					by name, not position.
 	 * @param statement			Calling DMLStatementNode (Insert or Update)
 	 * @param fromListParam		FromList to use/append to.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -858,7 +840,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * can appear above a SelectNode.
 	 *
 	 * @param dataDictionary	The DataDictionary to use for optimization
-	 * @param predicateList		The PredicateList to apply.
+	 * @param predicates		The PredicateList to apply.
 	 * @param outerRows			The number of outer joining rows
 	 *
 	 * @return	ResultSetNode	The top of the optimized query tree
@@ -919,9 +901,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	/**
 	 * Set the resultColumns in this ResultSetNode
 	 *
-	 * @param resultColumns		The new ResultColumnList for this ResultSetNode
-	 *
-	 * @return None.
+	 * @param newRCL		The new ResultColumnList for this ResultSetNode
 	 */
 	public void setResultColumns(ResultColumnList newRCL)
 	{
@@ -942,8 +922,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * Set the referencedTableMap in this ResultSetNode
 	 *
 	 * @param newRTM	The new referencedTableMap for this ResultSetNode
-	 *
-	 * @return None.
 	 */
 	public void setReferencedTableMap(JBitSet newRTM)
 	{
@@ -964,8 +942,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * Fill the referencedTableMap with this ResultSetNode.
 	 *
 	 * @param passedMap	The table map to fill in.
-	 *
-	 * @return Nothing.
 	 */
 	public void fillInReferencedTableMap(JBitSet passedMap)
 	{
@@ -974,8 +950,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	/**
 	 * Check for (and reject) ? parameters directly under the ResultColumns.
 	 * This is done for SELECT statements.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown if a ? parameter found
 	 *									directly under a ResultColumn
@@ -996,8 +970,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * in this case because JDBC does not define an XML type/binding
 	 * and thus there's no standard way to pass such a type back
 	 * to a JDBC application.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown if an XML value found
 	 *									directly under a ResultColumn
@@ -1069,7 +1041,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * NOTE - The new or enhanced RCL will be fully bound.
 	 *
 	 * @param numTargetColumns	# of columns in target RCL
-	 * @param colMap[]			int array representation of correspondence between
+	 * @param colMap			int array representation of correspondence between
 	 *							RCLs - colmap[i] = -1 -> missing in current RCL
 	 *								   colmap[i] = j -> targetRCL(i) <-> thisRCL(j+1)
 	 * @param dataDictionary	DataDictionary to use
@@ -1734,8 +1706,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * This is useful when flattening a subquery.
 	 *
 	 * @param decrement	The amount to decrement by.
-	 *
-	 * @return Nothing;
 	 */
 	abstract void decrementLevel(int decrement);
 
@@ -1746,8 +1716,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * consider sort avoidance.
 	 *
 	 * @param orderByList	The order by list
-	 *
-	 * @return Nothing.
 	 */
 	void pushOrderByList(OrderByList orderByList)
 	{
@@ -1763,8 +1731,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * compiler. A couple ResultSets (the ones used by PREPARE SELECT FILTER)
 	 * implement this method.
 	 *
-	 * @param ecb	The ExpressionClassBuilder for the class being built
-	 * @param eb	The method the expression will go into
+	 * @param acb	The ExpressionClassBuilder for the class being built
+	 * @param mb	The method the expression will go into
 	 *
 	 *
 	 * @exception StandardException		Thrown on error
@@ -1797,8 +1765,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 	/**
 	 * Mark this node and its children as not being a flattenable join.
-	 *
-	 * @return Nothing.
 	 */
 	void notFlattenableJoin()
 	{
@@ -1866,8 +1832,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 	/**
 	 * Mark the underlying scan as a distinct scan.
-	 *
-	 * @return Nothing.
 	 */
 	void markForDistinctScan()
 	{
@@ -1883,8 +1847,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * Notify the underlying result set tree that the result is
 	 * ordering dependent.  (For example, no bulk fetch on an index
 	 * if under an IndexRowToBaseRow.)
-	 *
-	 * @return Nothing.
 	 */
 	void markOrderingDependent()
 	{

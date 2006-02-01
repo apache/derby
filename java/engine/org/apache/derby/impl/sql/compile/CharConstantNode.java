@@ -40,13 +40,7 @@ public final class CharConstantNode extends ConstantNode
 	/**
 	 * Initializer for a CharConstantNode.
 	 *
-	 * @param arg1	A String containing the value of the constant
-	 * @param arg2	The factory to get the TypeId
-	 *			and DataTypeServices factories from.
-	 *
-	 * - OR *
-	 *
-	 * @param arg1	The TypeId for the type of the node
+	 * @param arg1	A String containing the value of the constant OR The TypeId for the type of the node
 	 *
 	 * @exception StandardException
 	 */
@@ -81,8 +75,6 @@ public final class CharConstantNode extends ConstantNode
 	 *
 	 * @param newValue	A String containing the value of the constant
 	 * @param newLength The length of the new value of the constant
-	 * @param typeCompilationFactory	The factory to get the TypeId
-	 *			and DataTypeServices factories from.
 	 *
 	 * @exception StandardException
 	 */
@@ -162,8 +154,6 @@ public final class CharConstantNode extends ConstantNode
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the code to place the code
-	 *
-	 * @return		The compiled Expression, 
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

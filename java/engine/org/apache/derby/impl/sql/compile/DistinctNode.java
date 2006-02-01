@@ -227,7 +227,7 @@ public class DistinctNode extends SingleChildResultSetNode
 	 * Optimize this DistinctNode.  
 	 *
 	 * @param dataDictionary	The DataDictionary to use for optimization
-	 * @param predicateList		The PredicateList to optimize.  This should
+	 * @param predicates		The PredicateList to optimize.  This should
 	 *							be a join predicate.
 	 * @param outerRows			The number of outer joining rows
 	 *

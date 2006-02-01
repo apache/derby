@@ -135,8 +135,6 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 * @param	outerSubqueryList	SubqueryList from outer query block
 	 * @param	outerPredicateList	PredicateList from outer query block
 	 *
-	 * @return	Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void preprocess(int numTables,

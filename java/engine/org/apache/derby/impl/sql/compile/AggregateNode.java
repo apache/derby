@@ -137,7 +137,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 * that case it is called <B> after </B> bind time, so we need to create
 	 * the column differently.
 	 *
-	 * @param childRCL	The RCL to append to.
+	 * @param rcl	The RCL to append to.
 	 * @param tableNumber	The tableNumber for the new ColumnReference
 	 *
 	 * @return ValueNode	The (potentially) modified tree.
@@ -533,7 +533,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 * Get the result column that has a new aggregator.
 	 * This aggregator will be fed into the sorter.
 	 *
-	 * @param the data dictionary
+	 * @param dd	the data dictionary
 	 *
 	 * @return the result column.  WARNING: it still needs to be bound
 	 *
@@ -575,7 +575,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 * Get the aggregate expression in a new result
 	 * column.
 	 *
-	 * @param the data dictionary
+	 * @param dd the data dictionary
 	 *
 	 * @return the result column.  WARNING: it still needs to be bound
 	 *
@@ -628,8 +628,6 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class we're generating
 	 * @param mb	The method the code to place the code
-	 *
-	 * @return	An expression to evaluate this operator
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

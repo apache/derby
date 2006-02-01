@@ -168,8 +168,6 @@ public class IndexChanger
 	 * this index changer.
 	 *
 	 * @param baseCC	The heap's ConglomerateController.
-	 *
-	 * @return Nothing.
 	 */
 	public void setBaseCC(ConglomerateController baseCC)
 	{
@@ -571,7 +569,6 @@ public class IndexChanger
 	/**
 	  Perform index maintenance to support an update of a base table row.
 
-	  @param ef	                ExecutionFactory to use in case of cloning
 	  @param oldBaseRow         the old image of the base table row.
 	  @param newBaseRow         the new image of the base table row.
 	  @param baseRowLocation    the base table row's location.
@@ -602,7 +599,7 @@ public class IndexChanger
 	/**
 	  Perform index maintenance to support an insert of a base table row.
 
-	  @param baseRow            the base table row.
+	  @param newRow            the base table row.
 	  @param baseRowLocation    the base table row's location.
 
 	  @exception StandardException		Thrown on error
@@ -622,8 +619,7 @@ public class IndexChanger
 	  because this is the only operation that requires deferred inserts,
 	  and we only want to create the conglomerate if necessary.
 
-	  @param ef		            ExecutionFactory to use in case of cloning
-	  @param baseRow            the base table row.
+	  @param newRow            the base table row.
 	  @param baseRowLocation    the base table row's location.
 
 	  @exception StandardException		Thrown on error

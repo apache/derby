@@ -86,7 +86,6 @@ public class DDColumnDependableFinder extends DDdependableFinder
 	 * Get the byte array encoding the bitmap of referenced columns in
 	 * a table.
 	 *
-	 * @param		none
 	 * @return		byte array as in a FormatableBitSet encoding column bit map
 	 */
 	public 	byte[]	getColumnBitMap()
@@ -98,8 +97,7 @@ public class DDColumnDependableFinder extends DDdependableFinder
 	 * Set the byte array encoding the bitmap of referenced columns in
 	 * a table.
 	 *
-	 * @param		byte array as in a FormatableBitSet encoding column bit map
-	 * @return		none
+	 * @param	columnBitMap	byte array as in a FormatableBitSet encoding column bit map
 	 */
 	public	void	setColumnBitMap(byte[] columnBitMap)
 	{
@@ -110,8 +108,8 @@ public class DDColumnDependableFinder extends DDdependableFinder
 	 * Get a dependable object, which is essentially a table descriptor with
 	 * referencedColumnMap field set.
 	 *
-	 * @param	data dictionary
-	 * @param	dependable object ID (table UUID)
+	 * @param	dd data dictionary
+	 * @param	dependableObjectID dependable object ID (table UUID)
 	 * @return	a dependable, a table descriptor with referencedColumnMap
 	 *			field set
 	 */

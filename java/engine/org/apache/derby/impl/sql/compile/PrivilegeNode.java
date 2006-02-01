@@ -92,7 +92,7 @@ public class PrivilegeNode extends QueryTreeNode
      * Bind this GrantNode. Resolve all table, column, and routine references. Register
      * a dependency on the object of the privilege if it has not already been done
      *
-     * @dependencies The list of privilege objects that this statement has already seen.
+     * @param dependencies The list of privilege objects that this statement has already seen.
      *               If the object of this privilege is not in the list then this statement is registered
      *               as dependent on the object.
      *

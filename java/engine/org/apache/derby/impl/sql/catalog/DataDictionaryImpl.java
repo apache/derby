@@ -416,8 +416,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param startParams	The start-up parameters
 	 *
-	 * @return	Nothing
-	 *
 	 *	@exception StandardException	Thrown if the module fails to start
 	 */
 	public void boot(boolean create, Properties startParams) 
@@ -703,8 +701,6 @@ public final class	DataDictionaryImpl
 
 	/**
 	 * Stop this module.  In this case, nothing needs to be done.
-	 *
-	 * @return	Nothing
 	 */
 
 	public void stop()
@@ -1635,8 +1631,6 @@ public final class	DataDictionaryImpl
 	 * @param schemaName	The name of the schema to drop
 	 * @param tc			TransactionController for the transaction
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	dropSchemaDescriptor(String schemaName,
@@ -1926,7 +1920,7 @@ public final class	DataDictionaryImpl
 	 * the schema, on the assumption that there cannot
 	 * be any other objects in a schema w/o a table.
 	 *
-	 * @param schema descriptor
+	 * @param sd descriptor
 	 *
 	 * @return true/false
 	 *
@@ -2067,14 +2061,12 @@ public final class	DataDictionaryImpl
 	/**
 	 * Drop the table descriptor.
 	 *
-	 * @param descriptor	The table descriptor to drop
+	 * @param td	The table descriptor to drop
 	 * @param schema		A descriptor for the schema the table
 	 *						is a part of.  If this parameter is
 	 *						NULL, then the table is part of the
 	 *						current (default) schema
 	 * @param tc			TransactionController for the transaction
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -2109,8 +2101,6 @@ public final class	DataDictionaryImpl
 	 * @param schema			The SchemaDescriptor for the table
 	 * @param lockGranularity	The new lockGranularity
 	 * @param tc				The TransactionController to use.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -2212,8 +2202,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param td				The TableDescriptor.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	private void getColumnDescriptorsScan(TableDescriptor td)
@@ -2232,10 +2220,8 @@ public final class	DataDictionaryImpl
 	 * on the CDL in the given TD.
 	 *
 	 * @param uuid				The referencing UUID
-	 * @param cdlist			The column descriptor list
+	 * @param cdl			The column descriptor list
 	 * @param td				The parent tuple descriptor
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -2293,8 +2279,6 @@ public final class	DataDictionaryImpl
 	 * @param columnName	The name of the column to drop
 	 * @param tc		TransactionController for the transaction
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	dropColumnDescriptor(UUID tableID,
@@ -2326,8 +2310,6 @@ public final class	DataDictionaryImpl
 	 *			all the column descriptors
 	 * @param tc		TransactionController for the transaction
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	dropAllColumnDescriptors(UUID tableID, TransactionController tc)
@@ -2351,8 +2333,6 @@ public final class	DataDictionaryImpl
 	 * 
 	 * @param tc			The TransactionController
 	 * @param keyRow		Start/stop position.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -2383,8 +2363,6 @@ public final class	DataDictionaryImpl
 	 * @param wait		If true, then the caller wants to wait for locks. False will be
 	 * when we using a nested user xaction - we want to timeout right away if the parent
 	 * holds the lock.  (bug 4821)
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -2563,8 +2541,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param vd		A descriptor for the view to be dropped
 	 * @param tc		TransactionController to use
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -2961,8 +2937,6 @@ public final class	DataDictionaryImpl
 	 * @param descriptor	The descriptor to add
 	 * @param tc			The transaction controller
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	addSPSDescriptor
@@ -3084,10 +3058,8 @@ public final class	DataDictionaryImpl
 	 * Updates SYS.SYSSTATEMENTS with the info from the
 	 * SPSD. 
 	 *
-	 * @param descriptor	The descriptor to add
+	 * @param spsd	The descriptor to add
 	 * @param tc			The transaction controller
-	 * @param updCols		Int array of columns that are to be updated 
-	 *						(1 based).  Not null.
 	 * @param updateParamDescriptors If true, will update the
 	 *						parameter descriptors in SYS.SYSCOLUMNS.
 	 * @param wait		If true, then the caller wants to wait for locks. False will be
@@ -3096,8 +3068,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * when we using a nested user xaction - we want to timeout right away if the parent
 	 * holds the lock.  (bug 4821)
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -3506,7 +3476,7 @@ public final class	DataDictionaryImpl
 	 * is already loaded up, it is retuned without further
 	 * ado.
 	 *
-	 * @param table			The table descriptor.
+	 * @param td			The table descriptor.
 	 *
 	 * @return The ConstraintDescriptorList for the table
 	 *
@@ -3549,8 +3519,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param td				The TableDescriptor.
 	 * @param forUpdate			Whether or not to open scan for update
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -3618,8 +3586,6 @@ public final class	DataDictionaryImpl
 	 * @param colsToSet 			Array of ints of columns to be modified,
 	 *								1 based.  May be null (all cols).
 	 * @param tc					The TransactionController to use
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -3815,7 +3781,7 @@ public final class	DataDictionaryImpl
 	 * duplicates of constraint descriptors that are hung
 	 * off of the table descriptor cache.
 	 *
-	 * @param table			The table descriptor.  If null,
+	 * @param td			The table descriptor.  If null,
 	 *						all constraint descriptors are returned.
 	 *
 	 *
@@ -3901,7 +3867,7 @@ public final class	DataDictionaryImpl
 	 * Get the constraint descriptor given a table and the UUID String
 	 * of the backing index.
 	 *
-	 * @param table			The table descriptor.
+	 * @param td			The table descriptor.
 	 * @param uuid			the UUID for the backing index.
 	 *
 	 * @return The ConstraintDescriptor for the constraint.
@@ -3920,7 +3886,7 @@ public final class	DataDictionaryImpl
 	 * Get the constraint descriptor given a table and the UUID String
 	 * of the constraint
 	 *
-	 * @param table			The table descriptor.
+	 * @param td			The table descriptor.
 	 * @param uuid			The UUID for the constraint
 	 *
 	 * @return The ConstraintDescriptor for the constraint.
@@ -3940,7 +3906,7 @@ public final class	DataDictionaryImpl
 	/** 
 	 * Get the constraint descriptor given a TableDescriptor and the constraint name.
 	 *
-	 * @param table				The table descriptor.
+	 * @param td				The table descriptor.
 	 * @param sd				The schema descriptor for the constraint
 	 * @param constraintName	The constraint name.
 	 * @param forUpdate			Whether or not access is for update
@@ -3972,8 +3938,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param td				The TableDescriptor.
 	 * @param forUpdate			Whether or not to open scan for update
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -4155,7 +4119,7 @@ public final class	DataDictionaryImpl
 	 * @param scanQualifiers			qualifiers
 	 * @param ti						The TabInfo to use
 	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
-	 * @param dList						The list to build, if supplied.  
+	 * @param list						The list to build, if supplied.  
 	 *									If null, then caller expects a single descriptor
 	 *
 	 * @return	The last matching descriptor
@@ -4337,7 +4301,7 @@ public final class	DataDictionaryImpl
 	 * the indexed criteria.  If nothing matches, returns an
 	 * empty List (never returns null).
 	 *
-	 * @param constraintId	The id of the constraint
+	 * @param uuid	The id of the constraint
 	 * @param indexId		The index id in SYS.SYSCONSTRAINTS
 	 * @param columnNum		The column to retrieve
 	 *
@@ -4462,8 +4426,6 @@ public final class	DataDictionaryImpl
 	 * @param descriptor	The descriptor to add
 	 * @param tc			The transaction controller
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	addConstraintDescriptor(
@@ -4538,8 +4500,6 @@ public final class	DataDictionaryImpl
 	 * @param colsToSet 			Array of ints of columns to be modified,
 	 *								1 based.  May be null (all cols).
 	 * @param tc					The TransactionController to use
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -4631,8 +4591,6 @@ public final class	DataDictionaryImpl
 	 * @param descriptor	The descriptor to drop
 	 * @param tc			The TransactionController
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	dropConstraintDescriptor(TableDescriptor table,
@@ -4683,8 +4641,6 @@ public final class	DataDictionaryImpl
 	 * @param table	The table from which to drop all
 	 *			constraint descriptors
 	 * @param tc	The TransactionController
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -4767,8 +4723,6 @@ public final class	DataDictionaryImpl
 	 * @param descriptor	The KeyConstraintDescriptor for the constraint.
 	 * @param tc			The TransactionController
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	private void addSubKeyConstraint(KeyConstraintDescriptor descriptor,
@@ -4838,8 +4792,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param constraint	the constraint
 	 * @param tc			The TransactionController
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -4947,8 +4899,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param constraintId	The constraint id.
 	 * @param tc			The TransactionController
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -5229,8 +5179,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param td			The TableDescriptor.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	private void getConglomerateDescriptorsScan(TableDescriptor td)
@@ -5310,8 +5258,6 @@ public final class	DataDictionaryImpl
 	 * @param conglomerate	The ConglomerateDescriptor for the conglomerate
 	 * @param tc		TransactionController for the transaction
 	 *
-	 * @return	Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	public void dropConglomerateDescriptor(
@@ -5341,8 +5287,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param td		The TableDescriptor of the table 
 	 * @param tc		TransactionController for the transaction
-	 *
-	 * @return	Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -5379,8 +5323,6 @@ public final class	DataDictionaryImpl
 	 * @param conglomerateNumber	The new conglomerate number
 	 * @param tc					The TransactionController to use
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	public void updateConglomerateDescriptor(ConglomerateDescriptor cd,
@@ -5404,8 +5346,6 @@ public final class	DataDictionaryImpl
 	 * @param cds					The array of ConglomerateDescriptors
 	 * @param conglomerateNumber	The new conglomerate number
 	 * @param tc					The TransactionController to use
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -5490,7 +5430,7 @@ public final class	DataDictionaryImpl
 	/**
 	 * Gets a list of the dependency descriptors for the given provider's id.
 	 *
-	 * @param dependentID		The ID of the provider we're interested in
+	 * @param providerID		The ID of the provider we're interested in
 	 *
 	 * @return	List			Returns a list of DependencyDescriptors. 
 	 *							Returns an empty List if no stored dependencies for the
@@ -5588,8 +5528,6 @@ public final class	DataDictionaryImpl
 	 * @param dd	The DependencyDescriptor.
 	 * @param tc	TransactionController for the transaction
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	public void dropStoredDependency(DependencyDescriptor dd,
@@ -5629,8 +5567,6 @@ public final class	DataDictionaryImpl
 	 * 
 	 * @param dependentsUUID	Dependent's uuid
 	 * @param tc				TransactionController for the transaction
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -5754,7 +5690,6 @@ public final class	DataDictionaryImpl
 		If the schema is SYSFUN then do not use the system catalogs,
 		but instead look up the routines from the in-meomry table driven
 		by the contents of SYSFUN_FUNCTIONS.
-		@see SYSFUN_FUNCTIONS
 	 */
 	public java.util.List getRoutineList(String schemaID, String routineName, char nameSpace)
 		throws StandardException {
@@ -5817,8 +5752,6 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param ad	The AliasDescriptor to drop
 	 * @param tc	The TransactionController
-	 *
-	 * @return	Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -6886,8 +6819,6 @@ public final class	DataDictionaryImpl
 	/**
 	 * Clear all of the DataDictionary caches.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException Standard Cloudscape error policy
 	 */
 	public void clearCaches() throws StandardException
@@ -7216,7 +7147,7 @@ public final class	DataDictionaryImpl
 	 * @param keyRow	The supplied ExecIndexRow for search
 	 * @param ti		The TabInfo to use
 	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
-	 * @param dList		The list to build, if supplied.  If null, then caller expects
+	 * @param list		The list to build, if supplied.  If null, then caller expects
 	 *					a single descriptor
 	 * @param forUpdate	Whether or not to open the index for update.
 	 *
@@ -7427,7 +7358,7 @@ public final class	DataDictionaryImpl
 	 * @param scanQualifiers			qualifiers
 	 * @param ti						The TabInfo to use
 	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
-	 * @param dList						The list to build, if supplied.  
+	 * @param list						The list to build, if supplied.  
 	 *									If null, then caller expects a single descriptor
 	 *
 	 * @return	The last matching descriptor
@@ -7493,9 +7424,7 @@ public final class	DataDictionaryImpl
 	 * Get a TabInfo for a non-core table.
 	 * (We fault in information about non-core tables as needed.)
 	 *
-	 * @param nonCoreNum	The index into noncoreTable[].
-	 *
-	 * @return Nothing.
+	 * @param catalogNumber	The index into noncoreTable[].
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -7649,8 +7578,6 @@ public final class	DataDictionaryImpl
 	 * Get core catalog info.
 	 *
 	 * @param coreNum	The index into coreInfo[].
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -7949,7 +7876,6 @@ public final class	DataDictionaryImpl
 	 * autoincrement column.
 	 * 
 	 * @param tc		 Transaction Controller to use.
-	 * @param td		 Table Descriptor
 	 * @param columnName Name of the column.
 	 * @param aiValue	 Value to write to SYSCOLUMNS.
 	 * @param incrementNeeded whether to increment the value passed in by the
@@ -8156,7 +8082,7 @@ public final class	DataDictionaryImpl
 		Check to see if a database has been upgraded to the required
 		level in order to use a language feature. 
 
-		@param majorVersion Data Dictionary major version
+		@param requiredMajorVersion Data Dictionary major version
 		@param feature Non-null to throw an error, null to return the state of the version match.
 
 		@return True if the database has been upgraded to the required level, false otherwise.
@@ -8223,8 +8149,6 @@ public final class	DataDictionaryImpl
      * catalog.  
      *
      * Assumes all arguments are "IN" type.
-     *
-	 * @return The identifier to be used to open the conglomerate later.
      *
      * @param routine_name  name of the routine in java and the SQL 
      *                      procedure name.
@@ -9769,10 +9693,7 @@ public final class	DataDictionaryImpl
      * Get a table permissions descriptor from the system tables, without going through the cache.
      * This method is called to fill the permissions cache.
      *
-     * @param grantee
-     * @param tableUUID
-     *
-     * @returns a TablePermsDescriptor that describes the table permissions granted to the grantee, null
+     * @return a TablePermsDescriptor that describes the table permissions granted to the grantee, null
      *          if no table-level permissions have been granted to him on the table.
      *
      * @exception StandardException
@@ -9791,11 +9712,8 @@ public final class	DataDictionaryImpl
      * Get a column permissions descriptor from the system tables, without going through the cache.
      * This method is called to fill the permissions cache.
      *
-     * @param grantee
-     * @param tableUUID
-     * @param privType "s", "u", "r", "S", "U", or "R"
      *
-     * @returns a ColPermsDescriptor that describes the column permissions granted to the grantee, null
+     * @return a ColPermsDescriptor that describes the column permissions granted to the grantee, null
      *          if no column permissions have been granted to him on the table.
      *
      * @exception StandardException
@@ -9832,10 +9750,7 @@ public final class	DataDictionaryImpl
      * Get a routine permissions descriptor from the system tables, without going through the cache.
      * This method is called to fill the permissions cache.
      *
-     * @param grantee
-     * @param routineUUID
-     *
-     * @returns a RoutinePermsDescriptor that describes the table permissions granted to the grantee, null
+     * @return a RoutinePermsDescriptor that describes the table permissions granted to the grantee, null
      *          if no table-level permissions have been granted to him on the table.
      *
      * @exception StandardException

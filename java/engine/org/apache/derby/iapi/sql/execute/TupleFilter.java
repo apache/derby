@@ -44,7 +44,7 @@ public interface TupleFilter
 	/**
 	  *	Pump a row through the Filter.
 	  *
-	  *	@param	row		Column values to plug into restriction
+	  *	@param	currentRow		Column values to plug into restriction
 	  *
 	  *	@return	True if the row qualifies. False otherwise.
 	  *

@@ -410,11 +410,6 @@ public final class SQLTime extends DataType
      *<li>JIS & current ISO: hh:mm[:ss]
      *</ol>
      * 
-     * @param dateStr
-     * @param localFinder
-     *
-     * @return the internal DataValueDescriptor for the value
-     *
      * @exception Standard exception if the syntax is invalid or the value is out of range.
      */
     public SQLTime( String timeStr, boolean isJdbcEscape, LocaleFinder localeFinder)
@@ -431,11 +426,6 @@ public final class SQLTime extends DataType
      *<li>JIS & current ISO: hh:mm[:ss]
      *</ol>
      * 
-     * @param dateStr
-     * @param localFinder
-     *
-     * @return the internal DataValueDescriptor for the value
-     *
      * @exception Standard exception if the syntax is invalid or the value is out of range.
      */
     public SQLTime( String timeStr, boolean isJdbcEscape, LocaleFinder localeFinder, Calendar cal)
@@ -857,7 +847,7 @@ public final class SQLTime extends DataType
 	 *	encoded time is hour << 16 + min << 8 + sec
 	 *  this function is also used by SQLTimestamp 
 	 *
-	 * @param	calendar with time set
+	 * @param	cal calendar with time set
 	 * @return	encoded time
      *
      * @exception StandardException if the time is not in the DB2 range

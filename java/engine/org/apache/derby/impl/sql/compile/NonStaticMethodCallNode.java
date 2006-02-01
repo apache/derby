@@ -295,8 +295,6 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -324,8 +322,6 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 * @param	outerFromList		FromList from outer query block
 	 * @param	outerSubqueryList	SubqueryList from outer query block
 	 * @param	outerPredicateList	PredicateList from outer query block
-	 *
-	 * @return	Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

@@ -892,8 +892,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 *
 	 * @param predicate	A Predicate to add to the list
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -918,8 +916,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 *
 	 * @param optTable	The optimizable that we want qualifiers for
 	 * @param otherPL	ParameterList for non-qualifiers
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -951,7 +947,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * Categorize the predicates in the list.  Initially, this means
 	 * building a bit map of the referenced tables for each predicate.
 	 *
-	 * @return None.
 	 * @exception StandardException			Thrown on error
 	 */
 	public void categorize()
@@ -971,8 +966,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -999,8 +992,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 *  This is useful when checking for a NOP PRN as the
 	 *  Like transformation on c1 like 'ASDF%' can leave
 	 *  one of these predicates in the list.
-	 *
-	 * @return Nothing.
 	 */
 	public void eliminateBooleanTrueAndBooleanTrue()
 	{
@@ -1211,8 +1202,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * Remap all ColumnReferences in this tree to be clones of the
 	 * underlying expression.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException			Thrown on error
 	 */
 	public void remapColumnReferencesToExpressions() throws StandardException
@@ -1240,8 +1229,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 *
 	 * @param numTables			Number of tables in the DML Statement
 	 * @param searchClause	The search clause to operate on.
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1301,8 +1288,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * multi-table predicates.
 	 * 
 	 * @param fromMap	The JBitSet to XOR with.
-	 *
-	 * @return Nothing.
 	 */
 	public void xorReferencedSet(JBitSet fromMap)
 	{
@@ -1354,8 +1339,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * @param select			The underlying SelectNode.
 	 * @param copyPredicate		Whether to make a copy of the predicate
 	 *							before pushing
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1509,8 +1492,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * Mark all of the RCs and the RCs in their RC/VCN chain
 	 * referenced in the predicate list as referenced.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	void markReferencedColumns()
@@ -1541,17 +1522,12 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 *
 	 * @param tableNumber	The tableNumber of the table from which
 	 *						the columns of interest come from.
-	 * @param eqAllCols		Array of booleans for noting which columns
-	 *						are in = predicates, regardless of the source
-	 *						of the columns being joined with.
 	 * @param eqOuterCols	Array of booleans for noting which columns
 	 *						are in = predicates with constants or
 	 *						correlation columns.
 	 * @param tableNumbers	Array of table numbers in this query block.
 	 * @param resultColTable tableNumber is the table the result columns are
 	 *						coming from
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1650,8 +1626,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * 
 	 * @param fromList	The subquery's FROM list.
 	 * @param decrement	Decrement size.
-	 *
-	 * @return Nothing.
 	 */
 	void decrementLevel(FromList fromList, int decrement)
 	{
@@ -1738,8 +1712,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * @param numTables	The number of tables in the query
 	 * @param fromList	The FromList in question.
 	 * @param cc		The CompilerContext to use
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -2068,8 +2040,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	  * @param numTables			The number of tables in the query
 	  * @param hashJoinSpecified	Whether or not user specified a hash join
 	  *
-	  * @return Nothing.
-	  *
 	  * @exception StandardException		Thrown on error
 	  */
 	 void searchClauseTransitiveClosure(int numTables, boolean hashJoinSpecified)
@@ -2345,8 +2315,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	  * class (!= -1) and there are other predicates in the same equivalence
 	  * class after it in the list.  (Actually, we remove all of the predicates
 	  * in the same equivalence class that appear after this one.)
-	  *
-	  * @return Nothing.
 	  */
 	void removeRedundantPredicates()
 	{
@@ -3231,7 +3199,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * Generate the indexable row for a start key or stop key.
 	 *
 	 * @param acb	The ActivationClassBuilder for the class we're building
-	 * @param mb	The method the generated code is to go into
 	 * @param numberOfColumns	The number of columns in the key
 	 *
 	 * @return	The field that holds the indexable row
@@ -3380,8 +3347,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * @param acb	The ActivationClassBuilder for the class we're building
 	 * @param exprFun	The MethodBuilder for the method we're building
 	 * @param rowField	The name of the field that holds the indexable row
-	 *
-	 * @return	An Expression that evaluates to the start or stop key getter
 	 */
 	private void finishKey(ExpressionClassBuilder acb,
 								MethodBuilder mb,

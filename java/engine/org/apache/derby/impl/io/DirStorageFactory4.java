@@ -60,7 +60,7 @@ public class DirStorageFactory4 extends DirStorageFactory
     /**
      * Construct a persistent StorageFile from a directory and path name.
      *
-     * @param directory The path name of the directory. Guaranteed not to be in the temporary file directory.
+     * @param directoryName The path name of the directory. Guaranteed not to be in the temporary file directory.
      *                  Guaranteed not to be null
      * @param fileName The name of the file within the directory. Guaranteed not to be null.
      *
@@ -74,7 +74,7 @@ public class DirStorageFactory4 extends DirStorageFactory
     /**
      * Construct a persistent StorageFile from a directory and path name.
      *
-     * @param directory The path name of the directory. Guaranteed not to be to be null. Guaranteed to be
+     * @param directoryName The path name of the directory. Guaranteed not to be to be null. Guaranteed to be
      *                  created by a call to one of the newPersistentFile methods.
      * @param fileName The name of the file within the directory. Guaranteed not to be null.
      *

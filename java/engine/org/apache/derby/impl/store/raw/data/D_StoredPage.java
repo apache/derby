@@ -100,8 +100,6 @@ public class D_StoredPage implements Diagnosticable
      *   Page.DIAG_BYTES_RESERVED - # of reserved bytes on the page.
      * <p>
      *
-	 * @return string dump of the StoredPage
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
     public void diag_detail(Properties prop) 

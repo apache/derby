@@ -453,7 +453,6 @@ public	class DD_Version implements	Formatable
 	/**
  	 * Make a catalog.
 	 *	@param	tc	TransactionController
-	 *  @param  crf CatalogRowFactory for the catalog to drop.
 	 *	@exception StandardException  Standard Cloudscape error policy.
 	 */
 	protected void makeSystemCatalog(TransactionController tc,
@@ -701,7 +700,7 @@ public	class DD_Version implements	Formatable
 		Check to see if a database has been upgraded to the required
 		level in order to use a language feature.
 
-		@param majorVersion Data Dictionary major version
+		@param requiredMajorVersion Data Dictionary major version
 		@param feature Non-null to throw an error, null to return the state of the version match.
 
 		@return True if the database has been upgraded to the required level, false otherwise.

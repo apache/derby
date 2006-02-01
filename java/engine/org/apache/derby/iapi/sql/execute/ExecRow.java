@@ -67,7 +67,7 @@ public interface ExecRow extends Row {
 	/**
 	 * Get a clone of a DataValueDescriptor from an ExecRow.
 	 *
-	 * @param int columnPosition (1 based)
+	 * @param columnPosition (1 based)
 	 */
 	DataValueDescriptor cloneColumn(int columnPosition);
 

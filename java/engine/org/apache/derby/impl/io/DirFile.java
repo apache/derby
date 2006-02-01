@@ -54,7 +54,7 @@ class DirFile extends File implements StorageFile
     /**
      * Construct a DirFile from a directory name and a file name.
      *
-     * @param directory The directory part of the path name.
+     * @param directoryName The directory part of the path name.
      * @param fileName The name of the file within the directory.
      */
     DirFile( String directoryName, String fileName)
@@ -65,7 +65,7 @@ class DirFile extends File implements StorageFile
     /**
      * Construct a DirFile from a directory name and a file name.
      *
-     * @param directory The directory part of the path name.
+     * @param directoryName The directory part of the path name.
      * @param fileName The name of the file within the directory.
      */
     DirFile( DirFile directoryName, String fileName)
@@ -104,8 +104,6 @@ class DirFile extends File implements StorageFile
     /**
      * Creates an output stream from a file name.
      *
-     * @param name The file name.
-     *
      * @return an output stream suitable for writing to the file.
      *
      * @exception FileNotFoundException if the file exists but is a directory
@@ -138,8 +136,6 @@ class DirFile extends File implements StorageFile
     /**
      * Creates an input stream from a file name.
      *
-     * @param name The file name.
-     *
      * @return an input stream suitable for reading from the file.
      *
      * @exception FileNotFoundException if the file is not found.
@@ -153,8 +149,6 @@ class DirFile extends File implements StorageFile
      * Get an exclusive lock. This is used to ensure that two or more JVMs do not open the same database
      * at the same time.
      *
-     * @param lockFile The name of the lock. In a file system implementation it will be the name of a
-     *                 lock file.
      *
      * @return EXCLUSIVE_FILE_LOCK_NOT_AVAILABLE if the lock cannot be acquired because it is already held.<br>
      *    EXCLUSIVE_FILE_LOCK if the lock was successfully acquired.<br>
@@ -188,8 +182,6 @@ class DirFile extends File implements StorageFile
 	/**
      * Release the resource associated with an earlier acquired exclusive lock
      *
-     * @param lockFile the name of the lock file
-     *
      * @see #getExclusiveFileLock
      */
 	public synchronized void releaseExclusiveFileLock()
@@ -203,7 +195,6 @@ class DirFile extends File implements StorageFile
     /**
      * Get a random access (read/write) file.
      *
-     * @param name The name of the file.
      * @param mode "r", "rw", "rws", or "rwd". The "rws" and "rwd" modes specify
      *             that the data is to be written to persistent store, consistent with the
      *             java.io.RandomAccessFile class ("synchronized" with the persistent

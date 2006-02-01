@@ -52,7 +52,7 @@ public class TestConstraintNode extends UnaryLogicalOperatorNode
 	/**
 	 * Initializer for a TestConstraintNode
 	 *
-	 * @param operand	The operand of the constraint test
+	 * @param booleanValue	The operand of the constraint test
 	 * @param sqlState	The SQLState of the exception to throw if the
 	 *					constraint has failed
 	 * @param tableName	The name of the table that the constraint is on

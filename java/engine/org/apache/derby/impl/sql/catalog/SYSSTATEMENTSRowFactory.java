@@ -147,7 +147,6 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 	 * 
 	 * @param compileMe			passed into SPSDescriptorImpl.getPreparedStatement().
 	 *							if true, we (re)compile the stmt
-	 * @param emptyRow			Make an empty row if this parameter is true
 	 * @param spsDescriptor		In-memory tuple to be converted to a disk row.
 	 *
 	 * @return	Row suitable for inserting into SYSSTATEMENTS.

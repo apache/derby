@@ -112,8 +112,6 @@ public class XactXAResourceManager implements XAResourceManager
      * RESOLVE - how do we map to the "right" XAExceptions.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      * @param cm       The ContextManager returned from the find() call.
      * @param xid      A global transaction identifier.
      * @param onePhase If true, the resource manager should use a one-phase

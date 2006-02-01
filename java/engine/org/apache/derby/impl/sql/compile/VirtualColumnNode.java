@@ -84,8 +84,6 @@ public class VirtualColumnNode extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -176,8 +174,6 @@ public class VirtualColumnNode extends ValueNode
 	/**
 	 * Mark this VCN as a reference to a correlated column.
 	 * (It's source resultSet is an outer ResultSet.
-	 *
-	 * @return Nothing.
 	 */
 	void setCorrelated()
 	{

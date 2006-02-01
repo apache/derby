@@ -77,8 +77,6 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -173,8 +171,6 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -266,8 +262,6 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 * @param	outerFromList		FromList from outer query block
 	 * @param	outerSubqueryList	SubqueryList from outer query block
 	 * @param	outerPredicateList	PredicateList from outer query block
-	 *
-	 * @return	Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -361,8 +355,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 *
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class being built
-	 * @param mb	The method the expression will go into
-	 * @param SQLValue	An Expression holding the SQLValue.
+	 * @param mbex	The method the expression will go into
 	 *
 	 *
 	 * @exception StandardException		Thrown on error

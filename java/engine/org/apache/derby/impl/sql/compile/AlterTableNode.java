@@ -375,8 +375,6 @@ public class AlterTableNode extends DDLStatementNode
 	  
 	/**
 	  *	Generate the ColumnInfo argument for the constant action. Return the number of constraints.
-	  *
-	  *	@return	number of constraints
 	  */
 	public	void	genColumnInfo()
 	{

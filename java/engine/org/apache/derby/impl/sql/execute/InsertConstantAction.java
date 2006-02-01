@@ -120,10 +120,6 @@ public class InsertConstantAction extends WriteCursorConstantAction
 	 *  @param singleRowSource		Whether or not source is a single row source
 	 *  @param autoincRowLocation Array of rowlocations of autoincrement values
 	 * 							  in SYSCOLUMNS for each ai column.
-	 *  @param schemaName	schema of target table.
-	 *  @param tableName    name of target table.
-	 *  @param columnNames  array of columnnames of the target table.
-	 *  @param autoincIncrement array of increment values for ai columns.
 	 */
 	public	InsertConstantAction(TableDescriptor tableDescriptor,
 								long				conglomId,

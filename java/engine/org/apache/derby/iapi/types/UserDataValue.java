@@ -28,9 +28,6 @@ public interface UserDataValue extends DataValueDescriptor
 	 * Set the value of this UserDataValue to the given Object
 	 *
 	 * @param theValue	The value to set this UserDataValue to
-	 *
-	 * @return	This UserDataValue
-	 *
 	 */
 	public void setValue(Object theValue) throws StandardException;
 }

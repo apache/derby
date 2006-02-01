@@ -295,8 +295,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * @param isNullable	Whether or not the column is nullable
 	 *						(No need to call wasNull() if not)
 	 * 
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 * @exception SQLException		Error accessing the result set
 	 */
@@ -330,8 +328,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void setValue(int theValue) throws StandardException;
@@ -341,8 +337,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * Set the value of this DataValueDescriptor to the given double value
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -355,8 +349,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 *					DataValueDescriptor to.  Null means set the value
 	 *					to SQL null.
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -367,8 +359,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void setValue(short theValue) throws StandardException;
@@ -377,8 +367,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * Set the value of this DataValueDescriptor to the given long value
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -389,8 +377,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(byte theValue) throws StandardException;
 
@@ -400,26 +386,13 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 *
 	 * @param theValue	Contains the boolean value to set this to
 	 *
-	 * @return	This value
-	 *
 	 */
 	public void setValue(boolean theValue) throws StandardException;
 
 	/**
-	 * Set the value.
-	 *
-	 * @param theValue	Contains the boolean value to set this to
-	 *
-	 * @return	This value
-	 *
-	 */
-	
-	/**
 	 * Set the value of this DataValueDescriptor.
 	 *
 	 * @param theValue	The byte value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 */
 	public void setValue(byte[] theValue) throws StandardException;
@@ -442,8 +415,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 *
 	 * @param theValue	The String value to set this DataValueDescriptor to
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(String theValue) throws StandardException;
 
@@ -451,8 +422,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * Set the value of this DataValueDescriptor.
 	 *
 	 * @param theValue	The Time value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 */
 	public void setValue(Time theValue) throws StandardException;
@@ -463,8 +432,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * @param theValue	The Time value to set this DataValueDescriptor to
      * @param cal The time zone from the calendar is used to construct the database time value
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(Time theValue, Calendar cal) throws StandardException;
 
@@ -472,8 +439,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * Set the value of this DataValueDescriptor.
 	 *
 	 * @param theValue	The Timestamp value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 */
 	public void setValue(Timestamp theValue) throws StandardException;
@@ -484,8 +449,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * @param theValue	The Timestamp value to set this DataValueDescriptor to
      * @param cal The time zone from the calendar is used to construct the database timestamp value
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(Timestamp theValue, Calendar cal) throws StandardException;
 
@@ -493,8 +456,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * Set the value of this DataValueDescriptor.
 	 *
 	 * @param theValue	The Date value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 */
 	public void setValue(Date theValue) throws StandardException;
@@ -505,8 +466,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * @param theValue	The Date value to set this DataValueDescriptor to
      * @param cal The time zone from the calendar is used to construct the database date value
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(Date theValue, Calendar cal) throws StandardException;
 
@@ -514,8 +473,6 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * Set the value of this DataValueDescriptor from another.
 	 *
 	 * @param theValue	The Date value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 */
 	public void setValue(DataValueDescriptor theValue) throws StandardException;

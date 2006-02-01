@@ -230,7 +230,7 @@ public class EmbedResultSet20
      * param map to determine the class from which to construct data of 
      * SQL structured and distinct types.
      *
-     * @param i the first column is 1, the second is 2, ...
+     * @param columnIndex the first column is 1, the second is 2, ...
      * @param map the mapping from SQL type names to Java classes
      * @return an object representing the SQL value
          * @exception SQLException Feature not implemented for now.

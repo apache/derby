@@ -75,7 +75,6 @@ public interface AllocationActions {
      *
      * @param t				        The transaction
      * @param allocPage		        the allocation page to do compress on.
-     * @param instant               log address for this operation.
      * @param new_highest_page      The new highest page on this allocation 
      *                              page.  The number is the offset of the page
      *                              in the array of pages maintained by this 

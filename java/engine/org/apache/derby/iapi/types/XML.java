@@ -26,6 +26,8 @@ import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.StreamStorable;
+import org.apache.derby.iapi.services.io.Storable;
+import org.apache.derby.iapi.services.io.TypedFormat;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -231,7 +233,6 @@ public class XML
     }
 
     /**
-     * @see DataValueDescriptor#setFrom
      */
     protected void setFrom(DataValueDescriptor theValue)
         throws StandardException
@@ -430,12 +431,12 @@ public class XML
     /**
      * Method to parse an XML string and, if it's valid,
      * store the _parsed_ version for subsequent use.
+	 * If 'text' constitutes a valid XML document,
+     *  it has been stored in this XML value and nothing
+     *  is returned; otherwise, an exception is thrown.
      * @param text The string value to check.
      * @param preserveWS Whether or not to preserve
      *  ignorable whitespace.
-     * @return  If 'text' constitutes a valid XML document,
-     *  it has been stored in this XML value and nothing
-     *  is returned; otherwise, an exception is thrown.
      * @exception StandardException Thrown on parse error.
      */
     public void parseAndLoadXML(String text, boolean preserveWS)

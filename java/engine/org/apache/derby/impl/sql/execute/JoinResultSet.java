@@ -264,8 +264,6 @@ public abstract class JoinResultSet extends NoPutResultSetImpl
 	 * open the rightResultSet.  If already open,
 	 * just reopen.
 	 *
-	 * @return Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	protected void openRight() throws StandardException
@@ -284,9 +282,6 @@ public abstract class JoinResultSet extends NoPutResultSetImpl
 	/**
 	 * close the rightResultSet
 	 *
-	 * @return Nothing
-	 *
-	 * @exception StandardException thrown on error
 	 */
 	protected void closeRight() throws StandardException
 	{

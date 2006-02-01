@@ -254,8 +254,6 @@ public class UserType extends DataType
 	/**
 	 * Get the type name of this value,  overriding
 	 * with the passed in class name (for user/java types).
-	 * @param className
-	 * @return
 	 */
 	String getTypeName(String className)
 	{

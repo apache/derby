@@ -104,8 +104,6 @@ abstract class DMLStatementNode extends StatementNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -196,8 +194,6 @@ abstract class DMLStatementNode extends StatementNode
 	 *
 	 * @param dataDictionary	The data dictionary to use to look up the tables
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -228,8 +224,6 @@ abstract class DMLStatementNode extends StatementNode
 	/**
 	 * Bind the expressions in this DML statement.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -253,9 +247,6 @@ abstract class DMLStatementNode extends StatementNode
 
 	/**
 	 * Bind the expressions in the underlying ResultSets with tables.
-	 *
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -381,8 +372,6 @@ abstract class DMLStatementNode extends StatementNode
 	 * the values being inserted are of a different type or length
 	 * than the columns in the base table.
 	 *
-	 * @param name	The name of the cursor, if any
-	 *
 	 * @return	A ResultDescription for this DML statement
 	 */
 
@@ -403,8 +392,6 @@ abstract class DMLStatementNode extends StatementNode
 	 * all the parameters being set.
 	 * 
 	 * @param acb	The ActivationClassBuilder for the class we're building
-	 *
-	 * @return	Nothing
 	 */
 
 	void generateParameterValueSet(ActivationClassBuilder acb)

@@ -48,13 +48,13 @@ public class SystemColumnImpl implements SystemColumn
 	/**
 	 * Constructor to create a description of a column in a system table.
 	 *
-	 *	@param	Name of column.
-	 *	@param	Id of column.
-	 *	@param	Precision of data in column.
-	 *	@param	Scale of data in column.
-	 *	@param	Whether or not column accepts nulls.
-	 *	@param	Datatype of column.
-	 *	@param	Maximum length of data in column.
+	 *	@param	name of column.
+	 *	@param	id of column.
+	 *	@param	precision of data in column.
+	 *	@param	scale of data in column.
+	 *	@param	nullability Whether or not column accepts nulls.
+	 *	@param	dataType Datatype of column.
+	 *	@param	maxLength Maximum length of data in column.
 	 */
 	public	SystemColumnImpl(	String	name,
 								int		id,
@@ -79,9 +79,9 @@ public class SystemColumnImpl implements SystemColumn
 	 * Constructor to create a description of a column in a system table.
 	 * This constructor is used for SQL Identifiers (varchar 128).
 	 *
-	 *	@param	Name of column.
-	 *	@param	Id of column.
-	 *	@param	Whether or not column accepts nulls.
+	 *	@param	name of column.
+	 *	@param	id of column.
+	 *	@param	nullability Whether or not column accepts nulls.
 	 */
 	public	SystemColumnImpl(	String	name,
 								int		id,

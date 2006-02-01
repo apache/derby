@@ -538,8 +538,6 @@ public abstract class CachedPage extends BasePage implements Cacheable
      *      while the I/O was taking place.  
      *
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
 	 * @exception  StandardException  Error writing the page.
      *
      * @see Cacheable#clean
@@ -734,7 +732,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
      * write the page from this CachedPage object to disk.
      * <p>
      *
-     * @param newIdentity indentity (ie. page number) of the page to read
+     * @param identity indentity (ie. page number) of the page to read
      * @param syncMe      does the write of this single page have to be sync'd?
      *
 	 * @exception  StandardException  Standard exception policy.

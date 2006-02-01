@@ -422,8 +422,6 @@ class RowChangerImpl	implements	RowChanger
 	  Insert a row into the table and perform associated index maintenance.
 
 	  @param baseRow the row.
-	  @param baseRowLocation the row's base conglomerate
-	     location
 	  @exception StandardException		Thrown on error
 	  */
 	public void insertRow(ExecRow baseRow)
@@ -473,7 +471,6 @@ class RowChangerImpl	implements	RowChanger
 	/**
 	  Update a row in the table and perform associated index maintenance.
 
-	  @param ef	ExecutionFactory to use for cloning
 	  @param oldBaseRow the old image of the row.
 	  @param newBaseRow the new image of the row.
 	  @param baseRowLocation the row's base conglomerate

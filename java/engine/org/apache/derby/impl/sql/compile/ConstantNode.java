@@ -77,8 +77,6 @@ abstract class ConstantNode extends ValueNode
 	/**
 	 * Initializer for non-numeric types
 	 *
-	 * @param typeCompilationFactory	The factory to get the
-	 *									DataTypeServicesFactory from
 	 * @param typeId	The Type ID of the datatype
 	 * @param nullable	True means the constant is nullable
 	 * @param maximumWidth	The maximum number of bytes in the data value
@@ -218,9 +216,6 @@ abstract class ConstantNode extends ValueNode
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the code to place the code
 	 *
-	 * @return		The compiled Expression, if the constant is a null value,
-	 *				null if the constant is not a null value (confusing, huh?)
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void generateExpression
@@ -249,8 +244,6 @@ abstract class ConstantNode extends ValueNode
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the code to place the code
-	 *
-	 * @return		The compiled Expression, 
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

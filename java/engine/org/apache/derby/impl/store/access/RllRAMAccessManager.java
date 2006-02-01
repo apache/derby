@@ -95,8 +95,6 @@ public class RllRAMAccessManager extends RAMAccessManager
      * getSystemLockLevel().
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
     protected void bootLookupSystemLockLevel(

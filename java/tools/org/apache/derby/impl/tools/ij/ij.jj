@@ -1778,7 +1778,7 @@ throws SQLException
 
 /**
  * Hack to get the grammar to leave a
- * EXECUTE STATEMENT <stmt> alone.  Short
+ * EXECUTE STATEMENT &lt;stmt&gt; alone.  Short
  * circuit the ij EXECUTE built in.
  */
 ijResult JBMSPreparedStatementExec()	
@@ -1796,7 +1796,7 @@ throws SQLException :
 
 /**
  * Hack to get the grammar to leave a
- * EXECUTE PROCEDURE <procSpec> alone.  Short
+ * EXECUTE PROCEDURE &lt;procSpec&gt; alone.  Short
  * circuit the ij EXECUTE built in so that
  * we can deploy ij against Foundation2000.
  */
@@ -2510,48 +2510,48 @@ sign() throws SQLException :
 
 	This is the grammer for the XA commands
 
-	<XA_DATASOURCE> 'dbname' ( <CREATE> | shutdown ) 
+	&lt;XA_DATASOURCE&gt; 'dbname' ( &lt;CREATE&gt; | shutdown ) 
 		 - get a XADataSource whose database name is dbname and make that
 		XADataSource the current XADataSource
 
-	<XA_CONNECT> 	[ <USER> 'user' ]
-			[ <PASSWORD> 'password' ]
-			[ <AS> xaconnid ] 
+	&lt;XA_CONNECT&gt; 	[ &lt;USER&gt; 'user' ]
+			[ &lt;PASSWORD&gt; 'password' ]
+			[ &lt;AS&gt; xaconnid ] 
 		- make an XAConnection using the current XADataSource and make
 		that XAConnection the current XAConnection.  If xaconnid is 
 		given, then associate xaconnid with the XAConnection.  
 		(xaconnid not implemeneted)
 
 
-	<XA_COMMIT>  ( <XA_1PHASE> | <XA_2PHASE> ) xid
+	&lt;XA_COMMIT&gt;  ( &lt;XA_1PHASE&gt; | &lt;XA_2PHASE&gt; ) xid
 		- commit a global transaction xid
 
 
-	<XA_DISCONNECT> [ xaconnid = identifier() ] 
+	&lt;XA_DISCONNECT&gt; [ xaconnid = identifier() ] 
 		- disconnect an XAConnection.  If xaconnid is given, then
 		disconnect the XAConnection with the given xaconnid. 
 		(xaconnid not implemeneted)
 
 
-	<XA_END> ( <XA_SUSPEND> | <XA_SUCCESS> | <XA_FAIL> ) xid
+	&lt;XA_END&gt; ( &lt;XA_SUSPEND&gt; | &lt;XA_SUCCESS&gt; | &lt;XA_FAIL&gt; ) xid
 		- dissociate a transaction from the current XAConnection or end
 		an already suspened one 
 
-	<XA_FORGET> xid		- forget about a global transaction
+	&lt;XA_FORGET&gt; xid		- forget about a global transaction
 
-	<XA_GETCONNECTION>  [ <AS> connid ] 
+	&lt;XA_GETCONNECTION&gt;  [ &lt;AS&gt; connid ] 
 		- get a Connection object from the current XAConnection.
 		If connid is given, then associate connid with the connection.
 		(connid not implemented)
 
-	<XA_PREPARE> xid	- prepare a global transaction
+	&lt;XA_PREPARE&gt; xid	- prepare a global transaction
 
-	<XA_RECOVER> ( <XA_NOFLAGS> | <XA_STARTRSCAN> | <XA_ENDRSCAN> )
+	&lt;XA_RECOVER&gt; ( &lt;XA_NOFLAGS&gt; | &lt;XA_STARTRSCAN&gt; | &lt;XA_ENDRSCAN&gt; )
 	 	- return the list of in-doubt transactions
 
-	<XA_ROLLBACK> xid	- rollback a global transaction
+	&lt;XA_ROLLBACK&gt; xid	- rollback a global transaction
 
-	<XA_START> ( <XA_NOFLAGS> | <XA_JOIN> | <XA_RESUME> ) xid
+	&lt;XA_START&gt; ( &lt;XA_NOFLAGS&gt; | &lt;XA_JOIN&gt; | &lt;XA_RESUME&gt; ) xid
 		- associate a transaction or start a new global
 		transaction with the current XAConnection.
 
@@ -2560,35 +2560,35 @@ sign() throws SQLException :
 	their functionality will be lumped into xaHelper because these are here
 	only for testing purposes.
 
-	<DATASOURCE> 'dbname'	[ <PROTOCOL> 'protocol' ]
-				[ <USER> 'user' ]
-				[ <PASSWORD> 'password' ]
-				[ <AS> n=identifier() ]
+	&lt;DATASOURCE&gt; 'dbname'	[ &lt;PROTOCOL&gt; 'protocol' ]
+				[ &lt;USER&gt; 'user' ]
+				[ &lt;PASSWORD&gt; 'password' ]
+				[ &lt;AS&gt; n=identifier() ]
 		- get a data source whose database name is dbname and make that
-		DataSource the current DataSource.  If <PROTOCOL> is specified,
+		DataSource the current DataSource.  If &lt;PROTOCOL&gt; is specified,
 		the DataSource may be remote.   Get a connection from that
 		dataSource and use the user/password if specified.
 
-	<CP_DATASOURCE> 'dbname' [ <PROTOCOL> 'protocol' ]
+	&lt;CP_DATASOURCE&gt; 'dbname' [ &lt;PROTOCOL&gt; 'protocol' ]
 		- get a connection pool data source whose database name is
 		dbname and make that DataSource the current CPDataSource.  
-		If <PROTOCOL> is specified, the DataSource may be
+		If &lt;PROTOCOL&gt; is specified, the DataSource may be
 		remote.
 
-	<CP_CONNECT>	[ <USER> 'user' ]
-			[ <PASSWORD> 'password' ]
-			[ <AS> cpconnid ]
+	&lt;CP_CONNECT&gt;	[ &lt;USER&gt; 'user' ]
+			[ &lt;PASSWORD&gt; 'password' ]
+			[ &lt;AS&gt; cpconnid ]
 		- make a PooledConnection using the current CPDataSource and
 		make that PooledConnection the current PooledConnection.
 		If cpconnid is given, then associate cpconnid with the
 		PooledConnection. (cpconnid not implemented).
 
-	<CP_GETCONNECTION> [ <AS> connid ]
+	&lt;CP_GETCONNECTION&gt; [ &lt;AS&gt; connid ]
 		- get a Connection object from the current PooledConnection.
 		If connid is given, the associate connid with the connection.
 		(connid not implemented)
 
-	<CP_DISCONNECT> [  cpconnid = identifier() ] 
+	&lt;CP_DISCONNECT&gt; [  cpconnid = identifier() ] 
 		- disconnect a PooledConnection.  If cpconnid is given, then
 		disconnect the PooledConnection with the given cpconnid. 
 		(cpconnid not implemented)
@@ -2622,7 +2622,7 @@ throws SQLException
 }
 
 /**
- * XA_ConnectStatement is XA_CONNECT (<AS> connid)
+ * XA_ConnectStatement is XA_CONNECT (&lt;AS&gt; connid)
  * make a XAConnection using the currentXADataSource and make that XAConnection
  * the current XAConnection.  If connid is given, then associate connid with
  * the XAConnection.  This connid is not th xid.
@@ -2880,10 +2880,10 @@ throws SQLException
 /**
  * DataSourceStatement is 
  *	DataSource 'dbname' 
- *		[ <PROTCOL> 'protocol']
- *		[ <USER> 'user' ]
- *		[ <PASSWORD> 'password' ]
- *		[ <AS> n=identifier() ]
+ *		[ &lt;PROTCOL&gt; 'protocol']
+ *		[ &lt;USER&gt; 'user' ]
+ *		[ &lt;PASSWORD&gt; 'password' ]
+ *		[ &lt;AS&gt; n=identifier() ]
  *
  * We new'ed an instance of DataSource as the current DataSource and set its
  * database name to dbname.  Also get a connection
@@ -2914,10 +2914,10 @@ ijResult DataSourceStatement() throws SQLException
 
 /**
  * CP_DataSourceStatement is
- *	CP_DataSource 'dbname' [ <PROTOCOL> 'protocol' ]
+ *	CP_DataSource 'dbname' [ &lt;PROTOCOL&gt; 'protocol' ]
  *		- get a connection pool data source whose database name is
  *		dbname and make that DataSource the current CPDataSource.  
- *		If <PROTOCOL> is specified, the DataSource may be
+ *		If &lt;PROTOCOL&gt; is specified, the DataSource may be
  *		remote.
  */
 ijResult CP_DataSourceStatement() throws SQLException
@@ -2936,9 +2936,9 @@ ijResult CP_DataSourceStatement() throws SQLException
 
 /**
  * CP_ConnectStatement is
- *	<CP_CONNECT>	[ <USER> 'user' ]
- *			[ <PASSWORD> 'password' ]
- *			[ <AS> cpconnid ]
+ *	&lt;CP_CONNECT&gt;	[ &lt;USER&gt; 'user' ]
+ *			[ &lt;PASSWORD&gt; 'password' ]
+ *			[ &lt;AS&gt; cpconnid ]
  * make a PooledConnection using the current CPDataSource and
  * make that PooledConnection the current PooledConnection.
  * If cpconnid is given, then associate cpconnid with the
@@ -2963,7 +2963,7 @@ ijResult CP_ConnectStatement() throws SQLException
 
 /**
  * CP_GetConnectionStatement is
- *	<CP_GETCONNECTION> [ <AS> connid ]
+ *	&lt;CP_GETCONNECTION&gt; [ &lt;AS&gt; connid ]
  * get a Connection object from the current PooledConnection.
  * If connid is given, the associate connid with the connection.
  * (connid not implemented)
@@ -2984,7 +2984,7 @@ ijResult CP_GetConnectionStatement() throws SQLException
 
 /**
  * CP_DisconnectStatement is
- *	<CP_DISCONNECT> [ cpconnid = identifier() ]
+ *	&lt;CP_DISCONNECT&gt; [ cpconnid = identifier() ]
  * disconnect a PooledConnection.  If cpconnid is given, then
  * disconnect the PooledConnection with the given cpconnid. 
  * (cpconnid not implemented)

@@ -560,7 +560,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	  *	@param	checkGM			Generated code to run the check constraint.
 	  * @param	checkName		Name of the constraint to check.
 	  *	@param	heapConglom		Number of heap conglomerate.
-	  *	@param	Activation		Class in which checkGM lives.
+	  *	@param	activation		Class in which checkGM lives.
 	  *
 	  * @exception StandardException thrown on error
 	  */
@@ -608,7 +608,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	  * a check constraint is violated.
 	  *
 	  *	@param	checkGM			Generated code to run the check constraint.
-	  *	@param	Activation		Class in which checkGM lives.
+	  *	@param	activation		Class in which checkGM lives.
 	  *
 	  * @exception StandardException thrown on error
 	  */

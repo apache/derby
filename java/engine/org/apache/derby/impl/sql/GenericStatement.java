@@ -83,7 +83,7 @@ public class GenericStatement
 
 	/**
 	 * Constructor for a Statement given the text of the statement in a String
-	 * @param compliationSchema schema
+	 * @param compilationSchema schema
 	 * @param statementText	The text of the statement
 	 * @param isForReadOnly if the statement is opened with level CONCUR_READ_ONLY
 	 */
@@ -565,7 +565,6 @@ public class GenericStatement
 	 * Generates an execution plan given a set of named parameters.
 	 * Does so for a storable prepared statement.
 	 *
-	 * @param 	compilationSchema	the schema to compile against
 	 * @param	paramDefaults		Parameter defaults
 	 *
 	 * @return A PreparedStatement that allows execution of the execution

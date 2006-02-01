@@ -201,7 +201,6 @@ public class RowUtil
 	  <P>This is useful to remove dangling references to a column.
 
 	  @param setMe Set columns in this storable to be empty.
-	  @param count Number of columns to empty.
 	  */
 	public static void copyRefColumns(ExecRow setMe)
 		throws StandardException
@@ -361,7 +360,7 @@ public class RowUtil
 	/**
 	 * intArrayToString
 	 *
-	 * @param objs 			the int array
+	 * @param colMap 			the int array
 	 *
 	 * @return the string
 	 */

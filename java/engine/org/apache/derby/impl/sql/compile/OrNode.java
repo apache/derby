@@ -51,8 +51,6 @@ public class OrNode extends BinaryLogicalOperatorNode
 	 * We will consider converting the chain to an IN list
 	 * during preprocess() if all entries are of the form:
 	 *		ColumnReference = expression
-	 *
-	 * @return Nothing.
 	 */
 	void setFirstOr()
 	{
@@ -426,8 +424,6 @@ public class OrNode extends BinaryLogicalOperatorNode
 	/**
 	 * Do bind() by hand for an AndNode that was generated after bind(),
 	 * eg by putAndsOnTop(). (Set the data type and nullability info.)
-	 *
-	 * @return	None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

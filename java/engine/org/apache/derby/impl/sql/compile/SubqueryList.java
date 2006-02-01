@@ -42,8 +42,6 @@ public class SubqueryList extends QueryTreeNodeVector
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -67,9 +65,6 @@ public class SubqueryList extends QueryTreeNodeVector
 	 *
 	 * @param subqueryNode	A SubqueryNode to add to the list
 	 *
-	 * @return	Nothing
-	 *
-	 * @exception StandardException		Thrown on error
 	 */
 
 	public void addSubqueryNode(SubqueryNode subqueryNode) throws StandardException
@@ -85,8 +80,6 @@ public class SubqueryList extends QueryTreeNodeVector
 	 * @param	outerFromList		FromList from outer query block
 	 * @param	outerSubqueryList	SubqueryList from outer query block
 	 * @param	outerPredicateList	PredicateList from outer query block
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -114,8 +107,6 @@ public class SubqueryList extends QueryTreeNodeVector
 	 * @param dataDictionary	The data dictionary to use for optimization
 	 * @param outerRows			The optimizer's estimate of the number of
 	 *							times this subquery will be executed.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -215,8 +206,6 @@ public class SubqueryList extends QueryTreeNodeVector
 	 *
 	 * @param pointOfAttachment		The point of attachment
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException			Thrown on error
 	 */
 	public void setPointOfAttachment(int pointOfAttachment)
@@ -239,8 +228,6 @@ public class SubqueryList extends QueryTreeNodeVector
 	 * This is useful when flattening a subquery.
 	 *
 	 * @param decrement	The amount to decrement by.
-	 *
-	 * @return Nothing;
 	 */
 	void decrementLevel(int decrement)
 	{

@@ -158,7 +158,6 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 	 * subquery flattening.
 	 * NOTE: This is done before the outer ResultSetNode is preprocessed.
 	 *
-	 * @param	dataDictionary		DataDictionary to use.
 	 * @param	numTables			Number of tables in the DML Statement
 	 * @param	outerFromList		FromList from outer query block
 	 * @param	outerSubqueryList	SubqueryList from outer query block

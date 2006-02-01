@@ -116,8 +116,6 @@ public class UnionNode extends SetOperatorNode
 	 * table constructor has at least one non-? column.  The latter case
 	 * is checked below, in bindExpressions().
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown if a ? parameter found
 	 *									directly under a ResultColumn
 	 */
@@ -274,8 +272,6 @@ public class UnionNode extends SetOperatorNode
 	 * pushing is not possible or only partially feasible.
 	 *
 	 * @param 	predicateList		List of single table predicates to push
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception	StandardException		Thrown on error
 	 */
@@ -440,8 +436,6 @@ public class UnionNode extends SetOperatorNode
 	 * Bind the expressions under this TableOperatorNode.  This means
 	 * binding the sub-expressions, as well as figuring out what the
 	 * return type is for each expression.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

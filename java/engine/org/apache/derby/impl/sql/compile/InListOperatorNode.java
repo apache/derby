@@ -353,8 +353,6 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 * @param acb	The ExpressionClassBuilder for the class we're generating
 	 * @param mb The MethodBuilder the expression will go into
 	 *
-	 * @return	An Expression to evaluate this operator
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -507,8 +505,6 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 * @param isStartKey	are we generating start key or not
 	 * @param acb	The ExpressionClassBuilder for the class we're generating
 	 * @param mb The MethodBuilder the expression will go into
-	 *
-	 * @return	nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

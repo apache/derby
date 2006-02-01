@@ -80,7 +80,7 @@ public class HasVariantValueNodeVisitor implements Visitor
 	 *
 	 * @param variantType the type of variance we consider
 	 *		variant
-	 * @param skipParameter should I ignore parameter nodes?
+	 * @param ignoreParameters should I ignore parameter nodes?
  	 */
 	public HasVariantValueNodeVisitor(int variantType, boolean ignoreParameters)
 	{

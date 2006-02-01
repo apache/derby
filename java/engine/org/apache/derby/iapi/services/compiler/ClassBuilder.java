@@ -179,13 +179,14 @@ public interface ClassBuilder {
 	/**
 		Create a new private field and its getter and setter methods.
 
-		@param name basename for the methods, methods will have 'set' or 'get' prepended.
+		@param getter getter for field
+		@param setter setter for field
 		@param methodModifier modifier for method
-		@param boolean staticField true if the field is static
+		@param staticField true if the field is static
 		@param type type of the field, return type of the get method and
 		parameter type of the set method.
 
 	*/
-	void newFieldWithAccessors(String getter, String setter, int methodModifer,
+	void newFieldWithAccessors(String getter, String setter, int methodModifier,
 		boolean staticField, String type);
 }

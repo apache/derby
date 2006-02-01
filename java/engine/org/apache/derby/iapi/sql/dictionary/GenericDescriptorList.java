@@ -49,8 +49,6 @@ public class GenericDescriptorList extends ArrayList
 	 * when we need to scan the table.
 	 *
 	 * @param scanned	Whether or not the underlying system table has been scanned.
-	 *
-	 * @return Nothing.
 	 */
 	public void setScanned(boolean scanned)
 	{

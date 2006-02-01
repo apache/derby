@@ -1046,7 +1046,6 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 * @param errorOnTrunc	throw error on truncation (ignored -- 
 	 *		always thrown if we truncate the non-decimal part of
 	 *		the value)
-	 * @return this with the target width
 	 *
 	 * @exception StandardException		Thrown on non-zero truncation
 	 *		if errorOnTrunc is true	

@@ -85,8 +85,6 @@ public final class XMLConstantNode extends ConstantNode
      * @param acb The ExpressionClassBuilder for the class being built
      * @param mb The method the code to place the code
      *
-     * @return The compiled Expression, 
-     *
      * @exception StandardException        Thrown on error
      */
     void generateConstant(ExpressionClassBuilder acb, MethodBuilder mb)

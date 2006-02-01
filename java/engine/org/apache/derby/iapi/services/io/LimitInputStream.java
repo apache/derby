@@ -116,7 +116,6 @@ public class LimitInputStream extends FilterInputStream implements Limit {
 		the stream. Any attempt to read more than length bytes will
 		result in an EOFException
 
-		@return The value of length.
 		@exception IOException IOException from some underlying stream
 		@exception EOFException The set limit would exceed
 		the available data in the stream.

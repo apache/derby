@@ -98,17 +98,17 @@ public class FKInfo implements Formatable
 	 *
 	 * @param fkConstraintNames the foreign key constraint names
 	 * @param tableName	the name of the table being modified
-	 * @param statementType	the type of the statement: e.g. StatementType.INSERT
+	 * @param stmtType	the type of the statement: e.g. StatementType.INSERT
 	 * @param type either FKInfo.REFERENCED_KEY or FKInfo.FOREIGN_KEY
 	 * @param refUUID UUID of the referenced constraint
-	 * @param refConglomMnubmer congomerate number of the referenced key
+	 * @param refConglomNumber congomerate number of the referenced key
 	 * @param fkUUIDs an array of fkUUIDs of backing indexes.  if
 	 *			FOREIGN_KEY, then just one element, the backing
 	 *			index of the referrenced keys.  if REFERENCED_KEY,
 	 *			then all the foreign keys
 	 * @param fkConglomNumbers array of conglomerate numbers, corresponds
 	 *			to fkUUIDs
-	 * @param fkIsSelfRefernecing array of conglomerate booleans indicating
+	 * @param fkIsSelfReferencing array of conglomerate booleans indicating
 	 *			whether the fk references a key in the same table
 	 * @param colArray map of columns to the base row that DML
 	 * 			is changing.  1 based.  Note that this maps the

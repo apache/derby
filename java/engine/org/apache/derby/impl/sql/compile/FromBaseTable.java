@@ -205,19 +205,25 @@ public class FromBaseTable extends FromTable
 	private boolean getUpdateLocks;
 
 	/**
-	 * Initializer for a table in a FROM list.
+	 * Initializer for a table in a FROM list. Parameters are as follows:
 	 *
-	 * @param tableName			The name of the table
-	 * @param correlationName	The correlation name
-	 * @param derivedRCL		The derived column list
-	 * @param tableProperties	The Properties list associated with the table.
+	 * <ul>
+	 * <li>tableName			The name of the table</li>
+	 * <li>correlationName	The correlation name</li>
+	 * <li>derivedRCL		The derived column list</li>
+	 * <li>tableProperties	The Properties list associated with the table.</li>
+	 * </ul>
 	 *
+	 * <p>
 	 *  - OR -
+	 * </p>
 	 *
-	 * @param tableName			The name of the table
-	 * @param correlationName	The correlation name
-	 * @param updateOrDelete	Table is being updated/deleted from. 
-	 * @param derivedRCL		The derived column list
+	 * <ul>
+	 * <li>tableName			The name of the table</li>
+	 * <li>correlationName	The correlation name</li>
+	 * <li>updateOrDelete	Table is being updated/deleted from. </li>
+	 * <li>derivedRCL		The derived column list</li>
+	 * </ul>
 	 */
 	public void init(
 							Object arg1,
@@ -2054,8 +2060,6 @@ public class FromBaseTable extends FromTable
  	 * @param existsBaseTable Whether or not an EXISTS FBT.
 	 * @param dependencyMap	  The dependency map for the EXISTS FBT.
  	 * @param isNotExists     Whether or not for NOT EXISTS, more specifically.
-	 *
-	 * @return Nothing.
 	 */
 	void setExistsBaseTable(boolean existsBaseTable, JBitSet dependencyMap, boolean isNotExists)
 	{
@@ -2076,9 +2080,7 @@ public class FromBaseTable extends FromTable
 	/**
 	 * Clear the bits from the dependency map when join nodes are flattened
 	 *
-	 * @param vector of bit numbers to be cleared
-	 *
-	 * @return Nothing.
+	 * @param locations	vector of bit numbers to be cleared
 	 */
 	void clearDependency(Vector locations)
 	{
@@ -2093,8 +2095,6 @@ public class FromBaseTable extends FromTable
 	 * Set the table properties for this table.
 	 *
 	 * @param tableProperties	The new table properties.
-	 *
-	 * @return Nothing.
 	 */
 	public void setTableProperties(Properties tableProperties)
 	{
@@ -2399,8 +2399,6 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindExpressions(FromList fromListParam)
@@ -2419,8 +2417,6 @@ public class FromBaseTable extends FromTable
 	 * live under them.
 	 *
 	 * @param fromListParam		FromList to use/append to.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -2971,9 +2967,6 @@ public class FromBaseTable extends FromTable
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb	the execute() method to be built
 	 *
-	 * @return		A compiled Expression that returns a ResultSet that
-	 *				scans the table.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void generate(ActivationClassBuilder acb,
@@ -2998,9 +2991,6 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The execute() method to be built
-	 *
-	 * @return		A compiled Expression that returns a ResultSet that
-	 *				scans the table.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -3254,9 +3244,6 @@ public class FromBaseTable extends FromTable
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The execute() method to be built
 	 *
-	 * @return		A compiled Expression that returns a ResultSet that
-	 *				scans the referential action dependent table.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -3449,8 +3436,6 @@ public class FromBaseTable extends FromTable
 	 * Build a ResultColumnList based on all of the columns in this FromBaseTable.
 	 * NOTE - Since the ResultColumnList generated is for the FromBaseTable,
 	 * ResultColumn.expression will be a BaseColumnNode.
-	 *
-	 * @param dataDictionary	The Datadictionary to use in look up.
 	 *
 	 * @return ResultColumnList representing all referenced columns
 	 *
@@ -4046,8 +4031,6 @@ public class FromBaseTable extends FromTable
 
 	/**
 	 * Mark the underlying scan as a distinct scan.
-	 *
-	 * @return Nothing.
 	 */
 	void markForDistinctScan()
 	{
@@ -4059,8 +4042,6 @@ public class FromBaseTable extends FromTable
 	 * Notify the underlying result set tree that the result is
 	 * ordering dependent.  (For example, no bulk fetch on an index
 	 * if under an IndexRowToBaseRow.)
-	 *
-	 * @return Nothing.
 	 */
 	void markOrderingDependent()
 	{
@@ -4446,8 +4427,6 @@ public class FromBaseTable extends FromTable
 	/**
 	 * set the Information gathered from the parent table that is 
 	 * required to peform a referential action on dependent table.
-	 *
-	 * @return Nothing.
 	 */
 	public void setRefActionInfo(long fkIndexConglomId, 
 								 int[]fkColArray, 

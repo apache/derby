@@ -200,7 +200,7 @@ public class BCJava implements JavaFactory, CacheableFactory, ModuleControl {
 	  		// the modifiers such as static, public, etc.
 	   </verbatim>
 	 *
-	 * @see java.lang.reflect.Modifiers
+	 * See java.lang.reflect.Modifiers
 	 * @param packageName the name of the package the class is in.
 	 *	null if it is in the default package.
 	 * @param modifiers the | of the Modifiers

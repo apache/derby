@@ -109,8 +109,6 @@ public class SetSchemaNode extends MiscellaneousStatementNode
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb the method  for the execute() method to be built
 	 *
-	 * @return		A compiled expression returning the RepCreatePublicationResultSet
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -139,8 +137,6 @@ public class SetSchemaNode extends MiscellaneousStatementNode
 	 * all the parameters being set.
 	 * 
 	 * @param acb	The ActivationClassBuilder for the class we're building
-	 *
-	 * @return	Nothing
 	 */
 
 	void generateParameterValueSet(ActivationClassBuilder acb)

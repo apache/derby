@@ -54,7 +54,7 @@ public class SubKeyConstraintDescriptor extends SubConstraintDescriptor
 	/**
 	 * Constructor for a SubConstraintDescriptorImpl
 	 *
-	 * @param constraintID		The UUID of the constraint.
+	 * @param constraintId		The UUID of the constraint.
 	 * @param indexId			The UUID of the backing index.
 	 */
 	public SubKeyConstraintDescriptor(UUID constraintId, UUID indexId)
@@ -66,7 +66,7 @@ public class SubKeyConstraintDescriptor extends SubConstraintDescriptor
 	/**
 	 * Constructor for a SubConstraintDescriptor
 	 *
-	 * @param constraintID		The UUID of the constraint.
+	 * @param constraintId		The UUID of the constraint.
 	 * @param indexId			The UUID of the backing index.
 	 * @param keyConstraintId	The UUID of the referenced constraint (fks)
 	 */
@@ -80,7 +80,7 @@ public class SubKeyConstraintDescriptor extends SubConstraintDescriptor
 	/**
 	 * Constructor for a SubConstraintDescriptor
 	 *
-	 * @param constraintID		The UUID of the constraint.
+	 * @param constraintId		The UUID of the constraint.
 	 * @param indexId			The UUID of the backing index.
 	 * @param keyConstraintId	The UUID of the referenced constraint (fks)
 	 * @param raDeleteRule      The referential action for delete

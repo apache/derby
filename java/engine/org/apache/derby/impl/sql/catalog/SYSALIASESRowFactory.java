@@ -145,9 +145,6 @@ class SYSALIASESRowFactory extends CatalogRowFactory
   /**
 	 * Make a SYSALIASES row
 	 *
-	 * @param emptyRow		Make an empty row if this parameter is true
-	 * @param ad			Alias descriptor
-	 * @param dvf			A DataValueFactory
 	 *
 	 * @return	Row suitable for inserting into SYSALIASES.
 	 *

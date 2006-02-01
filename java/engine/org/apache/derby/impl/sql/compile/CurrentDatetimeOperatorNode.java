@@ -137,8 +137,6 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the code to place the code
 	 *
-	 * @return		The compiled Expression
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void generateExpression(ExpressionClassBuilder acb,

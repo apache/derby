@@ -136,8 +136,6 @@ public class HashTableNode extends SingleChildResultSetNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -187,7 +185,7 @@ public class HashTableNode extends SingleChildResultSetNode
 	 * compiler. A couple ResultSets (the ones used by PREPARE SELECT FILTER)
 	 * implement this method.
 	 *
-	 * @param ecb	The ExpressionClassBuilder for the class being built
+	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb the method  the expression will go into
 	 *
 	 *
@@ -204,7 +202,7 @@ public class HashTableNode extends SingleChildResultSetNode
 	/**
 	 * Logic shared by generate() and generateResultSet().
 	 *
-	 * @param ecb	The ExpressionClassBuilder for the class being built
+	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb the method  the expression will go into
 	 *
 	 * @exception StandardException		Thrown on error

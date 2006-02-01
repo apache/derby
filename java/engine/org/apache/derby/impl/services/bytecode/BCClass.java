@@ -73,7 +73,6 @@ import java.io.IOException;
  * Generators to give them code.  Most typically, they may have
  * a stream to which the Generator writes the code that is of
  * the type to satisfy what the Generator is writing.
- * @see Generator#giveCode
  * <p>
  * BCClass is a ClassBuilder implementation for generating java bytecode
  * directly.
@@ -189,7 +188,7 @@ class BCClass extends GClass {
 	 * This is used to start a constructor as well; pass in
 	 * null for the returnType when used in that manner.
 	 *
-	 * @see java.lang.reflect..Modifiers
+	 * See java.lang.reflect.Modifiers
 	 * @param modifiers the | of the Modifiers
 	 *	constants representing the visibility and control of this
 	 *	method.
@@ -222,7 +221,7 @@ class BCClass extends GClass {
 	 * This is used to start a constructor as well; pass in
 	 * null for the returnType when used in that manner.
 	 *
-	 * @see java.lang.reflect..Modifiers
+	 * See java.lang.reflect.Modifiers
 	 * @param modifiers the | of the Modifiers
 	 *	constants representing the visibility and control of this
 	 *	method.
@@ -268,7 +267,7 @@ class BCClass extends GClass {
 	 * This is used to start a constructor as well; pass in
 	 * null for the returnType when used in that manner.
 	 *
-	 * @see Modifiers
+	 * See Modifiers
 	 * @param modifiers the | of the Modifiers
 	 *	constants representing the visibility and control of this
 	 *	method.

@@ -39,11 +39,8 @@ public class AssertFailure extends RuntimeException
 	 * This constructor takes the pieces of information
 	 * expected for each error.
 	 *
-	 * @param messageID the message associated with
+	 * @param message the message associated with
 	 * the error.
-	 *
-	 * @param args the arguments and information items
-	 * for the error.
 	 *
 	 * @param nestedError errors can be nested together;
 	 * if this error has another error associated with it,

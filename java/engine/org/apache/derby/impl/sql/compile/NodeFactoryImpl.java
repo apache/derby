@@ -604,8 +604,7 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 	 * so this could be used by ALTER PUBLICATION.
 	 *
 	 * @param aliasName	The name of the alias
-	 * @param sourceJarFile			(Plugin only) the jar file that the source method lives in
-	 * @param fullStaticMethodName	The full path/method name
+	 * @param targetName	The full path/method name
 	 * @param aliasSpecificInfo	The full path of the target method name,
 	 *								if any
 	 * @param aliasType	The type of alias to create
@@ -677,7 +676,6 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 	 * Other attributes of the original FROM_TABLE node (such as resultColumns)
 	 * are passed into the FROM_VTI node.
 	 * 
-	 * @see org.apache.derby.iapi.sql.compile.NodeFactory#mapTableAsVTI(org.apache.derby.iapi.sql.dictionary.TableDescriptor, org.apache.derby.iapi.services.context.ContextManager)
 	 */
 	public ResultSetNode mapTableAsVTI(
 			TableDescriptor td,

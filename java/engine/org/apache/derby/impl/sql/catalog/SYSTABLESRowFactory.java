@@ -117,10 +117,6 @@ public class SYSTABLESRowFactory extends CatalogRowFactory
 	/**
 	 * Make a SYSTABLES row
 	 *
-	 * @param emptyRow	Make an empty row if this parameter is true
-	 * @param descriptor	Table descriptor
-	 * @param schema	Schema descriptor
-	 *
 	 * @return	Row suitable for inserting into SYSTABLES.
 	 *
 	 * @exception   StandardException thrown on failure

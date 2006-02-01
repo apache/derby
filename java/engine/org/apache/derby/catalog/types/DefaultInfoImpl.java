@@ -149,8 +149,6 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	 * Set the default value.
 	 *
 	 * @param defaultValue The default value.
-	 *
-	 * @return Nothing.
 	 */
 	public void setDefaultValue(DataValueDescriptor defaultValue)
 	{

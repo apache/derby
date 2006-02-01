@@ -168,7 +168,7 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	/**
 	  *	Gets the AliasDescriptor associated with the passed-in object ID.
 	  *
-	  *	@param	the object ID of an Alias. Used to locate its AliasDescriptor
+	  *	@param	dependableObjectID	the object ID of an Alias. Used to locate its AliasDescriptor
 	  *
 	  *	@return	the associated AliasDescriptor
 	  * @exception java.sql.SQLException		thrown on error
@@ -282,7 +282,7 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	/**
 	 * Get the UUID for the given string
 	 *
-	 * @param the string
+	 * @param idString the string
 	 *
 	 * @return the UUID
 	 */

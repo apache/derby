@@ -89,8 +89,6 @@ public interface RowChanger
 	  Insert a row into the table and perform associated index maintenance.
 
 	  @param baseRow the row.
-	  @param baseRowLocation the row's base conglomerate
-	     location
 	  @exception StandardException		Thrown on error
 	  */
 	public void insertRow(ExecRow baseRow)

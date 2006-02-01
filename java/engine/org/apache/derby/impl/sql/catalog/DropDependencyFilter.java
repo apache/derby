@@ -112,7 +112,7 @@ public class DropDependencyFilter implements TupleFilter
 	  *	Pump a SYSDEPENDS row through the Filter. If the providerID of the
 	  * row matches our providerID, we return true. Otherwise we return false.
 	  *
-	  *	@param	row		SYSDEPENDS row
+	  *	@param	currentRow		SYSDEPENDS row
 	  *
 	  *	@return	True if the row has our providerID. False otherwise.
 	  *

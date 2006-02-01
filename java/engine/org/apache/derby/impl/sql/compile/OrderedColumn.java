@@ -79,8 +79,6 @@ public abstract class OrderedColumn extends QueryTreeNode
 
 	/**
 	 * Set the position of this column
-	 *
-	 * @return	Nothing
 	 */
 	public void setColumnPosition(int columnPosition) 
 	{

@@ -49,7 +49,6 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 	 * @param activation
 	 * @param grant true if grant, false if revoke
 	 * @param grantees a list of authorization ids (strings)
-	 * @param withGrantOption true if grant with grant option, false if not. always false if !grant
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */

@@ -61,7 +61,7 @@ public class SchemaDescriptor extends TupleDescriptor
      * databases the name will use the same case as the source database 
      * identifiers.
      *
-     * @see org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext#getSystemSchemaName
+     * See org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext#getSystemSchemaName
      */
     public static final	String	STD_SYSTEM_SCHEMA_NAME      = "SYS";
 
@@ -103,7 +103,7 @@ public class SchemaDescriptor extends TupleDescriptor
      * target databases the name will use the same case as the source database 
      * identifiers.
      *
-     * @see org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext#getDefaultSchemaName
+     * See org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext#getDefaultSchemaName
      */
     public	static	final	String	STD_DEFAULT_SCHEMA_NAME = Property.DEFAULT_USER_NAME;
 

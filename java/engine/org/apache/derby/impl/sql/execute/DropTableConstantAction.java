@@ -78,7 +78,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 	 *	@param	fullTableName		Fully qualified table name
 	 *	@param	tableName			Table name.
 	 *	@param	sd					Schema that table lives in.
-	 *  @param  conglomerateNubmer	Conglomerate number for heap
+	 *  @param  conglomerateNumber	Conglomerate number for heap
 	 *  @param  tableId				UUID for table
 	 *  @param  behavior			drop behavior: RESTRICT, CASCADE or default
 	 *

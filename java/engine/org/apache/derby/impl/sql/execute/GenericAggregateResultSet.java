@@ -172,7 +172,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 	 * invoked to create a new row.  That row is then
 	 * initialized and used for the output of the aggregation.
 	 *
-	 * @param 	the row to finish aggregation
+	 * @param 	row	the row to finish aggregation
 	 *
 	 * @return	the result row.  If the input row != null, then
 	 *	the result row == input row

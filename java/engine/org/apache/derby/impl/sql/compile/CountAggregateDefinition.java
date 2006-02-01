@@ -49,8 +49,7 @@ public class CountAggregateDefinition
 	 * count() on anything, and it always returns a
 	 * INTEGER (java.lang.Integer).
 	 *
-	 * @param the input type, either a user type or a java.lang object
-	 * @param implementsInterface	the interface it implements
+	 * @param inputType the input type, either a user type or a java.lang object
 	 *
 	 * @return the output Class (null if cannot operate on
 	 *	value expression of this type.

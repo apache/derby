@@ -39,11 +39,7 @@ public final class VarbitConstantNode extends BitConstantNode
 	/**
 	 * Initializer for a VarbitConstantNode.
 	 *
-	 * @param arg1  The TypeId for the type of the node
-	 *
-	 * - OR -
-	 *
-	 * @param arg1	A Bit containing the value of the constant
+	 * @param arg1  The TypeId for the type of the node OR A Bit containing the value of the constant
 	 *
 	 * @exception StandardException
 	 */

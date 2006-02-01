@@ -164,8 +164,6 @@ abstract class DDLStatementNode extends StatementNode
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb	The execute() method to be built
 	 *
-	 * @return		A compiled expression returning the RepCreatePublicationResultSet
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -249,8 +247,6 @@ abstract class DDLStatementNode extends StatementNode
 	 * Validate that the table is ok for DDL -- e.g.
 	 * that it exists, it is not a view, and is not
 	 * a system table, and that its schema is ok.
-	 *
-	 * @param tableDescriptor td
 	 *
 	 * @return the validated table descriptor, never null
 	 *

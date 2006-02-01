@@ -63,8 +63,7 @@ public class SumAvgAggregateDefinition
 	 * sum on anything that implements plus().  In which
 	 * case avg() would need divide().
 	 *
-	 * @param the input type, either a user type or a java.lang object
-	 * @param implementsInterface	the interface it implements
+	 * @param inputType	the input type, either a user type or a java.lang object
 	 *
 	 * @return the output Class (null if cannot operate on
 	 *	value expression of this type.

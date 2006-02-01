@@ -76,7 +76,6 @@ public interface DataFactory extends Corruptable {
 		@param containerId the container's identity
 		@param locking the locking policy
 		@param mode see the different mode in @see ContainerHandle
-		@param droppedOK if true, then the container may be dropped.  If false,
 		then will return a null handle if the container is dropped.
 
 		@return the handle to the opened container
@@ -110,7 +109,7 @@ public interface DataFactory extends Corruptable {
 		@param mode whether or not to LOGGED or not.  The effect of this mode
 				is only for this addContainer call, not persisently stored
 				throughout the lifetime of the container
-		@param tablePropertes properties of the container that is persistently
+		@param tableProperties properties of the container that is persistently
 				stored throughout the lifetime of the container
 
 		@return the containerId of the newly created container
@@ -132,7 +131,7 @@ public interface DataFactory extends Corruptable {
 
 		@param t the transaction that is creating the container
 		@param segmentId the segment where the container is to go
-		@param tablePropertes properties of the container that is persistently
+		@param tableProperties properties of the container that is persistently
 				stored throughout the lifetime of the container
 		@param rowSource the data to load the container with
 

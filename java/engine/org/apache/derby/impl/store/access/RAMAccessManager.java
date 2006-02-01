@@ -261,8 +261,6 @@ public abstract class RAMAccessManager
      * getSystemLockLevel().
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
     abstract protected void bootLookupSystemLockLevel(

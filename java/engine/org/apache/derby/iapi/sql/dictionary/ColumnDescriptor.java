@@ -390,8 +390,6 @@ public class ColumnDescriptor extends TupleDescriptor
 
 	/**
 	 * Set the ordinal position of the column.
-	 *
-	 * @return	void.
 	 */
 	public void	setPosition(int columnPosition)
 	{

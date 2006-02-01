@@ -100,8 +100,6 @@ operand.treePrint();
 	 * this node.  Extracts out tasks that must be done by both bind()
 	 * and post-bind() AndNode generation.
 	 *
-	 * @return	None.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	protected void setFullTypeInfo()

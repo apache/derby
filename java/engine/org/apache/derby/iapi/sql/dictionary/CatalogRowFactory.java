@@ -186,7 +186,7 @@ public abstract	class CatalogRowFactory
 	/**
 	 * Return whether or not the specified index is unique.
 	 *
-	 * @param indexNum	The (0-based) index number.
+	 * @param indexNumber	The (0-based) index number.
 	 *
 	 * @return boolean		Whether or not the specified index is unique.
 	 */

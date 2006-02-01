@@ -52,8 +52,6 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 	 *
 	 * @param leftOperand	The left operand of the comparison
 	 * @param rightOperand	The right operand of the comparison
-	 * @param shortCircuitValue	The value which, if found on the left, means
-	 *							we don't have to evaluate the right.
 	 * @param methodName	The name of the method to call in the generated
 	 *						class.  In this case, it's actually an operator
 	 *						name.

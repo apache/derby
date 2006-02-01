@@ -79,8 +79,6 @@ public class MaterializeResultSetNode extends SingleChildResultSetNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)

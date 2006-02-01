@@ -190,8 +190,6 @@ public interface NumberDataValue extends DataValueDescriptor
 	 *					NumberDataValue to.  Null means set the value
 	 *					to SQL null.
 	 *
-	 * @return	This NumberDataValue
-	 *
 	 */
 	public void setValue(Number theValue) throws StandardException;
 

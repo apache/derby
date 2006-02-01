@@ -477,7 +477,7 @@ public class BrokeredConnection implements Connection
 	 *  Subsequent prepares will use this isoalation level
 	 * @param level - internal isolation level 
 	 * @throws SQLException
-	 * @see EmbedConnection#setPrepareIsolation
+	 * See EmbedConnection#setPrepareIsolation
 	 * 
 	 */
 	public void setPrepareIsolation(int level) throws SQLException
@@ -491,7 +491,7 @@ public class BrokeredConnection implements Connection
 	 * 
 	 * @throws SQLException
 	 * @return current prepare isolation level 
-	 * @see EmbedConnection#getPrepareIsolation
+	 * See EmbedConnection#getPrepareIsolation
 	 */
 	public int getPrepareIsolation() throws SQLException
 	{

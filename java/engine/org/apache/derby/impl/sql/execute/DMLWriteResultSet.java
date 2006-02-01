@@ -57,7 +57,6 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
 	 * Constructor
 	 *
  	 * @param activation		an activation
-	 * @param constantAction	a write constant action
 	 *
  	 * @exception StandardException on error
 	 */

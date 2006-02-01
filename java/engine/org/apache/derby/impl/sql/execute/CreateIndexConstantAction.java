@@ -103,7 +103,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 	 *
 	 *  @param unique		True means it will be a unique index
 	 *  @param indexType	The type of index (BTREE, for example)
-	 *  @param sd			the schema that table (and index) lives in.
+	 *  @param schemaName	the schema that table (and index) lives in.
 	 *  @param indexName	Name of the index
 	 *  @param tableName	Name of table the index will be on
 	 *  @param tableId		UUID of table
@@ -692,8 +692,6 @@ class CreateIndexConstantAction extends IndexConstantAction
 	 *
 	 * @param scan				ScanController for the heap
 	 * @param indexController	ConglomerateController for the index
-	 *
-	 * @return Nothing.
 	 */
 	private void statementExceptionCleanup(
 					ScanController scan, 

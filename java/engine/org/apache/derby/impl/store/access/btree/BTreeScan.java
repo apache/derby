@@ -336,8 +336,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * sets "current_slot" to the slot number.
      * <p>
      *
-	 * @return The leaf on which scan is positioned.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
     protected void positionAtStartForForwardScan(
@@ -502,9 +500,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * to return.
      * <p>
      *
-	 * @return The leaf page containing the start position, or null if no
-     *         start position is found.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
     protected void positionAtStartForBackwardScan(
@@ -663,8 +658,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * latch on next page.  This routine releases the latch on current_page
      * once it has successfully gotten both the latch on the next page and
      * the scan lock on the next page.
-     *
-	 * @return The next leaf page, null if scan is done.
      *
      * @param pos           current row position of the scan.
      *
@@ -1946,10 +1939,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      *           Maybe this is solved by work to be done on the sort 
      *           interface.
      *
-     *
-	 * @return boolean indicating that the fetch set succeeded.  If it failed
-     *                 Hashtable.clear() will be called leaving an empty 
-     *                 table.
      *
      * @param max_rowcnt        The maximum number of rows to insert into the 
      *                          Hash table.  Pass in -1 if there is no maximum.

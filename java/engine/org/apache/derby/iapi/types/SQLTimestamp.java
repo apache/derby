@@ -558,7 +558,7 @@ public final class SQLTimestamp extends DataType
      * Parse a localized timestamp.
      *
      * @param str the timestamp string, with trailing blanks removed.
-     * @param localFinder
+     * @param localeFinder
      *
      * @return a {encodedDate, encodedTime} array.
      *
@@ -1047,7 +1047,7 @@ public final class SQLTimestamp extends DataType
      *
      * @param intervalType One of FRAC_SECOND_INTERVAL, SECOND_INTERVAL, MINUTE_INTERVAL, HOUR_INTERVAL,
      *                     DAY_INTERVAL, WEEK_INTERVAL, MONTH_INTERVAL, QUARTER_INTERVAL, or YEAR_INTERVAL
-     * @param intervalCount The number of intervals to add
+     * @param count The number of intervals to add
      * @param currentDate Used to convert time to timestamp
      * @param resultHolder If non-null a DateTimeDataValue that can be used to hold the result. If null then
      *                     generate a new holder
@@ -1325,7 +1325,6 @@ public final class SQLTimestamp extends DataType
     /**
      * Promotes a DateTimeDataValue to a timestamp.
      *
-     * @param datetime
      *
      * @return the corresponding timestamp, using the current date if datetime is a time,
      *         or time 00:00:00 if datetime is a date.

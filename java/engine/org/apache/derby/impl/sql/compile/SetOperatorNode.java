@@ -115,8 +115,6 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindResultColumns(FromList fromListParam)
@@ -152,8 +150,6 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	 * @param statement			Calling DMLStatementNode (Insert or Update)
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -176,8 +172,6 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	/**
 	 * Build the RCL for this node.  We propagate the RCL up from the
 	 * left child to form this node's RCL.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -313,8 +307,6 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	 * need to validate the target list before blowing it away and replacing
 	 * it with a SELECT true.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -332,8 +324,6 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	 * consider sort avoidance.
 	 *
 	 * @param orderByList	The order by list
-	 *
-	 * @return Nothing.
 	 */
 	void pushOrderByList(OrderByList orderByList)
 	{
@@ -441,8 +431,6 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	 * @param outerFromList	The FromList from the outer query block(s)
 	 * @param subqueryType	The subquery type
 	 *
-	 * @return	None
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void verifySelectStarSubquery(FromList outerFromList, int subqueryType) 
@@ -488,8 +476,6 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	 * 
 	 * @param onlyConvertAlls	Boolean, whether or not to just convert *'s
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void setResultToBooleanTrueNode(boolean onlyConvertAlls)
@@ -510,7 +496,7 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	 * NOTE - The new or enhanced RCL will be fully bound.
 	 *
 	 * @param numTargetColumns	# of columns in target RCL
-	 * @param colMap[]			int array representation of correspondence between
+	 * @param colMap			int array representation of correspondence between
 	 *							RCLs - colmap[i] = -1 -> missing in current RCL
 	 *								   colmap[i] = j -> targetRCL(i) <-> thisRCL(j+1)
 	 * @param dataDictionary	DataDictionary to use

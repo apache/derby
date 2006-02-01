@@ -77,7 +77,7 @@ class CreateViewConstantAction extends DDLConstantAction
 	 *  @param checkOption	Check option type
 	 *  @param columnInfo	Information on all the columns in the table.
 	 *  @param providerInfo Information on all the Providers
-	 *  @param compSchemId 	Compilation Schema Id
+	 *  @param compSchemaId 	Compilation Schema Id
 	 *		 (REMIND tableDescriptor ignored)
 	 */
 	CreateViewConstantAction(

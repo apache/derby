@@ -1849,8 +1849,6 @@ public abstract class ControlRow implements AuxObject, TypedFormat
      * Perform page specific initialization.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      **/
     protected abstract void ControlRowInit();
 

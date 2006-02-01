@@ -303,8 +303,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 	 *
 	 * @param position	The position number to check
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException	Thrown if position number is
 	 *											out of range.
 	 */

@@ -616,8 +616,6 @@ public class StoredPage extends CachedPage
      * Initialize the object, ie. perform work normally perfomed in constructor.
      * Called by setIdentity() and createIdentity() - the Cacheable interfaces
      * which are used to move a page in/out of cache.
-     *
-	 * @return void
      **/
 	protected void initialize()
 	{
@@ -641,8 +639,6 @@ public class StoredPage extends CachedPage
      * to avoid creating unrequired objects for pages that are
      * never modified during their lifetime in the cache.
      * <p>
-     *
-	 * @return void
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -983,8 +979,6 @@ public class StoredPage extends CachedPage
      * in the page byte buffer.  This involves moving information from local
      * variables into encoded version on the page in page header and checksum.
      * <p>
-     *
-	 * @return void.
      *
      * @param identity  The key of this page.
      *
@@ -3375,8 +3369,6 @@ public class StoredPage extends CachedPage
      * As part of moving rows, updating rows, purging rows compact the space
      * left between rows.
      * <p>
-     *
-	 * @return The identifier to be used to open the conglomerate later.
      *
      * @param startByte compress out space starting at startByte offset
      * @param endByte   compress out space ending   at endByte   offset

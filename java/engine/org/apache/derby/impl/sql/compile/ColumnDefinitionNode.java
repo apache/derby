@@ -324,8 +324,6 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * definition describes a user type that either doesn't exist or is
 	 * inaccessible, or that doesn't implement Serializable.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -400,8 +398,6 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 * @param dd		The DataDictionary.
 	 * @param td		The TableDescriptor.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -517,8 +513,6 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * Check the validity of the default for this node.
 	 *
 	 * @param td		The TableDescriptor.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

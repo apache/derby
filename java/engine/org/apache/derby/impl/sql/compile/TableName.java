@@ -121,8 +121,6 @@ public class TableName extends QueryTreeNode
 	 * Set the schema name.
 	 *
 	 * @param schemaName	 Schema name as a String
-	 *
-	 * @return Nothing.
 	 */
 
 	public void setSchemaName(String schemaName)

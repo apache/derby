@@ -256,8 +256,6 @@ public class SubqueryNode extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -303,9 +301,7 @@ public class SubqueryNode extends ValueNode
 	/**
 	 * Set the type of this subquery.
 	 *
-	 * @param Type of this subquery.
-	 *
-	 * @return None.
+	 * @param subqueryType of this subquery.
 	 */
 	public void setSubqueryType(int subqueryType)
 	{
@@ -316,8 +312,6 @@ public class SubqueryNode extends ValueNode
 	 * Set the point of attachment of this subquery.
 	 *
 	 * @param pointOfAttachment	The point of attachment of this subquery.
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
@@ -377,8 +371,6 @@ public class SubqueryNode extends ValueNode
 	 * expression subqueries.
 	 *
 	 * @param parent	The parent BCON.
-	 *
-	 * @return Nothing.
 	 */
   	void setParentComparisonOperator(BinaryComparisonOperatorNode parent)
   	{
@@ -1677,8 +1669,6 @@ public class SubqueryNode extends ValueNode
 	 * @param outerRows			The optimizer's estimate of the number of
 	 *							times this subquery will be executed.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -2196,8 +2186,6 @@ public class SubqueryNode extends ValueNode
 	/**
 	 * Convert this IN/ANY subquery, which is known to return at most 1 row,
 	 * to an equivalent expression subquery.
-	 *
-	 * @return Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

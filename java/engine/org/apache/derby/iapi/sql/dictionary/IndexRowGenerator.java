@@ -131,9 +131,6 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 	 *					the partial row to the complete base row. <B> WARNING:
 	 *					</B> ONE based!!!
 	 *
-	 * @return	An index row conforming to this index description containing
-	 *			the column values from the base row and the given row location.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void getIndexRow(ExecRow baseRow,
@@ -196,7 +193,7 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 	 * Get a NULL Index Row for this index. This is useful to create objects 
 	 * that need to be passed to ScanController.
 	 *
-	 * @param columnrList ColumnDescriptors describing the base table.
+	 * @param columnList ColumnDescriptors describing the base table.
 	 * @param rowLocation	empty row location.
 	 *
 	 * @exception StandardException thrown on error.

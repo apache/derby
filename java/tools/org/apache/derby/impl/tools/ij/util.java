@@ -390,7 +390,6 @@ public final class util implements java.security.PrivilegedAction {
      * @param firstTime Indicates if the method is called first time. This is passed to setupDataSource 
      * method.
      *   
-     * @return
      * @throws SQLException
      */
     public static Connection getDataSourceConnection(String dsName,String user,String password,
@@ -761,15 +760,16 @@ AppUI.out.println("SIZE="+l);
 	 * remaining characters on the line become part of the associated
 	 * element string."
 	 *
+	 * Creates final properties set consisting of 'prop' plus all
+	 * properties loaded from 'iStr' (with the extra whitespace (if any)
+	 *  removed from all values), will be returned via the parameter.
+	 *
 	 * @param iStr An input stream from which the new properties are to be
 	 *  loaded (should already be initialized).
 	 * @param prop A set of properties to which the properties from
 	 *  iStr will be added (should already be initialized).
-	 * @return A final properties set consisting of 'prop' plus all
-	 * properties loaded from 'iStr' (with the extra whitespace (if any)
-	 *  removed from all values), will be returned via the parameter.
 	 *
-		Copied here to avoid dependency on an engine class.
+	 * Copied here to avoid dependency on an engine class.
 	 **/
 	private static void loadWithTrimmedValues(InputStream iStr,
 		Properties prop) throws IOException {

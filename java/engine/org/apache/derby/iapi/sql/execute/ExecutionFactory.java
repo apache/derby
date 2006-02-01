@@ -134,7 +134,7 @@ public interface ExecutionFactory {
 	 * @param unknownRV	The value to return if the comparison between
 	 *					the column and the Orderable value returns the
 	 *					unknown truth value
-	 * @param negate	True means to negate the result of the comparison.
+	 * @param negateCompareResult	True means to negate the result of the comparison.
 	 *					So, for example, to do a > comparison, you would
 	 *					pass ORDER_OP_LESSOREQUALS and set negate to true.
 	 * @param variantType	The variantType for the qualifier's orderable.
@@ -213,7 +213,7 @@ public interface ExecutionFactory {
 		read (1 based)
 	  @param baseRowReadMap baseRowReadMap[heapColId]->readRowColId
 	         (0 based)
-	  @param streamStorableHeapColIds Column ids of stream storable
+	  @param streamStorableColIds Column ids of stream storable
 	         columns. (0 based, Only needed for sync. null if none or
 			 not needed).
 	  @param activation	The Activation.

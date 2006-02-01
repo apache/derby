@@ -100,8 +100,6 @@ public class IndexRow extends ValueRow implements ExecIndexRow
 
 	/**
 	 * Turn the ExecRow into an ExecIndexRow.
-	 *
-	 * @return Nothing.
 	 */
 	public void execRowToExecIndexRow(ExecRow valueRow)
 	{

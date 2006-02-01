@@ -63,9 +63,6 @@ class CreateSchemaConstantAction extends DDLConstantAction
 	 *
 	 *  @param schemaName	Name of table.
 	 *  @param aid			Authorizaton id
-	 *  @param schemaId		ID of table. If null, we allocate one.
-	 *	@param setToDefault	if true, set the default schema to
-	 *			the new schema once it is created.
 	 */
 	CreateSchemaConstantAction(
 								String			schemaName,

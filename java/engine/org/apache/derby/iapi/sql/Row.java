@@ -56,8 +56,6 @@ public interface Row
 	 * Set a DataValueDescriptor in a Row by ordinal position (1-based).
 	 *
 	 * @param position	The ordinal position of the column.
-	 *
-	 * @return		The DataValueDescriptor, null if no such column exists
 	 */
 	void	setColumn (int position, DataValueDescriptor value);
 

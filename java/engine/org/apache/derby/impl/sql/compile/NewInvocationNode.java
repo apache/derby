@@ -64,10 +64,12 @@ public class NewInvocationNode extends MethodCallNode
 	private boolean delimitedIdentifier;
 
 	/**
-	 * Initializer for a NewInvocationNode
+	 * Initializer for a NewInvocationNode. Parameters are:
 	 *
-	 * @param javaClassName		The full package.class name of the class
-	 * @param parameterList		The parameter list for the constructor
+	 * <ul>
+	 * <li>javaClassName		The full package.class name of the class</li>
+	 * <li>parameterList		The parameter list for the constructor</li>
+	 * </ul>
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -89,8 +91,6 @@ public class NewInvocationNode extends MethodCallNode
 	 * Mark this node as only needing to
 	 * to a single instantiation.  (We can
 	 * reuse the object after newing it.)
-	 *
-	 * @return Nothing.
 	 */
 	void setSingleInstantiation()
 	{
@@ -284,8 +284,6 @@ public class NewInvocationNode extends MethodCallNode
 	 * correlated with.
 	 *
 	 * @param correlationMap	The JBitSet of the tables that we are correlated with.
-	 *
-	 * @return Nothing.
 	 */
 	void getCorrelationTables(JBitSet correlationMap)
 		throws StandardException

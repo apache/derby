@@ -117,8 +117,6 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * Set the childResult for this node.
 	 *
 	 * @param childResult 	The new childResult for this node.
-	 *
-	 * @return Nothing.
 	 */
 	void setChildResult(ResultSetNode childResult)
 	{
@@ -170,8 +168,6 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -221,8 +217,6 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * Set the (query block) level (0-based) for this FromTable.
 	 *
 	 * @param level		The query block level for this FromTable.
-	 *
-	 * @return Nothing
 	 */
 	public void setLevel(int level)
 	{
@@ -365,7 +359,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * Optimize this SingleChildResultSetNode.  
 	 *
 	 * @param dataDictionary	The DataDictionary to use for optimization
-	 * @param predicateList		The PredicateList to optimize.  This should
+	 * @param predicates		The PredicateList to optimize.  This should
 	 *							be a join predicate.
 	 * @param outerRows			The number of outer joining rows
 	 *
@@ -547,8 +541,6 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * Notify the underlying result set tree that the result is
 	 * ordering dependent.  (For example, no bulk fetch on an index
 	 * if under an IndexRowToBaseRow.)
-	 *
-	 * @return Nothing.
 	 */
 	void markOrderingDependent()
 	{

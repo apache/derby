@@ -189,8 +189,6 @@ public class CursorNode extends DMLStatementNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -731,7 +729,6 @@ public class CursorNode extends DMLStatementNode
 		REVISIT: If the list is empty, should it expand it out? at present,
 		it leaves it empty.
 	
-		@param dataDictionary	The DataDictionary to use for binding
 		@param targetTable	The underlying target table 
 	
 		@exception StandardException		Thrown on error

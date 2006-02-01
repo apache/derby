@@ -93,8 +93,6 @@ public class DefaultDescriptor
 	 * Set the UUID of the default.
 	 *
 	 * @param defaultUUID The new UUID for the default.
-	 *
-	 * @return Nothing.
 	 */
 	public void setDefaultUUID(UUID defaultUUID)
 	{

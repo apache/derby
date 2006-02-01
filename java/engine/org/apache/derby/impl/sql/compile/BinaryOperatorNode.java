@@ -206,8 +206,6 @@ public class BinaryOperatorNode extends ValueNode
 	 * Set the operator.
 	 *
 	 * @param operator	The operator.
-	 *
-	 * @return Nothing.
 	 */
 	void setOperator(String operator)
 	{
@@ -219,8 +217,6 @@ public class BinaryOperatorNode extends ValueNode
 	 * Set the methodName.
 	 *
 	 * @param methodName	The methodName.
-	 *
-	 * @return Nothing.
 	 */
 	void setMethodName(String methodName)
 	{
@@ -232,8 +228,6 @@ public class BinaryOperatorNode extends ValueNode
 	 * Set the interface type for the left and right arguments.
 	 * Used when we don't know the interface type until
 	 * later in binding.
-	 *
-	 * @return void
 	 */
 	public void setLeftRightInterfaceType(String iType)
 	{
@@ -246,8 +240,6 @@ public class BinaryOperatorNode extends ValueNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -261,8 +253,6 @@ public class BinaryOperatorNode extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -629,8 +619,6 @@ public class BinaryOperatorNode extends ValueNode
 	 * Set the leftOperand to the specified ValueNode
 	 *
 	 * @param newLeftOperand	The new leftOperand
-	 *
-	 * @return None.
 	 */
 	public void setLeftOperand(ValueNode newLeftOperand)
 	{
@@ -651,8 +639,6 @@ public class BinaryOperatorNode extends ValueNode
 	 * Set the rightOperand to the specified ValueNode
 	 *
 	 * @param newRightOperand	The new rightOperand
-	 *
-	 * @return None.
 	 */
 	public void setRightOperand(ValueNode newRightOperand)
 	{
@@ -778,8 +764,6 @@ public class BinaryOperatorNode extends ValueNode
 
 	/**
 	 * Swap the left and right sides.
-	 *
-	 * @return Nothing.
 	 */
 	void swapOperands()
 	{

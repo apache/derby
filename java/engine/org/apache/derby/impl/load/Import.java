@@ -78,11 +78,11 @@ public class Import extends ImportAbstract{
 	/**
 	 * SYSCS_IMPORT_TABLE  system Procedure from ij or from a Java application
 	 * invokes  this method to perform import to a table from a file.
-	 * @param con	 The Cloudscape database connection URL for the database containing the table
+	 * @param connection	 The Cloudscape database connection URL for the database containing the table
 	 * @param schemaName	The name of the schema where table to import exists 
 	 * @param tableName     Name of the Table the data has to be imported to.
 	 * @param inputFileName Name of the file from which data has to be imported.
-	 * @param colDelimiter  Delimiter that seperates columns in the file
+	 * @param columnDelimiter  Delimiter that seperates columns in the file
 	 * @param characterDelimiter  Delimiter that is used to quiote non-numeric types
 	 * @param codeset           Codeset of the data in the file
 	 * @param replace          Indicates whether the data in table has to be replaced or
@@ -109,7 +109,7 @@ public class Import extends ImportAbstract{
 	/**
 	 * SYSCS_IMPORT_DATA  system Procedure from ij or from a Java application
 	 * invokes  this method to perform import to a table from a file.
-	 * @param con	 The Cloudscape database connection URL for the database containing the table
+	 * @param connection	 The Cloudscape database connection URL for the database containing the table
 	 * @param schemaName	The name of the schema where table to import exists 
 	 * @param tableName     Name of the Table the data has to be imported to.
 	 * @param insertColumnList  Comma Seperated column name list to which data
@@ -117,7 +117,7 @@ public class Import extends ImportAbstract{
 	 * @param columnIndexes     Comma sepearted Lit Index of the columns in the file(first column
 	                             starts at 1). eg: '3 ,4 , 5'
 	 * @param inputFileName Name of the file from which data has to be imported.
-	 * @param colDelimiter  Delimiter that seperates columns in the file
+	 * @param columnDelimiter  Delimiter that seperates columns in the file
 	 * @param characterDelimiter  Delimiter that is used to quiote non-numeric types
 	 * @param codeset           Codeset of the data in the file
 	 * @param replace          Indicates whether the data in table has to be replaced or

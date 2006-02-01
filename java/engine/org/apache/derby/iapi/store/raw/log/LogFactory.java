@@ -145,7 +145,7 @@ public interface LogFactory extends Corruptable {
 		@return the LogScan.
 		@exception StandardException StandardCloudscape error policy
 		*/
-	ScanHandle openFlushedScan(DatabaseInstant start, int groupsIWant)
+	ScanHandle openFlushedScan(DatabaseInstant startAt, int groupsIWant)
 		 throws StandardException;
 
 	/**
@@ -248,7 +248,7 @@ public interface LogFactory extends Corruptable {
 	 * redoing a checkpoint  during rollforward recovery
 	 @param cinstant The LogInstant of the checkpoint
 	 @param redoLWM  Redo Low Water Mark in the check point record
-	 @param dataFactory - the data factory
+	 @param df - the data factory
 	 @exception StandardException - encounter exception during checkpoint
 	 */
 	public void checkpointInRFR(LogInstant cinstant, long redoLWM, 

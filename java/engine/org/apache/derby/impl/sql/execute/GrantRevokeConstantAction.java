@@ -51,7 +51,7 @@ class GrantRevokeConstantAction extends GenericConstantAction
 	/**
 	 *	This is the guts of the Execution-time logic for GRANT/REVOKE
 	 *
-	 *	@see ConstantAction#executeConstantAction
+	 *	See ConstantAction#executeConstantAction
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */

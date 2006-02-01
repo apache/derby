@@ -133,8 +133,6 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 	/**
 	 * set the Information gathered from the parent table that is 
 	 * required to peform a referential action on dependent table.
-	 *
-	 * @return Nothing.
 	 */
 	public void setRefActionInfo(long fkIndexConglomId, 
 								 int[]fkColArray, 

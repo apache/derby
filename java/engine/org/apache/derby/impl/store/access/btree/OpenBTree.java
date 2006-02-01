@@ -247,8 +247,6 @@ public class OpenBTree
      *
      * @param count the estimated number of rows in the container.
      *
-	 * @return The total estimated number of rows in the conglomerate.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
     public void setEstimatedRowCount(long count)
@@ -340,8 +338,6 @@ public class OpenBTree
      * passed in.  The container is always opened with no locking, it is up
      * to the caller to make the appropriate container locking call.
      * <p>
-     *
-	 * @return The identifier to be used to open the conglomerate later.
      *
      * @param open_user_scans The user transaction which opened this btree.
      * @param xact_manager    The current transaction, usually the same as

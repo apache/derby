@@ -116,27 +116,39 @@ public class ResultColumn extends ValueNode
 
 	/**
 	 * Different types of initializer parameters indicate different
-	 * types of initialization.
+	 * types of initialization. Parameters may be:
 	 *
-	 * @param arg1	The name of the column, if any.
-	 * @param arg2	The expression this result column represents
+	 * <ul>
+	 * <li>arg1	The name of the column, if any.</li>
+	 * <li>arg2	The expression this result column represents</li>
+	 * </ul>
 	 *
+	 * <p>
 	 * - OR -
+	 * </p>
 	 *
-	 * @param arg1	a column reference node
-	 * @param arg2	The expression this result column represents
+	 * <ul>
+	 * <li>arg1	a column reference node</li>
+	 * <li>arg2	The expression this result column represents</li>
+	 * </ul>
 	 *
+	 * <p>
 	 * - OR -
+	 * </p>
 	 *
-	 * @param arg1	The column descriptor.
-	 * @param arg2	The expression this result column represents
+	 * <ul>
+	 * <li>arg1	The column descriptor.</li>
+	 * <li>arg2	The expression this result column represents</li>
+	 * </ul>
 	 *
+	 * <p>
 	 * - OR -
+	 * </p>
 	 *
-	 * @param dtd			The type of the column
-	 * @param expression	The expression this result column represents
-	 *
-	 * @return	The newly initialized ResultColumn
+	 * <ul>
+	 * <li>dtd			The type of the column</li>
+	 * <li>expression	The expression this result column represents</li>
+	 * </ul>
 	 */
 	public void init(Object arg1, Object arg2) throws StandardException
 	{
@@ -306,8 +318,6 @@ public class ResultColumn extends ValueNode
 	 * be hooked up.
 	 *
 	 * @param expression	The expression to be set in this ResultColumn
-	 *
-	 * @return	Nothing
 	 */
 
 	public void setExpression(ValueNode expression)
@@ -330,8 +340,6 @@ public class ResultColumn extends ValueNode
 	 * Set the expression to a null node of the
 	 * correct type.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	void setExpressionToNullNode()
@@ -349,8 +357,6 @@ public class ResultColumn extends ValueNode
 	 * table they came from.
 	 *
 	 * @param name	The name to set in this ResultColumn
-	 *
-	 * @return	Nothing
 	 */
 
 	public void setName(String name)
@@ -392,8 +398,6 @@ public class ResultColumn extends ValueNode
 	 * back pointer to the RSN.
 	 *
 	 * @param resultSetNumber	The resultSetNumber.
-	 *
-	 * @return Nothing.
 	 */
 	public void setResultSetNumber(int resultSetNumber)
 	{
@@ -414,8 +418,6 @@ public class ResultColumn extends ValueNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -436,8 +438,6 @@ public class ResultColumn extends ValueNode
 	 * Adjust the virtualColumnId for this ResultColumn	by the specified amount
 	 * 
 	 * @param adjust	The adjustment for the virtualColumnId
-	 *
-	 * @return Nothing
 	 */
 
 	public void adjustVirtualColumnId(int adjust)
@@ -449,8 +449,6 @@ public class ResultColumn extends ValueNode
 	 * Set the virtualColumnId for this ResultColumn
 	 * 
 	 * @param id	The virtualColumnId for this ResultColumn
-	 *
-	 * @return Nothing
 	 */
 
 	public void setVirtualColumnId(int id)
@@ -471,8 +469,6 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Generate a unique (across the entire statement) column name for unnamed
 	 * ResultColumns
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -524,8 +520,6 @@ public class ResultColumn extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -611,8 +605,6 @@ public class ResultColumn extends ValueNode
 	 * @param columnId		The ordinal position of the column
 	 *						in the table, starting at 1.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -659,8 +651,6 @@ public class ResultColumn extends ValueNode
 	 *						in the table, starting at 1. (Used to
 	 *						set the VirtualColumnId.)
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -692,10 +682,6 @@ public class ResultColumn extends ValueNode
 	
 	/**
 	 * Change an untyped null to a typed null.
-	 *
-	 * @param typeId	The type of the null.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -734,7 +720,6 @@ public class ResultColumn extends ValueNode
 	 * @param columnDescriptor	The ColumnDescriptor to set in
 	 *				this ResultColumn.
 	 *
-	 * @return	Nothing
 	 * @exception StandardException tableNameMismatch
 	 */
 	void setColumnDescriptor(TableDescriptor tableDescriptor,
@@ -776,8 +761,6 @@ public class ResultColumn extends ValueNode
 	 * All this does is copy the datatype information to this node.
 	 * This is useful for SELECT statements, where the result type
 	 * of each column is the type of the column's expression.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -906,9 +889,6 @@ public class ResultColumn extends ValueNode
 	 * @param acb		The ActivationClassBuilder for the class we're generating
 	 * @param eb		The ExpressionBlock that the generate code is to go into
 	 * @param getColumnExpression "fieldx.getColumn(y)"
-	 *
-	 * @return	An Expression representing a Null for the result
-	 *			column.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1168,8 +1148,6 @@ public class ResultColumn extends ValueNode
 
 	/**
 	 * Mark this a columm as a generated column
-	 *
-	 * @return None.
 	 */
 	public void markGenerated()
 	{
@@ -1180,8 +1158,6 @@ public class ResultColumn extends ValueNode
 
 	/**
 	 * Mark this a columm as generated for an unmatched column in an insert
-	 *
-	 * @return None.
 	 */
 	public void markGeneratedForUnmatchedColumnInInsert()
 	{
@@ -1202,8 +1178,6 @@ public class ResultColumn extends ValueNode
 
 	/**
 	 * Mark this column as a referenced column.
-	 *
-	 * @return None.
 	 */
 	public void setReferenced()
 	{
@@ -1234,8 +1208,6 @@ public class ResultColumn extends ValueNode
 
 	/**
 	 * Mark this column as an unreferenced column.
-	 *
-	 * @return None.
 	 */
 	public void setUnreferenced()
 	{
@@ -1245,8 +1217,6 @@ public class ResultColumn extends ValueNode
 	/**
  	 * Mark this RC and all RCs in the underlying
 	 * RC/VCN chain as referenced.
-	 *
-	 * @return Nothing.
 	 */
 	void markAllRCsInChainReferenced()
 	{
@@ -1275,8 +1245,6 @@ public class ResultColumn extends ValueNode
 
 	/**
 	 * Mark this ResultColumn as redundant.
-	 *
-	 * @return None.
 	 */
 	public void setRedundant()
 	{
@@ -1285,8 +1253,6 @@ public class ResultColumn extends ValueNode
 
 	/**
 	 * Mark this ResultColumn as a grouping column in the SELECT list
-	 *
-	 * @return Nothing.
 	 */
 	public void markAsGroupingColumn()
 	{
@@ -1296,8 +1262,6 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Look for and reject ?/-?/+? parameter under this ResultColumn.  This is
 	 * called for SELECT statements.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown if a ?/-?/+? parameter was found
 	 *									directly under this ResultColumn.
@@ -1543,8 +1507,6 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Verify that this RC is orderable.
 	 *
-	 * @return Nothing.
-     *
 	 * @exception StandardException		Thrown on error
 	 */
 	void verifyOrderable() throws StandardException

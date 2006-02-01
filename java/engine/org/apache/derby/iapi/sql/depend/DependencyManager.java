@@ -380,8 +380,8 @@ public interface DependencyManager {
 		clearDependencies will delete dependencies if they are
 		stored; the delete is finalized at the next commit.
 
+		@param lcc	Compiler state
 		@param d the dependent
-		@param p the provider
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -451,7 +451,7 @@ public interface DependencyManager {
 	 * need to internationalize, which is causing the invokation
 	 * of the Dependency Manager.
 	 *
-	 * @param int		The action
+	 * @param action		The action
 	 *
 	 * @return String	The String representation
 	 */

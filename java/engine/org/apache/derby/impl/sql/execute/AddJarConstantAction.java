@@ -48,11 +48,9 @@ class AddJarConstantAction extends DDLConstantAction
 	/**
 	 *	Make the ConstantAction to add a jar file to database.
 	 *
-	 *	@param	id					The id for the jar file -
-	 *                              (null means create one)
 	 *	@param	schemaName			The SchemaName for the jar file.
 	 *	@param	sqlName			    The sqlName for the jar file.
-	 *  @param  fileName            The name of the file that holds the jar.
+	 *  @param  externalPath            The name of the file that holds the jar.
 	 */
 	AddJarConstantAction(UUID id,
 								 String schemaName,

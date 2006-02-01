@@ -24,7 +24,7 @@ package org.apache.derby.iapi.error;
  * This is a refactoring wrapper around the common ExceptionSeverity class
  * and may be removed at some point in the future.
  *
- * @see org.apache.derby.common.error.ExceptionSeverity
+ * See org.apache.derby.common.error.ExceptionSeverity
  */
 public interface ExceptionSeverity 
     extends org.apache.derby.shared.common.error.ExceptionSeverity

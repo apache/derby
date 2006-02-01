@@ -514,10 +514,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @param nodeFactory			Where to get query tree nodes.
 	 * @param targetTableDescriptor	The TableDescriptor for the constrained table.
-	 * @param resultColumnList		Result columns.
+	 * @param sourceRCL		Result columns.
 	 * @param checkConstraint		Parsed query tree for check constraint
-	 *
-	 * @return	The bound check constraint tree.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -878,7 +876,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	/**
 	 * Generate the TriggerInfo structures used during code generation.
 	 *
-	 * @param tdl				The trigger descriptor list
+	 * @param triggerList				The trigger descriptor list
 	 * @param td				The TableDescriptor
 	 * @param changedCols		The columns that are being modified
 	 *
@@ -1240,10 +1238,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	  *	Generate the code to evaluate a tree of CHECK CONSTRAINTS.
 	  *
 	  *	@param	checkConstraints	Bound query tree of ANDed check constraints.
-	  *	@param	generatedMethodName	Name to give the generated method. If null, we will
-	  *								generate a unique name.
 	  *	@param	ecb					Expression Class Builder
-	  *	@param	executeEB			Statement block of generated execute() method.
 	  *
 	  *
 	  *

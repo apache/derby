@@ -343,8 +343,6 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * Set the andNode.
 	 *
 	 * @param andNode	The new andNode.
-	 *
-	 * @return Nothing.
 	 */
 	public void setAndNode(AndNode andNode)
 	{
@@ -375,8 +373,6 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * Set the equivalence class, if any, for this predicate.
 	 *
 	 * @param equivalenceClass	The equivalence class for this predicate.
-	 *
-	 * @return	Nothing.
 	 */
 	void setEquivalenceClass(int equivalenceClass)
 	{
@@ -396,8 +392,6 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	/**
 	 * Categorize this predicate.  Initially, this means
 	 * building a bit map of the referenced tables for each predicate.
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -554,7 +548,6 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * @param ro	The search clause that we are currently considering
 	 *				as the source for transitive closure
 	 *
-	 * @return Nothing.
 	 */
 	void setTransitiveSearchClauseAdded(RelationalOperator ro)
 	{
@@ -622,8 +615,6 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 
 	/**
 	 * Clear the start/stop position and qualifier flags
-	 *
-	 * @return Nothing.
 	 */
 	void clearScanFlags()
 	{
@@ -634,8 +625,6 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 
 	/**
 	 * Clear the qualifier flag.
-	 *
-	 * @return Nothing.
 	 */
 	void clearQualifierFlag()
 	{
@@ -725,8 +714,6 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)

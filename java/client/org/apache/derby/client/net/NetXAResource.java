@@ -549,7 +549,7 @@ public class NetXAResource implements XAResource {
      * default transaction timeout value in the resource manager. The newly assigned timeout value is effective for the
      * life of this <CODE>XAResource</CODE> instance unless a new value is set.<P>
      *
-     * @param the transaction timeout value in seconds.
+     * @param seconds the transaction timeout value in seconds.
      *
      * @throws XAException An error has occurred. Possible exception values are XAER_RMERR, XAER_RMFAIL, or XAER_INVAL.
      */

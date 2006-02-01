@@ -46,11 +46,7 @@ public class BitConstantNode extends ConstantNode
 	/**
 	 * Initializer for a BitConstantNode.
 	 *
-	 * @param arg1	A Bit containing the value of the constant
-	 *
-	 * - OR -
-	 *
-	 * @param arg1	The TypeId for the type of the node
+	 * @param arg1	A Bit containing the value of the constant OR The TypeId for the type of the node
 	 *
 	 * @exception StandardException
 	 */
@@ -91,8 +87,6 @@ public class BitConstantNode extends ConstantNode
 	/**
 	 * Initializer for non-numeric types.  Needed for our subclasses
 	 *
-	 * @param typeCompilationFactory	The factory to get the
-	 *									DataTypeServicesFactory from
 	 * @param typeId	The Type ID of the datatype
 	 * @param nullable	True means the constant is nullable
 	 * @param maximumWidth	The maximum number of bytes in the data value
@@ -138,9 +132,6 @@ public class BitConstantNode extends ConstantNode
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class being built
 	 * @param mb	The method the code to place the code
-	 *
-	 * @return		The compiled Expression, 
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	void generateConstant(ExpressionClassBuilder acb, MethodBuilder mb)

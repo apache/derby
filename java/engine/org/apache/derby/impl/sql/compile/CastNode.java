@@ -168,8 +168,6 @@ public class CastNode extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -194,8 +192,6 @@ public class CastNode extends ValueNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -368,8 +364,6 @@ public class CastNode extends ValueNode
 	 * the child.
 	 * This is useful for when we generate a CastNode during binding
 	 * after having already bound the child.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -646,7 +640,7 @@ public class CastNode extends ValueNode
 	 *			non-integral type	 non-decimal numeric
 	 *			non-integral type	 char
 	 *
-	 * @param doubleValue		non-integral type a a double to cast from
+	 * @param constantValue		non-integral type a a double to cast from
 	 * @param destJDBCTypeId	The destination JDBC TypeId
 	 *
 	 * @return The new top of the tree (this CastNode or a new Constant)
@@ -810,8 +804,6 @@ public class CastNode extends ValueNode
 	 * By default unary operators don't accept ? parameters as operands.
 	 * This can be over-ridden for particular unary operators.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Always thrown to indicate a
 	 *									? parameter where it isn't allowed.
 	 */
@@ -862,8 +854,6 @@ public class CastNode extends ValueNode
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class we're generating
 	 * @param mb	The method the code to place the code
-	 *
-	 * @return	An expression to evaluate this operator
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

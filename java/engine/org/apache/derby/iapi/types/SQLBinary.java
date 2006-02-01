@@ -643,10 +643,6 @@ abstract class SQLBinary
 	 *
 	 * @param left			The value on the left side of the <
 	 * @param right			The value on the right side of the <
-	 * @param result	The result of a previous call to this method, null
-	 *					if not called yet.  NOTE: This is unused in this
-	 *					method, because comparison operators always return
-	 *					pre-allocated values.
 	 *
 	 * @return	A SQL boolean value telling whether the first operand is
 	 *			less than the second operand

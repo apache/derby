@@ -579,7 +579,7 @@ public abstract class NodeFactory
 	 * so this could be used by ALTER PUBLICATION.
 	 *
 	 * @param aliasName				The name of the alias
-	 * @param fullStaticMethodName	The full path/method name
+	 * @param targetName			The full path/method name
 	 * @param aliasSpecificInfo	The full path of the target method name,
 	 *								if any
 	 * @param aliasType	The type of alias to create
@@ -614,7 +614,6 @@ public abstract class NodeFactory
 	 * @param resultColumns Columns extracted from table.
 	 * @param tableProperties Properties being passed onto the table scan
 	 * @param cm Current context manager
-	 * @return
 	 */
 	public abstract ResultSetNode mapTableAsVTI(
 			TableDescriptor td,

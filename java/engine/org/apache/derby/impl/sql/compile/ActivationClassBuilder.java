@@ -161,9 +161,6 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	/**
 	 * Generate the assignment for numSubqueries = x
 	 *
-	 * @param numSubqueries		The number of subqueries in the query.
-	 *
-	 * @return Nothing.
 	 * @exception StandardException thrown on failure
 	 */
 	public	 void	setNumSubqueries()

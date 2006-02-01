@@ -83,8 +83,6 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 	 *
 	 * @param tc the xact controller
 	 * @param rowArray the row array
-	 * @param lastArraySlot the last array slot in use 
-	 * @param conglomId	0 if no conglom used
 	 * @param resultDescription value returned by getResultDescription()
 	 */
 	public TemporaryRowHolderResultSet
@@ -107,8 +105,6 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 	 *
 	 * @param tc the xact controller
 	 * @param rowArray the row array
-	 * @param lastArraySlot the last array slot in use 
-	 * @param conglomId	0 if no conglom used
 	 * @param resultDescription value returned by getResultDescription()
 	 * @param isAppendable true,if we can insert rows after this result is created
 	 * @param positionIndexConglomId conglomId of the index which has order rows
@@ -211,8 +207,6 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 	/**
 	 * Mark the ResultSet as the topmost one in the ResultSet tree.
 	 * Useful for closing down the ResultSet on an error.
-	 *
-	 * @return Nothing.
 	 */
 	public void markAsTopResultSet()
 	{ }
@@ -481,8 +475,6 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 	 * TargetResultSet.  This is useful when doing bulk insert.
 	 *
 	 * @param trs	The TargetResultSet.
-	 *
-	 * @return Nothing.
 	 */
 	public void setTargetResultSet(TargetResultSet trs)
 	{
@@ -492,9 +484,6 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 	 * Set whether or not the NPRS need the row location when acting
 	 * as a row source.  (The target result set determines this.)
 	 * 
-	 * @param boolean needsRowLocation
-	 *
-	 * @return Nothing.
 	 */
 	public void setNeedsRowLocation(boolean needsRowLocation)
 	{
@@ -629,8 +618,6 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 
 	/**
 	 * Tells the system that there will be calls to getNextRow().
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -841,8 +828,6 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 	/**
 	 * Tells the system to clean up on an error.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error.
 	 */
 	public void	cleanUp() throws StandardException
@@ -868,7 +853,6 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 	 * in particular, no more calls to open().
 	 * Will close the result set if it is not already closed.
 	 *
-	 * @return	Nothing
 	 * @exception StandardException	on error
 	 */
 	public void finish() throws StandardException

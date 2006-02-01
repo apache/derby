@@ -326,8 +326,6 @@ public class CreateIndexNode extends DDLStatementNode
 	/**
 	 * Check the uniqueness of the column names within the derived column list.
 	 *
-	 * @return None.
-	 *
 	 * @exception StandardException	Thrown if column list contains a
 	 *											duplicate name.
 	 */

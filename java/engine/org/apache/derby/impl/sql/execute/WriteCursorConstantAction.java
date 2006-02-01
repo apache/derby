@@ -125,7 +125,6 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	 *  @param emptyHeapRow	an empty heap row
 	 *  @param baseRowReadMap	BaseRowReadMap[heapColId]->ReadRowColumnId. (0 based)
      *  @param streamStorableHeapColIds Null for non rep. (0 based)
-	 *  @param numColumns	Number of columns to read.
 	 *  @param singleRowSource		Whether or not source is a single row source
 	 */
 	public	WriteCursorConstantAction(

@@ -80,8 +80,6 @@ public class IndexInfoImpl
 	 * Set the conglomerate number for the index.
 	 *
 	 * @param conglomerateNumber	The conglomerateNumber for the index.
-	 *
-	 * @return	Nothing.
 	 */
 	public void setConglomerateNumber(long conglomerateNumber)
 	{
@@ -102,8 +100,6 @@ public class IndexInfoImpl
 	 * Set the name for the index.
 	 *
 	 * @param indexName		The name for the index.
-	 *
-	 * @return	Nothing.
 	 */
 	public void setIndexName(String indexName)
 	{
@@ -134,8 +130,6 @@ public class IndexInfoImpl
 	 * Set the IndexRowGenerator for this index.
 	 *
 	 * @param irg			The IndexRowGenerator for this index.
-	 *
-	 * @return Nothing.
 	 */
 	public void setIndexRowGenerator(IndexRowGenerator irg)
 	{
@@ -160,9 +154,7 @@ public class IndexInfoImpl
 	 * given the (0-based) column number for the column within the index.
 	 *
 	 * @param colNumber		The column number within the index
-	 * @param baseColPos	The base column position for the column.
-	 *
-	 * @return Nothing.
+	 * @param baseColumnPosition	The base column position for the column.
 	 */
 	public void setBaseColumnPosition(int colNumber,
 									 int baseColumnPosition)

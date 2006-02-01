@@ -40,9 +40,6 @@ public class ErrorStringBuilder
 
 	/**
 	** Construct an error string builder
-	**
-	** @param boolean  whether a header string
-	**					is included in each message
 	*/
 	public ErrorStringBuilder(PrintWriterGetHeader headerGetter)
 	{
@@ -54,7 +51,7 @@ public class ErrorStringBuilder
 	/**
 	** Append an error string 
 	**
-	** @param String 	the string to append
+	** @param s 	the string to append
 	*/
 	public void append(String s)
 	{
@@ -67,7 +64,7 @@ public class ErrorStringBuilder
 	/**
 	** Append an error string with a newline
 	**
-	** @param String 	the string to append
+	** @param s 	the string to append
 	*/
 	public void appendln(String s)
 	{
@@ -80,7 +77,7 @@ public class ErrorStringBuilder
 	** Print a stacktrace from the throwable in the error
 	** buffer.
 	**
-	** @param Throwable	the error
+	** @param t	the error
 	*/
 	public void stackTrace(Throwable t)
 	{

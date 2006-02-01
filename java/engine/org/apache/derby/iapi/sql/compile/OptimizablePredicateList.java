@@ -56,8 +56,6 @@ public interface OptimizablePredicateList
 	 *
 	 * @param predCtr	The index.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	void removeOptPredicate(int predCtr) throws StandardException;
@@ -93,8 +91,6 @@ public interface OptimizablePredicateList
 	 * the given Optimizable.
 	 *
 	 * @param optTable	An Optimizable for the table in question
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -166,8 +162,6 @@ public interface OptimizablePredicateList
 	 * @param optTable		The optimizable the column comes from.
 	 * @param columnNumber	The column number within the base table.
 	 *
-	 * @return Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	void putOptimizableEqualityPredicateFirst(Optimizable optTable,
@@ -184,8 +178,6 @@ public interface OptimizablePredicateList
 	 * @param referencedTableMap	The table map to check against
 	 * @param table					The table to order the new predicates
 	 *								against
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -211,8 +203,6 @@ public interface OptimizablePredicateList
 	 * set, like when generating a HashScanResultSet.
 	 *
 	 * @param otherList				The predicateList to xfer to
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -287,9 +277,6 @@ public interface OptimizablePredicateList
 	 * @param mb	The method the generated code is to go into
 	 * @param optTable	The Optimizable table the start key is for
 	 *
-	 * @return	An expression which, when evaluated, returns the method to
-	 *			get the start key.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	void generateStartKey(ExpressionClassBuilderInterface acb,
@@ -303,9 +290,6 @@ public interface OptimizablePredicateList
 	 * @param acb	The ExpressionClassBuilderInterface for the class we're building
 	 * @param mb	the method the generated code is to go into
 	 * @param optTable	The Optimizable table the stop key is for
-	 *
-	 * @return	An expression which, when evaluated, returns the method to
-	 *			get the stop key.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

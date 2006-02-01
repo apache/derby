@@ -45,8 +45,6 @@ public interface TargetResultSet extends ResultSet
 	 * @param execRow		The changed row.
 	 * @param rowLocation	The row location of the row.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException thrown if cursor finished.
 	 */
 	public void changedRow(ExecRow execRow, RowLocation rowLocation) throws StandardException;

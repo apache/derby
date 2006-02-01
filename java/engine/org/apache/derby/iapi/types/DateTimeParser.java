@@ -49,8 +49,6 @@ class DateTimeParser
      *                          exactly ndigits long.
      * @param separator The separator at the end of the integer. If zero then the integer must be at the end of the string
      *                  but may be followed by spaces.
-     * @param separatorRequired If true then the integer must be followed by the separator. If false then the integer
-     *                          may terminate the string or be followed by the separator
      * @param isFraction If true then the returned integer will be multiplied by 10**(maxDigits - actualDigitCount)
      *
      * @return the integer.

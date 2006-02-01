@@ -47,7 +47,7 @@ public class DropViewNode extends DDLStatementNode
 	/**
 	 * Initializer for a DropViewNode
 	 *
-	 * @param objectName	The name of the object being dropped
+	 * @param dropObjectName	The name of the object being dropped
 	 *
 	 */
 

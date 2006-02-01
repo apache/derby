@@ -75,16 +75,16 @@ public interface CipherFactory
 		throws StandardException;
 
 	/**
-		Verify the external encryption key
+		Verify the external encryption key. Throws exception if unable to verify
+		that the encryption key is the same as that
+		used during database creation or if there are any problems when trying to do the
+		verification process.
+		
 		@param	create	 true means database is being created, whereas false
 					implies that the database has already been created
 		@param	storageFactory storageFactory is used to access any stored data
 					that might be needed for verification process of the encryption key
 		@param	properties	properties at time of database connection as well as those in service.properties
-
-		@return	throws exception if unable to verify that the encryption key is the same as that
-				used during database creation or if there are any problems when trying to do the
-				verification process
 	 */
 	public void verifyKey(boolean create, StorageFactory storageFactory,Properties properties)
 		throws StandardException;

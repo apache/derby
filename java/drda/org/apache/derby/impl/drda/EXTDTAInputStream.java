@@ -67,7 +67,7 @@ public class EXTDTAInputStream extends InputStream {
 	 * locks until end of transaction. DERBY-255.
 	 * 
 	 * 
-	 * @see DDMWriter.writeScalarStream
+	 * See DDMWriter.writeScalarStream
 	 * 
 	 * @param rs
 	 *            result set from which to retrieve the lob
@@ -80,7 +80,7 @@ public class EXTDTAInputStream extends InputStream {
 	 * 			   DRDAConstants.DRDA_TYPE_NLOBCMIXED
 	 *  		   DRDAConstants.DRDA_TYPE_LOBCMIXED
 	 * 
-	 * @returns null if the value is null or a new EXTDTAInputStream corresponding to 
+	 * @return null if the value is null or a new EXTDTAInputStream corresponding to 
 	 *  		rs.getBinaryStream(column) value and associated length
 	 * 
 	 * @throws SQLException

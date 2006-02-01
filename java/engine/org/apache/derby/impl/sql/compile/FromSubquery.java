@@ -56,7 +56,7 @@ public class FromSubquery extends FromTable
 	/**
 	 * Intializer for a table in a FROM list.
 	 *
-	 * @param tableName		The name of the table
+	 * @param subquery		The subquery
 	 * @param correlationName	The correlation name
 	 * @param derivedRCL		The derived column list
 	 * @param tableProperties	Properties list associated with the table
@@ -99,8 +99,6 @@ public class FromSubquery extends FromTable
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -132,8 +130,6 @@ public class FromSubquery extends FromTable
 	 * appear in the FromList of a SelectNode generated to represent
 	 * the result of the GROUP BY.  This allows us to add ResultColumns
 	 * to the SelectNode for the user's query.
-	 *
-	 * @return Nothing.
 	 */
 	public void markAsForGroupByClause()
 	{
@@ -145,8 +141,6 @@ public class FromSubquery extends FromTable
 	 * (This node represents the SELECT thru GROUP BY clauses.  We
 	 * appear in the FromList of a SelectNode generated to represent
 	 * the actual HAVING clause.
-	 *
-	 * @return Nothing.
 	 */
 	public void markAsForHavingClause()
 	{
@@ -226,8 +220,6 @@ public class FromSubquery extends FromTable
 	 * This is done for SELECT statements.  For FromSubquery, we
 	 * simply pass the check through to the subquery.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown if a ? parameter found
 	 *									directly under a ResultColumn
 	 */
@@ -241,8 +233,6 @@ public class FromSubquery extends FromTable
 	 * Bind the expressions in this FromSubquery.  This means 
 	 * binding the sub-expressions, as well as figuring out what the return 
 	 * type is for each expression.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

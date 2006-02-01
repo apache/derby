@@ -1,5 +1,4 @@
 /*
-
    Derby - Class org.apache.derby.impl.sql.compile.ResultColumnList
 
    Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
@@ -133,8 +132,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * AllResultColumn) to the list
 	 *
 	 * @param resultColumn	The ResultColumn to add to the list
-	 *
-	 * @return	Nothing
 	 */
 
 	public void addResultColumn(ResultColumn resultColumn)
@@ -151,8 +148,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param resultColumns		The ResultColumnList to be appended
 	 * @param destructiveCopy	Whether or not this is a descructive copy
 	 *							from resultColumns
-	 *
-	 * @return	Nothing
 	 */
 	public void appendResultColumns(ResultColumnList resultColumns,
 									boolean destructiveCopy)
@@ -489,9 +484,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @param nameList	The ResultColumnList from which to copy
 	 *			the column names
-	 *
-	 * @return	Nothing
-	 *
 	 */
 
 	void copyResultColumnNames(ResultColumnList nameList)
@@ -526,8 +518,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * nodes, and these have to be printed and indented properly.
 	 *
 	 * @param depth		The depth at which to indent the sub-nodes
-	 *
-	 * @return	Nothing
 	 */
 
 	public void treePrint(int depth)
@@ -549,8 +539,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *				expression is in, for binding columns.
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
 	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -580,8 +568,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * to each result column.  This is useful for SELECT statements, where
 	 * the result type of each column is the type of the column's expression.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindResultColumnsToExpressions()
@@ -599,9 +585,7 @@ public class ResultColumnList extends QueryTreeNodeVector
      * like "GRANT SELECT ON t(c1,c1,c3) TO george", where the user specified a column list.
 	 * This method does not check for duplicate column names.
 	 *
-	 * @param tableDescriptor	The descriptor for the table
-	 *
-	 * @return	Nothing
+	 * @param targetTableDescriptor	The descriptor for the table
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -629,7 +613,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * NOTE: We pass the ResultColumns position in the ResultColumnList so
 	 * that the VirtualColumnId gets set.
 	 *
-	 * @param tableDescriptor	The descriptor for the table being
+	 * @param targetTableDescriptor	The descriptor for the table being
 	 *				updated or inserted into
 	 * @param statement			DMLStatementNode containing this list, null if no duplicate checking is to be done
 	 *
@@ -685,8 +669,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @param fullRCL	The full RCL for the target table
 	 * @param statement			DMLStatementNode containing this list
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -757,10 +739,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * INSERT statements like "insert into t values (1, 2, 3)", where the
 	 * user did not specify a column list.
 	 *
-	 * @param tableDescriptor	The descriptor for the table being
+	 * @param targetTableDescriptor	The descriptor for the table being
 	 *				inserted into
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -792,8 +772,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param	outerFromList		FromList from outer query block
 	 * @param	outerSubqueryList	SubqueryList from outer query block
 	 * @param	outerPredicateList	PredicateList from outer query block
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1387,8 +1365,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param rowAllocatorType		The row type.
 	 * @param numCols				The number of columns in the row.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	private void genCreateRow(ExpressionClassBuilder acb,
@@ -1450,9 +1426,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * each ResultColumn has a name.  (All generated names will be unique across the
 	 * entire statement.)
 	 *
-	 * @param compilerContext	The CompilerContext to use.
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1529,8 +1502,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Generate (unique across the entire statement) column names for those
 	 * ResultColumns in this list which are not named.
 	 *
-	 * @return None.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void nameAllResultColumns()
@@ -1551,9 +1522,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * to another RCL (the source).  
 	 * This is useful when adding a NormalizeResultSetNode.
 	 *
-	 * @param sourcRCL	The source RCL
-	 *
-	 * @return Nothing.
+	 * @param sourceRCL	The source RCL
 	 */
 	public void copyTypesAndLengthsToSource(ResultColumnList sourceRCL) throws StandardException
 	{
@@ -1746,9 +1715,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * NOTE: This flavor marks all of the underlying RCs as referenced.
 	 *
 	 * @param sourceResultSet		ResultSetNode that is source of value
-	 * @param sourceResultColumn	ResultColumn that is source of value
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1767,11 +1733,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * up the query tree.
 	 *
 	 * @param sourceResultSet		ResultSetNode that is source of value
-	 * @param sourceResultColumn	ResultColumn that is source of value
 	 * @param markReferenced		Whether or not to mark the underlying RCs
 	 *								as referenced
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1810,9 +1773,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * by the specified amount.  If ResultColumn.expression is a VirtualColumnNode,
 	 * then we adjust the columnId there as well.
 	 *
-	 * @param increment		The size of the increment.
-	 *
-	 * @return None.
+	 * @param adjust		The size of the increment.
 	 */
 	public void adjustVirtualColumnIds(int adjust)
 	{
@@ -1844,8 +1805,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * reset the virtual column ids in the referenced ResultColumns.
 	 * If all ResultColumns are projected out, then the list is not empty.
 	 * 
-	 * @return None.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	doProjection() throws StandardException
@@ -1936,8 +1895,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param derivedRCL	The derived column list
 	 * @param tableName		The table name for the FromTable
 	 *
-	 * @return None.
-	 *
 	 * @exception StandardException	Thrown on error
 	 */
 	public void propagateDCLInfo(ResultColumnList derivedRCL, String tableName)
@@ -1966,8 +1923,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	/**
 	 * Look for and reject ? parameters under ResultColumns.  This is done for
 	 * SELECT statements.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown if a ? parameter found directly
 	 *									under a ResultColumn
@@ -2022,8 +1977,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * (user-specified) list must have been added internally
 	 * and will not be returned to the user.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown if an XML value found
 	 *									directly under a ResultColumn
 	 */
@@ -2053,8 +2006,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Set the resultSetNumber in all of the ResultColumns.
 	 *
 	 * @param resultSetNumber	The resultSetNumber
-	 *
-	 * @return Nothing.
 	 */
 	public void setResultSetNumber(int resultSetNumber)
 	{
@@ -2070,8 +2021,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Mark all of the ResultColumns as redundant.
 	 * Useful when chopping a ResultSetNode out of a tree when there are
 	 * still references to its RCL.
-	 *
-	 * @return Nothing.
 	 */
 	public void setRedundant()
 	{
@@ -2089,8 +2038,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @param ucl			The cursor's FOR UPDATE OF list.  (May be null.)
 	 * @param cursorName	The cursor's name.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
@@ -2128,8 +2075,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param tableNumber	The tableNumber for the UNION.
 	 * @param level		The nesting level for the UNION.
      * @param operatorName "UNION", "INTERSECT", or "EXCEPT"
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
@@ -2505,8 +2450,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 	/**
 	 * Mark all the columns in this list as updated by an update statement.
-	 *
-	 * @return	Nothing.
 	 */
 	void markUpdated()
 	{
@@ -2526,8 +2469,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * to tell which ones the user is really trying to update so we can
 	 * determine correctly whether all the updated columns are in the
 	 * "for update" list.
-	 *
-	 * @return	Nothing.
 	 */
 	void markUpdatableByCursor()
 	{
@@ -2545,7 +2486,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Verify that all of the column names in this list are contained
 	 * within the ColumnDefinitionNodes within the TableElementList.
 	 *
-	 * @param TableElementList tel
 	 * 
 	 * @return String	The 1st column name, if any, that is not in the list.
 	 */
@@ -2569,8 +2509,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Export the result column names to the passed in String[].
 	 *
 	 * @param columnNames	String[] to hold the column names.
-	 *
-	 * @return Nothing.
 	 */
 	public void exportNames(String[] columnNames)
 	{
@@ -2829,8 +2767,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Remap all ColumnReferences in this tree to be clones of the
 	 * underlying expression.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException			Thrown on error
 	 */
 	public void remapColumnReferencesToExpressions() throws StandardException
@@ -2949,8 +2885,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @param idArray	int[] for column ids
 	 * @param basis		0 (for 0-based ids) or 1 (for 1-based ids)
-	 *
-	 * @return Nothing.
 	 */
 	public void recordColumnReferences(int[] idArray, int basis)
 	{
@@ -2978,8 +2912,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param colArray1	boolean[] for columns
 	 * @param tableColMap	JBitSet[] for tables
 	 * @param tableNumber	Table number of column references
-	 *
-	 * @return Nothing.
 	 */
 	public void recordColumnReferences(boolean[] colArray1, JBitSet[] tableColMap,
 			int tableNumber)
@@ -3043,8 +2975,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	/**
 	 * Clear the column references from the RCL. (Restore RCL back to a state
 	 * where none of the RCs are marked as referenced.)
-	 *
-	 * @return Nothing.
 	 */
 	public void clearColumnReferences()
 	{
@@ -3064,8 +2994,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Copy the referenced RCs from this list to the supplied target list.
 	 *
 	 * @param targetList	The list to copy to
-	 *
-	 * @return Nothing.
 	 */
 	public void copyReferencedColumnsToNewList(ResultColumnList targetList)
 	{
@@ -3086,8 +3014,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @param targetList	The list to copy to,
 	 * @param copyList      1 based bitMap we copy columns associated with set bits.
-	 *
-	 * @return Nothing.
 	 */
 	public void copyColumnsToNewList(ResultColumnList targetList, FormatableBitSet copyList)
 	{
@@ -3155,8 +3081,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * via ALTER TABLE.
 	 *
 	 * @param allowed	Whether or not a mismatch is allowed.
-	 *
-	 * @return Nothing.
 	 */
 	protected void setCountMismatchAllowed(boolean allowed)
 	{
@@ -3204,8 +3128,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param rsmd			The ResultSetMetaData.
 	 * @param tableName		The TableName for the BCNs.
 	 * @param javaClassName	The name of the VTI
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
@@ -3318,8 +3240,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * and generate the expected code.  (We really should create yet another new node
 	 * type with its own code generation.)
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException			Thrown on error
 	 */
 	public void addRCForRID()
@@ -3349,8 +3269,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * when recalculating which RCs are referenced at what level like
 	 * when deciding which columns need to be returned from a non-matching
 	 * index scan (as opposed to those returned from the base table).
-	 *
-	 * @return None.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -3498,7 +3416,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *						belongs to is for update w/o a column list
 	 * @param always		Whether or not caller always wants a non-null FormatableBitSet if
 	 *						all RCs are referenced.
-	 * @param				If true, only set bit if expression is a BaseColumnNode,
+	 * @param onlyBCNs		If true, only set bit if expression is a BaseColumnNode,
 	 *						otherwise set bit for all referenced RCs.
 	 *
 	 * @return The FormatableBitSet representing the referenced RCs.
@@ -3631,8 +3549,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * for a JOIN with a USING clause.
 	 * 
 	 * @param joinColumns	The list of join columns
-	 *
-	 * @return Nothing.
 	 */
 	void removeJoinColumns(ResultColumnList joinColumns)
 	{
@@ -3699,8 +3615,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	/**
 	 * Reset the virtual column ids for all of the
 	 * underlying RCs.  (Virtual column ids are 1-based.)
-	 *
-	 * @return Nothing.
 	 */
 	void resetVirtualColumnIds()
 	{
@@ -3871,8 +3785,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * NOTE: The grammar allows:
 	 *		VALUES DEFAULT;
 	 *
-	 * @return Nothing.
-     *
 	 * @exception StandardException		Thrown on error
 	 */
 	void checkForInvalidDefaults()
@@ -3897,8 +3809,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	/**
 	 * Verify that all of the RCs in this list are comparable.
 	 * 
-	 * @return Nothing.
-     *
 	 * @exception StandardException		Thrown on error
      */
 	void verifyAllOrderable() 

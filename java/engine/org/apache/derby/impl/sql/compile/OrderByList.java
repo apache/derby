@@ -228,8 +228,6 @@ public class OrderByList extends OrderedColumnList
 	 * We need them to point to the RCL under that one.  This is useful
 	 * when combining sorts where we need to reorder the sorting
 	 * columns.
-	 *
-	 * @return Nothing.
 	 */
 	void resetToSourceRCs()
 	{
@@ -596,8 +594,6 @@ public class OrderByList extends OrderedColumnList
 	/**
 	 * Remap all ColumnReferences in this tree to be clones of the
 	 * underlying expression.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

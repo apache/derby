@@ -122,8 +122,6 @@ public class CallStatementNode extends DMLStatementNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -216,8 +214,6 @@ public class CallStatementNode extends DMLStatementNode
 	 *
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb	The method for the execute() method to be built
-	 *
-	 * @return		A compiled Expression returning a ResultSet for the call statement.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

@@ -302,7 +302,7 @@ public class DataDescriptorGenerator
 	/**
 	 * Create a conglomerate descriptor for the given conglomerate id.
 	 *
-	 * @param conglomerateID	The identifier for the conglomerate
+	 * @param conglomerateId	The identifier for the conglomerate
 	 *				we're interested in
 	 * @param name			The name of the conglomerate, if any
 	 * @param indexable		TRUE means the conglomerate is indexable,
@@ -345,7 +345,7 @@ public class DataDescriptorGenerator
 	 * Create a new trigger descriptor.
 	 *
 	 * @param sd	the schema descriptor for this trigger
-	 * @param id	the trigger id
+	 * @param uuid	the trigger id
 	 * @param name	the trigger name
 	 * @param eventMask	TriggerDescriptor.TRIGGER_EVENT_XXXX
 	 * @param isBefore	is this a before (as opposed to after) trigger 

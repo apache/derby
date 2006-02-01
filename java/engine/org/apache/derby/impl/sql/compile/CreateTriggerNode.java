@@ -126,8 +126,6 @@ public class CreateTriggerNode extends DDLStatementNode
 	 * @param actionText			the text of the trigger action
 	 * @param actionOffset			offset of start of action clause
 	 *
-	 * @return	A CreateTriggerNode 
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void init 
@@ -179,8 +177,6 @@ public class CreateTriggerNode extends DDLStatementNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)

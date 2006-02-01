@@ -91,8 +91,6 @@ public class ConditionalNode extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -119,8 +117,6 @@ public class ConditionalNode extends ValueNode
 	 * Set the clause that this node appears in.
 	 *
 	 * @param clause	The clause that this node appears in.
-	 *
-	 * @return Nothing.
 	 */
 	public void setClause(int clause)
 	{
@@ -441,8 +437,6 @@ public class ConditionalNode extends ValueNode
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class we're generating
 	 * @param mb	The method the expression will go into
-	 *
-	 * @return	An expression to evaluate this operator
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

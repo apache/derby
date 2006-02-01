@@ -122,9 +122,6 @@ public class BasicDaemon implements DaemonService, Runnable
 
 	/**
 		make a BasicDaemon
-
-		@param priority the priority of the daemon thread
-		@param delay the number of milliseconds between servcies to its clients
 	*/
 	public BasicDaemon(ContextService contextService)
 	{

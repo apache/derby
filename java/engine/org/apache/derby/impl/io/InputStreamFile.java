@@ -382,7 +382,6 @@ abstract class InputStreamFile implements StorageFile
     /**
      * Get a random access file.
      *
-     * @param name The name of the file.
      * @param mode "r", "rw", "rws", or "rwd". The "rws" and "rwd" modes specify
      *             that the data is to be written to persistent store, consistent with the
      *             java.io.RandomAccessFile class ("synchronized" with the persistent

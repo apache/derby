@@ -333,7 +333,7 @@ final class EmbedClob extends ConnectionChild implements Clob
    * Determines the character position at which the specified substring
    * <code>searchstr</code> appears in the <code>CLOB</code>.  The search
    * begins at position <code>start</code>.
-   * @param searchstr the substring for which to search
+   * @param searchStr the substring for which to search
    * @param start the position at which to begin searching; the first position
    *              is 1
    * @return the position at which the substring appears, else -1; the first
@@ -571,7 +571,7 @@ compareArrays:
    * <code>Clob</code> object <code>searchstr</code> appears in this
    * <code>Clob</code> object.  The search begins at position
    * <code>start</code>.
-   * @param searchstr the <code>Clob</code> object for which to search
+   * @param searchClob the <code>Clob</code> object for which to search
    * @param start the position at which to begin searching; the first
    *              position is 1
    * @return the position at which the <code>Clob</code> object appears,
@@ -704,7 +704,6 @@ restartScan:
     *
     * @param pos - the position at which to start writing to the CLOB value that
     * this Clob object represents
-    * @param str - the string to be written to the CLOB value that this Clob designates
     * @return the number of characters written 
     * @exception SQLException Feature not implemented for now.
 	*/

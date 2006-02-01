@@ -381,8 +381,6 @@ public class TableDescriptor extends TupleDescriptor
 	 *
 	 * @param	referencedColumnMap	FormatableBitSet of referenced columns.
 	 *
-	 * @return	void.
-	 *
 	 */
 	public void setReferencedColumnMap(FormatableBitSet referencedColumnMap)
 	{
@@ -416,8 +414,6 @@ public class TableDescriptor extends TupleDescriptor
 	 * Sets the UUID of the table
 	 *
 	 * @param oid	The UUID of the table to be set in the descriptor
-	 *
-	 * @return	Nothing
 	 */
 	public void setUUID(UUID oid)
 	{
@@ -530,8 +526,6 @@ public class TableDescriptor extends TupleDescriptor
 	 * Set (cache) the view descriptor for this TableDescriptor
 	 *
 	 * @param viewDescriptor	The view descriptor to cache.
-	 *
-	 * @return Nothing.
 	 */
 	public void setViewDescriptor(ViewDescriptor viewDescriptor)
 	{
@@ -600,8 +594,6 @@ public class TableDescriptor extends TupleDescriptor
 	  *	@param	statementType		defined in StatementType
 	  *	@param	changedColumnIds	array of changed columns
 	  *	@param	relevantTriggers	IN/OUT. Passed in as an empty list. Filled in as we go.
-	  *
-	  *	@return	list of relevant triggers
 	  *
 	  * @exception StandardException		Thrown on error
 	  */
@@ -869,8 +861,6 @@ public class TableDescriptor extends TupleDescriptor
 	/**
 	 * Empty the constraint descriptor list
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	public void emptyConstraintDescriptorList()
@@ -921,8 +911,6 @@ public class TableDescriptor extends TupleDescriptor
 	/**
 	 * Empty the trigger descriptor list
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	public void emptyTriggerDescriptorList()
@@ -961,7 +949,7 @@ public class TableDescriptor extends TupleDescriptor
 	/**
 	 * Remove this descriptor
 	 *
-	 * @param	The conglomerate descriptor 
+	 * @param	cd	The conglomerate descriptor 
 	 *
 	 * @exception StandardException on error
 	 */
@@ -975,7 +963,7 @@ public class TableDescriptor extends TupleDescriptor
 	 * Remove this descriptor.  Warning, removes by using object
 	 * reference, not uuid.
 	 *
-	 * @param	The constraint descriptor 
+	 * @param	cd constraint descriptor 
 	 *
 	 * @exception StandardException on error
 	 */

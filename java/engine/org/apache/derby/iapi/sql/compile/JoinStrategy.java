@@ -213,8 +213,7 @@ public interface JoinStrategy {
 	 * @param tableLocked	Whether or not the table is marked (in sys.systables)
 	 *						as always using table locking
 	 * @param isolationLevel		Isolation level specified (or not) for scans
-	 * @param closeMethodArgument	An Expression that evaluates to a method
-	 *								to call when the result set is closed.
+	 * @param maxMemoryPerTable	Max memory per table
 	 *
 	 * @return	Count of the expressions pushed to use as the parameters to the
 	 *			result set for the inner table

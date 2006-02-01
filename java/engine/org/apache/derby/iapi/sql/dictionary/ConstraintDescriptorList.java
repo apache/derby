@@ -51,8 +51,6 @@ public class ConstraintDescriptorList extends ArrayList
 	 * when we need to scan the table.
 	 *
 	 * @param scanned	Whether or not the underlying system table has been scanned.
-	 *
-	 * @return Nothing.
 	 */
 	public void setScanned(boolean scanned)
 	{
@@ -188,9 +186,6 @@ public class ConstraintDescriptorList extends ArrayList
 
 	/**
 	 * Get the ConstraintDescriptor with the matching constraint name.
-	 *
-	 * @param sd		The constraint schema descriptor.
-	 * @param name		The constraint name.
 	 *
 	 * @return The matching ConstraintDescriptor.
 	 */

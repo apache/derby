@@ -267,9 +267,6 @@ public abstract class DataType
 	 * At DataType level just throws an error lower classes will override
 	 *
 	 * @param theValue	The Time value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(Time theValue) throws StandardException
 	{
@@ -282,9 +279,6 @@ public abstract class DataType
 	 *
 	 * @param theValue	The Time value to set this DataValueDescriptor to
      * @param cal The time zone from the calendar is used to construct the database time value
-	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(Time theValue, Calendar cal) throws StandardException
 	{
@@ -296,9 +290,6 @@ public abstract class DataType
 	 * At DataType level just throws an error lower classes will override
 	 *
 	 * @param theValue	The Timestamp value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(Timestamp theValue) throws StandardException
 	{
@@ -311,9 +302,6 @@ public abstract class DataType
 	 *
 	 * @param theValue	The Timestamp value to set this DataValueDescriptor to
      * @param cal The time zone from the calendar is used to construct the database timestamp value
-	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(Timestamp theValue, Calendar cal) throws StandardException
 	{
@@ -325,9 +313,6 @@ public abstract class DataType
 	 * At DataType level just throws an error lower classes will override
 	 *
 	 * @param theValue	The Date value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(Date theValue) throws StandardException
 	{
@@ -340,9 +325,6 @@ public abstract class DataType
 	 *
 	 * @param theValue	The Date value to set this DataValueDescriptor to
      * @param cal The time zone from the calendar is used to construct the database date value
-	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(Date theValue, Calendar cal) throws StandardException
 	{
@@ -354,9 +336,6 @@ public abstract class DataType
 	 * At DataType level just throws an error lower classes will override
 	 *
 	 * @param theValue	The BigDecimal value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 */
 	public void setValue(String theValue) throws StandardException
 	{
@@ -369,8 +348,6 @@ public abstract class DataType
 	 * At DataType level just throws an error lower classes will override
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -385,8 +362,6 @@ public abstract class DataType
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void setValue(double theValue) throws StandardException
@@ -399,8 +374,6 @@ public abstract class DataType
 	 * At DataType level just throws an error lower classes will override
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -415,8 +388,6 @@ public abstract class DataType
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void setValue(short theValue) throws StandardException
@@ -428,8 +399,6 @@ public abstract class DataType
 	 * At DataType level just throws an error lower classes will override
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -444,8 +413,6 @@ public abstract class DataType
 	 *
 	 * @param theValue	The value to set this DataValueDescriptor to
 	 *
-	 * @return	This DataValueDescriptor
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void setValue(byte theValue) throws StandardException
@@ -459,8 +426,6 @@ public abstract class DataType
 	 *
 	 * @param theValue	Contains the boolean value to set this to
 	 *
-	 * @return	This value
-	 *
 	 */
 	public void setValue(boolean theValue) throws StandardException
 	{
@@ -472,8 +437,6 @@ public abstract class DataType
 	 * At DataType level just throws an error lower classes will override
 	 *
 	 * @param theValue	The byte value to set this DataValueDescriptor to
-	 *
-	 * @return	This DataValueDescriptor
 	 *
 	 */
 	public void setValue(byte[] theValue) throws StandardException
@@ -533,7 +496,6 @@ public abstract class DataType
 	 * @exception StandardException
 	 *                thrown on failure
 	 * 
-	 * @return me
 	 */
 	public void setObjectForCast(Object theValue, boolean instanceOfResultType,
 			String resultTypeClassName) throws StandardException {
@@ -572,7 +534,6 @@ public abstract class DataType
 	 * Get the type name of this value, possibly overriding
 	 * with the passed in class name (for user/java types).
 	 * @param className
-	 * @return
 	 */
 	String getTypeName(String className)
 	{

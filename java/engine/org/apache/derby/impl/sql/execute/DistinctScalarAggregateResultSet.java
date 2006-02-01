@@ -258,7 +258,8 @@ public class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 	}
 
         /**
-         * @inheritDoc
+         * If the result set has been opened,
+		 * close the open scan.
          */
         public void close() throws StandardException
         {

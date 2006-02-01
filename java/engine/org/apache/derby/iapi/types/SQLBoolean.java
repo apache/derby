@@ -507,8 +507,6 @@ public final class SQLBoolean
 	 * Set the value of this BooleanDataValue to the given byte array value
 	 *
 	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
 	 */
 	public void setValue(byte[] theValue)
 	{
@@ -550,8 +548,6 @@ public final class SQLBoolean
 	 * TRUE or FALSE, then an error is thrown.
 	 *
 	 * @param theValue	The value to set this BooleanDataValue to
-	 *
-	 * @return	This BooleanDataValue
 	 *
 	 * @exception StandardException Thrown on error
 	 */
@@ -888,7 +884,7 @@ public final class SQLBoolean
 	 * Throw an exception with the given SQLState if this BooleanDataValue
 	 * is false. This method is useful for evaluating constraints.
 	 *
-	 * @param SQLState		The SQLState of the exception to throw if
+	 * @param sqlState		The SQLState of the exception to throw if
 	 *						this SQLBoolean is false.
 	 * @param tableName		The name of the table to include in the exception
 	 *						message.

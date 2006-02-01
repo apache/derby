@@ -274,9 +274,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * Set the current auxiliary provider list for this CompilerContext.
 	 *
-	 * @param adl	The new current AuxiliaryProviderList.
-	 *
-	 * @return Nothing.
+	 * @param apl	The new current AuxiliaryProviderList.
 	 */
 
 	public void setCurrentAuxiliaryProviderList(ProviderList apl)
@@ -316,9 +314,6 @@ public class CompilerContextImpl extends ContextImpl
 	 * Add a Provider to the current AuxiliaryProviderList, if one exists.
 	 *
 	 * @param p		The Provider to add.
-	 *
-	 * @return Nothing.
-	 *
 	 */
 	private void addProviderToAuxiliaryList(Provider p)
 	{
@@ -387,9 +382,6 @@ public class CompilerContextImpl extends ContextImpl
 	 * Set the in use state for the compiler context.
 	 *
 	 * @param inUse	 The new inUse state for the compiler context.
-	 *
-	 * @return Nothing.
-	 *
 	 */
 	public void setInUse(boolean inUse)
 	{
@@ -542,7 +534,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * Set the compilation schema descriptor for this compilation context.
 	 *
-	 * @param the compilation schema
+	 * @param newDefault	the compilation schema
 	 * 
 	 * @return the previous compilation schema descirptor
 	 */

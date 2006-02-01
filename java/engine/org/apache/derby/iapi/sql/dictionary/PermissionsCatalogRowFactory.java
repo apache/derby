@@ -78,7 +78,6 @@ public abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      *
      * @param indexNumber
      * @param perm a permission descriptor of the appropriate class for this PermissionsCatalogRowFactory class.
-     * @param rowLocation
      *
      * @exception StandardException standard error policy
      */

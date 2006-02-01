@@ -252,8 +252,6 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 * Set the auxiliary provider list.
 	 *
 	 * @param apl	The new auxiliary provider list.
-	 *
-	 * @return Nothing.
 	 */
 	void setAuxiliaryProviderList(ProviderList apl)
 	{
@@ -369,8 +367,6 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 * Set the optional properties for the backing index to this constraint.
 	 *
 	 * @param properties	The optional Properties for this constraint.
-	 *
-	 * @return Nothing.
 	 */
 	public void setProperties(Properties properties)
 	{
@@ -434,8 +430,6 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 * where the list of referenced columns is built at bind time.
 	 *
 	 * @param columnList	The new columnList.
-	 *
-	 * @return	Nothing.
 	 */
 	public void setColumnList(ResultColumnList columnList)
 	{
@@ -456,8 +450,6 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 * Set the check condition for this table constraint.
 	 *
 	 * @param checkCondition	The check condition
-	 *
-	 * @return Nothing.
 	 */
 	public void setCheckCondition(ValueNode checkCondition)
 	{
@@ -489,8 +481,6 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @param checkColumnReferences	The array of 1-based column references
 	 *								for the check constraint.
-	 *
-	 * @return Nothing.
 	 */
 	public void setCheckColumnReferences(int[] checkColumnReferences)
 	{

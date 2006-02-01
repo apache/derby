@@ -129,7 +129,6 @@ class UpdateResultSet extends DMLWriteResultSet
     /**
 	 * @param source update rows come from source
 	 * @param checkGM	Generated method for enforcing check constraints
-	 * @param compiledConstants constantAction for the update
 	 * @exception StandardException thrown on error
      */
     UpdateResultSet(NoPutResultSet source,
@@ -175,7 +174,6 @@ class UpdateResultSet extends DMLWriteResultSet
     /**
 	 * @param source update rows come from source
 	 * @param checkGM	Generated method for enforcing check constraints
-	 * @param compiledConstants constantAction for the update
 	 * @exception StandardException thrown on error
      */
     UpdateResultSet(NoPutResultSet source,

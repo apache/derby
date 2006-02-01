@@ -130,8 +130,6 @@ public class CreateViewNode extends DDLStatementNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -338,8 +336,6 @@ public class CreateViewNode extends DDLStatementNode
 	 * Fill in the ColumnInfo[] for this create view.
 	 * 
 	 * @param colInfos	The ColumnInfo[] to be filled in.
-	 *
-	 * @return Nothing.
 	 */
 	private void genColumnInfos(ColumnInfo[] colInfos)
 	{

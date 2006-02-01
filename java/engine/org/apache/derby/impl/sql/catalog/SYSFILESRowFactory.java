@@ -123,9 +123,6 @@ public class SYSFILESRowFactory extends CatalogRowFactory
 	/**
 	 * Make a SYSFILES row
 	 *
-	 * @param emptyRow Make an empty row if this parameter is true
-	 * @param descriptor A descriptor
-	 *
 	 * @return	Row suitable for inserting into SYSFILES
 	 *
 	 * @exception   StandardException thrown on failure

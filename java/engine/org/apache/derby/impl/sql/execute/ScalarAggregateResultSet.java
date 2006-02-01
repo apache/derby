@@ -432,9 +432,8 @@ public class ScalarAggregateResultSet extends GenericAggregateResultSet
 	 * distinct aggregates will be accumulated here.
 	 * Otherwise, all aggregates will be accumulated here.
 	 *
-	 * @param	the input row
-	 * @param	the row with the accumulator (may be the same as
-	 *			the input row.
+	 * @param	inputRow	the input row
+	 * @param	accumulateRow	the row with the accumulator (may be the same as the input row.
 	 * @param	hasDistinctAggregates does this scan have distinct
 	 *			aggregates.  Used to figure out whether to merge
 	 *			or accumulate nondistinct aggregates.

@@ -155,7 +155,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	/**
 	 * Get a DataTypeServices that corresponds to a builtin SQL type
 	 *
-	 * @param javaTypeName	The name of the Java type for which to get
+	 * @param sqlTypeName	The name of the type for which to get
 	 *						a corresponding SQL DataTypeDescriptor
 	 *
 	 * @return	A new DataTypeDescriptor that corresponds to the Java type.
@@ -171,7 +171,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	/**
 	 * Get a DataTypeServices that corresponds to a builtin SQL type
 	 *
-	 * @param javaTypeName	The name of the Java type for which to get
+	 * @param sqlTypeName	The name of the type for which to get
 	 *						a corresponding SQL DataTypeDescriptor
 	 *
 	 * @return	A new DataTypeDescriptor that corresponds to the Java type.
@@ -794,8 +794,6 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 *
 	 * @param nullable	TRUE means set nullability to TRUE, FALSE
 	 *			means set it to FALSE
-	 *
-	 * @return	Nothing
 	 */
 	public void	setNullability(boolean nullable)
 	{
@@ -804,7 +802,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 
 	/**
 	  Compare if two TypeDescriptors are exactly the same
-	  @param typeDescriptor the typeDescriptor to compare to.
+	  @param aTypeDescriptor the typeDescriptor to compare to.
 	  */
 	public boolean equals(Object aTypeDescriptor)
 	{
@@ -915,7 +913,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 * equivalent
 	 *
 	 * @param existingType  JDBC type id of Cloudscape data type
-	 * @param jdbcTypeIdB   JDBC type id passed in from application.
+	 * @param jdbcTypeId   JDBC type id passed in from application.
 	 *
 	 * @return boolean true if types are equivalent, false if not
 	 */

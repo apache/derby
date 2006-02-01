@@ -343,8 +343,6 @@ public class AndNode extends BinaryLogicalOperatorNode
 	 * Do bind() by hand for an AndNode that was generated after bind(),
 	 * eg by putAndsOnTop(). (Set the data type and nullability info.)
 	 *
-	 * @return	None.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	void postBindFixup()

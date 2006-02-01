@@ -261,7 +261,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	 * at the end of it.
 	 *
 	 * @exception StandardException thrown on failure
-	 * @return	Nothing
 	 */
 
 	void finishConstructor()
@@ -293,8 +292,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	 * Generate the assignment for row = new ExecRow[numResultSets]
 	 *
 	 * @param numResultSets	The size of the array.
-	 *
-	 * @return Nothing.
 	 */
 	private void addNewArrayOfRows(int numResultSets)
 	{
@@ -369,8 +366,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	 * function names in the activation class. If you pass in a function
 	 * name, think carefully about whether it will collide with other names.
 	 *
-	 * @param exprName	Name of function. Usually null, which causes us to
-	 *					generate a unique name.
 	 * @param returnType the return type of the function
 	 * @param modifiers the modifiers on the function
 	 *
@@ -471,10 +466,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	 * and a user expression is that a user expression catches all exceptions
 	 * (because we don't want random exceptions thrown from user methods to
 	 * propagate to the rest of the system.
-	 *
-	 * @param functionName	Name to give to the function. If null, we'll generate a
-	 *						unique name.
-	 * @param returnType	A String telling the return type from the expression
 	 *
 	 * @return	A new MethodBuilder
 	 */
@@ -592,7 +583,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	 * Add a column to the existing Ordering list.  Takes
 	 * a column id and only adds it if it isn't in the list.
 	 *
-	 * @param columNum	the column to add
 	 *
 	 * @return the ColumnOrdering array
 	 */
@@ -764,11 +754,8 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	/**
 	 * Generate a reference to a colunm in a result set.
 	 * 
-	 * @param eb the expression block
 	 * @param rsNumber the result set number
 	 * @param colId the column number
-	 *
-	 * @return expression
 	 */
 	void pushColumnReference(MethodBuilder mb, int rsNumber, int colId)
 	{
@@ -789,9 +776,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	 * Generate a reference to the parameter value
 	 * set that all activations use.
 	 * 
-	 * @param eb the expression block
-	 *
-	 * @return expression
 	 */
 	void pushPVSReference(MethodBuilder mb)
 	{

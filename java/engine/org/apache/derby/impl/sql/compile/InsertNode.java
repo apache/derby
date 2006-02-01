@@ -119,7 +119,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *			user did not specify the columns - in this
 	 *			case, the binding phase will have to figure
 	 *			it out.
-	 * @param queryExpresssion	The query expression that will generate
+	 * @param queryExpression	The query expression that will generate
 	 *				the rows to insert into the given table
 	 * @param targetProperties	The properties specified on the target table
 	 */
@@ -184,8 +184,6 @@ public final class InsertNode extends DMLModStatementNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -540,8 +538,6 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @param dd	The DataDictionary
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	private void verifyTargetProperties(DataDictionary dd)
@@ -723,8 +719,6 @@ public final class InsertNode extends DMLModStatementNode
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb the method  for the execute() method to be built
 	 *
-	 * @return		A compiled Expression returning an InsertResultSet
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void generate(ActivationClassBuilder acb,
@@ -823,8 +817,6 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @param td	TableDescriptor for the table being inserted into
 	 *				or deleted from
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

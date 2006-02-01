@@ -207,8 +207,6 @@ public abstract class Scan implements ScanManager, ScanInfo
      *
      * @param count the estimated number of rows in the container.
      *
-	 * @return The total estimated number of rows in the conglomerate.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
     public void setEstimatedRowCount(long count)

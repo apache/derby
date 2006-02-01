@@ -2647,7 +2647,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * Determine whether a result set's own changes visible.
      *
-     * @param result set type, i.e. ResultSet.TYPE_XXX
+     * @param type result set type, i.e. ResultSet.TYPE_XXX
      * @return true if changes are visible for the result set type
      */
     public boolean ownUpdatesAreVisible(int type)   {
@@ -2665,7 +2665,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * Determine whether changes made by others are visible.
      *
-     * @param result set type, i.e. ResultSet.TYPE_XXX
+     * @param type result set type, i.e. ResultSet.TYPE_XXX
      * @return true if changes are visible for the result set type
      */
     //Since Derby materializes a forward only ResultSet incrementally, it is possible to see changes
@@ -2696,7 +2696,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * Determine whether or not a visible row update can be detected by 
      * calling ResultSet.rowUpdated().
      *
-     * @param result set type, i.e. ResultSet.TYPE_XXX
+     * @param type result set type, i.e. ResultSet.TYPE_XXX
      * @return true if changes are detected by the resultset type
      */
     //updatable resultsets are supported for forward only resultset types only. And for forward only
@@ -2712,7 +2712,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * calling ResultSet.rowDeleted().  If deletesAreDetected()
      * returns false, then deleted rows are removed from the result set.
      *
-     * @param result set type, i.e. ResultSet.TYPE_XXX
+     * @param type result set type, i.e. ResultSet.TYPE_XXX
      * @return true if changes are detected by the resultset type
      */
     //updatable resultsets are supported for forward only resultset types only. And for forward only
@@ -2727,7 +2727,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * Determine whether or not a visible row insert can be detected
      * by calling ResultSet.rowInserted().
      *
-     * @param result set type, i.e. ResultSet.TYPE_XXX
+     * @param type result set type, i.e. ResultSet.TYPE_XXX
      * @return true if changes are detected by the resultset type
      */
     public boolean insertsAreDetected(int type) {

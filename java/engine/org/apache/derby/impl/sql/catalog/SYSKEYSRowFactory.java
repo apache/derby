@@ -111,9 +111,6 @@ public class SYSKEYSRowFactory extends CatalogRowFactory
   /**
 	 * Make a SYSKEYS row
 	 *
-	 * @param emptyRow	Make an empty row if this parameter is true
-	 * @param constraint	key constraint descriptor
-	 *
 	 * @return	Row suitable for inserting into SYSKEYS.
 	 *
 	 * @exception   StandardException thrown on failure

@@ -115,8 +115,6 @@ public class RowResultSetNode extends FromTable
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -197,8 +195,6 @@ public class RowResultSetNode extends FromTable
 	 * sub-expressions, as well as figuring out what the return type is
 	 * for each expression.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -257,8 +253,6 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindExpressionsWithTables(FromList fromListParam)
@@ -274,8 +268,6 @@ public class RowResultSetNode extends FromTable
 	 * for each expression.  This is useful for EXISTS subqueries, where we
 	 * need to validate the target list before blowing it away and replacing
 	 * it with a SELECT true.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -351,8 +343,6 @@ public class RowResultSetNode extends FromTable
 	 * @param outerFromList	The FromList from the outer query block(s)
 	 * @param subqueryType	The subquery type
 	 *
-	 * @return	None
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void verifySelectStarSubquery(FromList outerFromList, int subqueryType) 
@@ -368,8 +358,6 @@ public class RowResultSetNode extends FromTable
 	 * consider sort avoidance.
 	 *
 	 * @param orderByList	The order by list
-	 *
-	 * @return Nothing.
 	 */
 	void pushOrderByList(OrderByList orderByList)
 	{
@@ -656,8 +644,6 @@ public class RowResultSetNode extends FromTable
      *      RowResultSet -- for the VALUES clause
      *
 	 *
-	 * @return		A compiled Expression returning a ResultSet
-	 *
 	 * @exception StandardException		Thrown on error
      */
 	public void generate(ActivationClassBuilder acb,
@@ -727,8 +713,6 @@ public class RowResultSetNode extends FromTable
 	 * else.  This is useful for a RowResultSetNode as a derived table
 	 * because it doesn't get optimized otherwise.
 	 *
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	void optimizeSubqueries(DataDictionary dd, double rowCount)
@@ -741,8 +725,6 @@ public class RowResultSetNode extends FromTable
 	 * Notify the underlying result set tree that the result is
 	 * ordering dependent.  (For example, no bulk fetch on an index
 	 * if under an IndexRowToBaseRow.)
-	 *
-	 * @return Nothing.
 	 */
 	void markOrderingDependent()
 	{

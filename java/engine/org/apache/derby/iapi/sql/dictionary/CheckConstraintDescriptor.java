@@ -109,8 +109,7 @@ public class CheckConstraintDescriptor extends ConstraintDescriptor
 	/**
 	 * Set the ReferencedColumns; used in drop column
 	 *
-	 * @param	The new ReferencedColumns.
-	 * @return	void
+	 * @param	rcd	The new ReferencedColumns.
 	 */
 	public void setReferencedColumnsDescriptor(ReferencedColumns rcd)
 	{
@@ -132,7 +131,7 @@ public class CheckConstraintDescriptor extends ConstraintDescriptor
 	 * DML?  For a check constraint, all inserts, and
 	 * appropriate updates
 	 *
-	 * @param dmlType	the type of DML 
+	 * @param stmtType	the type of DML 
 	 * (StatementType.INSERT|StatementType.UPDATE|StatementType.DELETE)
 	 * @param modifiedCols	the columns modified, or null for all
 	 *

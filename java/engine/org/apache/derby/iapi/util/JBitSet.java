@@ -74,8 +74,6 @@ public final class JBitSet
 	 * Set the BitSet to have the exact same bits set as the parameter's BitSet.
 	 *
 	 * @param sourceBitSet	The JBitSet to copy.
-	 *
-	 * @return Nothing.
 	 */
 	public void setTo(JBitSet sourceBitSet)
 	{
@@ -180,8 +178,6 @@ public final class JBitSet
 
 	/**
 	 * Clear all of the bits in this JBitSet
-	 *
-	 * @return Nothing.
 	 */
 	public void clearAll()
 	{

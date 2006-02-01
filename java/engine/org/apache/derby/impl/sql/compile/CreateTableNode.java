@@ -61,7 +61,7 @@ public class CreateTableNode extends DDLStatementNode
 	/**
 	 * Initializer for a CreateTableNode for a base table
 	 *
-	 * @param objectName		The name of the new object being created (ie base table)
+	 * @param newObjectName		The name of the new object being created (ie base table)
 	 * @param tableElementList	The elements of the table: columns,
 	 *				constraints, etc.
 	 * @param properties		The optional list of properties associated with
@@ -100,7 +100,7 @@ public class CreateTableNode extends DDLStatementNode
 	/**
 	 * Initializer for a CreateTableNode for a global temporary table
 	 *
-	 * @param objectName		The name of the new object being declared (ie temporary table)
+	 * @param newObjectName		The name of the new object being declared (ie temporary table)
 	 * @param tableElementList	The elements of the table: columns,
 	 *				constraints, etc.
 	 * @param properties		The optional list of properties associated with

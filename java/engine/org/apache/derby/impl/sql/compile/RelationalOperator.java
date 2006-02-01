@@ -240,9 +240,6 @@ public interface RelationalOperator
 	 * @param mb	The method the generated code is to go into
 	 * @param optTable	The Optimizable table the Qualifier will qualify
 	 *
-	 * @return	An expression that evaluates to the GeneratedMethod that
-	 *			returns the Orderable to be returned by Qualifier.getOrderable()
-	 *
 	 * @exception StandardException		Thrown on error.
 	 */
 	void generateQualMethod(ExpressionClassBuilder acb,

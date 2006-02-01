@@ -91,7 +91,7 @@ public class RIBulkChecker
 	 *								Will be cloned when it is used.
 	 *								Must be a full index row.
 	 * @param quitOnFirstFailure	quit on first unreferenced key
-	 * @param unreferencedKeysCC	put unreferenced keys here
+	 * @param unreferencedCC	put unreferenced keys here
 	 * @param firstRowToFail		the first row that fails the constraint
 	 *								is copied to this, if non-null
      */

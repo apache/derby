@@ -2102,7 +2102,6 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 		Copy num_rows from srcPage, src_slot into this page starting at dest_slot.
 		This is destination page of the the copy half of copy and Purge.
 
-		@return An array of the new record identifiers.
 		@see Page#copyAndPurge
 	 */
 	private void copyInto(BasePage srcPage, int src_slot, int num_rows, 

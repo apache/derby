@@ -70,8 +70,6 @@ class GenericAggregator
 	 * Constructor:
 	 *
 	 * @param aggInfo 	information about the user aggregate
-	 * @param jdbcFactory 	the jdbc factory, may be null if
-	 *		this is a system aggregate
 	 * @param cf		the class factory. 
 	 */
 	GenericAggregator

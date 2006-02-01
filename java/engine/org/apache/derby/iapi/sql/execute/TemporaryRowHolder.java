@@ -40,7 +40,7 @@ public interface TemporaryRowHolder
 	/**
 	 * Insert a row
 	 *
-	 * @param row the row to insert 
+	 * @param inputRow the row to insert 
 	 *
 	 * @exception StandardException on error
  	 */

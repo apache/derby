@@ -300,7 +300,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	  * RepAlterTableConstantAction
 	  *	could enjoy the benefits of the startWriting() method above.
 	  *
-	  *	@param	dd			the data dictionary
 	  *
 	  * @exception StandardException		Thrown on failure
 	  */
@@ -559,7 +558,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	/**
 	 * Workhorse for adding a new column to a table.
 	 *
-	 * @param 	dd 			the data dictionary.
 	 * @param   ix 			the index of the column specfication in the ALTER 
 	 *						statement-- currently we allow only one.
 	 * @exception StandardException 	thrown on failure.
@@ -655,7 +653,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	/**
 	 * Workhorse for dropping a column from a table.
 	 *
-	 * @param 	dd 			the data dictionary.
 	 * @param   ix 			the index of the column specfication in the ALTER 
 	 *						statement-- currently we allow only one.
 	 * @exception StandardException 	thrown on failure.

@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -144,7 +145,7 @@ public class XMLTypeCompiler extends BaseTypeCompiler
     }
 
     /**
-     * @see TypeCompiler#nullMethodName
+     * @see BaseTypeCompiler#nullMethodName
      */
     protected String nullMethodName()
     {
@@ -161,7 +162,7 @@ public class XMLTypeCompiler extends BaseTypeCompiler
     }
 
     /**
-     * @see TypeCompiler#dataValueMethodName
+     * @see BaseTypeCompiler#dataValueMethodName
      */
     protected String dataValueMethodName()
     {

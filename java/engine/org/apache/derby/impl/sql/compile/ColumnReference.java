@@ -151,8 +151,6 @@ public class ColumnReference extends ValueNode
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -191,8 +189,6 @@ public class ColumnReference extends ValueNode
 	 * at which the CR appears.)
 	 *
 	 * @param nestingLevel	The Nesting level at which the CR appears.
-	 *
-	 * @return Nothing.
 	 */
 	void setNestingLevel(int nestingLevel)
 	{
@@ -219,8 +215,6 @@ public class ColumnReference extends ValueNode
 	 * of the source of the CR.)
 	 *
 	 * @param sourceLevel	The Nesting level of the source of the CR.
-	 *
-	 * @return Nothing.
 	 */
 	void setSourceLevel(int sourceLevel)
 	{
@@ -247,8 +241,6 @@ public class ColumnReference extends ValueNode
 	 * (Useful for replacing aggregates in the HAVING clause with 
 	 * column references to the matching aggregate in the 
 	 * user's SELECT.
-	 *
-	 * @return Nothing.
 	 */
 	public void markGeneratedToReplaceAggregate()
 	{
@@ -389,9 +381,7 @@ public class ColumnReference extends ValueNode
 	/**
 	 * Set the name of this column
 	 *
-	 * @param columName	The name of this column
-	 *
-	 * @return None.
+	 * @param columnName	The name of this column
 	 */
 
 	public void setColumnName(String columnName)
@@ -413,9 +403,7 @@ public class ColumnReference extends ValueNode
 	/**
 	 * Set this ColumnReference to refer to the given table number.
 	 *
-	 * @param table	The table number this ColumnReference will refer to
-	 *
-	 * @return	Nothing
+	 * @param tableNumber	The table number this ColumnReference will refer to
 	 */
 
 	public void setTableNumber(int tableNumber)
@@ -525,8 +513,6 @@ public class ColumnReference extends ValueNode
 	 * Set the source this columnReference
 	 *
 	 * @param source	The source of this columnReference
-	 *
-	 * @return None.
 	 */
 
 	public void setSource(ResultColumn source)
@@ -625,8 +611,6 @@ public class ColumnReference extends ValueNode
 	 *
 	 * RESOLVE: Once we start pushing join clauses, we will need to walk the
 	 * ResultColumn/VirtualColumnNode chain for them to remap the references.
-	 *
-	 * @return None.
 	 */
 	public void remapColumnReferences()
 	{
@@ -825,8 +809,6 @@ public class ColumnReference extends ValueNode
 	 * of this CR.
 	 *
 	 * @param refs	The table map.
-	 *
-	 * @return Nothing.
 	 */
 	void getTablesReferenced(JBitSet refs)
 	{

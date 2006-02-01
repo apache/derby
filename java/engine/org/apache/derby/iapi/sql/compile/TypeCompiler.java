@@ -78,7 +78,6 @@ public interface TypeCompiler
 	/**
 	 * Type resolution methods on binary operators
 	 *
-	 * @param descrFactory	A factory to generate the return value
 	 * @param leftType	The type of the left parameter
 	 * @param rightType	The type of the right parameter
 	 * @param operator	The name of the operator (e.g. "+").

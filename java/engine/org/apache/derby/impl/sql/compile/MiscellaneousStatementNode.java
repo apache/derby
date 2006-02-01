@@ -60,8 +60,6 @@ abstract class MiscellaneousStatementNode extends StatementNode
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb the method  for the execute() method to be built
 	 *
-	 * @return		A compiled expression returning the RepCreatePublicationResultSet
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 

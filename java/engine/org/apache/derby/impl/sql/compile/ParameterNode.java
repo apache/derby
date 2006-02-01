@@ -121,10 +121,8 @@ public class ParameterNode extends ValueNode
 	/**
 	 * Set the descriptor array
 	 *
-	 * @param	The array of DataTypeServices to fill in when the parameters
+	 * @param	descriptors	The array of DataTypeServices to fill in when the parameters
 	 *			are bound.
-	 *
-	 * @return	Nothing
 	 */
 
 	void setDescriptors(DataTypeDescriptor[] descriptors)
@@ -146,8 +144,6 @@ public class ParameterNode extends ValueNode
 	 * Set the DataTypeServices for this parameter
 	 *
 	 * @param descriptor	The DataTypeServices to set for this parameter
-	 *
-	 * @return	Nothing
 	 */
 
 	public void setType(DataTypeDescriptor descriptor) throws StandardException
@@ -392,8 +388,6 @@ public class ParameterNode extends ValueNode
 	 * @param acb					The ExpressionClassBuilder for the class we're building
 	 * @param numberOfParameters	number of parameters for this statement
 	 * @param parameterList			The parameter list for the statement.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException on error
 	 */

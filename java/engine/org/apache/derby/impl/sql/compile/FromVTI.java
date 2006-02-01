@@ -380,8 +380,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -442,8 +440,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 	/**
 	 * Mark this VTI as the target of a delete or update.
-	 *
-	 * @return Nothing.
 	 */
 	void setTarget()
 	{
@@ -831,9 +827,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	 * binding the sub-expressions, as well as figuring out what the return 
 	 * type is for each expression.
 	 *
-	 * @param typeCompilationFactory	The factory to get DataTypeServices
-	 *				from, if necessary.
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1155,9 +1148,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	 *
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb The MethodBuilder for the execute() method to be built
-	 *
-	 * @return		A compiled Expression that returns a ResultSet that
-	 *				iterates through the user's java.sql.ResultSet.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

@@ -66,7 +66,6 @@ abstract class BaseStorageFactory implements StorageFactory
      * @param databaseName The name of the database (directory). All relative pathnames are relative to this directory.
      *                     If null then the storage factory will only be used to deal with the directory containing
      *                     the databases.
-     * @param create If true then the database is being created.
      * @param tempDirName The name of the temporary file directory set in properties. If null then a default
      *                    directory should be used. Each database should get a separate temporary file
      *                    directory within this one to avoid collisions.
@@ -174,7 +173,7 @@ abstract class BaseStorageFactory implements StorageFactory
     /**
      * Construct a persistent StorageFile from a directory and path name.
      *
-     * @param directory The path name of the directory. Guaranteed not to be in the temporary file directory.
+     * @param directoryName The path name of the directory. Guaranteed not to be in the temporary file directory.
      *                  Guaranteed not to be null
      * @param fileName The name of the file within the directory. Guaranteed not to be null.
      *
@@ -185,7 +184,7 @@ abstract class BaseStorageFactory implements StorageFactory
     /**
      * Construct a persistent StorageFile from a directory and path name.
      *
-     * @param directory The path name of the directory. Guaranteed not to be to be null. Guaranteed to be
+     * @param directoryName The path name of the directory. Guaranteed not to be to be null. Guaranteed to be
      *                  created by a call to one of the newPersistentFile methods.
      * @param fileName The name of the file within the directory. Guaranteed not to be null.
      *

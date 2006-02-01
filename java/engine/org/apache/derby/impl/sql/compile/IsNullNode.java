@@ -132,8 +132,6 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	/**
 	 * Bind a ? parameter operand of the IS [NOT] NULL predicate.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 

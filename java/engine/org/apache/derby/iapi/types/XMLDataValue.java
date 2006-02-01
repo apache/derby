@@ -43,14 +43,13 @@ public interface XMLDataValue extends DataValueDescriptor
     /**
      * Parse the received string value as XML.  If the
      * parse succeeds, store the string value as the
-     * contents of this XML value.
-     *
-     * @param text The string value to check.
-     * @param preserveWS Whether or not to preserve
-     *  ignorable whitespace.
-     * @return  If 'text' constitutes a valid XML document,
+     * contents of this XML value. If 'text' constitutes a valid XML document,
      *  it has been stored in this XML value and nothing
      *  is returned; otherwise, an exception is thrown.
+     *
+     * @param xmlText The string value to check.
+     * @param preserveWS Whether or not to preserve
+     *  ignorable whitespace.
      * @exception StandardException Thrown on parse error.
      */
     public void parseAndLoadXML(String xmlText, boolean preserveWS)

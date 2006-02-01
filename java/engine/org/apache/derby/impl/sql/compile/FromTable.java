@@ -1067,8 +1067,6 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 	 * Set the table # for this table.  
 	 *
 	 * @param tableNumber	The table # for this table.
-	 *
-	 * @return None.
 	 */
 	public void setTableNumber(int tableNumber)
 	{
@@ -1104,8 +1102,6 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 	 * Set the (query block) level (0-based) for this FromTable.
 	 *
 	 * @param level		The query block level for this FromTable.
-	 *
-	 * @return Nothing
 	 */
 	public void setLevel(int level)
 	{
@@ -1169,7 +1165,7 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 	/**
 	* Get a schema descriptor for the given table.
 	*
-	* @param	TableName the table name
+	* @param	tableName the table name
 	*
 	* @return Schema Descriptor
 	*
@@ -1255,8 +1251,6 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 	 * Fill the referencedTableMap with this ResultSetNode.
 	 *
 	 * @param passedMap	The table map to fill in.
-	 *
-	 * @return Nothing.
 	 */
 	public void fillInReferencedTableMap(JBitSet passedMap)
 	{
@@ -1315,8 +1309,6 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 	 * Optimize any subqueries that haven't been optimized any where
 	 * else.  This is useful for a RowResultSetNode as a derived table
 	 * because it doesn't get optimized otherwise.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

@@ -226,9 +226,6 @@ public interface CompilerContext extends Context
 
 	/**
 	 * Reset the next ResultSet number from this CompilerContext.
-	 *
-	 * @return None.
-	 *
 	 */
 
 	void resetNextResultSetNumber();
@@ -236,7 +233,7 @@ public interface CompilerContext extends Context
 	/**
 	 * Get the number of Results in the current statement from this CompilerContext.
 	 *
-	 * @return int	The number of ResultSets in the current statement.
+	 * @return The number of ResultSets in the current statement.
 	 *
 	 */
 
@@ -308,7 +305,7 @@ public interface CompilerContext extends Context
 	 *	(#objectType) (this.getPreparedStatement().getSavedObject(#int))
 	 *  <\pre>
 	 *
-	 * @param the object to add to the pool of saved objects
+	 * @param o object to add to the pool of saved objects
 	 * @return the entry # for the object
 	 */
 	int	addSavedObject(Object o);
@@ -332,9 +329,6 @@ public interface CompilerContext extends Context
 	 * Set the in use state for the compiler context.
 	 *
 	 * @param inUse	 The new inUse state for the compiler context.
-	 *
-	 * @return Nothing.
-	 *
 	 */
 	public void setInUse(boolean inUse);
 
@@ -387,7 +381,7 @@ public interface CompilerContext extends Context
 	/**
 	 * Set the compilation schema descriptor for this compilation context.
 	 *
-	 * @param the compilation schema
+	 * @param newDefault compilation schema
 	 * 
 	 * @return the previous compilation schema descirptor
 	 */
@@ -417,8 +411,6 @@ public interface CompilerContext extends Context
 	 * Set the parameter list.
 	 *
 	 * @param parameterList	The parameter list.
-	 *
-	 * @return Nothing.
 	 */
 	public void setParameterList(Vector parameterList);
 
@@ -431,9 +423,6 @@ public interface CompilerContext extends Context
 
 	/**
 	 * If callable statement uses ? = form
-	 *
-	 *
-	 * @return Nothing.
 	 */
 	public void setReturnParameterFlag();
 
@@ -471,8 +460,6 @@ public interface CompilerContext extends Context
 	 * Set the isolation level for the scans in this query.
 	 *
 	 * @param isolationLevel	The isolation level to use.
-	 *
-	 * @return Nothing.
 	 */
 	public void setScanIsolationLevel(int isolationLevel);
 
@@ -487,8 +474,6 @@ public interface CompilerContext extends Context
 	 * Set the isolation level on entry to this CC so that it can be restored on exit.
 	 *
 	 * @param isolationLevel	The isolation level on entry.
-	 *
-	 * @return Nothing.
 	 */
 	public void setEntryIsolationLevel(int isolationLevel);
 

@@ -2059,8 +2059,6 @@ public class RAMTransaction
      * RESOLVE - how do we map to the "right" XAExceptions.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      * @param onePhase If true, the resource manager should use a one-phase
      *                 commit protocol to commit the work done on behalf of 
      *                 current xid.

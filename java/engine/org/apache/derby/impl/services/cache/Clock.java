@@ -135,10 +135,8 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 
 		<P>MT - not needed for constructor.
 
-		@param holderClass the cacheable object class
+		@param holderFactory the cacheable object class
 		@param name the name of the cache
-		@param initParam parameter to call the cacheable object the first time
-		it is being initialized.
 		@param initialSize the initial number of cachable object this cache
 		holds.
 		@param maximumSize the maximum size of the cache.  The cache may grow
@@ -369,7 +367,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
      * Mark a set of  entries as having been used. Normally this is done as a side effect
      * of find() or findCached. Entries that are no longer in the cache are ignored.
      *
-     * @param key the key of the used entry.
+     * @param keys the key of the used entry.
      */
     public void setUsed( Object[] keys)
     {

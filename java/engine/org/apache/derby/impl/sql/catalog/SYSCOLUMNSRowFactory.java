@@ -178,10 +178,6 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
   /**
 	 * Make a SYSCOLUMNS row
 	 *
-	 * @param emptyRow	Make an empty row if this parameter is true
-	 * @param tableID	Table that the column is in
-	 * @param column	Column descriptor
-	 *
 	 * @return	Row suitable for inserting into SYSCOLUMNS.
 	 *
 	 * @exception   StandardException thrown on failure

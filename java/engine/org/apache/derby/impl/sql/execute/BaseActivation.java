@@ -712,8 +712,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 * @param columnPositions	The array of column positions
 	 * @param positionToSet		The place to put the column position
 	 * @param column			The column position
-	 *
-	 * @return	Nothing
 	 */
 	public static void setColumnPosition(
 							int[] columnPositions,
@@ -749,7 +747,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 * @param qualifiers	The array of Qualifiers
 	 * @param qualifier		The Qualifier
 	 * @param position_1    The Nth array index into qualifiers[N][M]
-	 * @param position_1    The Nth array index into qualifiers[N][M]
+	 * @param position_2    The Nth array index into qualifiers[N][M]
 	 */
 	public static void setQualifier(
     Qualifier[][]   qualifiers,
@@ -1227,7 +1225,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 * This method can help reduce the amount of generated code by changing
 	 * instances of this.pvs.getParameter(position) to this.getParameter(position) 
 	 * @param position
-	 * @return
 	 * @throws StandardException
 	 */
 	protected final DataValueDescriptor getParameter(int position) throws StandardException { 
@@ -1307,8 +1304,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 
 	/**
 	 	Throw an exception if any parameters are uninitialized.
-
-		@return		Nothing
 
 		@exception StandardException	Thrown if any parameters
 												are unitialized

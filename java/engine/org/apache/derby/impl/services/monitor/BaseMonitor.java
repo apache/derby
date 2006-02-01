@@ -1264,7 +1264,6 @@ nextModule:
 	 * files. This must be executed in a privileged block otherwise
 	 * when running in a security manager environment no properties will
 	 * be returned.
-	 * @return
 	 */
 	Properties getDefaultModuleProperties()
 	{
@@ -1920,7 +1919,7 @@ nextModule:
 	/**
 	Return the UUID factory for this system.  Returns null
 	if there isn't one.
-	@see com.ibm.db2j.system.System
+	See com.ibm.db2j.system.System
 	*/
 	public UUIDFactory getUUIDFactory()	{
 

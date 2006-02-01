@@ -57,9 +57,9 @@ public class FormatableLongHolder implements Formatable
 	}
 
 	/**
-	 * Set the held int to the input int.
+	 * Set the held long to the input int.
 	 *
-	 * @param theInt the int to hold
+	 * @param theLong the int to hold
 	 */
 	public void setLong(int theLong)
 	{
@@ -80,7 +80,7 @@ public class FormatableLongHolder implements Formatable
 	 * Create and return an array of FormatableLongHolders
 	 * given an array of ints.
 	 *
-	 * @param theInts	The array of ints
+	 * @param theLongs	The array of longs
 	 *
 	 * @return	An array of FormatableLongHolders
 	 */

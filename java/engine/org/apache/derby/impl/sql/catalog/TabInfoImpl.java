@@ -75,7 +75,6 @@ public class TabInfoImpl implements TabInfo
 	 * Constructor
 	 *
 	 * @param crf				the associated CatalogRowFactory
-	 * @param executionFactory	execution factory of the database
 	 */
 	public TabInfoImpl(CatalogRowFactory crf)
 	{

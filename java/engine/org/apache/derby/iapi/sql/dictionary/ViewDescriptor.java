@@ -117,8 +117,6 @@ public class ViewDescriptor extends TupleDescriptor
 	 * Sets the UUID of the view.
 	 *
 	 * @param uuid	The UUID of the view.
-	 *
-	 * @return Nothing.
 	 */
 	public void	setUUID(UUID uuid)
 	{
@@ -140,8 +138,6 @@ public class ViewDescriptor extends TupleDescriptor
 	 * Sets the name of the view.
 	 *
 	 * @param name	The name of the view.
-	 *
-	 * @return Nothing.
 	 */
 	public void	setViewName(String name)
 	{

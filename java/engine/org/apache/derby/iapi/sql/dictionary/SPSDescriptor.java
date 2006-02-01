@@ -170,7 +170,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 * @param 	uuid	the UUID
 	 * @param 	suuid	the schema UUID
 	 * @param 	compSchemaUUID	the schema UUID at compilation time
-	 * @param	char	type
+	 * @param	type	type
 	 * @param 	valid	is the sps valid
 	 * @param 	text	the text for this statement
 	 * @param 	usingText	the text for the USING clause supplied to
@@ -209,7 +209,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 * @param 	uuid	the UUID
 	 * @param 	suuid	the schema UUID
 	 * @param 	compSchemaUUID	the schema UUID at compilation time
-	 * @param	char	type
+	 * @param	type	type
 	 * @param 	valid	is the sps valid
 	 * @param 	text	the text for this statement
 	 * @param 	usingText	the text for the USING clause supplied to
@@ -619,7 +619,7 @@ public class SPSDescriptor extends TupleDescriptor
 	/**
 	 * Set the parameter defaults for this statement.
 	 *
-	 * @param params	the parameter defaults
+	 * @param values	the parameter defaults
 	 */
 	public final synchronized void setParameterDefaults(Object[] values)
 	{
@@ -1138,7 +1138,7 @@ public class SPSDescriptor extends TupleDescriptor
 	/**
 	 * Get the UUID for the given string
 	 *
-	 * @param the string
+	 * @param idString	the string
 	 *
 	 * @return the UUID
 	 */

@@ -163,7 +163,6 @@ abstract class BaseTypeCompiler implements TypeCompiler
 	 *
 	 * @param thisType	The TypeId of the value to be stored
 	 * @param otherType	The TypeId of the value to be stored in
-	 * @param cm		Current ContextManager
 	 *
 	 * @return	true if thisType is storable in otherType
 	 */

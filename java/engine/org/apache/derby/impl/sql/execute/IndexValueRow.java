@@ -141,8 +141,6 @@ class IndexValueRow implements ExecIndexRow {
 
 	/**
 	 * Turn the ExecRow into an ExecIndexRow.
-	 *
-	 * @return Nothing.
 	 */
 	public void execRowToExecIndexRow(ExecRow valueRow)
 	{

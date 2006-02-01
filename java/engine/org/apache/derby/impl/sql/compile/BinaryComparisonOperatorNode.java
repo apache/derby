@@ -76,8 +76,6 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 * This node was generated as part of a query rewrite. Bypass the
 	 * normal comparability checks.
 	 * @param val  true if this was for a query rewrite
-	 *
-	 * @return Nothing
 	 */
 	public void setForQueryRewrite(boolean val)
 	{
@@ -96,8 +94,6 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 
 	/**
 	 * Use between selectivity when calculating the selectivity.
-	 *
-	 * @return Nothing.
 	 */
 	void setBetweenSelectivity()
 	{
@@ -224,11 +220,6 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 * Test the type compatability of the operands and set the type info
 	 * for this node.  This method is useful both during binding and
 	 * when we generate nodes within the language module outside of the parser.
-	 *
-	 * @param fromQueryRewrite  If true this call came from a query that was
-	 * rewritten by the optimizer.  The normal isComparable check will be 
-	 * bypassed to allow > < and the like with longvarchar.  
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

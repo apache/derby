@@ -117,9 +117,7 @@ public abstract class UserUtility
 
 	  @param userName the user's name. A valid possibly delimited
 	  SQL identifier.
-	  @return if the user existed in the database and was
-	  dropped return true. If the user did not exist
-	  in the database to start with return false.
+
 	  @exception SQLException thrown if this fails or the user
 	  being dropped does not exist.
 	  */

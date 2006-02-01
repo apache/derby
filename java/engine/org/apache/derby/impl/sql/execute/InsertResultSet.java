@@ -312,7 +312,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	  *	Run the check constraints against the current row. Raise an error if
 	  * a check constraint is violated.
 	  *
-	  * @return Nothing.
 	  * @exception StandardException thrown on error
 	  */
 	private	void	evaluateCheckConstraints()
@@ -664,8 +663,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	 * convert column names array to corresponding column positions array
 	 * Save that column positions array in activation. We do this to simplify the
 	 * rest of the logic(it only has to deal with column positions here after).
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error if invalid column
    * name in the list.
@@ -2054,8 +2051,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	 *
 	 * @param heapConglom	Conglomerate number for the heap
 	 *
-	 * @return Nothing
-	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	private void setEstimatedRowCount(long heapConglom)
@@ -2090,8 +2085,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	 * as we populated the table.  Doing a 0 row replace into a
 	 * table with indexes is a degenerate case, hence we allow
 	 * ugly and unoptimized code.
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */

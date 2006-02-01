@@ -68,8 +68,6 @@ public interface XATransactionController extends TransactionController
      * than destroy will throw exceptions.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      * @param onePhase If true, the resource manager should use a one-phase
      *                 commit protocol to commit the work done on behalf of 
      *                 current xid.

@@ -126,8 +126,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @param fromTable	A FromTable to add to the list
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -281,8 +279,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * @param dataDictionary	The DataDictionary to use for binding
 	 * @param fromListParam		FromList to use/append to.
 	 *
-	 * @return	Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -328,8 +324,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * binding the sub-expressions, as well as figuring out what the return 
 	 * type is for each expression.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
@@ -374,8 +368,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * live under them.
 	 *
 	 * @param fromListParam		FromList to use/append to.
-	 *
-	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -609,8 +601,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * Check for (and reject) all ? parameters directly under the ResultColumns.
 	 * This is done for SELECT statements.
 	 *
-	 * @return	Nothing
-	 *
 	 * @exception StandardException		Thrown if a ? parameter found
 	 *									directly under a ResultColumn
 	 */
@@ -657,8 +647,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @param numTables			The number of tables in the DML Statement
 	 * @param gbl				The group by list, if any
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -826,8 +814,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
-	 *
-	 * @return	Nothing
 	 */
 
 	public void printSubNodes(int depth)
@@ -852,8 +838,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * FromList.
 	 *
 	 * @param level		The query block level for this table.
-	 *
-	 * @return Nothing
 	 */
 	public void setLevel(int level)
 	{
@@ -1081,8 +1065,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * This is useful when flattening a subquery.
 	 *
 	 * @param decrement	The amount to decrement by.
-	 *
-	 * @return Nothing;
 	 */
 	void decrementLevel(int decrement)
 	{
@@ -1460,8 +1442,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * @param referencedTableMap	The referenced table map.
 	 * @param outerFromList			FromList from outer query block
 	 * @param isNotExists			Whether or not for NOT EXISTS
-	 *
-	 * @return Nothing.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

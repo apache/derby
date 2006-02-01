@@ -112,9 +112,6 @@ public interface BooleanDataValue extends DataValueDescriptor
 	 *
 	 * @param theValue	Contains the boolean value to set this BooleanDataValue
 	 *					to.  Null means set this BooleanDataValue to null.
-	 *
-	 * @return	This BooleanDataValue
-	 *
 	 */
 	public void setValue(Boolean theValue);
 

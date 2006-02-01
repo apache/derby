@@ -444,7 +444,7 @@ public class StandardException extends Exception
      * @param localizedMessage The message associated with this exception.
      *        <b>It is the caller's responsibility to ensure that this message is properly localized.</b>
      *
-     * @see org.apache.derby.iapi.tools.i18n.LocalizedResource
+     * See org.apache.derby.iapi.tools.i18n.LocalizedResource
      */
     public static StandardException newPreLocalizedException( String MessageID,
                                                               Throwable t,
