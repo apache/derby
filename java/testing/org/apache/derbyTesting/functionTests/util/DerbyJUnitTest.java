@@ -21,7 +21,7 @@ limitations under the License.
 /**
  * <p>
  * This class factors out utility methods (including assertion machinery)
- * for re-use by Derby JUnit tests.
+ * for re-use by Derby JUnit tests. JUnit tests should extend this class.
  * </p>
  *
  * @author Rick
@@ -128,6 +128,11 @@ public	class	DerbyJUnitTest	extends	TestCase
 	//
 	/////////////////////////////////////////////////////////////
 	
+	/**
+	 * <p>
+	 * Vacuous constructor for JUnit machinery.
+	 * </p>
+	 */
 	public	DerbyJUnitTest() {}
 
 	/////////////////////////////////////////////////////////////
@@ -245,11 +250,18 @@ public	class	DerbyJUnitTest	extends	TestCase
 	 */
 	public	static	void	println( String text )
 	{
-		if ( _debug )
-		{
-			_outputStream.println( text );
-			_outputStream.flush();
-		}
+		if ( _debug ) { alarm( text ); }
+	}
+
+	/**
+	 * <p>
+	 * Print a message regardless of whether we are running in debug mode.
+	 * </p>
+	 */
+	public	static	void	alarm( String text )
+	{
+		_outputStream.println( text );
+		_outputStream.flush();
 	}
 
 	/**
@@ -312,6 +324,11 @@ public	class	DerbyJUnitTest	extends	TestCase
 	//
 	/////////////////////////////////////////////////////////////
 
+	/**
+	 * <p>
+	 * Load a client driver, given its particulars.
+	 * </p>
+	 */
 	protected	static	boolean	faultInDriver( String[] clientSettings )
 	{
 		String	currentClientName = clientSettings[ DRIVER_NAME ];
@@ -328,12 +345,21 @@ public	class	DerbyJUnitTest	extends	TestCase
 		}
 	}
 
-	// Get a connection to the server.
+	/**
+	 * <p>
+	 * Get a connection to a database, using the default client.
+	 * </p>
+	 */
 	protected	static	Connection	getConnection()
 		throws Exception
 	{
 		return getConnection( _defaultClientSettings, _databaseName, new Properties() );
 	}
+	/**
+	 * <p>
+	 * Get a connection to a database, using the specified client.
+	 * </p>
+	 */
 	protected	static	Connection	getConnection
 	(
 	    String[]	clientSettings,
@@ -356,7 +382,11 @@ public	class	DerbyJUnitTest	extends	TestCase
 		return conn;
 	}
 
-	// Build the connection URL.
+	/**
+	 * <p>
+	 * Cobble together a connection URL.
+	 * </p>
+	 */
 	private	static	String	makeDatabaseURL( String[] clientSettings, String databaseName )
 	{
 		return clientSettings[ DATABASE_URL ] + databaseName;
@@ -393,6 +423,11 @@ public	class	DerbyJUnitTest	extends	TestCase
 	//
 	///////////////
 
+	/**
+	 * <p>
+	 * Execute DDL statement.
+	 * </p>
+	 */
 	protected	static	void	executeDDL( Connection conn, String text )
 		throws SQLException
 	{
@@ -406,9 +441,13 @@ public	class	DerbyJUnitTest	extends	TestCase
 		finally { close( ps ); }
 	}
 	
-	//
-	// Thin wrapper around statement execution to support debugging.
-	//
+	/**
+	 * <p>
+	 * Execute a SQL statement, given by the text argument. This thin
+	 * wrapper around the JDBC machinery logs the statement text when
+	 * running in debug mode.
+	 * </p>
+	 */
 	protected	static	void	execute( Connection conn, String text )
 		throws SQLException
 	{
@@ -418,9 +457,13 @@ public	class	DerbyJUnitTest	extends	TestCase
 		close( ps );
 	}
 
-	//
-	// Thin wrapper around jdbc layer to support debugging.
-	//
+	/**
+	 * <p>
+	 * Prepare a SQL statement, given by the text argument. This thin
+	 * wrapper around the JDBC machinery logs the statement text when
+	 * running in debug mode.
+	 * </p>
+	 */
 	protected	static	PreparedStatement	prepare( Connection conn, String text )
 		throws SQLException
 	{
@@ -429,9 +472,13 @@ public	class	DerbyJUnitTest	extends	TestCase
 		return conn.prepareStatement( text );
 	}
 
-	//
-	// Thin wrapper around jdbc layer to support debugging.
-	//
+	/**
+	 * <p>
+	 * Prepare a SQL call statement, given by the text argument. This thin
+	 * wrapper around the JDBC machinery logs the statement text when
+	 * running in debug mode.
+	 * </p>
+	 */
 	protected	static	CallableStatement	prepareCall( Connection conn, String text )
 		throws SQLException
 	{
@@ -442,6 +489,11 @@ public	class	DerbyJUnitTest	extends	TestCase
 		return cs;
 	}
 
+	/**
+	 * <p>
+	 * Scour out all the rows from a table.
+	 * </p>
+	 */
 	protected	static	void	truncateTable( Connection conn, String name )
 		throws SQLException
 	{
@@ -450,21 +502,57 @@ public	class	DerbyJUnitTest	extends	TestCase
 		ps.execute();
 	}
 
+	/**
+	 * <p>
+	 * Drop a table regardless of whether it exists. If the table does not
+	 * exist, don't log an error unless
+	 * running in debug mode. This method is to be used for reinitializing
+	 * a schema in case a previous test run failed to clean up after itself.
+	 * Do not use this method if you need to verify that the table really exists.
+	 * </p>
+	 */
 	protected	static	void	dropTable( Connection conn, String name )
 	{
 		dropSchemaObject( conn, TABLE, name );
 	}
 
+	/**
+	 * <p>
+	 * Drop a function regardless of whether it exists. If the function does not
+	 * exist, don't log an error unless
+	 * running in debug mode. This method is to be used for reinitializing
+	 * a schema in case a previous test run failed to clean up after itself.
+	 * Do not use this method if you need to verify that the function really exists.
+	 * </p>
+	 */
 	protected	static	void	dropFunction( Connection conn, String name )
 	{
 		dropSchemaObject( conn, FUNCTION, name );
 	}
 
+	/**
+	 * <p>
+	 * Drop a procedure regardless of whether it exists. If the procedure does
+	 * not exist, don't log an error unless
+	 * running in debug mode. This method is to be used for reinitializing
+	 * a schema in case a previous test run failed to clean up after itself.
+	 * Do not use this method if you need to verify that the procedure really exists.
+	 * </p>
+	 */
 	protected	static	void	dropProcedure( Connection conn, String name )
 	{
 		dropSchemaObject( conn, PROCEDURE, name );
 	}
 
+	/**
+	 * <p>
+	 * Drop a schema object regardless of whether it exists. If the object does
+	 * not exist, don't log an error unless
+	 * running in debug mode. This method is to be used for reinitializing
+	 * a schema in case a previous test run failed to clean up after itself.
+	 * Do not use this method if you need to verify that the object really exists.
+	 * </p>
+	 */
 	protected	static	void	dropSchemaObject( Connection conn, String genus, String objectName )
 	{
 		PreparedStatement	ps = null;
@@ -474,37 +562,72 @@ public	class	DerbyJUnitTest	extends	TestCase
 
 			ps.execute();
 		}
-		catch (SQLException e) {}
+		catch (SQLException e)
+		{
+			if ( _debug ) { printStackTrace( e ); }
+		}
 
 		close( ps );
 	}
 
-	//
-	// Swallow uninteresting exceptions when disposing of jdbc objects.
-	//
+	/**
+	 * <p>
+	 * Close a ResultSet. This method factors out the check for whether
+	 * the ResultSet was created in the first place. This tidies up the
+	 * caller's cleanup logic. If an error occurs, print it. Because this
+	 * method swallows the exception after printing it, do not call this
+	 * method if you want your test to halt on error.
+	 * </p>
+	 */
 	protected	static	void	close( ResultSet rs )
 	{
 		try {
 			if ( rs != null ) { rs.close(); }
 		}
-		catch (SQLException e) {}
+		catch (SQLException e) { printStackTrace( e ); }
 	}	
+
+	/**
+	 * <p>
+	 * Close a Statement. This method factors out the check for whether
+	 * the Statement was created in the first place. This tidies up the
+	 * caller's cleanup logic. If an error occurs, print it. Because this
+	 * method swallows the exception after printing it, do not call this
+	 * method if you want your test to halt on error.
+	 * </p>
+	 */
 	protected	static	void	close( Statement statement )
 	{
 		try {
 			if ( statement != null ) { statement.close(); }
 		}
-		catch (SQLException e) {}
+		catch (SQLException e) { printStackTrace( e ); }
 	}
+
+	/**
+	 * <p>
+	 * Close a Connection. This method factors out the check for whether
+	 * the Connection was created in the first place. This tidies up the
+	 * caller's cleanup logic. If an error occurs, print it. Because this
+	 * method swallows the exception after printing it, do not call this
+	 * method if you want your test to halt on error.
+	 * </p>
+	 */
 	protected	static	void	close( Connection conn )
 	{
 		try {
 			if ( conn != null ) { conn.close(); }
 		}
-		catch (SQLException e) {}
+		catch (SQLException e) { printStackTrace( e ); }
 	}
 
-	// read a column from a result set
+	/**
+	 * <p>
+	 * Read a column from a ResultSet given its column name and expected jdbc
+	 * type. This method is useful if you are want to verify the getXXX() logic
+	 * most naturally fitting the declared SQL type.
+	 * </p>
+	 */
 	protected	Object	getColumn( ResultSet rs, String columnName, int jdbcType )
 		throws Exception
 	{
@@ -583,9 +706,17 @@ public	class	DerbyJUnitTest	extends	TestCase
 		return retval;
 	}
 
-	//
-	// Get a column based on an expected return value.
-	//
+	/**
+	 * <p>
+	 * Read a column from a ResultSet given its column position
+	 * and an expected Java type. This method is useful when
+	 * comparing ResultSets against expected values.
+	 * </p>
+	 *
+	 * @param	rs		The ResultSet to read.
+	 * @param	param	The column number (1-based)
+	 * @param	value	An object whose type is what we expect the column to be.
+	 */
 	protected	Object	getColumn( ResultSet rs, int param, Object value )
 		throws Exception
 	{
@@ -610,10 +741,14 @@ public	class	DerbyJUnitTest	extends	TestCase
 
 		return retval;
 	}
-
-
 	
-	// get an output argument from a call to a stored procedure
+	/**
+	 * <p>
+	 * Read an output argument from a CallableStatement given its 1-based
+	 * argument position and expected jdbc type. This is useful for
+	 * exercising the getXXX() methods most natural to a declared SQL type.
+	 * </p>
+	 */
 	protected	Object	getOutArg( CallableStatement cs, int arg, int jdbcType )
 		throws Exception
 	{
@@ -692,9 +827,13 @@ public	class	DerbyJUnitTest	extends	TestCase
 		return retval;
 	}
 
-	//
-	// Logic for stuffing a data value into a column, given its type.
-	//
+	/**
+	 * <p>
+	 * Stuff a PreparedStatement parameter given its 1-based parameter position
+	 * and expected jdbc type. This method is useful for testing the setXXX()
+	 * methods most natural for a declared SQL type.
+	 * </p>
+	 */
 	protected	void	setParameter( PreparedStatement ps, int param, int jdbcType, Object value )
 		throws Exception
 	{
@@ -775,10 +914,15 @@ public	class	DerbyJUnitTest	extends	TestCase
 
 	}
 	
-	//
-	// Logic for stuffing a data value into a column
-	//
-	protected	void	setParameter( PreparedStatement ps, int param,Object value )
+	/**
+	 * <p>
+	 * Stuff a PreparedStatement parameter given its 1-based parameter position.
+	 * The appropriate setXXX() method is determined by the Java type of the
+	 * value being stuffed. This method is useful for testing setXXX() methods
+	 * other than the most natural fit for the declared SQL type.
+	 * </p>
+	 */
+	protected	void	setParameter( PreparedStatement ps, int param, Object value )
 		throws Exception
 	{
 		if ( value == null )
@@ -806,6 +950,12 @@ public	class	DerbyJUnitTest	extends	TestCase
 	//
 	////////////////////
 
+	/**
+	 * <p>
+	 * Single quote a string. This is a helper routine for use in generating
+	 * SQL text.
+	 * </p>
+	 */
 	protected	String	singleQuote( String text )
 	{
 		return "'" + text + "'";
@@ -861,7 +1011,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 
 	/**
 	 * <p>
-	 * Assert a the values in a ResultSet for a given column across all rows.
+	 * Assert the values in a ResultSet for a given column across all rows.
 	 * </p>
 	 */
 	public	void	assertColumnEquals
@@ -893,7 +1043,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 
 	/**
 	 * <p>
-	 * Compare two objects, allowing nulls to be equal.
+	 * Assert two objects are equal, allowing nulls to be equal.
 	 * </p>
 	 */
 	public	void	compareObjects( String message, Object left, Object right )
@@ -917,7 +1067,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 
 	/**
 	 * <p>
-	 * Compare two byte arrays, allowing nulls to be equal.
+	 * Assert two byte arrays are equal, allowing nulls to be equal.
 	 * </p>
 	 */
 	public	void	compareBytes( String message, Object left, Object right )
@@ -940,10 +1090,10 @@ public	class	DerbyJUnitTest	extends	TestCase
 			assertEquals( message + "[ " + i + " ]", leftBytes[ i ], rightBytes[ i ] );
 		}
 	}
-	
+
 	/**
 	 * <p>
-	 * Compare two Dates, allowing nulls to be equal.
+	 * Assert two Dates are equal, allowing nulls to be equal.
 	 * </p>
 	 */
 	public	void	compareDates( String message, Object left, Object right )
