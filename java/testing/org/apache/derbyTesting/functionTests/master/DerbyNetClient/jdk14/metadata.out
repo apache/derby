@@ -75,7 +75,7 @@ storesUpperCaseQuotedIdentifiers(): false
 storesLowerCaseQuotedIdentifiers(): false
 storesMixedCaseQuotedIdentifiers(): true
 getIdentifierQuoteString(): "
-getNumericFunctions(): ABS,MOD,SQRT
+getNumericFunctions(): ABS,ACOS,ASIN,ATAN,CEILING,COS,DEGREES,EXP,FLOOR,LOG,MOD,RADIANS,SIN,SQRT,TAN
 getStringFunctions(): CONCAT,LENGTH,LCASE,LOCATE,LTRIM,RTRIM,SUBSTRING,UCASE
 getSystemFunctions(): USER
 getTimeDateFunctions(): CURDATE,CURTIME,HOUR,MINUTE,MONTH,SECOND,TIMESTAMPADD,TIMESTAMPDIFF,YEAR
@@ -458,49 +458,37 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],COLUMN_NAME[VARCHAR]
 Test escaped numeric functions - JDBC 3.0 C.1
 TEST FUNCTIONS DECLARED IN DATABASEMETADATA LIST
 Executing VALUES { fn ABS(-25.67) } --   = >25.67<  << 
+Executing VALUES { fn ACOS(0.0707) } --   = >1.50<  << 
+Executing VALUES { fn ASIN(0.997) } --   = >1.49<  << 
+Executing VALUES { fn ATAN(14.10) } --   = >1.49<  << 
+Executing VALUES { fn CEILING(3.45) } --   = >4.0<  << 
+Executing VALUES { fn COS(1.2) } --   = >0.36<  << 
+Executing VALUES { fn DEGREES(2.1) } --   = >120.<  << 
+Executing VALUES { fn EXP(2.3) } --   = >9.97<  << 
+Executing VALUES { fn FLOOR(3.22) } --   = >3.0<  << 
+Executing VALUES { fn LOG(34.1) } --   = >3.52<  << 
 Executing VALUES { fn MOD(124, 7) } --   = >5<  << 
+Executing VALUES { fn RADIANS(54) } --   = >0.94<  << 
+Executing VALUES { fn SIN(0.32) } --   = >0.31<  << 
 Executing VALUES { fn SQRT(6.22) } --   = >2.49<  << 
+Executing VALUES { fn TAN(0.57) } --   = >0.64<  << 
 TEST FUNCTIONS NOT DECLARED IN DATABASEMETADATA LIST
-Executing VALUES { fn ACOS(1.34) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "ACOS" at line 1, column 13.
-Executing VALUES { fn ASIN(1.21) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "ASIN" at line 1, column 13.
-Executing VALUES { fn ATAN(0.34) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "ATAN" at line 1, column 13.
 Executing VALUES { fn ATAN2(0.56, 1.2) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "ATAN2" at line 1, column 13.
-Executing VALUES { fn CEILING(3.45) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "CEILING" at line 1, column 13.
-Executing VALUES { fn COS(1.2) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "COS" at line 1, column 13.
 Executing VALUES { fn COT(3.4) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "COT" at line 1, column 13.
-Executing VALUES { fn DEGREES(2.1) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "DEGREES" at line 1, column 13.
-Executing VALUES { fn EXP(2.3) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "EXP" at line 1, column 13.
-Executing VALUES { fn FLOOR(3.22) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "FLOOR" at line 1, column 13.
-Executing VALUES { fn LOG(34.1) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "LOG" at line 1, column 13.
 Executing VALUES { fn LOG10(18.7) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "LOG10" at line 1, column 13.
 Executing VALUES { fn PI() } -- 
 SQLSTATE(42X01): Syntax error: Encountered "PI" at line 1, column 13.
 Executing VALUES { fn POWER(2, 3) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "POWER" at line 1, column 13.
-Executing VALUES { fn RADIANS(54) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "RADIANS" at line 1, column 13.
 Executing VALUES { fn RAND(17) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "RAND" at line 1, column 13.
 Executing VALUES { fn ROUND(345.345, 1) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "ROUND" at line 1, column 13.
 Executing VALUES { fn SIGN(-34) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "SIGN" at line 1, column 13.
-Executing VALUES { fn SIN(0.32) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "SIN" at line 1, column 13.
-Executing VALUES { fn TAN(0.57) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "TAN" at line 1, column 13.
 Executing VALUES { fn TRUNCATE(345.395, 1) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "TRUNCATE" at line 1, column 13.
 Test escaped string functions - JDBC 3.0 C.2

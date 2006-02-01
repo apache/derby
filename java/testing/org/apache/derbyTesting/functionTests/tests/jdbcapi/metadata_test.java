@@ -96,9 +96,9 @@ public abstract class metadata_test {
 	{
 		// Section C.1 JDBC 3.0 spec.
 		{ "ABS", "-25.67" },
-		{ "ACOS", "1.34" },
-		{ "ASIN", "1.21" },
-		{ "ATAN", "0.34" },
+		{ "ACOS", "0.0707" },
+		{ "ASIN", "0.997" },
+		{ "ATAN", "14.10" },
 		{ "ATAN2", "0.56", "1.2" },
 		{ "CEILING", "3.45" },
 		{ "COS", "1.2" },

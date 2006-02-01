@@ -1,4 +1,3 @@
-
 options
 {
 	STATIC = false;
@@ -110,6 +109,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -991,6 +991,32 @@ public class SQLParser
 		}
 
 		return getToken(2).kind == FN;
+	}
+	
+
+    /**
+       List of JDBC escape functions that map directly onto
+       a function in the SYSFUN schema.
+    */
+	private static final String[] ESCAPED_SYSFUN_FUNCTIONS =
+        {"ACOS", "ASIN", "ATAN", "COS", "SIN", "TAN",
+         "DEGREES", "RADIANS", "EXP", "LOG", "CEILING", "FLOOR" };
+       
+    /**
+       Convert a JDBC escaped function name to a function
+       name in the SYSFUC schema. Returns null if no such
+       function exists.
+    */  
+	private String getEscapedSYSFUN(String name)
+	{
+	    name = StringUtil.SQLToUpperCase(name);
+	    
+	    for (int i = 0; i < ESCAPED_SYSFUN_FUNCTIONS.length; i++)
+	    {
+	        if (ESCAPED_SYSFUN_FUNCTIONS[i].equals(name))
+	            return name;
+	    }
+	    return null;
 	}
 
 	/**
@@ -3283,7 +3309,9 @@ QueryTreeNode
 bareCallStatement() throws StandardException :
 {
 	ParameterNode		returnParam = null;
+
 	ValueNode			value = null;
+
 	ResultSetNode		resultSetNode = null;
 }
 {
@@ -5864,7 +5892,59 @@ escapedValueFunction() throws StandardException :
     {
         return value;
     }
+ 
+|   
+    LOOKAHEAD({ getEscapedSYSFUN(getToken(1).image) != null }) 
+    value = escapedSYSFUNFunction()
+    {
+        return value;
+    }
+
+    
 }
+
+/*
+ * <A NAME="numericValueFunction">numericValueFunction</A>
+ */
+ValueNode
+escapedSYSFUNFunction() throws StandardException :
+{
+    Vector      parameterList = new Vector();
+	Token tok;
+}
+{
+    tok = <IDENTIFIER> methodCallParameterList(parameterList)
+    {
+	    String sysFunName = getEscapedSYSFUN(tok.image);
+	    
+	    TableName functionName = (TableName) nodeFactory.getNode(
+								C_NodeTypes.TABLE_NAME,
+								SchemaDescriptor.IBM_SYSTEM_FUN_SCHEMA_NAME,
+								sysFunName,
+								new Integer(0),
+								new Integer(0),
+								getContextManager());
+	   
+		MethodCallNode methodNode = (MethodCallNode) nodeFactory.getNode(
+								C_NodeTypes.STATIC_METHOD_CALL_NODE,
+								functionName,
+								null,
+								getContextManager());
+
+		methodNode.addParms(parameterList);
+
+		/*
+		** Assume this is being returned to the SQL domain.  If it turns
+		** out that this is being returned to the Java domain, we will
+		** get rid of this node.
+		*/
+		return (ValueNode) nodeFactory.getNode(
+								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
+								methodNode,
+								getContextManager());
+     }
+}
+
 
 /*
  * <A NAME="timestampArithmeticFuncion">timestampArithmeticFuncion</A>
