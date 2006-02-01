@@ -24,7 +24,7 @@
     <groupId>org.apache.derby</groupId>
     <name>Derby Project</name>
     <id>derby-project</id>
-    <currentVersion>10.2-SNAPSHOT</currentVersion>
+    <currentVersion>10.1-SNAPSHOT</currentVersion>
     <organization>
         <name>Apache Software Foundation</name>
         <url>http://db.apache.org/</url>
