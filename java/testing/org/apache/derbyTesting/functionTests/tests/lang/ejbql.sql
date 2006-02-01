@@ -388,22 +388,16 @@ insert into myint values (null);
 select abs(a) from myint;
 autocommit off;
 
--- Prepare Statements, should pass and return 1
-prepare p1 as 'select abs(?) from myint';
-prepare p1 as 'select 1 from myint where ? <= 4';
-execute p1 using 'values absval( 4 )';
-execute p1 using 'values absval( -4 )';
-execute p1 using 'values absval( 4.4 )';
-execute p1 using 'values absval( -4.4 )';
+values absval( 4 );
+values absval( -4 );
+values absval( 4.4 );
+values absval( -4.4 );
 
--- Prepare Statements, should pass and return 1
-prepare p2 as 'select {fn abs(?)} from myint';
-prepare p2 as 'select 1 from myint where ? <= 4';
-execute p2 using 'values {fn abs( 4 )}';
-execute p2 using 'values {fn abs( -4 )}';
-execute p2 using 'values {fn abs( 4.4 )}';
-execute p2 using 'values {fn abs( -4.4 )}';
-execute p2 using 'values {fn abs( -4.44444444444444444444444 )}';
+values {fn abs( 4 )};
+values {fn abs( -4 )};
+values {fn abs( 4.4 )};
+values {fn abs( -4.4 )};
+values {fn abs( -4.44444444444444444444444 )};
 autocommit on;
 
 drop table myint;
