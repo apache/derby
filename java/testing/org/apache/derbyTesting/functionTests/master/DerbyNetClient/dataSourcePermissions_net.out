@@ -35,6 +35,21 @@ ConnectionPoolDataSource with valid default user
 CP connected as EDWARD
 CP connected as FRANCES
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
+Checking connections with XADataSource
+XADataSource with no default user
+EXPECTED CONNFAIL Connection refused : Invalid authentication.
+EXPECTED CONNFAIL Connection refused : Invalid authentication.
+XA connected as EDWARD
+XA connected as FRANCES
+EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
+XADataSource with invalid default user
+EXPECTED CONNFAIL Connection refused : Invalid authentication.
+XA connected as FRANCES
+EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
+XADataSource with valid default user
+XA connected as EDWARD
+XA connected as FRANCES
+EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 ** checkMessageText() with retrieveMessageText= false
 PASS: Message text not retrieved
 ** checkMessageText() with retrieveMessageText= true

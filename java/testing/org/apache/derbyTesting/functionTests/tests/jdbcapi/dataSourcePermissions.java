@@ -231,8 +231,8 @@ public class dataSourcePermissions
 		System.out.println("Checking connections with XADataSource");
 
 		System.out.println("XADataSource with no default user");
-		EmbeddedXADataSource ds = new EmbeddedXADataSource();
-		ds.setDatabaseName("wombat");
+		XADataSource ds = getXADS("wombat",null,null);
+		
 
 		try {
 			ds.getXAConnection().close();
@@ -257,10 +257,9 @@ public class dataSourcePermissions
 		shutdown();
 
 		System.out.println("XADataSource with invalid default user");
-		ds = new EmbeddedXADataSource();
-		ds.setDatabaseName("wombat");
-		ds.setUser("edward");
-		ds.setPassword("sara");
+		ds = getXADS("wombat","edward","sara");
+
+		
 		try {
 			ds.getXAConnection().close();
 			System.out.println("FAIL - get XADataSource connection with no user and invalid defaults");
@@ -271,10 +270,7 @@ public class dataSourcePermissions
 		shutdown();
 
 		System.out.println("XADataSource with valid default user");
-		ds = new EmbeddedXADataSource();
-		ds.setDatabaseName("wombat");
-		ds.setUser("EDWARD");
-		ds.setPassword("noodle");
+		ds = getXADS("wombat","EDWARD","noodle");
 
 		checkConnection(ds.getXAConnection());
 		checkConnection(ds.getXAConnection("FRANCES", "isabella"));
@@ -283,7 +279,22 @@ public class dataSourcePermissions
 		}
 	}
 
-	private static void checkConnection(Connection conn) throws SQLException {
+	/**
+     * @return
+     */
+    private javax.sql.XADataSource getXADS(String database, String user, String password) {
+        EmbeddedXADataSource ds = new EmbeddedXADataSource();
+        ds.setDatabaseName(database);
+        if (user != null) {
+			ds.setUser(user);
+			ds.setPassword(password);
+		}
+        return ds;
+        
+    }
+
+
+    private static void checkConnection(Connection conn) throws SQLException {
 		checkConnection("DS", conn);
 	}
 

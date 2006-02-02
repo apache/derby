@@ -20,41 +20,19 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
-import org.apache.derby.jdbc.EmbeddedXADataSource;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-import java.sql.CallableStatement;
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.sql.DriverManager;
-
-import javax.sql.DataSource;
-import javax.sql.XADataSource;
-import javax.sql.PooledConnection;
-import javax.sql.XAConnection;
-import javax.sql.ConnectionPoolDataSource;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.Xid;
-import javax.sql.ConnectionEventListener;
-import javax.sql.ConnectionEvent;
-import org.apache.derby.tools.JDBCDisplayUtil;
-import org.apache.derby.tools.ij;
-import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
-import java.io.*;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
-import java.util.Hashtable;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
-import javax.naming.*;
-import javax.naming.directory.*;
+import javax.sql.DataSource;
 
-import java.lang.reflect.*;
+import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class dataSourcePermissions_net extends org.apache.derbyTesting.functionTests.tests.jdbcapi.dataSourcePermissions
 {
@@ -205,8 +183,12 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	public boolean supportsPooling() {
 		return true;
 	}
+	
 	public boolean supportsXA() {
-		return false;
+	    if (TestUtil.isDerbyNetClientFramework())
+	    	return true; 
+	    // No XA for JCC
+	    return false;
 	}
 
 	public void start() {
