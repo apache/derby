@@ -19,10 +19,10 @@
 */
 
 package org.apache.derby.client.am;
-
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import java.sql.SQLException;
+import java.io.UnsupportedEncodingException;
 
 // When we calculate column offsets make sure we calculate the correct offsets for double byte charactr5er data
 // length from server is number of chars, not bytes
@@ -410,71 +410,111 @@ public abstract class Cursor {
 
     // Build a JDBC Date object from the DERBY ISO DATE field.
     private final java.sql.Date getDATE(int column) throws SqlException {
-        return org.apache.derby.client.am.DateTime.dateBytesToDate(dataBuffer_,
+        try {
+            return org.apache.derby.client.am.DateTime.dateBytesToDate(dataBuffer_,
                 columnDataPosition_[column - 1],
-                recyclableDate_);
+                recyclableDate_, 
+                charsetName_[column - 1]);
+        }catch (UnsupportedEncodingException e) {
+             throw new SqlException(agent_.logWriter_, e, 
+                    "Encoding is unsupported for conversion to DATE");
+        }
+
+        
     }
 
     // Build a JDBC Time object from the DERBY ISO TIME field.
     private final java.sql.Time getTIME(int column) throws SqlException {
-        return org.apache.derby.client.am.DateTime.timeBytesToTime(dataBuffer_,
-                columnDataPosition_[column - 1],
-                recyclableTime_);
+        try {
+            return org.apache.derby.client.am.DateTime.timeBytesToTime(dataBuffer_,
+                    columnDataPosition_[column - 1],
+                    recyclableTime_,
+                    charsetName_[column - 1]);
+        } catch (UnsupportedEncodingException e) {
+            throw new SqlException(agent_.logWriter_, e, 
+                    "Encoding is unsupported for conversion to TIME");
+        }
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO TIMESTAMP field.
     private final java.sql.Timestamp getTIMESTAMP(int column) throws SqlException {
-        return org.apache.derby.client.am.DateTime.timestampBytesToTimestamp(dataBuffer_,
+
+        try {
+        return org.apache.derby.client.am.DateTime.timestampBytesToTimestamp(
+                dataBuffer_,
                 columnDataPosition_[column - 1],
-                recyclableTimestamp_);
+                recyclableTimestamp_, 
+                charsetName_[column - 1]);
+    } catch (java.io.UnsupportedEncodingException e) {
+        throw new SqlException(agent_.logWriter_, e, 
+                "Encoding is unsupported for conversion to TIMESTAMP");
+    }
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO DATE field.
     private final java.sql.Timestamp getTimestampFromDATE(int column) throws SqlException {
-        return org.apache.derby.client.am.DateTime.dateBytesToTimestamp(dataBuffer_,
-                columnDataPosition_[column - 1],
-                recyclableTimestamp_);
+        try {
+            return org.apache.derby.client.am.DateTime.dateBytesToTimestamp(dataBuffer_,
+                    columnDataPosition_[column - 1],
+                    recyclableTimestamp_, 
+                    charsetName_[column -1]);
+        } catch (UnsupportedEncodingException e) {
+              throw new SqlException(agent_.logWriter_, e, 
+                      "Encoding is unsupported for conversion to TIMESTAMP");            
+        }
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO TIME field.
     private final java.sql.Timestamp getTimestampFromTIME(int column) throws SqlException {
-        return org.apache.derby.client.am.DateTime.timeBytesToTimestamp(dataBuffer_,
-                columnDataPosition_[column - 1],
-                recyclableTimestamp_);
+        try {
+            return org.apache.derby.client.am.DateTime.timeBytesToTimestamp(dataBuffer_,
+                    columnDataPosition_[column - 1],
+                    recyclableTimestamp_,
+                    charsetName_[column -1]);
+        } catch (UnsupportedEncodingException e) {
+            throw new SqlException(agent_.logWriter_, e, 
+                    "Encoding is unsupported for conversion to TIMESTAMP");
+        }
     }
 
     // Build a JDBC Date object from the DERBY ISO TIMESTAMP field.
     private final java.sql.Date getDateFromTIMESTAMP(int column) throws SqlException {
-        return org.apache.derby.client.am.DateTime.timestampBytesToDate(dataBuffer_,
-                columnDataPosition_[column - 1],
-                recyclableDate_);
+        try {
+            return org.apache.derby.client.am.DateTime.timestampBytesToDate(dataBuffer_,
+                    columnDataPosition_[column - 1],
+                    recyclableDate_,
+                    charsetName_[column -1]);
+        } catch (UnsupportedEncodingException e) {
+             throw new SqlException(agent_.logWriter_, e, 
+                     "Encoding is unsupported for conversion to DATE");
+        }
     }
 
     // Build a JDBC Time object from the DERBY ISO TIMESTAMP field.
     private final java.sql.Time getTimeFromTIMESTAMP(int column) throws SqlException {
-        return org.apache.derby.client.am.DateTime.timestampBytesToTime(dataBuffer_,
-                columnDataPosition_[column - 1],
-                recyclableTime_);
+        try {
+            return org.apache.derby.client.am.DateTime.timestampBytesToTime(dataBuffer_,
+                    columnDataPosition_[column - 1],
+                    recyclableTime_,
+                    charsetName_[column -1]);
+        } catch (UnsupportedEncodingException e) {
+             throw new SqlException(agent_.logWriter_, e, 
+                     "Encoding is unsupported for conversion to TIME");
+        }
     }
 
     private final String getStringFromDATE(int column) throws SqlException {
-        return org.apache.derby.client.am.DateTime.dateBytesToDate(dataBuffer_,
-                columnDataPosition_[column - 1],
-                recyclableDate_).toString();
+        return getDATE(column).toString();
     }
 
     // Build a string object from the DERBY byte TIME representation.
     private final String getStringFromTIME(int column) throws SqlException {
-        return org.apache.derby.client.am.DateTime.timeBytesToTime(dataBuffer_,
-                columnDataPosition_[column - 1],
-                recyclableTime_).toString();
+        return getTIME(column).toString();
     }
 
     // Build a string object from the DERBY byte TIMESTAMP representation.
     private final String getStringFromTIMESTAMP(int column) throws SqlException {
-        return org.apache.derby.client.am.DateTime.timestampBytesToTimestamp(dataBuffer_,
-                columnDataPosition_[column - 1],
-                recyclableTimestamp_).toString();
+        return getTIMESTAMP(column).toString();
     }
 
     // Extract bytes from a database java.sql.Types.BINARY field.

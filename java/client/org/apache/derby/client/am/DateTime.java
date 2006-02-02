@@ -19,6 +19,8 @@
 */
 package org.apache.derby.client.am;
 
+import java.io.UnsupportedEncodingException;
+
 
 /**
  * High performance converters from date/time byte encodings to JDBC Date, Time and Timestamp objects.
@@ -44,15 +46,25 @@ public class DateTime {
     // *********************************************************
 
     /**
-     * Expected character representation is DERBY string representation of a date, which is in one of the following
-     * format.
+     * Expected character representation is DERBY string representation of a date, 
+     * which is in JIS format: <code> yyyy-mm-dd </code>
+     * 
+     * @param buffer    
+     * @param offset    
+     * @param recyclableDate
+     * @param encoding            encoding of buffer data
+     * @return
+     * @throws UnsupportedEncodingException
      */
     public static final java.sql.Date dateBytesToDate(byte[] buffer,
                                                       int offset,
-                                                      java.sql.Date recyclableDate) {
+                                                      java.sql.Date recyclableDate, 
+                                                      String encoding) 
+    throws UnsupportedEncodingException {
         int year, month, day;
 
-        String date = new String(buffer, offset, DateTime.dateRepresentationLength);
+        String date = new String(buffer, offset, 
+                DateTime.dateRepresentationLength,encoding);
         int yearIndx, monthIndx, dayIndx;
         if (date.charAt(4) == '-') {
             // JIS format: yyyy-mm-dd.
@@ -90,16 +102,26 @@ public class DateTime {
         }
     }
 
+    
     /**
-     * Expected character representation is DERBY string representation of a time, which is in one of the following
-     * format: hh.mm.ss.
+     * Expected character representation is DERBY string representation of time,
+     * which is in the format: <code> hh.mm.ss </code>
+     * @param buffer
+     * @param offset
+     * @param recyclableTime
+     * @param encoding           encoding of buffer
+     * @return
+     * @throws UnsupportedEncodingException
      */
     public static final java.sql.Time timeBytesToTime(byte[] buffer,
                                                       int offset,
-                                                      java.sql.Time recyclableTime) {
+                                                      java.sql.Time recyclableTime,
+                                                      String encoding) 
+    throws UnsupportedEncodingException {
         int hour, minute, second;
 
-        String time = new String(buffer, offset, DateTime.timeRepresentationLength);
+        String time = new String(buffer, offset, 
+                DateTime.timeRepresentationLength, encoding);
         int zeroBase = ((int) '0');
 
         // compute hour.
@@ -128,13 +150,24 @@ public class DateTime {
     /**
      * Expected character representation is DERBY string representation of a timestamp:
      * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
+     * 
+     * @param buffer
+     * @param offset
+     * @param recyclableTimestamp
+     * @param encoding                encoding of buffer
+     * @return
+     * @throws UnsupportedEncodingException
      */
     public static final java.sql.Timestamp timestampBytesToTimestamp(byte[] buffer,
                                                                      int offset,
-                                                                     java.sql.Timestamp recyclableTimestamp) {
+                                                                     java.sql.Timestamp recyclableTimestamp, 
+                                                                     String encoding) 
+    throws UnsupportedEncodingException
+    {
         int year, month, day, hour, minute, second, fraction;
-
-        String timestamp = new String(buffer, offset, DateTime.timestampRepresentationLength);
+        String timestamp = new String(buffer, offset, 
+                DateTime.timestampRepresentationLength,encoding);
+       
         int zeroBase = ((int) '0');
 
         year =
@@ -301,16 +334,27 @@ public class DateTime {
     // ******* CROSS output converters (byte[] -> class) *******
     // *********************************************************
 
+    
     /**
-     * Expected character representation is DERBY string representation of a date, which is in one of the following
-     * format.
+     * Expected character representation is DERBY string representation of a date
+     * which is in JIS format: <code> yyyy-mm-dd </code>
+     * 
+     * @param buffer
+     * @param offset
+     * @param recyclableTimestamp
+     * @param encoding                encoding of buffer
+     * @return
+     * @throws UnsupportedEncodingException
      */
     public static final java.sql.Timestamp dateBytesToTimestamp(byte[] buffer,
                                                                 int offset,
-                                                                java.sql.Timestamp recyclableTimestamp) {
+                                                                java.sql.Timestamp recyclableTimestamp,
+                                                                String encoding) 
+    throws UnsupportedEncodingException {
         int year, month, day;
 
-        String date = new String(buffer, offset, DateTime.dateRepresentationLength);
+        String date = new String(buffer, offset, DateTime.dateRepresentationLength,
+                encoding);
         int yearIndx, monthIndx, dayIndx;
 
         yearIndx = 0;
@@ -348,16 +392,28 @@ public class DateTime {
         }
     }
 
+    
     /**
-     * Expected character representation is DERBY string representation of a time, which is in one of the following
-     * format.
+     *  Expected character representation is DERBY string representation of time
+     * which is in the format: <code> hh.mm.ss </code>
+     * 
+     * @param buffer
+     * @param offset
+     * @param recyclableTimestamp
+     * @param encoding                 encoding of buffer
+     * @return  
+     * @throws UnsupportedEncodingException
+     * 
      */
     public static final java.sql.Timestamp timeBytesToTimestamp(byte[] buffer,
                                                                 int offset,
-                                                                java.sql.Timestamp recyclableTimestamp) {
+                                                                java.sql.Timestamp recyclableTimestamp, 
+                                                                String encoding)
+    throws UnsupportedEncodingException {
         int hour, minute, second;
 
-        String time = new String(buffer, offset, DateTime.timeRepresentationLength);
+        String time = new String(buffer, offset, 
+                DateTime.timeRepresentationLength, encoding);
         int zeroBase = ((int) '0');
 
         // compute hour.
@@ -386,17 +442,29 @@ public class DateTime {
             return recyclableTimestamp;
         }
     }
-
+    
+    
     /**
      * Expected character representation is DERBY string representation of a timestamp:
      * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
+     * 
+     * @param buffer
+     * @param offset
+     * @param recyclableDate
+     * @param encoding             encoding of buffer
+     * @return
+     * @throws UnsupportedEncodingException
      */
     public static final java.sql.Date timestampBytesToDate(byte[] buffer,
                                                            int offset,
-                                                           java.sql.Date recyclableDate) {
+                                                           java.sql.Date recyclableDate, 
+                                                           String encoding) 
+    throws UnsupportedEncodingException 
+     {
         int year, month, day;
 
-        String timestamp = new String(buffer, offset, DateTime.timestampRepresentationLength);
+        String timestamp = new String(buffer, offset, 
+                DateTime.timestampRepresentationLength, encoding);
         int zeroBase = ((int) '0');
 
         year =
@@ -423,16 +491,27 @@ public class DateTime {
         }
     }
 
+   
     /**
      * Expected character representation is DERBY string representation of a timestamp:
      * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
+     * 
+     * @param buffer
+     * @param offset
+     * @param recyclableTime
+     * @param encoding            encoding of buffer
+     * @return
+     * @throws UnsupportedEncodingException
      */
     public static final java.sql.Time timestampBytesToTime(byte[] buffer,
                                                            int offset,
-                                                           java.sql.Time recyclableTime) {
+                                                           java.sql.Time recyclableTime, 
+                                                           String encoding) 
+    throws  UnsupportedEncodingException {
         int hour, minute, second;
 
-        String timestamp = new String(buffer, offset, DateTime.timestampRepresentationLength);
+        String timestamp = new String(buffer, offset, 
+                DateTime.timestampRepresentationLength, encoding);
         int zeroBase = ((int) '0');
 
         hour =
