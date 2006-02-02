@@ -274,6 +274,8 @@ insert into SYSFUN_MATH_TEST values 1.34;
 -- cast result to DECIMAL to reduce possible diffs
 -- with different vms and double values.;
 
+VALUES PI();
+
 select cast (ACOS(d) as DECIMAL(6,3)) AS ACOS FROM SYSFUN_MATH_TEST;
 select cast (ASIN(d) as DECIMAL(6,3)) AS ASIN FROM SYSFUN_MATH_TEST;
 select cast (ATAN(d) as DECIMAL(6,3)) AS ATAN FROM SYSFUN_MATH_TEST;
@@ -289,6 +291,8 @@ select cast (LN(d) as DECIMAL(6,3)) AS LN,
        cast (LOG(d) as DECIMAL(6,3)) AS LOG
                        FROM SYSFUN_MATH_TEST;
 select cast (EXP(d) as DECIMAL(6,3)) AS EXP FROM SYSFUN_MATH_TEST;
+
+select cast (LOG10(d) as DECIMAL(6,3)) AS LOG10 FROM SYSFUN_MATH_TEST;
 
 select cast (CEIL(d) as DECIMAL(6,3)) AS CEIL FROM SYSFUN_MATH_TEST;
 select cast (CEILING(d) as DECIMAL(6,3)) AS CEILING FROM SYSFUN_MATH_TEST;

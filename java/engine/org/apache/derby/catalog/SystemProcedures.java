@@ -54,6 +54,10 @@ import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 	These procedures are built-in to the SYSIBM schema which match the DB2 SYSIBM procedures.
 	Currently information on those can be found at url: 
 	ftp://ftp.software.ibm.com/ps/products/db2/info/vr8/pdf/letter/db2l2e80.pdf
+	
+	<P>
+	Also used for builtin-routines, such as SYSFUN functions, when direct calls
+	into Java libraries cannot be made.
 */
 public class SystemProcedures  {
 
@@ -1176,4 +1180,33 @@ public class SystemProcedures  {
 		ps.close();
 	}
 	
+	/**
+	 * Method to return the constant PI.
+	 * SYSFUN.PI().
+	 * @return PI
+	 */
+	public static double PI()
+	{
+		return StrictMath.PI;
+	}
+	
+	/**
+	 * Constant for natural log(10).
+	 */
+	private static final double LOG10 = StrictMath.log(10.0d);
+	
+	/**
+	 * Base 10 log function. SYSFUN.LOG10
+	 * Calculated by
+	 * <code>
+	 * log(value) / log(10)
+	 * </code>
+	 * where log is the natural log.
+	 * @param value
+	 * @return
+	 */
+	public static double LOG10(double value)
+	{
+		return StrictMath.log(value) / LOG10;
+	}
 }

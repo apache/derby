@@ -75,7 +75,7 @@ storesUpperCaseQuotedIdentifiers(): false
 storesLowerCaseQuotedIdentifiers(): false
 storesMixedCaseQuotedIdentifiers(): true
 getIdentifierQuoteString(): "
-getNumericFunctions(): ABS,ACOS,ASIN,ATAN,CEILING,COS,DEGREES,EXP,FLOOR,LOG,MOD,RADIANS,SIN,SQRT,TAN
+getNumericFunctions(): ABS,ACOS,ASIN,ATAN,CEILING,COS,DEGREES,EXP,FLOOR,LOG,LOG10,MOD,PI,RADIANS,SIN,SQRT,TAN
 getStringFunctions(): CONCAT,LENGTH,LCASE,LOCATE,LTRIM,RTRIM,SUBSTRING,UCASE
 getSystemFunctions(): USER
 getTimeDateFunctions(): CURDATE,CURTIME,HOUR,MINUTE,MONTH,SECOND,TIMESTAMPADD,TIMESTAMPDIFF,YEAR
@@ -467,7 +467,9 @@ Executing VALUES { fn DEGREES(2.1) } --   = >120.<  <<
 Executing VALUES { fn EXP(2.3) } --   = >9.97<  << 
 Executing VALUES { fn FLOOR(3.22) } --   = >3.0<  << 
 Executing VALUES { fn LOG(34.1) } --   = >3.52<  << 
+Executing VALUES { fn LOG10(18.7) } --   = >1.27<  << 
 Executing VALUES { fn MOD(124, 7) } --   = >5<  << 
+Executing VALUES { fn PI() } --   = >3.14<  << 
 Executing VALUES { fn RADIANS(54) } --   = >0.94<  << 
 Executing VALUES { fn SIN(0.32) } --   = >0.31<  << 
 Executing VALUES { fn SQRT(6.22) } --   = >2.49<  << 
@@ -477,10 +479,6 @@ Executing VALUES { fn ATAN2(0.56, 1.2) } --
 SQLSTATE(42X01): Syntax error: Encountered "ATAN2" at line 1, column 13.
 Executing VALUES { fn COT(3.4) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "COT" at line 1, column 13.
-Executing VALUES { fn LOG10(18.7) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "LOG10" at line 1, column 13.
-Executing VALUES { fn PI() } -- 
-SQLSTATE(42X01): Syntax error: Encountered "PI" at line 1, column 13.
 Executing VALUES { fn POWER(2, 3) } -- 
 SQLSTATE(42X01): Syntax error: Encountered "POWER" at line 1, column 13.
 Executing VALUES { fn RAND(17) } -- 

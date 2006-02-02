@@ -426,7 +426,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return the list
      */
 	public String getNumericFunctions() {
-		return "ABS,ACOS,ASIN,ATAN,CEILING,COS,DEGREES,EXP,FLOOR,LOG,MOD,RADIANS,SIN,SQRT,TAN";
+		return "ABS,ACOS,ASIN,ATAN,CEILING,COS,DEGREES,EXP,FLOOR,LOG,LOG10,MOD,PI,RADIANS,SIN,SQRT,TAN";
 	}
 
     /**

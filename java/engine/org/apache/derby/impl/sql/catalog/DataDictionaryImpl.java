@@ -190,14 +190,32 @@ public final class	DataDictionaryImpl
 	
 	/**
 	* SYSFUN functions. Table of functions that automatically appear
-	* in the SYSFUN schema. This simple table assumes a single parameter
+	* in the SYSFUN schema. These functions are resolved to directly
+	* if no schema name is given, e.g.
+	* 
+	* <code>
+	* SELECT COS(angle) FROM ROOM_WALLS
+	* </code>
+	* 
+	* Adding a function here is suitable when the function defintion
+	* can have a single return type and fixed parameter types.
+	* 
+	* Functions that need to have a return type based upon the
+	* input type(s) are not supported here. Typically those are
+	* added into the parser and methods added into the DataValueDescriptor interface.
+	* Examples are character based functions whose return type
+	* length is based upon the passed in type, e.g. passed a CHAR(10)
+	* returns a CHAR(10).
+	* 
+	* 
+	* This simple table assumes zero or a single parameter
 	* and RETURNS NULL ON NULL INPUT. The scheme could be expanded
 	* to handle other function options such as other parameters if needed.
 	*[0] = FUNCTION name
 	*[1] = RETURNS type
 	*[2] = Java class
 	*[3] = method name and signature
-	*[4] = parameter type (single parameter)
+	*[4] = parameter type (single parameter) or null for no parameters.
 	*
 	*/
 	private static final String[][] SYSFUN_FUNCTIONS = {
@@ -207,10 +225,12 @@ public final class	DataDictionaryImpl
 			{"COS", "DOUBLE", "java.lang.StrictMath", "cos(double)", "DOUBLE"},
 			{"SIN", "DOUBLE", "java.lang.StrictMath", "sin(double)", "DOUBLE"},
 			{"TAN", "DOUBLE", "java.lang.StrictMath", "tan(double)", "DOUBLE"},
+			{"PI", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "PI()", null},
 			{"DEGREES", "DOUBLE", "java.lang.StrictMath", "toDegrees(double)", "DOUBLE"},
 			{"RADIANS", "DOUBLE", "java.lang.StrictMath", "toRadians(double)", "DOUBLE"},
 			{"LN", "DOUBLE", "java.lang.StrictMath", "log(double)", "DOUBLE"},
 			{"LOG", "DOUBLE", "java.lang.StrictMath", "log(double)", "DOUBLE"}, // Same as LN
+			{"LOG10", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "LOG10(double)", "DOUBLE"},
 			{"EXP", "DOUBLE", "java.lang.StrictMath", "exp(double)", "DOUBLE"},
 			{"CEIL", "DOUBLE", "java.lang.StrictMath", "ceil(double)", "DOUBLE"},
 			{"CEILING", "DOUBLE", "java.lang.StrictMath", "ceil(double)", "DOUBLE"}, // Same as CEIL
@@ -5714,15 +5734,34 @@ public final class	DataDictionaryImpl
 					TypeDescriptor rt =
 						DataTypeDescriptor.getBuiltInDataTypeDescriptor(details[1]);
 
-					// details[4] - single argument type
-					TypeDescriptor[] pt = new TypeDescriptor[1];
-					pt[0] =
-						DataTypeDescriptor.getBuiltInDataTypeDescriptor(details[4]);
+					// details[4] - zero or single argument type
+					String paramType = details[4];
+					TypeDescriptor[] pt;
+					String[] paramNames;
+					int[] paramModes;
+					int paramCount;
+					if (paramType != null)
+					{			
+						paramNames = DataDictionaryImpl.SYSFUN_PNAME;
+						paramCount = 1;
+						paramModes = DataDictionaryImpl.SYSFUN_PMODE;
+						pt = new TypeDescriptor[1];
+						pt[0] =
+							DataTypeDescriptor.getBuiltInDataTypeDescriptor(paramType);
+					}
+					else
+					{
+						// no parameters
+						paramNames = null;
+						pt = null;
+						paramCount = 0;
+						paramModes = null;
+					}
 					
 					// details[3] = java method
 					RoutineAliasInfo ai = new RoutineAliasInfo(details[3],
-							1, DataDictionaryImpl.SYSFUN_PNAME,
-							pt, DataDictionaryImpl.SYSFUN_PMODE, 0,
+							paramCount, paramNames,
+							pt, paramModes, 0,
 							RoutineAliasInfo.PS_JAVA, RoutineAliasInfo.NO_SQL,
 							false, rt);
 
