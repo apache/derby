@@ -44,7 +44,7 @@ Column result scale after division is: 23
 dc / 2 = 5.55000000000000000000000
 dc / 2 = 5.55500000000000000000000
 JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.2 (10.2.0.0 alpha)
-The URL is: jdbc:derby:wombat
+DatabaseMetaData.getURL test passed
 allTablesAreSelectable(): true
 maxColumnNameLength(): 128
 getSchemas():

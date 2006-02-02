@@ -30,6 +30,7 @@ import java.sql.Statement;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  * Test of database meta-data for new methods in jdbc 30. This program simply calls
@@ -66,12 +67,21 @@ public class dbMetaDataJdbc30 {
 							   "." + met.getDriverMinorVersion() +
 							   " (" + met.getDriverVersion() + ")");
 
+			boolean pass = false;
 			try {
-				System.out.println("The URL is: " + met.getURL());
-			} catch (NoSuchMethodError msme)
-			{
-				System.out.println("DatabaseMetaData.getURL not present - correct for JSR169");
+				pass = TestUtil.compareURL(met.getURL());				 
+			}catch (NoSuchMethodError msme) {
+				// DatabaseMetaData.getURL not present - correct for JSR169
+				if(!TestUtil.HAVE_DRIVER_CLASS)
+					pass = true;
+			} catch (Throwable err) {
+			    System.out.println("%%getURL() gave the exception: " + err);
 			}
+			
+			if(pass)
+				System.out.println("DatabaseMetaData.getURL test passed");
+			else
+				System.out.println("FAIL: DatabaseMetaData.getURL test failed");
 			
 			System.out.println();
 			System.out.println("supportsSavepoints() : " + met.supportsSavepoints());

@@ -354,14 +354,21 @@ public abstract class metadata_test {
 							   "." + met.getDriverMinorVersion() +
 							   " (" + met.getDriverVersion() + ")");
 
+			boolean pass = false;
 			try {
-			    System.out.println("The URL is: " + met.getURL());
-			}catch (NoSuchMethodError msme)
-			{
-				System.out.println("DatabaseMetaData.getURL not present - correct for JSR169");
+				pass = TestUtil.compareURL(met.getURL());				 
+			}catch (NoSuchMethodError msme) {
+				// DatabaseMetaData.getURL not present - correct for JSR169
+				if(!TestUtil.HAVE_DRIVER_CLASS)
+					pass = true;
 			} catch (Throwable err) {
 			    System.out.println("%%getURL() gave the exception: " + err);
 			}
+			
+			if(pass)
+				System.out.println("DatabaseMetaData.getURL test passed");
+			else
+				System.out.println("FAIL: DatabaseMetaData.getURL test failed");
 
 			System.out.println("allTablesAreSelectable(): " +
 							   met.allTablesAreSelectable());

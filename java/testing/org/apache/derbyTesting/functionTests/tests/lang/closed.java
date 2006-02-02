@@ -29,9 +29,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.Properties;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
 	Test execution of closed JDBC objects. Executing or accessing a closed
@@ -46,6 +48,7 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  */
 public class closed implements Runnable {
 
+	private static boolean jsr169_test = false;
 
 	public static void main(String[] args) {
 		System.out.println("Test closed starting");
@@ -59,15 +62,19 @@ public class closed implements Runnable {
 			ij.getPropertyArg(args);
 			conn = ij.startJBMS();
 			
-			boolean jsr169_test = false;
+			
 			String url = new String();
 			try{
 				url = conn.getMetaData().getURL();
 			}
 			catch (NoSuchMethodError msme)
 			{
-				jsr169_test = true;
-				System.out.println("DatabaseMetaData.getURL not present - correct for JSR169");
+				// DatabaseMetaData.getURL not present - correct for JSR169
+				if(!TestUtil.HAVE_DRIVER_CLASS)
+					jsr169_test = true;
+				else
+					passed = false;
+				
 			} catch (Throwable err) {
 			    System.out.println("%%getURL() gave the exception: " + err);
 			}
@@ -91,13 +98,14 @@ public class closed implements Runnable {
 				conn.close();
 			}
 
-			if(!jsr169_test){
-				// shutdown the database
-				passed = shutdownTest(url, url + ";shutdown=true");
+			// shutdown the database
+			System.out.println("Test database shutdown ...");
+			passed = shutdownTest(url, url + ";shutdown=true", "wombat");
 
-				// shutdown the system
-				passed = shutdownTest(url, "jdbc:derby:;shutdown=true");
-			}
+			// shutdown the system
+			System.out.println("Test system shutdown ...");
+			passed = shutdownTest(url, "jdbc:derby:;shutdown=true", "");
+			
 
 
 		} catch (Throwable e) {
@@ -111,15 +119,29 @@ public class closed implements Runnable {
 		System.out.println("Test closed finished");
 	}
 
-	static boolean shutdownTest(String url, String shutdownUrl) throws SQLException {
+	static boolean shutdownTest(String url, String shutdownUrl, String databaseName) throws SQLException {
 
 		boolean passed = true;
 
-		Connection c1 = DriverManager.getConnection(url);
-		Connection c2 = DriverManager.getConnection(url);
-		Connection c3a = DriverManager.getConnection(url);
-		Connection c3b = DriverManager.getConnection(url);
-
+		Connection c1;
+		Connection c2;
+		Connection c3a;
+		Connection c3b;
+		
+		if(!jsr169_test) {
+			c1 = DriverManager.getConnection(url);
+			c2 = DriverManager.getConnection(url);
+			c3a = DriverManager.getConnection(url);
+			c3b = DriverManager.getConnection(url);
+		} else {
+			Properties prop = new Properties();
+			prop.setProperty("databaseName", "wombat");
+			c1 = TestUtil.getDataSourceConnection(prop);
+			c2 = TestUtil.getDataSourceConnection(prop);
+			c3a = TestUtil.getDataSourceConnection(prop);
+			c3b = TestUtil.getDataSourceConnection(prop);
+		}
+		
 		try {
 			c3a.createStatement().execute("DROP TABLE CLOSED.LOCKME");
 		} catch (SQLException sqle) {
@@ -151,7 +173,10 @@ public class closed implements Runnable {
 
 		SQLException s = null;
 		try {
-			DriverManager.getConnection(shutdownUrl);
+			if(!jsr169_test) 
+				DriverManager.getConnection(shutdownUrl);
+			else 
+				TestUtil.shutdownUsingDataSource(databaseName);
 		} catch (SQLException sqle) {
 			s = sqle;
 		}
@@ -184,7 +209,7 @@ public class closed implements Runnable {
 			c2.close();
 		}
 
-		System.out.println("Shutdown test completed " + shutdownUrl);
+		System.out.println("Shutdown test completed.");
 		return passed;
 	}
 

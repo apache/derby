@@ -28,6 +28,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.NoSuchElementException;
 
 import javax.sql.DataSource;
 
@@ -715,6 +717,37 @@ public class TestUtil {
 		catch (SQLException e) {
 			throw e;
 		}
+	}
+	
+	//Used by metadata tests for DatabaseMetadata.getURL
+	public static boolean compareURL(String url) {
+			
+		if(isEmbeddedFramework()) {
+			if(url.compareTo("jdbc:derby:wombat") == 0)
+				return true;
+		} else if(isNetFramework()) {
+			try {
+				StringTokenizer urlTokenizer = new StringTokenizer(url, "/");
+				String urlStart = urlTokenizer.nextToken();
+				urlTokenizer.nextToken();
+				String urlEnd = urlTokenizer.nextToken();
+				
+				if(urlEnd.compareTo("wombat;create=true") != 0)
+					return false;
+				
+				if(isJCCFramework() && (urlStart.compareTo("jdbc:derby:net:") == 0))
+					return true;
+				
+				if(isDerbyNetClientFramework() && (urlStart.compareTo("jdbc:derby:") == 0))
+					return true;
+				
+			} catch (NoSuchElementException nsee) {
+				//Should not reach here.
+				return false;
+			}
+		}
+		
+		return false;
 	}
 
 }

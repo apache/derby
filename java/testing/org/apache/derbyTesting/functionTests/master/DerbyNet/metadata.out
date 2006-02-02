@@ -14,7 +14,7 @@ Column result scale after division is: 23
 dc / 2 = 5.55000000000000000000000
 dc / 2 = 5.55500000000000000000000
 JDBC Driver 'IBM DB2 JDBC Universal Driver Architecture', version (EXPECTED VERSION)
-The URL is: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/wombat;create=true
+DatabaseMetaData.getURL test passed
 allTablesAreSelectable(): true
 maxColumnNameLength(): 128
 getSchemas():
