@@ -1,4 +1,4 @@
-Test savepointJdbc30 starting
+Test savepointJdbc30 starting for regular connections
 Tests common to DRDA and embedded Cloudscape
 Test1 - no unnamed savepoints allowed if autocommit is true
 Expected Exception is Cannot set savepoint when in auto-commit mode.
@@ -72,4 +72,4 @@ Expected Exception is Cannot rollback to a null savepoint.
 Test 26b release  of null savepoint
 Expected Exception is Cannot release a null savepoint.
 Next try non-DRDA tests
-Test savepointJdbc30 finished
+Test savepointJdbc30 finished for regular connections

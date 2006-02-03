@@ -27,6 +27,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Properties;
+
+import javax.sql.XADataSource;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
@@ -45,21 +48,50 @@ public class savepointJdbc30 {
 	static private boolean isDerbyNet = false;
 
 	public static void main(String[] args) {
-		Connection con = null, con2 = null;
+	    // Check savepoints for both regular connections and XA
+	    
+	    Connection con = null, con2 = null;
+	    isDerbyNet = TestUtil.isNetFramework();
+	    
+	    try {
+	    //	  use the ij utility to read the property file and
+		// make the initial connection.
+		ij.getPropertyArg(args);
+		con = ij.startJBMS();
+		con2 = ij.startJBMS();
+		runTests("regular connections", con,con2);
+		con.close();
+		con2.close();
+		if (TestUtil.isJCCFramework())  // no xa for jcc
+		    return;
+		
+		// Test connections obtained via XADataSource DERBY-899
+		Properties dsprops = new Properties();
+		dsprops.setProperty("databaseName","wombat");
+		XADataSource ds  = TestUtil.getXADataSource(dsprops);
+		con = ds.getXAConnection().getConnection();
+		con2 = ds.getXAConnection().getConnection();
+		runTests("connections from XADataSource (local tranasaction)", 
+				 con, con2);
+		con.close();
+		con2.close();
+	    }
+		catch (SQLException e) {
+		    dumpSQLExceptions(e);
+				}
+		catch (Throwable e) {
+			System.out.println("FAIL -- unexpected exception:");
+			e.printStackTrace(System.out);
+		}
+
+	}
+	public static void runTests(String tag, Connection con, Connection con2) 
+	throws SQLException {
 		Statement  s;
-		System.out.println("Test savepointJdbc30 starting");
-
-		try
-		{
-			// use the ij utility to read the property file and
-			// make the initial connection.
-			ij.getPropertyArg(args);
-			con = ij.startJBMS();
-			isDerbyNet = TestUtil.isNetFramework();
-
+		System.out.println("Test savepointJdbc30 starting for "  + tag);
+		
 			con.setAutoCommit(true); // make sure it is true
 			s = con.createStatement();
-			con2 = ij.startJBMS();
 			con2.setAutoCommit(false);
 			/* Create the table and do any other set-up */
 			setUpTest(s);
@@ -78,18 +110,9 @@ public class savepointJdbc30 {
 				nonDRDATests(con, s);
 
 			s.close();
-			con.close();
-			con2.close();
-		}
-		catch (SQLException e) {
-			dumpSQLExceptions(e);
-		}
-		catch (Throwable e) {
-			System.out.println("FAIL -- unexpected exception:");
-			e.printStackTrace(System.out);
-		}
-
-		System.out.println("Test savepointJdbc30 finished");
+			
+	
+		System.out.println("Test savepointJdbc30 finished for " + tag);
 	}
 
 	//The following tests have nested savepoints through JDBC calls. When coming through JCC,
@@ -873,7 +896,15 @@ public class savepointJdbc30 {
 	//Set up the test by creating the table used by the rest of the test.
 	static void setUpTest(Statement s)
 					throws SQLException {
-		/* Create a table */
+		/* drop and create tables */
+	    try {
+	        s.execute("drop table t1");
+	    }catch (SQLException e){};
+	    
+	    try {
+	        s.execute("drop table t2");
+	    }catch (SQLException e){};
+	    
 		s.execute("create table t1 (c11 int, c12 smallint)");
 		s.execute("create table t2 (c11 int)");
 
