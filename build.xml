@@ -137,6 +137,7 @@
     <delete file="${out.dir}/org/apache/derby/info/net.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/dnc.properties"/>
   </target>
+
 <!-- ==================================================================== -->
 <!--                         Info writer build target                     -->
 <!-- ==================================================================== -->
