@@ -1202,8 +1202,6 @@ public class SystemProcedures  {
 	 * log(value) / log(10)
 	 * </code>
 	 * where log is the natural log.
-	 * @param value
-	 * @return
 	 */
 	public static double LOG10(double value)
 	{
