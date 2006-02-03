@@ -403,6 +403,23 @@ public class LobLimits {
 
        deleteTable(conn, deleteClob, 2);
        
+       // Negative tests use the setClob API to insert a 4GB clob
+
+       long _4GB =  4*1024*1024*(1024L);
+
+       ClobImpl _4GBClob = new ClobImpl(new RandomCharReader(new java.util.Random(),_4GB),_4GB);		
+
+       try
+       {
+           insertClob_SetClob("ClobTest #13 (setClob with 4Gb clob",conn,insertClob,_4GBClob,
+                   _4GB,0,1,0);
+       }
+       catch(SQLException sqle)
+       {
+           System.out.println("DERBY DOES NOT SUPPORT INSERT OF 4GB CLOB ");
+           expectedException(sqle);
+       }
+
        // ADD NEW TESTS HERE
    }
 
@@ -914,6 +931,59 @@ public class LobLimits {
 
    }
 
+  /**
+    * insert clob, using a setClob api.
+    * @param cloblen
+    *            length of clob to insert
+    * @param clob
+    *            clob to insert
+    * @param start
+    *            start id value for insert
+    * @param rows
+    *            insert rows number of rows
+    * @param expectedRows
+    *            rows expected to be inserted
+   */
+    private static void insertClob_SetClob(String testId, Connection conn,
+            PreparedStatement ps, java.sql.Clob clob, long cloblen, int start,
+            int rows, int expectedRows) throws SQLException {
+        System.out.println("========================================");
+        System.out.println("START " + testId + "insertClob of size = "
+                + cloblen);
+        long ST = 0;
+        if (trace)
+           ST = System.currentTimeMillis();
+        int count = 0;
+
+        try {
+            
+            for (int i = start; i < start + rows; i++) {
+                ps.setInt(1, i);
+                ps.setInt(2, 0);
+                ps.setLong(3, cloblen);
+                ps.setClob(4, clob);
+                count += ps.executeUpdate();
+            }
+            conn.commit();
+            if (trace) {
+                System.out.println("Insert Clob (" + cloblen + ")" + " rows= "
+                        + count + " = "
+                        + (long) (System.currentTimeMillis() - ST));
+
+            }
+        } catch (SQLException e) {
+            verifyTest(count, expectedRows,
+                    " Rows inserted with clob of size (" + cloblen + ") =");
+            System.out.println("========================================");
+            throw e;
+        }
+
+        verifyTest(count, expectedRows,
+                " Rows inserted with clob of size (" + cloblen + ") =");
+        System.out.println("========================================");
+
+    }
+
    /**
     * select from clob table
     * @param cloblen  select expects to retrieve a clob of this length
@@ -1340,18 +1410,18 @@ class RandomByteStream extends java.io.InputStream {
  * Class to generate random char data, generates 1,2,3bytes character.
  */
 class RandomCharReader extends java.io.Reader {
-   private int length;
-   private int numTrailingSpaces;
+   private long length;
+   private long numTrailingSpaces;
 
    private java.util.Random dpr;
 
-   RandomCharReader(java.util.Random dpr, int length) {
+   RandomCharReader(java.util.Random dpr, long length) {
        this.length = length;
        this.dpr = dpr;
        this.numTrailingSpaces = 0;
    }
 
-   RandomCharReader(java.util.Random dpr, int length,int numTrailingSpaces) {
+   RandomCharReader(java.util.Random dpr, long length,long numTrailingSpaces) {
        this.length = length;
        this.dpr = dpr;
        this.numTrailingSpaces = numTrailingSpaces;
@@ -1459,7 +1529,7 @@ class RandomCharReader extends java.io.Reader {
            return -1;
 
        if (len > length)
-           len = length;
+           len = (int)length;
 
        for (int i = 0; i < len; i++) {
            data[off + i] = getChar();
@@ -1472,6 +1542,75 @@ class RandomCharReader extends java.io.Reader {
    public void close() {
 
    }
+}
+
+/**
+ * Class used to simulate a 4GB Clob implementation to 
+ * check whether derby implements such large Clobs correctly.
+ * Derby throws an error if the clob size exceeds 2GB
+ **/
+
+class ClobImpl implements java.sql.Clob {
+  long length;
+  Reader myReader;
+ 
+  public ClobImpl(Reader myReader,long length) {
+      this.length = length;
+      this.myReader = myReader;
+  }
+
+  public long length() throws SQLException {
+      return length;
+  }
+
+  public String getSubString(long pos, int length) throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
+  public java.io.Reader getCharacterStream() throws SQLException {
+      return myReader;
+  }
+
+  public java.io.InputStream getAsciiStream() throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
+  public long position(String searchstr, long start) throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
+  public long position(Clob searchstr, long start) throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
+  public int setString(long pos, String str) throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
+  public int setString(long pos, String str, int offset, int len) throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
+  public java.io.OutputStream setAsciiStream(long pos) throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
+  public java.io.Writer setCharacterStream(long pos) throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
+  public void truncate(long len) throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
+  public void free() throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
+  public Reader getCharacterStream(long pos, long length) throws SQLException {
+      throw new SQLException("Not implemented");
+  }
+
 }
 
 /***
@@ -1553,4 +1692,3 @@ class BlobImpl implements java.sql.Blob
     }
     
 }
-

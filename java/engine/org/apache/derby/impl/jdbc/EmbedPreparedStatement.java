@@ -611,33 +611,44 @@ public abstract class EmbedPreparedStatement
 	}
 
     protected void setCharacterStreamInternal(int parameterIndex,
-						Reader reader, int length)
+						Reader reader, long length)
 	    throws SQLException
 	{
-        // currently the max number of chars that can be inserted
-        // into a clob field is Integer.MAX_INT ( 2Gb -1)
-        // setClob or setCharacterStream interfaces will eventually call 
-        // this method and in setClob, a long is casted to an int; hence
         // check for -ve length
         if (length < 0) 
           throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
       
-		checkStatus();
+        checkStatus();
 
-		int jdbcTypeId = getParameterJDBCType(parameterIndex);
-	    
-		    
-        if (reader == null)
-        {
-            setNull(parameterIndex, jdbcTypeId);
-            return;
+	    int jdbcTypeId = getParameterJDBCType(parameterIndex);
+
+
+        if (reader == null)  {
+             setNull(parameterIndex, jdbcTypeId);
+             return;
         }
 
-		try {
+        /*
+           The value stored should not exceed the maximum value that can be 
+           stored in an integer 
+           This checking needs to be done because currently derby does not
+           support Clob sizes greater than 2G-1 
+        */
+   	    if (length > Integer.MAX_VALUE)
+               throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
+                  preparedStatement.getParameterTypes()
+                  [parameterIndex-1].getSQLstring());
+        /*
+            We cast the length from long to int. This would'nt be appropriate if
+            the limit of 2G-1 is decided to be increased at a later stage. 
+        */
+        int intLength = (int)length;		    
+
+	    try {
            
             LimitReader limitIn = new LimitReader(reader);
 			ParameterValueSet pvs = getParms();
-            int usableLength = length;
+            int usableLength = intLength;
             ReaderToUTF8Stream utfIn = null;
 
             // Currently long varchar does not allow for truncation of trailing
@@ -662,19 +673,21 @@ public abstract class EmbedPreparedStatement
                 // usableLength is the length of the data from stream that can
                 // be inserted which is min(colWidth,length) provided 
                 // length - colWidth has trailing blanks only
-                if (colWidth < length)
+                // we have used intLength into which the length variable had
+                // been cast to an int and stored  
+                if (colWidth < intLength)
                     usableLength = colWidth;
                 
                 // keep information with the stream about how much data needs 
                 // to be truncated, and colWidth info to give proper truncation
                 // message
                 utfIn = new ReaderToUTF8Stream(
-                            limitIn, colWidth, length - usableLength);
+                            limitIn, colWidth, intLength - usableLength);
             }
             else
             {
                 utfIn = new ReaderToUTF8Stream(
-                            limitIn,usableLength,length - usableLength);
+                            limitIn,usableLength,intLength - usableLength);
             }
 
             limitIn.setLimit(usableLength);
@@ -1225,7 +1238,7 @@ public abstract class EmbedPreparedStatement
             // stream using x.getCharacterStream() because EmbedClob.length()
             // will read from the stream and drain the stream. 
             // Hence the need to declare this local variable - streamLength
-            int streamLength = (int) x.length();
+            long streamLength = x.length();
 
             setCharacterStreamInternal(i, x.getCharacterStream(), streamLength);
         }

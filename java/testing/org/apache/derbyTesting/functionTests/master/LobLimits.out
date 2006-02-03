@@ -80,6 +80,12 @@ Matched rows selected with clob of size(104857600) =0
 ========================================
 Rows deleted =2
 ========================================
+START ClobTest #13 (setClob with 4Gb clobinsertClob of size = 4294967296
+ Rows inserted with clob of size (4294967296) =0
+========================================
+DERBY DOES NOT SUPPORT INSERT OF 4GB CLOB 
+EXPECTED SQL Exception: (22003) The resulting value is outside the range for the data type CLOB(2147483647).
+========================================
 START BlobTest #1insertBlob of size = 2147483647
  Rows inserted with blob of size (2147483647) =2
 ========================================
