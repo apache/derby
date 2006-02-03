@@ -53,7 +53,7 @@ public class DateTime {
      * @param offset    
      * @param recyclableDate
      * @param encoding            encoding of buffer data
-     * @return
+     * @return  Date translated from  buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
     public static final java.sql.Date dateBytesToDate(byte[] buffer,
@@ -110,7 +110,7 @@ public class DateTime {
      * @param offset
      * @param recyclableTime
      * @param encoding           encoding of buffer
-     * @return
+     * @return  Time translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
     public static final java.sql.Time timeBytesToTime(byte[] buffer,
@@ -155,7 +155,7 @@ public class DateTime {
      * @param offset
      * @param recyclableTimestamp
      * @param encoding                encoding of buffer
-     * @return
+     * @return TimeStamp translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
     public static final java.sql.Timestamp timestampBytesToTimestamp(byte[] buffer,
@@ -343,7 +343,7 @@ public class DateTime {
      * @param offset
      * @param recyclableTimestamp
      * @param encoding                encoding of buffer
-     * @return
+     * @return Timestamp translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
     public static final java.sql.Timestamp dateBytesToTimestamp(byte[] buffer,
@@ -401,7 +401,7 @@ public class DateTime {
      * @param offset
      * @param recyclableTimestamp
      * @param encoding                 encoding of buffer
-     * @return  
+     * @return Timestamp translated from buffer with specified encoding 
      * @throws UnsupportedEncodingException
      * 
      */
@@ -452,7 +452,7 @@ public class DateTime {
      * @param offset
      * @param recyclableDate
      * @param encoding             encoding of buffer
-     * @return
+     * @return Date translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
     public static final java.sql.Date timestampBytesToDate(byte[] buffer,
@@ -500,7 +500,7 @@ public class DateTime {
      * @param offset
      * @param recyclableTime
      * @param encoding            encoding of buffer
-     * @return
+     * @return  Time translated from buffer with specified Encoding
      * @throws UnsupportedEncodingException
      */
     public static final java.sql.Time timestampBytesToTime(byte[] buffer,
