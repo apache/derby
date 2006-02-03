@@ -70,7 +70,7 @@ public class largeCodeGen
 		PreparedStatement ps;
 		try {
 			ps = con.prepareStatement(sqlBuffer.toString());
-			
+			System.out.println("PASS: PREPARE: " + testName);
 			if (TEST_QUERY_EXECUTION)
 			{
 				for (int i = 1; i <= numParams; i++)
@@ -101,6 +101,8 @@ public class largeCodeGen
 	private static void testLogicalOperators(Connection con)  throws SQLException {
 		 
 		// svn 372388 trunk - passed @ 400
+		// Fix to DERBY-921 - passed @ 800
+		//   DERBY-921 - support 32bit branch offsets
 		 for (int count = 200; count <= 10000 ; count += 100)
 		 {
 			 // keep testing until it fails with linkage error

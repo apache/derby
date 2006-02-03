@@ -232,4 +232,11 @@ public interface VMOpcode {
     short GOTO_W = 200;
     short JSR_W = 201;
     short BREAKPOINT = 202;
+    
+    
+    /**
+     * Maximum code length in a single method.
+     * See section 4.10 of JVM spec version 1.
+     */
+    int MAX_CODE_LENGTH = 65535;
 }

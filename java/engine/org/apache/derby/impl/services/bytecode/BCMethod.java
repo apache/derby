@@ -141,7 +141,7 @@ class BCMethod implements MethodBuilder {
 		myEntry = modClass.addMember(methodName, sig, modifiers);
 
 		// get code chunk
-		myCode = new CodeChunk(true);
+		myCode = new CodeChunk();
 	}
 	//
 	// MethodBuilder interface
@@ -180,7 +180,7 @@ class BCMethod implements MethodBuilder {
 		// added in the sub method.
 		if (SanityManager.DEBUG)
 		{
-			if (myCode.getRelativePC() != 0)
+			if (myCode.getPC() != 0)
 				SanityManager.THROWASSERT("Adding exception after code generation " + exceptionClass
 						+ " to method " + getName());
 		}
@@ -1129,7 +1129,7 @@ class BCMethod implements MethodBuilder {
 		if (condition != null)
 			return;
 		
-		int currentCodeSize = myCode.getRelativePC();
+		int currentCodeSize = myCode.getPC();
 		
 		// Overflow at >= 55,000 bytes which is someway
 		// below the limit of 65,535. Ideally overflow

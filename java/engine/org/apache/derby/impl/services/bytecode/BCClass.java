@@ -371,7 +371,7 @@ class BCClass extends GClass {
 
 		ClassMember method = classHold.addMember(getter, sig, methodModifers);
 
-		CodeChunk chunk = new CodeChunk(true);
+		CodeChunk chunk = new CodeChunk();
 
 		// load 'this' if required
 		if (!staticField)
@@ -395,7 +395,7 @@ class BCClass extends GClass {
 		pda[0] = vmType;
 		sig = new BCMethodDescriptor(pda, VMDescriptor.VOID, factory).toString();
 		method = classHold.addMember(setter, sig, methodModifers);
-		chunk = new CodeChunk(true);
+		chunk = new CodeChunk();
 
 		// load 'this' if required
 		if (!staticField)
