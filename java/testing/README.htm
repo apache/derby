@@ -1531,27 +1531,29 @@ SecurityManager.</p>
 SecurityManager.</p>
   </li>
   <li>
-    <p>Client side JVM, this is the JVM executing the JDBC calls against any Derby driver.
+    <p>Client side JVM, this is the JVM executing the JDBC calls
+against any Derby driver.
 Installs a SecurityManager unless:</p>
   </li>
-  <UL>
-  <li>
-    <p><font face="Courier New"><font size="2"><font color="#000000">noSecurityManager=</font><font
+  <ul>
+    <li>
+      <p><font face="Courier New"><font size="2"><font color="#000000">noSecurityManager=</font><font
  color="#2a00ff">true </font><font size="3"><font
  face="Times New Roman, serif"><font color="#000000">in the test's
 _app.properties file.Used to disable individual tests that cannot run
 under the security manager, or if the test has a functional requirement
 not to run with the SecurityManager. Ideally, few tests will have this
 property set. Any disabling of the SecurityManager for a test requires
-a comment in the test's _app.properties file indicating why the test cannot run under the SecurityManager.
-</font></font></font></font></font></p>
-  </li>
-  <li>
-    <p><font color="#000000"><font face="Times New Roman, serif"><font
+a comment in the test's _app.properties file indicating why the test
+cannot run under the SecurityManager.
+      </font></font></font></font></font></p>
+    </li>
+    <li>
+      <p><font color="#000000"><font face="Times New Roman, serif"><font
  size="3">Client JDBC driver is DB2's Universal driver for JDBC.
 Currently does not install a SecurityManager, no technical reasons,
 just has not been done.</font></font></font></p>
-  </li>
+    </li>
   </ul>
 </ul>
 <h3><a name="hostName"></a><br>
@@ -1588,9 +1590,11 @@ and derbyTesting.jar.<br>
     <tr>
       <td style="vertical-align: top;">java -Djava.security.manager
 -Djava.security.policy=derby_tests.policy
--Dcsinfo.codeclasses=file:/derby/classes/
--Dcsinfo.codedir=/derby/classes -Dcsinfo.serverhost=localhost
--Dcsinfo.trustedhost=localhost -Dcsinfo.codejar=file://unused/
+-DderbyTesting.codeclasses=file:/derby/classes/
+-DderbyTesting.codedir=/derby/classes
+-DderbyTesting.serverhost=localhost
+-DderbyTesting.clienthost=localhost
+-DderbyTesting.codejar=file://unused/
 org.apache.derby.drda.NetworkServerControl -h 0.0.0.0 start<br>
       <small>where /derbyt/classes is the directory where either the
 classes, can be found</small><br>
@@ -1608,9 +1612,11 @@ or like so when using jars:<br>
       <td style="vertical-align: top;">java
 -Dderby.system.home=/home/derbytst/ns -Djava.security.manager
 -Djava.security.policy=/home/derbytst/ns/derby_tests.policy
--Dcsinfo.codejar=file:/derby/tstbld/
--Dcsinfo.codedir=/derby/tstbld -Dcsinfo.serverhost=localhost
--Dcsinfo.trustedhost=localhost -Dcsinfo.codeclasses=file://unused/
+-DderbyTesting.codejar=file:/derby/tstbld/
+-DderbyTesting.codedir=/derby/tstbld
+-DderbyTesting.serverhost=localhost
+-DderbyTesting.clienthost=localhost
+-DderbyTesting.codeclasses=file://unused/
 org.apache.derby.drda.NetworkServerControl -h 0.0.0.0 start<br>
       <small>where /derbyt/tstbld&nbsp; is the directory where
 derbynet.jar is found and home/derbytst/ns is the directory where your

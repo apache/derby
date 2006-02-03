@@ -4,23 +4,29 @@
 //
 // The test harness sets up three variables used by this policy file
 //
-// csinfo.codejar - URL to the jar files when they are in the classpath
-// csinfo.codeclasses - URL to the classes directory when it is in the classpath
+// derbyTesting.codejar - URL to the jar files when they are in the classpath
+// derbyTesting.codeclasses - URL to the classes directory when it is in the classpath
 //
-// Only one of csinfo.codejar and csinfo.codeclasses will be valid, the
+// Only one of derbyTesting.codejar and derbyTesting.codeclasses will be valid, the
 // other will be set to a bogus URL like file://unused
 //
-// csinfo.codedir - File location of either csinfo.codejar or csinfo.codejar.
-// Only required due to a BUG.
+// derbyTesting.codedir - File location of either derbyTesting.codejar or derbyTesting.codeclasses.
+// Only required due to a BUG (see below for more info).
+//
+// 
+// derbyTesting.serverhost - Host name or ip where network server is started 
+// derbyTesting.clienthost - specifies the clients ip address/hostName. 
+//     when testing with networkserver on a remote host, this needs to be passed in 
+//     with the NetworkServerControl start command
 
 //
 // Permissions for the embedded engine (derby.jar)
 //
-grant codeBase "${csinfo.codejar}derby.jar" {
+grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.util.PropertyPermission "derby.*", "read";
   
   // for unit tests
-  permission java.util.PropertyPermission "db2j.unittest.*", "read";
+  permission java.util.PropertyPermission "derbyTesting.unittest.*", "read";
   
   permission java.lang.RuntimePermission "createClassLoader";
   
@@ -37,12 +43,12 @@ grant codeBase "${csinfo.codejar}derby.jar" {
   permission java.io.FilePermission "${user.dir}${/}extout${/}-", "write";
   permission java.io.FilePermission "${user.dir}${/}extinout", "read,write";
   
-  // unit tests set this property (called from derbyTesting.jar through
-  // code in derby.jar
-  permission java.util.PropertyPermission "db2j.unittest.*", "write";
+  // unit tests (e.g. store/T_RecoverFullLog) set this property 
+  // (called from derbyTesting.jar through code in derby.jar)
+  permission java.util.PropertyPermission "derbyTesting.unittest.*", "write";
 
   // BUG DERBY-622 derbynet/sysinfo.java
-  permission java.io.FilePermission "${csinfo.codedir}${/}*", "read";
+  permission java.io.FilePermission "${derbyTesting.codedir}${/}*", "read";
   
   // sane=true, jdbcapi/secureUsers1.sql
   permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
@@ -57,14 +63,14 @@ grant codeBase "${csinfo.codejar}derby.jar" {
 //
 // Permissions for the network server (derbynet.jar)
 //
-grant codeBase "${csinfo.codejar}derbynet.jar" {
+grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   
   // accept is needed for the server accepting connections
   // connect is needed for ping command (which is in the server jar)
   permission java.net.SocketPermission "127.0.0.1", "accept,connect";
   permission java.net.SocketPermission "localhost", "accept,connect";
-  permission java.net.SocketPermission "${csinfo.serverhost}", "accept,connect";
-  permission java.net.SocketPermission "${csinfo.trustedhost}", "accept,connect";
+  permission java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect";
+  permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
   
   // derbynet/NSinSameJVM uses this addres for its serverControl 
   permission java.net.SocketPermission "0.0.0.0:20000", "connect";
@@ -74,7 +80,7 @@ grant codeBase "${csinfo.codejar}derbynet.jar" {
   permission java.io.FilePermission "${derby.system.home}${/}*", "write";  
   
   // BUG DERBY-622 derbynet/sysinfo.java
-  permission java.io.FilePermission "${csinfo.codedir}${/}*", "read";
+  permission java.io.FilePermission "${derbyTesting.codedir}${/}*", "read";
   
   // BUG DERBY-616 lang/wisconsin.sql & jdbcapi/maxfieldsize.java
   permission java.io.FilePermission "${derby.system.home}${/}wombat${/}tmp${/}-", "read, write, delete";
@@ -91,9 +97,10 @@ grant codeBase "${csinfo.codejar}derbynet.jar" {
 //
 // Permissions for the network client (derbyclient.jar)
 //
-grant codeBase "${csinfo.codejar}derbyclient.jar" {
+grant codeBase "${derbyTesting.codejar}derbyclient.jar" {
   permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
   permission java.net.SocketPermission "localhost", "connect,resolve";
+  permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
 };
 
 //
@@ -101,7 +108,7 @@ grant codeBase "${csinfo.codejar}derbyclient.jar" {
 // Ideally this would be more secure, for now the
 // focus is on getting the engine & network server secure.
 //
-grant codeBase "${csinfo.codejar}derbytools.jar" {
+grant codeBase "${derbyTesting.codejar}derbytools.jar" {
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
   
@@ -109,7 +116,7 @@ grant codeBase "${csinfo.codejar}derbytools.jar" {
   permission java.io.FilePermission "${user.dir}${/}-", "read";
   
   // ij needs permission to read the sql files in this jar
-  permission java.io.FilePermission "${csinfo.codedir}${/}derbyTesting.jar", "read";
+  permission java.io.FilePermission "${derbyTesting.codedir}${/}derbyTesting.jar", "read";
   
   // sane=true, jdbcapi/secureUsers1.sql
   permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
@@ -120,7 +127,7 @@ grant codeBase "${csinfo.codejar}derbytools.jar" {
 // We are liberal here, it's not a goal to make the test harness
 // or tests secure.
 //
-grant codeBase "${csinfo.codejar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.codejar}derbyTesting.jar" {
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
   
@@ -139,7 +146,7 @@ grant codeBase "${csinfo.codejar}derbyTesting.jar" {
 //
 // super-set of the jar permissions for running out of the classes directory
 //
-grant codeBase "${csinfo.codeclasses}" {
+grant codeBase "${derbyTesting.codeclasses}" {
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
   
@@ -154,8 +161,8 @@ grant codeBase "${csinfo.codeclasses}" {
   // combination of client and server side.
   permission java.net.SocketPermission "127.0.0.1", "accept,connect,resolve";
   permission java.net.SocketPermission "localhost", "accept,connect,resolve";
-  permission java.net.SocketPermission "${csinfo.serverhost}", "accept";
-  permission java.net.SocketPermission "${csinfo.trustedhost}", "accept"; 
+  permission java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect";
+  permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
   
   // derbynet/NSinSameJVM uses this addres for its serverControl 
   permission java.net.SocketPermission "0.0.0.0:20000", "connect";

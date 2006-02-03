@@ -4314,7 +4314,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	  out, only used when TEST_LOG_INCOMPLETE_LOG_WRITE is on.  Default is 1
 	  byte.
 	*/
-	public static final String TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES = SanityManager.DEBUG ? "db2j.unittest.partialLogWrite" : null;
+	public static final String TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES = SanityManager.DEBUG ? "derbyTesting.unittest.partialLogWrite" : null;
 
 	/**
 	  Set to true if we want to simulate a log full condition
@@ -4336,7 +4336,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	  simulated to be full.
 	*/
 	public static final String TEST_RECORD_TO_FILL_LOG = 
-        SanityManager.DEBUG ? "db2j.unittest.recordToFillLog" : null;
+        SanityManager.DEBUG ? "derbyTesting.unittest.recordToFillLog" : null;
 
 	/**
 	 * Set to true if we want to simulate max possible log file number is 
