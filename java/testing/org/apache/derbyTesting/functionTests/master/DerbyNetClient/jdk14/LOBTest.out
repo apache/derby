@@ -45,7 +45,7 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
 	1 getDouble            ->'101.0'    	: java.lang.Double
 	1 getFloat             ->'101.0'    	: java.lang.Float
 	1 getInt               ->'101'    	: java.lang.Integer
@@ -53,8 +53,8 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getRef               ->		EXCEPTION (not yet implemented)
 	1 getShort             ->'101'    	: java.lang.Short
 	1 getString            ->'101       '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from bit_table
 	2 getObject            ->'102'    	: java.lang.String
@@ -68,7 +68,7 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
@@ -76,8 +76,8 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getRef               ->		EXCEPTION (not yet implemented)
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
-	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
+	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from bit_table
 	3 getObject            ->'103'    	: java.lang.String
@@ -91,7 +91,7 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
@@ -99,8 +99,8 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getRef               ->		EXCEPTION (not yet implemented)
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
-	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
+	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from bit_table
 	4 getObject            ->Object'   	: byte[]
@@ -607,7 +607,7 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
 	1 getDouble            ->'101.0'    	: java.lang.Double
 	1 getFloat             ->'101.0'    	: java.lang.Float
 	1 getInt               ->'101'    	: java.lang.Integer
@@ -615,8 +615,8 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getRef               ->		EXCEPTION (not yet implemented)
 	1 getShort             ->'101'    	: java.lang.Short
 	1 getString            ->'101       '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from bit_table
 	2 getObject            ->'102'    	: java.lang.String
@@ -630,7 +630,7 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
@@ -638,8 +638,8 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getRef               ->		EXCEPTION (not yet implemented)
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
-	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
+	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from bit_table
 	3 getObject            ->'103'    	: java.lang.String
@@ -653,7 +653,7 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
@@ -661,8 +661,8 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getRef               ->		EXCEPTION (not yet implemented)
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
-	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
+	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from bit_table
 	4 getObject            ->Object'   	: byte[]
@@ -1169,7 +1169,7 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
 	1 getDouble            ->'101.0'    	: java.lang.Double
 	1 getFloat             ->'101.0'    	: java.lang.Float
 	1 getInt               ->'101'    	: java.lang.Integer
@@ -1177,8 +1177,8 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getRef               ->		EXCEPTION (not yet implemented)
 	1 getShort             ->'101'    	: java.lang.Short
 	1 getString            ->'101       '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from blob_table
 	2 getObject            ->'102'    	: java.lang.String
@@ -1192,7 +1192,7 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
@@ -1200,8 +1200,8 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getRef               ->		EXCEPTION (not yet implemented)
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
-	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
+	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from blob_table
 	3 getObject            ->'103'    	: java.lang.String
@@ -1215,7 +1215,7 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
@@ -1223,8 +1223,8 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getRef               ->		EXCEPTION (not yet implemented)
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
-	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
+	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from blob_table
 	4 getObject            ->Object'   	: byte[]
@@ -1710,7 +1710,7 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
 	1 getDouble            ->'101.0'    	: java.lang.Double
 	1 getFloat             ->'101.0'    	: java.lang.Float
 	1 getInt               ->'101'    	: java.lang.Integer
@@ -1718,8 +1718,8 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getRef               ->		EXCEPTION (not yet implemented)
 	1 getShort             ->'101'    	: java.lang.Short
 	1 getString            ->'101       '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from blob_table
 	2 getObject            ->'102'    	: java.lang.String
@@ -1733,7 +1733,7 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
@@ -1741,8 +1741,8 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getRef               ->		EXCEPTION (not yet implemented)
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
-	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
+	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from blob_table
 	3 getObject            ->'103'    	: java.lang.String
@@ -1756,7 +1756,7 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
@@ -1764,8 +1764,8 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getRef               ->		EXCEPTION (not yet implemented)
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
-	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
+	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from blob_table
 	4 getObject            ->Object'   	: byte[]
@@ -2251,7 +2251,7 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
 	1 getDouble            ->'101.0'    	: java.lang.Double
 	1 getFloat             ->'101.0'    	: java.lang.Float
 	1 getInt               ->'101'    	: java.lang.Integer
@@ -2259,8 +2259,8 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getRef               ->		EXCEPTION (not yet implemented)
 	1 getShort             ->'101'    	: java.lang.Short
 	1 getString            ->'101       '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from blob_table
 	2 getObject            ->'102'    	: java.lang.String
@@ -2274,7 +2274,7 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
@@ -2282,8 +2282,8 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getRef               ->		EXCEPTION (not yet implemented)
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
-	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
+	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from blob_table
 	3 getObject            ->'103'    	: java.lang.String
@@ -2297,7 +2297,7 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
+	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
@@ -2305,8 +2305,8 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getRef               ->		EXCEPTION (not yet implemented)
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
-	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
+	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from blob_table
 	4 getObject            ->Object'   	: byte[]
@@ -2786,24 +2786,24 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getObject            ->'true      '    	: java.lang.String
 	1 getArray             ->		EXCEPTION (not yet implemented)
 	1 getAsciiStream       ->Object'   	: java.io.InputStream
-	1 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.math.BigDecimal. Caused by exception class java.lang.NumberFormatException: null)
+	1 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.math.BigDecimal.)
 	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
-	1 getByte              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to byte. Caused by exception class java.lang.NumberFormatException: true      )
+	1 getByte              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to byte.)
 	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
-	1 getDouble            ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to double. Caused by exception class java.lang.NumberFormatException: true)
-	1 getFloat             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to float. Caused by exception class java.lang.NumberFormatException: true)
-	1 getInt               ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to int. Caused by exception class java.lang.NumberFormatException: true      )
-	1 getLong              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to long. Caused by exception class java.lang.NumberFormatException: true      )
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Date.)
+	1 getDouble            ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to double.)
+	1 getFloat             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to float.)
+	1 getInt               ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to int.)
+	1 getLong              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to long.)
 	1 getRef               ->		EXCEPTION (not yet implemented)
-	1 getShort             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to short. Caused by exception class java.lang.NumberFormatException: true      )
+	1 getShort             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to short.)
 	1 getString            ->'true      '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from clob_table
 	2 getObject            ->		EXCEPTION (null)
@@ -3339,24 +3339,24 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 	1 getObject            ->'true      '    	: java.lang.String
 	1 getArray             ->		EXCEPTION (not yet implemented)
 	1 getAsciiStream       ->Object'   	: java.io.InputStream
-	1 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.math.BigDecimal. Caused by exception class java.lang.NumberFormatException: null)
+	1 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.math.BigDecimal.)
 	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
-	1 getByte              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to byte. Caused by exception class java.lang.NumberFormatException: true      )
+	1 getByte              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to byte.)
 	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Date. Caused by exception class java.lang.IllegalArgumentException: null)
-	1 getDouble            ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to double. Caused by exception class java.lang.NumberFormatException: true)
-	1 getFloat             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to float. Caused by exception class java.lang.NumberFormatException: true)
-	1 getInt               ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to int. Caused by exception class java.lang.NumberFormatException: true      )
-	1 getLong              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to long. Caused by exception class java.lang.NumberFormatException: true      )
+	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Date.)
+	1 getDouble            ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to double.)
+	1 getFloat             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to float.)
+	1 getInt               ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to int.)
+	1 getLong              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to long.)
 	1 getRef               ->		EXCEPTION (not yet implemented)
-	1 getShort             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to short. Caused by exception class java.lang.NumberFormatException: true      )
+	1 getShort             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to short.)
 	1 getString            ->'true      '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Time. Caused by exception class java.lang.IllegalArgumentException: null)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Timestamp. Caused by exception class java.lang.IllegalArgumentException: Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff)
+	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Time.)
+	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Timestamp.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from clob_table
 	2 getObject            ->		EXCEPTION (null)
