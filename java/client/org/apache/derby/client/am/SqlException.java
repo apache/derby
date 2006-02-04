@@ -281,10 +281,10 @@ public class SqlException extends Exception implements Diagnosable {
             getErrorCode());
 
         // If we're in a runtime that supports chained exceptions, set the cause 
-        // of the SQLException.
+        // of the SQLException to be this SqlException.
          if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14 )
         {
-            sqle.initCause(getCause());
+            sqle.initCause(this);
         }
 
         // Set up the nextException chain
