@@ -32,6 +32,8 @@
 
     <target name="compile_jdbc4" if="jdk16" depends="copyfiles">
         <javac
+            fork="yes"
+            executable="${jdk16.javac}"
             bootclasspath="${empty}"
             nowarn="on"
             debug="${debug}"
