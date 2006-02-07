@@ -46,7 +46,9 @@ public class prepStmt
 
     private static String[] testObjects =  // string array for cleaning up
         {"table t1", "table tab1", "table t2", "table bigtab", "table tstab",
-         "table doubletab", "table numtab", "table Numeric_Tab", "table jira614"};
+         "table doubletab", "table numtab", "table Numeric_Tab", "table jira614", 
+	 "table jira125", 
+         "table jira125125125125125125125125125125125125125125125125125125125125125125125125125125125125125125125"};
 
 	public static void main (String args[])
 	{

@@ -79,9 +79,9 @@ public class testSecMec extends dataSourcePermissions_net
 		}
 
 		// Start the NetworkServer on another thread, unless it's a remote host
-		networkServer = new NetworkServerControl(InetAddress.getByName(hostName),NETWORKSERVER_PORT);
 		if (hostName.equals("localhost"))
 		{
+			networkServer = new NetworkServerControl(InetAddress.getByName(hostName),NETWORKSERVER_PORT);
 			networkServer.start(null);
 
 			// Wait for the NetworkServer to start.

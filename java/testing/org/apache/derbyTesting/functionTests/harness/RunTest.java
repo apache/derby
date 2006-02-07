@@ -1057,14 +1057,12 @@ public class RunTest
 		else
 		    useprocess = true;
 		
-        // if the hostName is something other than localhost, we must
-        // be trying to connect to a remote server, and so, we should not
-        // try to create a new database.
-        // also, startServer should be false.
+		// if the hostName is something other than localhost, we must
+		// be trying to connect to a remote server, and so, 
+		// startServer should be false.
 		if (!hostName.equals("localhost"))
 		{
-        	useprocess=false;
-        	startServer=false;
+        	    startServer=false;
 		}
 		
 		String nosed = sp.getProperty("skipsed");

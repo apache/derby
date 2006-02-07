@@ -11,9 +11,8 @@
 <body dir="ltr" lang="en-US">
 <h1><a name="mozTocId934928"></a>Derby Functional Tests</h1>
 <h2><a name="mozTocId504000"></a>Package: org.apache.derbyTesting<!--mozToc h1 1 h2 2 h3 3 h4 4 h5 5 h6 6--></h2>
-<p><font size="2">created by myrna@golux.com<br>
-last updated on
-04/18/2005 by: m.v.lunteren@gmail.com</font></p>
+<p><font size="2"><br>
+</font></p>
 <ul>
   <li>
     <p style="margin-bottom: 0in;"><a href="#intro">1. Introduction</a>
@@ -1047,7 +1046,7 @@ multi threaded tests. There is currently only 1 test being run. The
 multi test functions a little differently from .java and .sql* tests in
 that RunTest starts a separate harness class called MultiTest to
 control the details of the run. Also, the actual test files live under
-org/apache/derbyTesting/functionTests/multiTests, rather than
+org/apache/derbyTesting/functionTests/multi/stress, rather than
 org/apache/derbyTesting/functionTests/tests. </p>
   </li>
   <li>
@@ -1497,11 +1496,13 @@ excludeJCC<br>
 useprocess<br>
 &nbsp;&nbsp;&nbsp; (default=true) Controls
 whether RunTest runs the test in a separate VM or in a thread in
-harness VM. It is
-potentially<br>
-&nbsp; &nbsp;&nbsp; useful for debugging tests. Unit tests are not
+harness VM. Also does not create&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp; subdirectories for each test and thus will
+attempt to reuse databases with the same name. It is
+potentially useful for debugging<br>
+&nbsp; &nbsp;&nbsp; tests. Unit tests are not
 (yet) runnable with
-"useprocess=false", though.<br>
+"useprocess=false". <br>
 startServer - allows for Network Server tests to start and shutdown
 Network Server from the test itself. Default is true - i.e. the <br>
 &nbsp;&nbsp;&nbsp;&nbsp; test harness will start Network Server.<br>
@@ -1545,8 +1546,7 @@ under the security manager, or if the test has a functional requirement
 not to run with the SecurityManager. Ideally, few tests will have this
 property set. Any disabling of the SecurityManager for a test requires
 a comment in the test's _app.properties file indicating why the test
-cannot run under the SecurityManager.
-      </font></font></font></font></font></p>
+cannot run under the SecurityManager. </font></font></font></font></font></p>
     </li>
     <li>
       <p><font color="#000000"><font face="Times New Roman, serif"><font
@@ -1558,30 +1558,41 @@ just has not been done.</font></font></font></p>
 </ul>
 <h3><a name="hostName"></a><br>
 4.14 Testing with Network Server on a remote host</h3>
+To enable testing against a Network
+Server running on a remote
+machine - which is for instance needed to test on IPV6 machines - one
+can use the property hostName. <br>
 By default the network server is assumed not to be running, and the
-test harness will start Network Server for each test - unless the test
+test harness will start Network Server on the local machine for each
+test - unless the test
 has been qualified explicitly with the property startServer to
-false when the test itself is assumed to be starting Network Server.
+false. In that case, the test itself is assumed to be starting Network
+Server.
 (This can be set either in a test's property file or with the -D on the
 commandline). Thus, by default Network Server is started and shutdown
-in the subdirectory for the framework created for each test, and the
-databases are created in that directory (e.g. ./DerbyNetClient/wombat).<br>
-However, to enable testing against a Network Server running on a remote
-machine - which is for instance needed to test on IPV6 machines - one
-can use the property hostName. This is not a pre-set value in any
-suite, some manual steps are required to run tests this way.<br>
+in the subdirectory for the framework created for each test, and new
+databases are created in each test directory (e.g.
+./getCurConnJdbc20/wombat). The test policy file also gets copied to
+the appropriate location. <br>
+When one wants to run against a Network Server running on a remote
+machine, the test harness cannot start or stop it because of security
+reasons. Thus, the setting of the property hostName automatically sets
+startServer to false. The hostName is automatically passed on to the
+actual test run as the property ${derbyTesting.serverhost} which is
+used in the derby_tests.policy file on the client machine.<br>
+The hostName property is not a pre-set value in
+any
+suite, some manual steps are required to run tests this way:<br>
 <ol>
-  <li>extract and/or copy the derby_tests.policy from the
-derbyTesting.jar or a supporting branch (after 10.1) to the location on
-the host where you want to run the NetworkServer</li>
-  <li>modify the derby_test.policy to reflect access from the machine
-where you want to run the tests (i.e. the client). This means that in
-each location where 'localhost' is listed, you should add a line
-reflecting your client machine's IP address or hostname.</li>
+  <li>Extract and/or copy the
+(java/testing/org/apache/derbyTesting/functionTests/util)derby_tests.policy
+from the
+derbyTesting.jar or from the svn source to a location on
+the host on which you want to run the NetworkServer</li>
   <li>Set up the classpath for Network Server to include derbynet.jar
-and derbyTesting.jar.<br>
+and derbyTesting.jar (or equivalent classes).<br>
   </li>
-  <li>start Network Server like so when using compiled classes for it:</li>
+  <li>Start Network Server like so when using compiled classes for it:</li>
 </ol>
 <table
  style="width: 751px; height: 72px; text-align: left; margin-right: auto; margin-left: 40px;"
@@ -1589,15 +1600,19 @@ and derbyTesting.jar.<br>
   <tbody>
     <tr>
       <td style="vertical-align: top;">java -Djava.security.manager
--Djava.security.policy=derby_tests.policy
+-Djava.security.policy=copied_derby_tests.policy
 -DderbyTesting.codeclasses=file:/derby/classes/
 -DderbyTesting.codedir=/derby/classes
 -DderbyTesting.serverhost=localhost
--DderbyTesting.clienthost=localhost
+-DderbyTesting.clienthost=clientIPaddress
 -DderbyTesting.codejar=file://unused/
 org.apache.derby.drda.NetworkServerControl -h 0.0.0.0 start<br>
-      <small>where /derbyt/classes is the directory where either the
-classes, can be found</small><br>
+      <small>where /derbyt/classes is the directory where the
+classes can be found, </small><small>and clientIPaddress is your
+client machine's IP
+address or name. In this example, derby.system.home is in the directory
+where Network Server is started, and the derby_tests.policy file is in
+that directory too.</small><br>
       </td>
     </tr>
   </tbody>
@@ -1611,24 +1626,29 @@ or like so when using jars:<br>
     <tr>
       <td style="vertical-align: top;">java
 -Dderby.system.home=/home/derbytst/ns -Djava.security.manager
--Djava.security.policy=/home/derbytst/ns/derby_tests.policy
+-Djava.security.policy=/home/derbytst/ns/copied_derby_tests.policy
+-DderbyTesting.clienthost=clientIPaddress
 -DderbyTesting.codejar=file:/derby/tstbld/
 -DderbyTesting.codedir=/derby/tstbld
 -DderbyTesting.serverhost=localhost
--DderbyTesting.clienthost=localhost
 -DderbyTesting.codeclasses=file://unused/
 org.apache.derby.drda.NetworkServerControl -h 0.0.0.0 start<br>
       <small>where /derbyt/tstbld&nbsp; is the directory where
-derbynet.jar is found and home/derbytst/ns is the directory where your
-derby.properties, derby_tests.policy file are and where you want to
-have derby.log and any databases go. </small><br>
+derbynet.jar is found and derby.system.home points to the directory
+where your
+derby.properties are and where you want to
+have derby.log and any databases go, </small><small>and
+clientIPaddress is your client machine's IP address or name</small><small>.
+      </small><br>
       </td>
     </tr>
   </tbody>
 </table>
-<br>
-&nbsp;&nbsp;&nbsp; 5.&nbsp; start
-runsuite like so for the Network Server Client:</div>
+<ol start="4">
+  <li>On the client machine, start the tests as usual, but specifying
+hostName, like so:</li>
+</ol>
+</div>
 <table
  style="width: 786px; height: 31px; text-align: left; margin-right: auto; margin-left: 40px;"
  border="1" cellpadding="2" cellspacing="2">
@@ -1638,19 +1658,29 @@ runsuite like so for the Network Server Client:</div>
 -DhostName=favorite.remotehost.com
 org.apache.derbyTesting.functionTests.harness.RunSuite
 derbynetclientmats<br>
+      <small>where favorite.remotehost.com is the host name or ip
+address.</small><br>
       </td>
     </tr>
   </tbody>
 </table>
 <br>
 RunTest can pick up the property in a similar way. You can set
--Dframework as usual. You can also run derbynetmats with jcc. Tests in
+-Dframework as usual. You can also run derbynetmats with jcc using
+-DhostName flag; in that case you do not need to worry about running
+with a policy
+file - at the moment, tests run with DerbyNet framework do not run with
+SecurityManager. Tests in
 the derbynet(client)mats suite have been modified to run against a
-remote server as much as possible.<br>
+remote server as much as possible. <br>
 <br>
 When the test harness encounters the -DhostName, and the value is not
-null and not localhost, it switches to use useprocess=false and
-startServer=false.&nbsp; This has a number of implications:<br>
+null and not localhost, it switches to startServer=false. Also, against
+a remote host, only the ping operations of the NetworkServerControl is
+supported. Finally, because on the remote server no new directories can
+be created by the test harness because of security, databases will be
+reused. This
+has a number of implications:<br>
 <ol>
   <li>the test harness, or individual tests cannot start and stop
 Network Server. <br>
@@ -1658,26 +1688,52 @@ Network Server. <br>
   <li>the tests cannot check derby.log, nor data files created on the
 server by import/export or dblook utilities.<br>
   </li>
-  <li>the database location is the same for each test
-(useprocess=false), and thus tests run this way need to be diligent
+  <li>as the database location is the same for each test, tests
+run this way need to be diligent
 about cleaning up after or will cause failures in later tests. The
 .java
 tests can use the TestUtil.cleanUp method to drop any database object
 without any output being reflected. Test writers need to ensure that
 the objects are in fact getting dropped or the test needs to be
-excluded from running remotely.<br>
+excluded from running remotely. To facilitate cleanup, a method was
+added to org.apache.derbyTesting.functionTests.util.TestUtil,
+cleanUpTest(Statement, testObjects[]). This method drops anything
+passed in the array of strings and disregards any SQLExceptions. The
+benefit of this is that a possible failure of drop does not stop the
+test, and does not prevent other objects passed in the string to be
+dropped. An example of usage of this method:<br>
+    <table style="width: 100%; text-align: left;" border="1"
+ cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">&nbsp;&nbsp;&nbsp; static
+void teardown() throws SQLException {<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Statement stmt =
+conn.createStatement();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String[] testObjects = {
+"table t1", "table t2", "procedure p1", "schema s restrict"};<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TestUtil.cleanUpTest(stmt,
+testObjects);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; conn.commit();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; stmt.close();<br>
+&nbsp; &nbsp; }&nbsp; <br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+Note that if something prohibits an object from being dropped, e.g. if
+there still are locks on it, this will not be noticed with this method
+- the test writer should still verify that the test objects get cleaned
+up appropriately.<br>
   </li>
   <li>tests cannot use a mix of Network Server and local connections to
 the same database.</li>
-  <li>tests should not use 'localhost' or they cannot be run in this
+  <li>tests should not hardcode the string 'localhost' or they cannot
+be run in this
 fashion. Tests that need to be run in this fashion can use the result
 of
 the TestUtil.getHostName() method instead.</li>
-  <li>because of the usage of useprocess=false, the location of test
-files is slightly different. The extin, extinout directories are one
-directory up. A number of tests have been modified to correctly locate
-these directories for supporting files.</li>
-  <li>you can only use the ping option of the NetworkServerControl
+  <li>Tests can only use the ping option of the NetworkServerControl
 class.<br>
   </li>
 </ol>

@@ -34,6 +34,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Locale;
 import java.io.UnsupportedEncodingException;
+import java.io.FileNotFoundException;
 
 /**
 	This class is used to test error conditions in the protocol.
@@ -178,18 +179,15 @@ public class TestProto {
 		current_filename = filename;
         	String hostName=getHostName();
 		FileReader fr;
-                if (!hostName.equals("localhost")) 
+                try
 		{
-			// if we're not on localhost, we must also be starting
-			// the server remotely, and useprocess=false, so, the location may
-			// be different.
+			fr = new FileReader(filename);
+		} catch (FileNotFoundException fnfe) {
+			// if useprocess=false & we're running in a suite, 
+			// the location is different, try it
 			String userdir =  System.getProperty("user.dir");
 			String sep =  System.getProperty("file.separator");
 			fr = new FileReader(userdir + sep + ".." + sep + filename);
-		}
-		else
-		{
-			fr = new FileReader(filename);
 		}
 		tkn = new StreamTokenizer(fr);
 		int val;

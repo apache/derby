@@ -626,6 +626,8 @@ public class resultset {
             if (!TestUtil.isJCCFramework()) {
                 runAutoCommitTests(con);
             }
+		    // final clean up
+    		cleanUp(con);
 			con.close();
 
 		}
@@ -1225,4 +1227,14 @@ public class resultset {
             sh.invoke(conn, holdArray);
         } catch (Exception e) {System.out.println("shouldn't get that error " + e.getMessage());}//for jdks prior to jdk14
     }
+
+    private static void cleanUp(Connection conn) throws SQLException {
+	Statement s = conn.createStatement();
+	String[] testObjects = {"TABLE APP.T"};
+        try {
+		TestUtil.cleanUpTest(s, testObjects);
+        } catch (SQLException se){
+        }
+    }
+
 }

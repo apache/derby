@@ -11,8 +11,7 @@
 #     i.e. set in a derby.properties file - to be database properties - i.e. set using
 #     SYSCS_SET_ procedure.
 # derbynet/dblook_test_net because it tries to search derby.log, which is on
-#     the server machine, and it assumes files in a location not consistent with running with 
-#     useprocess=false 
+#     the server machine
 # derbynet/getCurrentProperties for it exercises NetworkServerControl statements
 #     that are only supported on localhost
 # derbynet/NSinSameJVM - tries to start the server
@@ -24,14 +23,11 @@
 # derbynet/timeslice - tries to use NetworkServerControl statements
 # derbynet/DerbyNetAutoStart - tries to start networkserver
 # derbynet/DerbyNetNewServer - tries to start networkserver and uses local connections to the db.
-# tools/ieptests - names files in extin dir, which is in a different location when run with
-#     useprocess=false
+# tools/ieptests - names files in extin dir, but they are on the server
 # tools/importExport - tries to confirm correct export by file-comparing the exported files,
 #	which may be on a different machine and thus not found.
 # lang/wisconsin - optimization is quite different when running remote server.
-# lang/syscat - test is too sensitive to other tests leaving behind stuff
-# junitTests/derbyNet/CompatibilityTest.java - tries to start and shutdown the server, which will
-# 	give securitymanager errors.
+# junitTests/derbyNet/CompatibilityTest.java - tries to start and shutdown the server
 # 
 store/bootLock.java
 jdbcapi/secureUsers.sql
@@ -52,5 +48,4 @@ derbynet/DerbyNetNewServer.java
 tools/ieptests.sql
 tools/importExport.java
 lang/wisconsin.java
-lang/syscat.sql
 junitTests/derbyNet/CompatibilityTest.java
