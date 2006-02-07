@@ -1807,6 +1807,7 @@ public class updatableResultSet {
 								System.out.println("Test failed");
 								return;
 							}
+							resetData();
 						} catch (Throwable e) {
 							if ((TestUtil.isNetFramework() && updateXXXRulesTableForNetworkServer[sqlType-1][updateXXXName-1].equals("ERROR")) ||
 								(TestUtil.isEmbeddedFramework() && updateXXXRulesTableForEmbedded[sqlType-1][updateXXXName-1].equals("ERROR")))
@@ -1986,6 +1987,7 @@ public class updatableResultSet {
 									System.out.println("Test failed");
 									return;
 								}
+								resetData();
 						} catch (Throwable e) {
 							if ((TestUtil.isNetFramework() && updateXXXRulesTableForNetworkServer[sqlType-1][updateXXXName-1].equals("ERROR")) ||
 								(TestUtil.isEmbeddedFramework() && updateXXXRulesTableForEmbedded[sqlType-1][updateXXXName-1].equals("ERROR")))
@@ -2465,9 +2467,487 @@ public class updatableResultSet {
 			System.out.println("  Make sure the contents of table are unchanged:");
 			dumpRS(stmt.executeQuery("select * from t1"));	
 
+			stmt.close();
+			reloadData();
+            
+			// Tests for insert Row
+			int c41, c42, c41old, c42old;
+			conn.setAutoCommit(false);
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			
+			System.out.println("Positive Test 35 - moveToInsertRow, insertRow," +
+					"getXXX and moveToCurrentRow");
+			rs = stmt.executeQuery("SELECT * FROM t4");
+			rs.next();
+			// Get values before insertRow for test36
+			c41old = rs.getInt(1);
+			c42old = rs.getInt(2);
+			System.out.println("Positive Test 35.a - moveToInsertRow");
+			rs.moveToInsertRow();
+			rs.updateInt(1, 4);
+			rs.updateInt(2, 4);
+			System.out.println("Positive Test 35.b - insertRow");
+			try {
+				rs.insertRow();
+			} catch (Throwable t) {
+				System.out.println("Error " + t.getMessage());
+			}
+			System.out.println("Positive Test 35.c - check that getXXX gets the " +
+					"correct values after insertRow");
+			c41 = rs.getInt(1);
+			c42 = rs.getInt(2);
+			if ((c41 != 4) || (c42 != 4)) {
+				System.out.println("getXXX failed after insertRow");
+			}
+			System.out.println("Positive Test 35.d - moveToCurrentRow");
+			rs.moveToCurrentRow();
+			System.out.println("Positive Test 35.e - check that getXXX gets the " +
+					"correct values after moveToCurrentRow");
+			if (c41old != rs.getInt(1) || c42old != rs.getInt(2)) {
+				System.out.println("rs positioned on wrong row after moveToCurrentRow");
+			}
+
+			System.out.println("Positive test 36 - call moveToCurrentRow from current row");
+			rs.moveToCurrentRow();
+			if (c41old != rs.getInt(1) || c42old != rs.getInt(2)) {
+				System.out.println("rs positioned on wrong row after second moveToCurrentRow");
+			}			
+
+			System.out.println("Positive test 37 - several moveToInsertRow");
+			System.out.println("Positive test 37.a - check that getXXX gets the " +
+					"correct values after moveToInsertRow");
+			rs.moveToInsertRow();
+			rs.updateInt(1, 5);
+			rs.updateInt(2, 4);
+			c41 = rs.getInt(1);
+			c42 = rs.getInt(2);
+			if (c41 != 5 || c42 != 4) {
+				System.out.println("Got wrong value for columns");
+			}			
+			System.out.println("Positive test 37.b - moveToinsertRow from " +
+					"insertRow");
+			rs.moveToInsertRow();
+			System.out.println("Positive test 37.c - check that getXXX gets " +
+					"undefined values when updateXXX has not been called yet " +
+					"on insertRow");
+			c41 = rs.getInt(1);
+			if (!rs.wasNull() || c41 != 0) {
+				System.out.println("c41 should have been set to NULL after second " +
+					"moveToInsertRow");
+			}
+			c42 = rs.getInt(2);
+			if (!rs.wasNull() || c42 != 0) {
+				System.out.println("c42 should have been set to NULL after second " +
+					"moveToInsertRow");
+			}
+
+			System.out.println("Negative Test 38 - insertRow: do not set a value " +
+				"to all not nullable columns");
+			rs.moveToInsertRow();
+			// Do not update column1
+			rs.updateInt(2, 5);
+			try {
+				rs.insertRow();
+				System.out.println("Should not have gotten here");
+			} catch (SQLException se) {
+				dumpExpectedSQLException(se);
+			}
+
+			System.out.println("Negative Test 39 - run updateRow and deleterow " +
+				"when positioned at insertRow");
+			rs.moveToInsertRow();
+			rs.updateInt(1, 6);
+			rs.updateInt(2, 6);
+			try {
+				System.out.println("Negative Test 39.a - run updateRow on " +
+						"insertRow");
+				rs.updateRow();
+				System.out.println("Never get here, updateRow not allowed from insertRow");
+			} catch (SQLException se) {
+				dumpExpectedSQLException(se);
+			}
+			try {
+				System.out.println("Negative Test 39.a - run deleteRow on " +
+						"insertRow");
+				rs.deleteRow();
+				System.out.println("Never get here, deleteRow not allowed from insertRow");
+			} catch (SQLException se) {
+				dumpExpectedSQLException(se);
+			}
+			
+			System.out.println("Negative test 40 - Try to insert row from currentRow");
+			rs.moveToCurrentRow();
+			try {
+				rs.insertRow();
+				System.out.println("Should not get here, insertRow should fail " +
+						"when cursor is not positioned on InsertRow.");
+			} catch (SQLException se) {
+				dumpExpectedSQLException(se);
+			}
+			
+			System.out.println("Positive test 41 - try to insertRow from all " +
+					"posible positions");
+			rs = stmt.executeQuery("SELECT * FROM t4 WHERE c41 <= 5");
+			rs.moveToInsertRow();
+			rs.updateInt(1, 1000);
+			rs.updateInt(2, 1000);
+			rs.insertRow();	
+			while (rs.next()) {
+				c41 = rs.getInt(1);
+				c42 = rs.getInt(2);
+				rs.moveToInsertRow();
+				rs.updateInt(1, c41 + 100);
+				rs.updateInt(2, c42 + 100);
+				rs.insertRow();
+			}
+			rs.moveToInsertRow();
+			rs.updateInt(1, 2000);
+			rs.updateInt(2, 2000);
+			rs.insertRow();
+			
+			System.out.println("Positive test 42 - InsertRow leaving a nullable " +
+					"columns = NULL");
+			rs.moveToInsertRow();
+			rs.updateInt(1, 7);
+			rs.insertRow();
+			
+			rs.close();
+			stmt.close();
+			
+			System.out.println("Positive and negative tests 43 - Commit while on insertRow");
+			try {
+				conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+			} catch (Throwable e) {
+				System.out.println("This exception is expected with jdk 1.3\n" +
+						e.getMessage());
+			}
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			System.out.println("Positive test 43 - Commit while on insertRow " +
+					"with holdable cursor");
+			rs = stmt.executeQuery("SELECT * FROM t4");
+			rs.next();
+			rs.moveToInsertRow();
+			rs.updateInt(1, 8);
+			rs.updateInt(2, 8);
+			conn.commit();
+			try {
+				rs.insertRow();
+			} catch (SQLException se){ 
+				dumpSQLExceptions(se);
+			}
+			rs.close();
+			stmt.close();
+			try {
+				conn.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+			} catch (Throwable e) {
+				System.out.println("This exception is expected with jdk 1.3\n" +
+						e.getMessage());
+			}
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			System.out.println("Negative test 43 - Commit while on insertRow " +
+					"with not holdable cursor");
+			rs = stmt.executeQuery("SELECT * FROM t4");
+			rs.next();
+			rs.moveToInsertRow();
+			rs.updateInt(1, 82);
+			rs.updateInt(2, 82);
+			conn.commit();
+			try {
+				rs.insertRow();
+			} catch (SQLException se){ 
+				dumpExpectedSQLException(se);
+			}
+			rs.close();
+			
+			System.out.println("Negative test 44 - Closed RS");
+			rs = stmt.executeQuery("SELECT * FROM t4");
+			rs.next();
+			rs.moveToInsertRow();
+			rs.updateInt(1, 9);
+			rs.updateInt(2, 9);
+			rs.close();
+			System.out.println("Negative test 44.a - try insertRow on closed RS");
+			try {
+				rs.insertRow();
+				System.out.println("FAIL: insertRow can not be called on " +
+						"closed RS");
+			} catch (SQLException se){ 
+				dumpExpectedSQLException(se);
+			}
+			System.out.println("Negative test 44.b - try moveToCurrentRow on " +
+					"closed RS");
+			try {
+				rs.moveToCurrentRow();
+				System.out.println("FAIL: moveToCurrentRow can not be called on " +
+						"closed RS");
+			} catch (SQLException se){ 
+				dumpExpectedSQLException(se);
+			}
+			System.out.println("Negative test 44.c - try moveToInsertRow on " +
+					"closed RS");
+			try {
+				rs.moveToInsertRow();
+				System.out.println("FAIL: moveToInsertRow can not be called on " +
+						"closed RS");
+			} catch (SQLException se){ 
+				dumpExpectedSQLException(se);
+			}
+			
+			System.out.println("Positive test 45 - try to insert without " +
+					"updating all columns. All columns allow nulls or have a " +
+					"default value");
+			rs = stmt.executeQuery("SELECT * FROM t5");
+			rs.next();
+			rs.moveToInsertRow();
+			try {
+				// Should insert a row with NULLS and DEFAULT VALUES
+				rs.insertRow();
+			} catch (SQLException se){ 
+				dumpSQLExceptions(se);
+			}
+			
+			rs.close();
+			conn.commit();
+			
+			System.out.println("Positive test 46 - Rollback with AutoCommit on");
+			conn.setAutoCommit(true);
+			rs = stmt.executeQuery("SELECT * FROM t4");
+			rs.next();
+			rs.moveToInsertRow();
+			rs.updateInt(1, 4000);
+			rs.updateInt(2, 4000);
+			rs.insertRow();
+			conn.rollback();
+			stmt.close();
+
+			System.out.println("Negative test 47 - insertRow and read-only RS");
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+					ResultSet.CONCUR_READ_ONLY);
+			rs = stmt.executeQuery("SELECT * FROM t4");
+			System.out.println("Negative test 47.a - try moveToInsertRow on " +
+					"read-only RS");
+			try {
+				rs.moveToInsertRow();
+				System.out.println("FAIL: moveToInsertRow can not be called on " +
+						"read-only RS");
+			} catch (SQLException se){ 
+				dumpExpectedSQLException(se);
+			}
+			System.out.println("Negative test 47.b - try updateXXX on " +
+					"read-only RS");
+			try {
+				rs.updateInt(1, 5000);
+				System.out.println("FAIL: updateXXX not allowed on read-only RS");
+				rs.updateInt(2, 5000);
+				System.out.println("FAIL: updateXXX not allowed on read-only RS");
+			} catch (SQLException se){ 
+				dumpExpectedSQLException(se);
+			}
+			System.out.println("Negative test 47.c - try insertRow on " +
+					"read-only RS");
+			try {
+				rs.insertRow();
+				System.out.println("FAIL: insertRow not allowed on read-only RS");
+			} catch (SQLException se){ 
+				dumpExpectedSQLException(se);
+			}
+			System.out.println("Negative test 47.d - try moveToCurrentRow on " +
+					"read-only RS");
+			try {
+				rs.moveToCurrentRow();
+				System.out.println("FAIL: moveToCurrentRow can not be called on " +
+						"read-only RS");
+			} catch (SQLException se){ 
+				dumpExpectedSQLException(se);
+			}
+			rs.close();
+			conn.commit();
+			stmt.close();
+			
+			System.out.println("Positive test 48 - Test all updateXXX methods on " +
+					"all the supported sql datatypes");
+			conn.setAutoCommit(false);
+			stmt = conn.createStatement();
+			stmt.executeUpdate("DELETE FROM AllDataTypesForTestingTable");
+			conn.commit();
+			PreparedStatement pstmti = conn.prepareStatement("SELECT * FROM AllDataTypesForTestingTable FOR UPDATE", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			PreparedStatement pstmt1i = conn.prepareStatement("SELECT * FROM AllDataTypesNewValuesData");
+			for (int sqlType = 1, checkAgainstColumn = 1; sqlType <= allSQLTypes.length; sqlType++ ) {
+				System.out.println("Next datatype to test is " + allSQLTypes[sqlType-1]);
+				for (int updateXXXName = 1;  updateXXXName <= allUpdateXXXNames.length; updateXXXName++) {
+					checkAgainstColumn = updateXXXName;
+					System.out.println("  Testing " + allUpdateXXXNames[updateXXXName-1] + " on SQL type " + allSQLTypes[sqlType-1]);
+					for (int indexOrName = 1; indexOrName <= 2; indexOrName++) {
+						if (indexOrName == 1) //test by passing column position
+							System.out.println("    Using column position as first parameter to " + allUpdateXXXNames[updateXXXName-1]);
+						else
+							System.out.println("    Using column name as first parameter to " + allUpdateXXXNames[updateXXXName-1]);
+						rs = pstmti.executeQuery();
+						rs.moveToInsertRow();
+						rs1 = pstmt1i.executeQuery();
+						rs1.next();
+						try {
+							if (updateXXXName == 1) {//update column with updateShort methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateShort(sqlType, rs1.getShort(updateXXXName));
+								else //test by passing column name
+									rs.updateShort(ColumnNames[sqlType-1], rs1.getShort(updateXXXName));
+							} else if (updateXXXName == 2){ //update column with updateInt methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateInt(sqlType, rs1.getInt(updateXXXName));
+								else //test by passing column name
+									rs.updateInt(ColumnNames[sqlType-1], rs1.getInt(updateXXXName));
+							} else if (updateXXXName ==  3){ //update column with updateLong methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateLong(sqlType, rs1.getLong(updateXXXName));
+								else //test by passing column name
+									rs.updateLong(ColumnNames[sqlType-1], rs1.getLong(updateXXXName));
+							} else if (updateXXXName == 4){ //update column with updateBigDecimal methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateBigDecimal(sqlType, rs1.getBigDecimal(updateXXXName));
+								else //test by passing column name
+									rs.updateBigDecimal(ColumnNames[sqlType-1], rs1.getBigDecimal(updateXXXName));
+							} else if (updateXXXName == 5){ //update column with updateFloat methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateFloat(sqlType, rs1.getFloat(updateXXXName));
+								else //test by passing column name
+									rs.updateFloat(ColumnNames[sqlType-1], rs1.getFloat(updateXXXName));
+							} else if (updateXXXName == 6){ //update column with updateDouble methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateDouble(sqlType, rs1.getDouble(updateXXXName));
+								else //test by passing column name
+									rs.updateDouble(ColumnNames[sqlType-1], rs1.getDouble(updateXXXName));
+							} else if (updateXXXName == 7){ //update column with updateString methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateString(sqlType, rs1.getString(updateXXXName));
+								else //test by passing column name
+									rs.updateString(ColumnNames[sqlType-1], rs1.getString(updateXXXName));
+							} else if (updateXXXName == 8){ //update column with updateAsciiStream methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateAsciiStream(sqlType,rs1.getAsciiStream(updateXXXName), 4);
+								else //test by passing column name
+									rs.updateAsciiStream(ColumnNames[sqlType-1],rs1.getAsciiStream(updateXXXName), 4);
+							} else if (updateXXXName == 9){ //update column with updateCharacterStream methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateCharacterStream(sqlType,rs1.getCharacterStream(updateXXXName), 4);
+								else //test by passing column name
+									rs.updateCharacterStream(ColumnNames[sqlType-1],rs1.getCharacterStream(updateXXXName), 4);
+							} else if (updateXXXName == 10){ //update column with updateByte methods
+									checkAgainstColumn = 1;
+								if (indexOrName == 1) //test by passing column position
+									rs.updateByte(sqlType,rs1.getByte(checkAgainstColumn));
+								else //test by passing column name
+									rs.updateByte(ColumnNames[sqlType-1],rs1.getByte(checkAgainstColumn));
+							} else if (updateXXXName == 11){ //update column with updateBytes methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateBytes(sqlType,rs1.getBytes(updateXXXName));
+								else //test by passing column name
+									rs.updateBytes(ColumnNames[sqlType-1],rs1.getBytes(updateXXXName));
+							} else if (updateXXXName == 12){ //update column with updateBinaryStream methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateBinaryStream(sqlType,rs1.getBinaryStream(updateXXXName), 2);
+								else //test by passing column name
+									rs.updateBinaryStream(ColumnNames[sqlType-1],rs1.getBinaryStream(updateXXXName), 2);
+							} else if (updateXXXName == 13){ //update column with updateClob methods
+								if (JVMInfo.JDK_ID == 2) //Don't test this method because running JDK1.3 and this jvm does not support the method
+									continue;
+								if (indexOrName == 1) //test by passing column position
+									rs.updateClob(sqlType,rs1.getClob(updateXXXName));
+								else //test by passing column name
+									rs.updateClob(ColumnNames[sqlType-1],rs1.getClob(updateXXXName));
+							} else if (updateXXXName == 14){ //update column with updateDate methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateDate(sqlType,rs1.getDate(updateXXXName));
+								else //test by passing column name
+									rs.updateDate(ColumnNames[sqlType-1],rs1.getDate(updateXXXName));
+							} else if (updateXXXName == 15){ //update column with updateTime methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateTime(sqlType,rs1.getTime(updateXXXName));
+								else //test by passing column name
+									rs.updateTime(ColumnNames[sqlType-1],rs1.getTime(updateXXXName));
+							} else if (updateXXXName == 16){ //update column with updateTimestamp methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateTimestamp(sqlType,rs1.getTimestamp(updateXXXName));
+								else //test by passing column name
+									rs.updateTimestamp(ColumnNames[sqlType-1],rs1.getTimestamp(updateXXXName));
+							} else if (updateXXXName == 17){ //update column with updateBlob methods
+								if (JVMInfo.JDK_ID == 2) //Don't test this method because running JDK1.3 and this jvm does not support the method
+									continue;
+								if (indexOrName == 1) //test by passing column position
+									rs.updateBlob(sqlType,rs1.getBlob(updateXXXName));
+								else //test by passing column name
+									rs.updateBlob(ColumnNames[sqlType-1],rs1.getBlob(updateXXXName));
+							} else if (updateXXXName == 18){ //update column with getBoolean methods
+									//use SHORT sql type column's value for testing boolean since Derby don't support boolean datatype
+									//Since Derby does not support Boolean datatype, this method is going to fail with the syntax error
+								if (indexOrName == 1) //test by passing column position
+									rs.updateBoolean(sqlType, rs1.getBoolean(1));
+								else //test by passing column name
+									rs.updateBoolean(ColumnNames[sqlType-1], rs1.getBoolean(1));
+							} else if (updateXXXName == 19){ //update column with updateNull methods
+								if (indexOrName == 1) //test by passing column position
+									rs.updateNull(sqlType);
+								else //test by passing column name
+									rs.updateNull(ColumnNames[sqlType-1]);
+							} else if (updateXXXName == 20){ //update column with updateArray methods - should get not implemented exception
+								if (JVMInfo.JDK_ID == 2) //Don't test this method because running JDK1.3 and this jvm does not support the method
+									continue;
+								if (indexOrName == 1) //test by passing column position
+									rs.updateArray(sqlType, null);
+								else //test by passing column name
+									rs.updateArray(ColumnNames[sqlType-1], null);
+							} else if (updateXXXName == 21){ //update column with updateRef methods - should get not implemented exception
+								if (JVMInfo.JDK_ID == 2) //Don't test this method because running JDK1.3 and this jvm does not support the method
+									continue;
+								if (indexOrName == 1) //test by passing column position
+									rs.updateRef(sqlType, null);
+								else //test by passing column name
+									rs.updateRef(ColumnNames[sqlType-1], null);
+							}
+							rs.insertRow();
+							if ((TestUtil.isNetFramework() && updateXXXRulesTableForNetworkServer[sqlType-1][updateXXXName-1].equals("ERROR")) ||
+								(TestUtil.isEmbeddedFramework() && updateXXXRulesTableForEmbedded[sqlType-1][updateXXXName-1].equals("ERROR"))) {
+								System.out.println("FAILURE : We shouldn't reach here. The test should have failed earlier on updateXXX or updateRow call");
+								return;
+							}
+							if (!verifyData(sqlType,checkAgainstColumn, "AllDataTypesNewValuesData"))
+							{
+								System.out.println("Verify data failed\nTest failed");
+								return;
+							}
+							stmt.executeUpdate("DELETE FROM AllDataTypesForTestingTable");
+						} catch (Throwable e) {
+							if ((TestUtil.isNetFramework() && updateXXXRulesTableForNetworkServer[sqlType-1][updateXXXName-1].equals("ERROR")) ||
+								(TestUtil.isEmbeddedFramework() && updateXXXRulesTableForEmbedded[sqlType-1][updateXXXName-1].equals("ERROR")))
+								System.out.println("      Got expected exception : " + e.getMessage());
+							else {
+								if ((sqlType == 14 || sqlType == 15 || sqlType == 16) && //we are dealing with DATE/TIME/TIMESTAMP column types
+									checkAgainstColumn == 7) //we are dealing with updateString. The failure is because string does not represent a valid datetime value
+									System.out.println("      Got expected exception : " + e.getMessage());
+								else {
+									System.out.println("      Got UNexpected exception : " + e.getMessage());
+									return;
+								}
+							}
+						}
+					}
+					rs.close();
+					rs1.close();
+				}
+			}
+			conn.rollback();
+			conn.setAutoCommit(true);
+			
+			// Verify positive tests
+			dumpRS(stmt.executeQuery("select * from t4"));
+			dumpRS(stmt.executeQuery("select * from t5"));
+			
+			stmt.close();			
+
 			teardown();
 
 			conn.close();
+
 
 		} catch (Throwable e) {
 			System.out.println("FAIL: exception thrown:");
@@ -2545,6 +3025,10 @@ public class updatableResultSet {
 		rs1.close();
 		pstmt.close();
 		pstmt1.close();
+		return(true);
+	}
+
+	static void resetData() throws SQLException {
 		Statement stmt = conn.createStatement();
 		stmt.executeUpdate("delete from AllDataTypesForTestingTable");
 		StringBuffer insertSQL = new StringBuffer("insert into AllDataTypesForTestingTable values(");
@@ -2554,7 +3038,6 @@ public class updatableResultSet {
 		}
 		insertSQL.append("cast("+SQLData[allSQLTypes.length - 1][0]+" as BLOB(1K)))");
 		stmt.executeUpdate(insertSQL.toString());
-		return(true);
 	}
 
 	// lifted from the autoGeneratedJdbc30 test
@@ -2636,6 +3119,10 @@ public class updatableResultSet {
 		stmt.executeUpdate("insert into t1 values (1,'aa'), (2,'bb'), (3,'cc')");
 		stmt.executeUpdate("delete from t3");
 		stmt.executeUpdate("insert into t3 values (1,1), (2,2)");
+		stmt.executeUpdate("delete from t4");
+		stmt.executeUpdate("insert into t4 values (1,1), (2,2), (3,3)");
+		stmt.executeUpdate("delete from t5");
+		stmt.executeUpdate("insert into t5 values (1,1), (2,2), (3,3)");        
 		stmt.executeUpdate("delete from table0WithTriggers");
 		stmt.executeUpdate("insert into table0WithTriggers values (1, 1), (2, 2), (3, 3), (4, 4)");
 		stmt.executeUpdate("delete from table1WithTriggers");
@@ -2652,6 +3139,8 @@ public class updatableResultSet {
 		stmt.executeUpdate("create view v1 as select * from t1");
 		stmt.executeUpdate("create table t2 (c21 int, c22 int)");
 		stmt.executeUpdate("create table t3 (c31 int not null primary key, c32 smallint)");
+		stmt.executeUpdate("create table t4 (c41 int not null primary key, c42 int)");
+		stmt.executeUpdate("create table t5 (c51 int not null default 0, c52 int)");
 		stmt.executeUpdate("create table tableWithPrimaryKey (c1 int not null, c2 int not null, constraint pk primary key(c1,c2))");
 		stmt.executeUpdate("create table tableWithConstraint (c1 int, c2 int, constraint fk foreign key(c1,c2) references tableWithPrimaryKey)");
 		stmt.executeUpdate("create table table0WithTriggers (c1 int, c2 bigint)");
@@ -2672,6 +3161,8 @@ public class updatableResultSet {
 		stmt.executeUpdate("insert into t2 values (1,1)");
 		stmt.executeUpdate("insert into t3 values (1,1)");
 		stmt.executeUpdate("insert into t3 values (2,2)");
+		stmt.executeUpdate("insert into t4 values (1,1), (2,2), (3,3)");
+		stmt.executeUpdate("insert into t5 values (1,1), (2,2), (3,3)");        
 		stmt.executeUpdate("insert into tableWithPrimaryKey values (1, 1), (2, 2), (3, 3), (4, 4)");
 		stmt.executeUpdate("insert into tableWithConstraint values (1, 1), (2, 2), (3, 3), (4, 4)");
 		stmt.executeUpdate("insert into table0WithTriggers values (1, 1), (2, 2), (3, 3), (4, 4)");
@@ -2718,7 +3209,8 @@ public class updatableResultSet {
 			"table updateTriggerInsertIntoThisTable", "table table0WithTriggers",
 			"table table1WithTriggers", "table table2WithTriggers",
 			"table selfReferencingT1", "table selfReferencingT2",
-			"table AllDataTypesForTestingTable", "table AllDataTypesNewValuesData"};
+			"table AllDataTypesForTestingTable", "table AllDataTypesNewValuesData",
+			"table t4", "table t5"};
 		TestUtil.cleanUpTest(stmt, testObjects);	
 		conn.commit();
 		stmt.close();
@@ -2751,6 +3243,14 @@ public class updatableResultSet {
 			System.out.print("SQLSTATE("+se.getSQLState()+"):");
 			se = se.getNextException();
 		}
+	}
+	
+	static private void dumpExpectedSQLException (SQLException se) {
+		while (se != null) {
+			System.out.println("SQL State: " + se.getSQLState());
+			System.out.println("Got expected exception: " + se.getMessage());
+			se = se.getNextException();
+		}		
 	}
 
 }

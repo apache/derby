@@ -178,6 +178,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     public PreparedStatement preparedStatementForUpdate_;
     public PreparedStatement preparedStatementForDelete_;
+    public PreparedStatement preparedStatementForInsert_;
 
     // Nesting level of the result set in a stored procedure
     public int nestingLevel_ = -1;
@@ -274,6 +275,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
         checkForClosedResultSet();
         clearWarningsX();
 
+        if (isOnInsertRow_) {
+            isOnInsertRow_ = false;
+            isOnCurrentRow_ = true;
+        }
+        
         wasNull_ = ResultSet.WAS_NULL_UNSET;
 
         // discard all previous updates when moving the cursor
@@ -541,14 +547,16 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column);
             boolean result = false;
-            if (wasNonNullSensitiveUpdate(column)) {
-                result = agent_.crossConverters_.setBooleanFromObject(updatedColumns_[column - 1],
-                        resultSetMetaData_.types_[column - 1]);
+            if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
+                if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
+                    result = false;
+                } else {
+                    result = agent_.crossConverters_.setBooleanFromObject(
+                            updatedColumns_[column - 1],
+                            resultSetMetaData_.types_[column - 1]);
+                }
             } else {
                 result = isNull(column) ? false : cursor_.getBoolean(column);
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getBoolean", result);
             }
             setWasNull(column);  // Placed close to the return to minimize risk of thread interference
             return result;
@@ -570,9 +578,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column);
             byte result = 0;
-            if (wasNonNullSensitiveUpdate(column)) {
-                result = agent_.crossConverters_.setByteFromObject(updatedColumns_[column - 1],
-                        resultSetMetaData_.types_[column - 1]);
+            if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
+                if ((isOnInsertRow_) && (updatedColumns_[column - 1] == null)) {
+                    result = 0;
+                } else {
+                    result = agent_.crossConverters_.setByteFromObject(
+                            updatedColumns_[column - 1],
+                            resultSetMetaData_.types_[column - 1]);
+                }
             } else {
                 result = isNull(column) ? 0 : cursor_.getByte(column);
             }
@@ -599,9 +612,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column);
             short result = 0;
-            if (wasNonNullSensitiveUpdate(column)) {
-                result = ((Short) agent_.crossConverters_.setObject(java.sql.Types.SMALLINT,
-                        updatedColumns_[column - 1])).shortValue();
+            if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
+                if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
+                    result = 0;
+                } else {
+                    result = ((Short) agent_.crossConverters_.setObject(
+                            java.sql.Types.SMALLINT,
+                            updatedColumns_[column - 1])).shortValue();
+                }
             } else {
                 result = isNull(column) ? 0 : cursor_.getShort(column);
             }
@@ -628,9 +646,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column);
             int result = 0;
-            if (wasNonNullSensitiveUpdate(column)) {
-                result = ((Integer) agent_.crossConverters_.setObject(java.sql.Types.INTEGER,
-                        updatedColumns_[column - 1])).intValue();
+            if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
+                if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
+                    result = 0;
+                } else {
+                    result = ((Integer) agent_.crossConverters_.setObject(
+                            java.sql.Types.INTEGER,
+                            updatedColumns_[column - 1])).intValue();
+                }
             } else {
                 result = isNull(column) ? 0 : cursor_.getInt(column);
             }
@@ -657,9 +680,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column);
             long result = 0;
-            if (wasNonNullSensitiveUpdate(column)) {
-                result = ((Long) agent_.crossConverters_.setObject(java.sql.Types.BIGINT,
-                        updatedColumns_[column - 1])).longValue();
+            if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
+                if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
+                    result = 0;
+                } else {
+                    result = ((Long) agent_.crossConverters_.setObject(
+                            java.sql.Types.BIGINT,
+                            updatedColumns_[column - 1])).longValue();
+                }
             } else {
                 result = isNull(column) ? 0 : cursor_.getLong(column);
             }
@@ -686,9 +714,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column);
             float result = 0;
-            if (wasNonNullSensitiveUpdate(column)) {
-                result = ((Float) agent_.crossConverters_.setObject(java.sql.Types.REAL,
-                        updatedColumns_[column - 1])).floatValue();
+            if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
+                if ((isOnInsertRow_ && updatedColumns_[column - 1] == null)) {
+                    result = 0;
+                } else {
+                    result = ((Float) agent_.crossConverters_.setObject(
+                            java.sql.Types.REAL,
+                            updatedColumns_[column - 1])).floatValue();
+                }
             } else {
                 result = isNull(column) ? 0 : cursor_.getFloat(column);
             }
@@ -715,9 +748,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column);
             double result = 0;
-            if (wasNonNullSensitiveUpdate(column)) {
-                result = ((Double) agent_.crossConverters_.setObject(java.sql.Types.DOUBLE,
-                        updatedColumns_[column - 1])).doubleValue();
+            if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
+                if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
+                    result = 0;
+                } else {
+                    result = ((Double) agent_.crossConverters_.setObject(
+                            java.sql.Types.DOUBLE,
+                            updatedColumns_[column - 1])).doubleValue();
+                }
             } else {
                 result = isNull(column) ? 0 : cursor_.getDouble(column);
             }
@@ -1378,7 +1416,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private void setWasNull(int column) {
-        if (wasNullSensitiveUpdate(column)) {
+        if (wasNullSensitiveUpdate(column) || (isOnInsertRow_ && updatedColumns_[column - 1] == null)) {
             wasNull_ = WAS_NULL;
         } else {
             wasNull_ = (cursor_.isNull_ == null || cursor_.isNull_[column - 1]) ? WAS_NULL : WAS_NOT_NULL;
@@ -2643,14 +2681,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public boolean rowInserted() throws SQLException {
         try
         {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "rowInserted");
-            }
-            checkForClosedResultSet();
-            if (true) {
-                throw new SqlException(agent_.logWriter_, "under construction");
-            }
             boolean rowInserted = false;
+            checkForClosedResultSet();
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "rowInserted", rowInserted);
             }
@@ -3297,8 +3329,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "insertRow");
                 }
-                checkForClosedResultSet();
-                throw new SqlException(agent_.logWriter_, "Driver not capable: insertRow");
+                insertRowX();
             }
         }
         catch ( SqlException se )
@@ -3307,6 +3338,53 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
+    private void insertRowX() throws SqlException {
+        checkForClosedResultSet();
+        if (isOnCurrentRow_ || resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+            throw new SqlException(agent_.logWriter_, "This method cannot be invoked while the cursor is not on the insert " +
+                    "row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.");
+       }
+ 
+        // if not on a valid row, then do not accept updateXXX calls
+        if (!isValidCursorPosition_) {
+            throw new SqlException(agent_.logWriter_, "Invalid operation to " +
+                    "insert at current cursor position");
+        }
+
+        // User might not be updating all the updatable columns selected in the
+        // select sql and hence every insertRow on the same ResultSet can be
+        // potentially different than the previous one. Because of that, we
+        // should get a new prepared statement to do inserts every time
+        getPreparedStatementForInsert();
+
+        // build the inputs array for the prepared statement for insert
+        int paramNumber = 0;
+        for (int i = 0; i < updatedColumns_.length; i++) {
+            if (resultSetMetaData_.sqlxUpdatable_[i] == 1) {
+                // Since user may choose not to update all the columns in the
+                // select list, check first if the column has been updated
+                if (columnUpdated_[i] == true) {
+                    paramNumber++;
+
+                    // column is updated either if the updatedColumns_ entry is not null,
+                    // or if the updatedColumns_ entry is null, but columnUpdated is
+                    // set to true, which means columns is updated to a null.
+                    if (updatedColumns_[i] != null ||
+                            (updatedColumns_[i] == null && columnUpdated_[i])) {
+                        preparedStatementForInsert_.setInput(
+                                paramNumber, 
+                                updatedColumns_[i]);
+                    }
+                }
+            }
+        }
+        try {
+            insert();
+        } catch (SqlException e) {
+            throw e;
+        }
+    }
+    
     public void updateRow() throws java.sql.SQLException {
         try
         {
@@ -3550,7 +3628,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     agent_.logWriter_.traceEntry(this, "moveToInsertRow");
                 }
                 checkForClosedResultSet();
-                throw new SqlException(agent_.logWriter_, "Driver not capable");
+                checkUpdatableCursor();
+
+                resetUpdatedColumnsForInsert();
+
+                isOnInsertRow_ = true;
+                isOnCurrentRow_ = false;
+                isValidCursorPosition_ = true;
             }
         }
         catch ( SqlException se )
@@ -3567,15 +3651,18 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     agent_.logWriter_.traceEntry(this, "moveToCurrentRow");
                 }
                 checkForClosedResultSet();
-                if (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
-                    throw new SqlException(agent_.logWriter_, "This method should only be called on ResultSet objects that are " +
-                            "updatable(concurrency type CONCUR_UPDATABLE).");
-                }
+                checkUpdatableCursor();
 
                 if (!isOnInsertRow_) {
                     // no affect
                 } else {
-                    throw new SqlException(agent_.logWriter_, "Driver no capable");
+                    resetUpdatedColumns();
+                    isOnInsertRow_ = false;
+                    isOnCurrentRow_ = true;
+                    if (currentRowInRowset_ > 0) {
+                        updateColumnInfoFromCache();
+                    }
+                    isValidCursorPosition_ = true;
                 }
             }
         }
@@ -3724,6 +3811,35 @@ public abstract class ResultSet implements java.sql.ResultSet,
         agent_.endReadChain();
     }
 
+    protected void insert() throws SqlException {
+        agent_.beginWriteChain(statement_);
+
+        // re-prepare the insert statement if repreparing is needed after a commit.
+        if (!preparedStatementForInsert_.openOnServer_) {
+            preparedStatementForInsert_.materialPreparedStatement_.writePrepare_(
+                    preparedStatementForInsert_.sql_,
+                    preparedStatementForInsert_.section_);
+        }
+
+        try {
+            writeInsertRow(false);
+        } catch (SQLException se ) {
+            throw new SqlException(se);
+        }
+
+        agent_.flow(statement_);
+
+        // read prepare replies if the update statement is re-prepared after a commit.
+        if (!preparedStatementForInsert_.openOnServer_) {
+            preparedStatementForInsert_.materialPreparedStatement_.readPrepare_();
+        }
+
+        readInsertRow();
+
+        agent_.endReadChain();
+     }    
+
+    
     protected void update() throws SqlException {
         agent_.beginWriteChain(statement_);
 
@@ -3915,6 +4031,24 @@ public abstract class ResultSet implements java.sql.ResultSet,
         agent_.endReadChain();
     }
 
+    public void writeInsertRow(boolean chainedWritesFollowingSetLob) throws SQLException {
+        try
+        {
+            preparedStatementForInsert_.materialPreparedStatement_.writeExecute_(
+                    preparedStatementForInsert_.section_,
+                    preparedStatementForInsert_.parameterMetaData_,
+                    preparedStatementForInsert_.parameters_,
+                    (preparedStatementForInsert_.parameterMetaData_ == null ? 0 : 
+                        preparedStatementForInsert_.parameterMetaData_.getColumnCount()),
+                    false, // false means we're not expecting output
+                    chainedWritesFollowingSetLob);  // chaining after the execute        
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+    
     public void writeUpdateRow(boolean chainedWritesFollowingSetLob) throws SQLException {
         try
         {
@@ -3954,6 +4088,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
         {
             throw se.getSQLException();
         }
+    }
+
+    public void readInsertRow() throws DisconnectException, SqlException {
+        preparedStatementForInsert_.materialPreparedStatement_.readExecute_();
     }
 
     public void readUpdateRow() throws DisconnectException, SqlException {
@@ -4128,7 +4266,51 @@ public abstract class ResultSet implements java.sql.ResultSet,
         updatedColumns_[column - 1] = value;
         columnUpdated_[column - 1] = true;
     }
+    
+    /*
+     * Builds the insert statement that will be used well calling insertRow
+     * 
+     * If no values have been supplied for a column, it will be set 
+     * to the column's default value, if any. 
+     * If no default value had been defined, the default value of a 
+     * nullable column is set to NULL.
+     */
+    private String buildInsertString() throws SqlException {
+        int column;
+        boolean foundOneUpdatedColumnAlready = false;
+        
+        StringBuffer insertSQL = new StringBuffer("INSERT INTO ");
+        StringBuffer valuesSQL = new StringBuffer("VALUES (");
 
+        insertSQL.append(getTableName());
+        insertSQL.append(" (");
+        
+        for (column = 1; column <= resultSetMetaData_.columns_; column++) {
+            if (foundOneUpdatedColumnAlready) {
+                insertSQL.append(",");
+                valuesSQL.append(",");
+            }
+            //using quotes around the column name to preserve case sensitivity
+            try {
+                insertSQL.append("\"" + resultSetMetaData_.getColumnName(column) + "\"");
+            } catch ( SQLException sqle ) {
+                throw new SqlException(sqle);
+            }
+            if (columnUpdated_[column - 1]) { 
+                valuesSQL.append("?");
+            } else {
+                valuesSQL.append("DEFAULT");
+            }
+            foundOneUpdatedColumnAlready = true;
+        }
+        
+        insertSQL.append(") ");
+        valuesSQL.append(") ");
+        insertSQL.append(valuesSQL.toString());
+        
+        return(insertSQL.toString());
+    }
+    
     private String buildUpdateString() throws SqlException {
         int column;
         int numColumns = 0;
@@ -4219,6 +4401,18 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return statement_.section_.getServerCursorName();
     }
 
+    private void getPreparedStatementForInsert() throws SqlException {
+        // each column is associated with a tableName in the extended describe info.
+        String insertString = buildInsertString();
+
+        try {
+            preparedStatementForInsert_ = (PreparedStatement)statement_.connection_.
+                    prepareStatement(insertString);
+        } catch ( SQLException sqle ) {
+            throw new SqlException(sqle);
+        }
+    }
+
     private void getPreparedStatementForUpdate() throws SqlException {
         // each column is associated with a tableName in the extended describe info.
         String updateString = buildUpdateString();
@@ -4239,6 +4433,22 @@ public abstract class ResultSet implements java.sql.ResultSet,
         preparedStatementForDelete_ =
                 statement_.connection_.preparePositionedUpdateStatement(deleteString,
                         statement_.section_.getPositionedUpdateSection()); // update section
+    }
+
+    private final void resetUpdatedColumnsForInsert() {
+        // initialize updateColumns with nulls for all columns
+        if (updatedColumns_ == null) {
+            updatedColumns_ = new Object[resultSetMetaData_.columns_];
+        }
+        if (columnUpdated_ != null) {
+            columnUpdated_ = new boolean[resultSetMetaData_.columns_];
+        }
+        for (int i = 0; i < updatedColumns_.length; i++) {
+            updateColumn(i+1, null);
+        }
+        for (int i = 0; i < columnUpdated_.length; i++) {
+            columnUpdated_[i] = false;
+        }
     }
 
     private final void resetUpdatedColumns() {
@@ -4290,6 +4500,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (column < 1 || column > resultSetMetaData_.columns_) {
             throw new SqlException(agent_.logWriter_, "Invalid argument: parameter index " +
                     column + " is out of range.");
+        }
+    }
+
+    private void checkUpdatableCursor() throws SqlException {
+        if (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+            throw new SqlException(agent_.logWriter_, 
+                    "This method should only be called on ResultSet objects " +
+                    "that are updatable(concurrency type CONCUR_UPDATABLE).");
         }
     }
 

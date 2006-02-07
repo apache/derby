@@ -1445,6 +1445,7 @@ public interface SQLState {
     //updatable resultset related
     String UPDATABLE_RESULTSET_API_DISALLOWED = "XJ083.U";
     String COLUMN_NOT_FROM_BASE_TABLE = "XJ084.U";
+    String NOT_POSITIONED_ON_INSERT_ROW = "XJ086.S";
 
     //following are session severity.
     String DATABASE_NOT_FOUND = "XJ004.C";

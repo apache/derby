@@ -103,6 +103,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 	private DataValueDescriptor[] rowData;
 	protected boolean wasNull;
 	protected boolean isClosed;
+	private boolean isOnInsertRow;
+	private ExecRow currentRowBeforeInsert;
+	private ExecRow insertRow = null;
 	private Object	currentStream;
 
 	// immutable state
@@ -249,6 +252,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 		}		
 	}
 
+	private void checkNotOnInsertRow() throws SQLException {
+		if (isOnInsertRow) {
+			throw newSQLException(SQLState.NO_CURRENT_ROW);
+		}
+	}
+
 	// onRow protects us from making requests of
 	// resultSet that would fail with NullPointerExceptions
 	// or milder problems due to not having a row.
@@ -336,6 +345,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 		checkExecIfClosed(positionText);	// checking result set closure does not depend
 								// on the underlying connection.  Do this
 								// outside of the connection synchronization.
+
+		if (isOnInsertRow) {
+			moveToCurrentRow();
+		}
 
 
 		synchronized (getConnectionSynchronization()) {
@@ -2044,7 +2057,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @see EmbedDatabaseMetaData#insertsAreDetected
 	 */
 	public boolean rowInserted() throws SQLException {
-		throw Util.notImplemented();
+		return false;
 	}
 
 	/**
@@ -2087,7 +2100,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 					getCursorName());
 	}
 
-	//do following few checks before accepting updatable resultset api
+	//do following few checks before accepting updateRow or deleteRow
 	//1)Make sure this is an updatable ResultSet
 	//2)Make sure JDBC ResultSet is not closed
 	//3)Make sure JDBC ResultSet is positioned on a row
@@ -2095,8 +2108,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	protected void checksBeforeUpdateOrDelete(String methodName, int columnIndex) throws SQLException {
 
       //1)Make sure this is an updatable ResultSet
-      if (getConcurrency() != JDBC20Translation.CONCUR_UPDATABLE)//if not updatable resultset, then throw exception
-        throw Util.generateCsSQLException(SQLState.UPDATABLE_RESULTSET_API_DISALLOWED, methodName);
+      checkUpdatableCursor(methodName);
 
       //2)Make sure JDBC ResultSet is not closed
       checkIfClosed(methodName);
@@ -2125,7 +2137,33 @@ public abstract class EmbedResultSet extends ConnectionChild
       return currentRow.getColumn(columnIndex);
 	}
 
-	/**
+    /* do following few checks before accepting insertRow
+     * 1) Make sure this is an updatable ResultSet
+     * 2) Make sure JDBC ResultSet is not closed
+     * 3) Make sure JDBC ResultSet is positioned on insertRow
+     * 4) Make sure underneath language resultset is not closed
+     */
+    protected void checksBeforeInsert() throws SQLException {
+        // 1)Make sure this is an updatable ResultSet
+        // if not updatable resultset, then throw exception
+        checkUpdatableCursor("insertRow");
+
+        // 2)Make sure JDBC ResultSet is not closed
+        checkIfClosed("insertRow");
+
+        // 3)Make sure JDBC ResultSet is positioned on insertRow
+        if (!isOnInsertRow) {
+            throw newSQLException(SQLState.NOT_POSITIONED_ON_INSERT_ROW);
+        }
+
+        // 4)Make sure underneath language resultset is not closed
+        if (theResults.isClosed()) {
+            throw Util.generateCsSQLException(SQLState.LANG_RESULT_SET_NOT_OPEN, "insertRow");
+        }
+    }
+
+    
+    /**
 	 * JDBC 2.0
 	 * 
 	 * Give a nullable column a null value.
@@ -3208,7 +3246,94 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                insert row have not been given a value
 	 */
 	public void insertRow() throws SQLException {
-		throw Util.notImplemented();
+        synchronized (getConnectionSynchronization()) {
+            checksBeforeInsert();
+            setupContextStack();
+            LanguageConnectionContext lcc = null;
+            StatementContext statementContext = null;
+            try {
+                /*
+                 * construct the insert statement
+                 *
+                 * If no values have been supplied for a column, it will be set 
+                 * to the column's default value, if any. 
+                 * If no default value had been defined, the default value of a 
+                 * nullable column is set to NULL.
+                 */
+
+                boolean foundOneColumnAlready = false;
+                StringBuffer insertSQL = new StringBuffer("INSERT INTO ");
+                StringBuffer valuesSQL = new StringBuffer("VALUES (");
+                CursorActivation activation = getEmbedConnection().
+                        getLanguageConnection().lookupCursorActivation(getCursorName());
+
+                ExecCursorTableReference targetTable = 
+                        activation.getPreparedStatement().getTargetTable();
+                // got the underlying (schema.)table name
+                insertSQL.append(getFullBaseTableName(targetTable));
+                ResultDescription rd = theResults.getResultDescription();
+
+                insertSQL.append(" (");
+                // in this for loop we are constructing list of column-names 
+                // and values (?) ,... part of the insert sql
+                for (int i=1; i<=rd.getColumnCount(); i++) { 
+                    if (foundOneColumnAlready) {
+                        insertSQL.append(",");
+                        valuesSQL.append(",");
+                    }
+                    // using quotes around the column name 
+                    // to preserve case sensitivity
+                    insertSQL.append("\"" + 
+                            rd.getColumnDescriptor(i).getName() + "\"");
+                    if (columnGotUpdated[i-1]) { 
+                        valuesSQL.append("?");
+                    } else {
+                        valuesSQL.append("DEFAULT");
+                    }
+                    foundOneColumnAlready = true;
+                }
+                insertSQL.append(") ");
+                valuesSQL.append(") ");
+                insertSQL.append(valuesSQL);
+
+                lcc = getEmbedConnection().getLanguageConnection();
+
+                // Context used for preparing, don't set any timeout (use 0)
+                statementContext = lcc.pushStatementContext(
+                        isAtomic, 
+                        false, 
+                        insertSQL.toString(), 
+                        null, 
+                        false, 
+                        0L);
+                org.apache.derby.iapi.sql.PreparedStatement ps = 
+                        lcc.prepareInternalStatement(insertSQL.toString());
+                Activation act = ps.getActivation(lcc, false);
+
+                // in this for loop we are assigning values for parameters 
+                //in sql constructed earlier VALUES (?, ..)
+                for (int i=1, paramPosition=0; i<=rd.getColumnCount(); i++) { 
+                    // if the column got updated, do following
+                    if (columnGotUpdated[i-1]) {  
+                        act.getParameterValueSet().
+                                getParameterForSet(paramPosition++).
+                                setValue(currentRow.getColumn(i));
+                    }
+                }
+                // Don't see any timeout when inserting rows (use 0)
+                //execute the insert
+                org.apache.derby.iapi.sql.ResultSet rs = 
+                        ps.execute(act, false, true, true, 0L); 
+                rs.close();
+                rs.finish();
+
+                lcc.popStatementContext(statementContext, null);
+            } catch (StandardException t) {
+                throw closeOnTransactionError(t);
+            } finally {
+                restoreContextStack();
+            }
+        }
 	}
 
     /**
@@ -3223,6 +3348,10 @@ public abstract class EmbedResultSet extends ConnectionChild
     public void updateRow() throws SQLException {
 			synchronized (getConnectionSynchronization()) {
         checksBeforeUpdateOrDelete("updateRow", -1);
+        
+        // Check that the cursor is not positioned on insertRow
+        checkNotOnInsertRow();
+        
         setupContextStack();
         LanguageConnectionContext lcc = null;
         StatementContext statementContext = null;
@@ -3294,6 +3423,9 @@ public abstract class EmbedResultSet extends ConnectionChild
     public void deleteRow() throws SQLException {
         synchronized (getConnectionSynchronization()) {
             checksBeforeUpdateOrDelete("deleteRow", -1);
+        
+            // Check that the cursor is not positioned on insertRow
+            checkNotOnInsertRow();
 
             setupContextStack();
             //now construct the delete where current of sql
@@ -3375,6 +3507,9 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     public void cancelRowUpdates () throws SQLException {
         checksBeforeUpdateOrDelete("cancelRowUpdates", -1);
+        
+        checkNotOnInsertRow();
+        
         if (currentRowHasBeenUpdated == false) return; //nothing got updated on this row so cancelRowUpdates is a no-op in this case.
 
         for (int i=0; i < columnGotUpdated.length; i++){
@@ -3406,7 +3541,42 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                not updatable
 	 */
 	public void moveToInsertRow() throws SQLException {
-		throw Util.notImplemented();
+		// if not updatable resultset, then throw exception
+		checkUpdatableCursor("moveToInsertRow");
+
+		checkExecIfClosed("moveToInsertRow");
+
+		synchronized (getConnectionSynchronization()) {
+			try {
+				// initialize state corresponding to insertRow/updateRow impl.
+				for (int i=0; i < columnGotUpdated.length; i++) {
+					columnGotUpdated[i] = false;
+				}
+				currentRowHasBeenUpdated = false;
+
+				// Remember position
+				if (!isOnInsertRow) {
+					currentRowBeforeInsert = currentRow;
+				}
+
+				isOnInsertRow = true;
+
+				// If insertRow has not been allocated yet, get new insertRow
+				if (insertRow == null) {
+					insertRow = stmt.lcc.getExecutionContext().
+						getExecutionFactory().getValueRow(columnGotUpdated.length);
+				}
+				for (int i=1; i <= columnGotUpdated.length; i++) {
+					insertRow.setColumn(i, 
+						resultDescription.getColumnDescriptor(i).getType().getNull());
+				}
+				// Set currentRow to insertRow
+				currentRow = insertRow;
+				rowData = currentRow.getRowArray();
+			} catch (Throwable ex) {
+				handleException(ex);
+			}
+		}
 	}
 
 	/**
@@ -3420,7 +3590,36 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                not updatable
 	 */
 	public void moveToCurrentRow() throws SQLException {
-		throw Util.notImplemented();
+		// if not updatable resultset, then throw exception
+		checkUpdatableCursor("moveToCurrentRow");
+
+		checkExecIfClosed("moveToCurrentRow");
+
+		synchronized (getConnectionSynchronization()) {
+			try {
+
+				if (isOnInsertRow) {
+					// Get position previous to moveToInsertRow
+					currentRow = currentRowBeforeInsert;
+					currentRowBeforeInsert = null;
+
+					// initialize state corresponding to insertRow/updateRow impl.
+					for (int i=0; i < columnGotUpdated.length; i++) {
+						columnGotUpdated[i] = false;
+					}
+					currentRowHasBeenUpdated = false;
+
+					// Get rowData
+					if (currentRow != null) {
+						rowData = currentRow.getRowArray();
+					}
+
+					isOnInsertRow = false;
+				}
+			} catch (Throwable ex) {
+				handleException(ex);
+			}
+		}
 	}
 
     /**
@@ -3770,7 +3969,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		if ((appConn == null) || appConn.isClosed())
 			throw Util.noCurrentConnection();
 	}
-
+    
 	/**
 	 * Try to see if we can fish the SQL Statement out of the local statement.
 	 * @return null if we cannot figure out what SQL Statement is currently
@@ -3915,6 +4114,16 @@ public abstract class EmbedResultSet extends ConnectionChild
 							StandardException
 									.getSeverityFromIdentifier(SQLState.NOT_ON_FORWARD_ONLY_CURSOR));
 	}
+    
+    private void checkUpdatableCursor(String operation) throws SQLException {
+        if (getConcurrency() != JDBC20Translation.CONCUR_UPDATABLE) {
+            throw Util.generateCsSQLException(
+                    SQLState.UPDATABLE_RESULTSET_API_DISALLOWED, 
+                    operation);
+        }
+    }
+
+    
 	private boolean checkRowPosition(int position, String positionText)
 			throws SQLException {
 		// beforeFirst is only allowed on scroll cursors

@@ -3200,4 +3200,1631 @@ Positive Test34 - in autocommit mode, check that updateRow and deleteRow does no
 	{1,aa                  }
 	{2,bb                  }
 	{3,cc                  }
+Positive Test 35 - moveToInsertRow, insertRow,getXXX and moveToCurrentRow
+Positive Test 35.a - moveToInsertRow
+Positive Test 35.b - insertRow
+Positive Test 35.c - check that getXXX gets the correct values after insertRow
+Positive Test 35.d - moveToCurrentRow
+Positive Test 35.e - check that getXXX gets the correct values after moveToCurrentRow
+Positive test 36 - call moveToCurrentRow from current row
+Positive test 37 - several moveToInsertRow
+Positive test 37.a - check that getXXX gets the correct values after moveToInsertRow
+Positive test 37.b - moveToinsertRow from insertRow
+Positive test 37.c - check that getXXX gets undefined values when updateXXX has not been called yet on insertRow
+Negative Test 38 - insertRow: do not set a value to all not nullable columns
+SQL State: 23502
+Got expected exception: Column 'C41'  cannot accept a NULL value.
+Negative Test 39 - run updateRow and deleterow when positioned at insertRow
+Negative Test 39.a - run updateRow on insertRow
+SQL State: null
+Got expected exception: This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Negative Test 39.a - run deleteRow on insertRow
+SQL State: null
+Got expected exception: This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Negative test 40 - Try to insert row from currentRow
+SQL State: null
+Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Positive test 41 - try to insertRow from all posible positions
+Positive test 42 - InsertRow leaving a nullable columns = NULL
+Positive and negative tests 43 - Commit while on insertRow
+Positive test 43 - Commit while on insertRow with holdable cursor
+Negative test 43 - Commit while on insertRow with not holdable cursor
+SQL State: null
+Got expected exception: Invalid operation: result set closed
+Negative test 44 - Closed RS
+Negative test 44.a - try insertRow on closed RS
+SQL State: null
+Got expected exception: Invalid operation: result set closed
+Negative test 44.b - try moveToCurrentRow on closed RS
+SQL State: null
+Got expected exception: Invalid operation: result set closed
+Negative test 44.c - try moveToInsertRow on closed RS
+SQL State: null
+Got expected exception: Invalid operation: result set closed
+Positive test 45 - try to insert without updating all columns. All columns allow nulls or have a default value
+Positive test 46 - Rollback with AutoCommit on
+Negative test 47 - insertRow and read-only RS
+Negative test 47.a - try moveToInsertRow on read-only RS
+SQL State: null
+Got expected exception: This method should only be called on ResultSet objects that are updatable(concurrency type CONCUR_UPDATABLE).
+Negative test 47.b - try updateXXX on read-only RS
+SQL State: null
+Got expected exception: ResultSet is not updatable.
+Negative test 47.c - try insertRow on read-only RS
+SQL State: null
+Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Negative test 47.d - try moveToCurrentRow on read-only RS
+SQL State: null
+Got expected exception: This method should only be called on ResultSet objects that are updatable(concurrency type CONCUR_UPDATABLE).
+Positive test 48 - Test all updateXXX methods on all the supported sql datatypes
+Next datatype to test is SMALLINT
+  Testing updateShort on SQL type SMALLINT
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type SMALLINT
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type SMALLINT
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type SMALLINT
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type SMALLINT
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type SMALLINT
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type SMALLINT
+    Using column position as first parameter to updateString
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Using column name as first parameter to updateString
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+  Testing updateAsciiStream on SQL type SMALLINT
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type SMALLINT
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type SMALLINT
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type SMALLINT
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type SMALLINT
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type SMALLINT
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type SMALLINT
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type SMALLINT
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type SMALLINT
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type SMALLINT
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type SMALLINT
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type SMALLINT
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type SMALLINT
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type SMALLINT
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is INTEGER
+  Testing updateShort on SQL type INTEGER
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type INTEGER
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type INTEGER
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type INTEGER
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type INTEGER
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type INTEGER
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type INTEGER
+    Using column position as first parameter to updateString
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Using column name as first parameter to updateString
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+  Testing updateAsciiStream on SQL type INTEGER
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type INTEGER
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type INTEGER
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type INTEGER
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type INTEGER
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type INTEGER
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type INTEGER
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type INTEGER
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type INTEGER
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type INTEGER
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type INTEGER
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type INTEGER
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type INTEGER
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type INTEGER
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is BIGINT
+  Testing updateShort on SQL type BIGINT
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type BIGINT
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type BIGINT
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type BIGINT
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type BIGINT
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type BIGINT
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type BIGINT
+    Using column position as first parameter to updateString
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Using column name as first parameter to updateString
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+  Testing updateAsciiStream on SQL type BIGINT
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type BIGINT
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type BIGINT
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type BIGINT
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type BIGINT
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type BIGINT
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type BIGINT
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type BIGINT
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type BIGINT
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type BIGINT
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type BIGINT
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type BIGINT
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type BIGINT
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type BIGINT
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is DECIMAL(10,5)
+  Testing updateShort on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateString
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+    Using column name as first parameter to updateString
+      Got expected exception : Invalid data conversion: Parameter instance 1992                                                         is invalid for requested conversion.
+  Testing updateAsciiStream on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is REAL
+  Testing updateShort on SQL type REAL
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type REAL
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type REAL
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type REAL
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type REAL
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type REAL
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type REAL
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type REAL
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type REAL
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type REAL
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type REAL
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type REAL
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type REAL
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type REAL
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type REAL
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type REAL
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type REAL
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type REAL
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type REAL
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type REAL
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type REAL
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is DOUBLE
+  Testing updateShort on SQL type DOUBLE
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type DOUBLE
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type DOUBLE
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type DOUBLE
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type DOUBLE
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type DOUBLE
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type DOUBLE
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type DOUBLE
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type DOUBLE
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type DOUBLE
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type DOUBLE
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type DOUBLE
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type DOUBLE
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type DOUBLE
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type DOUBLE
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type DOUBLE
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type DOUBLE
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type DOUBLE
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type DOUBLE
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type DOUBLE
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type DOUBLE
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is CHAR(60)
+  Testing updateShort on SQL type CHAR(60)
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type CHAR(60)
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type CHAR(60)
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type CHAR(60)
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type CHAR(60)
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type CHAR(60)
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type CHAR(60)
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type CHAR(60)
+    Using column position as first parameter to updateAsciiStream
+    Using column name as first parameter to updateAsciiStream
+  Testing updateCharacterStream on SQL type CHAR(60)
+    Using column position as first parameter to updateCharacterStream
+    Using column name as first parameter to updateCharacterStream
+  Testing updateByte on SQL type CHAR(60)
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type CHAR(60)
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type CHAR(60)
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type CHAR(60)
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type CHAR(60)
+    Using column position as first parameter to updateDate
+    Using column name as first parameter to updateDate
+  Testing updateTime on SQL type CHAR(60)
+    Using column position as first parameter to updateTime
+    Using column name as first parameter to updateTime
+  Testing updateTimestamp on SQL type CHAR(60)
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type CHAR(60)
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type CHAR(60)
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type CHAR(60)
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type CHAR(60)
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type CHAR(60)
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is VARCHAR(60)
+  Testing updateShort on SQL type VARCHAR(60)
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type VARCHAR(60)
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type VARCHAR(60)
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type VARCHAR(60)
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type VARCHAR(60)
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type VARCHAR(60)
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type VARCHAR(60)
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type VARCHAR(60)
+    Using column position as first parameter to updateAsciiStream
+    Using column name as first parameter to updateAsciiStream
+  Testing updateCharacterStream on SQL type VARCHAR(60)
+    Using column position as first parameter to updateCharacterStream
+    Using column name as first parameter to updateCharacterStream
+  Testing updateByte on SQL type VARCHAR(60)
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type VARCHAR(60)
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type VARCHAR(60)
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type VARCHAR(60)
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type VARCHAR(60)
+    Using column position as first parameter to updateDate
+    Using column name as first parameter to updateDate
+  Testing updateTime on SQL type VARCHAR(60)
+    Using column position as first parameter to updateTime
+    Using column name as first parameter to updateTime
+  Testing updateTimestamp on SQL type VARCHAR(60)
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type VARCHAR(60)
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type VARCHAR(60)
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type VARCHAR(60)
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type VARCHAR(60)
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type VARCHAR(60)
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is LONG VARCHAR
+  Testing updateShort on SQL type LONG VARCHAR
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type LONG VARCHAR
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type LONG VARCHAR
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type LONG VARCHAR
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type LONG VARCHAR
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type LONG VARCHAR
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type LONG VARCHAR
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type LONG VARCHAR
+    Using column position as first parameter to updateAsciiStream
+    Using column name as first parameter to updateAsciiStream
+  Testing updateCharacterStream on SQL type LONG VARCHAR
+    Using column position as first parameter to updateCharacterStream
+    Using column name as first parameter to updateCharacterStream
+  Testing updateByte on SQL type LONG VARCHAR
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type LONG VARCHAR
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type LONG VARCHAR
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type LONG VARCHAR
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type LONG VARCHAR
+    Using column position as first parameter to updateDate
+    Using column name as first parameter to updateDate
+  Testing updateTime on SQL type LONG VARCHAR
+    Using column position as first parameter to updateTime
+    Using column name as first parameter to updateTime
+  Testing updateTimestamp on SQL type LONG VARCHAR
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type LONG VARCHAR
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type LONG VARCHAR
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type LONG VARCHAR
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type LONG VARCHAR
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type LONG VARCHAR
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is CHAR(2) FOR BIT DATA
+  Testing updateShort on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+  Testing updateInt on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+  Testing updateLong on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+  Testing updateBigDecimal on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+  Testing updateFloat on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+  Testing updateDouble on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+  Testing updateString on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateString
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateString
+      Got expected exception : Illegal Conversion
+  Testing updateAsciiStream on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+  Testing updateBytes on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBinaryStream
+    Using column name as first parameter to updateBinaryStream
+  Testing updateClob on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+  Testing updateNull on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is VARCHAR(2) FOR BIT DATA
+  Testing updateShort on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+  Testing updateInt on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+  Testing updateLong on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+  Testing updateBigDecimal on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+  Testing updateFloat on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+  Testing updateDouble on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+  Testing updateString on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateString
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateString
+      Got expected exception : Illegal Conversion
+  Testing updateAsciiStream on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+  Testing updateBytes on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBinaryStream
+    Using column name as first parameter to updateBinaryStream
+  Testing updateClob on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+  Testing updateNull on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is LONG VARCHAR FOR BIT DATA
+  Testing updateShort on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+  Testing updateInt on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+  Testing updateLong on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+  Testing updateBigDecimal on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+  Testing updateFloat on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+  Testing updateDouble on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+  Testing updateString on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateString
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateString
+      Got expected exception : Illegal Conversion
+  Testing updateAsciiStream on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+  Testing updateBytes on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateBinaryStream
+    Using column name as first parameter to updateBinaryStream
+  Testing updateClob on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+  Testing updateNull on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is CLOB(1k)
+  Testing updateShort on SQL type CLOB(1k)
+    Using column position as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+  Testing updateInt on SQL type CLOB(1k)
+    Using column position as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+  Testing updateLong on SQL type CLOB(1k)
+    Using column position as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+  Testing updateBigDecimal on SQL type CLOB(1k)
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+  Testing updateFloat on SQL type CLOB(1k)
+    Using column position as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+  Testing updateDouble on SQL type CLOB(1k)
+    Using column position as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+  Testing updateString on SQL type CLOB(1k)
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type CLOB(1k)
+    Using column position as first parameter to updateAsciiStream
+    Using column name as first parameter to updateAsciiStream
+  Testing updateCharacterStream on SQL type CLOB(1k)
+    Using column position as first parameter to updateCharacterStream
+    Using column name as first parameter to updateCharacterStream
+  Testing updateByte on SQL type CLOB(1k)
+    Using column position as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+  Testing updateBytes on SQL type CLOB(1k)
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type CLOB(1k)
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type CLOB(1k)
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type CLOB(1k)
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type CLOB(1k)
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type CLOB(1k)
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type CLOB(1k)
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type CLOB(1k)
+    Using column position as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+  Testing updateNull on SQL type CLOB(1k)
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type CLOB(1k)
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type CLOB(1k)
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is DATE
+  Testing updateShort on SQL type DATE
+    Using column position as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+  Testing updateInt on SQL type DATE
+    Using column position as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+  Testing updateLong on SQL type DATE
+    Using column position as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+  Testing updateBigDecimal on SQL type DATE
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+  Testing updateFloat on SQL type DATE
+    Using column position as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+  Testing updateDouble on SQL type DATE
+    Using column position as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+  Testing updateString on SQL type DATE
+    Using column position as first parameter to updateString
+      Got expected exception : null
+    Using column name as first parameter to updateString
+      Got expected exception : null
+  Testing updateAsciiStream on SQL type DATE
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type DATE
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type DATE
+    Using column position as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+  Testing updateBytes on SQL type DATE
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type DATE
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type DATE
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type DATE
+    Using column position as first parameter to updateDate
+    Using column name as first parameter to updateDate
+  Testing updateTime on SQL type DATE
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type DATE
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type DATE
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type DATE
+    Using column position as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+  Testing updateNull on SQL type DATE
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type DATE
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type DATE
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is TIME
+  Testing updateShort on SQL type TIME
+    Using column position as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+  Testing updateInt on SQL type TIME
+    Using column position as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+  Testing updateLong on SQL type TIME
+    Using column position as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+  Testing updateBigDecimal on SQL type TIME
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+  Testing updateFloat on SQL type TIME
+    Using column position as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+  Testing updateDouble on SQL type TIME
+    Using column position as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+  Testing updateString on SQL type TIME
+    Using column position as first parameter to updateString
+      Got expected exception : null
+    Using column name as first parameter to updateString
+      Got expected exception : null
+  Testing updateAsciiStream on SQL type TIME
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type TIME
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type TIME
+    Using column position as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+  Testing updateBytes on SQL type TIME
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type TIME
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type TIME
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type TIME
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type TIME
+    Using column position as first parameter to updateTime
+    Using column name as first parameter to updateTime
+  Testing updateTimestamp on SQL type TIME
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type TIME
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type TIME
+    Using column position as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+  Testing updateNull on SQL type TIME
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type TIME
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type TIME
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is TIMESTAMP
+  Testing updateShort on SQL type TIMESTAMP
+    Using column position as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+  Testing updateInt on SQL type TIMESTAMP
+    Using column position as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+  Testing updateLong on SQL type TIMESTAMP
+    Using column position as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+  Testing updateBigDecimal on SQL type TIMESTAMP
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+  Testing updateFloat on SQL type TIMESTAMP
+    Using column position as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+  Testing updateDouble on SQL type TIMESTAMP
+    Using column position as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+  Testing updateString on SQL type TIMESTAMP
+    Using column position as first parameter to updateString
+      Got expected exception : Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff
+    Using column name as first parameter to updateString
+      Got expected exception : Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff
+  Testing updateAsciiStream on SQL type TIMESTAMP
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type TIMESTAMP
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type TIMESTAMP
+    Using column position as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+  Testing updateBytes on SQL type TIMESTAMP
+    Using column position as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBytes
+      Got expected exception : Illegal Conversion
+  Testing updateBinaryStream on SQL type TIMESTAMP
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : Illegal Conversion
+  Testing updateClob on SQL type TIMESTAMP
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type TIMESTAMP
+    Using column position as first parameter to updateDate
+    Using column name as first parameter to updateDate
+  Testing updateTime on SQL type TIMESTAMP
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type TIMESTAMP
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type TIMESTAMP
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type TIMESTAMP
+    Using column position as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+  Testing updateNull on SQL type TIMESTAMP
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type TIMESTAMP
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type TIMESTAMP
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+Next datatype to test is BLOB(1k)
+  Testing updateShort on SQL type BLOB(1k)
+    Using column position as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateShort
+      Got expected exception : Illegal Conversion
+  Testing updateInt on SQL type BLOB(1k)
+    Using column position as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateInt
+      Got expected exception : Illegal Conversion
+  Testing updateLong on SQL type BLOB(1k)
+    Using column position as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateLong
+      Got expected exception : Illegal Conversion
+  Testing updateBigDecimal on SQL type BLOB(1k)
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : Illegal Conversion
+  Testing updateFloat on SQL type BLOB(1k)
+    Using column position as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateFloat
+      Got expected exception : Illegal Conversion
+  Testing updateDouble on SQL type BLOB(1k)
+    Using column position as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDouble
+      Got expected exception : Illegal Conversion
+  Testing updateString on SQL type BLOB(1k)
+    Using column position as first parameter to updateString
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateString
+      Got expected exception : Illegal Conversion
+  Testing updateAsciiStream on SQL type BLOB(1k)
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : Illegal Conversion
+  Testing updateCharacterStream on SQL type BLOB(1k)
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : Illegal Conversion
+  Testing updateByte on SQL type BLOB(1k)
+    Using column position as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateByte
+      Got expected exception : Illegal Conversion
+  Testing updateBytes on SQL type BLOB(1k)
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type BLOB(1k)
+    Using column position as first parameter to updateBinaryStream
+    Using column name as first parameter to updateBinaryStream
+  Testing updateClob on SQL type BLOB(1k)
+    Using column position as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateClob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateDate on SQL type BLOB(1k)
+    Using column position as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateDate
+      Got expected exception : Illegal Conversion
+  Testing updateTime on SQL type BLOB(1k)
+    Using column position as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTime
+      Got expected exception : Illegal Conversion
+  Testing updateTimestamp on SQL type BLOB(1k)
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : Illegal Conversion
+  Testing updateBlob on SQL type BLOB(1k)
+    Using column position as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateBlob
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateBoolean on SQL type BLOB(1k)
+    Using column position as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+    Using column name as first parameter to updateBoolean
+      Got expected exception : Illegal Conversion
+  Testing updateNull on SQL type BLOB(1k)
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type BLOB(1k)
+    Using column position as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateArray
+      Got expected exception : JDBC 3 method called - not yet supported
+  Testing updateRef on SQL type BLOB(1k)
+    Using column position as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+    Using column name as first parameter to updateRef
+      Got expected exception : JDBC 3 method called - not yet supported
+	 C41,C42
+	 --- ---
+	{1,1}
+	{2,2}
+	{3,3}
+	{4,4}
+	{1000,1000}
+	{101,101}
+	{102,102}
+	{103,103}
+	{104,104}
+	{2000,2000}
+	{7,null}
+	{8,8}
+	 C51,C52
+	 --- ---
+	{1,1}
+	{2,2}
+	{3,3}
+	{0,null}
 Finished testing updateable resultsets

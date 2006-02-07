@@ -2865,4 +2865,1482 @@ Positive Test34 - in autocommit mode, check that updateRow and deleteRow does no
 	{1,aa                  }
 	{2,bb                  }
 	{3,cc                  }
+Positive Test 35 - moveToInsertRow, insertRow,getXXX and moveToCurrentRow
+Positive Test 35.a - moveToInsertRow
+Positive Test 35.b - insertRow
+Positive Test 35.c - check that getXXX gets the correct values after insertRow
+Positive Test 35.d - moveToCurrentRow
+Positive Test 35.e - check that getXXX gets the correct values after moveToCurrentRow
+Positive test 36 - call moveToCurrentRow from current row
+Positive test 37 - several moveToInsertRow
+Positive test 37.a - check that getXXX gets the correct values after moveToInsertRow
+Positive test 37.b - moveToinsertRow from insertRow
+Positive test 37.c - check that getXXX gets undefined values when updateXXX has not been called yet on insertRow
+Negative Test 38 - insertRow: do not set a value to all not nullable columns
+SQL State: 23502
+Got expected exception: Column 'C41'  cannot accept a NULL value.
+Negative Test 39 - run updateRow and deleterow when positioned at insertRow
+Negative Test 39.a - run updateRow on insertRow
+SQL State: 24000
+Got expected exception: Invalid cursor state - no current row.
+Negative Test 39.a - run deleteRow on insertRow
+SQL State: 24000
+Got expected exception: Invalid cursor state - no current row.
+Negative test 40 - Try to insert row from currentRow
+SQL State: XJ086
+Got expected exception: This method cannot be invoked unless the cursor is positioned on the insert row.
+Positive test 41 - try to insertRow from all posible positions
+Positive test 42 - InsertRow leaving a nullable columns = NULL
+Positive and negative tests 43 - Commit while on insertRow
+This exception is expected with jdk 1.3
+null
+Positive test 43 - Commit while on insertRow with holdable cursor
+This exception is expected with jdk 1.3
+null
+Negative test 43 - Commit while on insertRow with not holdable cursor
+Negative test 44 - Closed RS
+Negative test 44.a - try insertRow on closed RS
+SQL State: XCL16
+Got expected exception: ResultSet not open. Operation 'insertRow' not permitted. Verify that autocommit is OFF.
+Negative test 44.b - try moveToCurrentRow on closed RS
+SQL State: XCL16
+Got expected exception: ResultSet not open. Operation 'moveToCurrentRow' not permitted. Verify that autocommit is OFF.
+Negative test 44.c - try moveToInsertRow on closed RS
+SQL State: XCL16
+Got expected exception: ResultSet not open. Operation 'moveToInsertRow' not permitted. Verify that autocommit is OFF.
+Positive test 45 - try to insert without updating all columns. All columns allow nulls or have a default value
+Positive test 46 - Rollback with AutoCommit on
+Negative test 47 - insertRow and read-only RS
+Negative test 47.a - try moveToInsertRow on read-only RS
+SQL State: XJ083
+Got expected exception: 'moveToInsertRow' not allowed because the ResultSet is not an updatable ResultSet. 
+Negative test 47.b - try updateXXX on read-only RS
+SQL State: XJ083
+Got expected exception: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+Negative test 47.c - try insertRow on read-only RS
+SQL State: XJ083
+Got expected exception: 'insertRow' not allowed because the ResultSet is not an updatable ResultSet. 
+Negative test 47.d - try moveToCurrentRow on read-only RS
+SQL State: XJ083
+Got expected exception: 'moveToCurrentRow' not allowed because the ResultSet is not an updatable ResultSet. 
+Positive test 48 - Test all updateXXX methods on all the supported sql datatypes
+Next datatype to test is SMALLINT
+  Testing updateShort on SQL type SMALLINT
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type SMALLINT
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type SMALLINT
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type SMALLINT
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type SMALLINT
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type SMALLINT
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type SMALLINT
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type SMALLINT
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type SMALLINT
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type SMALLINT
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type SMALLINT
+    Using column position as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'SMALLINT'.
+    Using column name as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'SMALLINT'.
+  Testing updateBinaryStream on SQL type SMALLINT
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'SMALLINT' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type SMALLINT
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type SMALLINT
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'SMALLINT'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'SMALLINT'.
+  Testing updateTime on SQL type SMALLINT
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'SMALLINT'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'SMALLINT'.
+  Testing updateTimestamp on SQL type SMALLINT
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'SMALLINT'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'SMALLINT'.
+  Testing updateBlob on SQL type SMALLINT
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type SMALLINT
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type SMALLINT
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type SMALLINT
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type SMALLINT
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is INTEGER
+  Testing updateShort on SQL type INTEGER
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type INTEGER
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type INTEGER
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type INTEGER
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type INTEGER
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type INTEGER
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type INTEGER
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type INTEGER
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type INTEGER
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type INTEGER
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type INTEGER
+    Using column position as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'.
+    Using column name as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'.
+  Testing updateBinaryStream on SQL type INTEGER
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type INTEGER
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type INTEGER
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'INTEGER'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'INTEGER'.
+  Testing updateTime on SQL type INTEGER
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'INTEGER'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'INTEGER'.
+  Testing updateTimestamp on SQL type INTEGER
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'INTEGER'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'INTEGER'.
+  Testing updateBlob on SQL type INTEGER
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type INTEGER
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type INTEGER
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type INTEGER
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type INTEGER
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is BIGINT
+  Testing updateShort on SQL type BIGINT
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type BIGINT
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type BIGINT
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type BIGINT
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type BIGINT
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type BIGINT
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type BIGINT
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type BIGINT
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type BIGINT
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type BIGINT
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type BIGINT
+    Using column position as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'BIGINT'.
+    Using column name as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'BIGINT'.
+  Testing updateBinaryStream on SQL type BIGINT
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'BIGINT' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type BIGINT
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type BIGINT
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BIGINT'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BIGINT'.
+  Testing updateTime on SQL type BIGINT
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'BIGINT'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'BIGINT'.
+  Testing updateTimestamp on SQL type BIGINT
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BIGINT'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BIGINT'.
+  Testing updateBlob on SQL type BIGINT
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type BIGINT
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type BIGINT
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type BIGINT
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type BIGINT
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is DECIMAL(10,5)
+  Testing updateShort on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DECIMAL'.
+    Using column name as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DECIMAL'.
+  Testing updateBinaryStream on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'DECIMAL' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DECIMAL'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DECIMAL'.
+  Testing updateTime on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'DECIMAL'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'DECIMAL'.
+  Testing updateTimestamp on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DECIMAL'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DECIMAL'.
+  Testing updateBlob on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type DECIMAL(10,5)
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is REAL
+  Testing updateShort on SQL type REAL
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type REAL
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type REAL
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type REAL
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type REAL
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type REAL
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type REAL
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type REAL
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type REAL
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type REAL
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type REAL
+    Using column position as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'REAL'.
+    Using column name as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'REAL'.
+  Testing updateBinaryStream on SQL type REAL
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'REAL' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type REAL
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type REAL
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'REAL'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'REAL'.
+  Testing updateTime on SQL type REAL
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'REAL'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'REAL'.
+  Testing updateTimestamp on SQL type REAL
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'REAL'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'REAL'.
+  Testing updateBlob on SQL type REAL
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type REAL
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type REAL
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type REAL
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type REAL
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is DOUBLE
+  Testing updateShort on SQL type DOUBLE
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type DOUBLE
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type DOUBLE
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type DOUBLE
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type DOUBLE
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type DOUBLE
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type DOUBLE
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type DOUBLE
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type DOUBLE
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type DOUBLE
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type DOUBLE
+    Using column position as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DOUBLE'.
+    Using column name as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DOUBLE'.
+  Testing updateBinaryStream on SQL type DOUBLE
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'DOUBLE' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type DOUBLE
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type DOUBLE
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DOUBLE'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DOUBLE'.
+  Testing updateTime on SQL type DOUBLE
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'DOUBLE'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'DOUBLE'.
+  Testing updateTimestamp on SQL type DOUBLE
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DOUBLE'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DOUBLE'.
+  Testing updateBlob on SQL type DOUBLE
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type DOUBLE
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type DOUBLE
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type DOUBLE
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type DOUBLE
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is CHAR(60)
+  Testing updateShort on SQL type CHAR(60)
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type CHAR(60)
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type CHAR(60)
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type CHAR(60)
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type CHAR(60)
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type CHAR(60)
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type CHAR(60)
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type CHAR(60)
+    Using column position as first parameter to updateAsciiStream
+    Using column name as first parameter to updateAsciiStream
+  Testing updateCharacterStream on SQL type CHAR(60)
+    Using column position as first parameter to updateCharacterStream
+    Using column name as first parameter to updateCharacterStream
+  Testing updateByte on SQL type CHAR(60)
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type CHAR(60)
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type CHAR(60)
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'CHAR' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type CHAR(60)
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type CHAR(60)
+    Using column position as first parameter to updateDate
+    Using column name as first parameter to updateDate
+  Testing updateTime on SQL type CHAR(60)
+    Using column position as first parameter to updateTime
+    Using column name as first parameter to updateTime
+  Testing updateTimestamp on SQL type CHAR(60)
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type CHAR(60)
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type CHAR(60)
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type CHAR(60)
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type CHAR(60)
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type CHAR(60)
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is VARCHAR(60)
+  Testing updateShort on SQL type VARCHAR(60)
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type VARCHAR(60)
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type VARCHAR(60)
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type VARCHAR(60)
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type VARCHAR(60)
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type VARCHAR(60)
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type VARCHAR(60)
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type VARCHAR(60)
+    Using column position as first parameter to updateAsciiStream
+    Using column name as first parameter to updateAsciiStream
+  Testing updateCharacterStream on SQL type VARCHAR(60)
+    Using column position as first parameter to updateCharacterStream
+    Using column name as first parameter to updateCharacterStream
+  Testing updateByte on SQL type VARCHAR(60)
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type VARCHAR(60)
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type VARCHAR(60)
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type VARCHAR(60)
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type VARCHAR(60)
+    Using column position as first parameter to updateDate
+    Using column name as first parameter to updateDate
+  Testing updateTime on SQL type VARCHAR(60)
+    Using column position as first parameter to updateTime
+    Using column name as first parameter to updateTime
+  Testing updateTimestamp on SQL type VARCHAR(60)
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type VARCHAR(60)
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type VARCHAR(60)
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type VARCHAR(60)
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type VARCHAR(60)
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type VARCHAR(60)
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is LONG VARCHAR
+  Testing updateShort on SQL type LONG VARCHAR
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type LONG VARCHAR
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type LONG VARCHAR
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type LONG VARCHAR
+    Using column position as first parameter to updateBigDecimal
+    Using column name as first parameter to updateBigDecimal
+  Testing updateFloat on SQL type LONG VARCHAR
+    Using column position as first parameter to updateFloat
+    Using column name as first parameter to updateFloat
+  Testing updateDouble on SQL type LONG VARCHAR
+    Using column position as first parameter to updateDouble
+    Using column name as first parameter to updateDouble
+  Testing updateString on SQL type LONG VARCHAR
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type LONG VARCHAR
+    Using column position as first parameter to updateAsciiStream
+    Using column name as first parameter to updateAsciiStream
+  Testing updateCharacterStream on SQL type LONG VARCHAR
+    Using column position as first parameter to updateCharacterStream
+    Using column name as first parameter to updateCharacterStream
+  Testing updateByte on SQL type LONG VARCHAR
+    Using column position as first parameter to updateByte
+    Using column name as first parameter to updateByte
+  Testing updateBytes on SQL type LONG VARCHAR
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type LONG VARCHAR
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type LONG VARCHAR
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type LONG VARCHAR
+    Using column position as first parameter to updateDate
+    Using column name as first parameter to updateDate
+  Testing updateTime on SQL type LONG VARCHAR
+    Using column position as first parameter to updateTime
+    Using column name as first parameter to updateTime
+  Testing updateTimestamp on SQL type LONG VARCHAR
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type LONG VARCHAR
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type LONG VARCHAR
+    Using column position as first parameter to updateBoolean
+    Using column name as first parameter to updateBoolean
+  Testing updateNull on SQL type LONG VARCHAR
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type LONG VARCHAR
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type LONG VARCHAR
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is CHAR(2) FOR BIT DATA
+  Testing updateShort on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateInt on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateLong on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateBigDecimal on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateFloat on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateDouble on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateString on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateString
+      Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateString
+      Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateAsciiStream on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'CHAR () FOR BIT DATA' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateBytes on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBinaryStream
+    Using column name as first parameter to updateBinaryStream
+  Testing updateClob on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateTime on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateTimestamp on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateBlob on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'CHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'CHAR () FOR BIT DATA'.
+  Testing updateNull on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type CHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is VARCHAR(2) FOR BIT DATA
+  Testing updateShort on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateInt on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateLong on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateBigDecimal on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateFloat on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateDouble on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateString on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateString
+      Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateString
+      Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateAsciiStream on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'VARCHAR () FOR BIT DATA' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateBytes on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBinaryStream
+    Using column name as first parameter to updateBinaryStream
+  Testing updateClob on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateTime on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateTimestamp on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateBlob on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'VARCHAR () FOR BIT DATA'.
+    Using column name as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'VARCHAR () FOR BIT DATA'.
+  Testing updateNull on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type VARCHAR(2) FOR BIT DATA
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is LONG VARCHAR FOR BIT DATA
+  Testing updateShort on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateInt on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateLong on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateBigDecimal on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateFloat on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateDouble on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateString on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateString
+      Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateString
+      Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateAsciiStream on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'LONG VARCHAR FOR BIT DATA' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateBytes on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateBinaryStream
+    Using column name as first parameter to updateBinaryStream
+  Testing updateClob on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateTime on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateTimestamp on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateBlob on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+    Using column name as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'LONG VARCHAR FOR BIT DATA'.
+  Testing updateNull on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type LONG VARCHAR FOR BIT DATA
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is CLOB(1k)
+  Testing updateShort on SQL type CLOB(1k)
+    Using column position as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'CLOB'.
+  Testing updateInt on SQL type CLOB(1k)
+    Using column position as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'CLOB'.
+  Testing updateLong on SQL type CLOB(1k)
+    Using column position as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'CLOB'.
+  Testing updateBigDecimal on SQL type CLOB(1k)
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'CLOB'.
+  Testing updateFloat on SQL type CLOB(1k)
+    Using column position as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'CLOB'.
+  Testing updateDouble on SQL type CLOB(1k)
+    Using column position as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'CLOB'.
+  Testing updateString on SQL type CLOB(1k)
+    Using column position as first parameter to updateString
+    Using column name as first parameter to updateString
+  Testing updateAsciiStream on SQL type CLOB(1k)
+    Using column position as first parameter to updateAsciiStream
+    Using column name as first parameter to updateAsciiStream
+  Testing updateCharacterStream on SQL type CLOB(1k)
+    Using column position as first parameter to updateCharacterStream
+    Using column name as first parameter to updateCharacterStream
+  Testing updateByte on SQL type CLOB(1k)
+    Using column position as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'CLOB'.
+  Testing updateBytes on SQL type CLOB(1k)
+    Using column position as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'CLOB'.
+  Testing updateBinaryStream on SQL type CLOB(1k)
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'CLOB' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'CLOB' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type CLOB(1k)
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type CLOB(1k)
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'CLOB'.
+  Testing updateTime on SQL type CLOB(1k)
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'CLOB'.
+  Testing updateTimestamp on SQL type CLOB(1k)
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CLOB'.
+  Testing updateBlob on SQL type CLOB(1k)
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type CLOB(1k)
+    Using column position as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'CLOB'.
+    Using column name as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'CLOB'.
+  Testing updateNull on SQL type CLOB(1k)
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type CLOB(1k)
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type CLOB(1k)
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is DATE
+  Testing updateShort on SQL type DATE
+    Using column position as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'DATE'.
+    Using column name as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'DATE'.
+  Testing updateInt on SQL type DATE
+    Using column position as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'DATE'.
+    Using column name as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'DATE'.
+  Testing updateLong on SQL type DATE
+    Using column position as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'DATE'.
+    Using column name as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'DATE'.
+  Testing updateBigDecimal on SQL type DATE
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'DATE'.
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'DATE'.
+  Testing updateFloat on SQL type DATE
+    Using column position as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'DATE'.
+    Using column name as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'DATE'.
+  Testing updateDouble on SQL type DATE
+    Using column position as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'DATE'.
+    Using column name as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'DATE'.
+  Testing updateString on SQL type DATE
+    Using column position as first parameter to updateString
+      Got expected exception : The syntax of the string representation of a datetime value is incorrect.
+    Using column name as first parameter to updateString
+      Got expected exception : The syntax of the string representation of a datetime value is incorrect.
+  Testing updateAsciiStream on SQL type DATE
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type DATE
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type DATE
+    Using column position as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'DATE'.
+    Using column name as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'DATE'.
+  Testing updateBytes on SQL type DATE
+    Using column position as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DATE'.
+    Using column name as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'DATE'.
+  Testing updateBinaryStream on SQL type DATE
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'DATE' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type DATE
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type DATE
+    Using column position as first parameter to updateDate
+    Using column name as first parameter to updateDate
+  Testing updateTime on SQL type DATE
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'DATE'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'DATE'.
+  Testing updateTimestamp on SQL type DATE
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type DATE
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type DATE
+    Using column position as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'DATE'.
+    Using column name as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'DATE'.
+  Testing updateNull on SQL type DATE
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type DATE
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type DATE
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is TIME
+  Testing updateShort on SQL type TIME
+    Using column position as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'TIME'.
+    Using column name as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'TIME'.
+  Testing updateInt on SQL type TIME
+    Using column position as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'TIME'.
+    Using column name as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'TIME'.
+  Testing updateLong on SQL type TIME
+    Using column position as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'TIME'.
+    Using column name as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'TIME'.
+  Testing updateBigDecimal on SQL type TIME
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'TIME'.
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'TIME'.
+  Testing updateFloat on SQL type TIME
+    Using column position as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'TIME'.
+    Using column name as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'TIME'.
+  Testing updateDouble on SQL type TIME
+    Using column position as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'TIME'.
+    Using column name as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'TIME'.
+  Testing updateString on SQL type TIME
+    Using column position as first parameter to updateString
+      Got expected exception : The syntax of the string representation of a datetime value is incorrect.
+    Using column name as first parameter to updateString
+      Got expected exception : The syntax of the string representation of a datetime value is incorrect.
+  Testing updateAsciiStream on SQL type TIME
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type TIME
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type TIME
+    Using column position as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIME'.
+    Using column name as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIME'.
+  Testing updateBytes on SQL type TIME
+    Using column position as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'TIME'.
+    Using column name as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'TIME'.
+  Testing updateBinaryStream on SQL type TIME
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'TIME' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type TIME
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type TIME
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'TIME'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'TIME'.
+  Testing updateTime on SQL type TIME
+    Using column position as first parameter to updateTime
+    Using column name as first parameter to updateTime
+  Testing updateTimestamp on SQL type TIME
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type TIME
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type TIME
+    Using column position as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'TIME'.
+    Using column name as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'TIME'.
+  Testing updateNull on SQL type TIME
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type TIME
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type TIME
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is TIMESTAMP
+  Testing updateShort on SQL type TIMESTAMP
+    Using column position as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'TIMESTAMP'.
+    Using column name as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'TIMESTAMP'.
+  Testing updateInt on SQL type TIMESTAMP
+    Using column position as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'TIMESTAMP'.
+    Using column name as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'TIMESTAMP'.
+  Testing updateLong on SQL type TIMESTAMP
+    Using column position as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'TIMESTAMP'.
+    Using column name as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'TIMESTAMP'.
+  Testing updateBigDecimal on SQL type TIMESTAMP
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'TIMESTAMP'.
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'TIMESTAMP'.
+  Testing updateFloat on SQL type TIMESTAMP
+    Using column position as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'TIMESTAMP'.
+    Using column name as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'TIMESTAMP'.
+  Testing updateDouble on SQL type TIMESTAMP
+    Using column position as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'TIMESTAMP'.
+    Using column name as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'TIMESTAMP'.
+  Testing updateString on SQL type TIMESTAMP
+    Using column position as first parameter to updateString
+      Got expected exception : The syntax of the string representation of a datetime value is incorrect.
+    Using column name as first parameter to updateString
+      Got expected exception : The syntax of the string representation of a datetime value is incorrect.
+  Testing updateAsciiStream on SQL type TIMESTAMP
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type TIMESTAMP
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type TIMESTAMP
+    Using column position as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIMESTAMP'.
+    Using column name as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIMESTAMP'.
+  Testing updateBytes on SQL type TIMESTAMP
+    Using column position as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'TIMESTAMP'.
+    Using column name as first parameter to updateBytes
+      Got expected exception : An attempt was made to put a data value of type 'byte[]' into a data value of type 'TIMESTAMP'.
+  Testing updateBinaryStream on SQL type TIMESTAMP
+    Using column position as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateBinaryStream
+      Got expected exception : An attempt was made to get a data value of type 'TIMESTAMP' from a data value of type 'java.io.InputStream'.
+  Testing updateClob on SQL type TIMESTAMP
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type TIMESTAMP
+    Using column position as first parameter to updateDate
+    Using column name as first parameter to updateDate
+  Testing updateTime on SQL type TIMESTAMP
+    Using column position as first parameter to updateTime
+    Using column name as first parameter to updateTime
+  Testing updateTimestamp on SQL type TIMESTAMP
+    Using column position as first parameter to updateTimestamp
+    Using column name as first parameter to updateTimestamp
+  Testing updateBlob on SQL type TIMESTAMP
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type TIMESTAMP
+    Using column position as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'TIMESTAMP'.
+    Using column name as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'TIMESTAMP'.
+  Testing updateNull on SQL type TIMESTAMP
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type TIMESTAMP
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type TIMESTAMP
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+Next datatype to test is BLOB(1k)
+  Testing updateShort on SQL type BLOB(1k)
+    Using column position as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateShort
+      Got expected exception : An attempt was made to put a data value of type 'short' into a data value of type 'BLOB'.
+  Testing updateInt on SQL type BLOB(1k)
+    Using column position as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateInt
+      Got expected exception : An attempt was made to put a data value of type 'int' into a data value of type 'BLOB'.
+  Testing updateLong on SQL type BLOB(1k)
+    Using column position as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateLong
+      Got expected exception : An attempt was made to put a data value of type 'long' into a data value of type 'BLOB'.
+  Testing updateBigDecimal on SQL type BLOB(1k)
+    Using column position as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateBigDecimal
+      Got expected exception : An attempt was made to put a data value of type 'java.math.BigDecimal' into a data value of type 'BLOB'.
+  Testing updateFloat on SQL type BLOB(1k)
+    Using column position as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateFloat
+      Got expected exception : An attempt was made to put a data value of type 'float' into a data value of type 'BLOB'.
+  Testing updateDouble on SQL type BLOB(1k)
+    Using column position as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateDouble
+      Got expected exception : An attempt was made to put a data value of type 'double' into a data value of type 'BLOB'.
+  Testing updateString on SQL type BLOB(1k)
+    Using column position as first parameter to updateString
+      Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateString
+      Got expected exception : An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'BLOB'.
+  Testing updateAsciiStream on SQL type BLOB(1k)
+    Using column position as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'BLOB' from a data value of type 'java.io.InputStream'.
+    Using column name as first parameter to updateAsciiStream
+      Got expected exception : An attempt was made to get a data value of type 'BLOB' from a data value of type 'java.io.InputStream'.
+  Testing updateCharacterStream on SQL type BLOB(1k)
+    Using column position as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'BLOB' from a data value of type 'java.io.Reader'.
+    Using column name as first parameter to updateCharacterStream
+      Got expected exception : An attempt was made to get a data value of type 'BLOB' from a data value of type 'java.io.Reader'.
+  Testing updateByte on SQL type BLOB(1k)
+    Using column position as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateByte
+      Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BLOB'.
+  Testing updateBytes on SQL type BLOB(1k)
+    Using column position as first parameter to updateBytes
+    Using column name as first parameter to updateBytes
+  Testing updateBinaryStream on SQL type BLOB(1k)
+    Using column position as first parameter to updateBinaryStream
+    Using column name as first parameter to updateBinaryStream
+  Testing updateClob on SQL type BLOB(1k)
+    Using column position as first parameter to updateClob
+    Using column name as first parameter to updateClob
+  Testing updateDate on SQL type BLOB(1k)
+    Using column position as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateDate
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BLOB'.
+  Testing updateTime on SQL type BLOB(1k)
+    Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'BLOB'.
+  Testing updateTimestamp on SQL type BLOB(1k)
+    Using column position as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateTimestamp
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BLOB'.
+  Testing updateBlob on SQL type BLOB(1k)
+    Using column position as first parameter to updateBlob
+    Using column name as first parameter to updateBlob
+  Testing updateBoolean on SQL type BLOB(1k)
+    Using column position as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'BLOB'.
+    Using column name as first parameter to updateBoolean
+      Got expected exception : An attempt was made to put a data value of type 'boolean' into a data value of type 'BLOB'.
+  Testing updateNull on SQL type BLOB(1k)
+    Using column position as first parameter to updateNull
+    Using column name as first parameter to updateNull
+  Testing updateArray on SQL type BLOB(1k)
+    Using column position as first parameter to updateArray
+    Using column name as first parameter to updateArray
+  Testing updateRef on SQL type BLOB(1k)
+    Using column position as first parameter to updateRef
+    Using column name as first parameter to updateRef
+	 C41,C42
+	 --- ---
+	{1,1}
+	{2,2}
+	{3,3}
+	{4,4}
+	{1000,1000}
+	{101,101}
+	{102,102}
+	{103,103}
+	{104,104}
+	{2000,2000}
+	{7,null}
+	{8,8}
+	{82,82}
+	 C51,C52
+	 --- ---
+	{1,1}
+	{2,2}
+	{3,3}
+	{0,null}
 Finished testing updateable resultsets
