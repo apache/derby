@@ -1340,7 +1340,7 @@ innerscan:
 				// go from position (the last cached item in the holder array
 				// to 0 (the first).  Otherwise, if we go from 0 to
 				// position, some other thread may come in and shrink items
-				// which is between 0 and position.  Since a shrink move all
+				// which are between 0 and position.  Since a shrink moves all
 				// items up, we may skip some items without cleaning.
 				for ( ;  position >= 0; position--, item = null) {
 

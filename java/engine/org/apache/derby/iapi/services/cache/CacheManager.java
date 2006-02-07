@@ -199,10 +199,10 @@ public interface CacheManager {
 	/**
 		Place all objects in their clean state by calling their clean method
 		if they are dirty. This method guarantees that all objects that existed
-		in the cache at the time of the call are placed in the clean state sometime
-		during this call. Objects that are added to the cache during this call or
-		objects that are dirtied during this call (by other callers) are not guaranteed
-		to be clean once this call returns.
+		in the cache at the time of the call are placed in the clean state 
+        sometime during this call. Objects that are added to the cache during 
+        this call or objects that are dirtied during this call (by other 
+        callers) are not guaranteed to be clean once this call returns.
 
 		@see Cacheable#clean
 		@see Cacheable#isDirty
@@ -216,9 +216,9 @@ public interface CacheManager {
 		Any cached object that results in the partialKey.equals(Object)
 		method returning true when passed the cached object will be cleaned. 
 		<P>
-		In order to clean more than one object the Cacheable equals method must be able to handle
-		a partial key, e.g. a page has PageKey but a clean may pass a ContainerKey which will discard
-		all pages in that container.
+		In order to clean more than one object the Cacheable equals method must
+        be able to handle a partial key, e.g. a page has PageKey but a clean 
+        may pass a ContainerKey which will discard all pages in that container.
 
 		@exception StandardException Standard Cloudscape error policy.
 	*/

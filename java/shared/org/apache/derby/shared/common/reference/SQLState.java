@@ -503,6 +503,8 @@ public interface SQLState {
 	String FILE_UNEXPECTED_EXCEPTION                            = "XSDFF.S";
 	String FILE_ILLEGAL_ENCRYPTED_PAGE_SIZE                     = "XSDFG.S";
     String BACKUP_FILE_IO_ERROR                                 = "XSDFH.S";
+	String FILE_NEW_PAGE_DURING_RECOVERY                        = "XSDFI.S";
+
 	/*
 	** RawStore - Data.FSLDemo transaction exceptions
 	*/

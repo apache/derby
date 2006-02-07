@@ -740,4 +740,52 @@ public interface Property {
 	public static final String SERVICE_PROTOCOL = "derby.serviceProtocol";
 	public static final String SERVICE_LOCALE = "derby.serviceLocale";
 
+    /**
+     * db2j.storage.dataNotSyncedAtCheckPoint
+     * <p>
+     * When set, the store system will not force a sync() call on the
+     * containers during a checkpoint.
+     * <p>
+     * An internal debug system only flag.  The recovery system will not
+     * work properly if this flag is enabled, it is provided to do performance
+     * debugging to see whether the system is I/O bound based on checkpoint
+     * synchronous I/O.
+     * <p>
+     *
+     **/
+	public static final String STORAGE_DATA_NOT_SYNCED_AT_CHECKPOINT = 
+        "db2j.storage.dataNotSyncedAtCheckPoint";
+
+    /**
+     * db2j.storage.dataNotSyncedAtAllocation
+     * <p>
+     * When set, the store system will not force a sync() call on the
+     * containers when pages are allocated.
+     * <p>
+     * An internal debug system only flag.  The recovery system will not
+     * work properly if this flag is enabled, it is provided to do performance
+     * debugging to see whether the system is I/O bound based on page allocation
+     * synchronous I/O.
+     * <p>
+     *
+     **/
+	public static final String STORAGE_DATA_NOT_SYNCED_AT_ALLOCATION = 
+        "db2j.storage.dataNotSyncedAtAllocation";
+
+    /**
+     * db2j.storage.logNotSynced
+     * <p>
+     * When set, the store system will not force a sync() call on the log at 
+     * commit.
+     * <p>
+     * An internal debug system only flag.  The recovery system will not
+     * work properly if this flag is enabled, it is provided to do performance
+     * debugging to see whether the system is I/O bound based on log file
+     * synchronous I/O.
+     * <p>
+     *
+     **/
+	public static final String STORAGE_LOG_NOT_SYNCED = 
+        "db2j.storage.logNotSynced";
+
 }

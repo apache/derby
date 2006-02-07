@@ -2877,6 +2877,24 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
   		    //if log not being synced;files shouldn't be open in write sync mode
 		    isWriteSynced = false;	
 		}
+        else if (Performance.MEASURE)
+        {
+            // development build only feature, must by hand set the 
+            // Performance.MEASURE variable and rebuild.  Useful during
+            // development to compare/contrast effect of syncing, release
+            // users can use the above relaxed durability option to disable
+            // all syncing.  
+
+            logNotSynced = 
+                PropertyUtil.getSystemBoolean(
+                    Property.STORAGE_LOG_NOT_SYNCED);
+
+            if (logNotSynced)
+            {
+                isWriteSynced = false;
+                Monitor.logMessage("Performance.logNotSynced = true");
+            }
+        }
 
 		// try to access the log
 		// if it doesn't exist, create it.

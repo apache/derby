@@ -180,8 +180,9 @@ public final class BaseDataFileFactory
 	private static final String LINE = 
         "----------------------------------------------------------------";
 
-    // disable syncing of data during page allocation.
-    boolean dataNotSyncedAtAllocation = false;
+    // disable syncing of data during page allocation.  DERBY-888 changes
+    // the system to not require data syncing at allocation.  
+    boolean dataNotSyncedAtAllocation = true;
 
     // disable syncing of data during checkpoint.
     boolean dataNotSyncedAtCheckpoint = false;
@@ -420,9 +421,6 @@ public final class BaseDataFileFactory
             // - disable syncing of data during checkpoint.
             dataNotSyncedAtCheckpoint = true;
 
-            // - disable syncing of data during page allocation.
-            dataNotSyncedAtAllocation = true;
-
             // log message stating that derby.system.durability
             // is set to a mode, where syncs wont be forced and the
             // possible consequences of setting this mode
@@ -430,6 +428,25 @@ public final class BaseDataFileFactory
             	MessageId.STORE_DURABILITY_TESTMODE_NO_SYNC,
             	Property.DURABILITY_PROPERTY,
                 Property.DURABILITY_TESTMODE_NO_SYNC));
+		}
+        else if (Performance.MEASURE)
+        {
+            // development build only feature, must by hand set the 
+            // Performance.MEASURE variable and rebuild.  Useful during
+            // development to compare/contrast effect of syncing, release
+            // users can use the above relaxed durability option to disable
+            // all syncing.  
+
+            // debug only flag - disable syncing of data during checkpoint.
+            dataNotSyncedAtCheckpoint = 
+                PropertyUtil.getSystemBoolean(
+                    Property.STORAGE_DATA_NOT_SYNCED_AT_CHECKPOINT);
+
+            if (dataNotSyncedAtCheckpoint)
+                Monitor.logMessage(
+                    "Warning: " + 
+                    Property.STORAGE_DATA_NOT_SYNCED_AT_CHECKPOINT +
+                    "set to true.");
 		}
 
         fileHandler = new RFResource( this);
@@ -1136,6 +1153,43 @@ public final class BaseDataFileFactory
 	}
 
 
+    /**
+     * Implement checkpoint operation, write/sync all pages in cache.
+     * <p>
+     * The derby write ahead log algorithm uses checkpoint of the data
+     * cache to determine points of the log no longer required by
+     * restart recovery.  
+     * <p>
+     * This implementation uses the 2 cache interfaces to force all dirty
+     * pages to disk:
+     *
+     * WRITE DIRTY PAGES TO OS:
+     * In the first step all pages in the page cache
+     * are written, but not synced (pagecache.cleanAll).  The cachemanager
+     * cleanAll() interface guarantees that every dirty page that exists
+     * when this call is first made will have it's clean() method called.
+     * The data cache (CachedPage.clean()), will call writePage but not
+     * sync the page.  
+     * By using the java write then sync, the checkpoint is
+     * usually doing async I/O, allowing the OS to schedule multiple I/O's
+     * to the file as efficiently as it can.
+     * Note that it has been observed that checkpoints
+     * can flood the I/O system because these writes are not synced, see
+     * DERBY-799 - checkpoint should probably somehow restrict the rate
+     * it sends out those I/O's - it was observed a simple sleep every
+     * N writes fixed most of the problem.  
+     *
+     * FORCE THOSE DIRTY WRITES TO DISK:
+     * To force the I/O's to disk, the system calls each open dirty file
+     * and uses the java interface to sync any outstanding dirty pages to
+     * disk (containerCache.cleanAll()).  The open container cache does
+     * this work in RAFContainer.clean() by writing it's header out and
+     * syncing the file.  (Note if any change is made to checkpoint to
+     * sync the writes vs. syncing the file, one probably still needs to 
+     * write the container header out and sync it).
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
 	public void checkpoint() throws StandardException 
     {
 		pageCache.cleanAll();
