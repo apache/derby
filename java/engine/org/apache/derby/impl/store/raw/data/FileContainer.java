@@ -1960,12 +1960,29 @@ abstract class FileContainer
 		return retval;
 	}
 
-	protected long getLastPageNumber(BaseContainerHandle handle) throws StandardException
+	protected long getLastPageNumber(BaseContainerHandle handle) 
+        throws StandardException
 	{
 		long retval;
 		synchronized(allocCache)
 		{
-			retval = allocCache.getLastPageNumber(handle, firstAllocPageNumber);
+            // check if the first alloc page number is valid, it is invalid 
+            // if some one attempts to access the container info before the 
+            // first alloc page got created. One such case is online backup. 
+            // If first alloc page itself is invalid, then there are no pages
+            // on the disk yet for this container, just return
+            // ContainerHandle.INVALID_PAGE_NUMBER, caller can decide what to
+            // do. 
+            
+            if (firstAllocPageNumber == ContainerHandle.INVALID_PAGE_NUMBER)	
+            {
+                retval = ContainerHandle.INVALID_PAGE_NUMBER;
+            }
+            else
+            {
+                retval = 
+                    allocCache.getLastPageNumber(handle, firstAllocPageNumber);
+            }
 		}
 		return retval;
 	}

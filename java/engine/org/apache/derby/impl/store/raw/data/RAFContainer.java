@@ -1112,27 +1112,38 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                     }
                 }else {
                     // regular container file 
-                    StorageFile file = privGetFileName((ContainerKey)getIdentity(), 
-                                                       false, false, true);
-                    backupFile = new File(backupLocation , file.getName());
-                    backupRaf = new RandomAccessFile(backupFile,  "rw");
-
-					// copy all the pages of the container from the database 
-                    // to the backup location by reading through the page cache.
-                    
                     long lastPageNumber= getLastPageNumber(handle);
+                    if (lastPageNumber == ContainerHandle.INVALID_PAGE_NUMBER) {
+                        // last page number is invalid if there are no pages in
+                        // the container yet. No need to backup this container, 
+                        // this container creation is yet to complete.The reason
+                        // backup is getting called on such a container is 
+                        // because container handle appears in the cache after 
+                        // the file is created on the disk but before it's 
+                        // first page is allocated. 
+                        return;
+                    }
+
+                    StorageFile file = 
+                        privGetFileName(
+                            (ContainerKey)getIdentity(), false, false, true);
+
+                    backupFile = new File(backupLocation , file.getName());
+                    backupRaf  = new RandomAccessFile(backupFile,  "rw");
 
                     byte[] encryptionBuf = null;
                     if (dataFactory.databaseEncrypted()) {
                         // Backup uses seperate encryption buffer to encrypt the
-                        // page instead of encryption buffer used by the regular conatiner
-                        // writes. Otherwise writes to the backup 
+                        // page instead of encryption buffer used by the regular
+                        // conatiner writes. Otherwise writes to the backup 
                         // has to be synchronized with regualar database writes
                         // because backup can run in parallel to container
                         // writes.
                         encryptionBuf = new byte[pageSize];
                     }
 
+                    // copy all the pages of the container from the database 
+                    // to the backup location by reading through the page cache.
                     for (long pageNumber = FIRST_ALLOC_PAGE_NUMBER; 
                          pageNumber <= lastPageNumber; pageNumber++) {
                         page = getPageForBackup(handle, pageNumber);

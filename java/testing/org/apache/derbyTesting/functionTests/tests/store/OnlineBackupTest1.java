@@ -73,6 +73,7 @@ public class OnlineBackupTest1 {
 		dbActions.createTable(TEST_TABLE_NAME);
         dbActions.createTable(TEST_TABLE_NAME_1);
         dbActions.createTable(TEST_TABLE_NAME_2);
+        conn.commit();
 
         // start first unlogged operation
 		dbActions.startUnloggedAction(TEST_TABLE_NAME_1);
@@ -102,23 +103,17 @@ public class OnlineBackupTest1 {
 		dmlThread.start();
 
         // run some DDL create/drop tables in another thread
-
-
-         Connection ddlConn = getConnection();
-
-         /* Disabling create table operation running parallel to 
-          * backup because of DERBY-750 bug. This block of code
-          * should be uncommented when DERBY-750 is fixed.
-
-         DatabaseActions ddlActions = 
+        Connection ddlConn = getConnection();
+        
+        DatabaseActions ddlActions = 
             new DatabaseActions(DatabaseActions.CREATEDROPS, ddlConn);
-            Thread ddlThread = new Thread(ddlActions, "DDL_THREAD");
-            ddlThread.start();
-         */
+        Thread ddlThread = new Thread(ddlActions, "DDL_THREAD");
+        ddlThread.start();
 
-		// sleep for few seconds just to make sure backup thread is actually
-		// gone to a wait state for unlogged actions to commit.
-		java.lang.Thread.sleep(5000);
+        // sleep for few seconds just to make sure backup thread is actually
+		// gone to a wait state for unlogged actions to commit and there is
+        // some ddl and dml activity in progress. 
+		java.lang.Thread.sleep(50000);
 			
 		// backup should not even start doing real work before the
 		// unlogged transaction is commited
@@ -133,9 +128,9 @@ public class OnlineBackupTest1 {
 		backup.waitForBackupToEnd();
 		backupThread.join();
 		dmlActions.stopActivity();
-		// ddlActions.stopActivity(); -- uncomment this when derby-750 is fixed
+        ddlActions.stopActivity(); 
 		dmlThread.join();
-		// ddlThread.join(); -- uncomment this when derby-750 is fixed
+        ddlThread.join(); 
         
         // close the connections.
         conn.close();
@@ -344,28 +339,26 @@ public class OnlineBackupTest1 {
 			
 			Statement s = conn.createStatement();
 			while(!stopActivity) {
-				for( int i = 0 ; i < 100 ; i++) {
+				for( int i = 0 ; i < 10; i++) {
 					String tableName = "emp" + i ;
 					createTable(tableName);
 					//load some data
-					insert(tableName, 100, COMMIT, 10);
-					if((i % 2) == 0) 
+					insert(tableName, 100, OPENTX, 10);
+					if((i % 2) == 0) {
 						conn.commit();
+                    }
 					else
 						conn.rollback();
 				}
-				conn.commit();
 
-				for( int i = 0 ; i < 100 ; i=i+2) {
+                //drop all the table that are created above.
+				for( int i = 0 ; i < 10 ; i=i+2) {
 					String tableName = "emp" + i ;
 					s.executeUpdate("drop TABLE " + "emp" +i ); 
-					if((i % 2) == 0) 
-						conn.commit();
-					else
-						conn.rollback();
+                    conn.commit();
 				}
-				conn.commit();
 			}
+            s.close();
 		}
 
 
@@ -499,7 +492,6 @@ public class OnlineBackupTest1 {
 							"salary float)");
 			s.executeUpdate("create index " + tableName + "_id_idx on " + 
 							tableName + "(id)");
-			conn.commit();
 			s.close();
 		}
 
