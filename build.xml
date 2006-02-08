@@ -605,7 +605,7 @@
                excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
       <fileset dir="${derby.tools.src.dir}"
                excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/> 
-      <link href="${out.javadoc.dir}/engine"/>
+      <link href="."/>
     </javadoc>
 
   </target>
