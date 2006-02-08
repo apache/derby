@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.services.monitor.PersistentServiceImpl
+   Derby - Class org.apache.derby.impl.services.monitor.StorageFactoryService
 
    Copyright 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -61,7 +61,7 @@ import java.security.PrivilegedActionException;
  * This class implements the PersistentService interface using a StorageFactory class.
  * It handles all subSubProtocols except for cache.
  */
-final class PersistentServiceImpl implements PersistentService
+final class StorageFactoryService implements PersistentService
 {
 
     private String home; // the path of the database home directory. Can be null
@@ -71,7 +71,7 @@ final class PersistentServiceImpl implements PersistentService
     private StorageFactory rootStorageFactory;
     private char separatorChar;
 
-    PersistentServiceImpl( String subSubProtocol, Class storageFactoryClass)
+    StorageFactoryService( String subSubProtocol, Class storageFactoryClass)
         throws StandardException
     {
         this.subSubProtocol = subSubProtocol;

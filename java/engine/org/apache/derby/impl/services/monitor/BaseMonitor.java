@@ -62,7 +62,7 @@ import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.i18n.BundleFinder;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
-import org.apache.derby.impl.services.monitor.PersistentServiceImpl;
+import org.apache.derby.impl.services.monitor.StorageFactoryService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1662,7 +1662,7 @@ nextModule:
                                                   e,
                                                   subSubProtocol, className);
         }
-        return new PersistentServiceImpl( subSubProtocol, storageFactoryClass);
+        return new StorageFactoryService( subSubProtocol, storageFactoryClass);
     } // end of getPersistentService
 
     private String getStorageFactoryClassName( Properties properties, String subSubProtocol)
