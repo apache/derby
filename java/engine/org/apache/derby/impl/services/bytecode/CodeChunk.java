@@ -334,7 +334,7 @@ final class CodeChunk {
 	 * since 8 bytes are written.
 	 * For a nested CodeChunk return by insertCodeSpace the delta
 	 * corresponds to the original starting pc.
-	 * @see insetCodeSpace
+	 * @see #insertCodeSpace
 	 */
 	private final int pcDelta;
 
@@ -482,7 +482,6 @@ final class CodeChunk {
 	 * 
 	 * @param pc
 	 * @param additionalBytes
-	 * @return
 	 */
 	CodeChunk insertCodeSpace(int pc, int additionalBytes)
 	{

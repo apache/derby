@@ -41,7 +41,6 @@ public abstract class JVMInfo
 		<LI> 5 - J2SE_142 - JDK 1.4.2
 		<LI> 6 - J2SE_15 - JDK 1.5
 		</UL>
-		@return The JVM's runtime environment.
 	*/
 	public static final int JDK_ID;
 

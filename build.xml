@@ -586,37 +586,19 @@
     <delete dir="${out.javadoc.dir}/engine"/>
     <mkdir dir="${out.javadoc.dir}/engine"/>
 
-    <delete dir="${out.javadoc.dir}/sourcedir"/>
-    <mkdir dir="${out.javadoc.dir}/sourcedir"/>
-
-    <!-- engine files -->
-    <copy todir="${out.javadoc.dir}/sourcedir">
-      <fileset dir="${derby.engine.src.dir}"
-               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
-    </copy>
-    <!-- client files -->
-    <copy todir="${out.javadoc.dir}/sourcedir">
-      <fileset dir="${derby.client.src.dir}"
-               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
-    </copy>
-    <!-- drda files -->
-    <copy todir="${out.javadoc.dir}/sourcedir">
-      <fileset dir="${derby.drda.src.dir}"
-               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
-    </copy>
-    <!-- tools files -->
-    <copy todir="${out.javadoc.dir}/sourcedir">
-      <fileset dir="${derby.tools.src.dir}"
-               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
-    </copy>
+    <!-- Some of the link tags are lost when using nested filesets. Fool  -->
+    <!-- javadoc into creating relative links by seeding it with the list -->
+    <!-- of packages that have @link tags in their package.htmls          -->
+    <copy file="${javadoctools.dir}/package-list" 
+          todir="${out.javadoc.dir}/engine"/>
 
     <javadoc
         additionalparam="-J-mx320M"
         packagenames="org.*"
         access="private"
         breakiterator="yes"
-        sourcepath="${out.javadoc.dir}/sourcedir"
-        classpath="${basedir}/classes;${java14compile.classpath};${jars.extras};${osgi}"
+        useexternalfile="yes"
+        classpath="${out.dir};${java14compile.classpath};${jars.extras};${osgi}"
         destdir="${out.javadoc.dir}/engine"
         windowtitle="Apache Derby V${major}.${minor} Engine Documentation"
         doctitle="Apache Derby V${major}.${minor} Engine Documentation"
@@ -633,9 +615,18 @@
                 path="${basedir}/classes"/>
         <taglet name="org.apache.derbyBuild.javadoc.EndFormatTaglet" 
                 path="${basedir}/classes"/>
+      <fileset dir="${derby.engine.src.dir}"
+               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+      <fileset dir="${derby.client.src.dir}"
+               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+      <fileset dir="${derby.drda.src.dir}"
+               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+      <fileset dir="${derby.shared.src.dir}"
+               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+      <fileset dir="${derby.tools.src.dir}"
+               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/> 
+      <link href="${out.javadoc.dir}/engine"/>
     </javadoc>
-
-    <delete dir="${out.javadoc.dir}/sourcedir"/>
 
   </target>
 

@@ -21,3 +21,8 @@ org/apache/derby/impl/jdbc/EmbedRowId.java
 org/apache/derby/client/*40.java
 org/apache/derby/client/am/*40.java
 org/apache/derby/client/am/RowId.java
+**/build.xml
+**/*.properties
+**/*.jj
+**/*.tmpl
+**/package.html

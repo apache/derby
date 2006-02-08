@@ -128,7 +128,7 @@ public class MessageUtil
      *      The message for the given message id, with arguments
      *      substituted.
      * 
-     * @throw MissingResourceException
+     * @throws MissingResourceException
      *      If the message could not be found and the 
      *      <code>composeDefault</code> parameter was set to false.  
      */
