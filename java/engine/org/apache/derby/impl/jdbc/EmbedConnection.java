@@ -1643,6 +1643,16 @@ public class EmbedConnection implements java.sql.Connection
 		return getTR().getContextManager();
 	}
 
+	/**
+	 * Filter out properties from the passed in set of JDBC attributes
+	 * to remove any derby.* properties. This is to ensure that setting
+	 * derby.* properties does not work this way, it's not a defined way
+	 * to set such properties and could be a secuirty hole in allowing
+	 * remote connections to override system, application or database settings.
+	 * 
+	 * @return a new Properties set copied from the parameter but with no
+	 * derby.* properties.
+	 */
 	private Properties filterProperties(Properties inputSet) {
 		Properties limited = new Properties();
 
