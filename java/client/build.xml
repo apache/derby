@@ -55,7 +55,7 @@
 <target name="compile_jdbc4" if="jdk16">
     <javac
       fork="yes"
-      executable="${jdk16.javac}"
+      executable="${jdk16}/bin/javac"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
