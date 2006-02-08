@@ -990,6 +990,10 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 			return false;
 		}
 		
+		// To CLOB
+		if (existingType == Types.CLOB && DataTypeDescriptor.isCharacterType(jdbcTypeId))
+			return true;
+
 		return false;
 	}
 

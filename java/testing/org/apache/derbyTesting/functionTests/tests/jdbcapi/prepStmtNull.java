@@ -13,6 +13,7 @@ public class prepStmtNull {
     public static void main(String[] args) {
         test1(args);
         test2(args);
+        test3(args);
     }
     
         public static void test1(String []args) {   
@@ -117,6 +118,48 @@ public class prepStmtNull {
  		}
      }
      
+     /* Test setNull() on Clob/Blob using Varchar/binary types */
+     public static void test3(String []args) {
+          Connection con;
+          ResultSet rs;
+          PreparedStatement stmt = null;
+          PreparedStatement pStmt = null;
+          Statement stmt1 = null;
+          byte[] b2 = new byte[1];
+          b2[0] = (byte)64;
+
+          System.out.println("Test3 prepStmtNull starting");
+
+          try
+          {
+               // use the ij utility to read the property file and
+               // make the initial connection.
+               ij.getPropertyArg(args);
+               con = ij.startJBMS();
+					
+               stmt = con.prepareStatement("create table ClobBlob(cval clob, bval blob(16K))");
+               stmt.executeUpdate();
+   			
+               pStmt = con.prepareStatement("insert into ClobBlob values (?,?)");
+   			   			
+               pStmt.setNull(1, Types.VARCHAR);
+               pStmt.setBytes(2, b2);
+               pStmt.execute();
+
+               stmt1 = con.createStatement();
+               rs = stmt1.executeQuery("select * from ClobBlob");
+               while(rs.next()) {
+                    System.out.println("ResultSet is: "+rs.getObject(1));
+               }
+               String[] testObjects = {"table ClobBlob"};
+               TestUtil.cleanUpTest(stmt1, testObjects);
+          } catch(SQLException sqle) {
+               dumpSQLExceptions(sqle);
+          } catch(Throwable e) {
+               System.out.println("FAIL -- unexpected exception: ");
+          }
+     }
+     
      static private void dumpSQLExceptions (SQLException se) {
                 System.out.println("FAIL -- unexpected exception");
                 while (se != null) {
@@ -124,4 +167,4 @@ public class prepStmtNull {
                         se = se.getNextException();
                 }
         }
-}     
+}
