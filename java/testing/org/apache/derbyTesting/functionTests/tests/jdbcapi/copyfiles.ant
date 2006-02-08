@@ -36,8 +36,8 @@ resultsetStream_app.properties
 resultsetJdbc30_sed.properties
 resultset_app.properties
 resultset_derby.properties
-savepointJdbc30_app.properties
-savepointJdbc30_derby.properties
+savepointJdbc30_JSR169_app.properties
+savepointJdbc30_JSR169_derby.properties
 secureUsers.sql
 secureUsers1.sql
 secureUsers1_app.properties

@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi.savepointJdbc30
+   Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi.savepointJdbc30_JSR169
 
    Copyright 2002, 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -36,11 +36,12 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  * Also, test some mix and match of defining savepoints through JDBC and sql
  * Testing both callable and prepared statements meta data
  *
+ * Do not put tests in this file that are not compatible with JSR169
  * @author mamta
  */
 
 
-public class savepointJdbc30 {
+public class savepointJdbc30_JSR169 {
 
 	static private boolean isDerbyNet = false;
 
