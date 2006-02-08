@@ -537,45 +537,25 @@
         value="Built on ${javadoc.ts}, from revision ${changenumber}"/>
   
     <delete dir="${out.javadoc.dir}/publishedapi"/>
-    <delete dir="${out.javadoc.dir}/sourcedir"/>
     <mkdir dir="${out.javadoc.dir}/publishedapi"/>
-    <mkdir dir="${out.javadoc.dir}/sourcedir"/>
-
-    <!-- drda files -->
-    <mkdir dir="${out.javadoc.dir}/sourcedir"/>
-    <copy todir="${out.javadoc.dir}/sourcedir"> 
-      <fileset dir="${derby.drda.src.dir}"
-               includesfile="${javadoctools.dir}/publishedapi.ant"/>
-    </copy>
-
-	
-    <!-- engine files -->
-    <copy todir="${out.javadoc.dir}/sourcedir">
-      <fileset dir="${derby.engine.src.dir}"
-               includesfile="${javadoctools.dir}/publishedapi.ant"/>
-    </copy>
-
-    <!-- tools files -->
-    <copy todir="${out.javadoc.dir}/sourcedir">
-      <fileset dir="${derby.tools.src.dir}"
-               includesfile="${javadoctools.dir}/publishedapi.ant"/>
-    </copy>
-
-    <!-- client files -->
-    <copy todir="${out.javadoc.dir}/sourcedir">
-      <fileset dir="${derby.client.src.dir}"
-               includesfile="${javadoctools.dir}/publishedapi.ant"/>
-    </copy>
 
     <javadoc sourcepath="${out.javadoc.dir}/sourcedir"
              classpath="${compile.classpath};${osgi};${servlet24};${out.dir}"
              breakiterator="true"
              destdir="${out.javadoc.dir}/publishedapi"
-             packagenames="org.apache.derby.authentication,org.apache.derby.drda,org.apache.derby.jdbc.io,org.apache.derby.jdbc,org.apache.derby.tools"
              Windowtitle="Apache Derby ${major}.${minor} API Documentation"
              Doctitle="Apache Derby ${major}.${minor} API Documentation"
              Footer="${javadoc.Footer}"
-             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 1997,2005 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"/>
+             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 1997,2005 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;">
+      <fileset dir="${derby.engine.src.dir}"
+               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+      <fileset dir="${derby.client.src.dir}"
+               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+      <fileset dir="${derby.drda.src.dir}"
+               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+      <fileset dir="${derby.tools.src.dir}"
+               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+    </javadoc>
 
     <delete dir="${out.javadoc.dir}/sourcedir"/>
 
