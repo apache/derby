@@ -28,3 +28,5 @@ jdbcapi/checkDataSource30.java
 jdbcapi/statementJdbc30.java
 lang/holdCursorJava.java
 jdbcapi/dataSourceReference.java
+#no XA for JCC
+jdbcapi/savepointJdbc30_XA.java

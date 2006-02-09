@@ -22,14 +22,12 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.Savepoint;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.Savepoint;
+import java.sql.Statement;
 
 import org.apache.derby.tools.ij;
-import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 /**
  * Test the new class Savepoint in jdbc 30.
@@ -50,7 +48,7 @@ public class savepointJdbc30_JSR169 {
 
 
 	public static void main(String[] args) {
-		Connection con = null, con2 = null, con3 = null;
+		Connection con = null, con2 = null;
 		Statement  s;
 		System.out.println("Test savepointJdbc30 starting");
 
@@ -60,39 +58,11 @@ public class savepointJdbc30_JSR169 {
 			// make the initial connection.
 			ij.getPropertyArg(args);
 			con = ij.startJBMS();
-			isDerbyNet = TestUtil.isNetFramework();
-
-			con.setAutoCommit(true); // make sure it is true
-			s = con.createStatement();
 			con2 = ij.startJBMS();
-			con2.setAutoCommit(false);
-			/* Create the table and do any other set-up */
-			setUpTest(s);
-
-			//JCC translates the JDBC savepoint calls into equivalent SQL statements.
-			//In addition, we do not allow nested savepoints when
-			//coming through SQL statements. Because of this restriction, we can't run most of the
-			//JDBC savepoint tests under DRDA framework. The JDBC tests have nested JDBC savepoint
-			//calls and they fail when run under JCC(because they get translated into nested SQL savepoints).
-			//Hence, splitting the test cases into non-DRDA and more generic tests.
-			System.out.println("Tests common to DRDA and embedded Cloudscape");
-			genericTests(con, con2, s);
-
-			System.out.println("Next try non-DRDA tests");
-			if (!isDerbyNet)
-				nonDRDATests(con, s);
-
-			s.close();
+			runTests("regular connections", con,con2);
+			
 			con.close();
 			con2.close();
-
-			con3 = ij.startJBMS();
-			con3.setAutoCommit(true);
-			s = con3.createStatement();
-			TestUtil.cleanUpTest(s, testObjects);
-			s.close();
-			con3.close();
-
 
 		}
 		catch (SQLException e) {
@@ -103,8 +73,43 @@ public class savepointJdbc30_JSR169 {
 			e.printStackTrace(System.out);
 		}
 
-		System.out.println("Test savepointJdbc30 finished");
+	
 	}
+
+public static void runTests(String tag, Connection con, Connection con2) 
+throws SQLException {
+	
+	Statement  s;
+	System.out.println("Test savepointJdbc30 starting for "  + tag);
+	isDerbyNet = TestUtil.isNetFramework();
+	con.setAutoCommit(true); // make sure it is true
+	con2.setAutoCommit(false);
+	s = con.createStatement();
+
+	/* Create the table and do any other set-up */
+	setUpTest(s);
+
+	//JCC translates the JDBC savepoint calls into equivalent SQL statements.
+	//In addition, we do not allow nested savepoints when
+	//coming through SQL statements. Because of this restriction, we can't run most of the
+	//JDBC savepoint tests under DRDA framework. The JDBC tests have nested JDBC savepoint
+	//calls and they fail when run under JCC(because they get translated into nested SQL savepoints).
+	//Hence, splitting the test cases into non-DRDA and more generic tests.
+	System.out.println("Tests common to DRDA and embedded Cloudscape");
+	genericTests(con, con2, s);
+
+	System.out.println("Next try non-DRDA tests");
+	if (!isDerbyNet)
+		nonDRDATests(con, s);
+
+	
+	con.setAutoCommit(true);
+	TestUtil.cleanUpTest(s, testObjects);
+	
+	s.close();
+	
+	}
+
 
 	//The following tests have nested savepoints through JDBC calls. When coming through JCC,
 	//these nested JDBC savepoint calls are translated into equivalent SQL savepoint statements.
@@ -946,7 +951,7 @@ public class savepointJdbc30_JSR169 {
 		s.executeUpdate("insert into t2 values(1)");
 	}
 
-	static private void dumpSQLExceptions (SQLException se) {
+	 public static void dumpSQLExceptions (SQLException se) {
 		System.out.println("FAIL -- unexpected exception");
 		while (se != null) {
 			System.out.print("SQLSTATE("+se.getSQLState()+"):");

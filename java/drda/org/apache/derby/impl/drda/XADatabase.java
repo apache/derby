@@ -89,6 +89,9 @@ class XADatabase extends Database {
 		
 		// Get a new logical connection.
 		conn = xaConnection.getConnection();
+		// Client will always drive the commits so connection should
+		// always be autocommit false on the server. DERBY-898/DERBY-899
+		conn.setAutoCommit(false);
 		setConnection(conn);
 		return conn;
 		

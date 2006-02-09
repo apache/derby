@@ -1,5 +1,4 @@
-Test savepointJdbc30 starting
-Test savepointJdbc30 starting for regular connections
+Test savepointJdbc30 starting for connections from XADataSource (local tranasaction)
 Tests common to DRDA and embedded Cloudscape
 Test1 - no unnamed savepoints allowed if autocommit is true
 Expected Exception is Cannot set savepoint when in auto-commit mode.

@@ -1,4 +1,5 @@
 Test savepointJdbc30 starting
+Test savepointJdbc30 starting for regular connections
 Tests common to DRDA and embedded Cloudscape
 Test1 - no unnamed savepoints allowed if autocommit is true
 Expected Exception is Cannot issue savepoint when autoCommit is on.
@@ -99,4 +100,3 @@ Test 48 No nested SQL savepoints allowed.
 Following SQL savepoint will fail because we are trying to nest it inside JDBC savepoint
 Expected Exception is The maximum number of savepoints has been reached. 
 Expected Exception is The maximum number of savepoints has been reached. 
-Test savepointJdbc30 finished
