@@ -179,7 +179,7 @@ public	class DD_Version implements	Formatable
 		boolean minorOnly = false;
 		boolean performMajorUpgrade = false;
 		boolean softUpgradeRun = false;
-
+		boolean isReadOnly = bootingDictionary.af.isReadOnly();	
 
 		if (dictionaryVersion.majorVersionNumber == majorVersionNumber) {
 
@@ -207,7 +207,7 @@ public	class DD_Version implements	Formatable
 			doFullUpgrade( tc, dictionaryVersion.majorVersionNumber );
 		}
 
-		if (!minorOnly) {
+		if (!minorOnly && !isReadOnly) {
 			// apply changes that can be made and will continue to work
 			// against previous version.
 
