@@ -558,6 +558,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
             } else {
                 result = isNull(column) ? false : cursor_.getBoolean(column);
             }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getBoolean", result);
+            }
             setWasNull(column);  // Placed close to the return to minimize risk of thread interference
             return result;
         }
