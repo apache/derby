@@ -38,14 +38,12 @@ public abstract class Connection implements java.sql.Connection,
     // that they are now in an un-prepared state.
     final java.util.LinkedList openStatements_ = new java.util.LinkedList();
 
-    // Some statuses of DERBY objects may be invalid on server either after only rollback
-    // or after both commit and rollback. For example,
+    // Some statuses of DERBY objects may be invalid on server
+    // after both commit and rollback. For example,
     // (1) prepared statements need to be re-prepared
     //     after both commit and rollback
     // (2) result set will be unpositioned on server after both commit and rollback.
-    // If they only depend on rollback, they need to get on RollbackOnlyListeners_.
     // If they depend on both commit and rollback, they need to get on CommitAndRollbackListeners_.
-    final java.util.LinkedList RollbackOnlyListeners_ = new java.util.LinkedList();
     final java.util.LinkedList CommitAndRollbackListeners_ = new java.util.LinkedList();
     private SqlWarning warnings_ = null;
 
@@ -807,7 +805,6 @@ public abstract class Connection implements java.sql.Connection,
         inUnitOfWork_ = false;
         markStatementsClosed();
         CommitAndRollbackListeners_.clear();
-        RollbackOnlyListeners_.clear();
         markClosed_();
     }
 
@@ -1709,10 +1706,6 @@ public abstract class Connection implements java.sql.Connection,
     // This method will only throw an exception on bug check.
     public void completeLocalRollback() {
         for (java.util.Iterator i = CommitAndRollbackListeners_.iterator(); i.hasNext();) {
-            UnitOfWorkListener listener = (UnitOfWorkListener) i.next();
-            listener.completeLocalRollback(i);
-        }
-        for (java.util.Iterator i = RollbackOnlyListeners_.iterator(); i.hasNext();) {
             UnitOfWorkListener listener = (UnitOfWorkListener) i.next();
             listener.completeLocalRollback(i);
         }
