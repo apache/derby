@@ -992,13 +992,13 @@ public final class BaseDataFileFactory
 	}
 
 	/**
-		re-Create a container during recovery load tran.
+		re-Create a container during redo recovery.
 
 		called ONLY during recovery load tran.
 
 		@exception StandardException Standard Cloudscape Error policy
 	 */
-	public void reCreateContainerForLoadTran(
+	public void reCreateContainerForRedoRecovery(
     RawTransaction  t, 
     long            segmentId, 
     long            containerId, 

@@ -89,13 +89,17 @@ public interface RawContainerHandle extends ContainerHandle {
 	/** Backup restore support */
 
 	/**
-		ReCreate a page for load tran - called by recovery redo ONLY
+		ReCreate a page for redo recovery.
+
+        Used during redo recovery while trying to apply log records which
+        are creating the page.
 
 		@exception StandardException Standard Cloudscape error policy
 	 */
-	public Page reCreatePageForLoadTran(int pageFormat, 
-										long pageNumber, 
-										long pageOffset)
+	public Page reCreatePageForRedoRecovery(
+    int     pageFormat, 
+    long    pageNumber, 
+    long    pageOffset)
 		 throws StandardException;
 
 	/**

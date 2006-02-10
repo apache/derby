@@ -168,11 +168,14 @@ public interface DataFactory extends Corruptable {
 		throws StandardException;
 
 	/**
-		re-Create a container during recovery load tran.
+		re-Create a container during redo recovery.
+
+        Used if container is found to not exist during redo recovery of
+        log records creating the container.
 
 		@exception StandardException Standard Cloudscape Error policy
 	 */
-	public void reCreateContainerForLoadTran(RawTransaction t,
+	public void reCreateContainerForRedoRecovery(RawTransaction t,
 			long segmentId, long containerId, ByteArray containerInfo)
 		 throws StandardException;
 

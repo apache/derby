@@ -1365,18 +1365,22 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/**
-		Recreate a container during load tran - use only by media recovery.
+		Recreate a container during redo recovery.
+
+        Used only during redo recovery while processing log records which
+        are trying to create a container, and no valid container is found
+        in the database.
 
 		@exception StandardException  Standard cloudscape exception policy
-		@see RawTransaction#reCreateContainerForLoadTran
+		@see RawTransaction#reCreateContainerForRedoRecovery
 	 */
-	public void reCreateContainerForLoadTran
+	public void reCreateContainerForRedoRecovery
 		(long segmentId, long containerId, ByteArray containerInfo)
 		throws StandardException
 	{
 		setActiveState();
 
-		dataFactory.reCreateContainerForLoadTran(
+		dataFactory.reCreateContainerForRedoRecovery(
 			this, segmentId, containerId, containerInfo);
 	}
 

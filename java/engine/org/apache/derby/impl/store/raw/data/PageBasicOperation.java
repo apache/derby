@@ -312,7 +312,7 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 		//We do this if derby.storage.patchInitPageRecoverError is set.
 		if (page == null && getPageException != null && pageVersion == 0)
 			if (PropertyUtil.getSystemBoolean(RawStoreFactory.PATCH_INITPAGE_RECOVER_ERROR))
-				page = getPageForLoadTran(xact);
+				page = getPageForRedoRecovery(xact);
 		
 		// maybe we are in rollforward recovery and this is an init page operation,
 		// give subclass a chance to create the page
@@ -328,16 +328,16 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 				if (SanityManager.DEBUG) 
 					if(SanityManager.DEBUG_ON("LoadTran"))
 						SanityManager.DEBUG_PRINT(
-											  "Trace", "got null page " + pageId + 
-											  " and getPageException, now attempt last ditch effort");
+                            "Trace", "got null page " + pageId + 
+                            " and getPageException, attempt last ditch effort");
 
-				page = getPageForLoadTran(xact);
+				page = getPageForRedoRecovery(xact);
 				
 				if (SanityManager.DEBUG) 
 					if(SanityManager.DEBUG_ON("LoadTran"))
 						SanityManager.DEBUG_PRINT(
-											  "Trace"," getPageForLoadTran, got page=" + 
-											  (page != null));
+                            "Trace"," getPageForRedoRecovery, got page=" + 
+                            (page != null));
 			}	
 		}
 
@@ -363,7 +363,7 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 
 		@exception StandardException Cloudscape Standard error policy
 	 */
-	protected BasePage getPageForLoadTran(Transaction xact)
+	protected BasePage getPageForRedoRecovery(Transaction xact)
 		 throws StandardException
 	{
 		return null;

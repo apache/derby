@@ -152,18 +152,28 @@ public abstract class ContainerBasicOperation implements Loggable
 			if (containerHdl == null)
 			{
 				if (SanityManager.DEBUG) 
+                {
 					if(SanityManager.DEBUG_ON("LoadTran"))
-						SanityManager.DEBUG_PRINT("Trace", "cannot find container " + containerId + 
-												  ", now attempt last ditch effort");
+                    {
+						SanityManager.DEBUG_PRINT(
+                            "Trace", 
+                            "cannot find container " + containerId + 
+                                  ", now attempt last ditch effort");
+                    }
+                }
 				
 
-				containerHdl = findContainerForLoadTran(rtran);
+				containerHdl = findContainerForRedoRecovery(rtran);
 
 				if (SanityManager.DEBUG) 
+                {
 					if(SanityManager.DEBUG_ON("LoadTran"))
+                    {
 						SanityManager.DEBUG_PRINT("Trace",
-												  " findContainerForLoadTran, got container=" +
-												  (containerHdl != null));
+                            " findContainerForRedoRecovery, got container=" + 
+                            (containerHdl != null));
+                    }
+                }
 
 			}
 		}	
@@ -185,7 +195,8 @@ public abstract class ContainerBasicOperation implements Loggable
 
 		@exception StandardException Cloudscape Standard error policy
 	 */
-	protected RawContainerHandle findContainerForLoadTran(RawTransaction tran) 
+	protected RawContainerHandle findContainerForRedoRecovery(
+    RawTransaction tran) 
 		 throws StandardException 
 	{
 		return null;

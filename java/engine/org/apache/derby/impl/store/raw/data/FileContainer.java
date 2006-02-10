@@ -1715,12 +1715,13 @@ abstract class FileContainer
                 // there is no more reusable page.  Unless we are called 
                 // explicitly to bulk increase the container size in a preload 
                 // or in a create container.
-			    if (!noIO && (bulkIncreaseContainerSize ||
-						  (pageNumber > lastPreallocPage &&
-						   pageNumber > PreAllocThreshold)))
+			    if (!noIO && 
+                    (bulkIncreaseContainerSize ||
+					 (pageNumber > lastPreallocPage && 
+                      pageNumber > PreAllocThreshold)))
 			    {
-				    allocPage.preAllocatePage(this, PreAllocThreshold,
-				    						  PreAllocSize);
+				    allocPage.preAllocatePage(
+                        this, PreAllocThreshold, PreAllocSize);
 			    }
 
 			    // update last preAllocated Page, it may have been changed by 
@@ -2177,12 +2178,13 @@ abstract class FileContainer
 		// 1'st element is whether or not to sync the page to disk
 		// 2'nd element is the pagesize
 		// 3'rd element is spareSpace
-		// 4'th element is the number of bytes to reserve for the container header
+		// 4'th element is number of bytes to reserve for the container header
 		// 5'th element is the minimumRecordSize
 		// NOTE: the arg list here must match the one in allocPage
 
 		// No I/O at all if this new page is requested as part of a create
-		// and load statement or this new alloc page is in a temporary container.
+		// and load statement or this new alloc page is in a temporary 
+        // container.
 		// In the former case, BaseContainer will allow the MODE_UNLOGGED
 		// bit to go thru to the nested top transaction alloc handle.
 		// In the later case, there is no nested top transaction and the
@@ -2195,7 +2197,7 @@ abstract class FileContainer
 		createAllocPageArgs[0] = AllocPage.FORMAT_NUMBER;	
 		createAllocPageArgs[1] = noIO ? 0 : CachedPage.WRITE_SYNC;
 		createAllocPageArgs[2] = pageSize;
-		createAllocPageArgs[3] = 0;		// allocation page have no need for spare
+		createAllocPageArgs[3] = 0;		// allocation page has no need for spare
 		createAllocPageArgs[4] = containerInfoSize;
 		createAllocPageArgs[5] = minimumRecordSize;
 
@@ -2463,24 +2465,52 @@ abstract class FileContainer
 		return page;
 	}
 
-	/**
-		ReCreate a page for load tran/rollforward recovery.  
-		Only called during recovery redo
-
-		@exception StandardException Cloudscape Standard error policy
-	*/
-	protected BasePage reCreatePageForLoadTran(BaseContainerHandle handle,
-											   int pageFormat,
-											   long pageNumber,
-											   long pageOffset)
+    /**
+     * ReCreate a page for rollforward recovery.  
+     * <p>
+     * During redo recovery it is possible for the system to try to redo
+     * the creation of a page (ie. going from non-existence to version 0).
+     * It first trys to read the page from disk, but a few different types
+     * of errors can occur:
+     *     o the page does not exist at all on disk, this can happen during
+     *       rollforward recovery applied to a backup where the file was
+     *       copied and the page was added to the file during the time frame
+     *       of the backup but after the physical file was copied.
+     *     o space in the file exists, but it was never initalized.  This
+     *       can happen if you happen to crash at just the right moment during
+     *       the allocation process.  Also
+     *       on some OS's it is possible to read from a part of the file that
+     *       was not ever written - resulting in garbage from the store's 
+     *       point of view (often the result is all 0's).  
+     *
+     * All these errors are easy to recover from as the system can easily 
+     * create a version 0 from scratch and write it to disk.
+     *
+     * Because the system does not sync allocation of data pages, it is also
+     * possible at this point that whlie writing the version 0 to disk to 
+     * create it we may encounter an out of disk space error (caught in this
+     * routine as a StandardException from the create() call.  We can't 
+     * recovery from this without help from outside, so the caught exception
+     * is nested and a new exception thrown which the recovery system will
+     * output to the user asking them to check their disk for space/errors.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	protected BasePage reCreatePageForRedoRecovery(
+    BaseContainerHandle handle,
+    int                 pageFormat,
+    long                pageNumber,
+    long                pageOffset)
 		 throws StandardException
 	{
-		// recreating a page should be done only if are in the  middle of rollforward recovery or
-		// if derby.storage.patchInitPageRecoverError is set to true.
+		// recreating a page should be done only if are in the middle of 
+        // rollforward recovery or if derby.storage.patchInitPageRecoverError 
+        // is set to true.
 
 		//check if we are in rollforward recovery
 		boolean rollForwardRecovery = 
 			((RawTransaction)handle.getTransaction()).inRollForwardRecovery();
+
 		if (!rollForwardRecovery && !(PropertyUtil.getSystemBoolean(
                     RawStoreFactory.PATCH_INITPAGE_RECOVER_ERROR)))
 		{
@@ -2523,7 +2553,7 @@ abstract class FileContainer
 			reCreatePageArgs[0] = pageFormat;
 			reCreatePageArgs[1] = CachedPage.WRITE_SYNC;
 			reCreatePageArgs[2] = pageSize;
-			reCreatePageArgs[3] = 0;		// allocation page have no need for spare
+			reCreatePageArgs[3] = 0; // allocation page has no need for spare
 			reCreatePageArgs[4] = containerInfoSize;
 			reCreatePageArgs[5] = minimumRecordSize;
 		}
@@ -2534,33 +2564,46 @@ abstract class FileContainer
 		}
 
         if (SanityManager.DEBUG) 
-			if(SanityManager.DEBUG_ON("LoadTran"))
-				SanityManager.DEBUG_PRINT("Trace", "recreating page " + pkey + " for load tran");
+        {
+			if (SanityManager.DEBUG_ON("LoadTran"))
+				SanityManager.DEBUG_PRINT(
+                    "Trace", "recreating page " + pkey + " for load tran");
+        }
 
 		// Can't just call initPage because that wants to log an initPage
 		// operation, whereas we are here because of an initPage operation in
 		// the log already.
 		BasePage page = null;
 		boolean releasePage = true;
+
 		try
 		{
-			// a brand new page, initialize and a new page in cache
-			page = (BasePage) pageCache.create(pkey, reCreatePageArgs);
-
-			if (SanityManager.DEBUG)
+            try
             {
-                if (page == null)
-                    SanityManager.THROWASSERT(
-                        "reCreating page " + pkey + " failed");
+                // a brand new page, initialize a new page in cache
+                page = (BasePage) pageCache.create(pkey, reCreatePageArgs);
+            }
+            catch (StandardException se)
+            {
+                throw StandardException.newException(
+                    SQLState.FILE_NEW_PAGE_DURING_RECOVERY, se, pkey);
             }
 
-			releasePage = false;
-			page = latchPage(handle, page, false /* never need to wait */);
-
-			if (page == null)
+            if (page != null)
             {
-				throw StandardException.newException(
-                        SQLState.FILE_NEW_PAGE_NOT_LATCHED, pkey);
+                releasePage = false;
+                page = latchPage(handle, page, false /* never need to wait */);
+
+                if (page == null)
+                {
+                    throw StandardException.newException(
+                            SQLState.FILE_NEW_PAGE_NOT_LATCHED, pkey);
+                }
+            }
+            else
+            {
+                throw StandardException.newException(
+                    SQLState.FILE_NEW_PAGE_DURING_RECOVERY, pkey);
             }
 
 		}
@@ -2568,9 +2611,9 @@ abstract class FileContainer
 		{
 			if (releasePage && page != null)
 			{
-				// release the new page from cache if it errors 
-				// out before the exclusive lock is set
-				// error in load tran, we are doomed anyway
+				// release the new page from cache if it errors out before 
+                // the exclusive lock is set error in roll forward recovery.
+                // , we are doomed anyway
 				pageCache.release((Cacheable)page);
 				page = null;
 			}

@@ -536,9 +536,22 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		return true;
 	}
 
-	/**
-		@exception StandardException Standard Cloudscape error policy
-	*/
+    /**
+     * Clean the container.
+     * <p>
+     * Write out the container header and sync all dirty pages of this
+     * container to disk before returning.
+     * <p>
+     * checkpoint calls this interface through callbacks by telling
+     * the cache manager to clean all containers in the open container
+     * cache.  This sync of the file happens as part of writing and then
+     * syncing the container header in writeRAFHeader().
+     * <p>
+     *
+     * @param boolean Is clean called because container is being removed?
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
 	public void clean(boolean forRemove) throws StandardException
 	{
 		boolean waited = false;

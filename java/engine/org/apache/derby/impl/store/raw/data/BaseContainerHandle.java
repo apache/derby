@@ -590,11 +590,38 @@ public class BaseContainerHandle extends Observable
 		return container.getAnyPage(this, pageNumber, true /* wait */);
 	}
 
-	/**
-		Re-create this page for load tran.  Called by recovery redo ONLY
-		@exception StandardException Cloudscape Standard error policy
-	 */
-	public Page reCreatePageForLoadTran(
+    /**
+     * ReCreate a page for rollforward recovery.  
+     * <p>
+     * During redo recovery it is possible for the system to try to redo
+     * the creation of a page (ie. going from non-existence to version 0).
+     * It first trys to read the page from disk, but a few different types
+     * of errors can occur:
+     *     o the page does not exist at all on disk, this can happen during
+     *       rollforward recovery applied to a backup where the file was
+     *       copied and the page was added to the file during the time frame
+     *       of the backup but after the physical file was copied.
+     *     o space in the file exists, but it was never initalized.  This
+     *       can happen if you happen to crash at just the right moment during
+     *       the allocation process.  Also
+     *       on some OS's it is possible to read from a part of the file that
+     *       was not ever written - resulting in garbage from the store's 
+     *       point of view (often the result is all 0's).  
+     *
+     * All these errors are easy to recover from as the system can easily 
+     * create a version 0 from scratch and write it to disk.
+     *
+     * Because the system does not sync allocation of data pages, it is also
+     * possible at this point that whlie writing the version 0 to disk to 
+     * create it we may encounter an out of disk space error (caught in this
+     * routine as a StandardException from the create() call.  We can't 
+     * recovery from this without help from outside, so the caught exception
+     * is nested and a new exception thrown which the recovery system will
+     * output to the user asking them to check their disk for space/errors.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	public Page reCreatePageForRedoRecovery(
     int     pageFormat,
     long    pageNumber, 
     long    pageOffset)
@@ -602,7 +629,7 @@ public class BaseContainerHandle extends Observable
 	{
 		checkUpdateOpen();
 
-		return container.reCreatePageForLoadTran(
+		return container.reCreatePageForRedoRecovery(
 					this, pageFormat, pageNumber, pageOffset);
 	}
 

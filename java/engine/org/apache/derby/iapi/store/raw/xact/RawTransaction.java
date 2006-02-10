@@ -267,11 +267,14 @@ public abstract class RawTransaction extends Observable implements Transaction {
 		 throws StandardException;
 
 	/**
-		Recreate a container during load tran - use only by media recovery.
+		Recreate a container during redo recovery.
+
+        Used during redo recovery when processing log records trying to 
+        create a container, but no container is found in the db.
 
 		@exception StandardException  Standard cloudscape exception policy
 	 */
-	public abstract void reCreateContainerForLoadTran
+	public abstract void reCreateContainerForRedoRecovery
 		(long segmentId, long containerId, ByteArray containerInfo)
 		throws StandardException;
 

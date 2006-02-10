@@ -155,7 +155,7 @@ public final class InitPageOperation extends PhysicalPageOperation
 	}
 
 	/*
-	 * Override PageBasicOperation's getPageForLoadTran
+	 * Override PageBasicOperation's getPageForRedoRecovery
 	 */
 	/**
 		If we are in load tran, this page may not exist for the container yet.
@@ -166,17 +166,17 @@ public final class InitPageOperation extends PhysicalPageOperation
 
 		@exception StandardException Standard Cloudscape policy.
 	*/
-	protected BasePage getPageForLoadTran(Transaction xact)
+	protected BasePage getPageForRedoRecovery(Transaction xact)
 		 throws StandardException
 	{
-		BasePage p = super.getPageForLoadTran(xact);
+		BasePage p = super.getPageForRedoRecovery(xact);
 		if (p != null)
 			return p;
 
 		// create the page
 		// RESOLVE: we need the page format to properly recreate an Alloc page
 		// NEED TO UPGRADE this log record.
-		p = (BasePage)containerHdl.reCreatePageForLoadTran(
+		p = (BasePage)containerHdl.reCreatePageForRedoRecovery(
 						pageFormatId,								   
 						getPageId().getPageNumber(), 
 						pageOffset);

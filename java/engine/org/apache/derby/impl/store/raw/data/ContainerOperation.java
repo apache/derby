@@ -141,7 +141,7 @@ public class ContainerOperation extends ContainerBasicOperation implements Undoa
 
 
 	/*
-	 * override ContainerBasicOperation's findContainerForLoadTran
+	 * override ContainerBasicOperation's findContainerForRedoRecovery
 	 */
 	/**
         Find container for load tran.
@@ -151,7 +151,8 @@ public class ContainerOperation extends ContainerBasicOperation implements Undoa
 
 		@exception StandardException Standard Cloudscape policy.
 	 */
-	protected RawContainerHandle findContainerForLoadTran(RawTransaction xact)
+	protected RawContainerHandle findContainerForRedoRecovery(
+    RawTransaction xact)
 		 throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -161,7 +162,7 @@ public class ContainerOperation extends ContainerBasicOperation implements Undoa
 		long sid = containerId.getSegmentId();
 		long cid = containerId.getContainerId();
 
-		xact.reCreateContainerForLoadTran(sid, cid, createByteArray);
+		xact.reCreateContainerForRedoRecovery(sid, cid, createByteArray);
 
 		// now we should be able to open this container
 		return xact.openDroppedContainer(containerId, (LockingPolicy)null);
