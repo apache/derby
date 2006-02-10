@@ -548,7 +548,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
      * syncing the container header in writeRAFHeader().
      * <p>
      *
-     * @param boolean Is clean called because container is being removed?
+     * @param forRemove Is clean called because container is being removed?
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
