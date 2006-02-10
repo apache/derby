@@ -77,12 +77,9 @@ public class RecoveryAfterBackup
             s.execute ("INSERT INTO t1 SELECT a+128 FROM t1");
 
             // Shut down database
-            Properties shutdownAttrs = new Properties();
-            shutdownAttrs.setProperty("shutdownDatabase", "shutdown");
             System.out.println("Shutting down database ...");
             try {
-                DataSource ds = TestUtil.getDataSource(shutdownAttrs);
-                ds.getConnection();
+            	TestUtil.getConnection("", "shutdown=true");
             } catch(SQLException sqle) {
                 if (sqle.getSQLState() != null 
                     && sqle.getSQLState().equals("XJ015")) {
@@ -94,12 +91,10 @@ public class RecoveryAfterBackup
 
             // Start up with rollforward-recovery
             System.out.println("Starting restore with roll-forward recovery..");
-            Properties restoreAttrs = new Properties();
-            restoreAttrs.setProperty("DatabaseName", "hairynosedwombat");
-            restoreAttrs.setProperty("connectionAttributes", 
-                  "rollForwardRecoveryFrom=extinout/mybackup/hairynosedwombat");
-            DataSource ds = TestUtil.getDataSource(restoreAttrs);
-            conn = ds.getConnection();
+            String dbName = "hairynosedwombat";
+            String connAttrs = 
+            	"rollForwardRecoveryFrom=extinout/mybackup/hairynosedwombat";
+            conn = TestUtil.getConnection(dbName, connAttrs);
 
             // After restore table should contain all records inserted above
             System.out.println("Verifying database ...");

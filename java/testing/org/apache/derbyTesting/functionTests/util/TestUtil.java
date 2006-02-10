@@ -694,8 +694,48 @@ public class TestUtil {
         }	
     }
 
-	
-	public static Connection getDataSourceConnection (Properties prop) throws SQLException {
+    
+    /**
+     * Get connection to given database using the connection attributes. This
+     * method is used by tests to get a secondary connection with 
+     * different set of attributes. It does not use what is specified in 
+     * app_properties file or system properties. This method uses DataSource 
+     * class for CDC/Foundation Profile environments, which are based on 
+     * JSR169. Using DataSource will not work with other j9 profiles. So
+     * DriverManager is used for non-JSR169. The method is used as a wrapper to
+     * hide this difference in getting connections in different environments.
+     *  
+     * @param databaseName
+     * @param connAttrs
+     * @return Connection to database 
+     * @throws SQLException on failure to connect.
+     * @throws ClassNotFoundException on failure to load driver.
+     * @throws InstantiationException on failure to load driver.
+     * @throws IllegalAccessException on failure to load driver.
+     */
+    public static Connection getConnection(String databaseName, 
+    									   String connAttrs) 
+    	throws SQLException, ClassNotFoundException, 
+				InstantiationException, IllegalAccessException {
+    	
+    	Connection conn;
+    	if(TestUtil.HAVE_DRIVER_CLASS) {
+    		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
+    		Class.forName(driver).newInstance();
+    		conn = DriverManager.getConnection("jdbc:derby:" + databaseName 
+												+ ";" + connAttrs );
+    	}
+    	else {
+    		//Use DataSource for JSR169
+	    	Properties prop = new Properties();
+	        prop.setProperty("databaseName", databaseName);
+	        prop.setProperty("connectionAttributes", connAttrs);
+	        conn = getDataSourceConnection(prop);
+    	}
+        return conn;
+    }
+    
+    public static Connection getDataSourceConnection (Properties prop) throws SQLException {
 		DataSource ds = TestUtil.getDataSource(prop);
 		try {
 			Connection conn = ds.getConnection();
