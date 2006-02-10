@@ -111,7 +111,7 @@ public class NetAgent extends Agent {
             socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port));
         } catch (java.security.PrivilegedActionException e) {
             throw new DisconnectException(this,
-                    e.getClass().getName() + " : Error opening socket to server " + server + " on port " + port + " with message : " + e.getMessage());
+                    e.getClass().getName() + " : Error opening socket to server " + server + " on port " + port + " with message : " + e.getException().getMessage());
         }
 
         // Set TCP/IP Socket Properties
