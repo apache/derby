@@ -546,7 +546,7 @@ public class ClassHolder {
 	** Methods to convert indexes to constant pool entries and vice-versa.
 	*/
 
-	ConstantPoolEntry getEntry(int index) {
+	public ConstantPoolEntry getEntry(int index) {
 		return (ConstantPoolEntry) cptEntries.elementAt(index);
 	}
 

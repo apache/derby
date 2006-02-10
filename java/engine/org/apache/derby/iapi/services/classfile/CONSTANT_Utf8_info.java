@@ -26,7 +26,7 @@ import java.io.IOException;
 /** Constant Pool class - pages 92-99 */
 
 /** Utf8- page 100 - Section 4.4.7 */
-final class CONSTANT_Utf8_info extends ConstantPoolEntry {
+public final class CONSTANT_Utf8_info extends ConstantPoolEntry {
 	private final String value;
 	private int asString;
 	private int asCode;
