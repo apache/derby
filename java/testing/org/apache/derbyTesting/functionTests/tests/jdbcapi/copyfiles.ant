@@ -14,6 +14,7 @@ dbMetaDataJdbc30_app.properties
 dbMetaDataJdbc30_sed.properties
 default_app.properties
 default_derby.properties
+derbyStress_app.properties
 empty.txt
 getCurConnJdbc20_app.properties
 getCurConnJdbc20.sql

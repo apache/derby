@@ -30,3 +30,6 @@ lang/holdCursorJava.java
 jdbcapi/dataSourceReference.java
 #no XA for JCC
 jdbcapi/savepointJdbc30_XA.java
+# excluding jdbcapi/derbyStress.java - jcc runs out of memory with this test
+jdbcapi/derbyStress.java
+
