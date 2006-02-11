@@ -516,6 +516,14 @@ public class Monitor {
 
 		If true is returned then findService should be used to see if the service
 		exists or not.
+		
+		<P> The poperty set passed in is for boot options for the modules
+		required to start the service. It does not support defining different
+		or new modules implementations.
+		
+		@param serviceName Name of the service to be started
+		@param properties Property set made available to all modules booted
+		for this service, through their ModuleControl.boot method.
 
 		@return true if the service type is handled by the monitor, false if it isn't
 

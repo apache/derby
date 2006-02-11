@@ -961,7 +961,7 @@ abstract class BaseMonitor
 				try {
 					if (protocolOrType.equals(Monitor.SERVICE_TYPE_DIRECTORY)) {
 						if (bootAll)	// only if automatic booting is required
-							startPersistentService(name, properties, true);
+							findProviderAndStartService(name, properties, true);
 					} else {
 						bootService((PersistentService) null,
 							protocolOrType, name, (Properties)null, false);
@@ -984,18 +984,11 @@ abstract class BaseMonitor
 		@see ModuleFactory#startPersistentService
 		@see Monitor#startPersistentService
 	*/
-	public boolean startPersistentService(String name, Properties properties)
+	public final boolean startPersistentService(String name, Properties properties)
 		throws StandardException {
 
-		return startPersistentService(name, properties, false);
+		return findProviderAndStartService(name, properties, false);
 
-	}
-
-	protected boolean startPersistentService(String name, 
-				 Properties properties, boolean bootTime)
-		throws StandardException {
-
-		return findProviderAndStartService(name, properties, bootTime);
 	}
 
 	/**
@@ -1012,24 +1005,24 @@ abstract class BaseMonitor
 		throws StandardException {
 
 
-		PersistentService provider = findProviderForCreate(properties, name);
+		PersistentService provider = findProviderForCreate(name);
 		if (provider == null) {
 			throw StandardException.newException(SQLState.PROTOCOL_UNKNOWN, name);
 		}
 
 		return bootService(provider, factoryInterface, name, properties, true);
 	}
-    /* Removes a PersistentService
+    /**
+     *  Removes a PersistentService.
+     *  Could be used for drop database.
        @param name : Service name to be removed.
        
-       Note : Currently needed by dropPublisher. But this can be used to
-              remove any PersistentService.
-	*/
+    */
     public void removePersistentService(String name)
          throws StandardException 
     {
         PersistentService provider=null;
-		provider = findProviderForCreate(null, name);
+		provider = findProviderForCreate(name);
         String serviceName = provider.getCanonicalServiceName(name);
         boolean removed = provider.removeServiceRoot(serviceName);
         if (removed == false)
@@ -1503,7 +1496,7 @@ nextModule:
 	/**
 		Find a provider and start  a service.
 	*/
-	protected boolean findProviderAndStartService(String name, 
+	private boolean findProviderAndStartService(String name, 
 						  Properties properties, boolean bootTime)
 		throws StandardException {
 
@@ -1515,7 +1508,7 @@ nextModule:
 		// see if the name already includes a service type
 		int colon = name.indexOf(':');
 		if (colon != -1) {
-			actualProvider = findProviderFromName(properties, name, colon);
+			actualProvider = findProviderFromName(name, colon);
 
 			// if null is returned here then its a sub-sub protocol/provider
 			// that we don't understand. Attempt to load it as an untyped name.
@@ -1593,25 +1586,17 @@ nextModule:
 		return true;
 	}
 
-	protected PersistentService findProvider() throws StandardException
-	{
-		// This is a hack. This is called when we want to re-write 
-		// services.properties, and need the provider for the database
-		// directory.
-		return findProviderForCreate(null, "");
-	}
-
-	protected PersistentService findProviderForCreate(Properties startParams, String name) throws StandardException {
+	protected PersistentService findProviderForCreate(String name) throws StandardException {
 		// RESOLVE - hard code creating databases in directories for now.
-		return (PersistentService) findProviderFromName( startParams, name, name.indexOf(':'));
+		return (PersistentService) findProviderFromName(name, name.indexOf(':'));
 	}
 
 	/**
 		Find the service provider from a name that includes a service type,
-		ie. is of the form 'type:name'. If type is less than 3 chanacters
+		ie. is of the form 'type:name'. If type is less than 3 characters
 		then it is assumed to be of type directory, i.e. a windows driver letter.
 	*/
-	private PersistentService findProviderFromName(Properties startParams, String name, int colon) throws StandardException
+	private PersistentService findProviderFromName(String name, int colon) throws StandardException
     {
 		// empty type, treat as a unknown protocol
 		if (colon == 0)
@@ -1624,10 +1609,10 @@ nextModule:
 		} else {
 			serviceType = name.substring(0, colon);
 		}
-		return getServiceProvider( startParams, serviceType);
+		return getServiceProvider(serviceType);
 	}
 
-    public PersistentService getServiceProvider( Properties startParams, String subSubProtocol) throws StandardException
+    public PersistentService getServiceProvider(String subSubProtocol) throws StandardException
     {
         if( subSubProtocol == null)
             return null;
@@ -1637,13 +1622,18 @@ nextModule:
             if( ps != null)
                 return ps;
         }
-        return getPersistentService( startParams, subSubProtocol);
+        return getPersistentService(subSubProtocol);
     } // end of getServiceProvider
 
-    private PersistentService getPersistentService( Properties properties, String subSubProtocol)
+ 
+    /**
+     * Return a PersistentService implementation to handle the subSubProtocol.
+     * @return Valid PersistentService or null if the protocol is not handled.
+      */
+    private PersistentService getPersistentService(String subSubProtocol)
         throws StandardException
     {
-        String className = getStorageFactoryClassName( properties, subSubProtocol);
+        String className = getStorageFactoryClassName(subSubProtocol);
         return getPersistentService( className, subSubProtocol);
     }
 
@@ -1665,14 +1655,16 @@ nextModule:
         return new StorageFactoryService( subSubProtocol, storageFactoryClass);
     } // end of getPersistentService
 
-    private String getStorageFactoryClassName( Properties properties, String subSubProtocol)
+    /**
+     * Find the StorageFactory class name that handles the subSub protocol.
+     * Looks in the system property set and the set defined during boot.
+ 
+      * @return Valid class name, or null if no StorageFactory handles the protocol.
+     */
+    private String getStorageFactoryClassName(String subSubProtocol)
     {
         String propertyName = Property.SUB_SUB_PROTOCOL_PREFIX + subSubProtocol;
-        String className = null;
-        if( properties != null)
-            className = properties.getProperty( propertyName);
-        if( className == null)
-            className = PropertyUtil.getSystemProperty( propertyName);
+        String className = PropertyUtil.getSystemProperty( propertyName);
         if( className != null)
             return className;
         return (String) storageFactories.get( subSubProtocol);
@@ -2169,7 +2161,7 @@ nextModule:
                 try
                 {
                     storageFactoryPersistentService
-                      = getPersistentService( getStorageFactoryClassName( null, PersistentService.DIRECTORY),
+                      = getPersistentService( getStorageFactoryClassName(PersistentService.DIRECTORY),
                                               PersistentService.DIRECTORY);
                 }
                 catch( StandardException se){ storageFactoryPersistentService = null; }

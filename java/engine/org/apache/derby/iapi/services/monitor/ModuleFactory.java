@@ -103,7 +103,7 @@ public interface ModuleFactory
      *
      * @exception StandardException
      */
-    public PersistentService getServiceProvider( Properties startParams, String subSubProtocol) throws StandardException;
+    public PersistentService getServiceProvider(String subSubProtocol) throws StandardException;
     
 	public Properties getApplicationProperties();
 
@@ -175,6 +175,14 @@ public interface ModuleFactory
 		Start a persistent service.
 		<BR>
 		<B>Do not call directly - use Monitor.startPersistentService()</B>
+		
+		<P> The poperty set passed in is for boot options for the modules
+		required to start the service. It does not support defining different
+		or new modules implementations.
+		
+		@param serviceName Name of the service to be started
+		@param properties Property set made available to all modules booted
+		for this service, through their ModuleControl.boot method.
 
 		@return true if the service type is handled by the monitor, false if it isn't
 

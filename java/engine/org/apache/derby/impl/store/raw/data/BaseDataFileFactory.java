@@ -250,7 +250,7 @@ public final class BaseDataFileFactory
 		if (serviceType == null)
 			return false;
 
-		if (!handleServiceType(startParams, serviceType))
+		if (!handleServiceType(serviceType))
 			return false;
 
 		if (startParams.getProperty(PersistentService.ROOT) == null)
@@ -1770,13 +1770,12 @@ public final class BaseDataFileFactory
 		Does this factory support this service type.
 	*/
 	private boolean handleServiceType(
-    Properties  startParams, 
     String      type) 
     {
         try
         {
             PersistentService ps = 
-                Monitor.getMonitor().getServiceProvider( startParams, type);
+                Monitor.getMonitor().getServiceProvider(type);
             return ps != null && ps.hasStorageFactory();
         }
         catch (StandardException se)
