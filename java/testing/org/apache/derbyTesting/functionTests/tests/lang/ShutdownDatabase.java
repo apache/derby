@@ -657,7 +657,7 @@ public class ShutdownDatabase{
 		if(!isShutdownError(e))
 			throw e;
 		
-		System.err.println("SQLException of shutting down was found.");
+		System.out.println("SQLException of shutting down was found.");
 		
 	}
 
