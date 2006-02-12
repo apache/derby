@@ -1065,162 +1065,154 @@ nextModule:
 		for (Enumeration e = moduleList.propertyNames(); e.hasMoreElements(); ) {
 
 			String key = (String) e.nextElement();
-			if (key.startsWith("derby.module.")) {
-				int keylength = "derby.module.".length();
-				String tag = key.substring(keylength);
+            
+            // module tagged name in the modules.properties file.
+            // used as the tag  for dependent properties.
+            String tag;
+            
+            // Dynamically loaded code is defined by a property of
+            // the form:
+            // derby.module.<modulename>=<class name>
+            // or
+            // derby.subSubProtocol.<modulename>=<classname>
+            
+			if (key.startsWith(Property.MODULE_PREFIX)) {
+				tag = key.substring(Property.MODULE_PREFIX.length());
+            } else if (key.startsWith(Property.SUB_SUB_PROTOCOL_PREFIX)) {
+                tag = key.substring(Property.MODULE_PREFIX.length());
+            } else {
+                continue nextModule;
+            }
+            
 
-				// Check to see if it has any environment requirements
+			// Check to see if it has any environment requirements
 
-				// derby.env.jdk.<tag> - Any JDK requirements.
-				String envKey = "derby.env.jdk.".concat(tag);
-				String envJDK = moduleList.getProperty(envKey);
-				int envJDKId = 0;
-				
-				if (envJDK != null) {
-					envJDKId = Integer.parseInt(envJDK.trim());
-					if (envJDKId > theJDKId) {
+			// derby.env.jdk.<modulename> - Any JDK requirements.
+			String envKey = Property.MODULE_ENV_JDK_PREFIX.concat(tag);
+			String envJDK = moduleList.getProperty(envKey);
+			int envJDKId = 0;
+			
+			if (envJDK != null) {
+				envJDKId = Integer.parseInt(envJDK.trim());
+				if (envJDKId > theJDKId) {
+					continue nextModule;
+				}
+			}
+
+			// derby.env.classes.<tag> - Any class requirements
+			envKey = Property.MODULE_ENV_CLASSES_PREFIX.concat(tag);
+			String envClasses = moduleList.getProperty(envKey);
+			if (envClasses != null) {
+
+				StringTokenizer st = new StringTokenizer(envClasses, ",");
+				for (; st.hasMoreTokens(); ) {
+					try {
+						Class.forName(st.nextToken().trim());
+					} catch (ClassNotFoundException cnfe) {
+						continue nextModule;
+					} catch (LinkageError le) {
 						continue nextModule;
 					}
 				}
-
-				// derby.env.classes.<tag> - Any class requirements
-				envKey = "derby.env.classes.".concat(tag);
-				String envClasses = moduleList.getProperty(envKey);
-				if (envClasses != null) {
-
-					StringTokenizer st = new StringTokenizer(envClasses, ",");
-					for (; st.hasMoreTokens(); ) {
-						try {
-							Class.forName(st.nextToken().trim());
-						} catch (ClassNotFoundException cnfe) {
-							continue nextModule;
-						} catch (LinkageError le) {
-							continue nextModule;
-						}
-					}
-				}
-
-
-
-				// we load the class and run its registerFormatC
-				// if we can't load the class or create an instance then
-				// we don't use this calls as a valid module implementation
-				String className = moduleList.getProperty(key);
-
-				if (SanityManager.DEBUG && reportOn) {
-					report("Accessing module " + className + " to run initializers at boot time");
-				}
-
-				try {
-					Class possibleModule = Class.forName(className);
-
-					// Look for the monitors special modules, PersistentService ones.
-					if (getPersistentServiceImplementation(possibleModule))
-                        continue;
-
-					// If this is a specific JDK version (environment) module
-					// then it must be ordered in the implementation list by envJDKId.
-					// Those with a higher number are at the front, e.g.
-					//
-					//	JDK 1.4 modules (envJDKId == 4)
-					//  JDK 1.2/1.3 modules (envJDKId == 2)
-					//  JDK 1.1 modules (envJDKId == 1)
-					//  generic modules (envJDKId == 0 (not set in modules.properties)
-					//
-					//  Note modules with envJDKId > theJDKId do not get here
-
-					if (envJDKId != 0) {
-
-						// total how many modules with a higher envJDKId are ahead of us
-						int offset = 0;
-						for (int eji = theJDKId; eji > envJDKId; eji--) {
-							offset += envModuleCount[eji];
-						}
-
-						implementations.insertElementAt(possibleModule, offset);
-						envModuleCount[envJDKId]++;
-
-					}
-					else {
-						// just add to the end of the vector
-						implementations.addElement(possibleModule);
-					}
-
-					// Since ModuleControl and ModuleSupportable are not called directly
-					// check that if the have the methods then the class implements the
-					// interface.
-					if (SanityManager.DEBUG) {
-						// ModuleSupportable
-						Class[] csParams = { new java.util.Properties().getClass()};
-						try {
-							possibleModule.getMethod("canSupport", csParams);
-							if (!ModuleSupportable.class.isAssignableFrom(possibleModule)) {
-								SanityManager.THROWASSERT("Module does not implement ModuleSupportable but has canSupport() - " + className);
-							}
-						} catch (NoSuchMethodException nsme){/* ok*/}
-
-						// ModuleControl
-						boolean eitherMethod = false;
-
-						Class[] bootParams = {Boolean.TYPE, new java.util.Properties().getClass()};
-						try {
-							possibleModule.getMethod("boot", bootParams);
-							eitherMethod = true;
-						} catch (NoSuchMethodException nsme){/*ok*/}
-
-						Class[] stopParams = {};
-						try {
-							possibleModule.getMethod("stop", stopParams);
-							eitherMethod = true;
-						} catch (NoSuchMethodException nsme){/*ok*/}
-
-						if (eitherMethod) {
-							if (!ModuleControl.class.isAssignableFrom(possibleModule)) {
-								SanityManager.THROWASSERT("Module does not implement ModuleControl but has its methods - " + className);
-							}
-						}
-
-
-						
-					}
-
-				}
-				catch (ClassNotFoundException cnfe) {
-					report("Class " + className + " " + cnfe.toString() + ", module ignored.");
-				}
-				catch (LinkageError le) {
-					report("Class " + className + " " + le.toString() + ", module ignored.");
-				}
 			}
-            else if( key.startsWith( Property.SUB_SUB_PROTOCOL_PREFIX)) {
-                String subSubProtocol = key.substring( Property.SUB_SUB_PROTOCOL_PREFIX.length());
-                String className = moduleList.getProperty(key);
 
-				if (SanityManager.DEBUG && reportOn) {
-					report("Accessing module " + className + " to run initializers at boot time");
-				}
-                try {
-                    Class possibleImplementation = Class.forName(className);
-					// Look for the monitors special classes, PersistentService and StorageFactory ones.
-                    if( getPersistentServiceImplementation( possibleImplementation))
-                        continue;
-                    if( StorageFactory.class.isAssignableFrom( possibleImplementation)) {
-                        if( newInstance( possibleImplementation) == null)
-                            report("Class " + className + " cannot create instance, StorageFactory ignored.");
-                        else
-                            storageFactories.put( subSubProtocol, className);
-                        continue;
-                    }
+
+
+			// Try to load the class
+			// if we can't load the class or create an instance then
+			// we don't use this calls as a valid module implementation
+			String className = moduleList.getProperty(key);
+
+			if (SanityManager.DEBUG && reportOn) {
+				report("Accessing module " + className + " to run initializers at boot time");
+			}
+
+			try {
+				Class possibleModule = Class.forName(className);
+
+				// Look for the monitors special modules, PersistentService ones.
+				if (getPersistentServiceImplementation(possibleModule))
+                    continue;
+                
+                
+                if( StorageFactory.class.isAssignableFrom(possibleModule)) {
+                    storageFactories.put(tag, className);
+                    continue;
                 }
-				catch (ClassNotFoundException cnfe) {
-					report("Class " + className + " " + cnfe.toString() + ", module ignored.");
-				}
-				catch (LinkageError le) {
-					report("Class " + className + " " + le.toString() + ", module ignored.");
-				}
-            }
-        }
 
+
+				// If this is a specific JDK version (environment) module
+				// then it must be ordered in the implementation list by envJDKId.
+				// Those with a higher number are at the front, e.g.
+				//
+				//	JDK 1.4 modules (envJDKId == 4)
+				//  JDK 1.2/1.3 modules (envJDKId == 2)
+				//  JDK 1.1 modules (envJDKId == 1)
+				//  generic modules (envJDKId == 0 (not set in modules.properties)
+				//
+				//  Note modules with envJDKId > theJDKId do not get here
+
+				if (envJDKId != 0) {
+
+					// total how many modules with a higher envJDKId are ahead of us
+					int offset = 0;
+					for (int eji = theJDKId; eji > envJDKId; eji--) {
+						offset += envModuleCount[eji];
+					}
+
+					implementations.insertElementAt(possibleModule, offset);
+					envModuleCount[envJDKId]++;
+
+				}
+				else {
+					// just add to the end of the vector
+					implementations.addElement(possibleModule);
+				}
+
+				// Since ModuleControl and ModuleSupportable are not called directly
+				// check that if the have the methods then the class implements the
+				// interface.
+				if (SanityManager.DEBUG) {
+					// ModuleSupportable
+					Class[] csParams = { new java.util.Properties().getClass()};
+					try {
+						possibleModule.getMethod("canSupport", csParams);
+						if (!ModuleSupportable.class.isAssignableFrom(possibleModule)) {
+							SanityManager.THROWASSERT("Module does not implement ModuleSupportable but has canSupport() - " + className);
+						}
+					} catch (NoSuchMethodException nsme){/* ok*/}
+
+					// ModuleControl
+					boolean eitherMethod = false;
+
+					Class[] bootParams = {Boolean.TYPE, new java.util.Properties().getClass()};
+					try {
+						possibleModule.getMethod("boot", bootParams);
+						eitherMethod = true;
+					} catch (NoSuchMethodException nsme){/*ok*/}
+
+					Class[] stopParams = {};
+					try {
+						possibleModule.getMethod("stop", stopParams);
+						eitherMethod = true;
+					} catch (NoSuchMethodException nsme){/*ok*/}
+
+					if (eitherMethod) {
+						if (!ModuleControl.class.isAssignableFrom(possibleModule)) {
+							SanityManager.THROWASSERT("Module does not implement ModuleControl but has its methods - " + className);
+						}
+					}
+				}
+
+			}
+			catch (ClassNotFoundException cnfe) {
+				report("Class " + className + " " + cnfe.toString() + ", module ignored.");
+			}
+			catch (LinkageError le) {
+				report("Class " + className + " " + le.toString() + ", module ignored.");
+			}
+		}
+        
 		if (implementations.isEmpty())
 			return null;
 		implementations.trimToSize();

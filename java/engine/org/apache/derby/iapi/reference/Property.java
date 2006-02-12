@@ -486,6 +486,23 @@ public interface Property {
 	 *<B>INTERNAL USE ONLY</B> 
 	 */
 	String LOG_DEVICE_AT_BACKUP = "derby.storage.logDeviceWhenBackedUp";
+    
+    /**
+     * derby.module.modulename
+     * <P>
+     * Defines a new module. Modulename is a name used when loading the definition
+     * of a module, it provides the linkage to other properties used to define the
+     * module, derby.env.jdk.modulename and derby.env.classes.modulename.
+     * 
+     * The value is a Java class name that implements functionality required by
+     * the other parts of a Derby system or database. The class can optionally implement
+     * these classes to control its use and startup.
+     * <UL>
+     * <LI> org.apache.derby.iapi.services.monitor.ModuleControl
+     * <LI> org.apache.derby.iapi.services.monitor.ModuleSupportable
+     * </UL>
+     */
+    String MODULE_PREFIX = "derby.module.";
 
     /**
      *  derby.subSubProtocol.xxx
@@ -510,8 +527,31 @@ public interface Property {
      * Subsubprotocols "directory", "classpath", "jar", "http", and "https" are built in and may not be overridden.
      */
     String SUB_SUB_PROTOCOL_PREFIX = "derby.subSubProtocol.";
+    
+    
+    /**
+     * Declare a minimum JDK level the class for a module or sub sub protocol supports.
+     * Set to an integer value from the JVMInfo class to represent a JDK.
+     * If the JDK is running at a lower level than the class requires
+     * then the class will not be loaded and will not be used.
+     * 
+     * If there are multiple modules classes implementing the same functionality
+     * and supported by the JVM, then the one with the highest JDK
+     * requirements will be selected. This functionality is not present for
+     * sub sub protocol classes yet.
+     * 
+     * @see org.apache.derby.iapi.services.info.JVMInfo.JDK_ID
+     */
+    String MODULE_ENV_JDK_PREFIX = "derby.env.jdk.";
 
-	/*
+    /**
+     * Declare a set of classes that the class for a module or sub sub protocol requires.
+     * Value is a comma separated list of classes. If the classes listed are not
+     * loadable by the virtual machine then the module class will not be loaded and will not be used.
+    */
+    String MODULE_ENV_CLASSES_PREFIX = "derby.env.classes.";
+
+    /*
 	** derby.language.*
 	*/
 
