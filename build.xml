@@ -580,10 +580,10 @@
         useexternalfile="yes"
         classpath="${out.dir};${java14compile.classpath};${jars.extras};${osgi}"
         destdir="${out.javadoc.dir}/engine"
-        windowtitle="Apache Derby V${major}.${minor} Engine Documentation"
-        doctitle="Apache Derby V${major}.${minor} Engine Documentation"
+        windowtitle="Apache Derby V${major}.${minor} Internals"
+        doctitle="Apache Derby V${major}.${minor} Internals"
         Footer="${javadoc.Footer}"
-        bottom="Apache Derby V${major}.${minor} Engine Documentation - &lt;i&gt;Copyright &amp;copy; 1997,2005 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"
+        bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 1997,2006 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"
         source="1.4">
         <taglet name="org.apache.derbyBuild.javadoc.FormatIdTaglet" 
                 path="${basedir}/classes"/>
