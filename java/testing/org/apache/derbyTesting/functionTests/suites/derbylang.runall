@@ -145,3 +145,4 @@ lang/updateCursor.java
 lang/valuesclause.sql
 lang/views.sql
 lang/wisconsin.java
+lang/ShutdownDatabase.java

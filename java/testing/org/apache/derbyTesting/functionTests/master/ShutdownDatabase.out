@@ -1,0 +1,27 @@
+A connection to testOnlyTransactionWasCommitedDB was opened.
+SQLException of shutting down was found.
+1000
+A connection to testTwiceCommitedDB was opened.
+SQLException of shutting down was found.
+1999
+A connection to testOnceRollbackedAndCommitedDB was opened.
+SQLException of shutting down was found.
+999
+A connection to testOnlyTransactionWasRollbackedDB was opened.
+SQLException of shutting down was found.
+0
+A connection to testOnceCommitedAndRollbackedDB was opened.
+SQLException of shutting down was found.
+1000
+A connection to testTwiceRollbackedDB was opened.
+SQLException of shutting down was found.
+0
+A connection to testOnlyTransactionWasLeftDB was opened.
+SQLException of shutting down was found.
+0
+A connection to testOnceCommitedAndLeftDB was opened.
+SQLException of shutting down was found.
+1000
+A connection to testOnceRollbackedAndLeftDB was opened.
+SQLException of shutting down was found.
+0
