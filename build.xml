@@ -543,10 +543,11 @@
              classpath="${compile.classpath};${osgi};${servlet24};${out.dir}"
              breakiterator="true"
              destdir="${out.javadoc.dir}/publishedapi"
+    	     Overview="${basedir}/published_api_overview.html"
              Windowtitle="Apache Derby ${major}.${minor} API Documentation"
              Doctitle="Apache Derby ${major}.${minor} API Documentation"
              Footer="${javadoc.Footer}"
-             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 1997,2005 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;">
+             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 1997,2006 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;">
       <fileset dir="${derby.engine.src.dir}"
                includesfile="${javadoctools.dir}/publishedapi.ant"/>
       <fileset dir="${derby.client.src.dir}"

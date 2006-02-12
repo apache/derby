@@ -1,0 +1,25 @@
+<body>
+JDBC driver and data source implementations.
+<P>
+Client/Remote driver and data sources, used to connect to the network server
+<UL>
+<LI> <B>ClientDriver</B> - Type 4 JDBC driver
+<LI> <B>ClientDataSource</B> - Data source
+<LI> <B>ClientConnectionPoolDataSource</B> - Connection pooling data source
+<LI> <B>ClientXADataSource</B> - XA data source
+</UL>
+<P>
+Embedded driver and data sources, used when the database engine is embedded with the application.
+<UL>
+<LI> <B>EmbeddedDriver</B> - Type 4 JDBC driver
+<LI> <B>EmbeddedDataSource</B> - Data source for J2SE and J2EE
+<LI> <B>EmbeddedSimpleDataSource</B> - Data source for J2ME/CDC/Foundation and J2SE
+<LI> <B>EmbeddedConnectionPoolSource</B> - Connection pooling data source
+<LI> <B>EmbeddedXASource</B> - XA data source
+</UL>
+<P>
+Derby's JDBC api is defined by its entry point classes, the drivers and data source implementations
+and the standard JDBC api definitions of the <code>java.sql</code> and <code>javax.sql</code> classes.
+Derby does not provide non-standard extensions to standard JDBC classes such as <code>Connection</code>,
+to encourage portable JDBC applications.
+</body>
