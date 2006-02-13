@@ -83,9 +83,27 @@ public class setTransactionIsolation{
 
 
     System.out.println("Creating table...");
-    stmt.executeUpdate( "CREATE TABLE TAB1 (c11 int, c12 int)" );
-    stmt.executeUpdate("INSERT INTO TAB1 VALUES(1,1)");
-    stmt.executeUpdate("INSERT INTO TAB1 VALUES(2,1)");
+    final int stringLength = 400;
+    stmt.executeUpdate("CREATE TABLE TAB1 (c11 int, " +
+                       "c12 varchar(" + stringLength + "))");
+    PreparedStatement insertStmt =
+        conn.prepareStatement("INSERT INTO TAB1 VALUES(?,?)");
+    // We need to ensure that there is more data in the table than the
+    // client can fetch in one message (about 32K). Otherwise, the
+    // cursor might be closed on the server and we are not testing the
+    // same thing in embedded mode and client/server mode.
+    final int rows = 40000 / stringLength;
+    StringBuffer buff = new StringBuffer(stringLength);
+    for (int i = 0; i < stringLength; i++) {
+        buff.append(" ");
+    }
+    for (int i = 1; i <= rows; i++) {
+        insertStmt.setInt(1, i);
+        insertStmt.setString(2, buff.toString());
+        insertStmt.executeUpdate();
+    }
+    insertStmt.close();
+
 	stmt.execute("create table t1(I int, B char(15))");
 	stmt.execute("create table t1copy(I int, B char(15))");
 	

@@ -289,3 +289,5 @@ PASSED
 Test for missing SQLSTT in EXCSQLSET - PKGNAMCT is ignored
 PASSED
 PASSED
+Test explicitly closing implicitly closed cursor
+PASSED

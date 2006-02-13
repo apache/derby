@@ -105,6 +105,7 @@ values (1, 2, 3) for update;
 -- unions are not updatable
 select * from t1 union all select * from t1 for update;
 
+insert into t1 (i) values (1);
 -- . table with/without correlation name
 -- the idea is that the delete is against the table name, not the correlation name
 -- we've already seen the without correlation name case in previous tests
@@ -112,7 +113,7 @@ get cursor c4 as 'select i from t1 s1 for update';
 next c4;
 -- this will get a target table mismatch error, it uses the correlation name:
 delete from s1 where current of c4;
--- this will compile and get a 'no current row' error, it uses the table name:
+-- this will compile and succeed, it uses the table name:
 delete from t1 where current of c4;
 close c4;
 

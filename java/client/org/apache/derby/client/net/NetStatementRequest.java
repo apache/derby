@@ -339,6 +339,13 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
             buildQRYROWSET(fetchSize);
         }
 
+        // Tell the server to close forward-only result sets
+        // implicitly when they are exhausted. The server will ignore
+        // this parameter if the result set is scrollable.
+        if (netAgent_.netConnection_.serverSupportsQryclsimp()) {
+            buildQRYCLSIMP();
+        }
+
         updateLengthBytes();  // opnqry is complete
     }
 
@@ -1448,6 +1455,14 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         }
     }
 
+    /**
+     * Build QRYCLSIMP (Query Close Implicit). Query Close Implicit
+     * controls whether the target server implicitly closes a
+     * non-scrollable query upon end of data (SQLSTATE 02000).
+     */
+    private void buildQRYCLSIMP() {
+        writeScalar1Byte(CodePoint.QRYCLSIMP, CodePoint.QRYCLSIMP_YES);
+    }
 
     // helper method to buildFDODTA to build the actual data length
     private void setFDODTALobLength(int[][] protocolTypesAndLengths, int i, long dataLength) throws SqlException {

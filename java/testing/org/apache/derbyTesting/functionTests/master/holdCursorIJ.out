@@ -94,13 +94,16 @@ C11        |C12
 -----------------------
 1          |1          
 ij> -- wont' be able to drop table because of cursors jdk1 and jdk4
+-- in DerbyNetClient, cursor is closed on server and DROP TABLE succeeds
 drop table t1;
 ERROR X0X95: Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
 ij> commit;
 ij> -- drop table still won't work because jdk4 is still open after commit
+-- in DerbyNetClient, the table is already dropped
 drop table t1;
 ERROR X0X95: Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
 ij> -- close cursor jdk4 and try then deleting the table
+-- in DerbyNetClient, the table is already dropped
 close jdk4;
 ij> drop table t1;
 0 rows inserted/updated/deleted
@@ -126,10 +129,12 @@ C11        |C12
 -----------------------
 1          |1          
 ij> -- try to change the isolation level. will give error because of jdk1 and jdk4
+-- no error in DerbyNetClient because cursor is closed on server
 set current isolation RR;
 ERROR X0X03: Invalid transaction state - held cursor requires same isolation level
 ij> commit;
 ij> -- attempt to change isolation level should give error because of jdk4 hold cursor
+-- no error in DerbyNetClient because cursor is closed on server
 set isolation = REPEATABLE READ;
 ERROR X0X03: Invalid transaction state - held cursor requires same isolation level
 ij> -- close jdk4 and then should be able to change isolation
@@ -151,9 +156,11 @@ C11        |C12
 -----------------------
 1          |1          
 ij> -- following should fail because of cursor jdk4
+-- no error in DerbyNetClient because cursor is closed on server
 set isolation RS;
 ERROR X0X03: Invalid transaction state - held cursor requires same isolation level
 ij> -- following should fail because of cursor jdk4
+-- no error in DerbyNetClient because cursor is closed on server
 set isolation UR;
 ERROR X0X03: Invalid transaction state - held cursor requires same isolation level
 ij> close jdk4;

@@ -939,3 +939,4 @@ MultipleRSAutoCommit: PASS.
 MultipleRSNoCommit: PASS. 
 JIRA-491 Successful.
 JIRA-492 successful -- no hang!
+testImplicitClose(): PASSED

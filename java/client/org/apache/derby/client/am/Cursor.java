@@ -69,7 +69,7 @@ public abstract class Cursor {
     // This flag indicates that the server has returned all the rows, and is positioned
     // after last, for both scrollable and forward-only cursors.
     // For singleton cursors, this memeber will be set to true as soon as next is called.
-    public boolean allRowsReceivedFromServer_;
+    private boolean allRowsReceivedFromServer_;
 
     // Total number of rows read so far.
     // This should never exceed this.statement.maxRows
@@ -116,7 +116,7 @@ public abstract class Cursor {
     public Cursor(Agent agent, byte[] dataBuffer) {
         this(agent);
         dataBuffer_ = dataBuffer;
-        allRowsReceivedFromServer_ = false;
+        setAllRowsReceivedFromServer(false);
     }
 
     public void setNumberOfColumns(int numberOfColumns) {
@@ -133,9 +133,16 @@ public abstract class Cursor {
         jdbcTypes_ = new int[numberOfColumns];
     }
 
-    // Makes the next row the current row.
-    // Returns true if the current row position is a valid row position.
-    public boolean next() throws SqlException {
+    /**
+     * Makes the next row the current row. Returns true if the current
+     * row position is a valid row position.
+     *
+     * @param allowServerFetch if false, don't fetch more data from
+     * the server even if more data is needed
+     * @return <code>true</code> if current row position is valid
+     * @exception SqlException if an error occurs
+     */
+    protected boolean stepNext(boolean allowServerFetch) throws SqlException {
         // local variable usd to hold the returned value from calculateColumnOffsetsForRow()
         boolean rowPositionIsValid = true;
 
@@ -162,15 +169,43 @@ public abstract class Cursor {
         // The parameter passed in here is used as an index into the cached rowset for
         // scrollable cursors, for the arrays to be reused.  It is not used for forward-only
         // cursors, so just pass in 0.
-        rowPositionIsValid = calculateColumnOffsetsForRow_(0);  // readFetchedRows()
+        rowPositionIsValid = calculateColumnOffsetsForRow_(0, allowServerFetch);
         markNextRowPosition();
         return rowPositionIsValid;
     }
 
+    /**
+     * Makes the next row the current row. Returns true if the current
+     * row position is a valid row position.
+     *
+     * @return <code>true</code> if current row position is valid
+     * @exception SqlException if an error occurs
+     */
+    public boolean next() throws SqlException {
+        return stepNext(true);
+    }
+
     //--------------------------reseting cursor state-----------------------------
 
-    public final void setAllRowsReceivedFromServer(boolean b) {
+    /**
+     * Set the value of value of allRowsReceivedFromServer_.
+     *
+     * @param b a <code>boolean</code> value indicating whether all
+     * rows are received from the server
+     */
+    public void setAllRowsReceivedFromServer(boolean b) {
         allRowsReceivedFromServer_ = b;
+    }
+
+    /**
+     * Return <code>true</code> if all rows are received from the
+     * server.
+     *
+     * @return <code>true</code> if all rows are received from the
+     * server.
+     */
+    public final boolean allRowsReceivedFromServer() {
+        return allRowsReceivedFromServer_;
     }
 
     public final boolean currentRowPositionIsEqualToNextRowPosition() {
@@ -186,7 +221,7 @@ public abstract class Cursor {
         lastValidBytePosition_ = 0;
         currentRowPosition_ = 0;
         nextRowPosition_ = 0;
-        allRowsReceivedFromServer_ = false;
+        setAllRowsReceivedFromServer(false);
         dataBufferStream_.reset();
     }
 
@@ -194,7 +229,20 @@ public abstract class Cursor {
         return (lastValidBytePosition_ - position_) > 0;
     }
 
-    protected abstract boolean calculateColumnOffsetsForRow_(int row) throws SqlException, DisconnectException;
+    /**
+     * Calculate the column offsets for a row.
+     *
+     * @param row row index
+     * @param allowServerFetch if true, allow fetching more data from
+     * server
+     * @return <code>true</code> if the current row position is a
+     * valid row position.
+     * @exception SqlException
+     * @exception DisconnectException
+     */
+    protected abstract boolean
+        calculateColumnOffsetsForRow_(int row, boolean allowServerFetch)
+        throws SqlException, DisconnectException;
 
     protected abstract void clearLobData_();
 

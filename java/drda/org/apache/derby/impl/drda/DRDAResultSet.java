@@ -59,7 +59,7 @@ class DRDAResultSet
 	protected int blksize;				// Query block size
 	protected int maxblkext;			// Maximum number of extra blocks
 	protected int outovropt;			// Output Override option
-	private int qryclsimp; // Implicit Query Close Setting
+	protected int qryclsimp;			// Implicit Query Close Setting
 	protected boolean qryrelscr;		// Query relative scrolling
 	protected long qryrownbr;			// Query row number
 	protected boolean qryrfrtbl;		// Query refresh answer set table
@@ -92,6 +92,10 @@ class DRDAResultSet
 	protected DRDAResultSet()
 	{
 		state = NOT_OPENED;
+		// Initialize qryclsimp to NO. Only result sets requested by
+		// an OPNQRY command should be implicitly closed. OPNQRY will
+		// set qryclsimp later in setOPNQRYOptions().
+		qryclsimp = CodePoint.QRYCLSIMP_NO;
 	}
 
 	/**
@@ -487,19 +491,6 @@ class DRDAResultSet
 				return "UNKNOWN_STATE";
 		}
 
-	}
-	
-	/**
-	 * Method to decide weather the ResultSet should be closed implicitly.
-	 * When the protocol type is Limited Block Query Protocol we should not
-	 * close implicitly even if qryclsimp is set to YES.
-	 * 
-	 * @return close implicit boolean
-	 * @throws SQLException
-	 */
-	boolean isRSCloseImplicit() throws SQLException {
-		return qryclsimp == CodePoint.QRYCLSIMP_YES && 
-			getQryprctyp() != CodePoint.LMTBLKPRC;
 	}
 	
 	/**

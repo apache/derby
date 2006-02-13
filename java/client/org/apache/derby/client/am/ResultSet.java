@@ -420,6 +420,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (!openOnClient_) {
             return;
         }
+        preClose_();
         try {
             if (openOnServer_) {
                 flowCloseAndAutoCommitIfNotAutoCommitted();
@@ -2264,7 +2265,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // for forward-only cursors, getRow() should return 0 if cursor is not on a valid row,
         // i.e. afterlast.
         {
-            row = (cursor_.allRowsReceivedFromServer_ &&
+            row = (cursor_.allRowsReceivedFromServer() &&
                     cursor_.currentRowPositionIsEqualToNextRowPosition()) ? 0 : cursor_.rowsRead_;
         } else {
             if (rowCountIsUnknown()) {
@@ -4184,7 +4185,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    void markClosedOnServer() {
+    /**
+     * Mark this ResultSet as closed on the server.
+     */
+    public void markClosedOnServer() {
         openOnServer_ = false;
     }
 
@@ -4212,19 +4216,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
             accumulateWarning(new SqlWarning(agent_.logWriter_, sqlca));
         }
         return sqlcode;
-    }
-
-    public void setCloseOnlyStateForSingletonCursors() {
-        markClosedOnServer();
-    }
-
-    // If autocommit is on, the commit was already flowed with the execute() that
-    // generated the singleton cursor.  The correct state needs to be set into
-    // the result set now.
-    public void setAutoCommitStateForSingletonCursors() {
-        if (connection_.autoCommit_) {
-            markAutoCommitted();
-        }
     }
 
     // Set rowCount.
@@ -4650,7 +4641,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
             // This method is only called after open query to parse out the very first rowset
             // received.
-            if (cursor_.allRowsReceivedFromServer_ && rowsReceivedInCurrentRowset_ == 0) {
+            if (cursor_.allRowsReceivedFromServer() &&
+                rowsReceivedInCurrentRowset_ == 0) {
                 setRowsetNoRowsEvent();
             }
         }
@@ -4756,7 +4748,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (resultSetContainsNoRows() || isAfterLastX()) {
                 return false;
             } else if (firstRowInRowset_ + currentRowInRowset_ == lastRowInRowset_ &&
-                    cursor_.allRowsReceivedFromServer_) {
+                    cursor_.allRowsReceivedFromServer()) {
                 isAfterLast_ = true;
                 setRowsetAfterLastEvent();
                 return false;
@@ -4789,7 +4781,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // If no row was received but received sqlcode +100, then the cursor is
         // positioned after last.
-        if (rowsReceivedInCurrentRowset_ == 0 && cursor_.allRowsReceivedFromServer_) {
+        if (rowsReceivedInCurrentRowset_ == 0 &&
+            cursor_.allRowsReceivedFromServer()) {
             isAfterLast_ = true;
             setRowsetAfterLastEvent();
             return false;
@@ -4861,8 +4854,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // If no row was received but received sqlcode +100, then the cursor is
         // positioned before first.
-        if (rowsReceivedInCurrentRowset_ == 0 && cursor_.allRowsReceivedFromServer_) {
-            //cursor_.beginningOfResultSetIsReached_ = true;
+        if (rowsReceivedInCurrentRowset_ == 0 &&
+            cursor_.allRowsReceivedFromServer()) {
             isBeforeFirst_ = true;
             setRowsetBeforeFirstEvent();
             return false;
@@ -4911,7 +4904,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // If no row was received but received sqlcode +100, then the cursor is
         // positioned after last or before first.
-        if ((rowsReceivedInCurrentRowset_ == 0 && cursor_.allRowsReceivedFromServer_) ||
+        if ((rowsReceivedInCurrentRowset_ == 0 &&
+             cursor_.allRowsReceivedFromServer()) ||
                 orientation == scrollOrientation_before__) {
             if (row > 0) {
                 setRowsetAfterLastEvent();
@@ -4940,7 +4934,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private boolean getRelativeRowset(long rows) throws SqlException {
         if (rows == 0 &&
-                (cursor_.allRowsReceivedFromServer_ || absolutePosition_ > rowCount_)) {
+                (cursor_.allRowsReceivedFromServer() ||
+                 absolutePosition_ > rowCount_)) {
             setRowsetAfterLastEvent();
             isAfterLast_ = true;
             return false;
@@ -4949,7 +4944,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         flowGetRowset(scrollOrientation_relative__, rows);
         parseRowset_();
 
-        if (rowsReceivedInCurrentRowset_ == 0 && cursor_.allRowsReceivedFromServer_) {
+        if (rowsReceivedInCurrentRowset_ == 0 &&
+            cursor_.allRowsReceivedFromServer()) {
             if (rows > 0) {
                 setRowsetAfterLastEvent();
                 isAfterLast_ = true;
@@ -4979,7 +4975,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         parseRowset_();
 
         // If no row was received but received sqlcode +100, then no row in the result set
-        if (rowsReceivedInCurrentRowset_ == 0 && cursor_.allRowsReceivedFromServer_) {
+        if (rowsReceivedInCurrentRowset_ == 0 &&
+            cursor_.allRowsReceivedFromServer()) {
             resetRowsetFlags();
             this.setRowsetNoRowsEvent();
             return false;
@@ -5022,7 +5019,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
         parseRowset_();
 
-        if (rowsReceivedInCurrentRowset_ == 0 && cursor_.allRowsReceivedFromServer_) {
+        if (rowsReceivedInCurrentRowset_ == 0 &&
+            cursor_.allRowsReceivedFromServer()) {
             isAfterLast_ = true;
             setRowsetAfterLastEvent();
             return false;
@@ -5070,7 +5068,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private void setAbsolutePositionBasedOnAllRowsReceived() {
-        absolutePosition_ = (cursor_.allRowsReceivedFromServer_) ?
+        absolutePosition_ = (cursor_.allRowsReceivedFromServer()) ?
                 lastRowInRowset_ + 1 : lastRowInRowset_;
     }
 
@@ -5103,6 +5101,15 @@ public abstract class ResultSet implements java.sql.ResultSet,
     protected abstract void parseRowset_() throws SqlException;
 
     public abstract void setFetchSize_(int rows);
+
+    /**
+     * Method that is invoked by <code>closeX()</code> before the
+     * result set is actually being closed. Subclasses may override
+     * this method if work needs to be done before closing.
+     *
+     * @exception SqlException
+     */
+    protected abstract void preClose_() throws SqlException;
 
     public ConnectionCallbackInterface getConnectionCallbackInterface() {
         return connection_;

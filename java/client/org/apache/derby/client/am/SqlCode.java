@@ -34,7 +34,12 @@ public class SqlCode {
         code_ = code;
     }
 
-    int getCode() {
+    /**
+     * Return the SQL code represented by this instance.
+     *
+     * @return an SQL code
+     */
+    public final int getCode() {
         return code_;
     }
 
@@ -48,4 +53,7 @@ public class SqlCode {
 
     public final static SqlCode undefinedError = new SqlCode(-99999);
 
+    /** SQL code for SQL state 02000 (end of data). DRDA does not
+     * specify the SQL code for this SQL state, but Derby uses 100. */
+    public final static SqlCode END_OF_DATA = new SqlCode(100);
 }

@@ -133,6 +133,17 @@ class AppRequester
 	}
 
 	/**
+	 * Check if the client expects QRYCLSIMP to be supported when the
+	 * protocol is LMTBLKPRC.
+	 *
+	 * @return <code>true</code> if QRYCLSIMP is supported for
+	 * LMTBLKPRC
+	 */
+	protected final boolean supportsQryclsimpForLmtblkprc() {
+		return clientType == DNC_CLIENT;
+	}
+
+	/**
 	 * Check if provided JCC version level is greaterThanOrEqualTo current level
 	 *
 	 * @param vLevel	Version level

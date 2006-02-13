@@ -65,6 +65,7 @@ class CodePointNameTable extends java.util.Hashtable
     put (new Integer (CodePoint.EXCSQLSET), "EXCSQLSET");
     put (new Integer (CodePoint.EXCSQLSTT), "EXCSQLSTT");
     put (new Integer (CodePoint.EXTNAM), "EXTNAM");
+    put (new Integer (CodePoint.FRCFIXROW), "FRCFIXROW");
     put (new Integer (CodePoint.MAXBLKEXT), "MAXBLKEXT");
     put (new Integer (CodePoint.MAXRSLCNT), "MAXRSLCNT");
     put (new Integer (CodePoint.MGRDEPRM), "MGRDEPRM");
@@ -93,6 +94,7 @@ class CodePointNameTable extends java.util.Hashtable
     put (new Integer (CodePoint.QRYBLKCTL), "QRYBLKCTL");
     put (new Integer (CodePoint.QRYBLKRST), "QRYBLKRST");
     put (new Integer (CodePoint.QRYBLKSZ), "QRYBLKSZ");
+    put (new Integer (CodePoint.QRYCLSIMP), "QRYCLSIMP");
     put (new Integer (CodePoint.QRYCLSRLS), "QRYCLSRLS");
     put (new Integer (CodePoint.QRYDSC), "QRYDSC");
     put (new Integer (CodePoint.QRYDTA), "QRYDTA");

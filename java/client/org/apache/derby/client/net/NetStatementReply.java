@@ -397,7 +397,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     protected NetResultSet parseResultSetCursor(StatementCallbackInterface statementI,
                                                 Section section) throws DisconnectException {
         // The first item returne is an OPNQRYRM.
-        NetResultSet netResultSet = parseOPNQRYRM(statementI);
+        NetResultSet netResultSet = parseOPNQRYRM(statementI, false);
 
         // The next to be returned is an OBJDSS so check for any TYPDEF overrides.
         int peekCP = parseTypdefsOrMgrlvlovrs();
@@ -439,7 +439,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     }
 
     protected void parseOpenQuery(StatementCallbackInterface statementI) throws DisconnectException {
-        NetResultSet netResultSet = parseOPNQRYRM(statementI);
+        NetResultSet netResultSet = parseOPNQRYRM(statementI, true);
 
         NetSqlca sqlca = null;
         int peekCP = peekCodePoint();
@@ -694,13 +694,26 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
 
     //-----------------------------parse DDM Reply Messages-----------------------
 
-    // Open Query Complete Reply Message indicates to the requester that
-    // an OPNQRY or EXCSQLSTT command completed normally and that the query
-    // process has been initiated.  It also indicates the type of query protocol
-    // and cursor used for the query.
-    // When an EXCSQLSTT contains an SQL statement that invokes a stored procedure,
-    // and the procedure completes, an OPNQRYRM is returned for each answer set.
-    protected NetResultSet parseOPNQRYRM(StatementCallbackInterface statementI) throws DisconnectException {
+    /**
+     * Open Query Complete Reply Message indicates to the requester
+     * that an OPNQRY or EXCSQLSTT command completed normally and that
+     * the query process has been initiated.  It also indicates the
+     * type of query protocol and cursor used for the query.
+     * <p>
+     * When an EXCSQLSTT contains an SQL statement that invokes a
+     * stored procedure, and the procedure completes, an OPNQRYRM is
+     * returned for each answer set.
+     *
+     * @param statementI statement callback interface
+     * @param isOPNQRYreply If true, parse a reply to an OPNQRY
+     * command. Otherwise, parse a reply to an EXCSQLSTT command.
+     * @return a <code>NetResultSet</code> value
+     * @exception DisconnectException
+     */
+    protected NetResultSet parseOPNQRYRM(StatementCallbackInterface statementI,
+                                         boolean isOPNQRYreply)
+        throws DisconnectException
+    {
         // these need to be initialized to the correct default values.
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean svrcodReceived = false;
@@ -851,6 +864,13 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
                     calculateResultSetConcurrency(qryattupd, statement.resultSetConcurrency_),
                     calculateResultSetHoldability(sqlcsrhld));
         }
+
+        // QRYCLSIMP only applies to OPNQRY, not EXCSQLSTT
+        final boolean qryclsimp =
+            isOPNQRYreply &&
+            (rs.resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) &&
+            netAgent_.netConnection_.serverSupportsQryclsimp();
+        rs.netCursor_.setQryclsimpEnabled(qryclsimp);
 
         return rs;
     }

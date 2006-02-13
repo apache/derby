@@ -10,3 +10,4 @@ Should see exceptions
 ERROR X0X03: Invalid transaction state - held cursor requires same isolation level
 PASS: Can't change isolation if they are open cursor
 Isolation level change test over
+testCloseCursor()

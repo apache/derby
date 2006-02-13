@@ -88,6 +88,7 @@ public class procedure
             
             multipleRSTests(conn);
                         jira_491_492(conn);
+            testImplicitClose(conn);
 			cleanUp(conn);
 		} catch (SQLException sqle) {
 			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
@@ -1818,8 +1819,49 @@ public class procedure
         cs.close();
     }
 
-    
-    
+    // DERBY-821: Test that the result set is not implicitly closed on
+    // the server when EXCSQLSTT is used to open the result set.
+    private static void testImplicitClose(Connection conn) throws SQLException {
+		System.out.print("testImplicitClose(): ");
+		final String proc =
+			"org.apache.derbyTesting.functionTests.util.ProcedureTest." +
+			"selectRows";
+		boolean savedAutoCommit = conn.getAutoCommit();
+		conn.setAutoCommit(false);
+		Statement stmt = conn.createStatement();
+		stmt.executeUpdate("create table derby821 (id int)");
+		stmt.executeUpdate("insert into derby821 (id) values (1), (2)");
+		stmt.execute("create procedure jira821 (name varchar(50)) " +
+					 "parameter style java language java external name " +
+					 "'" + proc + "' dynamic result sets 1 reads sql data");
+		CallableStatement cs = conn.prepareCall("call jira821 (?)");
+		cs.setString(1, "derby821");
+		cs.execute();
+		ResultSet rs = cs.getResultSet();
+		rs.next();
+		boolean passed = false;
+		try {
+			// We expect the result set to be open, so dropping the
+			// table should fail.
+			stmt.executeUpdate("drop table derby821");
+		} catch (SQLException sqle) {
+			if (sqle.getSQLState().equals("X0X95")) {
+				System.out.println("PASSED");
+				passed = true;
+			} else {
+				System.out.println("FAILED");
+				throw sqle;
+			}
+		}
+		if (!passed) {
+			// Table was successfully dropped, hence the result set
+			// must have been implicitly closed.
+			System.out.println("FAILED (no exception thrown)");
+		}
+		conn.rollback();
+		conn.setAutoCommit(savedAutoCommit);
+	}
+
     /**
      * Checks to see if there is a lock on a table by attempting to modify the
      * same table. If the first connection was serializable then it will 

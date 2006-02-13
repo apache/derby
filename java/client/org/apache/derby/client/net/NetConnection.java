@@ -1523,5 +1523,18 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 	public void setConnectionNull(boolean connectionNull) {
 		this.connectionNull = connectionNull;
 	}
+
+    /**
+     * Check whether the server has full support for the QRYCLSIMP
+     * parameter in OPNQRY.
+     *
+     * @return true if QRYCLSIMP is fully supported
+     */
+    public final boolean serverSupportsQryclsimp() {
+        NetDatabaseMetaData metadata =
+            (NetDatabaseMetaData) databaseMetaData_;
+        return metadata.serverSupportsQryclsimp();
+    }
+
 }
 

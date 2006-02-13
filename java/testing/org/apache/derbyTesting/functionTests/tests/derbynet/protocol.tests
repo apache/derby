@@ -3186,5 +3186,101 @@ checkSQLCard 0 "     "
 skipDss // ENDUOWRM
 skipDss //SQLCARD for commit
 endTest
+//
+DISPLAY "Test explicitly closing implicitly closed cursor"
+include connect.inc
+// prepare statement
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+// execute query
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+writeScalar1Byte QRYCLSIMP 1
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+writeScalar2Bytes QRYBLKCTL FRCFIXROW
+endDdm
+endDss
+flush
+readReplyDss
+readLengthAndCodepoint OPNQRYRM
+skipBytes
+readReplyDss
+readLengthAndCodepoint QRYDSC
+skipBytes
+// fetch data
+createDssRequest
+startDdm CNTQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+startDdm QRYINSID
+writeInt 0
+writeInt 1
+endDdm
+endDdm
+endDss
+flush
+readReplyDss
+readLengthAndCodepoint QRYDTA
+skipBytes
+// all rows are fetched, cursor is implicitly closed on server
+// close result set explicitly
+createDssRequest
+startDdm CLSQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYINSID
+writeInt 0
+writeInt 1
+endDdm
+endDdm
+endDss
+flush
+// DRDA says QRYNOPRM is to be expected here
+//readReplyDss
+//readLengthAndCodepoint QRYNOPRM
+// but JCC expects SQLCARD and we're nice guys...
+checkSQLCard 0 "     "
+endTest
+//
 completeTest
 //

@@ -28,6 +28,7 @@ import org.apache.derby.client.am.SignedBinary;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.SqlWarning;
 import org.apache.derby.client.am.Types;
+import org.apache.derby.client.am.SqlCode;
 
 public class NetCursor extends org.apache.derby.client.am.Cursor {
 
@@ -55,6 +56,10 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
 
     boolean rtnextrow_ = true;
 
+    /** Flag indicating whether the result set on the server is
+     * implicitly closed when end-of-data is received. */
+    private boolean qryclsimpEnabled_;
+
     //-----------------------------constants--------------------------------------
 
     //---------------------constructors/finalizer---------------------------------
@@ -80,18 +85,42 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     }
     //-----------------------------parsing the data buffer------------------------
 
-    // Pseudo-code:
-    //   parse thru the current row in dataBuffer computing column offsets
-    //   if (we hit the super.lastValidBytePosition, ie. encounter partial row) {
-    //     shift partial row bytes to beginning of dataBuffer (this.shiftPartialRowToBeginning())
-    //     reset current row position (also done by this.shiftPartialRowToBeginning())
-    //     send and recv continue-query into commBuffer (rs.flowContinueQuery())
-    //     parse commBuffer up to QRYDTA (rs.flowContinueQuery())
-    //     copy query data from reply's commBuffer to our dataBuffer (this.copyQrydta())
-    //   }
-    // Returns true if the current row position is a valid row position.
-    // rename this to parse*()
-    protected boolean calculateColumnOffsetsForRow_(int rowIndex) throws SqlException, org.apache.derby.client.am.DisconnectException {
+    /**
+     * Calculate the column offsets for a row.
+     * <p>
+     * Pseudo-code:
+     * <ol>
+     * <li>parse thru the current row in dataBuffer computing column
+     * offsets</li>
+     * <li>if (we hit the super.lastValidBytePosition, ie. encounter
+     * partial row)
+     *   <ol>
+     *     <li>shift partial row bytes to beginning of dataBuffer
+     *     (this.shiftPartialRowToBeginning())</li>
+     *     <li>reset current row position (also done by
+     *     this.shiftPartialRowToBeginning())</li>
+     *     <li>send and recv continue-query into commBuffer
+     *     (rs.flowContinueQuery())</li>
+     *     <li>parse commBuffer up to QRYDTA
+     *     (rs.flowContinueQuery())</li>
+     *     <li>copy query data from reply's commBuffer to our
+     *     dataBuffer (this.copyQrydta())</li>
+     *   </ol>
+     * </ol>
+     *
+     * @param rowIndex row index
+     * @param allowServerFetch if true, allow fetching more data from
+     * server
+     * @return <code>true</code> if the current row position is a
+     * valid row position.
+     * @exception SqlException
+     * @exception DisconnectException
+     */
+    protected
+        boolean calculateColumnOffsetsForRow_(int rowIndex,
+                                              boolean allowServerFetch)
+        throws SqlException, DisconnectException
+    {
         int daNullIndicator = CodePoint.NULLDATA;
         int colNullIndicator = CodePoint.NULLDATA;
         int length;
@@ -117,8 +146,8 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
                 throw new SqlException(netAgent_.logWriter_, netSqlca);
             } else {
                 if (sqlcode > 0) {
-                    if (sqlcode == 100) {
-                        allRowsReceivedFromServer_ = true;
+                    if (sqlcode == SqlCode.END_OF_DATA.getCode()) {
+                        setAllRowsReceivedFromServer(true);
                         if (netResultSet_ != null && netSqlca.containsSqlcax()) {
                             netResultSet_.setRowCountEvent(netSqlca.getRowCount(qrydscTypdef_));
                         }
@@ -146,7 +175,8 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         // since it's only resetting nextRowPosition_ to position_ and position_ will
         // not change again from this point.
 
-        if (allRowsReceivedFromServer_ && (position_ == lastValidBytePosition_)) {
+        if (allRowsReceivedFromServer() &&
+            (position_ == lastValidBytePosition_)) {
             markNextRowPosition();
             makeNextRowPositionCurrent();
             return false;
@@ -266,16 +296,19 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             columnDataComputedLength_ = columnDataComputedLength;
             isNull_ = columnDataIsNull;
 
-            if (!allRowsReceivedFromServer_) {
+            if (!allRowsReceivedFromServer()) {
                 calculateLobColumnPositionsForRow();
                 // Flow another CNTQRY if we are blocking, are using rtnextrow, and expect
                 // non-trivial EXTDTAs for forward only cursors.  Note we do not support
                 // EXTDTA retrieval for scrollable cursors.
                 // if qryrowset was sent on excsqlstt for a sp call, which is only the case
                 if (blocking_ && rtnextrow_ &&
-                        extdtaPositions_.size() > 0 && !netResultSet_.scrollable_) {
-                    if (!extdtaPositions_.isEmpty()) {
+                    !netResultSet_.scrollable_ &&
+                    !extdtaPositions_.isEmpty()) {
+                    if (allowServerFetch) {
                         netResultSet_.flowFetch();
+                    } else {
+                        return false;
                     }
                 }
             }
@@ -294,10 +327,26 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         // the flag for allRowsReceivedFromServer_ is set, we still want to continue to parse through
         // the data in the dataBuffer.
         // But in the case where fixed row protocol is used,
-        if (!blocking_ && allRowsReceivedFromServer_ && daNullIndicator == 0xFF) {
+        if (!blocking_ && allRowsReceivedFromServer() &&
+            daNullIndicator == 0xFF) {
             return false;
         } else {
             return true;
+        }
+    }
+
+    /**
+     * Scan the data buffer to see if end of data (SQL state 02000)
+     * has been received. This method should only be called when the
+     * cursor is being closed since the pointer to the current row can
+     * be modified.
+     *
+     * @exception SqlException
+     */
+    void scanDataBufferForEndOfData() throws SqlException {
+        while (!allRowsReceivedFromServer() &&
+               (position_ != lastValidBytePosition_)) {
+            stepNext(false);
         }
     }
 
@@ -1047,4 +1096,34 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         return (((fdocaLength_[index] >> 8) & 0xff) + 2) / 2;
     }
 
+    /**
+     * Set the value of value of allRowsReceivedFromServer_.
+     *
+     * @param b a <code>boolean</code> value indicating whether all
+     * rows are received from the server
+     */
+    public final void setAllRowsReceivedFromServer(boolean b) {
+        if (b && qryclsimpEnabled_) {
+            netResultSet_.markClosedOnServer();
+        }
+        super.setAllRowsReceivedFromServer(b);
+    }
+
+    /**
+     * Set a flag indicating whether QRYCLSIMP is enabled.
+     *
+     * @param flag true if QRYCLSIMP is enabled
+     */
+    final void setQryclsimpEnabled(boolean flag) {
+        qryclsimpEnabled_ = flag;
+    }
+
+    /**
+     * Check whether QRYCLSIMP is enabled on this cursor.
+     *
+     * @return true if QRYCLSIMP is enabled
+     */
+    final boolean getQryclsimpEnabled() {
+        return qryclsimpEnabled_;
+    }
 }

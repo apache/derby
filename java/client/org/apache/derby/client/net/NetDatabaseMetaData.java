@@ -28,6 +28,8 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
 
     private final NetAgent netAgent_;
 
+    /** True if the server supports QRYCLSIMP. */
+    private boolean supportsQryclsimp_;
 
     public NetDatabaseMetaData(NetAgent netAgent, NetConnection netConnection) {
         // Consider setting product level during parse
@@ -61,17 +63,47 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
     // Support for a specific server version can be set as follows. For example
     // if (productLevel_.greaterThanOrEqualTo(11,1,0))
     //  supportsTheBestThingEver = true
+    //
+    // WARNING WARNING WARNING !!!!
+    //
+    // If you define an instance variable of NetDatabaseMetaData that
+    // you want computeFeatureSet_() to compute, DO NOT assign an
+    // initial value to the variable in the
+    // declaration. NetDatabaseMetaData's constructor will invoke
+    // DatabaseMetaData's constructor, which then invokes
+    // computeFeatureSet_(). Initialization of instance variables in
+    // NetDatabaseMetaData will happen *after* the invocation of
+    // computeFeatureSet_() and will therefore overwrite the computed
+    // values. So, LEAVE INSTANCE VARIABLES UNINITIALIZED!
+    //
+    // END OF WARNING
     protected void computeFeatureSet_() {
         if (connection_.resultSetHoldability_ == 0)  // property not set
         {
             setDefaultResultSetHoldability();
         }
 
+        // Support for QRYCLSIMP was added in 10.2.0
+        if (productLevel_.greaterThanOrEqualTo(10, 2, 0)) {
+            supportsQryclsimp_ = true;
+        } else {
+            supportsQryclsimp_ = false;
+        }
     }
 
 
     public void setDefaultResultSetHoldability() {
         connection_.resultSetHoldability_ = org.apache.derby.jdbc.ClientDataSource.HOLD_CURSORS_OVER_COMMIT;
+    }
+
+    /**
+     * Check whether the server has full support for the QRYCLSIMP
+     * parameter in OPNQRY.
+     *
+     * @return true if QRYCLSIMP is fully supported
+     */
+    final boolean serverSupportsQryclsimp() {
+        return supportsQryclsimp_;
     }
 
 }

@@ -31,10 +31,10 @@ public class NetSqldta extends NetCursor {
     }
 
     public boolean next() throws org.apache.derby.client.am.SqlException {
-        if (allRowsReceivedFromServer_) {
+        if (allRowsReceivedFromServer()) {
             return false;
         } else {
-            allRowsReceivedFromServer_ = true;
+            setAllRowsReceivedFromServer(true);
             return true;
         }
     }
@@ -128,7 +128,7 @@ public class NetSqldta extends NetCursor {
             }
         }
 
-        if (!allRowsReceivedFromServer_) {
+        if (!allRowsReceivedFromServer()) {
             calculateLobColumnPositionsForRow();
         }
 

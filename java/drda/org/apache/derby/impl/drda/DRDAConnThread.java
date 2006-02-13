@@ -6043,9 +6043,12 @@ public class DRDAConnThread extends Thread {
 		if (! sentExtData)
 			writer.endDdmAndDss();
 
-		if( (!stmt.hasdata()) &&
-			stmt.isRSCloseImplicit()) {
-			stmt.rsClose();
+		if (!stmt.hasdata()) {
+			final boolean qryclsOnLmtblkprc =
+				appRequester.supportsQryclsimpForLmtblkprc();
+			if (stmt.isRSCloseImplicit(qryclsOnLmtblkprc)) {
+				stmt.rsClose();
+			}
 		}
 	}
 
@@ -6416,8 +6419,9 @@ public class DRDAConnThread extends Thread {
 			}
 			else  // non-scrollable cursor
 			{
-				if (stmt.isRSCloseImplicit())
-				{
+				final boolean qryclsOnLmtblkprc =
+					appRequester.supportsQryclsimpForLmtblkprc();
+				if (stmt.isRSCloseImplicit(qryclsOnLmtblkprc)) {
 					stmt.rsClose();
 					stmt.rsSuspend();
 				}

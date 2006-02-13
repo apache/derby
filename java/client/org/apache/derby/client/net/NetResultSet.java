@@ -112,7 +112,7 @@ public class NetResultSet extends org.apache.derby.client.am.ResultSet {
         // Parse all the rows received in the rowset
         // The index we are passing will keep track of which row in the rowset we are parsing
         // so we can reuse the columnDataPosition/Length/IsNull arrays.
-        while (netCursor_.calculateColumnOffsetsForRow_(row)) {
+        while (netCursor_.calculateColumnOffsetsForRow_(row, true)) {
             rowsReceivedInCurrentRowset_++;
             row++;
         }
@@ -124,10 +124,10 @@ public class NetResultSet extends org.apache.derby.client.am.ResultSet {
         //    the end of data is returned or when an error occurs.  all successfully fetched rows
         //    are returned to the user.  the specific error is not returned until the next fetch.
         while (rowsReceivedInCurrentRowset_ != fetchSize_ &&
-                !netCursor_.allRowsReceivedFromServer_ && !isRowsetCursor_ &&
+                !netCursor_.allRowsReceivedFromServer() && !isRowsetCursor_ &&
                 sensitivity_ != sensitivity_sensitive_dynamic__) {
             flowFetchToCompleteRowset();
-            while (netCursor_.calculateColumnOffsetsForRow_(row)) {
+            while (netCursor_.calculateColumnOffsetsForRow_(row, true)) {
                 rowsReceivedInCurrentRowset_++;
                 row++;
             }
@@ -219,5 +219,20 @@ public class NetResultSet extends org.apache.derby.client.am.ResultSet {
 
     public void readCursorClose_() throws SqlException {
         netAgent_.resultSetReply_.readCursorClose(this);
+    }
+
+    /**
+     * Method that is invoked by <code>closeX()</code> before the
+     * result set is actually being closed. If QRYCLSIMP is enabled on
+     * the cursor, scan data buffer for end of data (SQL state
+     * 02000). If end of data is received, the result set is closed on
+     * the server.
+     *
+     * @exception SqlException
+     */
+    protected void preClose_() throws SqlException {
+        if (netCursor_.getQryclsimpEnabled()) {
+            netCursor_.scanDataBufferForEndOfData();
+        }
     }
 }

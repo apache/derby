@@ -121,18 +121,22 @@ ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.
 ij> -- unions are not updatable
 select * from t1 union all select * from t1 for update;
 ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
+ij> insert into t1 (i) values (1);
+1 row inserted/updated/deleted
 ij> -- . table with/without correlation name
 -- the idea is that the delete is against the table name, not the correlation name
 -- we've already seen the without correlation name case in previous tests
 get cursor c4 as 'select i from t1 s1 for update';
 ij> next c4;
-No current row
+I          
+-----------
+1          
 ij> -- this will get a target table mismatch error, it uses the correlation name:
 delete from s1 where current of c4;
 ERROR 42X28: Delete table 'S1' is not target of cursor 'C4'.
-ij> -- this will compile and get a 'no current row' error, it uses the table name:
+ij> -- this will compile and succeed, it uses the table name:
 delete from t1 where current of c4;
-ERROR XCL08: Cursor 'C4' is not on a row.
+1 row inserted/updated/deleted
 ij> close c4;
 ij> -- . list columns in order same/different from appearance in table
 -- the columns are 'found' regardless of their order.

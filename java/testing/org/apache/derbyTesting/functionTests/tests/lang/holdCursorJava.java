@@ -76,6 +76,8 @@ public class holdCursorJava {
     
 		testHoldCursorOnMultiTableQuery(conn);
 		testIsolationLevelChange(conn);
+		testCloseCursor(conn);
+		testDropTable(conn);
 
 		conn.rollback();
                 conn.setAutoCommit(true);
@@ -100,9 +102,26 @@ public class holdCursorJava {
     TestUtil.cleanUpTest(stmt, databaseObjects);
 
     System.out.println("Creating table...");
-    stmt.executeUpdate( "CREATE TABLE T1 (c11 int, c12 int)" );
-    stmt.executeUpdate("INSERT INTO T1 VALUES(1,1)");
-    stmt.executeUpdate("INSERT INTO T1 VALUES(2,1)");
+    final int stringLength = 400;
+    stmt.executeUpdate("CREATE TABLE T1 (c11 int, c12 int, junk varchar(" +
+                       stringLength + "))");
+    PreparedStatement insertStmt =
+        conn.prepareStatement("INSERT INTO T1 VALUES(?,1,?)");
+    // We need to ensure that there is more data in the table than the
+    // client can fetch in one message (about 32K). Otherwise, the
+    // cursor might be closed on the server and we are not testing the
+    // same thing in embedded mode and client/server mode.
+    final int rows = 40000 / stringLength;
+    StringBuffer buff = new StringBuffer(stringLength);
+    for (int i = 0; i < stringLength; i++) {
+        buff.append(" ");
+    }
+    for (int i = 1; i <= rows; i++) {
+        insertStmt.setInt(1, i);
+        insertStmt.setString(2, buff.toString());
+        insertStmt.executeUpdate();
+    }
+    insertStmt.close();
     stmt.executeUpdate( "CREATE TABLE T2 (c21 int, c22 int)" );
     stmt.executeUpdate("INSERT INTO T2 VALUES(1,1)");
     stmt.executeUpdate("INSERT INTO T2 VALUES(1,2)");
@@ -242,6 +261,56 @@ public class holdCursorJava {
 	conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
   }
 
+    /**
+     * Test that drop table cannot be performed when there is an open
+     * cursor on that table.
+     *
+     * @param conn a <code>Connection</code> object
+     * @exception SQLException if an error occurs
+     */
+    private static void testDropTable(Connection conn) throws SQLException {
+        conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+        final String dropTable = "DROP TABLE T1";
+        Statement stmt1 = conn.createStatement();
+        Statement stmt2 = conn.createStatement();
+        ResultSet rs = stmt1.executeQuery("SELECT * FROM T1");
+        rs.next();
+
+        // dropping t1 should fail because there is an open cursor on t1
+        boolean ok = false;
+        try {
+            stmt2.executeUpdate(dropTable);
+        } catch (SQLException sqle) {
+            ok = true;
+        }
+        if (!ok) {
+            System.out.println("FAIL: Expected DROP TABLE to fail " +
+                               "because of open cursor.");
+        }
+
+        conn.commit();
+
+        // cursors are held over commit, so dropping should still fail
+        ok = false;
+        try {
+            stmt2.executeUpdate(dropTable);
+        } catch (SQLException sqle) {
+            ok = true;
+        }
+        if (!ok) {
+            System.out.println("FAIL: Expected DROP TABLE to fail " +
+                               "because of held cursor.");
+        }
+
+        rs.close();
+
+        // cursor is closed, so this one should succeed
+        stmt2.executeUpdate(dropTable);
+        stmt1.close();
+        stmt2.close();
+        conn.rollback();
+    }
+
 	//set connection holdability and test holdability of statements inside and outside procedures
 	//test that holdability of statements always overrides holdability of connection
 	private static void testHoldability(Connection conn,int holdability) throws SQLException{
@@ -303,6 +372,36 @@ public class holdCursorJava {
 		
 		cs1.close();
 		cs2.close();
+	}
+
+	// DERBY-821: Test that cursors are closed when close() is
+	// called. Since the network server implicitly closes a
+	// forward-only result set when all rows are read, the call to
+	// close() might be a no-op.
+	private static void testCloseCursor(Connection conn)
+		throws SQLException
+	{
+		System.out.println("\ntestCloseCursor()\n");
+		// Run this test on one large table (T1) where the network
+		// server won't close the cursor implicitly, and on one small
+		// table (T2) where the network server will close the cursor
+		// implicitly.
+		final String[] tables = { "T1", "T2" };
+		Statement stmt1 = conn.createStatement();
+		Statement stmt2 = conn.createStatement();
+		for (int i = 0; i < tables.length; i++) {
+			String table = tables[i];
+			ResultSet rs = stmt1.executeQuery("SELECT * FROM " + table);
+			rs.next();
+			rs.close();
+			// Cursor is closed, so this should succeed. If the cursor
+			// is open, it will fail because an table cannot be
+			// dropped when there are open cursors depending on it.
+			stmt2.executeUpdate("DROP TABLE " + table);
+		}
+		stmt1.close();
+		stmt2.close();
+		conn.rollback();
 	}
 	
 	//check if resultset is accessible 

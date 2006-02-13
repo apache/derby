@@ -1623,14 +1623,23 @@ class DRDAStatement
 	}
 	
 	/**
-	 * Delegation method to call DRDAResultSet.isRSCloseImplicit()
-	 * 
-	 * @see DRDAResultSet#isRSCloseImplicit()
+	 * Method to decide whether the ResultSet should be closed
+	 * implicitly based on the QRYCLSIMP value sent from the
+	 * client. Only forward-only result sets should be implicitly
+	 * closed. Some clients do not expect result sets to be closed
+	 * implicitly if the protocol is LMTBLKPRC.
+	 *
+	 * @param lmtblkprcOK <code>true</code> if the client expects
+	 * QRYCLSIMP to be respected for the LMTBLKPRC protocol
 	 * @return implicit close boolean
-	 * @throws SQLException
+	 * @exception SQLException
 	 */
-	boolean isRSCloseImplicit() throws SQLException {
-		return currentDrdaRs.isRSCloseImplicit();
+	boolean isRSCloseImplicit(boolean lmtblkprcOK) throws SQLException {
+		return
+			(currentDrdaRs.qryclsimp == CodePoint.QRYCLSIMP_YES) &&
+			!isScrollable() &&
+			(lmtblkprcOK ||
+			 (currentDrdaRs.getQryprctyp() != CodePoint.LMTBLKPRC));
 	}
 }
 

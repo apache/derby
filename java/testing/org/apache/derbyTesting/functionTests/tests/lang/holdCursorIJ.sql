@@ -73,13 +73,16 @@ get with hold cursor jdk4 as 'SELECT * FROM t1';
 next jdk1;
 next jdk4;
 -- wont' be able to drop table because of cursors jdk1 and jdk4
+-- in DerbyNetClient, cursor is closed on server and DROP TABLE succeeds
 drop table t1;
 commit;
 
 -- drop table still won't work because jdk4 is still open after commit
+-- in DerbyNetClient, the table is already dropped
 drop table t1;
 
 -- close cursor jdk4 and try then deleting the table
+-- in DerbyNetClient, the table is already dropped
 close jdk4;
 drop table t1;
 
@@ -99,11 +102,13 @@ next jdk1;
 next jdk4;
 
 -- try to change the isolation level. will give error because of jdk1 and jdk4
+-- no error in DerbyNetClient because cursor is closed on server
 set current isolation RR;
 
 commit;
 
 -- attempt to change isolation level should give error because of jdk4 hold cursor
+-- no error in DerbyNetClient because cursor is closed on server
 set isolation = REPEATABLE READ;
 
 -- close jdk4 and then should be able to change isolation
@@ -120,8 +125,10 @@ get with nohold cursor jdk1 as 'SELECT * FROM t1 WITH CS';
 next jdk4;
 next jdk1;
 -- following should fail because of cursor jdk4
+-- no error in DerbyNetClient because cursor is closed on server
 set isolation RS;
 -- following should fail because of cursor jdk4
+-- no error in DerbyNetClient because cursor is closed on server
 set isolation UR;
 close jdk4;
 -- should be able to change the isolation now
