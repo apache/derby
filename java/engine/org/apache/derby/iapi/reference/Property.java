@@ -540,7 +540,7 @@ public interface Property {
      * requirements will be selected. This functionality is not present for
      * sub sub protocol classes yet.
      * 
-     * @see org.apache.derby.iapi.services.info.JVMInfo.JDK_ID
+     * See org.apache.derby.iapi.services.info.JVMInfo.JDK_ID
      */
     String MODULE_ENV_JDK_PREFIX = "derby.env.jdk.";
 
