@@ -22,7 +22,9 @@ package org.apache.derby.impl.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
 import org.apache.derby.impl.jdbc.Util;
 
 
@@ -36,30 +38,50 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
     }
    
     public RowIdLifetime getRowIdLifetime() throws SQLException {
-        throw Util.notImplemented();
-        
+        return RowIdLifetime.ROWID_UNSUPPORTED;
     }
 
     
     public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-        throw Util.notImplemented();
+		PreparedStatement s = getPreparedQuery("getSchemasWithParams");
+		s.setString(1, swapNull(catalog));
+		s.setString(2, swapNull(schemaPattern));
+		return s.executeQuery();
     }
     
     
     public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
-        throw Util.notImplemented();
+        return true;
     }
      
     public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
-        throw Util.notImplemented();
+        // TODO - find out what this really should be 
+        return false;
     }
    
-    public ResultSet getClientInfoProperties()
-		throws SQLException {
-        throw Util.notImplemented();
+    public ResultSet getClientInfoProperties() throws SQLException {
+        return getSimpleQuery("getClientInfoProperties");
     }
    
     public boolean providesQueryObjectGenerator() throws SQLException {
-        throw Util.notImplemented();
+        return false;
     }
+    
+    public ResultSet getFunctions(java.lang.String catalog,
+                       java.lang.String schemaPattern,
+                       java.lang.String functionNamePattern)
+                       throws SQLException
+    {
+        return getSimpleQuery("getFunctions");
+    }
+    
+    public ResultSet getFunctionParameters(java.lang.String catalog,
+                                java.lang.String schemaPattern,
+                                java.lang.String functionNamePattern,
+                                java.lang.String parameterNamePattern)
+                                throws SQLException
+    {
+        return getSimpleQuery("getFunctionParameters");
+    }
+
 }

@@ -20,6 +20,7 @@
 
 package org.apache.derby.jdbc;
 
+import java.sql.DatabaseMetaData;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.BrokeredConnection40;
@@ -33,6 +34,7 @@ import org.apache.derby.impl.jdbc.EmbedRowId;
 import org.apache.derby.impl.jdbc.EmbedConnection40;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.jdbc.EmbedResultSet40;
+import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData40;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.CallableStatement;
@@ -106,5 +108,10 @@ public class Driver40 extends Driver30 {
     
     public EmbedRowId newEmbedRowId() throws SQLException {
         return new EmbedRowId();
+    }
+
+    public DatabaseMetaData newEmbedDatabaseMetaData(EmbedConnection conn, String dbname) 
+        throws SQLException {
+		return new EmbedDatabaseMetaData40(conn,dbname);
     }
 }

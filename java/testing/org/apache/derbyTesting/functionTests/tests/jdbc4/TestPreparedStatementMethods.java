@@ -29,6 +29,8 @@ import java.sql.NClob;
 import java.sql.SQLXML;
 import org.apache.derby.impl.jdbc.Util;
 
+import org.apache.derby.tools.ij;
+
 public class TestPreparedStatementMethods {
     
     Connection conn=null;

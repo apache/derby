@@ -3,3 +3,5 @@ TestPreparedStatement_app.properties
 TestRowId_app.properties
 TestConnectionMethods_app.properties
 TestResultSetMethods_app.properties
+TestDbMetaData_app.properties
+

@@ -163,8 +163,39 @@ public class resultsetJdbc30 {
  			}
 
 			rs.close();
-
 			stmt.close();
+            
+            //
+            // Check our behavior around closing result sets when auto-commit
+            // is true.  Test with both holdable and non-holdable result sets
+            //
+            con.setAutoCommit(true);
+            
+            // Create a non-updatable holdable result set, and then try to 
+            // update it
+            stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+            
+			rs = stmt.executeQuery("select * from t");
+			rs.next();
+            
+            checkForCloseOnException(rs, true);
+            
+            rs.close();
+            stmt.close();
+
+            // Create a non-updatable non-holdable result set, and then try to 
+            // update it
+            stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            
+			rs = stmt.executeQuery("select * from t");
+			rs.next();
+            
+            checkForCloseOnException(rs, false);
+                
+            rs.close();
+            stmt.close();
 			con.close();
 
 		}
@@ -175,9 +206,37 @@ public class resultsetJdbc30 {
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception: "+e);
 			e.printStackTrace();
-		}
+		}   
 
 		System.out.println("Test resultsetJdbc30 finished");
+    }
+    
+    static private void checkForCloseOnException(ResultSet rs, boolean holdable) 
+            throws Exception {
+        try {
+            rs.updateBlob("c",null);
+            throw new Exception("rs.updateBlob() on a read-only result set" +
+                "should not have succeeded");
+        } catch (SQLException ex) {
+        }
+
+        try {
+            rs.beforeFirst();
+            String holdableStr = holdable ? "holdable" : "non-holdable";
+            System.out.println(holdableStr + " result set was not closed on exception");
+        }
+        catch ( SQLException ex) {
+            String state = ex.getSQLState();
+            if ( state.equals("XCL16"))
+            {
+                System.out.println("Holdable result set was closed on exception");
+            }
+            else
+            {
+                throw ex;
+            }
+        }
+
     }
 
 	static private void dumpSQLExceptions (SQLException se) {

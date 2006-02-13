@@ -98,7 +98,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 
 	private	GenericConstantActionFactory	constantActionFactory;
-
+    
 	//////////////////////////////////////////////////////////////
 	//
 	// CONSTRUCTORS
@@ -3026,7 +3026,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public boolean locatorsUpdateCopy()
     throws SQLException
 	{
-		throw Util.notImplemented();
+		return false;
 	}
 
 	/**
@@ -3046,7 +3046,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern)
     throws SQLException
 	{
-		throw Util.notImplemented();
+		return getSimpleQuery("getSuperTypes");
 	}
 
 	/**
@@ -3060,12 +3060,12 @@ public class EmbedDatabaseMetaData extends ConnectionChild
     * @param schemaPattern - a schema name pattern; "" retrieves those without a schema
     * @param typeNamePattern - a UDT name pattern; may be a fully-qualified name
     * @return a ResultSet object in which each row is a type description
-    * @exception SQLException Feature not implemented for now.
+    * @exception SQLException if a database access error occurs
 	*/
 	public ResultSet getSuperTables(String catalog, String schemaPattern, String typeNamePattern)
     throws SQLException
 	{
-		throw Util.notImplemented();
+		return getSimpleQuery("getSuperTables");
 	}
 
 	/**
@@ -3084,13 +3084,13 @@ public class EmbedDatabaseMetaData extends ConnectionChild
     * @param attributeNamePattern - an attribute name pattern; must match the attribute
     * name as it is declared in the database
     * @return a ResultSet object in which each row is a type description
-    * @exception SQLException Feature not implemented for now.
+    * @exception SQLException if a database access error occurs.
 	*/
 	public ResultSet getAttributes(String catalog, String schemaPattern,
   String typeNamePattern, String attributeNamePattern)
     throws SQLException
 	{
-		throw Util.notImplemented();
+        return getSimpleQuery("getAttributes");
 	}
 	
 	//////////////////////////////////////////////////////////////
@@ -3103,7 +3103,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * utility helper routines:
 	 */
 
-	private ResultSet getSimpleQuery(String nameKey) throws SQLException
+	protected ResultSet getSimpleQuery(String nameKey) throws SQLException
 	{
 		PreparedStatement ps = getPreparedQuery(nameKey);
 		if (ps == null)
@@ -3124,9 +3124,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 				String queryText = getQueryDescriptions().getProperty(nameKey);
 				if (queryText == null)
 				{
-					throw Util.notImplemented(nameKey);
+                    throw Util.notImplemented(nameKey);
 				}
-
 				
                 ps = prepareSPS(nameKey, queryText);
 			}
@@ -3157,7 +3156,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * a prepared statement
 	 * @return PreparedStatement
 	 */
-	private PreparedStatement getPreparedQuery(String queryName)
+	protected PreparedStatement getPreparedQuery(String queryName)
 			throws SQLException {
 		PreparedStatement s;
 		//We can safely goto system table since we are not in soft upgrade

@@ -3,3 +3,4 @@ jdbc4/TestConnectionMethods.java
 jdbc4/TestCallableStatementMethods.java
 jdbc4/TestPreparedStatementMethods.java
 jdbc4/TestResultSetMethods.java
+jdbc4/TestDbMetaData.java

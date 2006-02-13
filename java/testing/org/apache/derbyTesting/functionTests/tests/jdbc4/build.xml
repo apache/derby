@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project default="compile_jdbc4" basedir="../../../../../../../..">
+<project default="compile" basedir="../../../../../../../..">
 
     <property file="${user.home}/ant.properties"/>
 
@@ -57,5 +57,7 @@
             includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbc4/copyfiles.ant"/>
         </copy>
     </target>
+    
+    <target name="compile" depends="compile_jdbc4"/>
 
 </project>

@@ -134,40 +134,22 @@ public class dbMetaDataJdbc30 {
 			//following will give not implemented exceptions.
 			// JCC will return an empty result set, so either a
 			// result set with no rows or an exception will pass
-			try {
-			  System.out.println();
-			  System.out.println("getSuperTypes() with null :");
-			  checkEmptyRSOrNotImplemented(met.getSuperTypes(null,null,null),null);
- 			} catch (SQLException ex) {
-				checkEmptyRSOrNotImplemented(null,ex);
- 			}
+			System.out.println();
+			System.out.println("getSuperTypes() with null :");
+			checkEmptyRS(met.getSuperTypes(null,null,null));
 
-			try {
-			  System.out.println();
-			  System.out.println("getSuperTables() with null :");
-			  checkEmptyRSOrNotImplemented(met.getSuperTables(null,null,null),null);
- 			} catch (SQLException ex) {
-				checkEmptyRSOrNotImplemented(null,ex);
- 			}
+			System.out.println();
+			System.out.println("getSuperTables() with null :");
+			checkEmptyRS(met.getSuperTables(null,null,null));
 
-			try {
-			  System.out.println();
-			  System.out.println("getAttributes() with null :");
+            System.out.println();
+            System.out.println("getAttributes() with null :");
 
- 			  checkEmptyRSOrNotImplemented(met.getAttributes(null, null, null,
-															 null), null);
- 			} catch (SQLException ex) {
-				checkEmptyRSOrNotImplemented(null,ex);
- 			}
+ 			checkEmptyRS(met.getAttributes(null, null, null, null));
 
-			try {
-			  System.out.println();
-			  System.out.println("locatorsUpdateCopy(): ");
-			  // JCC doesn't throw exception, Embedded driver does.
-			  System.out.println("Returned: " + met.locatorsUpdateCopy());
- 			} catch (SQLException ex) {
-			  System.out.println("Expected : " + ex.getMessage());
- 			}
+            System.out.println();
+			System.out.println("locatorsUpdateCopy(): ");
+			System.out.println("Returned: " + met.locatorsUpdateCopy());
         
 			s.close();
 
@@ -194,7 +176,7 @@ public class dbMetaDataJdbc30 {
 		}
 	}
 
-	static void dumpRS(ResultSet s) throws SQLException {
+	public static void dumpRS(ResultSet s) throws SQLException {
 		ResultSetMetaData rsmd = s.getMetaData ();
 
 		// Get the number of columns in the result set
@@ -226,18 +208,15 @@ public class dbMetaDataJdbc30 {
 	}
 
 	/**
-	 * JCC returns an empty resultset instead of throwing an exception
-	 * for some methods.
-	 * Checks for either a ResultSet with no rows or a NotImplemented  
-	 * exception.  Usually either the rs or se are null.
-	 *
+  	 * In order to be JDBC compliant, all metadata calls must return valid
+     * results, even if it's an empty result set.  It should be considered
+     * a failure if we throw an exception
 	 */
-	static void checkEmptyRSOrNotImplemented(ResultSet rs, SQLException se)
+	public static void checkEmptyRS(ResultSet rs)
 	{		
 		boolean passed = false;
 
 		try {
-			
 			if (rs != null)
 			{
 				int numrows = 0;
@@ -246,13 +225,6 @@ public class dbMetaDataJdbc30 {
 				// Zero rows is what we want.
 				if (numrows == 0)
 					passed = true;			
-			}
-			else if (se != null)
-			{
-				// Not implemented exception is OK too.
-				String sqlState =se.getSQLState();
-				if (sqlState != null && sqlState.startsWith("0A"))
-				passed = true;
 			}
 		}
 		catch (SQLException e)
@@ -264,9 +236,9 @@ public class dbMetaDataJdbc30 {
 		finally 
 		{
 			if (passed)
-				System.out.println("EXPECTED: Not Implemented Exception or empty  ResultSet");
+				System.out.println("EXPECTED: Empty ResultSet");
 			else 
-				System.out.println("FAIL:  Should have gotten Not Implemented Exception or empty ResultSet");
+				System.out.println("FAIL: Should have gotten empty ResultSet");
 		}
 	}
 }
