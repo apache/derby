@@ -688,7 +688,7 @@ run, and thus shouldn't be run every night.</p>
         <p style="margin-bottom: 0in;">As tests are added to this
 quite, it could require more and more time to run (several minutes to
 several hours to several days), which is why it is NOT included as part
-of the derbyall suite.</p>
+of the derbyall suite. Currently the largedata/LobLimits.java test takes about 17Gb of disk space. On a linux machine with 2.8Ghz Intel Xeon CPU, 4Gb RAM , Linux machine and IBM 1.4.2 JVM with default memory heap size, the test ran for about 4.5 hrs. If the test is successful, it will cleanup the database and other files.</p>
       </li>
     </ul>
   </li>

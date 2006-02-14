@@ -9,6 +9,8 @@
 # excluding jdbcapi/dataSourceReference.java - client side only tests, tests all data sources
 # excluding jdbcapi/derbyStress.java - till DERBY-210 is fixed
 #           regardless of framework
+# excluding largedata/LobLimits.java to run with the network server because currently lobs are materialized and this test tests for 2G lobs.
+# 			see DERBY-326 and DERBY-550 issues
 lang/errorStream.java
 # lang/scrollCursors2.java
 jdbcapi/batchUpdate.java
@@ -19,3 +21,4 @@ jdbcapi/checkDataSource30.java
 jdbcapi/statementJdbc30.java
 jdbcapi/dataSourceReference.java
 jdbcapi/derbyStress.java
+largedata/LobLimits.java

@@ -13,6 +13,8 @@
 # excluding jdbcapi/holdCursorJava.java - JCC behaves differently with hold cursors.
 # excluding jdbcapi/dataSourceReference.java - client side only tests, tests all data sources
 #           regardless of framework
+# excluding largedata/LobLimits.java to run with the network server because currently lobs are materialized and this test tests for 2G lobs.
+# 			see DERBY-326 and DERBY-550 issues
 jdbcapi/resultsetStream.java
 lang/errorStream.java
 lang/scrollCursors2.java
@@ -32,4 +34,4 @@ jdbcapi/dataSourceReference.java
 jdbcapi/savepointJdbc30_XA.java
 # excluding jdbcapi/derbyStress.java - jcc runs out of memory with this test
 jdbcapi/derbyStress.java
-
+largedata/LobLimits.java
