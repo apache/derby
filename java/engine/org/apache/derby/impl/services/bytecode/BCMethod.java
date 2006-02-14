@@ -64,6 +64,15 @@ import java.io.IOException;
  *
  */
 class BCMethod implements MethodBuilder {
+    
+    /**
+     * Code length at which to split into sub-methods.
+     * Normally set to the maximim code length the
+     * JVM can support, but for testing the split code
+     * it can be reduced so that the standard tests
+     * cause some splitting. Tested with value set to 2000.
+     */
+    static final int CODE_SPLIT_LENGTH = VMOpcode.MAX_CODE_LENGTH;
 
 	final BCClass		cb;
 	protected final ClassHolder modClass; // the class it is in (modifiable fmt)
@@ -75,8 +84,20 @@ class BCMethod implements MethodBuilder {
 	 */
 	private final String myName;
 
-	protected BCLocalField[] parameters; 
-	protected Vector thrownExceptions; // expected to be names of Classes under Throwable
+    /**
+     * Fast access for the parametes, will be null
+     * if the method has no parameters.
+     */
+	BCLocalField[] parameters; 
+    
+    /**
+     * List of parameter types with java language class names.
+     * Can be null or zero length for no parameters.
+     */
+    private final String[] parameterTypes;
+    
+    
+	Vector thrownExceptions; // expected to be names of Classes under Throwable
 
 	CodeChunk myCode;
 	protected ClassMember myEntry;
@@ -118,7 +139,7 @@ class BCMethod implements MethodBuilder {
 
 		String[] vmParamterTypes;
 
-		if (parms != null) {
+		if (parms != null && parms.length != 0) {
 			int len = parms.length;
 			vmParamterTypes = new String[len];
 			parameters = new BCLocalField[len];
@@ -142,6 +163,8 @@ class BCMethod implements MethodBuilder {
 
 		// get code chunk
 		myCode = new CodeChunk();
+        
+        parameterTypes = parms;
 	}
 	//
 	// MethodBuilder interface
@@ -200,24 +223,84 @@ class BCMethod implements MethodBuilder {
 	 * reflected in the code generated for it.
 	 */
 	public void complete() {
-		// write exceptions attribute info
-		writeExceptions();
-		
+        
+        
+        int codeLength = myCode.getPC();
+        if (codeLength > CODE_SPLIT_LENGTH)
+            splitMethod();
+                  
+       // write exceptions attribute info
+        writeExceptions();
+        	
 		// get the code attribute to put itself into the class
 		// provide the final header information needed
 		myCode.complete(this, modClass, myEntry, maxStack, currentVarNum);
 	}
+    
+    /**
+     * Attempt to split a large method by pushing code out to several
+     * sub-methods. Performs a number of steps.
+     * <OL>
+     * <LI> Split at zero stack depth.
+     * <LI> Split at non-zero stack depth (FUTURE)
+     * </OL>
+     * 
+     * If the class has already exceeded some limit in building the
+     * class file format structures then don't attempt to split.
+     * Most likely the number of constant pool entries has been exceeded
+     * and thus the built class file no longer has integrity.
+     * The split code relies on being able to read the in-memory
+     * version of the class file in order to determine descriptors
+     * for methods and fields.
+     */
+    private void splitMethod() {
+        
+        int split_pc = 0;
+        for (int codeLength = myCode.getPC();
+               (cb.limitMsg == null) &&
+               (codeLength > CODE_SPLIT_LENGTH);
+            codeLength = myCode.getPC())
+        {
+            int lengthToCheck = codeLength - split_pc;
+
+            int optimalMinLength;
+            if (codeLength < CODE_SPLIT_LENGTH * 2) {
+                // minimum required
+                optimalMinLength = codeLength - CODE_SPLIT_LENGTH;
+            } else {
+                // try to split as much as possible
+                // need one for the return instruction
+                optimalMinLength = CODE_SPLIT_LENGTH - 1;
+            }
+
+            if (optimalMinLength > lengthToCheck)
+                optimalMinLength = lengthToCheck;
+
+            split_pc = myCode.splitZeroStack(this, modClass, split_pc,
+                    lengthToCheck, optimalMinLength);
+
+            // Negative split point returned means that no split
+            // was possible. Give up on this approach and goto
+            // the next approach (none-yet).
+            if (split_pc < 0) {
+                break;
+            }
+
+            // success, continue on splitting after the call to the
+            // sub-method if the method still execeeds the maximum length.
+        }
+    }
 
 	/*
-	 * class interface
-	 */
+     * class interface
+     */
 
 	/**
-	 * In their giveCode methods, the parts of the method body
-	 * will want to get to the constant pool to add their constants.
-	 * We really only want them treating it like a constant pool
-	 * inclusion mechanism, we could write a wrapper to limit it to that.
-	 */
+     * In their giveCode methods, the parts of the method body will want to get
+     * to the constant pool to add their constants. We really only want them
+     * treating it like a constant pool inclusion mechanism, we could write a
+     * wrapper to limit it to that.
+     */
 	ClassHolder constantPool() {
 		return modClass;
 	}
@@ -290,7 +373,7 @@ class BCMethod implements MethodBuilder {
 	 * Corresponds to max_stack in the Code attribute of section 4.7.3
 	 * of the vm spec.
 	 */
-	private int maxStack;
+	int maxStack;
 	
 	/**
 	 * Current stack depth in this method, measured in words.
@@ -420,7 +503,7 @@ class BCMethod implements MethodBuilder {
 			chunk.addInstrU2(VMOpcode.SIPUSH,value);
 		else {
 			int cpe = modClass.addConstant(value);
-			chunk.addInstrCPE(VMOpcode.LDC, cpe);
+			addInstrCPE(VMOpcode.LDC, cpe);
 		}
 		growStack(1, type);
 		
@@ -458,7 +541,7 @@ class BCMethod implements MethodBuilder {
 		else 
 		{
 			int cpe = modClass.addConstant(value);
-			chunk.addInstrCPE(VMOpcode.LDC, cpe);
+			addInstrCPE(VMOpcode.LDC, cpe);
 		}
 		growStack(1, Type.FLOAT);
 	}
@@ -477,7 +560,7 @@ class BCMethod implements MethodBuilder {
 	}
 	public void push(String value) {
 		int cpe = modClass.addConstant(value);
-		myCode.addInstrCPE(VMOpcode.LDC, cpe);
+		addInstrCPE(VMOpcode.LDC, cpe);
 		growStack(1, Type.STRING);
 	}
  
@@ -1057,6 +1140,21 @@ class BCMethod implements MethodBuilder {
 		// an array reference is an object, hence width of 1
 		growStack(1, cb.factory.type(className.concat("[]")));
 	}
+    
+    /**
+     * Write a instruction that uses a constant pool entry
+     * as an operand, add a limit exceeded message if
+     * the number of constant pool entries has exceeded
+     * the limit.
+     */
+    private void addInstrCPE(short opcode, int cpe)
+    {
+        if (cpe >= VMOpcode.MAX_CONSTANT_POOL_ENTRIES)
+            cb.addLimitExceeded(this, "constant_pool_count",
+                    VMOpcode.MAX_CONSTANT_POOL_ENTRIES, cpe);
+        
+        myCode.addInstrCPE(opcode, cpe);
+    }
 
 	/**
 		Tell if statement number in this method builder hits limit.  This
@@ -1072,7 +1170,9 @@ class BCMethod implements MethodBuilder {
 	public boolean statementNumHitLimit(int noStatementsAdded)
 	{
 		if (statementNum > 2048)    // 2K limit
+		{
 			return true;
+		}
 		else
 		{
 			statementNum = statementNum + noStatementsAdded;
@@ -1141,43 +1241,22 @@ class BCMethod implements MethodBuilder {
 		// Only downside is that we may split into N methods when N-1 would suffice.
 		if (currentCodeSize < 55000)
 			return;
-		
+				
 		// only handle no-arg methods at the moment.
 		if (parameters != null)
 		{
 			if (parameters.length != 0)
 				return;
 		}
-		
-		int modifiers = myEntry.getModifier();	
-		//System.out.println("NEED TO SPLIT " + myEntry.getName() + "  " + currentCodeSize + " stack " + stackDepth);
-
-		// the sub-method can be private to ensure that no-one
-		// can call it accidentally from outside the class.
-		modifiers &= ~(Modifier.PROTECTED | Modifier.PUBLIC);
-		modifiers |= Modifier.PRIVATE;
-		
-		String subMethodName = myName + "_s" + Integer.toString(subMethodCount++);
-		BCMethod subMethod = (BCMethod) cb.newMethodBuilder(
-				modifiers,
-				myReturnType, subMethodName);
-		subMethod.thrownExceptions = this.thrownExceptions;
+        		
+		BCMethod subMethod = getNewSubMethod(myReturnType, false);
 				
 		// stop any recursion
 		handlingOverflow = true;
 		
 		// in this method make a call to the sub method we will
 		// be transferring control to.
-		short op;
-		if ((modifiers & Modifier.STATIC) == 0)
-		{
-			op = VMOpcode.INVOKEVIRTUAL;
-			this.pushThis();
-		} else {
-			op = VMOpcode.INVOKESTATIC;
-		}
-		
-		this.callMethod(op, (String) null, subMethodName, myReturnType, 0);
+        callSubMethod(subMethod);
 	
 		// and return its value, works just as well for a void method!
 		this.methodReturn();
@@ -1202,5 +1281,62 @@ class BCMethod implements MethodBuilder {
 		this.maxStack = subMethod.maxStack;
 		this.stackDepth = subMethod.stackDepth;
 	}
+	
+    /**
+     * Create a sub-method from this method to allow the code builder to split a
+     * single logical method into multiple methods to avoid the 64k per-method
+     * code size limit. The sub method with inherit the thrown exceptions of
+     * this method.
+     * 
+     * @param returnType
+     *            Return type of the new method
+     * @param withParameters
+     *            True to define the method with matching parameters false to
+     *            define it with no parameters.
+     * @return A valid empty sub method.
+     */
+    final BCMethod getNewSubMethod(String returnType, boolean withParameters) {
+        int modifiers = myEntry.getModifier();
+
+        // the sub-method can be private to ensure that no-one
+        // can call it accidentally from outside the class.
+        modifiers &= ~(Modifier.PROTECTED | Modifier.PUBLIC);
+        modifiers |= Modifier.PRIVATE;
+
+        String subMethodName = myName + "_s"
+                + Integer.toString(subMethodCount++);
+        BCMethod subMethod = (BCMethod) cb.newMethodBuilder(modifiers,
+                returnType, subMethodName, withParameters ? parameterTypes
+                        : null);
+        subMethod.thrownExceptions = this.thrownExceptions;
+
+        return subMethod;
+    }
+
+    /**
+     * Call a sub-method created by getNewSubMethod handling parameters
+     * correctly.
+     */
+    final void callSubMethod(BCMethod subMethod) {
+        // in this method make a call to the sub method we will
+        // be transferring control to.
+        short op;
+        if ((myEntry.getModifier() & Modifier.STATIC) == 0) {
+            op = VMOpcode.INVOKEVIRTUAL;
+            this.pushThis();
+        } else {
+            op = VMOpcode.INVOKESTATIC;
+        }
+
+        int parameterCount = subMethod.parameters == null ? 0
+                : subMethod.parameters.length;
+
+        // push my parameter values for the call.
+        for (int pi = 0; pi < parameterCount; pi++)
+            this.getParameter(pi);
+
+        this.callMethod(op, modClass.getName(), subMethod.getName(),
+                subMethod.myReturnType, parameterCount);
+    }
 }
 

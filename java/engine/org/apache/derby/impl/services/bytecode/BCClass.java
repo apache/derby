@@ -84,7 +84,7 @@ class BCClass extends GClass {
 	 * Simple text indicating any limits execeeded while generating
 	 * the class file.
 	 */
-	private String limitMsg;
+	String limitMsg;
 	
 	//
 	// ClassBuilder interface

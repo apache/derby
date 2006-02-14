@@ -257,5 +257,11 @@ public interface VMOpcode {
      * Used in conditional handling.
     */
     int GOTO_W_INS_LENGTH = 5;
+    
+    /**
+     * Maximum number of entries in the constant pool.
+     * See section 4.10 of JVM spec version 1.
+      */
+    int MAX_CONSTANT_POOL_ENTRIES = 65535;
    
 }
