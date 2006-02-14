@@ -21,11 +21,11 @@ getMaxProcedureNameLength() = 128
 getMaxTableNameLength() = 128
 getMaxUserNameLength() = 30
 getSuperTypes() with null :
-EXPECTED: Not Implemented Exception or empty  ResultSet
+EXPECTED: Empty ResultSet
 getSuperTables() with null :
-EXPECTED: Not Implemented Exception or empty  ResultSet
+EXPECTED: Empty ResultSet
 getAttributes() with null :
-EXPECTED: Not Implemented Exception or empty  ResultSet
+EXPECTED: Empty ResultSet
 locatorsUpdateCopy(): 
 Returned: true
 Test dbMetaDataJdbc30 finished

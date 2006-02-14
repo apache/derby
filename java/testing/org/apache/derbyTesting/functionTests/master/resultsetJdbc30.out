@@ -19,4 +19,6 @@ trying rs.updateArray(int, Array) :
 Expected : Feature not implemented: no details.
 trying rs.updateArray(String, Array) :
 Expected : Feature not implemented: no details.
+holdable result set was not closed on exception
+non-holdable result set was not closed on exception
 Test resultsetJdbc30 finished
