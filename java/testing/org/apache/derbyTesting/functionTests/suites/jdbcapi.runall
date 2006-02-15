@@ -20,3 +20,5 @@ jdbcapi/prepStmtNull.java
 jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/Stream.java
+jdbcapi/SURQueryMixTest.junit
+jdbcapi/SURTest.junit

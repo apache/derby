@@ -35,3 +35,8 @@ jdbcapi/savepointJdbc30_XA.java
 # excluding jdbcapi/derbyStress.java - jcc runs out of memory with this test
 jdbcapi/derbyStress.java
 largedata/LobLimits.java
+# These next three fail with an error saying that a null username is not 
+# supported
+jdbcapi/SURQueryMixTest.junit
+jdbcapi/SURTest.junit
+jdbcapi/ConcurrencyTest.junit

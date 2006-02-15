@@ -472,7 +472,7 @@ public class RunTest
         int index = scriptName.lastIndexOf('/');
         if (index == -1) // no test directory was specified
         {
-            if ( (!testType.equals("sql")) && (!testType.equals("java")) )
+            if ( (!testType.equals("sql")) && (!testType.equals("java")) && (!testType.equals("junit")))
             {
                 System.out.println("Test argument should be of the form: <dir>/<test>.<ext>");
                 System.exit(1);
@@ -502,7 +502,7 @@ public class RunTest
         // Get the test name without the extension
         testBase = scriptFileName.substring(0, scriptFileName.lastIndexOf("."+testType));
 
-		if (testType.equals("java"))
+		if (testType.equals("java") || testType.equals("junit"))
 		{
                     //get the javaPath
 		    String tmp = defaultPackageName.replace('/', '.');
@@ -621,7 +621,8 @@ public class RunTest
 
         // For certain test types, locate script file based on scriptName
         // Then determine the actual test name and directory
-        if ( (!testType.equals("java")) && 
+        if ( (!testType.equals("java")) &&
+             (!testType.equals("junit")) &&
              (!testType.equals("unit")) && 
              (!testType.equals("multi")) ) 
         {
@@ -1527,7 +1528,6 @@ clp.list(System.out);
 	                    jvmflags = "";
 	            }
 	        }
-	        
 	        if (NetServer.isJCCConnection(framework)
 	        		|| "true".equalsIgnoreCase(ap.getProperty("noSecurityManager")))
 	        	runWithoutSecurityManager = true;
@@ -2135,6 +2135,15 @@ clp.list(System.out);
             v.addElement("-p");
             v.addElement(propString);
         }
+        else if (testType.equals("junit"))
+        {
+            v.addElement("junit.textui.TestRunner");
+            if (javaPath.length() > 0) {
+                v.addElement(javaPath + "." + testBase);
+            } else {
+                v.addElement(testBase);
+            }
+        }
         else if ( testType.equals("multi") )
         {
 	System.out.println("scriptiflename is: " + scriptFileName);
@@ -2405,7 +2414,11 @@ clp.list(System.out);
             org.apache.derbyTesting.unitTests.harness.UnitTestMain.main(args);
             */
         }
-        
+        else if (testType.equals("junit"))
+        {
+            System.out.println("JUnit tests not implemented yet with useprocess=false");
+            System.exit(1);
+        }        
         ps.close();
          if (installedSecurityManager)
         {

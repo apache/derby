@@ -334,8 +334,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		// Return the current row for 0
 		if (row == 0)
 		{
-                    if ((beforeFirst || afterLast) ||
-                        (!beforeFirst && !afterLast)) {
+                    if (beforeFirst || afterLast || currentPosition==0) {
                         return null;
                     } else {
 			return getRowFromHashTable(currentPosition);

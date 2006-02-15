@@ -30,7 +30,10 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
-
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
 import javax.sql.DataSource;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
@@ -165,7 +168,13 @@ public class TestUtil {
 	{
 		if (framework != UNKNOWN_FRAMEWORK)
 			return framework;
-		String frameworkString = System.getProperty("framework");
+              String frameworkString = (String) AccessController.doPrivileged
+                  (new PrivilegedAction() {
+                          public Object run() {
+                              return System.getProperty("framework");
+                          }
+                      }
+                   );              
 		if (frameworkString == null || 
 		   frameworkString.toUpperCase(Locale.ENGLISH).equals("EMBEDDED"))
 			framework = EMBEDDED_FRAMEWORK;
@@ -199,7 +208,13 @@ public class TestUtil {
     */
     public static String getHostName()
     {
-        String hostName = (System.getProperty("hostName"));
+        String hostName = (String) AccessController.doPrivileged
+            (new PrivilegedAction() {
+                    public Object run() {
+                        return System.getProperty("hostName");
+                    }
+                }
+             );    
         if (hostName == null)
             hostName="localhost";
         return hostName;
@@ -243,7 +258,7 @@ public class TestUtil {
 	*/
 	public static void loadDriver() throws Exception
 	{
-		String driverName = null;
+              final String driverName;
 		framework = getFramework();
 		switch (framework)
 		{
@@ -258,9 +273,23 @@ public class TestUtil {
 			case DERBY_NET_CLIENT_FRAMEWORK:
 				driverName = "org.apache.derby.jdbc.ClientDriver";
 				break;
+                      default: 
+                            driverName=  "org.apache.derby.jdbc.EmbeddedDriver";
+                            break;
 		}
-		Class.forName(driverName).newInstance();
-	}
+                                
+              try {
+                  AccessController.doPrivileged
+                      (new PrivilegedExceptionAction() {
+                              public Object run() throws Exception {
+                                  return Class.forName(driverName).newInstance();
+                              }
+                          }
+                       );
+              } catch (PrivilegedActionException e) {
+                  throw e.getException();
+              }
+        }
 
 
 	/**
