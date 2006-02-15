@@ -591,3 +591,14 @@ create procedure d388 () language java parameter style java modifies sql data
 -- Just call the procedure; it will do the rest.
 call d388();
 
+-- Derby-85: It turns out that if a table t1 exists in a non-default schema 
+-- and the default schema (e.g., "SOMEUSER") doesn't exist yet (because no 
+-- objects have been created in that schema), then attempts to create a 
+-- trigger on t1 using its qualified name will lead to a null pointer 
+-- exception in the Derby engine. 
+connect 'wombat;user=someuser';
+autocommit off;
+create table myschema.mytable (i int);
+create trigger mytrigger after update on myschema.mytable for each row mode db2sql select * from sys.systables;
+rollback;
+
