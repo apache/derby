@@ -1,0 +1,119 @@
+ij> connect 'grantRevoke;create=true' user 'satheesh' as satConnection;
+ij(SATCONNECTION)> -- Test table privileges
+create table satheesh.tsat(i int, j int);
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant select on satheesh.tsat to public;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant insert on satheesh.tsat to foo;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant delete on satheesh.tsat to foo;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant update on satheesh.tsat to foo;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant update(i) on satheesh.tsat to bar;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> select * from sys.systableperms;
+GRANTEE                       |GRANTOR                       |TABLEID                             |&|&|&|&|&|&
+--------------------------------------------------------------------------------------------------------------
+PUBLIC                        |SATHEESH                      |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
+foo                           |SATHEESH                      |xxxxFILTERED-UUIDxxxx|N|y|y|y|N|N
+2 rows selected
+ij(SATCONNECTION)> connect 'grantRevoke' user 'bar' as barConnection;
+ij(BARCONNECTION)> -- Following revokes should fail. Only owner can revoke permissions
+revoke select on satheesh.tsat from public;
+ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
+ij(BARCONNECTION)> revoke insert on satheesh.tsat from foo;
+ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
+ij(BARCONNECTION)> revoke update(i) on satheesh.tsat from foo;
+ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
+ij(BARCONNECTION)> revoke update on satheesh.tsat from foo;
+ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
+ij(BARCONNECTION)> revoke delete on satheesh.tsat from foo;
+ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
+ij(BARCONNECTION)> set connection satConnection;
+ij(SATCONNECTION)> -- Revoke permissions not granted already
+revoke trigger on satheesh.tsat from foo;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> revoke references on satheesh.tsat from foo;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> -- Following revokes should revoke permissions
+revoke update on satheesh.tsat from foo;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> revoke delete on satheesh.tsat from foo;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> -- Check success by looking at systableperms directly for now
+select * from sys.systableperms;
+GRANTEE                       |GRANTOR                       |TABLEID                             |&|&|&|&|&|&
+--------------------------------------------------------------------------------------------------------------
+PUBLIC                        |SATHEESH                      |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
+foo                           |SATHEESH                      |xxxxFILTERED-UUIDxxxx|N|N|y|N|N|N
+2 rows selected
+ij(SATCONNECTION)> revoke insert on satheesh.tsat from foo;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> revoke select on satheesh.tsat from public;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> -- Check success by looking at systableperms directly for now
+select * from sys.systableperms;
+GRANTEE                       |GRANTOR                       |TABLEID                             |&|&|&|&|&|&
+--------------------------------------------------------------------------------------------------------------
+0 rows selected
+ij(SATCONNECTION)> -- Test routine permissions
+CREATE FUNCTION F_ABS(P1 INT)
+RETURNS INT
+NO SQL
+RETURNS NULL ON NULL INPUT
+EXTERNAL NAME 'java.lang.Math.abs'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant execute on function F_ABS to foo;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant execute on function F_ABS(int) to bar;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> revoke execute on function F_ABS(int) from bar RESTRICT;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> drop function f_abs;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> -- Tests with views
+create view v1 as select * from tsat;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant select on v1 to bar;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant insert on v1 to foo;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant update on v1 to public;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> -- Tests for synonym. Not supported currently.
+create synonym mySym for satheesh.tsat;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> -- Expected to fail
+grant select on mySym to bar;
+ERROR 42X05: Table 'MYSYM' does not exist.
+ij(SATCONNECTION)> grant insert on mySym to foo;
+ERROR 42X05: Table 'MYSYM' does not exist.
+ij(SATCONNECTION)> -- Test for external security clause
+-- Expected to fail
+CREATE FUNCTION F_ABS(P1 INT)
+RETURNS INT NO SQL
+RETURNS NULL ON NULL INPUT
+EXTERNAL NAME 'java.lang.Math.abs'
+EXTERNAL SECURITY DEFINOR
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+ERROR 42X01: Syntax error: Encountered "DEFINOR" at line 7, column 19.
+ij(SATCONNECTION)> CREATE PROCEDURE AUTH_TEST.addUserUtility(IN userName VARCHAR(50), IN permission VARCHAR(22)) 
+LANGUAGE JAVA PARAMETER STYLE JAVA
+EXTERNAL SECURITY INVOKER
+EXTERNAL NAME 'org.apache.derby.database.UserUtility.add';
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> CREATE FUNCTION F_ABS(P1 INT)
+RETURNS INT NO SQL
+RETURNS NULL ON NULL INPUT
+EXTERNAL NAME 'java.lang.Math.abs'
+EXTERNAL SECURITY DEFINER
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> values f_abs(-5);
+1          
+-----------
+5          
+1 row selected
+ij(SATCONNECTION)> 

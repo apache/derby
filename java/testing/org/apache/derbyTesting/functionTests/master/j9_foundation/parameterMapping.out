@@ -3112,12 +3112,12 @@ setNull() with all JDBC Types on CLOB(1k)
   setNull with batching support(Types.NUMERIC) IC
   setNull(Types.BIT) IC
   setNull with batching support(Types.BIT) IC
-  setNull(CHAR) IC
-  setNull with batching support(CHAR) IC
-  setNull(VARCHAR) IC
-  setNull with batching support(VARCHAR) IC
-  setNull(LONG VARCHAR) IC
-  setNull with batching support(LONG VARCHAR) IC
+  setNull(CHAR) getClob=null was null true
+  setNull with batching support(CHAR) getClob=null was null true
+  setNull(VARCHAR) getClob=null was null true
+  setNull with batching support(VARCHAR) getClob=null was null true
+  setNull(LONG VARCHAR) getClob=null was null true
+  setNull with batching support(LONG VARCHAR) getClob=null was null true
   setNull(VARCHAR () FOR BIT DATA) IC
   setNull with batching support(VARCHAR () FOR BIT DATA) IC
   setNull(DATE) IC

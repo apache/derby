@@ -2748,4 +2748,72 @@ Positive Test34 - in autocommit mode, check that updateRow and deleteRow does no
 	{1,aa                  }
 	{2,bb                  }
 	{3,cc                  }
-Finished testing updateable resultsets
+Positive Test 35 - moveToInsertRow, insertRow,getXXX and moveToCurrentRow
+Positive Test 35.a - moveToInsertRow
+Positive Test 35.b - insertRow
+Positive Test 35.c - check that getXXX gets the correct values after insertRow
+Positive Test 35.d - moveToCurrentRow
+Positive Test 35.e - check that getXXX gets the correct values after moveToCurrentRow
+Positive test 36 - call moveToCurrentRow from current row
+Positive test 37 - several moveToInsertRow
+Positive test 37.a - check that getXXX gets the correct values after moveToInsertRow
+Positive test 37.b - moveToinsertRow from insertRow
+Positive test 37.c - check that getXXX gets undefined values when updateXXX has not been called yet on insertRow
+Negative Test 38 - insertRow: do not set a value to all not nullable columns
+SQL State: 23502
+Got expected exception: Column 'C41'  cannot accept a NULL value.
+Negative Test 39 - run updateRow and deleterow when positioned at insertRow
+Negative Test 39.a - run updateRow on insertRow
+SQL State: 24000
+Got expected exception: Invalid cursor state - no current row.
+Negative Test 39.a - run deleteRow on insertRow
+SQL State: 24000
+Got expected exception: Invalid cursor state - no current row.
+Negative test 40 - Try to insert row from currentRow
+SQL State: XJ086
+Got expected exception: This method cannot be invoked unless the cursor is positioned on the insert row.
+Positive test 41 - try to insertRow from all posible positions
+Positive test 42 - InsertRow leaving a nullable columns = NULL
+Positive and negative tests 43 - Commit while on insertRow
+Positive test 43 - Commit while on insertRow with holdable cursor
+Negative test 43 - Commit while on insertRow with not holdable cursor
+SQL State: XCL16
+Got expected exception: ResultSet not open. Operation 'insertRow' not permitted. Verify that autocommit is OFF.
+Negative test 44 - Closed RS
+Negative test 44.a - try insertRow on closed RS
+SQL State: XCL16
+Got expected exception: ResultSet not open. Operation 'insertRow' not permitted. Verify that autocommit is OFF.
+Negative test 44.b - try moveToCurrentRow on closed RS
+SQL State: XCL16
+Got expected exception: ResultSet not open. Operation 'moveToCurrentRow' not permitted. Verify that autocommit is OFF.
+Negative test 44.c - try moveToInsertRow on closed RS
+SQL State: XCL16
+Got expected exception: ResultSet not open. Operation 'moveToInsertRow' not permitted. Verify that autocommit is OFF.
+Positive test 45 - try to insert without updating all columns. All columns allow nulls or have a default value
+Positive test 46 - Rollback with AutoCommit on
+Negative test 47 - insertRow and read-only RS
+Negative test 47.a - try moveToInsertRow on read-only RS
+SQL State: XJ083
+Got expected exception: 'moveToInsertRow' not allowed because the ResultSet is not an updatable ResultSet. 
+Negative test 47.b - try updateXXX on read-only RS
+SQL State: XJ083
+Got expected exception: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+Negative test 47.c - try insertRow on read-only RS
+SQL State: XJ083
+Got expected exception: 'insertRow' not allowed because the ResultSet is not an updatable ResultSet. 
+Negative test 47.d - try moveToCurrentRow on read-only RS
+SQL State: XJ083
+Got expected exception: 'moveToCurrentRow' not allowed because the ResultSet is not an updatable ResultSet. 
+Positive test 48 - Test all updateXXX methods on all the supported sql datatypes
+Next datatype to test is SMALLINT
+  Testing updateShort on SQL type SMALLINT
+    Using column position as first parameter to updateShort
+    Using column name as first parameter to updateShort
+  Testing updateInt on SQL type SMALLINT
+    Using column position as first parameter to updateInt
+    Using column name as first parameter to updateInt
+  Testing updateLong on SQL type SMALLINT
+    Using column position as first parameter to updateLong
+    Using column name as first parameter to updateLong
+  Testing updateBigDecimal on SQL type SMALLINT
+    Using column position as first parameter to updateBigDecimal
