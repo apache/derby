@@ -1,4 +1,5 @@
 Test derbyStress starting
 Testing with 2000 prepared statements
 PASS -- Prepared statement test
+DERBY-557: reExecuteStatementTest() PASSED
 Test derbyStress finished.

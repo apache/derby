@@ -53,6 +53,9 @@ public class derbyStress {
 				 System.out.println("PASS -- Prepared statement test");
 				 conn.close();
 			}
+
+			reExecuteStatementTest();
+
 			System.out.println("Test derbyStress finished.");
 		} catch (SQLException se) {
 			TestUtil.dumpSQLExceptions(se);
@@ -85,6 +88,9 @@ public class derbyStress {
 	// user (DERBY-210)
 	private static void prepStmtTest(Connection conn, int numRows, int numPreparedStmts) throws Exception
 	{
+		// Don't run under DerbyNetClient until DERBY-210 is fixed
+		if (TestUtil.isDerbyNetClientFramework()) return;
+
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		conn.setAutoCommit(false);
@@ -116,5 +122,20 @@ public class derbyStress {
 			TestUtil.dumpSQLExceptions(e);
 			conn.rollback();
 		}
+	}
+
+	// Tests re-execution of a statement without closing the result
+	// set (DERBY-557).
+	private static void reExecuteStatementTest() throws Exception {
+		System.out.print("DERBY-557: reExecuteStatementTest() ");
+		Connection conn = ij.startJBMS();
+		Statement stmt = conn.createStatement();
+		for (int i = 0; i < 50000; i++) {
+			ResultSet rs = stmt.executeQuery("values(1)");
+			// How silly! I forgot to close the result set.
+		}
+		stmt.close();
+		conn.close();
+		System.out.println("PASSED");
 	}
 }
