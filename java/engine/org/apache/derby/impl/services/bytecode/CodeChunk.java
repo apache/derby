@@ -1467,7 +1467,7 @@ final class CodeChunk {
      * @param ch My class
      * @param subMethod Sub-method code was pushed into
      * @param split_pc Program counter the split started at
-     * @param split_length Length of code split
+     * @param splitLength Length of code split
      * @param codeLength Length of code before split
      */
     private int removePushedCode(BCMethod mb, ClassHolder ch,
