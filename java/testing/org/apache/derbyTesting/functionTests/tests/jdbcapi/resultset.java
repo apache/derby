@@ -834,7 +834,8 @@ public class resultset {
 				} catch(SQLException ex){
 					if (ex.getSQLState().equals("22005")) {
 						if (s.getBytes(i) != null)
-                row.append(new String(s.getBytes(i)));
+							row.append(s.getBytes(i).toString());
+                //row.append(new String(s.getBytes(i)));
 						else
                 row.append(s.getBytes(i));
 					} else throw ex;

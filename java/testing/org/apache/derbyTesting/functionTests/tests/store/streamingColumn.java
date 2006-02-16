@@ -588,7 +588,7 @@ public class streamingColumn {
 			"this is a relatively long string, hopefully the row will be split or otherwise become long ???  I don't think it will become long but maybe if it rolls back it will become strange";
 		for (int i = 0; i < 100; i++)
 		{
-			ByteArrayInputStream string1 = new ByteArrayInputStream(longString.getBytes());
+			ByteArrayInputStream string1 = new ByteArrayInputStream(longString.getBytes("US-ASCII"));
 			ps.setAsciiStream(1, string1, longString.length());
 			ps.setInt(2, i);
 			ps.executeUpdate();
@@ -708,8 +708,9 @@ public class streamingColumn {
 				// get the second column as a string
 				String resultString = rs.getString(2);
 
-                // compare result with expected
-                String canon = new String(stream1_byte_array[a]);
+                // compare result with expected, using fixed length string from 
+				// the streamed byte array 
+                String canon = new String(stream1_byte_array[a], "US-ASCII");
 
                 if (canon.compareTo(resultString) != 0)
                 {
@@ -722,8 +723,9 @@ public class streamingColumn {
 				// get the second column as a string
 				resultString = rs.getString(3);
 
-                // compare result with expected
-                canon = new String(stream2_byte_array[a]);
+                // compare result with expected, using fixed length string from
+				// the second streamed byte array.
+                canon = new String(stream2_byte_array[a], "US-ASCII");
 
                 if (canon.compareTo(resultString) != 0)
                 {
@@ -1022,7 +1024,7 @@ public class streamingColumn {
 					dumpSQLExceptions(e);
 			}
 
-			Reader filer = new InputStreamReader(fileIn);
+			Reader filer = new InputStreamReader(fileIn,"US-ASCII");
 			try {
 				System.out.println("===> testing using setCharacterStream with -1 as length");
 				ps.setCharacterStream(2, filer, -1);
@@ -1784,7 +1786,7 @@ public class streamingColumn {
 	throws Exception{
 	 	File file = new File(fileName);
 	 	InputStream fileIn = new FileInputStream(file);
-	 	Reader filer = new InputStreamReader(fileIn);
+	 	Reader filer = new InputStreamReader(fileIn, "US-ASCII");
 	 	System.out.println("===> testing(using setCharacterStream) " + fileName + " length = " + file.length());
 	 	ps.setInt(1, intValue);
 	 	// insert a streaming column
@@ -1878,7 +1880,7 @@ public class streamingColumn {
 			"update foo set a = ?, b = ? where a = " + oldkey);
 
 		String updateString = pad("", newkey);
-		ByteArrayInputStream bais = new ByteArrayInputStream(updateString.getBytes());
+		ByteArrayInputStream bais = new ByteArrayInputStream(updateString.getBytes("US-ASCII"));
 		ps.setInt(1, newkey);
 		ps.setAsciiStream(2, bais, updateString.length());
 		int nRows = ps.executeUpdate();
@@ -1909,7 +1911,7 @@ public class streamingColumn {
 
 	public static int streamInLongCol(PreparedStatement ps, Object data) throws Exception {
 		String s = (String)data;
-		ByteArrayInputStream bais = new ByteArrayInputStream(s.getBytes());
+		ByteArrayInputStream bais = new ByteArrayInputStream(s.getBytes("US-ASCII"));
 		ps.setAsciiStream(1, bais, s.length());
 		int nRows = ps.executeUpdate();
 		bais.close();
