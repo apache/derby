@@ -20,38 +20,25 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
-import org.apache.derby.jdbc.EmbeddedXADataSource;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.sql.DriverManager;
-import java.sql.Savepoint;
+import java.sql.Connection;
 import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
 
-import javax.sql.DataSource;
-import javax.sql.XADataSource;
 import javax.sql.XAConnection;
-import javax.sql.ConnectionPoolDataSource;
-import javax.transaction.xa.XAResource;
+import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
-import javax.sql.ConnectionEventListener;
-import javax.sql.ConnectionEvent;
+
 import org.apache.derby.tools.JDBCDisplayUtil;
-import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
-import java.io.*;
-import java.util.Hashtable;
-
-import javax.naming.*;
-import javax.naming.directory.*;
 
 /**
  * Extends checkDataSource to provide testing of JDBC 3.0 specific
@@ -167,9 +154,10 @@ public class checkDataSource30 extends checkDataSource
 	private void checkXAHoldability() {
 		System.out.println("START XA HOLDABILITY TEST");
 		try {
-			EmbeddedXADataSource dscsx = new EmbeddedXADataSource();
-			dscsx.setDatabaseName("wombat");
-
+			Properties attrs = new Properties();
+			attrs.setProperty("databaseName", "wombat");
+			XADataSource dscsx =  TestUtil.getXADataSource(attrs);
+		
 			XAConnection xac = dscsx.getXAConnection("fred", "wilma");
 			XAResource xr = xac.getXAResource();
 			Xid xid = getXid(25, (byte) 21, (byte) 01);

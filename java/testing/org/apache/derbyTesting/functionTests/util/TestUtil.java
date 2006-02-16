@@ -304,13 +304,21 @@ public class TestUtil {
 	{
 		String classname;
 		if(HAVE_DRIVER_CLASS)
+		{
 			classname = getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource";
+			return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
+		}
 		else
-			classname = getDataSourcePrefix() + JSR169_DATASOURCE_STRING + "DataSource";
+			return getSimpleDataSource(attrs);
 		
-		return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
 	}
 
+	public static DataSource getSimpleDataSource(Properties attrs)
+	{
+		String classname = getDataSourcePrefix() + JSR169_DATASOURCE_STRING + "DataSource";
+		return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
+	}
+	
 	/**
 	 * Get an xa  data source for the appropriate framework
 	 * @param attrs  A set of attribute values to set on the datasource.

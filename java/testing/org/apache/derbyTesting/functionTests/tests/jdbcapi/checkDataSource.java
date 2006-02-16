@@ -20,39 +20,37 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
-import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
-import org.apache.derby.jdbc.EmbeddedXADataSource;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
+import java.io.Serializable;
 import java.sql.CallableStatement;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Properties;
 
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
-import javax.sql.XADataSource;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
-import javax.sql.ConnectionPoolDataSource;
-import javax.transaction.xa.XAResource;
+import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
-import javax.sql.ConnectionEventListener;
-import javax.sql.ConnectionEvent;
+
+import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
+import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
-
-import java.io.*;
-import java.util.Hashtable;
-import java.util.Iterator;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.oro.text.perl.Perl5Util;
-import javax.naming.*;
-import javax.naming.directory.*;
 
 /**
  * Test the various embedded DataSource implementations of Derby.
@@ -137,31 +135,29 @@ public class checkDataSource
 		checkJBMSToString();
 
 
-		EmbeddedDataSource dscs = new EmbeddedDataSource();
-		dscs.setDatabaseName("wombat");
+		Properties attrs = new Properties();
+		attrs.setProperty("databaseName", "wombat");
+		DataSource dscs = TestUtil.getDataSource(attrs);
+		
 		checkToString(dscs);
 
 		DataSource ds = dscs;
 
-		checkConnection("EmbeddedDataSource", ds.getConnection());
+		checkConnection("DataSource", ds.getConnection());
 		
-		EmbeddedSimpleDataSource dssimple = new EmbeddedSimpleDataSource();
-		dssimple.setDatabaseName("wombat");
+		DataSource dssimple = TestUtil.getSimpleDataSource(attrs);
 		ds = dssimple;
-		checkConnection("EmbeddedSimpleDataSource", ds.getConnection());		
+		checkConnection("SimpleDataSource", ds.getConnection());		
 
-		EmbeddedConnectionPoolDataSource dscsp = new EmbeddedConnectionPoolDataSource();
-		dscsp.setDatabaseName("wombat");
-		//dscsp.setConnectionAttributes("unicode=true");
-		ConnectionPoolDataSource dsp = dscsp;
+		ConnectionPoolDataSource dsp = TestUtil.getConnectionPoolDataSource(attrs);
 		checkToString(dsp);
 
 		PooledConnection pc = dsp.getPooledConnection();
 		SecurityCheck.inspect(pc, "javax.sql.PooledConnection");
 		pc.addConnectionEventListener(new EventCatcher(1));
 
-		checkConnection("EmbeddedConnectionPoolDataSource", pc.getConnection());
-		checkConnection("EmbeddedConnectionPoolDataSource", pc.getConnection());
+		checkConnection("ConnectionPoolDataSource", pc.getConnection());
+		checkConnection("ConnectionPoolDataSource", pc.getConnection());
 
 		// BUG 4471 - check outstanding updates are rolled back.
 		Connection c1 = pc.getConnection();
@@ -206,21 +202,16 @@ public class checkDataSource
 		pc.close();
 		pc = null;
 
-		testPoolReset("EmbeddedConnectionPoolDataSource", dsp.getPooledConnection());
+		testPoolReset("ConnectionPoolDataSource", dsp.getPooledConnection());
 
-
-		EmbeddedXADataSource dscsx = new EmbeddedXADataSource();
-		dscsx.setDatabaseName("wombat");
-		//dscsx.setConnectionAttributes("unicode=true");
-
-		XADataSource dsx = dscsx;
+		XADataSource dsx = TestUtil.getXADataSource(attrs);
 		checkToString(dsx);
 
 		XAConnection xac = dsx.getXAConnection();
 		SecurityCheck.inspect(xac, "javax.sql.XAConnection");
 		xac.addConnectionEventListener(new EventCatcher(3));
 
-		checkConnection("EmbeddedXADataSource", xac.getConnection());
+		checkConnection("XADataSource", xac.getConnection());
 
 		// BUG 4471 - check outstanding updates are rolled back wi XAConnection.
 		c1 = xac.getConnection();
@@ -248,12 +239,12 @@ public class checkDataSource
 		xac.close();
 		xac = null;
 
-		testPoolReset("EmbeddedXADataSource", dsx.getXAConnection());
+		testPoolReset("XADataSource", dsx.getXAConnection());
 
 
 
 		try {
-			DriverManager.getConnection("jdbc:derby:;shutdown=true");
+			TestUtil.getConnection("","shutdown=true");
 		} catch (SQLException sqle) {
 			JDBCDisplayUtil.ShowSQLException(System.out, sqle);
 		}
@@ -268,9 +259,9 @@ public class checkDataSource
 
 		checkConnection("DriverManager ", dmc);
 
-		// reset ds back to the EmbeddedDataSource
+		// reset ds back to the Regular DataSource
 		ds = dscs;
-		checkConnection("EmbeddedDataSource", ds.getConnection());
+		checkConnection("DataSource", ds.getConnection());
 		
 		// and back to EmbeddedSimpleDataSource
 		ds = dssimple;
@@ -278,14 +269,14 @@ public class checkDataSource
 		
 		pc = dsp.getPooledConnection();
 		pc.addConnectionEventListener(new EventCatcher(2));
-		checkConnection("EmbeddedConnectionPoolDataSource", pc.getConnection());
-		checkConnection("EmbeddedConnectionPoolDataSource", pc.getConnection());
+		checkConnection("ConnectionPoolDataSource", pc.getConnection());
+		checkConnection("ConnectionPoolDataSource", pc.getConnection());
 
 		// test "local" XAConnections
 		xac = dsx.getXAConnection();
 		xac.addConnectionEventListener(new EventCatcher(4));
-		checkConnection("EmbeddedXADataSource", xac.getConnection());
-		checkConnection("EmbeddedXADataSource", xac.getConnection());
+		checkConnection("XADataSource", xac.getConnection());
+		checkConnection("XADataSource", xac.getConnection());
 		xac.close();
 
 		// test "global" XAConnections
@@ -297,19 +288,19 @@ public class checkDataSource
 		xar.start(xid, XAResource.TMNOFLAGS);
 		Connection xacc = xac.getConnection();
 		xacc.close();
-		checkConnection("Global EmbeddedXADataSource", xac.getConnection());
-		checkConnection("Global EmbeddedXADataSource", xac.getConnection());
+		checkConnection("Global XADataSource", xac.getConnection());
+		checkConnection("Global XADataSource", xac.getConnection());
 
 		xar.end(xid, XAResource.TMSUCCESS);
 
-		checkConnection("Switch to local EmbeddedXADataSource", xac.getConnection());
-		checkConnection("Switch to local EmbeddedXADataSource", xac.getConnection());
+		checkConnection("Switch to local XADataSource", xac.getConnection());
+		checkConnection("Switch to local XADataSource", xac.getConnection());
 
 		Connection backtoGlobal = xac.getConnection();
 
 		xar.start(xid, XAResource.TMJOIN);
-		checkConnection("Switch to global EmbeddedXADataSource", backtoGlobal);
-		checkConnection("Switch to global EmbeddedXADataSource", xac.getConnection());
+		checkConnection("Switch to global XADataSource", backtoGlobal);
+		checkConnection("Switch to global XADataSource", xac.getConnection());
 		xar.end(xid, XAResource.TMSUCCESS);
 		xar.commit(xid, true);
 
