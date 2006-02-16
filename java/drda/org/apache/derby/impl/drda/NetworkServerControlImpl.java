@@ -62,6 +62,7 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
+import org.apache.derby.iapi.util.CheapDateFormatter;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 
@@ -149,6 +150,7 @@ public final class NetworkServerControlImpl {
     protected static byte[] prdIdBytes_;
     
 	private static String buildNumber;
+	private static String versionString;
 	// we will use single or mixed, not double byte to reduce traffic on the
 	// wire, this is in keeping with JCC
 	// Note we specify UTF8 for the single byte encoding even though it can
@@ -323,7 +325,8 @@ public final class NetworkServerControlImpl {
 		att_extnam = ATT_SRVNAM + " " + java.lang.Thread.currentThread().getName();
 		
 		att_srvclsnm = myPVH.getProductName();
-
+		versionString = myPVH.getVersionBuildString(false);
+		
 		String majorStr = String.valueOf(myPVH.getMajorVersion());
 		String minorStr = String.valueOf(myPVH.getMinorVersion());
 		// Maintenance version. Server protocol version.
@@ -558,9 +561,11 @@ public final class NetworkServerControlImpl {
 		// sure we print the error message before doing so (Beetle 5033).
 			throwUnexpectedException(e);
 		}
-
-		consolePropertyMessage("DRDA_Ready.I", Integer.toString(portNumber));
-
+		long startTime = System.currentTimeMillis();
+		consolePropertyMessage("DRDA_Ready.I", new String [] 
+                    {Integer.toString(portNumber), att_srvclsnm, versionString,
+					CheapDateFormatter.formatDate(startTime)});
+		
 		// We accept clients on a separate thread so we don't run into a problem
 		// blocking on the accept when trying to process a shutdown
 		acceptClients = (Runnable)new ClientThread(this, serverSocket);
@@ -646,8 +651,10 @@ public final class NetworkServerControlImpl {
 		}
 		*/
 
-
-		consolePropertyMessage("DRDA_ShutdownSuccess.I");
+		long shutdownTime = System.currentTimeMillis();
+		consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
+						        {att_srvclsnm, versionString, 
+								CheapDateFormatter.formatDate(shutdownTime)});
 		
 
     }
@@ -1705,7 +1712,10 @@ public final class NetworkServerControlImpl {
 				break;
 			case COMMAND_SHUTDOWN:
 				shutdown();
-				consolePropertyMessage("DRDA_ShutdownSuccess.I");
+				long shutdownTime = System.currentTimeMillis();
+				consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
+								{att_srvclsnm, versionString, 
+								CheapDateFormatter.formatDate(shutdownTime)});
 				break;
 			case COMMAND_TRACE:
 				{
