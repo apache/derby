@@ -115,6 +115,11 @@ public class SqlException extends Exception implements Diagnosable {
             ExceptionUtil.getSQLStateFromIdentifier(msgid.msgid),
             ExceptionUtil.getSeverityFromIdentifier(msgid.msgid));
     }
+
+    public SqlException(LogWriter logWriter, MessageId messageId, Throwable cause)
+    {
+        this(logWriter,messageId,null,cause);
+    }
     
     public SqlException(LogWriter logwriter, MessageId msgid, Object[] args)
     {
@@ -123,7 +128,7 @@ public class SqlException extends Exception implements Diagnosable {
     
     public SqlException (LogWriter logwriter, MessageId msgid)
     {
-        this(logwriter, msgid, null);
+        this(logwriter, msgid, (Object[])null);
     }
     
     public SqlException(LogWriter logwriter, MessageId msgid, Object arg1)

@@ -20,9 +20,11 @@
 
 package org.apache.derby.client.am;
 
-import org.apache.derby.jdbc.ClientDataSource;
-
 import java.sql.SQLException;
+
+import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.shared.common.reference.SQLState;
+
 
 // Note:
 //   Tag members using the strictest visibility.
@@ -1371,7 +1373,9 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         checkForClosedConnectionX();
         // check input params, table and columnNamePattern cannot be null
         if (table == null) {
-            throw new SqlException(agent_.logWriter_, "getColumnPrivileges(): null not allowed for table name");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+
         }
 
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLCOLPRIVILEGES(?,?,?,?,?)");
@@ -1469,7 +1473,9 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         //
         // validate input table, which can not be null
         if (table == null) {
-            throw new SqlException(agent_.logWriter_, "getBestRowIdentifier(): null not allowed for table name");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+
         }
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLSPECIALCOLUMNS(?,?,?,?,?,?,?)");
 
@@ -1514,7 +1520,9 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
         // validate input table, which can not be null
         if (table == null) {
-            throw new SqlException(agent_.logWriter_, "getBestRowIdentifier(): null not allowed for table name");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+
         }
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLSPECIALCOLUMNS(?,?,?,?,?,?,?)");
 
@@ -1563,7 +1571,9 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
         // validate the input table name
         if (table == null) {
-            throw new SqlException(agent_.logWriter_, "getIndexInfo(): null not allowed for table name");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+
         }
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLPRIMARYKEYS(?,?,?,?)");
 
@@ -1725,11 +1735,15 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
         // check input params, primaryTable and foreignTable cannot be null
         if (primaryTable == null) {
-            throw new SqlException(agent_.logWriter_, "getCrossReference(): null not allowed for primary table name");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.PRIMARY_TABLE_NAME_IS_NULL)); 
+
         }
 
         if (foreignTable == null) {
-            throw new SqlException(agent_.logWriter_, "getCrossReference(): null not allowed for foreign table name");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.FOREIGN_TABLE_NAME_IS_NULL)); 
+
         }
 
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
@@ -1818,7 +1832,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
         // validate the input table name
         if (table == null) {
-            throw new SqlException(agent_.logWriter_, "getIndexInfo(): null not allowed for table name");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
         }
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLSTATISTICS(?,?,?,?,?,?)");
 
@@ -2323,7 +2338,9 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     private void checkForClosedConnectionX() throws SqlException {
         if (connection_.isClosedX()) {
             agent_.checkForDeferredExceptions();
-            throw new SqlException(agent_.logWriter_, "DatabaseMetaData method called after connection was closed");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.NO_CURRENT_CONNECTION)); 
+
         } else {
             agent_.checkForDeferredExceptions();
         }

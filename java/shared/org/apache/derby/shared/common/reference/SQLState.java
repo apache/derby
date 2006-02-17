@@ -1515,7 +1515,15 @@ public interface SQLState {
     String CALENDAR_IS_NULL                                         = "XN006.S";
     String PARAM_NOT_OUT_OR_INOUT                                   = "XN009.S";
     String RETURN_PARAM_MUST_BE_INT                                 = "XN010.S";
-    
+    String TABLE_NAME_CANNOT_BE_NULL                                = "XN100.S";
+    String SHARED_KEY_LENGTH_ERROR                                  = "XN104.S";
+    String DES_KEY_HAS_WRONG_LENGTH                                 = "XN105.S";
+    String CRYPTO_NO_SUCH_PADDING                                   = "XN106.S";
+    String CRYPTO_BAD_PADDING                                       = "XN107.S";
+    String CRYPTO_ILLEGAL_BLOCK_SIZE                                = "XN108.S";
+    String PRIMARY_TABLE_NAME_IS_NULL                               = "XN110.S";
+    String FOREIGN_TABLE_NAME_IS_NULL                               = "XN111.S";
+    String SECURITY_EXCEPTION_ENCOUNTERED                           = "XN112.S";
     String UNABLE_TO_OPEN_FILE = "XN151.S";
     
 	/*

@@ -22,6 +22,8 @@ package org.apache.derby.client.am;
 
 import java.security.Provider;
 import java.security.Security;
+import org.apache.derby.shared.common.reference.SQLState;
+
 
 // This class is get used when using encrypted password and/or userid mechanism.
 // The <b>EncryptionManager</b> classs uses Diffie_Hellman algorithm to get the publick key and
@@ -105,18 +107,9 @@ public class EncryptionManager {
             keyPair_ = keyPairGenerator_.generateKeyPair();
             keyAgreement_ = javax.crypto.KeyAgreement.getInstance("DH", providerName);
             keyAgreement_.init(keyPair_.getPrivate());
-        } catch (java.security.NoSuchProviderException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.NoSuchProviderException is caught" +
-                    " when initializing EncryptionManager '" + e.getMessage() + "'");
-        } catch (java.security.NoSuchAlgorithmException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.NoSuchAlgorithmException is caught" +
-                    " when initializing EncryptionManager '" + e.getMessage() + "'");
-        } catch (java.security.InvalidAlgorithmParameterException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.InvalidAlgorithmParameterException is caught" +
-                    " when initializing EncryptionManager '" + e.getMessage() + "'");
-        } catch (java.security.InvalidKeyException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.InvalidKeyException is caught" +
-                    " when initializing EncryptionManager '" + e.getMessage() + "'");
+        } catch (java.security.GeneralSecurityException e) {
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
         }
     }
 
@@ -214,7 +207,10 @@ public class EncryptionManager {
         byte temp;
         int changeParity;
         if (key.length != 8) {
-            throw new SqlException(agent_.logWriter_, "DES key has the wrong length");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.DES_KEY_HAS_WRONG_LENGTH), 
+                new Integer(8), new Integer(key.length)); 
+                        
         }
         for (int i = 0; i < 8; i++) {
             temp = key[i];
@@ -297,28 +293,19 @@ public class EncryptionManager {
                     key[i] = newKey[i + 12];
                 }
             } else {
-                throw new SqlException(agent_.logWriter_, "sharedSecret key length error " + sharedSecret.length);
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.SHARED_KEY_LENGTH_ERROR),
+                    new Integer(sharedSecret.length)); 
             }
 
             //we do parity check here and flip the parity bit if the byte has even number of 1s
             keyParityCheck(key);
             return key;
-        }/*
-          catch (java.security.NoSuchProviderException e) {
-            throw new SqlException (agent_.logWriter_, e, "java.security.NoSuchProviderException is caught "
-                                    + "when encrypting data '" + e.getMessage() + "'");
-          }*/ catch (java.security.NoSuchAlgorithmException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.NoSuchAlgorithmException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
-        } catch (java.security.spec.InvalidKeySpecException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.InvalidKeySpecException is caught "
-                    + "when encrypting data");
-        } catch (java.security.InvalidKeyException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.InvalidKeyException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
         }
-
-
+        catch (java.security.GeneralSecurityException e) {
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e);
+        }
     }
 
     // This method encrypts the usreid/password with the middle 8 bytes of
@@ -373,31 +360,20 @@ public class EncryptionManager {
 
             //Execute the final phase of encryption
             cipherText = cipher.doFinal(plainText);
-        } catch (java.security.NoSuchProviderException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.NoSuchProviderException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
-        } catch (java.security.NoSuchAlgorithmException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.NoSuchAlgorithmException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
-        } catch (java.security.InvalidKeyException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.InvalidKeyException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
         } catch (javax.crypto.NoSuchPaddingException e) {
-            throw new SqlException(agent_.logWriter_, e, "javax.crypto.NoSuchPaddingException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
+            throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.CRYPTO_NO_SUCH_PADDING)); 
         } catch (javax.crypto.BadPaddingException e) {
-            throw new SqlException(agent_.logWriter_, e, "javax.crypto.BadPaddingException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
-        } catch (java.security.InvalidAlgorithmParameterException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.InvalidAlgorithmParameterException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
+            throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.CRYPTO_BAD_PADDING)); 
         } catch (javax.crypto.IllegalBlockSizeException e) {
-            throw new SqlException(agent_.logWriter_, e, "javax.crypto.IllegalBlockSizeException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
-        } catch (java.security.spec.InvalidKeySpecException e) {
-            throw new SqlException(agent_.logWriter_, e, "javax.crypto.IllegalBlockSizeException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
+            throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.CRYPTO_ILLEGAL_BLOCK_SIZE)); 
+        } catch (java.security.GeneralSecurityException e) {
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
         }
+
         return cipherText;
     }
 
@@ -454,30 +430,18 @@ public class EncryptionManager {
 
             //Execute the final phase of encryption
             plainText = cipher.doFinal(cipherText);
-        } catch (java.security.NoSuchProviderException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.NoSuchProviderException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
-        } catch (java.security.NoSuchAlgorithmException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.NoSuchAlgorithmException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
-        } catch (java.security.InvalidKeyException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.InvalidKeyException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
         } catch (javax.crypto.NoSuchPaddingException e) {
-            throw new SqlException(agent_.logWriter_, e, "javax.crypto.NoSuchPaddingException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
+            throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.CRYPTO_NO_SUCH_PADDING)); 
         } catch (javax.crypto.BadPaddingException e) {
-            throw new SqlException(agent_.logWriter_, e, "javax.crypto.BadPaddingException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
-        } catch (java.security.InvalidAlgorithmParameterException e) {
-            throw new SqlException(agent_.logWriter_, e, "java.security.InvalidAlgorithmParameterException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
+            throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.CRYPTO_BAD_PADDING)); 
         } catch (javax.crypto.IllegalBlockSizeException e) {
-            throw new SqlException(agent_.logWriter_, e, "javax.crypto.IllegalBlockSizeException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
-        } catch (java.security.spec.InvalidKeySpecException e) {
-            throw new SqlException(agent_.logWriter_, e, "javax.crypto.IllegalBlockSizeException is caught "
-                    + "when encrypting data '" + e.getMessage() + "'");
+            throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.CRYPTO_ILLEGAL_BLOCK_SIZE)); 
+        } catch (java.security.GeneralSecurityException e) {
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
         }
         return plainText;
     }
