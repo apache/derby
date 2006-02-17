@@ -26,7 +26,7 @@ import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
-import org.apache.derby.impl.jdbc.Util;
+import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.client.am.Cursor;
 
@@ -49,68 +49,68 @@ public class NetResultSet40 extends NetResultSet{
     }
     
     public RowId getRowId(int columnIndex) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getRowId (int)");
     }
     
     
     public RowId getRowId(String columnName) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getRowId (String)");
     }
     
     public void updateRowId(int columnIndex, RowId x) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("updateRowId (int, RowId)");
     }
     
     public void updateRowId(String columnName, RowId x) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("updateRowId (String, RowId)");
     }
     
     public int getHoldability() throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getHoldability ()");
     }
     
     public boolean isClosed() throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("isClosed ()");
     }
     
     public void updateNString(int columnIndex, String nString) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("updateNString (int, String)");
     }
     
     public void updateNString(String columnName, String nString) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("updateNString (String, String)");
     }
     
     public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("updateNClob (int, NClob)");
     }
     
     public void updateNClob(String columnName, NClob nClob) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("updateNClob (String, NClob)");
     }
     
     public NClob getNClob(int i) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getNClob (int)");
     }
     
     public NClob getNClob(String colName) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getNClob (String)");
     }
     
     public SQLXML getSQLXML(int columnIndex) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getSQLXML (int)");
     }
     
     public SQLXML getSQLXML(String colName) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getSQLXML (String)");
     }
     
     public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("updateSQLXML (int, SQLXML)");
     }
     
     public void updateSQLXML(String columnName, SQLXML xmlObject) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("updateSQLXML (String, SQLXML)");
     }
     
 }

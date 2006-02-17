@@ -20,7 +20,6 @@
 
 package org.apache.derby.client.am;
 
-import org.apache.derby.impl.jdbc.Util;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.NClob;
@@ -45,72 +44,73 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
     
     
     public RowId getRowId(int parameterIndex) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getRowId (int)");
     }
     
     public RowId getRowId(String parameterName) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getRowId (String)");
     }
     
     public void setRowId(String parameterName, RowId x) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setRowId (String, RowId)");
     }
     
     
     public void setNString(String parameterName, String value)
     throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setNString (String, String)");
     }
     
     public void setNCharacterStream(String parameterName, Reader value, long length)
     throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented (
+                "setNString (String, Reader, long)");
     }
     
     public void setNClob(String parameterName, NClob value) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setNClob (String, NClob)");
     }
     
     public void setClob(String parameterName, Reader reader, long length)
     throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setClob (String, Reader, long)");
         
     }
     
     public void setBlob(String parameterName, InputStream inputStream, long length)
     throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setBlob (String, InputStream, long)");
     }
     
     public void setNClob(String parameterName, Reader reader, long length)
     throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setNClob (String, Reader, long)");
     }
     
     public NClob getNClob(int i) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setNClob (int)");
     }
     
     
     public NClob getNClob(String parameterName) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setNClob (String)");
     }
     
     public void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setSQLXML (String, SQLXML)");
         
     }
     
     public SQLXML getSQLXML(int parameterIndex) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getSQLXML (int)");
     }
     
     public SQLXML getSQLXML(String parametername) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getSQLXML (String)");
     }
     
     public void setRowId(int parameterIndex, RowId x) throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setRowId (int, RowId)");
     }
     
     /*********************************************************************************************************

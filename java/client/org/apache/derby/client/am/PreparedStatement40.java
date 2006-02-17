@@ -20,7 +20,6 @@
 
 package org.apache.derby.client.am;
 
-import org.apache.derby.impl.jdbc.Util;
 import java.sql.RowId;
 import java.sql.NClob;
 import java.sql.SQLException;
@@ -47,46 +46,47 @@ public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedSt
     
     
     public void setRowId(int parameterIndex, RowId x) throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setRowId (int, RowId)");
     }
     
     public void setNString(int index, String value) throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setNString (int, String)");
     }
     
     public void setNCharacterStream(int index, Reader value, long length) throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setNCharacterStream " +
+                "(int,Reader,long)");
     }
     
     public void setNClob(int index, NClob value) throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setNClob (int, NClob)");
     }
     
     public void setClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setClob (int, Reader, long)");
     }
     
     public void setBlob(int parameterIndex, InputStream inputStream, long length)
     throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setBlob (int, InputStream, long)");
     }
     public void setNClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setNClob (int, Reader, long)");
     }
     
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setSQLXML (int, SQLXML)");
     }
     
     public void setPoolable(boolean poolable)
     throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("setPoolable (boolean)");
     }
     
     public boolean isPoolable()
     throws SQLException{
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("isPoolable ()");
     }
 }

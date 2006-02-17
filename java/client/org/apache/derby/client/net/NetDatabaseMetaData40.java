@@ -23,7 +23,7 @@ package org.apache.derby.client.net;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
-import org.apache.derby.impl.jdbc.Util;
+import org.apache.derby.client.am.SQLExceptionFactory;
 
 public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDatabaseMetaData {
     
@@ -33,29 +33,31 @@ public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDataba
     }
     
     public RowIdLifetime getRowIdLifetime() throws SQLException {
-        throw Util.notImplemented();
+	throw SQLExceptionFactory.notImplemented ("getRowIdLifetime ()");
         
     }
     
     public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getSchemas (String, String)");
     }
     
     
     public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented (
+                "supportsStoredFunctionsUsingCallSyntax ()");
     }
     
     public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented (
+                "autoCommitFailureClosesAllResultSets ()");
     }
     
     public ResultSet getClientInfoProperties()
     throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("getClientInfoProperties ()");
     }
     
     public boolean providesQueryObjectGenerator() throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("providesQueryObjectGenerator ()");
     }
 }

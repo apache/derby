@@ -20,8 +20,8 @@
 
 package org.apache.derby.client.net;
 
+import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
 import java.sql.Blob;
 import java.sql.ClientInfoException;
@@ -79,33 +79,33 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     
     
     public Clob createClob() throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("createClob ()");
     }
 
     public Blob createBlob() throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("createBlob ()");
     }
     
     public NClob createNClob() throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("createNClob ()");
     }
 
     public SQLXML createSQLXML() throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("createSQLXML ()");
     }
 
     public boolean isValid(int timeout) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("isValid ()");
     }
 
     public void setClientInfo(String name, String value)
 		throws SQLException{
-	throw Util.notImplemented();
+	throw SQLExceptionFactory.notImplemented ("setClientInfo (String, String)");
     }
 	
     public void setClientInfo(Properties properties)
 		throws ClientInfoException {
-	SQLException temp= Util.notImplemented();
+	SQLException temp= SQLExceptionFactory.notImplemented ("setClientInfo ()");
 	ClientInfoException clientInfoException = new ClientInfoException
 	(temp.getMessage(),temp.getSQLState(),(Properties) null);
 	throw clientInfoException; 
@@ -113,20 +113,20 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 	
     public String getClientInfo(String name)
 		throws SQLException{
-	throw Util.notImplemented();
+	throw SQLExceptionFactory.notImplemented ("getClientInfo (String)");
     }
 	
     public Properties getClientInfo()
 		throws SQLException{
-	throw Util.notImplemented();
+	throw SQLExceptionFactory.notImplemented ("getClientInfo (Properties)");
     }
     
     public <T> T createQueryObject(Class<T> ifc) throws SQLException {
-        throw Util.notImplemented();
+        throw SQLExceptionFactory.notImplemented ("createQueryObject (Class<T>)");
     }
     
     public java.util.Map<String,Class<?>> getTypeMap(){
-	throw new java.lang.UnsupportedOperationException();
+        throw new java.lang.UnsupportedOperationException("getTypeMap()");
     }
     
 }
