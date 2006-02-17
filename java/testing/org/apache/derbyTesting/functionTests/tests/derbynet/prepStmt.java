@@ -47,7 +47,7 @@ public class prepStmt
     private static String[] testObjects =  // string array for cleaning up
         {"table t1", "table tab1", "table t2", "table bigtab", "table tstab",
          "table doubletab", "table numtab", "table Numeric_Tab", "table jira614", 
-	 "table jira125", 
+	 "table jira614_a", "table jira125", 
          "table jira125125125125125125125125125125125125125125125125125125125125125125125125125125125125125125125"};
 
 	public static void main (String args[])
@@ -311,6 +311,7 @@ public class prepStmt
 			test5130(conn);
 			test5172(conn);
 			jira614Test(conn);
+			jira614Test_a(conn);
 			jira170Test(conn);
 			jira125Test(conn);
 			conn.close();
@@ -748,6 +749,46 @@ public class prepStmt
 		    buf.append(c);
 	    return buf.toString();
     }
+	// Part two of the regression test for bug 614 verifies that the
+	// server-side statement state is cleaned up when a statement is
+	// re-used. Specifically, we set up a statement which has a non-null
+	// splitQRYDTA value, then we close that statement and re-use it for
+	// a totally unrelated query. If the splitQRYDTA wasn't cleaned up
+	// properly, it comes flooding back as the response to that unrelated
+	// query, causing a protocol parsing exception on the client.
+	private static void jira614Test_a(Connection conn)
+		throws Exception
+	{
+		// 1: set up a second table to use for an unrelated query:
+	    Statement stmt = conn.createStatement();
+		PreparedStatement ps ;
+	    try { stmt.execute("drop table jira614_a"); } catch (Throwable t) { }
+	    stmt.execute("create table jira614_a (c1 int)");
+	    ps = conn.prepareStatement("insert into jira614_a values (?)");
+	    for (int row = 1; row <= 5; row++)
+		{
+			ps.setInt(1, row);
+		    ps.executeUpdate();
+		}
+
+		// 2: get the first statement into a splitQRYDTA state:
+		ResultSet rs = stmt.executeQuery("select * from jira614");
+		int rowNum = 0;
+		while (rs.next())
+		{
+			rowNum++;
+			if (rowNum == 26)
+				break;
+		}
+		// 3: Now re-use the statement for some totally different purpose:
+		stmt.close();
+		stmt = conn.createStatement();
+		rs = stmt.executeQuery("select * from jira614_a");
+		while (rs.next());
+		ps.close();
+		rs.close();
+		stmt.close();
+	}
     // Jira-170 has to do with how the server handles re-synchronization of
     // the data stream when an enormous parameter value follows a failed
     // prepare statement. Note that it is deliberate here that we are preparing

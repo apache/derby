@@ -359,6 +359,7 @@ class DRDAResultSet
 		rsPrecision = null;
 		rsScale = null;
 		extDtaObjects = null;
+		splitQRYDTA = null;
 		rsExtPositions = null;
 		state=NOT_OPENED;
 		hasdata = true;
