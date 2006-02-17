@@ -64,6 +64,24 @@ import org.apache.oro.text.perl.Perl5Util;
  */
 public class checkDataSource
 { 
+	// Only test connection toString values for embedded.
+	// Client connection toString values are not correlated at this time and just 
+	// use default toString
+	// These tests are exempted from other frameworks
+	private static boolean testConnectionToString = TestUtil.isEmbeddedFramework();
+	
+	// Only embedded supports SimpleDataSource (JSR169).  
+	// These tests are exempted from other frameworks
+	private static boolean testSimpleDataSource = TestUtil.isEmbeddedFramework();
+
+	// for a PooledConnection.getConnection() the connection gets closed.
+	// Embedded automatically rolls back any activity on the connection.
+	// Client requires the user to rollback and gives an SQLException  
+	// java.sql.Connection.close() requested while a transaction is in progress
+	// I think client is right here (kmarsden), the user should have to rollback 
+	private static boolean needRollbackBeforePCGetConnection = 
+		TestUtil.isDerbyNetClientFramework(); 
+		
     /**
      * A hashtable of opened connections.  This is used when checking to
      * make sure connection strings are unique; we need to make sure all
@@ -132,25 +150,35 @@ public class checkDataSource
 		
 
 		checkConnection("DriverManager ", dmc);
-		checkJBMSToString();
+		if (testConnectionToString)
+			checkJBMSToString();
 
 
 		Properties attrs = new Properties();
 		attrs.setProperty("databaseName", "wombat");
 		DataSource dscs = TestUtil.getDataSource(attrs);
 		
-		checkToString(dscs);
+		if (testConnectionToString) 
+				checkToString(dscs);
 
 		DataSource ds = dscs;
 
 		checkConnection("DataSource", ds.getConnection());
-		
-		DataSource dssimple = TestUtil.getSimpleDataSource(attrs);
-		ds = dssimple;
-		checkConnection("SimpleDataSource", ds.getConnection());		
+		 
+		DataSource dssimple = null;
+		if (testSimpleDataSource)
+		{
+			dssimple = TestUtil.getSimpleDataSource(attrs);
+			ds = dssimple;
+			checkConnection("SimpleDataSource", ds.getConnection());
+		}
 
 		ConnectionPoolDataSource dsp = TestUtil.getConnectionPoolDataSource(attrs);
-		checkToString(dsp);
+		
+		
+		if (testConnectionToString) 
+			checkToString(dsp);
+	
 
 		PooledConnection pc = dsp.getPooledConnection();
 		SecurityCheck.inspect(pc, "javax.sql.PooledConnection");
@@ -172,7 +200,9 @@ public class checkDataSource
 
 		// this update should be rolled back
 		s.executeUpdate("insert into t values(2)");
-
+		if (needRollbackBeforePCGetConnection)
+			c1.rollback();
+		
 		c1 = pc.getConnection();
 
 		ResultSet rs = c1.createStatement().executeQuery("select count(*) from t");
@@ -205,7 +235,8 @@ public class checkDataSource
 		testPoolReset("ConnectionPoolDataSource", dsp.getPooledConnection());
 
 		XADataSource dsx = TestUtil.getXADataSource(attrs);
-		checkToString(dsx);
+		if (testConnectionToString)
+			checkToString(dsx);
 
 		XAConnection xac = dsx.getXAConnection();
 		SecurityCheck.inspect(xac, "javax.sql.XAConnection");
@@ -224,7 +255,9 @@ public class checkDataSource
 
 		// this update should be rolled back
 		s.executeUpdate("insert into t values(2)");
-
+		if (needRollbackBeforePCGetConnection)
+			c1.rollback();
+		
 		c1 = xac.getConnection();
 
 		rs = c1.createStatement().executeQuery("select count(*) from t");
@@ -264,8 +297,12 @@ public class checkDataSource
 		checkConnection("DataSource", ds.getConnection());
 		
 		// and back to EmbeddedSimpleDataSource
-		ds = dssimple;
-		checkConnection("EmbeddedSimpleDataSource", dssimple.getConnection());
+		if(TestUtil.isEmbeddedFramework())
+		{
+			// JSR169 (SimpleDataSource) is only available on embedded.
+			ds = dssimple;
+			checkConnection("EmbeddedSimpleDataSource", dssimple.getConnection());
+		}
 		
 		pc = dsp.getPooledConnection();
 		pc.addConnectionEventListener(new EventCatcher(2));

@@ -1,0 +1,41 @@
+START XA HOLDABILITY TEST
+By default, autocommit is true for a connection
+Default holdability for a connection is HOLD_CURSORS_OVER_COMMIT
+CONNECTION(not in xa transaction yet) HOLDABILITY true
+Notice that autocommit now is false for connection because it is part of the global transaction
+Autocommit on Connection inside global transaction has been set correctly to false
+CONNECTION(non-xa) HOLDABILITY false
+STATEMENT HOLDABILITY false
+STATEMENT HOLDABILITY false
+STATEMENT HOLDABILITY true
+PREPARED STATEMENT HOLDABILITY true
+CALLABLE STATEMENT HOLDABILITY true
+H@1 id 1
+H@2 id 2
+H@3 id 3
+CONNECTION(xa) HOLDABILITY false
+STATEMENT(this one was created with holdability false, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
+STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY true
+STATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
+PREPAREDSTATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
+CALLABLESTATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
+X@1 id 1
+X@2 id 2
+Expected SQLException No current connection. : 
+Expected SQLException Invalid operation: result set closed
+resume XA transaction and keep using rs
+Check holdability of various jdbc objects after resuming XA transaction
+CONNECTION(xa) HOLDABILITY false
+STATEMENT(this one was created with holdability false, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
+STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY true
+STATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
+PREPAREDSTATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
+CALLABLESTATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
+STATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
+PREPAREDSTATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
+CALLABLESTATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
+Expected SQLException Invalid operation: result set closed
+Expected SQLException Invalid operation: result set closed
+Set connection to hold 
+CONNECTION(held) HOLDABILITY true
+Completed checkDataSource30
