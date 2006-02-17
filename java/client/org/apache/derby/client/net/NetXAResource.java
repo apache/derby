@@ -413,7 +413,7 @@ public class NetXAResource implements XAResource {
         } finally {
             conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending callinfo
         }
-        if (rc != XAResource.XA_OK) {
+        if ((rc != XAResource.XA_OK ) && (rc != XAResource.XA_RDONLY)) {
             throwXAException(rc, false);
         }
         if (conn_.agent_.loggingEnabled()) {
