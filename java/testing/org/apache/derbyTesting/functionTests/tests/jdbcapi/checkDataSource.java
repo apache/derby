@@ -137,7 +137,7 @@ public class checkDataSource
 
 	}
 
-	public checkDataSource() throws Exception {
+	public checkDataSource() {
 	}
 
 	protected void runTest(String[] args) throws Exception {
@@ -148,7 +148,12 @@ public class checkDataSource
 
 		dmc.createStatement().executeUpdate("create table y(i int)");
 
-		dmc.createStatement().executeUpdate("create procedure checkConn2(in dsname varchar(20)) parameter style java language java modifies SQL Data external name 'org.apache.derbyTesting.functionTests.tests.jdbcapi.checkDataSource.checkNesConn'");
+		dmc.createStatement().executeUpdate(
+                "create procedure checkConn2(in dsname varchar(20)) " +
+                "parameter style java language java modifies SQL DATA " +
+                "external name 'org.apache.derbyTesting.functionTests.tests.jdbcapi." +
+                this.getNestedMethodName() +
+                "'");
 		CallableStatement cs = dmc.prepareCall("call checkConn2(?)");
 		cs.setString(1,"Nested");
 		cs.execute();
@@ -785,6 +790,16 @@ public class checkDataSource
 	protected CallableStatement internalCreateFloatCallForStateChecking(Connection conn, String sql) throws SQLException {
 		return conn.prepareCall(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 	}
+    
+    /**
+     * Return the Java class and method for the procedure
+     * for the nested connection test.
+     * checkDataSource 30 will override.
+     */
+    protected String getNestedMethodName()
+    {
+        return "checkDataSource.checkNesConn";
+    }
 
 	static String rsType(int type) {
 		switch (type) {
@@ -878,36 +893,9 @@ public class checkDataSource
 
 	//calling checkConnection - for use in a procedure to get a nested connection.
 	public static void checkNesConn (String dsName) throws SQLException {
-		checkConnectionS(dsName, DriverManager.getConnection("jdbc:default:connection"));
-			
-	}
-
-	public static void checkConnectionS(String dsName, Connection conn) throws SQLException {
-
-		System.out.println("Running connection checks on " + dsName);
-		
-		SecurityCheck.inspect(conn, "java.sql.Connection");
-		SecurityCheck.inspect(conn.getMetaData(), "java.sql.DatabaseMetaData");
-
-		//System.out.println("  url             " + conn.getMetaData().getURL());
-		System.out.println("  isolation level " + conn.getTransactionIsolation());
-		System.out.println("  auto commit     " + conn.getAutoCommit());
-		System.out.println("  read only       " + conn.isReadOnly());
-
-		// when 4729 is fixed, remove the startsWith() clause
-		if (dsName.endsWith("DataSource") && !dsName.startsWith("Global"))
-			System.out.println("  has warnings    " + (conn.getWarnings() != null));
-
-		checkStatementS(conn, conn.createStatement());
-		checkStatementS(conn, conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
-
-		Connection c1 = conn.getMetaData().getConnection();
-		if (c1 != conn)
-			System.out.println("FAIL incorrect connection object returned for DatabaseMetaData.getConnection()");
-
-		checkConnectionPreCloseS(dsName, conn);
-		conn.close();
-	}
+        Connection conn = DriverManager.getConnection("jdbc:default:connection");
+        new checkDataSource().checkConnection(dsName, conn);			
+    }
 
 	public void checkConnection(String dsName, Connection conn) throws SQLException {
 
@@ -926,8 +914,8 @@ public class checkDataSource
 			System.out.println("  has warnings    " + (conn.getWarnings() != null));
 
 		Statement s1 = conn.createStatement();
-		checkStatement(conn, s1);
-		checkStatement(conn, conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
+		checkStatement(dsName, conn, s1);
+		checkStatement(dsName, conn, conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
 
 		Connection c1 = conn.getMetaData().getConnection();
 		if (c1 != conn)
@@ -1201,20 +1189,6 @@ public class checkDataSource
         }
         xaConns.clear();
     }
-    
-	protected static void checkConnectionPreCloseS(String dsName, Connection conn) throws SQLException {
-		if (dsName.endsWith("DataSource")) {
-
-			// see if setting the state is carried over to any future connection from the
-			// data source object.
-			try {
-				conn.setReadOnly(true);
-			} catch (SQLException sqle) {
-				// cannot set read-only in an active transaction, & sometimes
-				// connections are active at this point.
-			}
-		}
-	}
 
 	protected void checkConnectionPreClose(String dsName, Connection conn) throws SQLException {
 		if (dsName.endsWith("DataSource")) {
@@ -1230,10 +1204,10 @@ public class checkDataSource
 		}
 	}
 
-	protected static void checkStatementS(Connection conn, Statement s) throws SQLException {
+	protected void checkStatement(String dsName, Connection conn, Statement s) throws SQLException {
 
-		SecurityCheck.inspect(s, "java.sql.Statement");
-		
+        SecurityCheck.inspect(s, "java.sql.Statement");
+
 		Connection c1 = s.getConnection();
 		if (c1 != conn)
 			System.out.println("FAIL incorrect connection object returned for Statement.getConnection()");
@@ -1246,22 +1220,10 @@ public class checkDataSource
 		if (states[1] != 2)
 			System.out.println("FAIL invalid update count for second batch statement");
 
-		s.close();
-	}
-	protected void checkStatement(Connection conn, Statement s) throws SQLException {
-		
-		Connection c1 = s.getConnection();
-		if (c1 != conn)
-			System.out.println("FAIL incorrect connection object returned for Statement.getConnection()");
-
-		s.addBatch("insert into y values 1");
-		s.addBatch("insert into y values 2,3");
-		int[] states = s.executeBatch();
-		if (states[0] != 1)
-			System.out.println("FAIL invalid update count for first batch statement");
-		if (states[1] != 2)
-			System.out.println("FAIL invalid update count for second batch statement");
-
+        ResultSet rs = s.executeQuery("VALUES 1");
+        if (rs.getStatement() != s)
+            System.out.println(dsName + " FAIL incorrect Statement object returned for ResultSet.getStatement");
+        rs.close();
 		s.close();
 	}
 

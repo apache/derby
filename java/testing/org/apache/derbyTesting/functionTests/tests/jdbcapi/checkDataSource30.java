@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -68,7 +69,7 @@ public class checkDataSource30 extends checkDataSource
 	}
 
 
-	public checkDataSource30() throws Exception {
+	public checkDataSource30() {
 	}
 
 	public void checkConnection(String dsName, Connection conn) throws SQLException {
@@ -413,4 +414,23 @@ public class checkDataSource30 extends checkDataSource
 		}
 		System.out.flush();
 	}
+    
+    /**
+     * Perform connection checks on the default connection
+     * using checkDataSourc30.
+     */
+    public static void checkNesConn30(String dsName) throws SQLException {
+        Connection conn = DriverManager.getConnection("jdbc:default:connection");
+        new checkDataSource30().checkConnection(dsName, conn);            
+    }
+
+    
+    /**
+     * USe checkNesConn30 for the procedure, will
+     * cause the 30 checks to be invoked as well. 
+     */
+    protected String getNestedMethodName()
+    {
+        return "checkDataSource30.checkNesConn30";
+    }
 }
