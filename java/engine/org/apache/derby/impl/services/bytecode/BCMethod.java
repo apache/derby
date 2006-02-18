@@ -224,11 +224,14 @@ class BCMethod implements MethodBuilder {
 	 */
 	public void complete() {
         
+        // myCode.getPC() gives the code length since
+        // the program counter will be positioned after
+        // the last instruction. Note this value can
+        // be changed by the splitMethod call.
         
-        int codeLength = myCode.getPC();
-        if (codeLength > CODE_SPLIT_LENGTH)
+        if (myCode.getPC() > CODE_SPLIT_LENGTH)
             splitMethod();
-                  
+                         
        // write exceptions attribute info
         writeExceptions();
         	
@@ -491,6 +494,15 @@ class BCMethod implements MethodBuilder {
 
 	}
 
+    /**
+     * Push an integer value. Uses the special integer opcodes
+     * for the constants -1 to 5, BIPUSH for values that fit in
+     * a byte and SIPUSH for values that fit in a short. Otherwise
+     * uses LDC with a constant pool entry.
+     * 
+     * @param value Value to be pushed
+     * @param type Final type of the value.
+     */
 	private void push(int value, Type type) {
 
 		CodeChunk chunk = myCode;
@@ -505,23 +517,40 @@ class BCMethod implements MethodBuilder {
 			int cpe = modClass.addConstant(value);
 			addInstrCPE(VMOpcode.LDC, cpe);
 		}
-		growStack(1, type);
+		growStack(type.width(), type);
 		
 	}
 
-	public void push(long value){
-		CodeChunk chunk = myCode;
+    /**
+     * Push a long value onto the stack.
+     * For the values zero and one the LCONST_0 and
+     * LCONST_1 instructions are used.
+     * For values betwee Short.MIN_VALUE and Short.MAX_VALUE
+     * inclusive an byte/short/int value is pushed
+     * using push(int, Type) followed by an I2L instruction.
+     * This saves using a constant pool entry for such values.
+     * All other values use a constant pool entry. For values
+     * in the range of an Integer an integer constant pool
+     * entry is created to allow sharing with integer constants
+     * and to reduce constant pool slot entries.
+     */
+	public void push(long value) {
+        CodeChunk chunk = myCode;
 
-		if (value == 0 || value == 1) {
-				chunk.addInstr((short)(VMOpcode.LCONST_0+(short)value));
-		}
-		else {
-			int cpe = modClass.addConstant(value);
-			chunk.addInstrU2(VMOpcode.LDC2_W, cpe);
-		}
-		growStack(2, Type.LONG);
-
-	}
+        if (value == 0L || value == 1L) {
+            short opcode = value == 0L ? VMOpcode.LCONST_0 : VMOpcode.LCONST_1;
+            chunk.addInstr(opcode);
+        } else if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+            // the push(int, Type) method grows the stack for us.
+            push((int) value, Type.LONG);
+            chunk.addInstr(VMOpcode.I2L);
+            return;
+        } else {
+            int cpe = modClass.addConstant(value);
+            chunk.addInstrU2(VMOpcode.LDC2_W, cpe);
+        }
+        growStack(2, Type.LONG);
+    }
 	public void push(float value) {
 
 		CodeChunk chunk = myCode;
