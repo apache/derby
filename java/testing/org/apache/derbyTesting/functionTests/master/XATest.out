@@ -1,0 +1,172 @@
+singleConnectionOnePhaseCommit
+A          
+-----------
+0          
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(0  |ACTIVE  |false|APP       |UserTransaction               
+interleavingTransactions
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |ACTIVE  |false|SKU       |UserTransaction               
+(2  |ACTIVE  |false|SKU       |UserTransaction               
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |ACTIVE  |false|SKU       |UserTransaction               
+(2  |ACTIVE  |false|SKU       |UserTransaction               
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |PREPARED|false|SKU       |UserTransaction               
+(2  |PREPARED|false|SKU       |UserTransaction               
+recovered start 2
+recovered 0
+recovered end 0
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(3  |IDLE    |NULL |SKU       |UserTransaction               
+A          
+-----------
+0          
+1          
+3          
+noTransaction
+morph
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |IDLE    |NULL |APP       |UserTransaction               
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Statement created in global has holdabilty: false
+A          
+-----------
+2001       
+2002       
+2003       
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+(1  |PREPARED|false|APP       |UserTransaction               
+(1  |IDLE    |NULL |APP       |UserTransaction               
+GXID|STATUS  |READ&|USERNAME  |TYPE                          
+-------------------------------------------------------------
+A          
+-----------
+2001       
+2002       
+2003       
+2005       
+2007       
+A          
+-----------
+A          
+-----------
+2001       
+2002       
+2003       
+2005       
+2007       
+EXPECTED SQLSTATE(XJ059): Cannot close a connection while a global transaction is still active.
+A          
+-----------
+A          
+-----------
+2001       
+2002       
+2003       
+2005       
+2007       
+derby966
+Local connection holdable true
+Local(held) default Statement holdable true
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
+held true
+  BC A=0
+  AC A=1
+Local(held) default PreparedStatement holdable true
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
+held true
+  BC A=0
+  AC A=1
+Local(held) held Statement holdable true
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
+held true
+  BC A=0
+  AC A=1
+Local(held) held PreparedStatement holdable true
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
+held true
+  BC A=0
+  AC A=1
+Local(held) close Statement holdable false
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
+held false
+  BC A=0
+EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+Local(held) close PreparedStatement holdable false
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
+held false
+  BC A=0
+EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+Local(close) default Statement holdable false
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
+held false
+  BC A=0
+EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+Local(close) default PreparedStatement holdable false
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
+held false
+  BC A=0
+EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+Local(close) held Statement holdable true
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
+held true
+  BC A=0
+  AC A=1
+Local(close) held PreparedStatement holdable true
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
+held true
+  BC A=0
+  AC A=1
+Local(close) close Statement holdable false
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
+held false
+  BC A=0
+EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+Local(close) close PreparedStatement holdable false
+FAIL - mismatched statement & ResultSet
+Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
+ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
+held false
+  BC A=0
+EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+XATest complete
