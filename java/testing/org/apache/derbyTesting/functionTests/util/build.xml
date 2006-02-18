@@ -63,6 +63,7 @@
       <include name="${this.dir}/StaticInitializers/*.java"/> 
       <include name="${this.dir}/VTIClasses/*.java"/> 
       <exclude name="${this.dir}/TestUtil.java"/>
+      <exclude name="${this.dir}/XATestUtil.java"/>
     </javac>
 <javac
       bootclasspath="${empty}"
@@ -80,6 +81,7 @@
       </classpath>
       <!--exclude name=""/-->
       <include name="${this.dir}/TestUtil.java"/>
+	  <include name="${this.dir}/XATestUtil.java"/>
     </javac>
   </target>
 
