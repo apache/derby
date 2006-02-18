@@ -80,4 +80,5 @@ xaSimplePositive_app.properties
 xaSimplePositive_sed.properties
 xaSimplePositive_derby.properties
 xaStateTran.sql
+XATest_app.properties
 lobStreams_app.properties
