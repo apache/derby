@@ -484,6 +484,15 @@ public class NetworkServerControl{
 	{
 		serverImpl.clientLocale = locale;
 	}
+    
+    
+    public void setLogWriter(PrintWriter logWriter){
+	
+	serverImpl.setLogWriter( logWriter );
+	
+    }
+    
+    
 }
 
 

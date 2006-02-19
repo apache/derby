@@ -120,10 +120,28 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		// Shutdown the server.
 		if (hostName.equals("localhost"))
 		{
+		    
+		    PrintWriter shutdownLogWriter = null;
+
+		    try{
+
+			shutdownLogWriter = 
+			    new PrintWriter( new FileWriter( new File("shutdown.log") ) );
+			networkServer.setLogWriter(shutdownLogWriter);
+		    
 			networkServer.shutdown();
 			// how do we do this with the new api?
 			//networkServer.join();
 			Thread.sleep(5000);
+			
+		    }finally{
+			
+			if( shutdownLogWriter != null ){
+			    shutdownLogWriter.flush();
+			    shutdownLogWriter.close();
+			}
+		    }
+		    
 		}
 		System.out.println("Completed dataSourcePermissions_net");
 
