@@ -80,86 +80,50 @@ A
 derby966
 Local connection holdable true
 Local(held) default Statement holdable true
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
 held true
   BC A=0
   AC A=1
 Local(held) default PreparedStatement holdable true
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
 held true
   BC A=0
   AC A=1
 Local(held) held Statement holdable true
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
 held true
   BC A=0
   AC A=1
 Local(held) held PreparedStatement holdable true
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
 held true
   BC A=0
   AC A=1
 Local(held) close Statement holdable false
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
 held false
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Local(held) close PreparedStatement holdable false
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
 held false
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Local(close) default Statement holdable false
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
 held false
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Local(close) default PreparedStatement holdable false
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
 held false
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Local(close) held Statement holdable true
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
 held true
   BC A=0
   AC A=1
 Local(close) held PreparedStatement holdable true
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
 held true
   BC A=0
   AC A=1
 Local(close) close Statement holdable false
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredStatement
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedStatement
 held false
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Local(close) close PreparedStatement holdable false
-FAIL - mismatched statement & ResultSet
-Statement class class org.apache.derby.iapi.jdbc.BrokeredPreparedStatement30
-ResultSet' Statements class class org.apache.derby.impl.jdbc.EmbedPreparedStatement30
 held false
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.

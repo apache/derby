@@ -31,10 +31,8 @@ import org.apache.derby.impl.jdbc.Util;
 
 public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
     
-    private final Object generatedKeys;
     public BrokeredPreparedStatement40(BrokeredStatementControl control, int jdbcLevel, String sql, Object generatedKeys) throws SQLException {
         super(control, jdbcLevel, sql,generatedKeys);
-        this.generatedKeys = generatedKeys;
     }
     
     public void setRowId(int parameterIndex, RowId x) throws SQLException{

@@ -84,8 +84,6 @@ Running connection checks on XADataSource
   auto commit     true
   read only       false
   has warnings    false
-XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
-XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
 setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
@@ -179,8 +177,6 @@ Running connection checks on XADataSource
   auto commit     true
   read only       false
   has warnings    false
-XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
-XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
 setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
@@ -194,8 +190,6 @@ Running connection checks on XADataSource
   auto commit     true
   read only       false
   has warnings    false
-XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
-XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
 setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
@@ -209,8 +203,6 @@ Running connection checks on Global XADataSource
   isolation level 2
   auto commit     false
   read only       false
-Global XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
-Global XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
 setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
@@ -223,8 +215,6 @@ Running connection checks on Global XADataSource
   isolation level 2
   auto commit     false
   read only       false
-Global XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
-Global XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
 setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
@@ -238,8 +228,6 @@ Running connection checks on Switch to local XADataSource
   auto commit     true
   read only       false
   has warnings    false
-Switch to local XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
-Switch to local XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
 setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
@@ -253,8 +241,6 @@ Running connection checks on Switch to local XADataSource
   auto commit     true
   read only       false
   has warnings    false
-Switch to local XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
-Switch to local XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
 setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
@@ -268,8 +254,6 @@ Running connection checks on Switch to global XADataSource
   auto commit     false
   read only       false
   has warnings    false
-Switch to global XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
-Switch to global XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
 setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
@@ -283,8 +267,6 @@ Running connection checks on Switch to global XADataSource
   auto commit     false
   read only       false
   has warnings    false
-Switch to global XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
-Switch to global XADataSource FAIL incorrect Statement object returned for ResultSet.getStatement
 setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.

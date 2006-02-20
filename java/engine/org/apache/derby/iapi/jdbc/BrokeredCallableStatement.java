@@ -214,10 +214,25 @@ public class BrokeredCallableStatement extends BrokeredPreparedStatement
 	** Control methods
 	*/
 
-	protected final CallableStatement getCallableStatement() throws SQLException {
+    /**
+     * Access the underlying CallableStatement. This method
+     * is package protected to restrict access to the underlying
+     * object to the brokered objects. Allowing the application to
+     * access the underlying object thtough a public method would
+     * 
+     */
+    final CallableStatement getCallableStatement() throws SQLException {
 		return control.getRealCallableStatement();
 	}
-	public final PreparedStatement getPreparedStatement() throws SQLException {
+	
+    /**
+     * Access the underlying PreparedStatement. This method
+     * is package protected to restrict access to the underlying
+     * object to the brokered objects. Allowing the application to
+     * access the underlying object thtough a public method would
+     * 
+     */
+    final PreparedStatement getPreparedStatement() throws SQLException {
 		return getCallableStatement();
 	}
 	/**

@@ -38,7 +38,7 @@ public class BrokeredPreparedStatement extends BrokeredStatement
 	/**
 		SQL used to create me.
 	*/
-	protected final String	sql;
+	final String	sql;
 
     public BrokeredPreparedStatement(BrokeredStatementControl control, int jdbcLevel, String sql) throws SQLException
     {
@@ -491,7 +491,14 @@ public class BrokeredPreparedStatement extends BrokeredStatement
 	** Control methods.
 	*/
 
-	public PreparedStatement getPreparedStatement() throws SQLException {
+    /**
+     * Access the underlying PreparedStatement. This method
+     * is package protected to restrict access to the underlying
+     * object to the brokered objects. Allowing the application to
+     * access the underlying object thtough a public method would
+     * 
+     */
+    PreparedStatement getPreparedStatement() throws SQLException {
 		return control.getRealPreparedStatement();
 	}
 

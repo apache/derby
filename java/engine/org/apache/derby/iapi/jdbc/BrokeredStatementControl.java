@@ -53,6 +53,7 @@ public interface BrokeredStatementControl
 
 	/**
 		Optionally wrap a returned ResultSet in another ResultSet.
+        @param s Statement that created the ResultSet.
 	*/
-	public ResultSet	wrapResultSet(ResultSet rs);
+	public ResultSet	wrapResultSet(Statement s, ResultSet rs);
 }

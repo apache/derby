@@ -141,12 +141,29 @@ public abstract class EmbedResultSet extends ConnectionChild
     private int NumberofFetchedRows;
 
 
-	/*
+	/**
+     * The statement object that originally created us.
 		we hang on to the statement to prevent GC from
 		closing it under us
 	 */
-	protected final EmbedStatement stmt;
+	private final EmbedStatement stmt;
+    
+    /**
+     * The statement that currently owns this ResultSet.
+     * Statements created in procedures are passed off
+     * to the Statement that called the procedure.
+     * This is to avoid the ResultSet being closed
+     * due to the Statement within the procedure
+     * or the nested Connection being closed.
+     */
 	private EmbedStatement owningStmt;
+    
+    /**
+     * Statement object the application used to
+     * create this ResultSet.
+     */
+    private Statement applicationStmt;
+    
     private long timeoutMillis;
 
 	protected final boolean isAtomic;
@@ -182,7 +199,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		SanityManager.ASSERT(resultsToWrap!=null);
 		theResults = resultsToWrap;
 		this.forMetaData = forMetaData;
-		this.stmt = owningStmt = stmt;
+        this.applicationStmt = this.stmt = owningStmt = stmt;
 
         this.timeoutMillis = stmt == null
             ? 0L
@@ -1662,7 +1679,17 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public final Statement getStatement()
     {
-            return stmt;
+            return applicationStmt;
+    }
+    
+    /**
+     * Set the application Statement object that created this ResultSet.
+     * Used when the Statement objects returned to the application
+     * are wrapped for XA.
+     */
+    public final void setApplicationStatement(Statement applicationStmt)
+    {
+        this.applicationStmt = applicationStmt;
     }
 
 	//---------------------------------------------------------------------
