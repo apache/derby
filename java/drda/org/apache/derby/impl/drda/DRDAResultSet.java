@@ -89,7 +89,7 @@ class DRDAResultSet
 	// emitted in the next QRYDTA response to a CNTQRY request.
 	private byte []splitQRYDTA;
 
-	protected DRDAResultSet()
+	DRDAResultSet()
 	{
 		state = NOT_OPENED;
 		// Initialize qryclsimp to NO. Only result sets requested by

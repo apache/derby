@@ -27,7 +27,7 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 
 
 
-public class SQLTypes {
+class SQLTypes {
 
   // define final statics for the fdoca type codes here!!!
 

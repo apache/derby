@@ -40,7 +40,7 @@ import org.apache.derby.impl.jdbc.Util;
  * 
  *  
  */
-public class EXTDTAInputStream extends InputStream {
+class EXTDTAInputStream extends InputStream {
 
 	long dataLength = 0; // length of the stream;
 

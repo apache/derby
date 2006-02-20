@@ -74,7 +74,7 @@ class AppRequester
 	 * 
 	 * @exception throws IOException
 	 */
-	protected AppRequester () 
+	AppRequester () 
 	{
 		for (int i = 0; i < CodePoint.MGR_CODEPOINTS.length; i++)
 			managerLevels[i] = MGR_LEVEL_UNKNOWN;

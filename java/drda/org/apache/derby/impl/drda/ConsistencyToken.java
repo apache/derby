@@ -34,7 +34,7 @@ final class ConsistencyToken {
      *
      * @param bytes byte array representing the token
      */
-    public ConsistencyToken(byte[] bytes) {
+    ConsistencyToken(byte[] bytes) {
         this.bytes = bytes;
     }
 

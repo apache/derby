@@ -60,7 +60,7 @@ import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.EmbedStatement;
 import org.apache.derby.impl.jdbc.Util;
 
-public class DRDAConnThread extends Thread {
+class DRDAConnThread extends Thread {
 
     private static final String leftBrace = "{";
 	private static final String rightBrace = "}";
@@ -180,7 +180,7 @@ public class DRDAConnThread extends Thread {
 	 * @param logConnections
 	 **/
 
-	public DRDAConnThread(Session session, NetworkServerControlImpl server, 
+	DRDAConnThread(Session session, NetworkServerControlImpl server, 
 						  long timeSlice,
 						  boolean logConnections) {
 	

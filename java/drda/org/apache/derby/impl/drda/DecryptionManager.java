@@ -44,7 +44,7 @@ import java.math.BigInteger;
  * to do Diffie_Hellman algorithm and DES encryption.
  */
 
-public class DecryptionManager
+class DecryptionManager
 {
   // DRDA's Diffie-Hellman agreed public value: prime.
   private static final byte modulusBytes__[] = {
@@ -94,7 +94,7 @@ public class DecryptionManager
    *
    * @throws SQLException that wraps any error
    */
-  public DecryptionManager () throws SQLException
+  DecryptionManager () throws SQLException
   {
     try {
       if (java.security.Security.getProvider ("IBMJCE") == null) // IBMJCE is not installed, install it.

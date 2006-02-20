@@ -47,7 +47,7 @@ final class DRDAString {
      * @param m a <code>CcsidManager</code> value specifying
      * which encoding is used
      */
-    public DRDAString(CcsidManager m) {
+    DRDAString(CcsidManager m) {
         this.buffer = new byte[0];
         this.ccsidManager = m;
         this.cachedString = null;

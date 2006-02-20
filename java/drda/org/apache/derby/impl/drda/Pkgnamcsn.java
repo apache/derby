@@ -49,7 +49,7 @@ final class Pkgnamcsn {
      * @param pkgsn RDB Package Section Number
      * @param pkgcnstkn RDB Package Consistency Token
      */
-    public Pkgnamcsn(String rdbnam, String rdbcolid, String pkgid,
+    Pkgnamcsn(String rdbnam, String rdbcolid, String pkgid,
                      int pkgsn, ConsistencyToken pkgcnstkn) {
         this.rdbnam = rdbnam;
         this.rdbcolid = rdbcolid;

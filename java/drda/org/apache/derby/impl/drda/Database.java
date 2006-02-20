@@ -81,7 +81,7 @@ class Database
 	 * 
 	 * @param dbName	database name
 	 */
-	protected Database (String dbName)
+	Database (String dbName)
 	{
 		if (dbName != null)
 		{

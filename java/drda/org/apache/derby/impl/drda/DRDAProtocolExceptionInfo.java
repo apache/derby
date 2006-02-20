@@ -20,7 +20,7 @@
 
 package org.apache.derby.impl.drda;
 
-public class DRDAProtocolExceptionInfo {
+class DRDAProtocolExceptionInfo {
     
     /*
       Holds static information about the protocol error
@@ -38,7 +38,7 @@ public class DRDAProtocolExceptionInfo {
     // Sends an originating Codepoint
     protected boolean sendsCodpntArg;
 	
-    protected DRDAProtocolExceptionInfo(int errorCodePoint, int svrcod,  
+    DRDAProtocolExceptionInfo(int errorCodePoint, int svrcod,  
 					int errCdCodePoint,
 					boolean sendsCodpntArg)
     {

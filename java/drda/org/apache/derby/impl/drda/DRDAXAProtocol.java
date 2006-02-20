@@ -34,14 +34,14 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import javax.transaction.xa.*;
 
 
-public class DRDAXAProtocol {
+class DRDAXAProtocol {
 
 	private DRDAConnThread connThread;
 	private DDMReader reader;
 	private DDMWriter writer;
 
 
-	public DRDAXAProtocol(DRDAConnThread connThread)
+	DRDAXAProtocol(DRDAConnThread connThread)
 	{
 		this.connThread = connThread;
 		reader = connThread.getReader();

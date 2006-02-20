@@ -117,7 +117,7 @@ class DRDAStatement
 	 * @param database
 	 * 
 	 */
-	protected DRDAStatement (Database database) 
+	DRDAStatement (Database database) 
 	{
 		this.database = database;
 		setTypDefValues();

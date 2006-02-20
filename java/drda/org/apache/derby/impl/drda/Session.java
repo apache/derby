@@ -81,7 +81,7 @@ class Session
 	 *
 	 * @exception throws IOException
 	 */
-	protected Session (int connNum, Socket clientSocket, String traceDirectory,
+	Session (int connNum, Socket clientSocket, String traceDirectory,
 			boolean traceOn) throws IOException
 	{
 		this.connNum = connNum;

@@ -152,7 +152,7 @@ class DDMReader
 	private InputStream inputStream;
 
 	// constructor
-	protected DDMReader (DRDAConnThread agent, DssTrace dssTrace)
+	DDMReader (DRDAConnThread agent, DssTrace dssTrace)
 	{
 		buffer = new byte[DEFAULT_BUFFER_SIZE];
 		ddmCollectionLenStack = new long[MAX_MARKS_NESTING];
@@ -163,7 +163,7 @@ class DDMReader
 	 * It is used by TestProto to read the protocol returned by the
 	 * server 
 	 */
-	protected DDMReader(CcsidManager ccsidManager, InputStream inputStream)
+	DDMReader(CcsidManager ccsidManager, InputStream inputStream)
 	{
 		buffer = new byte[DEFAULT_BUFFER_SIZE];
 		ddmCollectionLenStack = new long[MAX_MARKS_NESTING];

@@ -33,7 +33,7 @@ package org.apache.derby.impl.drda;
  * be fine since this class is intended for converting
  * DDM Parameter data only.
  */
-public class EbcdicCcsidManager extends CcsidManager
+class EbcdicCcsidManager extends CcsidManager
 {
 	private static final int[] conversionArrayToEbcdic = {
 		0x0000,0x0001,0x0002,0x0003,0x0037,0x002d,0x002e,0x002f

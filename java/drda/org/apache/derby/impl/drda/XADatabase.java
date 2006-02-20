@@ -52,7 +52,7 @@ class XADatabase extends Database {
 	private XAConnection xaConnection;
 
 	
-	protected XADatabase (String dbName)
+	XADatabase (String dbName)
 	{
 		super(dbName);
 		forXA = true;

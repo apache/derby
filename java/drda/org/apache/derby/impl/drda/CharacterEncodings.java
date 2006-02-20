@@ -20,7 +20,7 @@
 
 package org.apache.derby.impl.drda;
 
-public final class CharacterEncodings
+final class CharacterEncodings
 {
 
   // This is a static class, so hide the default constructor.

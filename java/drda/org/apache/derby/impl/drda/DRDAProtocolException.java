@@ -32,7 +32,7 @@
 package org.apache.derby.impl.drda;
 import java.util.Hashtable;
 
-public class DRDAProtocolException extends Exception
+class DRDAProtocolException extends Exception
 {
 	
 	/* Static values, used in constructor if there is no associated 
@@ -210,7 +210,7 @@ public class DRDAProtocolException extends Exception
 	 *
 	 */
 	
-	protected DRDAProtocolException(String msgid,
+	DRDAProtocolException(String msgid,
 									DRDAConnThread agent, 
 									int cpArg, 
 									int errCdArg, Object []args)
@@ -291,7 +291,7 @@ public class DRDAProtocolException extends Exception
 	}
 	
 	// Constructor with no additional args
-	protected DRDAProtocolException(String msgid,
+	DRDAProtocolException(String msgid,
 									DRDAConnThread agent, 
 									int cpArg, 
 									int errCdArg)
