@@ -55,9 +55,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.impl.jdbc.EmbedParameterSetMetaData;
-import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
-import org.apache.derby.impl.jdbc.EmbedStatement;
 import org.apache.derby.impl.jdbc.Util;
 
 class DRDAConnThread extends Thread {
@@ -3781,8 +3779,6 @@ class DRDAConnThread extends Thread {
 	 */
 	private void writeSQLRSLRD(DRDAStatement stmt) throws DRDAProtocolException,SQLException
 	{
-
-		EmbedPreparedStatement ps = (EmbedPreparedStatement) stmt.getPreparedStatement();
 		int numResults = stmt.getNumResultSets();
 
 		writer.createDssObject();
@@ -5900,13 +5896,7 @@ class DRDAConnThread extends Thread {
 	//pass PreparedStatement here so we can send correct holdability on the wire for jdk1.3 and higher
 	//For jdk1.3, we provide hold cursor support through reflection.
 	private void writeSQLDHROW (DRDAStatement stmt) throws DRDAProtocolException,SQLException
-	{
-		ResultSet rs = null;
-		EmbedStatement rsstmt;
-		if (!stmt.needsToSendParamData)
-			rs = stmt.getResultSet();
-		
-
+	{		
 		if (JVMInfo.JDK_ID < 2) //write null indicator for SQLDHROW because there is no holdability support prior to jdk1.3
 		{
 			writer.writeByte(CodePoint.NULLDATA);
