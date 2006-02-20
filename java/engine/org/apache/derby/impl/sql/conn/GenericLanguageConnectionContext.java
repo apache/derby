@@ -82,6 +82,7 @@ import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
 import org.apache.derby.iapi.reference.Property;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -1141,7 +1142,7 @@ public class GenericLanguageConnectionContext
 			// reset the savepoints to the new
 			// location, since any outer nesting
 			// levels expect there to be a savepoint
-			resetSavepoints(statementContext);
+			resetSavepoints();
 		}
 	}
 
@@ -1317,40 +1318,26 @@ public class GenericLanguageConnectionContext
 			// reset the savepoints to the new
 			// location, since any outer nesting
 			// levels expet there to be a savepoint
-			resetSavepoints(statementContext);
+			resetSavepoints();
 		}
 	}
 
-	/*
-	** Reset all statement savepoints.  
-	*/
-	private void resetSavepoints(StatementContext statementContext)
-		 throws StandardException 
+	/**
+	 * Reset all statement savepoints. Traverses the StatementContext
+	 * stack from bottom to top, calling resetSavePoint()
+	 * on each element.
+	 *
+	 * @exception StandardException thrown if something goes wrong
+	 */
+	private void resetSavepoints() throws StandardException 
 	{
-		if (statementContext == null)
-			return;
-
-		ContextManager cm = getContextManager();
-		Stack stack = new Stack();
-
-		// build up a stack with all the statement
-		// contexts.
-		do
-		{
-			stack.push(statementContext);
-			statementContext.popMe();
-		}
-		while ((statementContext = ((StatementContext)cm.getContext(org.apache.derby.iapi.reference.ContextId.LANG_STATEMENT))) != null);
-
-		while (!stack.empty())
-		{
-			statementContext = ((StatementContext)stack.pop());
-
-			// reset the savepoints to the new spot
-			statementContext.resetSavePoint();
-
-			// replace the contexts that we removed above
-			statementContext.pushMe();
+		final ContextManager cm = getContextManager();
+		final List stmts = cm.getContextStack(org.apache.derby.
+											  iapi.reference.
+											  ContextId.LANG_STATEMENT);
+		final int end = stmts.size();
+		for (int i = 0; i < end; ++i) {
+			((StatementContext)stmts.get(i)).resetSavePoint();
 		}
 	}
 

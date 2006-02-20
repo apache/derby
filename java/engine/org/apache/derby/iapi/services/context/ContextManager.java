@@ -37,9 +37,10 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 import java.io.PrintWriter;
 
-import java.util.Hashtable;
-import java.util.Stack;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
 import java.util.Locale;
 
 /**
@@ -58,121 +59,171 @@ import java.util.Locale;
  */
 
 public class ContextManager
-
 {
-
-
-	private final Stack holder;
-
-	/*
-	 * ContextManager interface
+	/**
+	 * The CtxStack implement a stack on top of an ArrayList (to avoid
+	 * the inherent overhead associated with java.util.Stack which is
+	 * built on top of java.util.Vector, which is fully
+	 * synchronized).
 	 */
+	private static final class CtxStack {
+		private ArrayList stack_ = new ArrayList();
 
+		// Keeping a reference to the top element on the stack
+		// optimizes the frequent accesses to this element. The
+		// tradeoff is that pushing and popping becomes more
+		// expensive, but those operations are infrequent.
+		private Context top_ = null;
+
+		void push(Context context) { 
+			stack_.add(context); 
+			top_ = context; 
+		}
+		void pop() {
+			stack_.remove(stack_.size()-1);
+			top_ = stack_.isEmpty() ? 
+				null : (Context) stack_.get(stack_.size()-1); 
+		}
+		void remove(Context context) {
+			if (context == top_) {
+				pop();
+				return;
+			}
+			stack_.remove(stack_.lastIndexOf(context)); 
+		}
+		Context top() { 
+			return top_; 
+		}
+		boolean isEmpty() { return stack_.isEmpty(); }
+		List getUnmodifiableList() { 
+		    return Collections.unmodifiableList(stack_); 
+		}
+	}
+
+	/**
+	 * Empty ArrayList to use as void value
+	 */
+	//private final ArrayList voidArrayList_ = new ArrayList(0);
+
+	/**
+	 * HashMap that holds the Context objects. The Contexts are stored
+	 * with a String key.
+	 * @see ContextManager#pushContext(Context)
+	 */
+	private final HashMap ctxTable = new HashMap();
+
+	/**
+	 * List of all Contexts
+	 */
+	private final ArrayList holder = new ArrayList();
+
+	/**
+	 * Add a Context object to the ContextManager. The object is added
+	 * both to the holder list and to a stack for the specific type of
+	 * Context.
+	 * @param newContext the new Context object
+	 */
 	public void pushContext(Context newContext)
 	{
 		checkInterrupt();
-
-		String contextId = newContext.getIdName();
-
-		Stack idStack = (Stack) ctxTable.get(contextId);
+		final String contextId = newContext.getIdName();
+		CtxStack idStack = (CtxStack) ctxTable.get(contextId);
 
 		// if the stack is null, create a new one.
-		if (idStack == null)
-		{
-			idStack = new Stack();
-			ctxTable.put(contextId,idStack);
+		if (idStack == null) {
+			idStack = new CtxStack();
+			ctxTable.put(contextId, idStack);
 		}
 
 		// add to top of id's stack
 		idStack.push(newContext);
 
 		// add to top of global stack too
-		holder.push(newContext);
+		holder.add(newContext);
 	}
-
+	
 	/**
-	 * @see org.apache.derby.iapi.services.context.ContextManager#getContext
+	 * Obtain the last pushed Context object of the type indicated by
+	 * the contextId argument.
+	 * @param contextId a String identifying the type of Context
+	 * @return The Context object with the corresponding contextId, or null if not found
 	 */
-	public Context getContext(String contextId)
-	{
+	public Context getContext(String contextId) {
 		checkInterrupt();
-
-		Stack idStack = (Stack)ctxTable.get(contextId);
-
+		
+		final CtxStack idStack = (CtxStack) ctxTable.get(contextId);
 		if (SanityManager.DEBUG)
-		SanityManager.ASSERT( idStack == null ||
-			idStack.empty() ||
-			((Context)idStack.peek()).getIdName().equals(contextId));
-
-		if (idStack == null ||
-		    idStack.empty())
-		{
-			return null;
-		}
-
-
-
-		return (Context) idStack.peek();
+			SanityManager.ASSERT( idStack == null ||
+								  idStack.isEmpty() ||
+								  idStack.top().getIdName() == contextId);
+		return (idStack==null?null:idStack.top());
 	}
 
 	/**
-	 * @see org.apache.derby.iapi.services.context.ContextManager#popContext
+	 * Remove the last pushed Context object, regardless of type. If
+	 * there are no Context objects, no action is taken.
 	 */
 	public void popContext()
 	{
 		checkInterrupt();
-
-		Context theContext;
-		String contextId;
-		Stack idStack;
-
 		// no contexts to remove, so we're done.
-		if (holder.empty())
-		{
+		if (holder.isEmpty()) {
 			return;
 		}
 
 		// remove the top context from the global stack
-		theContext = (Context) holder.pop();
+		Context theContext = (Context) holder.remove(holder.size()-1);
 
 		// now find its id and remove it from there, too
-		contextId = theContext.getIdName();
-		idStack = (Stack)ctxTable.get(contextId);
+		final String contextId = theContext.getIdName();
+		final CtxStack idStack = (CtxStack) ctxTable.get(contextId);
 
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT( idStack != null &&
-			(! idStack.empty()) &&
-			((Context)idStack.peek()).getIdName() == contextId);
-
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT( idStack != null &&
+								  (! idStack.isEmpty()) &&
+								  idStack.top().getIdName() == contextId);
+		}
 		idStack.pop();
 	}
 
+	/**
+	 * Removes the specified Context object. If
+	 * the specified Context object does not exist, the call will fail.
+	 * @param theContext the Context object to remove.
+	 */
 	void popContext(Context theContext)
 	{
 		checkInterrupt();
-
-		Stack idStack;
-
 		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(!holder.empty());
+			SanityManager.ASSERT(!holder.isEmpty());
 
 		// first, remove it from the global stack.
-		// to do this we treat it like its vector supertype.
-		int index = holder.lastIndexOf(theContext);
-		if (index != -1)
-			holder.removeElementAt(index);
-		else if (SanityManager.DEBUG) {
-			//SanityManager.THROWASSERT("Popped non-existent context by id " + theContext + " type " + theContext.getIdName());
-		}
+		holder.remove(holder.lastIndexOf(theContext));
+
+		final String contextId = theContext.getIdName();
+		final CtxStack idStack = (CtxStack) ctxTable.get(contextId);
 
 		// now remove it from its id's stack.
-		idStack = (Stack) ctxTable.get(theContext.getIdName());
-		boolean wasThere = idStack.removeElement(theContext);
-		if (SanityManager.DEBUG) {
-			//if (!wasThere)
-			//	SanityManager.THROWASSERT("Popped non-existent stack by id " + theContext + " type " + theContext.getIdName());
-		}
+		idStack.remove(theContext);
 	}
+	
+	/**
+	 * Return an unmodifiable list reference to the ArrayList backing
+	 * CtxStack object for this type of Contexts. This method allows
+	 * fast traversal of all Contexts on that stack. The first element
+	 * in the List corresponds to the bottom of the stack. The
+	 * assumption is that the Stack will not be modified while it is
+	 * being traversed.
+	 * @param contextId the type of Context stack to return.
+	 * @return an unmodifiable "view" of the ArrayList backing the stack
+	 * @see org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext#resetSavepoints()
+	 * @see org.apache.derby.iapi.sql.conn.StatementContext#resetSavePoint()
+	 */
+	public final List getContextStack(String contextId) {
+		final CtxStack cs = (CtxStack) ctxTable.get(contextId);
+		return (cs==null?Collections.EMPTY_LIST:cs.getUnmodifiableList());
+	}
+
 
 	/**
 		@return true if the context manager is shutdown, false otherwise.
@@ -264,7 +315,7 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 						break;
 					}
 
-					Context ctx = ((Context) holder.elementAt(index));
+					Context ctx = ((Context) holder.get(index));
 					lastHandler = ctx.isLastHandler(errorSeverity);
 
 					ctx.cleanupOnError(error);
@@ -443,22 +494,19 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 	}
 
 	/**
-	 * constructor specifying the hash table size and load
-	 * factor for the hashed-by-id context stacks.
+	 * Constructs a new instance. No CtxStacks are inserted into the
+	 * hashMap as they will be allocated on demand.
+	 * @param csf the ContextService owning this ContextManager
+	 * @param stream error stream for reporting errors
 	 */
 	ContextManager(ContextService csf, HeaderPrintWriter stream)
 	{
 		errorStream = stream;
-		ctxTable = new Hashtable();
 		owningCsf = csf;
 
 		logSeverityLevel = PropertyUtil.getSystemInt(Property.LOG_SEVERITY_LEVEL,
 			SanityManager.DEBUG ? 0 : ExceptionSeverity.SESSION_SEVERITY);
-
-		holder = new Stack();
 	}
-
-	private final Hashtable ctxTable;
 
 	final ContextService owningCsf;
 
@@ -469,8 +517,6 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 
 	private boolean shutdown;
 	private LocaleFinder finder;
-
-	final Stack cmStack = new Stack();
 
 	Thread	activeThread;
 	int		activeCount;
