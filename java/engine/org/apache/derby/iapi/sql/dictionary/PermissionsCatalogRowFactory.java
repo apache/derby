@@ -36,7 +36,7 @@ public abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
 {
     public static final String AUTHORIZATION_ID_TYPE = "VARCHAR";
     public static final boolean AUTHORIZATION_ID_IS_BUILTIN_TYPE = true;
-    public static final int AUTHORIZATION_ID_LENGTH = Limits.DB2_MAX_USERID_LENGTH;
+    public static final int AUTHORIZATION_ID_LENGTH = Limits.MAX_IDENTIFIER_LENGTH;
 
     public PermissionsCatalogRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                         boolean convertIdToLower)
