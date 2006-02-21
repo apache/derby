@@ -29,6 +29,8 @@ import java.sql.SQLException;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Properties;
+
+import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.impl.jdbc.EmbedConnection;
@@ -67,7 +69,10 @@ class Database
 											// occurred in this transaction
 	protected boolean sendTRGDFTRT = false; // Send package target default value
 
-	private Connection conn;			// Connection to the database
+    /**
+     * Connection to the database in the embedded engine.
+     */
+	private EngineConnection conn;
 	DRDAStatement defaultStatement;    // default statement used 
 													   // for execute imm
 	private DRDAStatement currentStatement; // current statement we are working on
@@ -112,7 +117,7 @@ class Database
 	 * @param conn Connection
 	 * @exception SQLException
 	 */
-	void setConnection(Connection conn)
+	final void setConnection(EngineConnection conn)
 		throws SQLException
 	{
 		this.conn = conn;
@@ -124,7 +129,7 @@ class Database
 	 *
 	 * @return connection
 	 */
-	Connection getConnection()
+	final EngineConnection getConnection()
 	{
 		return conn;
 	}
@@ -206,7 +211,6 @@ class Database
 	 * Make a new connection using the database name and set 
 	 * the connection in the database
 	 * @param p Properties for connection attributes to pass to connect
-	 * @return new local connection
 	 */
 	void makeConnection(Properties p) throws SQLException
 	{
@@ -215,7 +219,11 @@ class Database
                 // take care of case of SECMEC_USRIDONL
                 if(password != null) 
 		    p.put(Attribute.PASSWORD_ATTR, password);
-        Connection conn = NetworkServerControlImpl.getDriver().connect(Attribute.PROTOCOL
+                
+        // Contract between network server and embedded engine
+        // is that any connection returned implements EngineConnection.
+        EngineConnection conn = (EngineConnection)
+            NetworkServerControlImpl.getDriver().connect(Attribute.PROTOCOL
 							 + shortDbName + attrString, p);
 		if(conn != null){
 			conn.setAutoCommit(false);

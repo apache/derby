@@ -41,6 +41,7 @@ import java.util.Enumeration;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.derby.impl.drda.DRDAXid;
 import  org.apache.derby.iapi.jdbc.BrokeredConnection;
+import org.apache.derby.iapi.jdbc.EngineConnection;
 
 class XADatabase extends Database {
 
@@ -75,7 +76,7 @@ class XADatabase extends Database {
 		if (attrString != null)
 			xaDataSource.setConnectionAttributes(attrString);
 		
-		Connection conn = getConnection();
+		EngineConnection conn = getConnection();
 		// If we have no existing connection. this is a brand new XAConnection.
 		if (conn == null)
 		{
@@ -88,7 +89,9 @@ class XADatabase extends Database {
 		}
 		
 		// Get a new logical connection.
-		conn = xaConnection.getConnection();
+        // Contract between network server and embedded engine
+        // is that any connection returned implements EngineConnection.
+ 		conn = (EngineConnection) xaConnection.getConnection();
 		// Client will always drive the commits so connection should
 		// always be autocommit false on the server. DERBY-898/DERBY-899
 		conn.setAutoCommit(false);
