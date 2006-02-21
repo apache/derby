@@ -1,0 +1,14 @@
+<body>
+Useful constants that the Java compiler will in-line.
+A collection of reference interfaces that contain primitive or
+String constants. Such constants will be in-lined by the Java
+compiler hopefully leading to smaller footprint, than a reference
+to a field entails. Fields in interfaces are automatically public,
+static and final, hence constants.
+<P>
+These classes should not need to be shipped with any of the Derby jar files.
+If one is shipped with a Jar file then it most likely means the field
+representing the constant was a non-String Object (e.g. new Integer(1))
+or the final field is a calculated value that could not be resolved
+to a constant by the Java compiler.
+</body>
