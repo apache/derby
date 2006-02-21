@@ -112,7 +112,7 @@ class Database
 	 * @param conn Connection
 	 * @exception SQLException
 	 */
-	protected void setConnection(Connection conn)
+	void setConnection(Connection conn)
 		throws SQLException
 	{
 		this.conn = conn;
@@ -124,7 +124,7 @@ class Database
 	 *
 	 * @return connection
 	 */
-	protected Connection getConnection()
+	Connection getConnection()
 	{
 		return conn;
 	}
@@ -208,7 +208,7 @@ class Database
 	 * @param p Properties for connection attributes to pass to connect
 	 * @return new local connection
 	 */
-	protected Connection makeConnection(Properties p) throws SQLException
+	void makeConnection(Properties p) throws SQLException
 	{
 		p.put(Attribute.USERNAME_ATTR, userId);
                 
@@ -221,7 +221,6 @@ class Database
 			conn.setAutoCommit(false);
 		}
 		setConnection(conn);
-		return conn;
 	}
 
 	// Create string to pass to DataSource.setConnectionAttributes

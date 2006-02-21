@@ -62,7 +62,7 @@ class XADatabase extends Database {
 	 * Make a new connection using the database name and set 
 	 * the connection in the database
 	 **/
-	protected synchronized Connection makeConnection(Properties p) throws
+	synchronized void makeConnection(Properties p) throws
  SQLException
 	{
 		if (xaDataSource == null)
@@ -92,9 +92,7 @@ class XADatabase extends Database {
 		// Client will always drive the commits so connection should
 		// always be autocommit false on the server. DERBY-898/DERBY-899
 		conn.setAutoCommit(false);
-		setConnection(conn);
-		return conn;
-		
+		setConnection(conn);		
 	}
 
 	/** SetXAResource
