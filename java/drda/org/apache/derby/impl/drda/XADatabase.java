@@ -106,38 +106,6 @@ class XADatabase extends Database {
 		this.xaResource = resource;
 	}
 
-	/** Set DRDA id for this connection
-	 * @param drdaID
-	 */
-	protected void setDrdaID(String drdaID)
-	{
-		if (getConnection() != null)
-			((BrokeredConnection) getConnection()).setDrdaID(drdaID);
-	}
-
-
-	/**
-	 *  Set the internal isolation level to use for preparing statements.
-	 *  Subsequent prepares will use this isoalation level
-	 * @param level internal isolation level 
-	 *
-	 * @throws SQLException
-	 * @see BrokeredConnection#setPrepareIsolation
-	 * 
-	 */
-	protected void setPrepareIsolation(int level) throws SQLException
-	{
-		((BrokeredConnection) getConnection()).setPrepareIsolation(level);
-	}
-
-	/** get prepare isolation level for this connection.
-	 * 
-	 */
-	protected int getPrepareIsolation() throws SQLException
-	{
-		return ((BrokeredConnection) getConnection()).getPrepareIsolation();
-	}
-
 	/**
 	 * get XA Resource for this connection
 	 */

@@ -33,7 +33,6 @@ import java.util.Properties;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
-import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 /**
 	Database stores information about the current database
@@ -322,10 +321,10 @@ class Database
 		}
 	}
 
-	protected void setDrdaID(String drdaID)
+	final void setDrdaID(String drdaID)
 	{
 		if (conn != null)
-			((EmbedConnection)conn).setDrdaID(drdaID);
+			conn.setDrdaID(drdaID);
 	}
 
 	/**
@@ -334,17 +333,17 @@ class Database
 	 * @param level internal isolation level 
 	 *
 	 * @throws SQLException
-	 * @see EmbedConnection#setPrepareIsolation
+	 * @see EngineConnection#setPrepareIsolation
 	 * 
 	 */
-	protected void setPrepareIsolation(int level) throws SQLException
+	final void setPrepareIsolation(int level) throws SQLException
 	{
-		((EmbedConnection) conn).setPrepareIsolation(level);
+		conn.setPrepareIsolation(level);
 	}
 
-	protected int getPrepareIsolation() throws SQLException
+	final int getPrepareIsolation() throws SQLException
 	{
-		return ((EmbedConnection) conn).getPrepareIsolation();
+		return conn.getPrepareIsolation();
 	}
 
 	protected String buildRuntimeInfo(String indent, LocalizedResource localLangUtil)
