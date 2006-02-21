@@ -52,22 +52,6 @@ public class BrokeredConnection30 extends BrokeredConnection
 			throw se;
 		}
 	}
-	public final PreparedStatement prepareStatement(String sql,
-                                          int resultSetType,
-                                          int resultSetConcurrency,
-                                          int resultSetHoldability)
-										  throws SQLException {
-		try {
-			control.checkHoldCursors(resultSetHoldability);
-			return control.wrapStatement(
-				getRealConnection().prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability), sql, null);
-		}
-		catch (SQLException se)
-		{
-			notifyException(se);
-			throw se;
-		}
-	}
 	public final CallableStatement prepareCall(String sql,
                                      int resultSetType,
                                      int resultSetConcurrency,
@@ -140,19 +124,6 @@ public class BrokeredConnection30 extends BrokeredConnection
 		}
 	}
 
-
-	public final int getHoldability()
-		throws SQLException
-	{
-		try {
-			return getRealConnection().getHoldability();
-		}
-		catch (SQLException se)
-		{
-			notifyException(se);
-			throw se;
-		}
-	}
 
 	public final void setHoldability(int holdability)
 		throws SQLException
