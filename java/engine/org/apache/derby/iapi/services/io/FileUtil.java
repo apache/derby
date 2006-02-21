@@ -223,14 +223,16 @@ nextFile:	for (int i = 0; i < list.length; i++) {
                                          StorageFile from,
                                          File to)
     {
-        return copyDirectory( storageFactory, from, to, null, null);
+        return copyDirectory( storageFactory, from, to, null, null, true);
     }
     
+
     public static boolean copyDirectory( StorageFactory storageFactory,
                                          StorageFile from,
                                          File to,
                                          byte[] buffer,
-                                         String[] filter)
+                                         String[] filter, 
+                                         boolean copySubDirs)
     {
 		if (from == null)
 			return false;
@@ -275,8 +277,18 @@ nextFile:	for (int i = 0; i < list.length; i++) {
 
 				if (entry.isDirectory())
 				{
-					if (!copyDirectory( storageFactory, entry, new File(to,fileName), buffer, filter))
-						return false;
+                    if(copySubDirs) {
+                        if (!copyDirectory( storageFactory, entry, 
+                                            new File(to,fileName), buffer, 
+                                            filter, copySubDirs))
+                            return false;
+                    }
+                    else {
+                        // the request is to not copy the directories, continue
+                        // to the next file in the list.
+                        continue nextFile;
+                    }
+
 				}
 				else
 				{

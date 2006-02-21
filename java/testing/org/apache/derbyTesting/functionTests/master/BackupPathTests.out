@@ -1,0 +1,11 @@
+Begin Backup Path Tests
+case1 : try Backup with backup path as database dir
+Backup in to a database dir failed
+End test case1
+case2 : Backup with backup path as database jar dir
+End test case 2
+case 3: Backup again into the same db jar dir location
+End test case 3
+case 4: Backup using an absolute path
+End test case 4
+End Backup Path Tests

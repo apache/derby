@@ -358,7 +358,7 @@ public interface SQLState {
     String RAWSTORE_RECORD_VANISHED                             = "XSRS9.S";
     String BACKUP_BLOCKING_OPERATIONS_IN_PROGRESS               = "XSRSA.S";
     String BACKUP_OPERATIONS_NOT_ALLOWED                        = "XSRSB.S";
-    
+    String RAWSTORE_CANNOT_BACKUP_INTO_DATABASE_DIRECTORY       = "XSRSC.S";
 
 	/*
 	** RawStore - Log.Generic statement exceptions

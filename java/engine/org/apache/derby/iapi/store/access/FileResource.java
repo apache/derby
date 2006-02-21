@@ -57,7 +57,12 @@ import java.io.InputStream;
 	useful when processing old transactions in the stage. 
 */
 public interface FileResource {
-	
+
+    /**
+       The name of the jar directory
+    */
+    public static final String JAR_DIRECTORY_NAME = "jar";
+
 	/**
 	  Add a file resource, copying from the input stream.
 	  

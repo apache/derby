@@ -25,6 +25,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.store.access.FileResource;
 
 public class JarDDL
 {
@@ -111,7 +112,7 @@ public class JarDDL
 	{
 		StringBuffer sb = new StringBuffer(30);
 
-		sb.append("jar");
+		sb.append(FileResource.JAR_DIRECTORY_NAME);
 		sb.append(separatorChar);
 		sb.append(schemaName);
 		sb.append(separatorChar);

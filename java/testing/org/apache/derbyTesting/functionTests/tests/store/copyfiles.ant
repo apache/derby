@@ -150,3 +150,4 @@ OnlineBackupTest3_app.properties
 obtest_customer.jar
 onlineBackupTest4.sql
 onlineBackupTest4_app.properties
+BackupPathTests_app.properties

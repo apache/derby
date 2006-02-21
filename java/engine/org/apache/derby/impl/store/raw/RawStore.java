@@ -39,6 +39,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.iapi.store.access.TransactionInfo;
 import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
+import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.raw.ScanHandle;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
@@ -98,17 +99,6 @@ import java.security.PrivilegedExceptionAction;
 public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction
 {
 	private static final String BACKUP_HISTORY = "BACKUP.HISTORY";
-    
-    // files that should not be copied into the backup using simple 
-    // directory copy or not needed in the backup at all. 
-	private static final String[] BACKUP_FILTER =
-	{ DataFactory.TEMP_SEGMENT_NAME,    // not required to be in the backup
-      DataFactory.DB_LOCKFILE_NAME,     // not required to be in the backup
-      DataFactory.DB_EX_LOCKFILE_NAME,  // not required to be in the backup
-      LogFactory.LOG_DIRECTORY_NAME,    // written to the backup using log factory
-      "seg0"                            // written to the backup using data factory
-    };
-
 	protected TransactionFactory	xactFactory;
 	protected DataFactory			dataFactory;
 	protected LogFactory			logFactory;
@@ -144,10 +134,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     private static final int COPY_STORAGE_DIRECTORY_TO_REGULAR_ACTION = 9;
     private byte[] actionBuffer;
     private String[] actionFilter;
+    private boolean actionCopySubDirs;
     private static final int COPY_REGULAR_DIRECTORY_TO_STORAGE_ACTION = 10;
     private static final int COPY_REGULAR_FILE_TO_STORAGE_ACTION = 11;
     private static final int REGULAR_FILE_LIST_DIRECTORY_ACTION = 12;
-    
+    private static final int STORAGE_FILE_LIST_DIRECTORY_ACTION = 13;
+    private static final int COPY_STORAGE_FILE_TO_REGULAR_ACTION = 14;
+
 	public RawStore() {
 	}
 
@@ -579,6 +572,18 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                     SQLState.RAWSTORE_CANNOT_BACKUP_TO_NONDIRECTORY,
                     (File) backupDir);
             }
+
+            // check if a user has given the backup as a database directory by
+            // mistake, backup path can not be a derby database directory. 
+            // If a directory contains PersistentService.PROPERTIES_NAME, it 
+            // is assumed as derby database directory because derby databases
+            // always has this file. 
+ 
+            if (privExists(new File(backupDir, PersistentService.PROPERTIES_NAME))) { 
+                throw StandardException.newException(
+                    SQLState.RAWSTORE_CANNOT_BACKUP_INTO_DATABASE_DIRECTORY,
+                    (File) backupDir); 
+            }
 		}
 		
 		boolean error = true;
@@ -638,61 +643,107 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 				}
 			}
 
-
-            // copy the files that does not need any special handling and are 
-            // needed to be in the database directory to the backup directory. 
-            // See BACKUP_FILTER for all the files that are not copied 
-            // to the database directory by the call below. After this copy 
-            // information from log(transaction log), seg0(data segment)   has 
-            // to be copied into the backup from the database.
-			
-            if (!privCopyDirectory(dbase, backupcopy, (byte[])null, BACKUP_FILTER))
+            // create the backup database directory
+            if (!privMkdirs(backupcopy))
             {
-                throw StandardException.
-                    newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
-                                 dbase, backupcopy);
+                throw StandardException.newException(
+                    SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY,
+                    (File) backupcopy);
             }
 
-			
-			StorageFile logdir = logFactory.getLogDirectory();
+            // if they are any jar file stored in the database, copy them into
+            // the backup. 
+            StorageFile jarDir = 
+                storageFactory.newStorageFile(FileResource.JAR_DIRECTORY_NAME);
+            if (privExists(jarDir)) {
 
-			// munge service.properties file if necessary
-			StorageFile defaultLogDir = storageFactory.newStorageFile( LogFactory.LOG_DIRECTORY_NAME);
-			if (!logdir.equals(defaultLogDir))
-			{
-				// Read in property from service.properties file, remove
-				// logDevice from it, then write it out again.
-				try
-				{
-					String name = Monitor.getMonitor().getServiceName(this);
-					PersistentService ps = Monitor.getMonitor().getServiceType(this);
-					String fullName = ps.getCanonicalServiceName(name);
-					Properties prop = ps.getServiceProperties(fullName, (Properties)null);
+                // find the list of schema directories under the jar dir and
+                // then copy only the plain files under those directories. One could
+                // just use the recursive copy of directory to copy all the files
+                // under the jar dir, but the problem with that is if a user 
+                // gives jar directory as the backup path by mistake, copy will 
+                // fail while copying the backup dir onto itself in recursion
 
-					prop.remove(Attribute.LOG_DEVICE);
+                String [] jarSchemaList = privList(jarDir);
+                File backupJarDir = new File(backupcopy, 
+                                             FileResource.JAR_DIRECTORY_NAME);
+                // Create the backup jar directory
+                if (!privMkdirs(backupJarDir))
+                {
+                    throw StandardException.newException(
+                          SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY,
+                          (File) backupJarDir);
+                }
 
-					if (SanityManager.DEBUG)
-						SanityManager.ASSERT(prop.getProperty(Attribute.LOG_DEVICE) == null,
-											 "cannot get rid of logDevice property");
+                for (int i = 0; i < jarSchemaList.length; i++)
+                {
+                    StorageFile jarSchemaDir = 
+                        storageFactory.newStorageFile(jarDir, jarSchemaList[i]);
+                    File backupJarSchemaDir = new File(backupJarDir, jarSchemaList[i]);
+                    if (!privCopyDirectory(jarSchemaDir, backupJarSchemaDir, 
+                                           (byte[])null, null, false)) {
+                        throw StandardException.
+                            newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                                         jarSchemaDir, backupJarSchemaDir);  
+                    }
+                }
+            }
 
-					ps.saveServiceProperties( backupcopy.getCanonicalPath(), prop, true);
 
-					logHistory(historyFile,
-                        MessageService.getTextMessage(
-                            MessageId.STORE_EDITED_SERVICEPROPS));
+            // save service properties into the backup, Read in property 
+            // from service.properties file, remove logDevice from it, 
+            // then write it to the backup.
 
-				}
-				catch(StandardException se)
-				{
-					logHistory(historyFile,
-                        MessageService.getTextMessage(
-                            MessageId.STORE_ERROR_EDIT_SERVICEPROPS)
-                            + se);
+            StorageFile logdir = logFactory.getLogDirectory();
+            
+            try {
+                
+                String name = Monitor.getMonitor().getServiceName(this);
+                PersistentService ps = Monitor.getMonitor().getServiceType(this);
+                String fullName = ps.getCanonicalServiceName(name);
+                Properties prop = ps.getServiceProperties(fullName, (Properties)null);
+                StorageFile defaultLogDir = 
+                    storageFactory.newStorageFile( LogFactory.LOG_DIRECTORY_NAME);
 
-					return; // skip the rest and let finally block clean up
-				}
-			}
+                if (!logdir.equals(defaultLogDir))  
+                {
+                    prop.remove(Attribute.LOG_DEVICE);
+                    if (SanityManager.DEBUG)
+                        SanityManager.ASSERT(prop.getProperty(Attribute.LOG_DEVICE) == null,
+                                             "cannot get rid of logDevice property");
+                    logHistory(historyFile,
+                               MessageService.getTextMessage(
+                               MessageId.STORE_EDITED_SERVICEPROPS));
+                }
+            
+                // save the service properties into the backup.
+                ps.saveServiceProperties( backupcopy.getPath(), prop, false);
 
+            }catch(StandardException se) {
+                logHistory(historyFile,
+                           MessageService.getTextMessage(
+                           MessageId.STORE_ERROR_EDIT_SERVICEPROPS)
+                           + se);
+
+                return; // skip the rest and let finally block clean up
+            }
+
+            // Incase of encrypted database and the key is an external 
+            // encryption key, there is an extra file with name  
+            // Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE , this file should be
+            // copied in to the backup.
+            StorageFile verifyKeyFile = 
+                storageFactory.newStorageFile(
+                                 Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE);
+            if (privExists(verifyKeyFile)) {
+                File backupVerifyKeyFile = 
+                    new File(backupcopy, Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE);
+                if(!privCopyFile(verifyKeyFile, backupVerifyKeyFile))
+                   throw StandardException.
+                       newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                                    verifyKeyFile, backupVerifyKeyFile);  
+            }
+                
 			File logBackup = new File(backupcopy, LogFactory.LOG_DIRECTORY_NAME);
 
 			// this is wierd, delete it
@@ -1124,7 +1175,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 	protected boolean privCopyDirectory(StorageFile from, File to)
 	{
-		return privCopyDirectory(from, to, (byte[])null, (String[])null);
+		return privCopyDirectory(from, to, (byte[])null, 
+                                 (String[])null, true);
 	}
 
 	protected boolean privCopyDirectory(File from, StorageFile to)
@@ -1297,13 +1349,18 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
     }
 
-    private synchronized boolean privCopyDirectory( StorageFile from, File to, byte[] buffer, String[] filter)
+    private synchronized boolean privCopyDirectory(StorageFile from, 
+                                                   File to, 
+                                                   byte[] buffer, 
+                                                   String[] filter,
+                                                   boolean copySubdirs)
     {
         actionCode = COPY_STORAGE_DIRECTORY_TO_REGULAR_ACTION;
         actionStorageFile = from;
         actionRegularFile = to;
         actionBuffer = buffer;
         actionFilter = filter;
+        actionCopySubDirs = copySubdirs;
 
         try
         {
@@ -1364,6 +1421,26 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
     }
 
+    private synchronized boolean privCopyFile( StorageFile from, File to)
+    {
+        actionCode = COPY_STORAGE_FILE_TO_REGULAR_ACTION;
+        actionStorageFile = from;
+        actionRegularFile = to;
+
+        try
+        {
+            Object ret = AccessController.doPrivileged( this);
+            return ((Boolean) ret).booleanValue();
+        }
+        catch( PrivilegedActionException pae) { return false;} // does not throw an exception
+        finally
+        {
+            actionStorageFile = null;
+            actionRegularFile = null;
+        }
+    }
+
+
     private synchronized String[] privList(final File file)
     {
         actionCode = REGULAR_FILE_LIST_DIRECTORY_ACTION;
@@ -1379,6 +1456,23 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             actionRegularFile = null;
         }
     }
+
+    private synchronized String[] privList(final StorageFile file)
+    {
+        actionCode = STORAGE_FILE_LIST_DIRECTORY_ACTION;
+        actionStorageFile = file;
+
+        try
+        {
+            return (String[]) AccessController.doPrivileged( this);
+        }
+        catch( PrivilegedActionException pae) { return null;} // does not throw an exception
+        finally
+        {
+            actionStorageFile = null;
+        }
+    }
+    
 
     // PrivilegedExceptionAction method
     public final Object run() throws IOException
@@ -1420,7 +1514,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                                                   actionStorageFile,
                                                                   actionRegularFile,
                                                                   actionBuffer,
-                                                                  actionFilter));
+                                                                  actionFilter,
+                                                                  actionCopySubDirs));
 
         case COPY_REGULAR_DIRECTORY_TO_STORAGE_ACTION:
             // SECURITY PERMISSION - MP1, OP4
@@ -1439,6 +1534,19 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         case REGULAR_FILE_LIST_DIRECTORY_ACTION:
             // SECURITY PERMISSION - MP1
             return (String[])(actionRegularFile.list());
+
+        case STORAGE_FILE_LIST_DIRECTORY_ACTION:
+            // SECURITY PERMISSION - MP1
+            return (String[])(actionStorageFile.list());
+
+        case COPY_STORAGE_FILE_TO_REGULAR_ACTION:
+            // SECURITY PERMISSION - MP1, OP4
+            return ReuseFactory.getBoolean(FileUtil.copyFile(
+                                           (WritableStorageFactory) storageFactory,
+                                           actionStorageFile,
+                                           actionRegularFile));
+
+
         }
         return null;
     } // end of run
