@@ -26,20 +26,17 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.sql.SQLException;
 import javax.naming.Referenceable;
 import javax.naming.Reference;
 import javax.naming.NamingException;
 import javax.naming.StringRefAddr;
-import javax.naming.RefAddr;
 
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.SetAccessibleAction;
 import org.apache.derby.client.am.Connection;
 import org.apache.derby.client.net.NetConfiguration;
 import org.apache.derby.client.net.NetLogWriter;
@@ -50,7 +47,7 @@ import org.apache.derby.client.ClientDataSourceFactory;
  */
 public abstract class ClientBaseDataSource implements Serializable, Referenceable {
     private static final long serialVersionUID = -7660172643035173692L;
-
+    
     // The loginTimeout jdbc 2 data source property is not supported as a jdbc 1 connection property,
     // because loginTimeout is set by the jdbc 1 api via java.sql.DriverManager.setLoginTimeout().
     // The databaseName, serverName, and portNumber data source properties are also not supported as connection properties
@@ -72,7 +69,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      *
      * @serial
      */
-    protected int loginTimeout = propertyDefault_loginTimeout;
+    private int loginTimeout = propertyDefault_loginTimeout;
     public final static String propertyKey_loginTimeout = "loginTimeout";
     public static final int propertyDefault_loginTimeout = 0;
 
@@ -108,7 +105,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // and therefore may throw an SQLException.
     //
     //
-    protected String databaseName;
+    private String databaseName;
     public final static String propertyKey_databaseName = "databaseName";
 
     // databaseName is not permitted in a properties object
@@ -116,7 +113,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     // ---------------------------- description ------------------------------
     // A description of this data source.
-    protected String description;
+    private String description;
     public final static String propertyKey_description = "description";
 
     // ---------------------------- dataSourceName -----------------------------------
@@ -125,19 +122,19 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // used to name an underlying XADataSource,
     // or ConnectionPoolDataSource when pooling of connections is done.
     //
-    protected String dataSourceName;
+    private String dataSourceName;
     public final static String propertyKey_dataSourceName = "dataSourceName";
 
     // ---------------------------- portNumber -----------------------------------
     //
-    protected int portNumber = propertyDefault_portNumber;
+    private int portNumber = propertyDefault_portNumber;
     public final static int propertyDefault_portNumber = 1527;
     public final static String propertyKey_portNumber = "portNumber";
 
     // ---------------------------- serverName -----------------------------------
     //
     // Derby-410 fix.
-    protected String serverName = propertyDefault_serverName;
+    private String serverName = propertyDefault_serverName;
     public final static String propertyDefault_serverName = "localhost";
     public final static String propertyKey_serverName = "serverName";
 
@@ -155,7 +152,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // This password property may or may not be declared transient, and therefore may be serialized
     // to a file in clear-text, care must taken by the user to prevent security breaches.
     // Derby-406 fix
-    protected String user = propertyDefault_user;
+    private String user = propertyDefault_user;
     public final static String propertyKey_user = "user";
     public final static String propertyDefault_user = "APP";
 
@@ -224,7 +221,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     // ---------------------------- getServerMessageTextOnGetMessage -----------------------------------
     //
-    protected boolean retrieveMessageText = propertyDefault_retrieveMessageText;
+    private boolean retrieveMessageText = propertyDefault_retrieveMessageText;
     public final static boolean propertyDefault_retrieveMessageText = true;
     public final static String propertyKey_retrieveMessageText = "retrieveMessageText";
 
@@ -236,7 +233,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     // ---------------------------- traceFile -----------------------------------
     //
-    protected String traceFile;
+    private String traceFile;
     public final static String propertyKey_traceFile = "traceFile";
 
     public static String getTraceFile(Properties properties) {
@@ -247,7 +244,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // For the suffix of the trace file when traceDirectory is enabled.
     private transient int traceFileSuffixIndex_ = 0;
     //
-    protected String traceDirectory;
+    private String traceDirectory;
     public final static String propertyKey_traceDirectory = "traceDirectory";
 
     public static String getTraceDirectory(Properties properties) {
@@ -256,7 +253,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     // ---------------------------- traceFileAppend -----------------------------------
     //
-    protected boolean traceFileAppend = propertyDefault_traceFileAppend;
+    private boolean traceFileAppend = propertyDefault_traceFileAppend;
     public final static boolean propertyDefault_traceFileAppend = false;
     public final static String propertyKey_traceFileAppend = "traceFileAppend";
 
@@ -276,7 +273,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         return properties.getProperty("password");
     }
 
-    protected String password;
+    private String password;
 
     synchronized public final void setPassword(String password) {
         this.password = password;
@@ -309,126 +306,64 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
         Reference ref = new Reference(this.getClass().getName(), ClientDataSourceFactory.class.getName(), null);
 
-        Class clz = getClass();
-        Field[] fields = clz.getFields();
-        for (int i = 0; i < fields.length; i++) {
-            String name = fields[i].getName();
-            if (name.startsWith("propertyKey_")) {
-                if (Modifier.isTransient(fields[i].getModifiers())) {
-                    continue; // if it is transient, then skip this propertyKey.
-                }
-                try {
-                    String propertyKey = fields[i].get(this).toString();
-                    // search for property field.
-                    Field propertyField;
-                    clz = getClass(); // start from current class.
-                    while (true) {
-                        try {
-                            propertyField = clz.getDeclaredField(name.substring(12));
-                            break; // found the property field, so break the while loop.
-                        } catch (NoSuchFieldException nsfe) {
-                            // property field is not found at current level of class, so continue to super class.
-                            clz = clz.getSuperclass();
-                            if (clz == Object.class) {
-                                throw new NamingException("bug check: corresponding property field does not exist");
-                            }
-                            continue;
-                        }
-                    }
-
-                    if (!Modifier.isTransient(propertyField.getModifiers())) {
-                        // if the property is not transient:
-                        // get the property.
-                        AccessController.doPrivileged(new SetAccessibleAction(propertyField, true));
-                        //propertyField.setAccessible (true);
-                        Object propertyObj = propertyField.get(this);
-                        String property = (propertyObj == null) ? null : String.valueOf(propertyObj);
-                        // add into reference.
-                        ref.add(new StringRefAddr(propertyKey, property));
-                    }
-                } catch (IllegalAccessException e) {
-                    throw new NamingException("bug check: property cannot be accessed");
-                } catch (PrivilegedActionException e) {
-                    throw new NamingException("Privileged action exception occurred.");
-                }
-            }
-        }
+        addBeanProperties(ref);
         return ref;
     }
-
+    
     /**
-     * Not an external.  Do not document in pubs. Populates member data for this data source given a JNDI reference.
-     */
-    public void hydrateFromReference(Reference ref) throws SqlException {
-    	
-        RefAddr address;
+     * Add Java Bean properties to the reference using
+     * StringRefAddr for each property. List of bean properties
+     * is defined from the public getXXX() methods on this object
+     * that take no arguments and return short, int, boolean or String.
+     * The StringRefAddr has a key of the Java bean property name,
+     * converted from the method name. E.g. traceDirectory for
+     * traceDirectory.
+     * 
+      */
+    private void addBeanProperties(Reference ref)
+    {
+        // Look for all the getXXX methods in the class that take no arguments.
+        Method[] methods = this.getClass().getMethods();
+        
+        for (int i = 0; i < methods.length; i++) {
 
-        Class clz = getClass();
-        Field[] fields = clz.getFields();
-        for (int i = 0; i < fields.length; i++) {
-            String name = fields[i].getName();
-            if (name.startsWith("propertyKey_")) {
-                if (Modifier.isTransient(fields[i].getModifiers())) {
-                    continue; // if it is transient, then skip this propertyKey.
-                }
+            Method m = methods[i];
+
+            // only look for simple getter methods.
+            if (m.getParameterTypes().length != 0)
+                continue;
+
+            // only non-static methods
+            if (Modifier.isStatic(m.getModifiers()))
+                continue;
+
+            // Only getXXX methods
+            String methodName = m.getName();
+            if ((methodName.length() < 5) || !methodName.startsWith("get"))
+                continue;
+
+            Class returnType = m.getReturnType();
+
+            if (Integer.TYPE.equals(returnType)
+                    || Short.TYPE.equals(returnType)
+                    || String.class.equals(returnType)
+                    || Boolean.TYPE.equals(returnType)) {
+
+                // setSomeProperty
+                // 01234
+
+                String propertyName = methodName.substring(3, 4).toLowerCase(
+                        java.util.Locale.ENGLISH).concat(
+                        methodName.substring(4));
+
                 try {
-                    String propertyKey = fields[i].get(this).toString();
-                    // search for property field.
-                    Field propertyField;
-                    clz = getClass(); // start from current class.
-                    while (true) {
-                        try {
-                            propertyField = clz.getDeclaredField(name.substring(12));
-                            break; // found the property field, so break the while loop.
-                        } catch (NoSuchFieldException nsfe) {
-                            // property field is not found at current level of class, so continue to super class.
-                            clz = clz.getSuperclass();
-                            if (clz == Object.class) {
-                                throw new SqlException(new LogWriter(logWriter, traceLevel), "bug check: corresponding property field does not exist");
-                            }
-                            continue;
-                        }
-                    }
-
-                    if (!Modifier.isTransient(propertyField.getModifiers())) {
-                        // if the property is not transient:
-                        // set the property.
-                        address = ref.get(propertyKey);
-                        if (address != null) {
-                            propertyField.setAccessible(true);
-                            String type = propertyField.getType().toString();
-                            if (type.equals("boolean")) {
-                                boolean value = ((String) address.getContent()).equalsIgnoreCase("true");
-                                propertyField.setBoolean(this, value);
-                            } else if (type.equals("byte")) {
-                                byte value = Byte.parseByte((String) address.getContent());
-                                propertyField.setByte(this, value);
-                            } else if (type.equals("short")) {
-                                short value = Short.parseShort((String) address.getContent());
-                                propertyField.setShort(this, value);
-                            } else if (type.equals("int")) {
-                                int value = Integer.parseInt((String) address.getContent());
-                                propertyField.setInt(this, value);
-                            } else if (type.equals("long")) {
-                                long value = Long.parseLong((String) address.getContent());
-                                propertyField.setLong(this, value);
-                            } else if (type.equals("float")) {
-                                float value = Float.parseFloat((String) address.getContent());
-                                propertyField.setFloat(this, value);
-                            } else if (type.equals("double")) {
-                                double value = Double.parseDouble((String) address.getContent());
-                                propertyField.setDouble(this, value);
-                            } else if (type.equals("char")) {
-                                char value = ((String) address.getContent()).charAt(0);
-                                propertyField.setChar(this, value);
-                            } else {
-                                propertyField.set(this, address.getContent());
-                            }
-                        }
-                    }
-                } catch (IllegalAccessException e) {
-                    throw new SqlException(new LogWriter(this.logWriter, this.traceLevel), "bug check: property cannot be accessed");
+                    Object ov = m.invoke(this, null);
+                    String value = ov == null ? null : ov.toString();
+                    ref.add(new StringRefAddr(propertyName, value));
+                } catch (IllegalAccessException iae) {
+                } catch (InvocationTargetException ite) {
                 }
+
             }
         }
     }

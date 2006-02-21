@@ -20,6 +20,12 @@
 
 package org.apache.derby.client;
 
+import java.lang.reflect.Method;
+import java.util.Enumeration;
+
+import javax.naming.RefAddr;
+import javax.naming.Reference;
+
 import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientXADataSource;
@@ -85,8 +91,65 @@ public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
         }
 
         // Fill in the data source object shell with values from the jndi reference.
-        ds.hydrateFromReference(ref);
+        ClientDataSourceFactory.setBeanProperties(ds, ref);
 
         return ds;
+    }
+    
+    /** Reflect lookup for Java bean method taking a single String arg */
+    private static final Class[] STRING_ARG = { "".getClass() };
+    /** Reflect lookup for Java bean method taking a single int arg */
+    private static final Class[] INT_ARG = { Integer.TYPE };
+    /** Reflect lookup for Java bean method taking a single boolean arg */
+    private static final Class[] BOOLEAN_ARG = { Boolean.TYPE };
+    /** Reflect lookup for Java bean method taking a single short arg */
+    private static final Class[] SHORT_ARG = { Short.TYPE };
+    
+    /*
+     * Set the Java bean properties for an object from its Reference. The
+     * Reference contains a set of StringRefAddr values with the key being the
+     * bean name and the value a String representation of the bean's value. This
+     * code looks for setXXX() method where the set method corresponds to the
+     * standard bean naming scheme and has a single parameter of type String,
+     * int, boolean or short.
+     */
+    private static void setBeanProperties(Object ds, Reference ref)
+            throws Exception {
+
+        for (Enumeration e = ref.getAll(); e.hasMoreElements();) {
+
+            RefAddr attribute = (RefAddr) e.nextElement();
+
+            String propertyName = attribute.getType();
+
+            String value = (String) attribute.getContent();
+
+            String methodName = "set"
+                    + propertyName.substring(0, 1).toUpperCase(
+                            java.util.Locale.ENGLISH)
+                    + propertyName.substring(1);
+
+            Method m;
+
+            Object argValue;
+            try {
+                m = ds.getClass().getMethod(methodName, STRING_ARG);
+                argValue = value;
+            } catch (NoSuchMethodException nsme) {
+                try {
+                    m = ds.getClass().getMethod(methodName, INT_ARG);
+                    argValue = Integer.valueOf(value);
+                } catch (NoSuchMethodException nsme2) {
+                    try {
+                        m = ds.getClass().getMethod(methodName, BOOLEAN_ARG);
+                        argValue = Boolean.valueOf(value);
+                    } catch (NoSuchMethodException nsme3) {
+                        m = ds.getClass().getMethod(methodName, SHORT_ARG);
+                        argValue = Short.valueOf(value);
+                    }
+                }
+            }
+            m.invoke(ds, new Object[] { argValue });
+        }
     }
 }
