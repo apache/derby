@@ -22,6 +22,7 @@ package org.apache.derby.client.net;
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.ProductLevel;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.shared.common.reference.JDBC30Translation;
 
 
 public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMetaData {
@@ -93,7 +94,7 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
 
 
     public void setDefaultResultSetHoldability() {
-        connection_.resultSetHoldability_ = org.apache.derby.jdbc.ClientDataSource.HOLD_CURSORS_OVER_COMMIT;
+        connection_.resultSetHoldability_ = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
     }
 
     /**

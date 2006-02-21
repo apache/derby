@@ -161,10 +161,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         return parseString(userString, propertyDefault_user);
     }
 
-    public final static int HOLD_CURSORS_OVER_COMMIT = 1; // this matches jdbc 3 ResultSet.HOLD_CURSORS_OVER_COMMIT
-    public final static int CLOSE_CURSORS_AT_COMMIT = 2;  // this matches jdbc 3 ResultSet.CLOSE_CURSORS_AT_COMMIT
-
-
     // ---------------------------- securityMechanism -----------------------------------
     //
     // The source security mechanism to use when connecting to this data source.

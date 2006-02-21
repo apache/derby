@@ -30,6 +30,7 @@ import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.StatementCallbackInterface;
 import org.apache.derby.client.am.Types;
 import org.apache.derby.client.am.Utils;
+import org.apache.derby.shared.common.reference.JDBC30Translation;
 
 
 public class NetStatementReply extends NetPackageReply implements StatementReplyInterface {
@@ -2316,9 +2317,9 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
 
     private int calculateResultSetHoldability(int sqlcsrhld) {
         if (sqlcsrhld == 0xF0) {
-            return org.apache.derby.jdbc.ClientDataSource.CLOSE_CURSORS_AT_COMMIT;
+            return JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
         } else {
-            return org.apache.derby.jdbc.ClientDataSource.HOLD_CURSORS_OVER_COMMIT;
+            return JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
         }
     }
 

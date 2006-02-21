@@ -21,6 +21,8 @@ package org.apache.derby.client.am;
 
 import java.sql.SQLException;
 
+import org.apache.derby.shared.common.reference.JDBC30Translation;
+
 public class Statement implements java.sql.Statement, StatementCallbackInterface, UnitOfWorkListener {
 
     // JDBC 3 constant indicating that the current ResultSet object
@@ -333,8 +335,8 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
 
         switch (holdability) {
-        case org.apache.derby.jdbc.ClientDataSource.CLOSE_CURSORS_AT_COMMIT:
-        case org.apache.derby.jdbc.ClientDataSource.HOLD_CURSORS_OVER_COMMIT:
+        case JDBC30Translation.CLOSE_CURSORS_AT_COMMIT:
+        case JDBC30Translation.HOLD_CURSORS_OVER_COMMIT:
             resultSetHoldability_ = holdability;
             break;
         default:
