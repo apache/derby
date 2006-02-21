@@ -425,7 +425,7 @@ public class DRDAXAProtocol {
 		int xaRetVal = xaResource.XA_OK;
 
 		try {
-			xaResource.prepare(xid);
+			xaRetVal = xaResource.prepare(xid);
 			if (SanityManager.DEBUG)
 			{
 				connThread.trace("prepared xa transaction: xaRetVal=" +
