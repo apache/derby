@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class TestResultSetMethods {
     
@@ -35,15 +36,13 @@ public class TestResultSetMethods {
     PreparedStatement ps=null;
     ResultSet rs=null;
     
-    SQLException sqle = Util.notImplemented();
-    String message = sqle.getMessage();
     
     void t_getRowId1() {
         try {
             rs.getRowId(0);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -57,7 +56,7 @@ public class TestResultSetMethods {
             rs.getRowId(null);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -72,7 +71,7 @@ public class TestResultSetMethods {
             rs.updateRowId(0,null);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -87,7 +86,7 @@ public class TestResultSetMethods {
             rs.updateRowId(null,null);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -102,7 +101,7 @@ public class TestResultSetMethods {
             int i = rs.getHoldability();
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -117,7 +116,7 @@ public class TestResultSetMethods {
             boolean b = rs.isClosed();
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -132,7 +131,7 @@ public class TestResultSetMethods {
             rs.updateNString(0,null);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -147,7 +146,7 @@ public class TestResultSetMethods {
             rs.updateNString(null,null);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -162,7 +161,7 @@ public class TestResultSetMethods {
             rs.updateNClob(0,null);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -177,7 +176,7 @@ public class TestResultSetMethods {
             rs.updateNClob(null,null);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -192,7 +191,7 @@ public class TestResultSetMethods {
             rs.getNClob(0);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -207,7 +206,7 @@ public class TestResultSetMethods {
             rs.getNClob(null);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -222,7 +221,7 @@ public class TestResultSetMethods {
             rs.getSQLXML(0);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -237,7 +236,7 @@ public class TestResultSetMethods {
             rs.getSQLXML(null);
             System.out.println("unImplemented Exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             

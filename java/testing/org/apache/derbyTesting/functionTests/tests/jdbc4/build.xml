@@ -46,6 +46,7 @@
             destdir="${out.dir}">
             <classpath>
                 <pathelement path="${java16compile.classpath}"/>
+		        <pathelement path="${junit}"/>
             </classpath>
             <include name="${this.dir}/*.java"/>
         </javac>

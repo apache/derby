@@ -27,12 +27,10 @@ import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.util.Properties;
-import org.apache.derby.impl.jdbc.Util;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class TestConnectionMethods {
     Connection conn = null;
-    SQLException sqle = Util.notImplemented();
-    String message = sqle.getMessage();
     
     public TestConnectionMethods(Connection connIn) {
         conn = connIn;
@@ -44,7 +42,7 @@ public class TestConnectionMethods {
             clob = conn.createClob();
             System.out.println("unimplemented exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -58,7 +56,7 @@ public class TestConnectionMethods {
             blob = conn.createBlob();
             System.out.println("unimplemented exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -71,7 +69,7 @@ public class TestConnectionMethods {
             nclob = conn.createNClob();
             System.out.println("unimplemented exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -84,7 +82,7 @@ public class TestConnectionMethods {
             sqlXML = conn.createSQLXML();
             System.out.println("unimplemented exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -99,7 +97,7 @@ public class TestConnectionMethods {
             ret = conn.isValid(0);
             System.out.println("unimplemented exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -112,7 +110,7 @@ public class TestConnectionMethods {
             conn.setClientInfo("prop1","value1");
             System.out.println("unimplemented exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -126,7 +124,7 @@ public class TestConnectionMethods {
             conn.setClientInfo(p);
             System.out.println("unimplemented exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -140,7 +138,7 @@ public class TestConnectionMethods {
             info = conn.getClientInfo("prop1");
             System.out.println("unimplemented exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -155,7 +153,7 @@ public class TestConnectionMethods {
             p = conn.getClientInfo();
             System.out.println("unimplemented exception not thrown in code");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {

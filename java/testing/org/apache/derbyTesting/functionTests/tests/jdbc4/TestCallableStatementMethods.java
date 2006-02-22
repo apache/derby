@@ -20,7 +20,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import org.apache.derby.impl.jdbc.Util;
 import java.io.Reader;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -28,21 +27,19 @@ import java.sql.CallableStatement;
 import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class TestCallableStatementMethods{
     
     Connection conn=null;
     CallableStatement cs=null;
     
-    SQLException sqle = Util.notImplemented();
-    String message = sqle.getMessage();
-    
     void t_getRowId1() {
         try {
             cs.getRowId(0);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -57,7 +54,7 @@ public class TestCallableStatementMethods{
             cs.getRowId(null);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -72,7 +69,7 @@ public class TestCallableStatementMethods{
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
             
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -87,7 +84,7 @@ public class TestCallableStatementMethods{
             cs.setNString(null,null);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -101,7 +98,7 @@ public class TestCallableStatementMethods{
             cs.setNCharacterStream(null,null,0);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -115,7 +112,7 @@ public class TestCallableStatementMethods{
             cs.setNClob(null,null);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -129,7 +126,7 @@ public class TestCallableStatementMethods{
             cs.setClob(null,null,0);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -144,7 +141,7 @@ public class TestCallableStatementMethods{
             cs.setBlob(null,null,0);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
             
@@ -159,7 +156,7 @@ public class TestCallableStatementMethods{
             cs.setNClob(null,null,0);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -173,7 +170,7 @@ public class TestCallableStatementMethods{
             NClob nclob = cs.getNClob(0);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -187,7 +184,7 @@ public class TestCallableStatementMethods{
             NClob nclob = cs.getNClob(null);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -201,7 +198,7 @@ public class TestCallableStatementMethods{
             cs.setSQLXML(null,null);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -215,7 +212,7 @@ public class TestCallableStatementMethods{
             SQLXML sqlxml = cs.getSQLXML(0);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
@@ -229,7 +226,7 @@ public class TestCallableStatementMethods{
             SQLXML sqlxml = cs.getSQLXML(null);
             System.out.println("Not Implemented Exception not thrown");
         } catch(SQLException e) {
-            if(!message.equals(e.getMessage())) {
+            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
                 System.out.println("Unexpected SQLException"+e);
             }
         } catch(Exception e) {
