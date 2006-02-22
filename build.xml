@@ -951,11 +951,17 @@
       <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
     </copy>
 
+    <manifest file="${derby.jar.dir}/lists/smftools.mf">
+      <attribute name="Main-Class" value="org.apache.derby.tools.iapi.run"/>
+      <attribute name="Class-Path" value="derby.jar derbyclient.jar"/>
+    </manifest> 
+ 	
     <delete file="${derby.jar.dir}/derbytools.jar"/>
     <jar destfile="${derby.jar.dir}/derbytools.jar"
          basedir="${out.dir}"
          includesfile="${derby.jar.dir}/lists/derbytools.list"
          compress="true"
+         manifest="${derby.jar.dir}/lists/smftools.mf"
          filesonly="true"/>
     <jar destfile="${derby.jar.dir}/derbytools.jar"
          compress="true"
