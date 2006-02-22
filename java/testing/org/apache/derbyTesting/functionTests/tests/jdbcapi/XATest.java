@@ -50,7 +50,9 @@ public class XATest {
     public static void main(String[] args) throws Exception {
         ij.getPropertyArg(args);
         Connection dmc = ij.startJBMS();
-
+        
+        showHoldStatus("initial ", dmc);
+        
         XATestUtil.createXATransactionView(dmc);
         dmc.close();
 
@@ -149,8 +151,11 @@ public class XATest {
             xar.start(xid, XAResource.TMNOFLAGS);
 
             Connection conn = xac.getConnection();
+            
+            showHoldStatus("XA ", conn);
 
             Statement s = conn.createStatement();
+            showHoldStatus("XA ", s);
 
             s.execute("create table foo (a int)");
             s.executeUpdate("insert into foo values (0)");
@@ -172,6 +177,7 @@ public class XATest {
 
         } catch (SQLException sqle) {
             TestUtil.dumpSQLExceptions(sqle);
+            sqle.printStackTrace(System.out);
         } catch (XAException e) {
             XATestUtil.dumpXAException("singleConnectionOnePhaseCommit", e);
         }
@@ -701,7 +707,10 @@ public class XATest {
             try {
                 xar.start(xid3, XAResource.TMNOFLAGS);
             } catch (XAException xae) {
-                if (xae.errorCode != XAException.XAER_OUTSIDE)
+                if ((xae.errorCode != XAException.XAER_OUTSIDE)
+                    &&
+                    // DERBY-1024
+                    (xae.errorCode != XAException.XAER_RMFAIL))
                     throw xae;
             }
             conn.commit();
@@ -780,10 +789,7 @@ public class XATest {
             // Obtain Statements and PreparedStatements
             // with all the holdability options.
             
-            boolean hold =
-                conn.getHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT;
-            
-            System.out.println("Local connection holdable " + hold);
+            showHoldStatus("Local ", conn);
            
             Statement sdh = conn.createStatement();
             showHoldStatus("Local(held) default ", sdh);
@@ -859,9 +865,18 @@ public class XATest {
             conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
             
             ResultSet rs = sdh.executeQuery("SELECT * FROM APP.FOO");
+            rs.next(); System.out.println("BGBC " + rs.getInt(1));
             conn.commit();
-            rs.next();
+            rs.next(); System.out.println("BGAC " + rs.getInt(1));
             
+            // This switch to global is ok because conn
+            // is in auto-commit mode, thus the start performs
+            // an implicit commit to complete the local transaction.
+            
+            // DERBY-1025 Client only bug
+            if (TestUtil.isDerbyNetClientFramework())
+                conn.commit();
+            System.out.println("START GLOBAL TRANSACTION");
             // start a global xact and test those statements.
             xar.start(xid, XAResource.TMNOFLAGS);
             
@@ -918,6 +933,12 @@ public class XATest {
             }
             pscc.executeQuery().close();
             
+            xar.end(xid, XAResource.TMSUCCESS);
+            if (xar.prepare(xid) != XAResource.XA_RDONLY)
+                System.out.println("FAIL prepare didn't indicate r/o");
+            
+            System.out.println("derby966 complete");
+                
         } catch (SQLException e) {
             TestUtil.dumpSQLExceptions(e);
             e.printStackTrace(System.out);
@@ -947,23 +968,23 @@ public class XATest {
         boolean held = s.getResultSetHoldability() ==
             ResultSet.HOLD_CURSORS_OVER_COMMIT;
         
-        
-        
-        System.out.println("held " + held);
+        System.out.println("ResultSet " + holdStatus(s.getResultSetHoldability()));
         
         rs.next();
         System.out.println("  BC A=" + rs.getInt(1));
         conn.commit();
        
         try {
-           rs.next();
-           rs.getInt(1);
-           System.out.println("  AC A=" + rs.getInt(1));
+            while (rs.next())
+            {
+                rs.getInt(1);
+                System.out.println("  AC A=" + rs.getInt(1));
+            }
            if (!held)
                System.out.println("FAIL: non-held cursor not closed by commit");
         } catch (SQLException sqle)
         {
-            TestUtil.dumpSQLExceptions(sqle, !held);
+             TestUtil.dumpSQLExceptions(sqle, !held);
         }
         
         rs.close();
@@ -975,9 +996,35 @@ public class XATest {
     */
     private static void showHoldStatus(String tag, Statement s) throws SQLException
     {
-        boolean hold =
-            s.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT;
-        
-        System.out.println(tag + "Statement holdable " + hold);
+        System.out.println(tag + "Statement holdable " +
+                holdStatus(s.getResultSetHoldability()));
     }
+    /**
+     * Show the held status of the Connection.
+    */
+    private static void showHoldStatus(String tag, Connection conn) throws SQLException
+    {
+        System.out.println(tag + "Connection holdable " +
+                holdStatus(conn.getHoldability()));
+    }
+    
+    private static String holdStatus(int holdability)
+    {
+        String s;
+        switch (holdability)
+        {
+        case ResultSet.CLOSE_CURSORS_AT_COMMIT:
+            s = "CLOSE_CURSORS_AT_COMMIT ";
+            break;
+        case ResultSet.HOLD_CURSORS_OVER_COMMIT:
+            s = "HOLD_CURSORS_OVER_COMMIT ";
+            break;
+        default:
+            s = "UNKNOWN HOLDABILITY ";
+            break;
+        }
+        
+        return s + Integer.toString(holdability);
+    }
+    
 }

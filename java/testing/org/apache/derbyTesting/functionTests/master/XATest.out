@@ -1,29 +1,32 @@
+initial Connection holdable HOLD_CURSORS_OVER_COMMIT 1
 singleConnectionOnePhaseCommit
+XA Connection holdable CLOSE_CURSORS_AT_COMMIT 2
+XA Statement holdable CLOSE_CURSORS_AT_COMMIT 2
 A          
 -----------
 0          
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(0  |ACTIVE  |false|APP       |UserTransaction               
+GXID|STATUS  |READONLY|USERNAME  |TYPE                          
+----------------------------------------------------------------
+(0  |ACTIVE  |false   |APP       |UserTransaction               
 interleavingTransactions
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(1  |ACTIVE  |false|SKU       |UserTransaction               
-(2  |ACTIVE  |false|SKU       |UserTransaction               
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(1  |ACTIVE  |false|SKU       |UserTransaction               
-(2  |ACTIVE  |false|SKU       |UserTransaction               
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(1  |PREPARED|false|SKU       |UserTransaction               
-(2  |PREPARED|false|SKU       |UserTransaction               
+GXID|STATUS  |READONLY|USERNAME  |TYPE                          
+----------------------------------------------------------------
+(1  |ACTIVE  |false   |SKU       |UserTransaction               
+(2  |ACTIVE  |false   |SKU       |UserTransaction               
+GXID|STATUS  |READONLY|USERNAME  |TYPE                          
+----------------------------------------------------------------
+(1  |ACTIVE  |false   |SKU       |UserTransaction               
+(2  |ACTIVE  |false   |SKU       |UserTransaction               
+GXID|STATUS  |READONLY|USERNAME  |TYPE                          
+----------------------------------------------------------------
+(1  |PREPARED|false   |SKU       |UserTransaction               
+(2  |PREPARED|false   |SKU       |UserTransaction               
 recovered start 2
 recovered 0
 recovered end 0
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(3  |IDLE    |NULL |SKU       |UserTransaction               
+GXID|STATUS  |READONLY|USERNAME  |TYPE                          
+----------------------------------------------------------------
+(3  |IDLE    |NULL    |SKU       |UserTransaction               
 A          
 -----------
 0          
@@ -31,13 +34,13 @@ A
 3          
 noTransaction
 morph
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(1  |IDLE    |NULL |APP       |UserTransaction               
+GXID|STATUS  |READONLY|USERNAME  |TYPE                          
+----------------------------------------------------------------
+GXID|STATUS  |READONLY|USERNAME  |TYPE                          
+----------------------------------------------------------------
+GXID|STATUS  |READONLY|USERNAME  |TYPE                          
+----------------------------------------------------------------
+(1  |IDLE    |NULL    |APP       |UserTransaction               
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 Statement created in global has holdabilty: false
 A          
@@ -45,12 +48,12 @@ A
 2001       
 2002       
 2003       
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
-(1  |PREPARED|false|APP       |UserTransaction               
-(1  |IDLE    |NULL |APP       |UserTransaction               
-GXID|STATUS  |READ&|USERNAME  |TYPE                          
--------------------------------------------------------------
+GXID|STATUS  |READONLY|USERNAME  |TYPE                          
+----------------------------------------------------------------
+(1  |PREPARED|false   |APP       |UserTransaction               
+(1  |IDLE    |NULL    |APP       |UserTransaction               
+GXID|STATUS  |READONLY|USERNAME  |TYPE                          
+----------------------------------------------------------------
 A          
 -----------
 2001       
@@ -78,59 +81,99 @@ A
 2005       
 2007       
 derby966
-Local connection holdable true
-Local(held) default Statement holdable true
-held true
+Local Connection holdable HOLD_CURSORS_OVER_COMMIT 1
+Local(held) default Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
   BC A=0
   AC A=1
-Local(held) default PreparedStatement holdable true
-held true
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(held) default PreparedStatement holdable HOLD_CURSORS_OVER_COMMIT 1
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
   BC A=0
   AC A=1
-Local(held) held Statement holdable true
-held true
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(held) held Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
   BC A=0
   AC A=1
-Local(held) held PreparedStatement holdable true
-held true
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(held) held PreparedStatement holdable HOLD_CURSORS_OVER_COMMIT 1
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
   BC A=0
   AC A=1
-Local(held) close Statement holdable false
-held false
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(held) close Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
-Local(held) close PreparedStatement holdable false
-held false
+Local(held) close PreparedStatement holdable CLOSE_CURSORS_AT_COMMIT 2
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
-Local(close) default Statement holdable false
-held false
+Local(close) default Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
-Local(close) default PreparedStatement holdable false
-held false
+Local(close) default PreparedStatement holdable CLOSE_CURSORS_AT_COMMIT 2
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
-Local(close) held Statement holdable true
-held true
+Local(close) held Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
   BC A=0
   AC A=1
-Local(close) held PreparedStatement holdable true
-held true
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(close) held PreparedStatement holdable HOLD_CURSORS_OVER_COMMIT 1
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
   BC A=0
   AC A=1
-Local(close) close Statement holdable false
-held false
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(close) close Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
-Local(close) close PreparedStatement holdable false
-held false
+Local(close) close PreparedStatement holdable CLOSE_CURSORS_AT_COMMIT 2
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
   BC A=0
 EXPECTED SQLSTATE(XCL16): ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+BGBC 0
+BGAC 1
+START GLOBAL TRANSACTION
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+derby966 complete
 XATest complete
