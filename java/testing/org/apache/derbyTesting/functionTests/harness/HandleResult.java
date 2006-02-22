@@ -39,8 +39,15 @@ public class HandleResult
 	{
 	}
 
+	public static String handleResult(int exitCode, InputStream stdout,
+	        InputStream stderr, PrintWriter printWriter)
+	        throws IOException
+	{
+		return handleResult(exitCode, stdout, stderr, printWriter, null);
+	}
+	
     public static String handleResult(int exitCode, InputStream stdout,
-        InputStream stderr, PrintWriter printWriter)
+        InputStream stderr, PrintWriter printWriter, String encoding)
         throws IOException
     {
 		StringBuffer sb = new StringBuffer();
@@ -52,7 +59,11 @@ public class HandleResult
         if (stdout != null)
         {
     		// reader for stdout
-    		BufferedReader outReader = new BufferedReader(new InputStreamReader(stdout));
+        	BufferedReader outReader;
+        	if(encoding != null)
+        		outReader = new BufferedReader(new InputStreamReader(stdout, encoding));
+        	else
+        		outReader = new BufferedReader(new InputStreamReader(stdout));
 
             // Read each line and write to printWriter
     		String s = null;
@@ -74,7 +85,11 @@ public class HandleResult
         if (stderr != null)
         {
             // reader for stderr
-    		BufferedReader errReader = new BufferedReader(new InputStreamReader(stderr));
+        	BufferedReader errReader;
+        	if(encoding != null)
+        		errReader = new BufferedReader(new InputStreamReader(stderr, encoding));
+        	else
+        		errReader = new BufferedReader(new InputStreamReader(stderr));
 
     		String s = null;
     		int lines = 0;

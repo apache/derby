@@ -72,6 +72,7 @@ public class RunSuite
 	static String bootcp; //  path for j9 bootclasspath setting
 	static String serverJvm; //  path for j9 bootclasspath setting
 	static String hostName; // needs to be settable for IPV6 testing; localhost otherwise. 
+	static String testEncoding; // setting the encoding.
 	static String ijdefaultResourcePackage; // for ij tests only
 	static String debug; // for setting verbose mode to pass down to RunTest
     static String timeout; // to allow killing a hanging test
@@ -351,6 +352,7 @@ public class RunSuite
             reportstderr = p.getProperty("reportstderr");
             timeout = p.getProperty("timeout");
             shutdownurl = p.getProperty("shutdownurl");
+            testEncoding = p.getProperty("derbyTesting.encoding");
         }
         suites = p.getProperty("suites");
 		return p;
@@ -475,6 +477,9 @@ public class RunSuite
 		String serverJvm = sp.getProperty("serverJvm");
 		if (serverJvm != null)
 		    suiteProperties.put("serverJvm", serverJvm);
+		String cmlTestEncoding = sp.getProperty("derbyTesting.encoding");
+		if (cmlTestEncoding != null)
+		    suiteProperties.put("derbyTesting.encoding", cmlTestEncoding);
 		String testout = sp.getProperty("testoutname");
 		if (testout != null)
 		    suiteProperties.put("testoutname", testout); // toursDemo

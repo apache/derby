@@ -118,7 +118,8 @@ public class RunList
 	static Properties specialProperties; // for testSpecialProps
 	static BufferedReader runlistFile;
 	static String hostName;
-
+	static String testEncoding;	// Encoding used for child jvm and to read the test output 
+	
     static String [] clientExclusionKeywords = new String [] {
         "at-or-before:", "at-or-after:", "when-at-or-before:jdk",
         "when-at-or-after:jdk", "when:jdk"
@@ -414,6 +415,9 @@ public class RunList
             jvmProps.addElement("serverJvm=" + serverJvm);
         if ( (serverJvmName != null) && (serverJvmName.length()>0) )
             jvmProps.addElement("serverJvmName=" + serverJvmName);
+        if (testEncoding != null)
+            jvmProps.addElement("derbyTesting.encoding=" + testEncoding);
+
         if ( (hostName != null) && (hostName.length()>0) )
         	jvmProps.addElement("hostName=" + hostName);
         if ( useprocess == false )
@@ -516,7 +520,7 @@ public class RunList
                     pr.waitFor();
 
                     String result = HandleResult.handleResult(pr.exitValue(),
-                        stdout.getData(), stderr.getData(), pwOut);
+                        stdout.getData(), stderr.getData(), pwOut, testEncoding);
                     pr.destroy();
                 }
                 catch(Throwable t)
@@ -611,6 +615,7 @@ public class RunList
         {
             // Reset framework to the parent suite's framework, if any
             // because framework may have been set by previous suite
+            testEncoding = parentProps.getProperty("derbyTesting.encoding");
             framework = parentProps.getProperty("framework");
             serverJvm = parentProps.getProperty("serverJvm");
             serverJvmName = parentProps.getProperty("serverJvmName");
@@ -739,6 +744,7 @@ public class RunList
 		serverJvm = suiteProperties.getProperty("serverJvm");
 		serverJvmName = suiteProperties.getProperty("serverJvmName");
 		hostName = suiteProperties.getProperty("hostName");
+		testEncoding = suiteProperties.getProperty("derbyTesting.encoding");
 		canondir = suiteProperties.getProperty("canondir");
 		mtestdir = suiteProperties.getProperty("mtestdir");
 		String usepr = suiteProperties.getProperty("useprocess");
@@ -822,6 +828,14 @@ public class RunList
             p.put("serverJvmName", serverJvmName);
 		else
             serverJvmName = p.getProperty("serverJvmName");
+        
+        // derbyTesting.encoding may be set at the top, or just
+        // set for individual suites
+        if(parentProperties.getProperty("derbyTesting.encoding") != null)
+		    p.put("derbyTesting.encoding", testEncoding);
+		else
+            testEncoding = p.getProperty("derbyTesting.encoding");
+
         if ( hostName != null )
             p.put("hostName", hostName);
         else

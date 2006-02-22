@@ -122,6 +122,7 @@ public class RunTest
 	static String runwithjvm="true";
 	static boolean startServer=true; // should test harness start the server
 	static String hostName; // needs to be settable for ipv testing, localhost otherwise.)
+	static String testEncoding; // Encoding used for child jvm and to read the test output
 
 	// Other test variables for directories, files, output
 	static String scriptName = ""; // testname as passed in
@@ -930,6 +931,13 @@ public class RunTest
             }
         }
 		
+        testEncoding = sp.getProperty("derbyTesting.encoding");
+        if ((testEncoding != null) && (!jvmName.equals("jdk15")))
+        {
+            skiptest = true;
+            addSkiptestReason("derbyTesting.encoding can only be used with jdk15, skipping test");
+        }
+		
         javaCmd = sp.getProperty("javaCmd");
         bootcp = sp.getProperty("bootcp");
         jvmflags = sp.getProperty("jvmflags");
@@ -1528,6 +1536,18 @@ clp.list(System.out);
 	                    jvmflags = "";
 	            }
 	        }
+	        //Check derbyTesting.encoding property
+	        if(testEncoding == null) {
+	            testEncoding = ap.getProperty("derbyTesting.encoding");
+	            // only bother if we have jdk15, otherwise we'll be skipping
+	            if ((jvmName.equals("jdk15")) && (testEncoding != null))
+	            {
+	                    jvmflags = (jvmflags==null?"":jvmflags+" ") 
+	                                + "-Dfile.encoding=" + testEncoding; 
+	                    ap.put("file.encoding",testEncoding);	
+	            }
+	        }
+	        
 	        if (NetServer.isJCCConnection(framework)
 	        		|| "true".equalsIgnoreCase(ap.getProperty("noSecurityManager")))
 	        	runWithoutSecurityManager = true;
@@ -2067,6 +2087,15 @@ clp.list(System.out);
             if ((hostName != null) && (!hostName.equals("localhost")))
             		jvmProps.addElement("hostName=" + hostName);
         }
+
+        // if we're not jdk15, don't, we'll skip
+        if ((testEncoding != null) && (jvmName.equals("jdk15")))
+        {
+            jvmProps.addElement("derbyTesting.encoding=" + testEncoding);
+            jvmProps.addElement("file.encoding=" + testEncoding);
+            jvmflags = (jvmflags==null?"":jvmflags+" ") 
+                         + "-Dfile.encoding=" + testEncoding; 
+        }
             
         if ( (jvmflags != null) && (jvmflags.length()>0) )
         {
@@ -2195,17 +2224,20 @@ clp.list(System.out);
                 fos = new FileOutputStream(tmpOutFile);
                 bos = new BufferedOutputStream(fos, 1024);
                 prout = 
-                    new ProcessStreamResult(pr.getInputStream(), bos, timeoutStr);
+                    new ProcessStreamResult(pr.getInputStream(), bos, 
+                    					timeoutStr, testEncoding);
             }
             else
             {
                 fos = new FileOutputStream(stdOutFile);
                 bos = new BufferedOutputStream(fos, 1024);
                 prout = 
-                    new ProcessStreamResult(pr.getInputStream(), bos, timeoutStr);
+                    new ProcessStreamResult(pr.getInputStream(), bos, 
+                    					timeoutStr, testEncoding);
             }
             prerr =
-                new ProcessStreamResult(pr.getErrorStream(), bos, timeoutStr);
+                new ProcessStreamResult(pr.getErrorStream(), bos, 
+                						timeoutStr, testEncoding);
     
             if (framework != null && ! framework.equals(""))
                 if (verbose) System.out.println("The test should be running...");

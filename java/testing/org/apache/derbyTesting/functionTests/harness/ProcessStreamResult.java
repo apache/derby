@@ -27,8 +27,10 @@ import java.sql.Timestamp;
 public class ProcessStreamResult implements Runnable
 {
 
-	protected InputStream in;
-	protected BufferedOutputStream bos;
+	protected InputStream in; 
+	protected OutputStreamWriter outStream;
+	// Encoding to be used to read output of test jvm process
+	protected String encoding;
 	protected boolean finished;
 	protected IOException ioe;
 	protected Thread myThread;
@@ -37,10 +39,17 @@ public class ProcessStreamResult implements Runnable
 	protected int timeout;
 
 	public ProcessStreamResult(InputStream in, BufferedOutputStream bos,
-	    String timemin) throws IOException, InterruptedException
+		    String timemin) throws IOException, InterruptedException
+	{
+		this(in, bos, timemin, null);
+	}
+	
+	public ProcessStreamResult(InputStream in, BufferedOutputStream bos,
+	  String timemin, String encoding) throws IOException, InterruptedException
 	{
 		this.in = in;
-        this.bos = bos;
+		this.outStream = new OutputStreamWriter(bos);
+		this.encoding = encoding;
         this.startTime = System.currentTimeMillis();
         if (timemin != null)
         {
@@ -65,10 +74,19 @@ public class ProcessStreamResult implements Runnable
         
 		try
 		{
-			byte[] ba = new byte[1024];
+			char[] ca = new char[1024];
 			int valid;
 			interrupted = false;
-			while ((valid = in.read(ba, 0, ba.length)) != -1)
+			
+			// Create an InputStreamReader with encoding, if specified. 
+			// Otherwise, use default.
+			InputStreamReader inStream;
+			if(encoding != null)
+        		inStream = new InputStreamReader(in, encoding);
+        	else
+        		inStream = new InputStreamReader(in);
+			
+			while ((valid = inStream.read(ca, 0, ca.length)) != -1)
 			{
 			    //System.out.println("Still reading thread: " + tname);
 /*				if (timeout > 0) {
@@ -90,8 +108,8 @@ public class ProcessStreamResult implements Runnable
 						}
 					}
 			    }
-*/    			bos.write(ba, 0, valid);
-    			bos.flush();
+*/    			outStream.write(ca, 0, valid);
+    			outStream.flush();
 			}
 		}
 		catch (IOException ioe)

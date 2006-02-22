@@ -688,7 +688,11 @@ run, and thus shouldn't be run every night.</p>
         <p style="margin-bottom: 0in;">As tests are added to this
 quite, it could require more and more time to run (several minutes to
 several hours to several days), which is why it is NOT included as part
-of the derbyall suite. Currently the largedata/LobLimits.java test takes about 17Gb of disk space. On a linux machine with 2.8Ghz Intel Xeon CPU, 4Gb RAM , Linux machine and IBM 1.4.2 JVM with default memory heap size, the test ran for about 4.5 hrs. If the test is successful, it will cleanup the database and other files.</p>
+of the derbyall suite. Currently the largedata/LobLimits.java test
+takes about 17Gb of disk space. On a linux machine with 2.8Ghz Intel
+Xeon CPU, 4Gb RAM , Linux machine and IBM 1.4.2 JVM with default memory
+heap size, the test ran for about 4.5 hrs. If the test is successful,
+it will cleanup the database and other files.</p>
       </li>
     </ul>
   </li>
@@ -1057,6 +1061,10 @@ actual unit test harness and tests under
 org/apache/derbyTesting/unitTests. These tests test more underlying
 functionality than the (rest of the) functionTests, which are more
 geared toward how end-users might use functionality.</p>
+  </li>
+  <li>.junit&nbsp;&nbsp;&nbsp;&nbsp; junit tests. These require
+junit.jar to run and are actually run with junit.textui.TestRunner. The
+actual tests are .java files. <br>
   </li>
 </ul>
 <p><br>
@@ -1510,6 +1518,13 @@ noSecurityManager – disable the client JVM from installing a
 SecurityManager. See section 4.13<br>
 hostName - allows for running Network Server on a remote host. See
 section <a href="#hostName">4.14</a>.<br>
+derbyTesting.encoding - allows for running the harness with a different
+encoding. Only supported with jdk15. Example: <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small> java
+-DderbyTesting.encoding=UTF-16
+org.apache.derbyTesting.functionTests.harness.RunTest
+jdbcapi/resultset.java</small><br>
+      <br>
       </td>
     </tr>
   </tbody>
@@ -1590,7 +1605,9 @@ from the
 derbyTesting.jar or from the svn source to a location on
 the host on which you want to run the NetworkServer</li>
   <li>Set up the classpath for Network Server to include derbynet.jar
-and derbyTesting.jar (or equivalent classes).<br>
+and derbyTesting.jar (or equivalent classes). You need to have
+derby.jar available also, although it does not need to be in the
+classpath.<br>
   </li>
   <li>Start Network Server like so when using compiled classes for it:</li>
 </ol>
