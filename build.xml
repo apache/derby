@@ -1246,7 +1246,7 @@
 
   </target>
 
-  <target name="gump_split_1" depends="insane,init,state,parsers">
+  <target name="gump_split_1" depends="insane,init,state,parsers,shared">
     <ant dir="${derby.engine.src.dir}" target="engine_169"/>
     <ant dir="${derby.engine.dir}/iapi" target="compile_iapi_error"/>
     <ant dir="${derby.engine.dir}/iapi/jdbc" target="compile_iapi_jdbc_jsr169"/>
