@@ -832,13 +832,9 @@ public class resultset {
 				try{
 				row.append(s.getString(i));
 				} catch(SQLException ex){
-					if (ex.getSQLState().equals("22005")) {
-						if (s.getBytes(i) != null)
-							row.append(s.getBytes(i).toString());
-                //row.append(new String(s.getBytes(i)));
-						else
-                row.append(s.getBytes(i));
-					} else throw ex;
+					if (ex.getSQLState().equals("22005")) 
+						row.append("Invalid Conversion Error\n");
+					else throw ex;
 				}
 			}
 			row.append("}\n");
