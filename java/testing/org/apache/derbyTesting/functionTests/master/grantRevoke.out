@@ -13,10 +13,10 @@ ij> grant update on satheesh.tsat to foo;
 ij> grant update(i) on satheesh.tsat to bar;
 0 rows inserted/updated/deleted
 ij> select * from sys.systableperms;
-GRANTEE                       |GRANTOR                       |TABLEID                             |&|&|&|&|&|&
---------------------------------------------------------------------------------------------------------------
-PUBLIC                        |SATHEESH                      |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
-foo                           |SATHEESH                      |xxxxFILTERED-UUIDxxxx|N|y|y|y|N|N
+GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PUBLIC                                                                                                                          |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
+foo                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|y|y|y|N|N
 2 rows selected
 ij> connect 'grantRevoke' user 'bar' as barConnection;
 ij(BARCONNECTION)> -- Following revokes should fail. Only owner can revoke permissions
@@ -43,10 +43,10 @@ ij(SATCONNECTION)> revoke delete on satheesh.tsat from foo;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> -- Check success by looking at systableperms directly for now
 select * from sys.systableperms;
-GRANTEE                       |GRANTOR                       |TABLEID                             |&|&|&|&|&|&
---------------------------------------------------------------------------------------------------------------
-PUBLIC                        |SATHEESH                      |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
-foo                           |SATHEESH                      |xxxxFILTERED-UUIDxxxx|N|N|y|N|N|N
+GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PUBLIC                                                                                                                          |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
+foo                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|N|y|N|N|N
 2 rows selected
 ij(SATCONNECTION)> revoke insert on satheesh.tsat from foo;
 0 rows inserted/updated/deleted
@@ -54,8 +54,8 @@ ij(SATCONNECTION)> revoke select on satheesh.tsat from public;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> -- Check success by looking at systableperms directly for now
 select * from sys.systableperms;
-GRANTEE                       |GRANTOR                       |TABLEID                             |&|&|&|&|&|&
---------------------------------------------------------------------------------------------------------------
+GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 0 rows selected
 ij(SATCONNECTION)> -- Test routine permissions
 CREATE FUNCTION F_ABS(P1 INT)
