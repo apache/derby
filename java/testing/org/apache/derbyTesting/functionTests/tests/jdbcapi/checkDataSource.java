@@ -111,12 +111,7 @@ public class checkDataSource
 	 */
 	private final Object nogc = SecurityCheck.class;
   
-	// setTransactionIsolation in some contexts used in this test is 
-	// causing  java.sql.SQLException: Invalid operation: statement closed
-	// error on client. These cases are omitted for now where they cause the
-	// statement closed error
-	private static boolean  causesStmtClosedOnSetTransactionIsolation = TestUtil.isDerbyNetClientFramework();
-
+	
 	public static void main(String[] args) throws Exception {
 
         try
@@ -368,8 +363,7 @@ public class checkDataSource
 		printState("initial local", cs1);
 		xar.start(xid, XAResource.TMNOFLAGS);
 		printState("initial  X1", cs1);
-		if (!causesStmtClosedOnSetTransactionIsolation)
-			cs1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+		cs1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 		cs1.setReadOnly(true);
 		setHoldability(cs1, false);
 		printState("modified X1", cs1);
@@ -413,10 +407,7 @@ public class checkDataSource
 		// attach to the global and commit it.
 		// state should be that of the local after the commit.
 		cs1 = xac.getConnection();
-		if (! causesStmtClosedOnSetTransactionIsolation)
-		{
-			cs1.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-		}
+		cs1.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 		printState("pre-X1 commit - local", cs1);
 		xar.start(xid, XAResource.TMJOIN);
 		printState("pre-X1 commit - X1", cs1);
@@ -492,6 +483,11 @@ public class checkDataSource
 		cs1.setAutoCommit(false);
 
 		checkLocks(cs1);
+		// For client the test only runs this far 
+		// More DERBY-435 checkins will take it further.
+		if (TestUtil.isDerbyNetClientFramework())
+				return;
+		
 		Statement sru1 = cs1.createStatement();
 		sru1.setCursorName("SN1");
 		sru1.executeUpdate("create table ru(i int)");

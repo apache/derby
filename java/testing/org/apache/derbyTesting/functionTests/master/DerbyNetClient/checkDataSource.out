@@ -1,0 +1,397 @@
+Running connection checks on DriverManager 
+  isolation level 2
+  auto commit     true
+  read only       false
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+method calls on a closed connection
+DriverManager  <closedconn>.close() no error
+DriverManager  <closedconn>.createStatement() null - invalid operation: connection closed
+DriverManager  <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on DataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+method calls on a closed connection
+DataSource <closedconn>.close() no error
+DataSource <closedconn>.createStatement() null - invalid operation: connection closed
+DataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on ConnectionPoolDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(1):connectionClosed
+method calls on a closed connection
+ConnectionPoolDataSource <closedconn>.close() no error
+ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+ConnectionPoolDataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on ConnectionPoolDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(1):connectionClosed
+method calls on a closed connection
+ConnectionPoolDataSource <closedconn>.close() no error
+ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+ConnectionPoolDataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Changes rolled back OK in auto closed pooled connection
+EVENT(1):connectionClosed
+expected java.sql.SQLException: Invalid operation: result set closed
+expected java.sql.SQLException: Invalid operation: statement closed
+Start testPoolReset ConnectionPoolDataSource
+IDENTITY_VAL_LOCAL=1
+IDENTITY_VAL_LOCAL=2
+IDENTITY_VAL_LOCAL=3
+End testPoolReset ConnectionPoolDataSource
+Running connection checks on XADataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(3):connectionClosed
+method calls on a closed connection
+XADataSource <closedconn>.close() no error
+XADataSource <closedconn>.createStatement() 08003 - No current connection.
+XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Changes rolled back OK in auto closed local XAConnection
+EVENT(3):connectionClosed
+Start testPoolReset XADataSource
+IDENTITY_VAL_LOCAL=1
+IDENTITY_VAL_LOCAL=2
+IDENTITY_VAL_LOCAL=3
+End testPoolReset XADataSource
+ERROR XJ015: Derby system shutdown.
+Running connection checks on DriverManager 
+  isolation level 2
+  auto commit     true
+  read only       false
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+method calls on a closed connection
+DriverManager  <closedconn>.close() no error
+DriverManager  <closedconn>.createStatement() null - invalid operation: connection closed
+DriverManager  <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on DataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+method calls on a closed connection
+DataSource <closedconn>.close() no error
+DataSource <closedconn>.createStatement() null - invalid operation: connection closed
+DataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on ConnectionPoolDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(2):connectionClosed
+method calls on a closed connection
+ConnectionPoolDataSource <closedconn>.close() no error
+ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+ConnectionPoolDataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on ConnectionPoolDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(2):connectionClosed
+method calls on a closed connection
+ConnectionPoolDataSource <closedconn>.close() no error
+ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+ConnectionPoolDataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on XADataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(4):connectionClosed
+method calls on a closed connection
+XADataSource <closedconn>.close() no error
+XADataSource <closedconn>.createStatement() 08003 - No current connection.
+XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on XADataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(4):connectionClosed
+method calls on a closed connection
+XADataSource <closedconn>.close() no error
+XADataSource <closedconn>.createStatement() 08003 - No current connection.
+XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+EVENT(5):connectionClosed
+Running connection checks on Global XADataSource
+  isolation level 2
+  auto commit     false
+  read only       false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(5):connectionClosed
+method calls on a closed connection
+Global XADataSource <closedconn>.close() no error
+Global XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Global XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on Global XADataSource
+  isolation level 2
+  auto commit     false
+  read only       false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(5):connectionClosed
+method calls on a closed connection
+Global XADataSource <closedconn>.close() no error
+Global XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Global XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on Switch to local XADataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(5):connectionClosed
+method calls on a closed connection
+Switch to local XADataSource <closedconn>.close() no error
+Switch to local XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to local XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on Switch to local XADataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(5):connectionClosed
+method calls on a closed connection
+Switch to local XADataSource <closedconn>.close() no error
+Switch to local XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to local XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on Switch to global XADataSource
+  isolation level 2
+  auto commit     false
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(5):connectionClosed
+method calls on a closed connection
+Switch to global XADataSource <closedconn>.close() no error
+Switch to global XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to global XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Running connection checks on Switch to global XADataSource
+  isolation level 2
+  auto commit     false
+  read only       false
+  has warnings    false
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for Statement.getConnection()
+FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
+setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
+setTypeMap(null) - ok null - Connection.setTypeMap is not supported
+setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+EVENT(5):connectionClosed
+method calls on a closed connection
+Switch to global XADataSource <closedconn>.close() no error
+Switch to global XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to global XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+initial local
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+initial  X1
+  isolation level READ_COMMITTED
+  auto commit     false
+  read only       false
+modified X1
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+modified local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+reset local
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+re-join X1
+  isolation level READ_COMMITTED
+  auto commit     false
+  read only       false
+back to local (same as reset)
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+EVENT(6):connectionClosed
+new handle - local 
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+EVENT(6):connectionClosed
+re-join with new handle X1
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+EVENT(6):connectionClosed
+pre-X1 commit - local
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
+pre-X1 commit - X1
+  isolation level REPEATABLE_READ
+  auto commit     false
+  read only       false
+post-X1 end - local
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
+post-X1 commit - local
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
+EVENT(6):connectionClosed
+Some more isolation testing using SQL and JDBC api
+initial local
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
+Issue setTransactionIsolation in local transaction
+setTransactionIsolation in local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+Issue SQL to change isolation in local transaction
+SQL to change isolation in local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+1st global(new)
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+Issue SQL to change isolation in local transaction
+SQL to change isolation in local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+2nd global(new)
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+1st global(existing)
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+1st global(existing)
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+Issue SQL to change isolation in 1st global transaction
+change isolation of existing 1st global transaction
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+2nd global(existing)
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+(After 2nd global rollback) local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+(After 1st global rollback) local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+TESTING RE_USE OF STATEMENT OBJECTS
+THE STATEMENT OBJECTS CAN NOT BE REUSED ACROSS LOCAL/GLOBAL CONNECTIONS BECAUSE, LOCAL CONNECTION CREATES THEM
+WITH HOLDABILITY TRUE WHEREAS GLOBAL CONNECTION CAN ONLY WORK WITH STATEMENTS WITH HOLDABILITY FALSE
+LOCK TABLE
+END LOCK TABLE
+Completed checkDataSource
