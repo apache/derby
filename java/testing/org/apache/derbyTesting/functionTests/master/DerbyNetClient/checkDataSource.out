@@ -334,61 +334,6 @@ setTransactionIsolation in local
   isolation level READ_UNCOMMITTED
   auto commit     true
   read only       false
-Issue SQL to change isolation in local transaction
-SQL to change isolation in local
-  isolation level READ_UNCOMMITTED
-  auto commit     true
-  read only       false
-1st global(new)
-  isolation level READ_UNCOMMITTED
-  auto commit     false
-  read only       false
-local
-  isolation level READ_UNCOMMITTED
-  auto commit     true
-  read only       false
-Issue SQL to change isolation in local transaction
-SQL to change isolation in local
-  isolation level READ_UNCOMMITTED
-  auto commit     true
-  read only       false
-2nd global(new)
-  isolation level READ_UNCOMMITTED
-  auto commit     false
-  read only       false
-1st global(existing)
-  isolation level READ_UNCOMMITTED
-  auto commit     false
-  read only       false
-local
-  isolation level READ_UNCOMMITTED
-  auto commit     true
-  read only       false
-1st global(existing)
-  isolation level READ_UNCOMMITTED
-  auto commit     false
-  read only       false
-Issue SQL to change isolation in 1st global transaction
-change isolation of existing 1st global transaction
-  isolation level READ_UNCOMMITTED
-  auto commit     false
-  read only       false
-local
-  isolation level READ_UNCOMMITTED
-  auto commit     true
-  read only       false
-2nd global(existing)
-  isolation level READ_UNCOMMITTED
-  auto commit     false
-  read only       false
-(After 2nd global rollback) local
-  isolation level READ_UNCOMMITTED
-  auto commit     true
-  read only       false
-(After 1st global rollback) local
-  isolation level READ_UNCOMMITTED
-  auto commit     true
-  read only       false
 TESTING RE_USE OF STATEMENT OBJECTS
 THE STATEMENT OBJECTS CAN NOT BE REUSED ACROSS LOCAL/GLOBAL CONNECTIONS BECAUSE, LOCAL CONNECTION CREATES THEM
 WITH HOLDABILITY TRUE WHEREAS GLOBAL CONNECTION CAN ONLY WORK WITH STATEMENTS WITH HOLDABILITY FALSE

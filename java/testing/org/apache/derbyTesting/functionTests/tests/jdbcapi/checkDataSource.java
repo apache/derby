@@ -81,7 +81,13 @@ public class checkDataSource
 	// This has been filed as DERBY-1004 
 	private static boolean needRollbackBeforePCGetConnection = 
 		TestUtil.isDerbyNetClientFramework(); 
-		
+	
+	// DERBY-1035 With client, Connection.getTransactionIsolation() return value is 
+	// wrong after changing the isolation level with an SQL statement such as 
+	// "set current isolation = RS"
+	// Tests for setting isolation level this way only run in embedded for now.
+	private static boolean canSetIsolationWithStatement = TestUtil.isEmbeddedFramework();
+	  
     /**
      * A hashtable of opened connections.  This is used when checking to
      * make sure connection strings are unique; we need to make sure all
@@ -110,7 +116,8 @@ public class checkDataSource
 	 * test and lose the information it has collected.
 	 */
 	private final Object nogc = SecurityCheck.class;
-  
+
+	
 	
 	public static void main(String[] args) throws Exception {
 
@@ -427,49 +434,8 @@ public class checkDataSource
 		cs1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 		printState("setTransactionIsolation in local", cs1);
 
-    System.out.println("Issue SQL to change isolation in local transaction");
-		s.executeUpdate("set current isolation = RR");
-		printState("SQL to change isolation in local", cs1);
-
-		xid = new cdsXid(1, (byte) 35, (byte) 47);
-		xar.start(xid, XAResource.TMNOFLAGS);
-		printState("1st global(new)", cs1);
-		xar.end(xid, XAResource.TMSUCCESS);
-
-		printState("local", cs1);
-    System.out.println("Issue SQL to change isolation in local transaction");
-		s.executeUpdate("set current isolation = RS");
-		printState("SQL to change isolation in local", cs1);
-
-		Xid xid2 = new cdsXid(1, (byte) 93, (byte) 103);
-		xar.start(xid2, XAResource.TMNOFLAGS);
-		printState("2nd global(new)", cs1);
-		xar.end(xid2, XAResource.TMSUCCESS);
-
-		xar.start(xid, XAResource.TMJOIN);
-		printState("1st global(existing)", cs1);
-		xar.end(xid, XAResource.TMSUCCESS);
-
-		printState("local", cs1);
-
-		xar.start(xid, XAResource.TMJOIN);
-		printState("1st global(existing)", cs1);
-    System.out.println("Issue SQL to change isolation in 1st global transaction");
-		s.executeUpdate("set current isolation = UR");
-		printState("change isolation of existing 1st global transaction", cs1);
-		xar.end(xid, XAResource.TMSUCCESS);
-
-		printState("local", cs1);
-
-		xar.start(xid2, XAResource.TMJOIN);
-		printState("2nd global(existing)", cs1);
-		xar.end(xid2, XAResource.TMSUCCESS);
-
-		xar.rollback(xid2);
-		printState("(After 2nd global rollback) local", cs1);
-
-		xar.rollback(xid);
-		printState("(After 1st global rollback) local", cs1);
+		if (canSetIsolationWithStatement)
+			testSetIsolationWithStatement(s, xar, cs1);
 
 		// now check re-use of *Statement objects across local/global connections.
 		System.out.println("TESTING RE_USE OF STATEMENT OBJECTS");
@@ -723,6 +689,60 @@ public class checkDataSource
 		}
 
 		testDSRequestAuthentication();
+	}
+
+	/**
+	 * @param s
+	 * @param xar
+	 * @param conn
+	 * @throws SQLException
+	 * @throws XAException
+	 */
+	private void testSetIsolationWithStatement(Statement s, XAResource xar, Connection conn) throws SQLException, XAException {
+		Xid xid;
+		System.out.println("Issue SQL to change isolation in local transaction");
+			s.executeUpdate("set current isolation = RR");
+			printState("SQL to change isolation in local", conn);
+
+			xid = new cdsXid(1, (byte) 35, (byte) 47);
+			xar.start(xid, XAResource.TMNOFLAGS);
+			printState("1st global(new)", conn);
+			xar.end(xid, XAResource.TMSUCCESS);
+
+			printState("local", conn);
+		System.out.println("Issue SQL to change isolation in local transaction");
+			s.executeUpdate("set current isolation = RS");
+			printState("SQL to change isolation in local", conn);
+
+			Xid xid2 = new cdsXid(1, (byte) 93, (byte) 103);
+			xar.start(xid2, XAResource.TMNOFLAGS);
+			printState("2nd global(new)", conn);
+			xar.end(xid2, XAResource.TMSUCCESS);
+
+			xar.start(xid, XAResource.TMJOIN);
+			printState("1st global(existing)", conn);
+			xar.end(xid, XAResource.TMSUCCESS);
+
+			printState("local", conn);
+
+			xar.start(xid, XAResource.TMJOIN);
+			printState("1st global(existing)", conn);
+		System.out.println("Issue SQL to change isolation in 1st global transaction");
+			s.executeUpdate("set current isolation = UR");
+			printState("change isolation of existing 1st global transaction", conn);
+			xar.end(xid, XAResource.TMSUCCESS);
+
+			printState("local", conn);
+
+			xar.start(xid2, XAResource.TMJOIN);
+			printState("2nd global(existing)", conn);
+			xar.end(xid2, XAResource.TMSUCCESS);
+
+			xar.rollback(xid2);
+			printState("(After 2nd global rollback) local", conn);
+
+			xar.rollback(xid);
+			printState("(After 1st global rollback) local", conn);
 	}
 
 	protected void showXAException(String tag, XAException xae) {
