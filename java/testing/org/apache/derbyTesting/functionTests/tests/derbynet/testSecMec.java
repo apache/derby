@@ -56,12 +56,28 @@ public class testSecMec extends dataSourcePermissions_net
 	private static int NETWORKSERVER_PORT;
 
 	private static NetworkServerControl networkServer = null;
+    
+    private testSecMec(SwitchablePrintStream consoleLogStream,
+		       PrintStream originalStream,
+		       FileOutputStream shutdownLogStream,
+		       SwitchablePrintStream consoleErrLogStream, 
+		       PrintStream originalErrStream,
+		       FileOutputStream shutdownErrLogStream){
+	
+	super(consoleLogStream,
+	      originalStream,
+	      shutdownLogStream,
+	      consoleErrLogStream,
+	      originalErrStream,
+	      shutdownErrLogStream);
+	
+    }
 
 	public static void main(String[] args) throws Exception {
 
 		// Load harness properties.
 		ij.getPropertyArg(args);
-
+		
 		String hostName = TestUtil.getHostName();
 		if (hostName.equals("localhost"))
 			NETWORKSERVER_PORT = 20000;
@@ -77,6 +93,25 @@ public class testSecMec extends dataSourcePermissions_net
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		PrintStream originalStream = System.out;
+		FileOutputStream shutdownLogStream = 
+		    new FileOutputStream("testSecMec." + 
+					 System.getProperty("framework","") + "." + 
+					 "shutdown.std.log");
+		SwitchablePrintStream consoleLogStream = 
+		    new SwitchablePrintStream( originalStream );
+		
+		PrintStream originalErrStream = System.err;
+		FileOutputStream shutdownErrLogStream = 
+		    new FileOutputStream("testSecMec." + 
+					 System.getProperty("framework","") + "." + 
+					 "shutdown.err.log");
+		SwitchablePrintStream consoleErrLogStream = 
+		    new SwitchablePrintStream( originalErrStream );
+
+		System.setOut( consoleLogStream );
+		System.setErr( consoleErrLogStream );
 
 		// Start the NetworkServer on another thread, unless it's a remote host
 		if (hostName.equals("localhost"))
@@ -88,10 +123,16 @@ public class testSecMec extends dataSourcePermissions_net
 			if (!isServerStarted(networkServer, 60))
 				System.exit(-1);
 		}
-
+		
 		// Now, go ahead and run the test.
 		try {
-			testSecMec tester = new testSecMec();
+			testSecMec tester = 
+			    new testSecMec(consoleLogStream,
+					   originalStream,
+					   shutdownLogStream,
+					   consoleErrLogStream,
+					   originalErrStream,
+					   shutdownErrLogStream);
 			tester.runTest();
 
 		} catch (Exception e) {
@@ -106,16 +147,26 @@ public class testSecMec extends dataSourcePermissions_net
 
 		// Shutdown the server.
 		if (hostName.equals("localhost"))
-		{
+		    {
+			consoleLogStream.switchOutput( shutdownLogStream );
+			consoleErrLogStream.switchOutput( shutdownErrLogStream );
+
 			networkServer.shutdown();
 			// how do we do this with the new api?
 			//networkServer.join();
 			Thread.sleep(5000);
+
+			consoleLogStream.switchOutput( originalStream );
+			consoleErrLogStream.switchOutput( originalErrStream );
+
 		}
 		System.out.println("Completed testSecMec");
 
-		System.out.close();
-		System.err.close();
+		originalStream.close();
+		shutdownLogStream.close();
+
+		originalErrStream.close();
+		shutdownErrLogStream.close();
 
 	}
 

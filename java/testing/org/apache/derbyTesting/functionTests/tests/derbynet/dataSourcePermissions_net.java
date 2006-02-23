@@ -62,7 +62,15 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	private static int NETWORKSERVER_PORT;
 	private static String hostName;
 	private static NetworkServerControl networkServer = null;
+    
+    private SwitchablePrintStream consoleLogStream_;
+    private PrintStream originalStream_;
+    private FileOutputStream shutdownLogStream_;
 
+    private SwitchablePrintStream consoleErrLogStream_;
+    private PrintStream originalErrStream_;
+    private FileOutputStream shutdownErrLogStream_;
+    
 	public static void main(String[] args) throws Exception {
 
 		hostName = TestUtil.getHostName();
@@ -85,7 +93,25 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		PrintStream originalStream = System.out;
+		FileOutputStream shutdownLogStream = 
+		    new FileOutputStream("dataSourcePermissions_net." + 
+					 System.getProperty("framework","") + "." + 
+					 "shutdown.std.log");
+		SwitchablePrintStream consoleLogStream = 
+		    new SwitchablePrintStream( originalStream );
 
+		PrintStream originalErrStream = System.err;
+		FileOutputStream shutdownErrLogStream = 
+		    new FileOutputStream("dataSourcePermissions_net." + 
+					 System.getProperty("framework","") + "." + 
+					 "shutdown.err.log");
+		SwitchablePrintStream consoleErrLogStream = 
+		    new SwitchablePrintStream( originalErrStream );
+		
+		System.setOut( consoleLogStream );
+		System.setErr( consoleErrLogStream );
 
 		if (hostName.equals("localhost"))
 		{
@@ -97,15 +123,27 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 			if (!isServerStarted(networkServer, 60))
 				System.exit(-1);
 		}
-
+		
+		
 		// Now, go ahead and run the test.
 		try {
-			dataSourcePermissions_net tester = new dataSourcePermissions_net();
+		    dataSourcePermissions_net tester = 
+			new dataSourcePermissions_net( consoleLogStream ,
+						       originalStream ,
+						       shutdownLogStream ,
+						       consoleErrLogStream ,
+						       originalErrStream,
+						       shutdownErrLogStream);
 			tester.setProperties();
 			tester.runTest();
 			if (TestUtil.isDerbyNetClientFramework())
 				tester.testClientDataSourceProperties();
-			new dataSourcePermissions_net().cleanUp();
+			new dataSourcePermissions_net( consoleLogStream , 
+						       originalStream ,
+						       shutdownLogStream ,
+						       consoleErrLogStream ,
+						       originalErrStream ,
+						       shutdownErrLogStream ).cleanUp();
 
 		} catch (Exception e) {
 		// if we catch an exception of some sort, we need to make sure to
@@ -120,21 +158,48 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 		// Shutdown the server.
 		if (hostName.equals("localhost"))
 		{
+		    
+			consoleLogStream.switchOutput( shutdownLogStream );
+			consoleErrLogStream.switchOutput( shutdownErrLogStream );
+			
 			networkServer.shutdown();
+			consoleLogStream.flush();
+			
+			consoleLogStream.switchOutput( originalStream );
+			consoleErrLogStream.switchOutput( originalErrStream );
+			
 			// how do we do this with the new api?
 			//networkServer.join();
 			Thread.sleep(5000);
 		}
 		System.out.println("Completed dataSourcePermissions_net");
+		
+		originalStream.close();
+		shutdownLogStream.close();
 
-		System.out.close();
-		System.err.close();
+		originalErrStream.close();
+		shutdownErrLogStream.close();
 
 	}
 
 
-	public dataSourcePermissions_net() {
+	public dataSourcePermissions_net( SwitchablePrintStream consoleLogStream,
+					  PrintStream originalStream,
+					  FileOutputStream shutdownLogStream,
+					  SwitchablePrintStream consoleErrLogStream,
+					  PrintStream originalErrStream, 
+					  FileOutputStream shutdownErrLogStream ) {
+	    
+	    consoleLogStream_ = consoleLogStream;
+	    originalStream_ = originalStream;
+	    shutdownLogStream_ = shutdownLogStream;
+
+	    consoleErrLogStream_ = consoleErrLogStream;
+	    originalErrStream_ = originalErrStream;
+	    shutdownErrLogStream_ = shutdownErrLogStream;
+	    
 	}
+    
 
 	public void setProperties() {
 		// Set required server properties.
@@ -241,16 +306,34 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 	}
 
 	public void shutdown() {
+	    
+	    try{
 		try {
-			DriverManager.getConnection(TestUtil.getJdbcUrlPrefix(hostName,
+
+		    consoleLogStream_.switchOutput( shutdownLogStream_ );
+		    consoleErrLogStream_.switchOutput( shutdownErrLogStream_ );
+		    
+		    DriverManager.getConnection(TestUtil.getJdbcUrlPrefix(hostName,
 															  NETWORKSERVER_PORT) +
 										"wombat;shutdown=true",
 				"EDWARD", "noodle");
+		    
+		    consoleLogStream_.switchOutput( originalStream_ );
+		    consoleErrLogStream_.switchOutput( originalErrStream_);
+		    
 			System.out.println("FAIL - Shutdown returned connection");
 
 		} catch (SQLException sqle) {
+		    consoleLogStream_.switchOutput( originalStream_ );
+		    consoleErrLogStream_.switchOutput( originalErrStream_ );
+		    
 			System.out.println("EXPECTED SHUTDOWN " + sqle.getMessage());
 		}
+		
+	    } catch (IOException ioe){
+		originalStream_.println("Switching stream was failed. Could not complete test ... ");
+	    }
+		
 	}
 
 	protected static boolean isServerStarted(NetworkServerControl server, int ntries)
@@ -525,6 +608,21 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 }
 
 
+class SwitchablePrintStream extends PrintStream {
+    
+    public SwitchablePrintStream( OutputStream firstStream ){
+	super( firstStream );
+    }
+    
+    
+    public void switchOutput( OutputStream newStream ) throws IOException{
+	
+	out.flush();
+	out = newStream ;
+	
+    }
+    
+}
 
 
 
