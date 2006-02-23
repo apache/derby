@@ -19,4 +19,6 @@ trying rs.updateArray(int, Array) :
 ResultSet.updateArray not present - correct for JSR169
 trying rs.updateArray(String, Array) :
 ResultSet.updateArray not present - correct for JSR169
+holdable result set was not closed on exception
+non-holdable result set was not closed on exception
 Test resultsetJdbc30 finished
