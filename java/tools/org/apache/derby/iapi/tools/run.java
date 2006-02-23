@@ -18,7 +18,7 @@
 
  */
 
-package org.apache.derby.tools.iapi;
+package org.apache.derby.iapi.tools;
 
 import java.io.IOException;
 import org.apache.derby.tools.dblook;

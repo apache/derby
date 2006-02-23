@@ -952,7 +952,7 @@
     </copy>
 
     <manifest file="${derby.jar.dir}/lists/smftools.mf">
-      <attribute name="Main-Class" value="org.apache.derby.tools.iapi.run"/>
+      <attribute name="Main-Class" value="org.apache.derby.iapi.tools.run"/>
       <attribute name="Class-Path" value="derby.jar derbyclient.jar"/>
     </manifest> 
  	
