@@ -27,7 +27,7 @@ import java.security.PrivilegedExceptionAction;
 
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
-
+import org.apache.derby.shared.common.info.JVMInfo;
 public class Configuration {
 
 
@@ -229,5 +229,18 @@ public class Configuration {
 
         return myPVH;
     }
+    
+    /**
+     * Check to see if the jvm version is such that JDBC 4.0 is supported
+     */
+    
+    public static boolean supportsJDBC40() {
+        if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
+            return true;
+        }
+        return false;
+    }
+
+
 
 }

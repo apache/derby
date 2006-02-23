@@ -26,12 +26,14 @@ import org.apache.derby.client.am.PreparedStatementCallbackInterface;
 import org.apache.derby.client.am.ResultSetCallbackInterface;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlState;
+import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.StatementCallbackInterface;
 import org.apache.derby.client.am.Types;
 import org.apache.derby.client.am.Utils;
+import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.shared.common.reference.JDBC30Translation;
-
 
 public class NetStatementReply extends NetPackageReply implements StatementReplyInterface {
     NetStatementReply(NetAgent netAgent, int bufferSize) {
@@ -839,31 +841,42 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         if (statement.cachedCursor_ != null) {
             statement.cachedCursor_.resetDataBuffer();
             ((NetCursor) statement.cachedCursor_).extdtaData_.clear();
-            rs = new NetResultSet(netAgent_,
-                    (NetStatement) statement.materialStatement_,
-                    statement.cachedCursor_,
-                    //qryprctyp, //protocolType, CodePoint.FIXROWPRC | CodePoint.LMTBLKPRC
-                    sqlcsrhld, //holdOption, 0xF0 for false (default) | 0xF1 for true.
-                    qryattscr, //scrollOption, 0xF0 for false (default) | 0xF1 for true.
-                    qryattsns, //sensitivity, CodePoint.QRYUNK | CodePoint.QRYINS
-                    qryattset,
-                    qryinsid, //instanceIdentifier, 0 (if not returned, check default) or number
-                    calculateResultSetType(qryattscr, qryattsns, statement.resultSetType_),
-                    calculateResultSetConcurrency(qryattupd, statement.resultSetConcurrency_),
-                    calculateResultSetHoldability(sqlcsrhld));
+            try {
+                rs = (NetResultSet)ClientDriver.getFactory().newNetResultSet
+                        (netAgent_,
+                        (NetStatement) statement.materialStatement_,
+                        statement.cachedCursor_,
+                        //qryprctyp, //protocolType, CodePoint.FIXROWPRC | CodePoint.LMTBLKPRC
+                        sqlcsrhld, //holdOption, 0xF0 for false (default) | 0xF1 for true.
+                        qryattscr, //scrollOption, 0xF0 for false (default) | 0xF1 for true.
+                        qryattsns, //sensitivity, CodePoint.QRYUNK | CodePoint.QRYINS
+                        qryattset,
+                        qryinsid, //instanceIdentifier, 0 (if not returned, check default) or number
+                        calculateResultSetType(qryattscr, qryattsns, statement.resultSetType_),
+                        calculateResultSetConcurrency(qryattupd, statement.resultSetConcurrency_),
+                        calculateResultSetHoldability(sqlcsrhld));
+            } catch(SqlException sqle) {
+                throw new DisconnectException(netAgent_,sqle);
+            }
         } else {
-            rs = new NetResultSet(netAgent_,
-                    (NetStatement) statement.materialStatement_,
-                    new NetCursor(netAgent_, qryprctyp),
-                    //qryprctyp, //protocolType, CodePoint.FIXROWPRC | CodePoint.LMTBLKPRC
-                    sqlcsrhld, //holdOption, 0xF0 for false (default) | 0xF1 for true.
-                    qryattscr, //scrollOption, 0xF0 for false (default) | 0xF1 for true.
-                    qryattsns, //sensitivity, CodePoint.QRYUNK | CodePoint.QRYINS
-                    qryattset,
-                    qryinsid, //instanceIdentifier, 0 (if not returned, check default) or number
-                    calculateResultSetType(qryattscr, qryattsns, statement.resultSetType_),
-                    calculateResultSetConcurrency(qryattupd, statement.resultSetConcurrency_),
-                    calculateResultSetHoldability(sqlcsrhld));
+            try {
+                rs = (NetResultSet)ClientDriver.getFactory().newNetResultSet
+                        (netAgent_,
+                        (NetStatement) statement.materialStatement_,
+                        new NetCursor(netAgent_, qryprctyp),
+                        //qryprctyp, //protocolType, CodePoint.FIXROWPRC | CodePoint.LMTBLKPRC
+                        sqlcsrhld, //holdOption, 0xF0 for false (default) | 0xF1 for true.
+                        qryattscr, //scrollOption, 0xF0 for false (default) | 0xF1 for true.
+                        qryattsns, //sensitivity, CodePoint.QRYUNK | CodePoint.QRYINS
+                        qryattset,
+                        qryinsid, //instanceIdentifier, 0 (if not returned, check default) or number
+                        calculateResultSetType(qryattscr, qryattsns, statement.resultSetType_),
+                        calculateResultSetConcurrency(qryattupd, statement.resultSetConcurrency_),
+                        calculateResultSetHoldability(sqlcsrhld));
+            } catch(SqlException sqle) {
+               throw new DisconnectException(netAgent_,sqle);
+            }
+            
         }
 
         // QRYCLSIMP only applies to OPNQRY, not EXCSQLSTT

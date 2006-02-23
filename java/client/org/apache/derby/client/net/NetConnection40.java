@@ -30,6 +30,10 @@ import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.util.Properties;
+import org.apache.derby.client.am.SqlException;
+import org.apache.derby.impl.jdbc.Util;
+import org.apache.derby.jdbc.InternalDriver;
+
 
 
 public class  NetConnection40 extends org.apache.derby.client.net.NetConnection {
@@ -77,13 +81,32 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     
 
     
+    /**
+     * Constructs an object that implements the Clob interface. The object
+     * returned initially contains no data.
+     * @return An object that implements the Clob interface
+     * @throws SQLException if an object that implements the
+     * Clob interface can not be constructed.
+     *
+     */
     
     public Clob createClob() throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("createClob ()");
+        org.apache.derby.client.am.Clob clob = new org.apache.derby.client.am.Clob(this.agent_,"");
+        return clob;
     }
 
+    /**
+     * Constructs an object that implements the Clob interface. The object
+     * returned initially contains no data.
+     * @return An object that implements the Clob interface
+     * @throws SQLException if an object that implements the
+     * Clob interface can not be constructed.
+     *
+     */
+    
     public Blob createBlob() throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("createBlob ()");
+        org.apache.derby.client.am.Blob blob = new org.apache.derby.client.am.Blob(new byte[0],this.agent_, 0);
+        return blob;
     }
     
     public NClob createNClob() throws SQLException {

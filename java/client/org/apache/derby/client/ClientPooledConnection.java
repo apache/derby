@@ -20,11 +20,12 @@
 package org.apache.derby.client;
 
 import java.sql.SQLException;
-
+import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.am.ClientJDBCObjectFactory;
+import org.apache.derby.client.am.MessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
-import org.apache.derby.jdbc.ClientDataSource;
-import org.apache.derby.client.am.MessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class ClientPooledConnection implements javax.sql.PooledConnection {
@@ -60,14 +61,17 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             user_ = user;
             password_ = password;
             listeners_ = new java.util.Vector();
-
-            netPhysicalConnection_ = new org.apache.derby.client.net.NetConnection((NetLogWriter) logWriter_,
+            
+            netPhysicalConnection_ = (org.apache.derby.client.net.NetConnection)
+            ClientDriver.getFactory().newNetConnection(
+                    (NetLogWriter) logWriter_,
                     user,
                     password,
                     ds,
                     -1,
                     false);
-            physicalConnection_ = netPhysicalConnection_;
+        
+        physicalConnection_ = netPhysicalConnection_;
         }
         catch ( SqlException se )
         {
@@ -83,8 +87,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                                   String user,
                                   String password,
                                   int rmId) throws SQLException {
-        try
-        {
+        try {
             logWriter_ = logWriter;
             ds_ = ds;
             user_ = user;
@@ -98,29 +101,29 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                     rmId,
                     true);
             physicalConnection_ = netXAPhysicalConnection_;
-        }
-        catch ( SqlException se )
-        {
+        } catch ( SqlException se ) {
             throw se.getSQLException();
         }
     }
 
     public ClientPooledConnection(ClientDataSource ds,
                                   org.apache.derby.client.am.LogWriter logWriter) throws SQLException {
-        try
-        {
-            logWriter_ = logWriter;
-            ds_ = ds;
-            listeners_ = new java.util.Vector();
-            netPhysicalConnection_ = new org.apache.derby.client.net.NetConnection((NetLogWriter) logWriter_,
+        logWriter_ = logWriter;
+        ds_ = ds;
+        listeners_ = new java.util.Vector();
+	try {
+            netPhysicalConnection_ = (org.apache.derby.client.net.NetConnection)
+            ClientDriver.getFactory().newNetConnection(
+                    (NetLogWriter) logWriter_,
                     null,
                     null,
                     ds,
                     -1,
                     false);
+
             physicalConnection_ = netPhysicalConnection_;
         }
-        catch ( SqlException se )
+        catch (SqlException se)
         {
             throw se.getSQLException();
         }
@@ -184,7 +187,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             }
             return logicalConnection_;
         }
-        catch ( SqlException se )
+        catch (SqlException se)
         {
             throw se.getSQLException();
         }
@@ -245,6 +248,3 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         logicalConnection_ = null;
     }
 }
-
-
-

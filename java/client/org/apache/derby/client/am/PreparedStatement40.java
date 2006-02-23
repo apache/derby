@@ -53,7 +53,8 @@ public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedSt
         throw SQLExceptionFactory.notImplemented ("setNString (int, String)");
     }
     
-    public void setNCharacterStream(int index, Reader value, long length) throws SQLException{
+    public void setNCharacterStream(int index, Reader value, long length) 
+                throws SQLException{
         throw SQLExceptionFactory.notImplemented ("setNCharacterStream " +
                 "(int,Reader,long)");
     }
@@ -62,21 +63,73 @@ public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedSt
         throw SQLExceptionFactory.notImplemented ("setNClob (int, NClob)");
     }
     
+    /**
+     * Sets the designated parameter to a Reader object.
+     *
+     * @param parameterIndex index of the first parameter is 1, the second is 2, ...
+     * @param reader An object that contains the data to set the parameter value to.
+     * @param length the number of characters in the parameter data.
+     * @throws SQLException if parameterIndex does not correspond to a parameter
+     * marker in the SQL statement, or if the length specified is less than zero.
+     *
+     */
+    
     public void setClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
-        throw SQLExceptionFactory.notImplemented ("setClob (int, Reader, long)");
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setClob",
+                        parameterIndex, reader, new Long(length));
+            }
+            if(length > Integer.MAX_VALUE)
+                throw new SQLException("CLOB length exceeds maximum " +
+                        "possible limit");
+            else
+                setInput(parameterIndex, new Clob(agent_, reader, (int)length));
+        }
     }
+
+    /**
+     * Sets the designated parameter to a InputStream object.
+     *
+     * @param parameterIndex index of the first parameter is 1,
+     * the second is 2, ...
+     * @param inputStream An object that contains the data to set the parameter
+     * value to.
+     * @param length the number of bytes in the parameter data.
+     * @throws SQLException if parameterIndex does not correspond
+     * to a parameter marker in the SQL statement,  if the length specified
+     * is less than zero or if the number of bytes in the inputstream does not match
+     * the specfied length.
+     *
+     */
     
     public void setBlob(int parameterIndex, InputStream inputStream, long length)
     throws SQLException{
-        throw SQLExceptionFactory.notImplemented ("setBlob (int, InputStream, long)");
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setBlob", parameterIndex,
+                        inputStream, new Long(length));
+            }
+            if(length > Integer.MAX_VALUE)
+                throw new SQLException("BLOB length exceeds maximum " +
+                        "possible limit");
+            else {
+                try {
+                    setBinaryStreamX(parameterIndex, inputStream, (int)length);
+                } catch(SqlException se){
+                    throw se.getSQLException();
+                }
+            }
+        }
     }
     public void setNClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
         throw SQLExceptionFactory.notImplemented ("setNClob (int, Reader, long)");
     }
     
-    public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException{
+    public void setSQLXML(int parameterIndex, SQLXML xmlObject) 
+                throws SQLException{
         throw SQLExceptionFactory.notImplemented ("setSQLXML (int, SQLXML)");
     }
     

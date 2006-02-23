@@ -30,6 +30,9 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.client.am.ClientJDBCObjectFactory;
+
 
 public class NetConnection extends org.apache.derby.client.am.Connection {
 
@@ -975,7 +978,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
 
     protected DatabaseMetaData newDatabaseMetaData_() {
-        return new NetDatabaseMetaData(netAgent_, this);
+            return ClientDriver.getFactory().newNetDatabaseMetaData(netAgent_, this);
     }
 
     //-------------------private helper methods--------------------------------

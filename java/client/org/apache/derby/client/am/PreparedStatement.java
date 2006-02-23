@@ -788,7 +788,7 @@ public class PreparedStatement extends Statement
         }
     }
 
-    public void setBinaryStreamX(int parameterIndex,
+    protected void setBinaryStreamX(int parameterIndex,
                                  java.io.InputStream x,
                                  int length) throws SqlException {
         parameterIndex = checkSetterPreconditions(parameterIndex);

@@ -28,7 +28,13 @@ public class ClobOutputStream extends java.io.OutputStream {
     public ClobOutputStream(Clob clob, long offset) throws SqlException {
         clob_ = clob;
         offset_ = offset;
-        if (offset_ > clob_.sqlLength_) {
+        
+        /*
+            offset_ starts from 1 while sqlLenth_=0
+            in the case of a empty Clob hence check from
+            offset_-1
+         */
+        if ((offset_-1) > clob_.sqlLength_) {
             throw new IndexOutOfBoundsException();
         }
     }

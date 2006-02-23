@@ -28,7 +28,12 @@ public class BlobOutputStream extends java.io.OutputStream {
     public BlobOutputStream(Blob blob, long offset) {
         blob_ = blob;
         offset_ = offset;
-        if (offset_ > (blob_.binaryString_.length - blob_.dataOffset_)) {
+        
+        /*
+            offset_=1 while blob_.binaryString_.length - blob_.dataOffset_ = 0
+            for a empty Blob hence check for offset_-1
+         */
+        if ((offset_-1) > (blob_.binaryString_.length - blob_.dataOffset_)) {
             throw new IndexOutOfBoundsException();
         }
     }

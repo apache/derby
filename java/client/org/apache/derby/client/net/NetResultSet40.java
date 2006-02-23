@@ -32,7 +32,7 @@ import org.apache.derby.client.am.Cursor;
 
 public class NetResultSet40 extends NetResultSet{
     
-    public NetResultSet40(NetAgent netAgent,
+    NetResultSet40(NetAgent netAgent,
         NetStatement netStatement,
         Cursor cursor,
         //int qryprctyp,  //protocolType, CodePoint.FIXROWPRC | CodePoint.LMTBLKPRC

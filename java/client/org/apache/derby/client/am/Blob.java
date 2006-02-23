@@ -267,15 +267,33 @@ public class Blob extends Lob implements java.sql.Blob {
 
     public int setBytesX(long pos, byte[] bytes, int offset, int len) throws SqlException {
         int length = 0;
-        if ((int) pos <= 0) {
+        
+        /*
+            Check if position is less than 0 and if true
+            raise an exception
+         */
+        
+        if (pos <= 0L) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.BLOB_BAD_POSITION), new Long(pos));
+                    new MessageId(SQLState.BLOB_BAD_POSITION), new Long(pos));
         }
         
-        if ( pos > binaryString_.length - dataOffset_) {
-            throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.BLOB_POSITION_TOO_LARGE), new Long(pos));
+        /*
+           Currently only 2G-1 bytes can be inserted in a
+           single Blob column hence check corresponding position
+           value
+         */
+        
+        if (pos  >= Integer.MAX_VALUE) {
+            throw new SqlException(agent_.logWriter_,
+                    new MessageId(SQLState.BLOB_POSITION_TOO_LARGE), new Long(pos));
         }
+        
+        if (pos - 1 > binaryString_.length - dataOffset_) {
+            throw new SqlException(agent_.logWriter_,
+                    new MessageId(SQLState.BLOB_POSITION_TOO_LARGE), new Long(pos));
+        }
+        
         if ((offset < 0) || offset > bytes.length )
         {
             throw new SqlException(agent_.logWriter_,

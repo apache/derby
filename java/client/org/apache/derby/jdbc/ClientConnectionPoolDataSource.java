@@ -85,6 +85,7 @@ public class ClientConnectionPoolDataSource extends ClientDataSource implements 
     //  method that establishes the initial physical connection
     // using DS properties instead of CPDS properties.
     private PooledConnection getPooledConnectionX(LogWriter dncLogWriter, ClientDataSource ds, String user, String password) throws SQLException {
-        return new ClientPooledConnection(ds, dncLogWriter, user, password);
+            return ClientDriver.getFactory().newClientPooledConnection(ds,
+                    dncLogWriter, user, password);
     }
 }

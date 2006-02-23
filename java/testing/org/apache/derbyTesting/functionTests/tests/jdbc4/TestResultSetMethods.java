@@ -30,6 +30,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.SQLState;
 
+/**
+ * This class is used to test the implementations of the JDBC 4.0 methods
+ * in the ResultSet interface
+ */
 public class TestResultSetMethods {
     
     Connection conn=null;

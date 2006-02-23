@@ -20,14 +20,27 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Statement;
 import java.util.Properties;
 import org.apache.derby.shared.common.reference.SQLState;
+
+/**
+ * This class is used to test the implementations of the JDBC 4.0 methods
+ * in the Connection interface
+ */
 
 public class TestConnectionMethods {
     Connection conn = null;
@@ -63,6 +76,75 @@ public class TestConnectionMethods {
             System.out.println("Unexpected exception caught in function"+e);
         }
     }
+    /**
+     * Test the createClob method implementation in the Connection interface 
+     * in the Network Client
+     */
+    void t_createClob_Client() {
+        int c;
+        Clob clob;
+        try {
+            Statement s = conn.createStatement();
+            s.execute("create table clobtable2(n int,clobcol CLOB)");
+            PreparedStatement ps = conn.prepareStatement("insert into clobtable2" +
+                    " values(?,?)");
+            ps.setInt(1,1000);
+            clob = conn.createClob();
+            File file = new File("extin/short.txt");
+            FileInputStream is = new FileInputStream(file);
+            OutputStream os = clob.setAsciiStream(1);
+            c = is.read();
+            while(c>0) {
+                os.write(c);
+                c = is.read();
+            }
+            ps.setClob(2, clob);
+            ps.executeUpdate();
+        } catch(SQLException e) {
+            e.printStackTrace();
+        } catch(FileNotFoundException fnfe){
+            fnfe.printStackTrace();
+        } catch(IOException ioe) {
+            ioe.printStackTrace();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Test the createBlob method implementation in the Connection interface for
+     * in the Network Client
+     */
+    void t_createBlob_Client() {
+        int c;
+        Blob blob;
+        try {
+            Statement s = conn.createStatement();
+            s.execute("create table blobtable2(n int,blobcol BLOB)");
+            PreparedStatement ps = conn.prepareStatement("insert into blobtable2" +
+                    " values(?,?)");
+            ps.setInt(1,1000);
+            blob = conn.createBlob();
+            File file = new File("extin/short.txt");
+            FileInputStream is = new FileInputStream(file);
+            OutputStream os = blob.setBinaryStream(1);
+            c = is.read();
+            while(c>0) {
+                os.write(c);
+                c = is.read();
+            }
+            ps.setBlob(2, blob);
+            ps.executeUpdate();
+        } catch(SQLException e) {
+            e.printStackTrace();
+        } catch(FileNotFoundException fnfe){
+            fnfe.printStackTrace();
+        } catch(IOException ioe) {
+            ioe.printStackTrace();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     void t_createNClob() {
         NClob nclob;
         try {
@@ -161,7 +243,19 @@ public class TestConnectionMethods {
         }
     }
     
-    public void startTestConnectionMethods() {
+    public void startTestConnectionMethods_Client() {
+        t_createClob_Client();
+        t_createBlob_Client();
+        t_createNClob();
+        t_createSQLXML();
+        t_isValid();
+        t_setClientInfo1();
+        t_setClientInfo2();
+        t_getClientInfo1();
+        t_getClientInfo2();
+    }
+    
+    public void startTestConnectionMethods_Embedded() {
         t_createClob();
         t_createBlob();
         t_createNClob();
@@ -177,11 +271,17 @@ public class TestConnectionMethods {
         
         Connection connEmbedded = tc.createEmbeddedConnection();
         TestConnectionMethods tcm = new TestConnectionMethods(connEmbedded);
-        tcm.startTestConnectionMethods();
+        tcm.startTestConnectionMethods_Embedded();
         
         
         Connection connNetwork = tc.createClientConnection();
         TestConnectionMethods tcm1 = new TestConnectionMethods(connNetwork);
-        tcm1.startTestConnectionMethods();
+        tcm1.startTestConnectionMethods_Client();
+        try {
+            connEmbedded.close();
+            connNetwork.close();
+        } catch(SQLException sqle){
+            sqle.printStackTrace();
+        }
     }
 }

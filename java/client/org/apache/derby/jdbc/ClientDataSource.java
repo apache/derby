@@ -147,21 +147,24 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
      * @throws java.sql.SQLException if a database-access error occurs.
      */
     public Connection getConnection(String user, String password) throws SQLException {
+        // Jdbc 2 connections will write driver trace info on a
+        // datasource-wide basis using the jdbc 2 data source log writer.
+        // This log writer may be narrowed to the connection-level
+        // This log writer will be passed to the agent constructor.
+        
         try
         {
-            // Jdbc 2 connections will write driver trace info on a
-            // datasource-wide basis using the jdbc 2 data source log writer.
-            // This log writer may be narrowed to the connection-level
-            // This log writer will be passed to the agent constructor.
-
             LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
             updateDataSourceValues(tokenizeAttributes(getConnectionAttributes(), null));
-            return new NetConnection((NetLogWriter) dncLogWriter, user, password, this, -1, false);
+            return ClientDriver.getFactory().newNetConnection
+                    ((NetLogWriter) dncLogWriter, user,
+                    password, this, -1, false);
         }
-        catch ( SqlException se )
+        catch(SqlException se)
         {
             throw se.getSQLException();
         }
+        
     }
 
 }

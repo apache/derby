@@ -23,31 +23,50 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+ /**
+  * This class is used to create a connection. This class is then used by the
+  * other classes in the jdbc4 suite to create connection to a database
+  */
 public class TestConnection {
     TestConnection() {
     }
+    
+    /**
+     * This method creates a connection using the Embedded JDBC driver
+     */
     Connection createEmbeddedConnection() {
         Connection conn=null;
         try {
             Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-            conn = DriverManager.getConnection("jdbc:derby:mydb;create=true");
+            conn = DriverManager.getConnection("jdbc:derby:jdbc4_embedded_test_database;create=true");
         } catch(Exception e) {
             System.out.println("Failed in creating a Connection:	"+e);
             e.printStackTrace();
         }
         return conn;
     }
+    
+    /**
+     * This method creates a connection using the derby Client Driver
+     */
+    
     Connection createClientConnection() {
         Connection conn=null;
         try {
             Class.forName("org.apache.derby.jdbc.ClientDriver");
-            conn = DriverManager.getConnection("jdbc:derby:mydb;create=true");
+            conn = DriverManager.getConnection("jdbc:derby://localhost:1527/jdbc4_client_test_database" +
+                                               ";create=true");
         } catch(Exception e) {
             System.out.println("Failed in creating a Connection:	"+e);
             e.printStackTrace();
         }
         return conn;
     }
+    
+    /**
+     * closes the connection whose handle is given to the method
+     */
+    
     void closeConnection(Connection conn) {
         try {
             conn.close();

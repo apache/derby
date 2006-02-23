@@ -23,12 +23,13 @@ package org.apache.derby.jdbc;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.sql.SQLException;
-
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.ResourceUtilities;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.client.am.Version;
+import org.apache.derby.client.am.ClientJDBCObjectFactory;
+import org.apache.derby.client.net.ClientJDBCObjectFactoryImpl;
 import org.apache.derby.client.resources.ResourceKeys;
 
 
@@ -36,6 +37,8 @@ public class ClientDriver implements java.sql.Driver {
     private transient int traceFileSuffixIndex_ = 0;
 
     private final static int DERBY_REMOTE_PROTOCOL = 1;
+    
+    private static ClientJDBCObjectFactory factoryObject = null;
 
     static private SQLException exceptionsOnLoadDriver__ = null;
     // Keep track of the registere driver so that we can deregister it if we're a stored proc.
@@ -66,8 +69,8 @@ public class ClientDriver implements java.sql.Driver {
 
     public java.sql.Connection connect(String url,
                                        java.util.Properties properties) throws java.sql.SQLException {
-        try
-        {
+        org.apache.derby.client.net.NetConnection conn;
+        try {    
             if (exceptionsOnLoadDriver__ != null) {
                 throw exceptionsOnLoadDriver__;
             }
@@ -125,24 +128,24 @@ public class ClientDriver implements java.sql.Driver {
                             traceLevel,
                             "_driver",
                             traceFileSuffixIndex_++);
-
-            org.apache.derby.client.net.NetConnection conn =
-                    new org.apache.derby.client.net.NetConnection((org.apache.derby.client.net.NetLogWriter) dncLogWriter,
-                            java.sql.DriverManager.getLoginTimeout(),
-                            server,
-                            port,
-                            database,
-                            augmentedProperties);
-
-            if(conn.isConnectionNull())
-                return null;
-
-            return conn;
-        }
-        catch ( SqlException se )
-        {
+            
+            
+            conn = (org.apache.derby.client.net.NetConnection)getFactory().
+                    newNetConnection((org.apache.derby.client.net.NetLogWriter) 
+                    dncLogWriter,
+                    java.sql.DriverManager.getLoginTimeout(),
+                    server,
+                    port,
+                    database,
+                    augmentedProperties);
+        } catch(SqlException se) {
             throw se.getSQLException();
         }
+        
+        if(conn.isConnectionNull())
+            return null;
+        
+        return conn;
     }
 
     /**
@@ -334,8 +337,61 @@ public class ClientDriver implements java.sql.Driver {
         }
         return ClientDataSource.tokenizeAttributes(attributeString, properties);
     }
-
-
+    
+    /**
+     *This method returns an Implementation
+     *of ClientJDBCObjectFactory depending on
+     *VM under use
+     *Currently it returns either
+     *ClientJDBCObjectFactoryImpl
+     *(or)
+     *ClientJDBCObjectFactoryImpl40
+     */
+    
+    public static ClientJDBCObjectFactory getFactory() {
+        if(factoryObject!=null)
+            return factoryObject;
+        if(Configuration.supportsJDBC40()) {
+            factoryObject = createJDBC40FactoryImpl();
+        } else {
+            factoryObject = createDefaultFactoryImpl();
+        }
+        return factoryObject;
+    }
+    
+    /**
+     *Returns an instance of the ClientJDBCObjectFactoryImpl class
+     */
+    private static ClientJDBCObjectFactory createDefaultFactoryImpl() {
+        return  new ClientJDBCObjectFactoryImpl();
+    }
+    
+    /**
+     *Returns an instance of the ClientJDBCObjectFactoryImpl40 class
+     *If a ClassNotFoundException occurs then it returns an
+     *instance of ClientJDBCObjectFactoryImpl
+     *
+     *If a future version of JDBC comes then
+     *a similar method would be added say createJDBCXXFactoryImpl
+     *in which if  the class is not found then it would
+     *return the lower version thus having a sort of cascading effect
+     *until it gets a valid instance
+     */
+    
+    private static ClientJDBCObjectFactory createJDBC40FactoryImpl() {
+        final String factoryName =
+                "org.apache.derby.client.net.ClientJDBCObjectFactoryImpl40";
+        try {
+            return (ClientJDBCObjectFactory)
+            Class.forName(factoryName).newInstance();
+        } catch (ClassNotFoundException cnfe) {
+            return createDefaultFactoryImpl();
+        } catch (InstantiationException ie) {
+            return createDefaultFactoryImpl();
+        } catch (IllegalAccessException iae) {
+            return createDefaultFactoryImpl();
+        }
+    }
 }
 
 
