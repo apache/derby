@@ -40,10 +40,10 @@
   </target>
 
   <target name="tools_base">
-    <ant dir="${derby.tools.dir}/iapi/tools"/>
     <ant dir="${derby.tools.dir}/impl/tools"/>
     <ant dir="${derby.tools.dir}/tools"/>
     <ant dir="${derby.tools.dir}/loc"/>
+    <ant dir="${derby.tools.dir}/iapi/tools"/>
   </target>
 
 
