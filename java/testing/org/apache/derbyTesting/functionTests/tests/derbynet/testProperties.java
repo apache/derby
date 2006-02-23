@@ -54,6 +54,12 @@ public class testProperties
 	private static jvm jvm;
 	private static Vector vCmd;
     private static  BufferedOutputStream bos = null;
+    
+	// File and stream for output from shutdown process. We do not want the
+    // shutdown process to write to System.out because shutdown message has
+    // changed in later version (10.2)
+	private static final File outputFile = new File("shutdown.tmp");
+	private static BufferedOutputStream shutdownStream = null;
 
     //Command to start server specifying system properties without values
     private static String[] startServerCmd =
@@ -75,11 +81,11 @@ public class testProperties
 	 * Execute the given command and dump the results to standard out
 	 *
 	 * @param args	command and arguments
-	 * @param wait  true =wait for completion
-	 * @exception Exception
+	 * @param buf OutputStream for process outputs
+	 * @throws Exception
 	 */
 
-	private static void execCmdDumpResults (String[] args) throws Exception
+	private static void execCmdDumpResults (String[] args, BufferedOutputStream buf) throws Exception
 	{
         // We need the process inputstream and errorstream
         ProcessStreamResult prout = null;
@@ -87,8 +93,8 @@ public class testProperties
             
 		// Start a process to run the command
 		Process pr = execCmd(args);
-        prout = new ProcessStreamResult(pr.getInputStream(), bos, null);
-        prerr = new ProcessStreamResult(pr.getErrorStream(), bos, null);
+        prout = new ProcessStreamResult(pr.getInputStream(), buf, null);
+        prerr = new ProcessStreamResult(pr.getErrorStream(), buf, null);
 
 		// wait until all the results have been processed
 		prout.Wait();
@@ -128,8 +134,13 @@ public class testProperties
 	/** 
 	 * Issue derbyServer command if port is null, NetworkServerControl <cmd>
 	 * else  NetworkServerControl <cmd> -p <portstring>
+	 * 
+	 * @param cmd Network server command
+	 * @param portString port
+	 * @param buf OutputStream for process
+	 * @throws Exception
 	 */
-	private static void derbyServerCmd(String cmd, String  portString) throws Exception
+	private static void derbyServerCmd(String cmd, String  portString, BufferedOutputStream buf) throws Exception
 	{
 		String [] cmdArr = null;
 		// For start we don't wait or capture results, just 
@@ -146,7 +157,7 @@ public class testProperties
 		if (!wait)
 			execCmd(cmdArr);
 		else 
-			execCmdDumpResults(cmdArr);
+			execCmdDumpResults(cmdArr, buf);
 	}	
 	
 	private static void waitForStart(String portString, int timeToWait) throws Exception
@@ -196,6 +207,10 @@ public class testProperties
 		try
 		{
         	bos = new BufferedOutputStream(System.out, 1024);
+        	if(!outputFile.exists())
+        		outputFile.createNewFile();
+        	FileOutputStream fos = new FileOutputStream(outputFile);        	
+        	shutdownStream = new BufferedOutputStream(fos);
 			
 
 			System.out.println("Start testProperties to test property priority");
@@ -211,25 +226,25 @@ public class testProperties
 			derbyProperties.store(propFile,"testing derby.properties");
 			propFile.close();
 			//test start no parameters - Pickup 1528 from derby.properties
-			derbyServerCmd("start",null);	
+			derbyServerCmd("start",null, bos);	
 			waitForStart("1528",15000);
 			System.out.println("Successfully Connected");
 			//shutdown - also picks up from derby.properties
-			derbyServerCmd("shutdown",null);
+			derbyServerCmd("shutdown",null, shutdownStream);
 			System.out.println("Testing System properties  Port 1529 ");
 			//test start with system property. Overrides derby.properties
-			derbyServerCmd("start","-Dderby.drda.portNumber=1529");
+			derbyServerCmd("start","-Dderby.drda.portNumber=1529", bos);
 
 			waitForStart("1529",15000);	
 			System.out.println("Successfully Connected");
 			//shutdown - also picks up from System Properties
-			derbyServerCmd("shutdown","1529");
+			derbyServerCmd("shutdown","1529", shutdownStream);
 			System.out.println("Testing command line option. Port 1530");
-			derbyServerCmd("start","1530");
+			derbyServerCmd("start","1530", bos);
 			waitForStart("1530",15000);		
 			System.out.println("Successfully Connected");
 			//shutdown - with command line option
-			derbyServerCmd("shutdown","1530");
+			derbyServerCmd("shutdown","1530", shutdownStream);
 
 			/**********************************************************************
 			 *  Test start server specifying system properties without values
@@ -238,31 +253,34 @@ public class testProperties
 			System.out.println("First shutdown server started on default port by the test harness");
 
 			//Shutdown the server started by test
-			derbyServerCmd("shutdown","1527");
+			derbyServerCmd("shutdown","1527", shutdownStream);
 			execCmd(startServerCmd);
 			waitForStart("1527",15000);
 			//check that default properties are used
 			listProperties("1527");
 			System.out.println("Successfully Connected");
-			derbyServerCmd("shutdown","1527");
+			derbyServerCmd("shutdown","1527", shutdownStream);
 
 			System.out.println("End test");
 			bos.close();
+			fos.close();
+			shutdownStream.close();
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			// If something went wrong,
 			// make sure all these servers are shutdown
-			try {derbyServerCmd("shutdown","1527");} catch (Exception se) {}
-			try {derbyServerCmd("shutdown","1528");} catch (Exception se) {}
-			try {derbyServerCmd("shutdown","1529");} catch (Exception se) {}
-			try {derbyServerCmd("shutdown","1530");} catch (Exception se) {}
+			try {derbyServerCmd("shutdown","1527", shutdownStream);} catch (Exception se) {}
+			try {derbyServerCmd("shutdown","1528", shutdownStream);} catch (Exception se) {}
+			try {derbyServerCmd("shutdown","1529", shutdownStream);} catch (Exception se) {}
+			try {derbyServerCmd("shutdown","1530", shutdownStream);} catch (Exception se) {}
 		}
 		finally {
 			try {
 				File fileToDelete = new File("derby.properties");
 				fileToDelete.delete();
+				outputFile.delete();
 			} catch (Exception e)
 			{
 				e.printStackTrace();
