@@ -9115,7 +9115,8 @@ havingClause() throws StandardException :
 QueryTreeNode
 schemaDefinition() throws StandardException :
 {
-	String	schemaName;
+	String	schemaName = null;
+	String	authName = null;
 }
 {
 	/*
@@ -9123,19 +9124,37 @@ schemaDefinition() throws StandardException :
 	** We are not currently handling character set
 	** specifications for schema, or schema bodies.
 	*/
-	<SCHEMA> schemaName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
-	{
+	<SCHEMA>
+	(	schemaName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) [ <AUTHORIZATION> authName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) ]
+		{
+			if (authName != null)
+				checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "AUTHORIZATION");
 
-		if (schemaName.startsWith("SYS"))
-			throw StandardException.newException(SQLState.INVALID_SCHEMA_SYS, schemaName);
+			if (schemaName.startsWith("SYS"))
+				throw StandardException.newException(SQLState.INVALID_SCHEMA_SYS, schemaName);
  
-		return (QueryTreeNode) nodeFactory.getNode(
-				C_NodeTypes.CREATE_SCHEMA_NODE,
-				schemaName,
-				null,
-				getContextManager()
-				);
-	}
+			return (QueryTreeNode) nodeFactory.getNode(
+					C_NodeTypes.CREATE_SCHEMA_NODE,
+					schemaName,
+					authName,
+					getContextManager()
+					);
+		}
+	|
+		<AUTHORIZATION> authName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
+		{
+			checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "AUTHORIZATION");
+			if (authName.startsWith("SYS"))
+				throw StandardException.newException(SQLState.INVALID_SCHEMA_SYS, authName);
+
+			return (QueryTreeNode) nodeFactory.getNode(
+					C_NodeTypes.CREATE_SCHEMA_NODE,
+					authName,
+					authName,
+					getContextManager()
+					);
+		}
+	)
 }
 
 /*

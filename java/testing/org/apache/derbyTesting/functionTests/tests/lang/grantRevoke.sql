@@ -91,3 +91,13 @@ LANGUAGE JAVA PARAMETER STYLE JAVA;
 
 values f_abs(-5);
 
+-- Test for AUTHORIZATION option for create schema
+-- GrantRevoke TODO: Need to enforce who can create which schema.
+-- More negative test cases need to be added once enforcing is done.
+
+CREATE SCHEMA MYDODO AUTHORIZATION DODO;
+
+CREATE SCHEMA AUTHORIZATION DERBY;
+
+select * from sys.sysschemas where schemaname not like 'SYS%';
+

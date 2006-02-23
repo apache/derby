@@ -359,6 +359,12 @@ public	class DD_Version implements	Formatable
             bootingDictionary.create_10_2_system_procedures(
                 tc, 
                 bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
+
+			// Add new system catalogs created for grant and revoke
+			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSTABLEPERMS_CATALOG_NUM);
+			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSCOLPERMS_CATALOG_NUM);
+			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSROUTINEPERMS_CATALOG_NUM);
+			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSREQUIREDPERM_CATALOG_NUM);
         }
         
 	}
