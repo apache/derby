@@ -561,10 +561,10 @@ public final class NetworkServerControlImpl {
 		// sure we print the error message before doing so (Beetle 5033).
 			throwUnexpectedException(e);
 		}
-		long startTime = System.currentTimeMillis();
+		
 		consolePropertyMessage("DRDA_Ready.I", new String [] 
                     {Integer.toString(portNumber), att_srvclsnm, versionString,
-					CheapDateFormatter.formatDate(startTime)});
+					getFormattedTimestamp()});
 		
 		// We accept clients on a separate thread so we don't run into a problem
 		// blocking on the accept when trying to process a shutdown
@@ -651,10 +651,9 @@ public final class NetworkServerControlImpl {
 		}
 		*/
 
-		long shutdownTime = System.currentTimeMillis();
 		consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
 						        {att_srvclsnm, versionString, 
-								CheapDateFormatter.formatDate(shutdownTime)});
+								getFormattedTimestamp()});
 		
 
     }
@@ -1712,10 +1711,9 @@ public final class NetworkServerControlImpl {
 				break;
 			case COMMAND_SHUTDOWN:
 				shutdown();
-				long shutdownTime = System.currentTimeMillis();
 				consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
 								{att_srvclsnm, versionString, 
-								CheapDateFormatter.formatDate(shutdownTime)});
+								getFormattedTimestamp()});
 				break;
 			case COMMAND_TRACE:
 				{
@@ -3321,6 +3319,18 @@ public final class NetworkServerControlImpl {
 		return myPVH;
 	}
 
+	/**
+	 * This method returns a timestamp to be used in the messages. 
+	 * CheapDateFormatter class, which uses GMT, is used to format timestamps. 
+	 * This is to keep the formatting consistent with Derby boot message since
+	 * network server messages and the boot message get written to derby.log.   
+	 * 
+	 * @return current timestamp formatted in GMT
+	 */
+	private String getFormattedTimestamp(){
+		long currentTime = System.currentTimeMillis();
+		return CheapDateFormatter.formatDate(currentTime);
+	}
 }
 
 
