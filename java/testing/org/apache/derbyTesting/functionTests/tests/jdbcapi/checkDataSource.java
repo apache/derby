@@ -68,27 +68,46 @@ public class checkDataSource
 	// Client connection toString values are not correlated at this time and just 
 	// use default toString
 	// These tests are exempted from other frameworks
-	private static boolean testConnectionToString = TestUtil.isEmbeddedFramework();
+	private boolean testConnectionToString = TestUtil.isEmbeddedFramework();
 	
 	// Only embedded supports SimpleDataSource (JSR169).  
 	// These tests are exempted from other frameworks
-	private static boolean testSimpleDataSource = TestUtil.isEmbeddedFramework();
+	private boolean testSimpleDataSource = TestUtil.isEmbeddedFramework();
 
 	// for a PooledConnection.getConnection() the connection gets closed.
 	// Embedded automatically rolls back any activity on the connection.
 	// Client requires the user to rollback and gives an SQLException  
 	// java.sql.Connection.close() requested while a transaction is in progress
 	// This has been filed as DERBY-1004 
-	private static boolean needRollbackBeforePCGetConnection = 
+	private  boolean needRollbackBeforePCGetConnection = 
 		TestUtil.isDerbyNetClientFramework(); 
 	
 	// DERBY-1035 With client, Connection.getTransactionIsolation() return value is 
 	// wrong after changing the isolation level with an SQL statement such as 
 	// "set current isolation = RS"
 	// Tests for setting isolation level this way only run in embedded for now.
-	private static boolean canSetIsolationWithStatement = TestUtil.isEmbeddedFramework();
+	private boolean canSetIsolationWithStatement = TestUtil.isEmbeddedFramework();
 	  
-    /**
+	// DERBY-1044 [xa] client XAConnection.getConnection() does not have the 
+	// correct default isolation level if set by an earlier connection 
+	// obtained from the same XAConnection
+	// Only print out initial isolation for embedded in this case
+	private boolean isolationResetOnSecondGetConnection = 
+			TestUtil.isEmbeddedFramework();
+	
+	// DERBY-1047  wiht client xa a PreparedStatement created before the global 
+	//transaction starts gives java.sql.SQLException: 'Statement' already closed.' 
+	// when used after  the global transaction ends
+	private static boolean canUseStatementAfterXa_end = TestUtil.isEmbeddedFramework();
+	
+	// DERBY-1025 client  XAResource.start() does not commit an active local transaction 
+	// when auto commit is true. Embedded XAResource.start() implementation commits 
+	// the active local transaction on the Connection associated with the XAResource.
+	// Client incorrectly throws an error.
+	// run only for embedded for now.
+	private static boolean autocommitCommitsOnXa_Start =TestUtil.isEmbeddedFramework();
+	
+	/**
      * A hashtable of opened connections.  This is used when checking to
      * make sure connection strings are unique; we need to make sure all
      * the connections are closed when we are done, so they are stored
@@ -428,7 +447,8 @@ public class checkDataSource
 		System.out.println("Some more isolation testing using SQL and JDBC api");
 		cs1 = xac.getConnection();
 		s = cs1.createStatement();
-		printState("initial local", cs1);
+		if (isolationResetOnSecondGetConnection)
+			printState("initial local", cs1);
 
     System.out.println("Issue setTransactionIsolation in local transaction");
 		cs1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
@@ -449,10 +469,6 @@ public class checkDataSource
 		cs1.setAutoCommit(false);
 
 		checkLocks(cs1);
-		// For client the test only runs this far 
-		// More DERBY-435 checkins will take it further.
-		if (TestUtil.isDerbyNetClientFramework())
-				return;
 		
 		Statement sru1 = cs1.createStatement();
 		sru1.setCursorName("SN1");
@@ -503,7 +519,10 @@ public class checkDataSource
 		showStatementState("LOCAL ", sruState);
 		showStatementState("PS LOCAL ", psruState);
 		showStatementState("CS LOCAL ", csruState);
-		resultSetQuery("Params-local-2", psParams.executeQuery());
+		if (canUseStatementAfterXa_end)
+		{
+			resultSetQuery("Params-local-2", psParams.executeQuery());
+		}
 		checkLocks(cs1);
 		cs1.commit();
 
@@ -617,48 +636,50 @@ public class checkDataSource
 		conn3.close();
 		xac3.close();
 
-		// test that an xastart in auto commit mode commits the existing work.(beetle 5178)
-		XAConnection xac4 = dsx.getXAConnection();
-		Xid xid4a = new cdsXid(4, (byte) 23, (byte) 76);
-		Connection conn4 = xac4.getConnection();
-		System.out.println("conn4 autcommit " + conn4.getAutoCommit());
+		if (autocommitCommitsOnXa_Start)
+		{
+			// test that an xastart in auto commit mode commits the existing work.(beetle 5178)
+			XAConnection xac4 = dsx.getXAConnection();
+			Xid xid4a = new cdsXid(4, (byte) 23, (byte) 76);
+			Connection conn4 = xac4.getConnection();
+			System.out.println("conn4 autcommit " + conn4.getAutoCommit());
 
-		Statement s4 = conn4.createStatement();
-		s4.executeUpdate("create table autocommitxastart(i int)");
-		s4.executeUpdate("insert into autocommitxastart values 1,2,3,4,5");
+			Statement s4 = conn4.createStatement();
+			s4.executeUpdate("create table autocommitxastart(i int)");
+			s4.executeUpdate("insert into autocommitxastart values 1,2,3,4,5");
 
-		ResultSet rs4 = s4.executeQuery("select i from autocommitxastart");
-		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
-		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
+			ResultSet rs4 = s4.executeQuery("select i from autocommitxastart");
+			rs4.next(); System.out.println("acxs " + rs4.getInt(1));
+			rs4.next(); System.out.println("acxs " + rs4.getInt(1));
 
-		xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
-		xac4.getXAResource().end(xid4a, XAResource.TMSUCCESS);
-
-		try {
-			rs4.next(); System.out.println("acxs " + rs.getInt(1));
-		} catch (SQLException sqle) {
-			System.out.println("autocommitxastart expected " + sqle.getMessage());
-		}
-
-		conn4.setAutoCommit(false);
-
-		rs4 = s4.executeQuery("select i from autocommitxastart");
-		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
-		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
-
-		try {
 			xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
-		} catch (XAException xae) {
-			showXAException("autocommitxastart expected ", xae);
-		}
-		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
-		rs4.close();
+			xac4.getXAResource().end(xid4a, XAResource.TMSUCCESS);
 
-		conn4.rollback();
-		conn4.close();
-		xac4.close();
+			try {
+				rs4.next(); System.out.println("acxs " + rs.getInt(1));
+			} catch (SQLException sqle) {
+				System.out.println("autocommitxastart expected " + sqle.getMessage());
+			}
+
+			conn4.setAutoCommit(false);
+
+			rs4 = s4.executeQuery("select i from autocommitxastart");
+			rs4.next(); System.out.println("acxs " + rs4.getInt(1));
+			rs4.next(); System.out.println("acxs " + rs4.getInt(1));
+
+			try {
+				xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
+			} catch (XAException xae) {
+				showXAException("autocommitxastart expected ", xae);
+			}
+			rs4.next(); System.out.println("acxs " + rs4.getInt(1));
+			rs4.close();
+
+			conn4.rollback();
+			conn4.close();
+			xac4.close();
 		
-
+		}
 
 		// test jira-derby 95 - a NullPointerException was returned when passing
 		// an incorrect database name (a url in this case) - should now give error XCY00
@@ -687,7 +708,10 @@ public class checkDataSource
 		} catch (Exception e) {
 				System.out.println("; wrong, unexpected exception: " + e.toString());
 		}
-
+		// Continuing work for DERBY-435 to get checkDataSource working with client 
+		// return here for now.
+		if (TestUtil.isDerbyNetClientFramework())
+			return;
 		testDSRequestAuthentication();
 	}
 
@@ -737,7 +761,6 @@ public class checkDataSource
 			xar.start(xid2, XAResource.TMJOIN);
 			printState("2nd global(existing)", conn);
 			xar.end(xid2, XAResource.TMSUCCESS);
-
 			xar.rollback(xid2);
 			printState("(After 2nd global rollback) local", conn);
 
@@ -780,7 +803,10 @@ public class checkDataSource
 	}
 	protected PreparedStatement createFloatStatementForStateChecking(Connection conn, String sql) throws SQLException {
 		PreparedStatement s = internalCreateFloatStatementForStateChecking(conn, sql);
-		s.setCursorName("StokeNewington");
+		// Need to make a different cursor name here because of DERBY-1036
+		// client won't allow duplicate name.
+		//s.setCursorName("StokeNewington");
+		s.setCursorName("LondonNW17");
 		s.setFetchDirection(ResultSet.FETCH_REVERSE);
 		s.setFetchSize(888);
 		s.setMaxFieldSize(317);
@@ -791,7 +817,9 @@ public class checkDataSource
 	}
 	protected CallableStatement createFloatCallForStateChecking(Connection conn, String sql) throws SQLException {
 		CallableStatement s = internalCreateFloatCallForStateChecking(conn, sql);
-		s.setCursorName("StokeNewington");
+		//DERBY-1036 - need a new name
+		//s.setCursorName("StokeNewington");
+		s.setCursorName("districtInLondon");
 		s.setFetchDirection(ResultSet.FETCH_REVERSE);
 		s.setFetchSize(999);
 		s.setMaxFieldSize(137);

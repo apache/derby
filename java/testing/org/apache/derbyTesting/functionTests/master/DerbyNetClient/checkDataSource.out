@@ -325,10 +325,6 @@ post-X1 commit - local
   read only       false
 EVENT(6):connectionClosed
 Some more isolation testing using SQL and JDBC api
-initial local
-  isolation level REPEATABLE_READ
-  auto commit     true
-  read only       false
 Issue setTransactionIsolation in local transaction
 setTransactionIsolation in local
   isolation level READ_UNCOMMITTED
@@ -339,4 +335,135 @@ THE STATEMENT OBJECTS CAN NOT BE REUSED ACROSS LOCAL/GLOBAL CONNECTIONS BECAUSE,
 WITH HOLDABILITY TRUE WHEREAS GLOBAL CONNECTION CAN ONLY WORK WITH STATEMENTS WITH HOLDABILITY FALSE
 LOCK TABLE
 END LOCK TABLE
+Statement State @ Create 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 444
+  getMaxFieldSize() 713
+  getMaxRows() 19
+Statement State @ PS Create 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 888
+  getMaxFieldSize() 317
+  getMaxRows() 91
+Statement State @ CS Create 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 999
+  getMaxFieldSize() 137
+  getMaxRows() 85
+Params-local-1: ru(params) contents {3}
+sru1-local-1: mismatched Statement connection
+sru1-local-1: ru(SN1) contents {1} {2} {3}
+Expecting exception because global transaction sru1-global-2 is trying to use a statement with holdability true
+sru1-global-2: mismatched Statement connection
+sru1-global-2: java.sql.SQLException: Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+sru2-global-3: mismatched Statement connection
+sru2-global-3: ru(OAK2) contents {1} {2} {3}
+Expecting exception because global transaction sru1-global-4 is trying to use a statement with holdability true
+sru1-global-4: mismatched Statement connection
+sru1-global-4: java.sql.SQLException: Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Statement State @ GLOBAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 444
+  getMaxFieldSize() 713
+  getMaxRows() 19
+Statement State @ PS GLOBAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 888
+  getMaxFieldSize() 317
+  getMaxRows() 91
+Statement State @ CS GLOBAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 999
+  getMaxFieldSize() 137
+  getMaxRows() 85
+PASS: got exception because holdability is true on prepared statement and that is not allowed in global transactions
+Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+sru1-local-5: mismatched Statement connection
+sru1-local-5: ru(SQL_CURLH000C4) contents {1} {2} {3}
+sru2-local-6: mismatched Statement connection
+sru2-local-6: ru(SQL_CURLN000C8) contents {1} {2} {3}
+sru3-local-7: mismatched Statement connection
+sru3-local-7: ru(SF3) contents {1} {2} {3}
+Statement State @ LOCAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 444
+  getMaxFieldSize() 713
+  getMaxRows() 19
+Statement State @ PS LOCAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 888
+  getMaxFieldSize() 317
+  getMaxRows() 91
+Statement State @ CS LOCAL 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 999
+  getMaxFieldSize() 137
+  getMaxRows() 85
+LOCK TABLE
+  xid row 0 lock count 4
+  xid row 1 lock count 12
+END LOCK TABLE
+sru1-local-8: mismatched Statement connection
+sru1-local-8: ru(SQL_CURLH000C9) contents {1} {2} {3}
+sru2-local-9: mismatched Statement connection
+sru2-local-9: ru(SQL_CURLN000C1) contents {1} {2} {3}
+sru3-local-10: mismatched Statement connection
+sru3-local-10: ru(SQL_CURLH000C4) contents {1} {2} {3}
+Statement State @ LOCAL 2 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 444
+  getMaxFieldSize() 713
+  getMaxRows() 19
+Statement State @ PS LOCAL 2 
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 888
+  getMaxFieldSize() 317
+  getMaxRows() 91
+Statement State @ CS LOCAL 2
+  getResultSetType() SCROLL_INSENSITIVE
+  getResultSetConcurrency() READ_ONLY
+  getFetchDirection() REVERSE
+  getFetchSize() 999
+  getMaxFieldSize() 137
+  getMaxRows() 85
+LOCK TABLE
+  xid row 0 lock count 4
+  xid row 1 lock count 12
+END LOCK TABLE
+sruBatch update counts : 1  1  2  1 :
+sruBatch: mismatched Statement connection
+sruBatch: ru(SQL_CURLH000C10) contents {1} {2} {3} {4} {5} {6} {7} {8}
+XAConnection.getConnection : getConnection() is not valid on a closed PooledConnection.
+XAResource.start : XAException - XAER_RMFAIL : Connection is Closed.
+XAResource.end : XAException - XAER_RMFAIL : Connection is Closed.
+XAResource.commit : XAException - XAER_RMFAIL : Connection is Closed.
+XAResource.prepare : XAException - XAER_RMFAIL : Connection is Closed.
+XAResource.recover : XAException - XAER_RMFAIL : Connection is Closed.
+XAResource.prepare : XAException - XAER_RMFAIL : Connection is Closed.
+XAResource.isSameRM : XAException - XAER_RMFAIL : Connection is Closed.
+Patricio update count 1
+testing jira 95 for DataSource; ok - expected exception: XCY00
+testing jira 95 for XADataSource; ok - expected exception: XCY00
 Completed checkDataSource
