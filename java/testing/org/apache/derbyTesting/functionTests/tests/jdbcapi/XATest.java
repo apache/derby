@@ -618,8 +618,10 @@ public class XATest {
             xar.end(xid2, XAResource.TMSUSPEND);
 
             // DERBY-1004
-            if (TestUtil.isDerbyNetClientFramework())
+            if (TestUtil.isDerbyNetClientFramework()) {
+                System.out.println("DERBY-1004 Call conn.close to avoid exception with client");
                 conn.close();
+            }
 
             /*
              -- get local connection again
@@ -684,8 +686,10 @@ public class XATest {
             rs.close();
 
             // DERBY-1004
-            if (TestUtil.isDerbyNetClientFramework())
+            if (TestUtil.isDerbyNetClientFramework()) {
+                System.out.println("DERBY-1004 Call conn.rollback to avoid exception with client");
                 conn.rollback();
+            }
             /*
              -- yanking a local connection away should rollback the changes
              */
@@ -706,12 +710,11 @@ public class XATest {
             Xid xid3 = XATestUtil.getXid(1003, 27, 9);
             try {
                 xar.start(xid3, XAResource.TMNOFLAGS);
+                System.out.println("FAIL XAResource.start on a global transaction with an active local transaction (autocommit false)");
             } catch (XAException xae) {
-                if ((xae.errorCode != XAException.XAER_OUTSIDE)
-                    &&
-                    // DERBY-1024
-                    (xae.errorCode != XAException.XAER_RMFAIL))
+                if (xae.errorCode != XAException.XAER_OUTSIDE)
                     throw xae;
+                System.out.println("Correct XAException on starting a global transaction with an active local transaction (autocommit false)");
             }
             conn.commit();
             xar.start(xid3, XAResource.TMNOFLAGS);
@@ -720,12 +723,16 @@ public class XATest {
              -- now I shouldn't be able to yank it
              xa_getconnection;
              */
+            if (TestUtil.isDerbyNetClientFramework()) {
+                System.out.println("DERBY-341 - Client skipping XAConnection with active local transaction");              
+            } else {
             try {
                 xac.getConnection();
                 System.out
                         .println("FAIL: getConnection with active global xact");
             } catch (SQLException sqle) {
                 TestUtil.dumpSQLExceptions(sqle, true);
+            }
             }
             /*
              select * from foo;
@@ -874,8 +881,10 @@ public class XATest {
             // an implicit commit to complete the local transaction.
             
             // DERBY-1025 Client only bug
-            if (TestUtil.isDerbyNetClientFramework())
+            if (TestUtil.isDerbyNetClientFramework()) {
+                System.out.println("DERBY-1025 Call conn.commit to avoid exception with client");
                 conn.commit();
+            }
             System.out.println("START GLOBAL TRANSACTION");
             // start a global xact and test those statements.
             xar.start(xid, XAResource.TMNOFLAGS);
@@ -984,7 +993,21 @@ public class XATest {
                System.out.println("FAIL: non-held cursor not closed by commit");
         } catch (SQLException sqle)
         {
-             TestUtil.dumpSQLExceptions(sqle, !held);
+            boolean ok = !held;
+            boolean showError = true;
+            if (ok) {
+                if (TestUtil.isEmbeddedFramework()) {
+                    if ("XCL16".equals(sqle.getSQLState()))
+                        showError = false;
+                } else if (TestUtil.isDerbyNetClientFramework()) {
+                    // No SQL state yet from client error.
+                    showError = false;
+                }
+            }
+            if (showError)
+                TestUtil.dumpSQLExceptions(sqle, ok);
+            else if (ok)
+                System.out.println("Non-held ResultSet correctly closed after commit");
         }
         
         rs.close();
