@@ -22,6 +22,8 @@ package org.apache.derby.client.net;
 
 import java.sql.SQLException;
 
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.SqlException;
@@ -148,16 +150,16 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
         if (isXAConnection_) { // XA Connection
             int xaState = getXAState();
             NetXACallInfo callInfo = xares_.callInfoArray_[currXACallInfoOffset_];
-            callInfo.xaRetVal_ = NetXAResource.XARETVAL_XAOK; // initialize XARETVAL
+            callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
             if (xaState == XA_T0_NOT_ASSOCIATED) {
                 readLocalXACommit_();
                 //TODO: Remove
                 //setXAState(XA_LOCAL);
             }
-            if (callInfo.xaRetVal_ != NetXAResource.XARETVAL_XAOK) { // xaRetVal has possible error, format it
+            if (callInfo.xaRetVal_ != XAResource.XA_OK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = NetXAResource.XAFUNC_COMMIT;
                 xares_.xaRetValErrorAccumSQL(callInfo, 0);
-                callInfo.xaRetVal_ = NetXAResource.XARETVAL_XAOK; // re-initialize XARETVAL
+                callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
                 throw xares_.exceptionsOnXA;
             }
         } else
@@ -180,13 +182,13 @@ public class NetXAConnection extends org.apache.derby.client.net.NetConnection {
     public void readRollback() throws SqlException {
         if (isXAConnection_) { // XA connections
             NetXACallInfo callInfo = xares_.callInfoArray_[currXACallInfoOffset_];
-            callInfo.xaRetVal_ = NetXAResource.XARETVAL_XAOK; // initialize XARETVAL
+            callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
             readLocalXARollback_();
 
-            if (callInfo.xaRetVal_ != NetXAResource.XARETVAL_XAOK) { // xaRetVal has possible error, format it
+            if (callInfo.xaRetVal_ != XAResource.XA_OK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = NetXAResource.XAFUNC_ROLLBACK;
                 xares_.xaRetValErrorAccumSQL(callInfo, 0);
-                callInfo.xaRetVal_ = NetXAResource.XARETVAL_XAOK; // re-initialize XARETVAL
+                callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
                 throw xares_.exceptionsOnXA;
             }
 

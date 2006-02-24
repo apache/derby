@@ -62,39 +62,6 @@ public class NetXAResource implements XAResource {
     public static final int RECOVER_XID_ARRAY_LENGTH = 10;
     public static final ClientXid nullXid = new ClientXid();
 
-    // xaretval defines
-    public static final int XARETVAL_XALCSNOTSUPP = 99; // Loosely Coupled Not Supported
-    public static final int XARETVAL_RBROLLBACK = 100; // Rollback
-    public static final int XARETVAL_RBCOMMFAIL = 101; // Rollback Communication Failure
-    public static final int XARETVAL_RBDEADLOCK = 102; // Rollback Deadlock
-    public static final int XARETVAL_RBINTEGRITY = 103; // Rollback integrity violation
-    public static final int XARETVAL_RBOTHER = 104; // Rollback Other
-    public static final int XARETVAL_RBPROTO = 105; // Rollback Protocol
-    public static final int XARETVAL_RBTIMEOUT = 106; // Rollback Timeout
-    public static final int XARETVAL_RBTRANSIENT = 107; // Rollback Transaction branch
-    public static final int XARETVAL_NODISSOCIATE = 108; // Unable to Dissociate resources from connection
-    public static final int XARETVAL_XATWOPHASE = 13; // TwoPhase commit required
-    public static final int XARETVAL_XAPROMOTED = 12; // Promoted - unused
-    public static final int XARETVAL_XADEFERRED = 11; // Deferred - unused
-    public static final int XARETVAL_XACOMMFAIL = 10; // Communication Failure
-    public static final int XARETVAL_XANOMIGRATE = 9; // No Migration
-    public static final int XARETVAL_XAHEURHAZ = 8; // Heuristically completed
-    public static final int XARETVAL_XAHEURCOM = 7; // Heuristically Commited
-    public static final int XARETVAL_XAHEURRB = 6; // Heuristically Rolledback
-    public static final int XARETVAL_XAHEURMIX = 5; // Branch heuristically commit and rollback
-    public static final int XARETVAL_XARETRY = 4; // Retry Commit
-    public static final int XARETVAL_XARDONLY = 3; // Read Only
-    public static final int XARETVAL_XAOK = 0; // OK
-    public static final int XARETVAL_XAERASYNC = -2; // Async Request not possible
-    public static final int XARETVAL_XAERRMERR = -3; // RM Error
-    public static final int XARETVAL_XAERNOTA = -4; // XID does not exist
-    public static final int XARETVAL_XAERINVAL = -5; // Invalid arguments
-    public static final int XARETVAL_XAERPROTO = -6; // Protocol Violation
-    public static final int XARETVAL_XAERRMFAIL = -7; // RM Failed
-    public static final int XARETVAL_XAERDUPID = -8; // Duplicate XID
-    public static final int XARETVAL_XAEROUTSIDE = -9; // Local tansaction active
-    public static final int XARETVAL_XAEROPENRES = -10; // Open resources
-
     // xaFunction defines, shows which queued XA function is being performed
     public static final int XAFUNC_NONE = 0;
     public static final int XAFUNC_COMMIT = 1;
@@ -193,16 +160,16 @@ public class NetXAResource implements XAResource {
                 XAResource.TMNOFLAGS);
         callInfo.xid_ = xid;
         callInfo.xaResource_ = this;
-        callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+        callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
             netAgent.netConnectionRequest_.writeXaCommit(conn_, xid);
             netAgent.flowOutsideUOW();
             netAgent.netConnectionReply_.readXaCommit(conn_);
-            if (callInfo.xaRetVal_ != XARETVAL_XAOK) { // xaRetVal has possible error, format it
+            if (callInfo.xaRetVal_ != XAResource.XA_OK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = XAFUNC_COMMIT;
                 rc = xaRetValErrorAccumSQL(callInfo, rc);
-                callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+                callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
             }
             netAgent.endReadChain();
         } catch (SqlException sqle) {
@@ -253,17 +220,17 @@ public class NetXAResource implements XAResource {
         callInfo.xaFlags_ = flags;
         callInfo.xid_ = xid;
         callInfo.xaResource_ = this;
-        callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+        callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
             netAgent.netConnectionRequest_.writeXaEndUnitOfWork(conn_);
             netAgent.flowOutsideUOW();
             rc = netAgent.netConnectionReply_.readXaEndUnitOfWork(conn_);
             conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending end
-            if (callInfo.xaRetVal_ != XARETVAL_XAOK) { // xaRetVal has possible error, format it
+            if (callInfo.xaRetVal_ != XAResource.XA_OK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = XAFUNC_END;
                 rc = xaRetValErrorAccumSQL(callInfo, rc);
-                callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+                callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
             }
             netAgent.endReadChain();
         } catch (SqlException sqle) {
@@ -303,7 +270,7 @@ public class NetXAResource implements XAResource {
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
         callInfo.xid_ = xid;
         callInfo.xaResource_ = this;
-        callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+        callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             // flow the required PROTOCOL to the server
             netAgent.beginWriteChainOutsideUOW();
@@ -317,10 +284,10 @@ public class NetXAResource implements XAResource {
             netAgent.netConnectionReply_.readXaForget(netAgent.netConnection_);
 
             netAgent.endReadChain();
-            if (callInfo.xaRetVal_ != XARETVAL_XAOK) { // xaRetVal has possible error, format it
+            if (callInfo.xaRetVal_ != XAResource.XA_OK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = XAFUNC_FORGET;
                 rc = xaRetValErrorAccumSQL(callInfo, rc);
-                callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+                callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
             }
         } catch (SqlException sqle) {
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
@@ -389,7 +356,7 @@ public class NetXAResource implements XAResource {
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
         callInfo.xid_ = xid;
         callInfo.xaResource_ = this;
-        callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+        callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
             // sent the prepare PROTOCOL
@@ -398,11 +365,11 @@ public class NetXAResource implements XAResource {
 
             // read the reply to the prepare
             rc = netAgent.netConnectionReply_.readXaPrepare(conn_);
-            if ((callInfo.xaRetVal_ != XARETVAL_XAOK) &&
-                    (callInfo.xaRetVal_ != XARETVAL_XARDONLY)) { // xaRetVal has possible error, format it
+            if ((callInfo.xaRetVal_ != XAResource.XA_OK) &&
+                    (callInfo.xaRetVal_ != XAException.XA_RDONLY)) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = XAFUNC_PREPARE;
                 rc = xaRetValErrorAccumSQL(callInfo, rc);
-                callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+                callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
             }
 
             netAgent.endReadChain();
@@ -455,17 +422,17 @@ public class NetXAResource implements XAResource {
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
         callInfo.xaFlags_ = flag;
         callInfo.xaResource_ = this;
-        callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+        callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
             // sent the recover PROTOCOL
             netAgent.netConnectionRequest_.writeXaRecover(conn_, flag);
             netAgent.flowOutsideUOW();
             netAgent.netConnectionReply_.readXaRecover(conn_);
-            if (callInfo.xaRetVal_ != XARETVAL_XAOK) { // xaRetVal has possible error, format it
+            if (callInfo.xaRetVal_ != XAResource.XA_OK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = XAFUNC_RECOVER;
                 rc = xaRetValErrorAccumSQL(callInfo, rc);
-                callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+                callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
             }
             netAgent.endReadChain();
             if (conn_.indoubtTransactions_ != null) {
@@ -518,7 +485,7 @@ public class NetXAResource implements XAResource {
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
         callInfo.xid_ = xid;
         callInfo.xaResource_ = this;
-        callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+        callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
             netAgent.netConnectionRequest_.writeXaRollback(conn_, xid);
@@ -526,10 +493,10 @@ public class NetXAResource implements XAResource {
             // read the reply to the rollback
             rc = netAgent.netConnectionReply_.readXaRollback(conn_);
             netAgent.endReadChain();
-            if (callInfo.xaRetVal_ != XARETVAL_XAOK) { // xaRetVal has possible error, format it
+            if (callInfo.xaRetVal_ != XAResource.XA_OK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = XAFUNC_END;
                 rc = xaRetValErrorAccumSQL(callInfo, rc);
-                callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+                callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
             }
         } catch (SqlException sqle) {
             rc = XAException.XAER_RMERR;
@@ -591,20 +558,20 @@ public class NetXAResource implements XAResource {
         callInfo.xaInProgress_ = true;
         callInfo.xid_ = xid;
         callInfo.xaResource_ = this;
-        callInfo.xaRetVal_ = XARETVAL_XAOK; // initialize XARETVAL
+        callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
         try {
             netAgent.beginWriteChainOutsideUOW();
             netAgent.netConnectionRequest_.writeXaStartUnitOfWork(conn_);
             netAgent.flowOutsideUOW();
             netAgent.netConnectionReply_.readXaStartUnitOfWork(conn_);
-            if (callInfo.xaRetVal_ != XARETVAL_XAOK) { // xaRetVal has possible error, format it
+            if (callInfo.xaRetVal_ != XAResource.XA_OK) { // xaRetVal has possible error, format it
                 callInfo.xaFunction_ = XAFUNC_START;
                 rc = xaRetValErrorAccumSQL(callInfo, rc);
-                callInfo.xaRetVal_ = XARETVAL_XAOK; // re-initialize XARETVAL
+                callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
             }
             // Setting this is currently required to avoid client from sending
             // commit for autocommit.
-            if (rc == XARETVAL_XAOK) {
+            if (rc == XAResource.XA_OK) {
                 conn_.setXAState(Connection.XA_T1_ASSOCIATED);
             }
 
@@ -915,58 +882,10 @@ public class NetXAResource implements XAResource {
     }
 
     protected int xaRetValErrorAccumSQL(NetXACallInfo callInfo, int currentRC) {
-        int rc;
-        switch (callInfo.xaRetVal_) {
-        case XARETVAL_XAOK:
-        case XARETVAL_NODISSOCIATE:
-            rc = XAResource.XA_OK;
-            break;
-        case XARETVAL_XALCSNOTSUPP:
-            rc = XAResource.XA_OK;
-            break;
-        case XARETVAL_RBROLLBACK:
-            rc = XAException.XA_RBROLLBACK;
-            break;
-        case XARETVAL_RBOTHER:
-            rc = XAException.XA_RBOTHER;
-            break;
-        case XARETVAL_RBDEADLOCK:
-            rc = XAException.XA_RBDEADLOCK;
-            break;
-        case XARETVAL_RBPROTO:
-            rc = XAException.XA_RBPROTO;
-            break;
-        case XARETVAL_XAERPROTO:
-            rc = XAException.XAER_PROTO;
-            break;
-        case XARETVAL_XARDONLY:
-            rc = XAException.XA_RDONLY;
-            break;
-        case XARETVAL_XAHEURCOM:
-            rc = XAException.XA_HEURCOM;
-            break;
-        case XARETVAL_XAHEURRB:
-            rc = XAException.XA_HEURRB;
-            break;
-        case XARETVAL_XAERDUPID:
-            rc = XAException.XAER_DUPID;
-            break;
-        case XARETVAL_XAERNOTA:
-            rc = XAException.XAER_NOTA;
-            break;
-        case XARETVAL_XAERRMERR:
-            rc = XAException.XAER_RMERR;
-            break;
-        case XARETVAL_XAERRMFAIL:
-            rc = XAException.XAER_RMFAIL;
-            break;
-        case XARETVAL_XAERINVAL:
-            rc = XAException.XAER_INVAL;
-            break;
-        default:
-            rc = XAException.XAER_RMFAIL;
-            break;
-        }
+
+        // xaRetVal_ is set by the server to be one of the
+        // standard constants from XAException.
+        int rc = callInfo.xaRetVal_;
 
         if (rc != XAResource.XA_OK) { // error was detected
             // create an SqlException to report this error within
