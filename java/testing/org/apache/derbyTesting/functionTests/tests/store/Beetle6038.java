@@ -37,16 +37,7 @@ public class Beetle6038  {
 	{
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 		Class.forName(driver).newInstance();
-		String dburl = null;
-
-		if(System.getProperty("java.vm.vendor") != null)
-		{
-			String vendor = System.getProperty("java.vm.vendor");
-			if(vendor.toUpperCase().lastIndexOf("SUN") != -1)
-				dburl="jdbc:derby:Beetle6038Db;create=true;dataEncryption=true;bootPassword=Thursday;encryptionAlgorithm=DES/CBC/NoPadding;encryptionProvider=com.sun.crypto.provider.SunJCE";
-			else
-			 dburl = "jdbc:derby:Beetle6038Db;create=true;dataEncryption=true;bootPassword=Thursday;encryptionAlgorithm=DES/CBC/NoPadding;encryptionProvider=com.ibm.crypto.provider.IBMJCE";
-		}
+		String dburl = "jdbc:derby:Beetle6038Db;create=true;dataEncryption=true;bootPassword=Thursday;encryptionAlgorithm=DES/CBC/NoPadding";
 
 		Connection conn = DriverManager.getConnection(dburl);
 		conn.close();
