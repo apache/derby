@@ -79,10 +79,6 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
     //
     // END OF WARNING
     protected void computeFeatureSet_() {
-        if (connection_.resultSetHoldability_ == 0)  // property not set
-        {
-            setDefaultResultSetHoldability();
-        }
 
         // Support for QRYCLSIMP was added in 10.2.0
         if (productLevel_.greaterThanOrEqualTo(10, 2, 0)) {
@@ -90,11 +86,6 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
         } else {
             supportsQryclsimp_ = false;
         }
-    }
-
-
-    public void setDefaultResultSetHoldability() {
-        connection_.resultSetHoldability_ = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
     }
 
     /**

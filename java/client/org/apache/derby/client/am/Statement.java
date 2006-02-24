@@ -1447,7 +1447,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
         if (connection_.autoCommit_ && requiresAutocommit) { // for the auto-commit;
             if (connection_.isXAConnection_) {
-                return (connection_.xaState_ == Connection.XA_T0_NOT_ASSOCIATED) ;
+                return (connection_.getXAState() == Connection.XA_T0_NOT_ASSOCIATED) ;
             } else {
                 return true;
             }
@@ -1526,7 +1526,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         if (connection_.autoCommit_ && requiresAutocommit && isAutoCommittableStatement_) {
             connection_.writeAutoCommit();
             if (connection_.isXAConnection_) {
-                return (connection_.xaState_ == Connection.XA_T0_NOT_ASSOCIATED) ;
+                return (connection_.getXAState() == Connection.XA_T0_NOT_ASSOCIATED) ;
             } else {
                 return true;
             }

@@ -37,6 +37,7 @@ import java.util.Vector;
 
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
+import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.util.StringUtil;
@@ -65,7 +66,7 @@ class DRDAStatement
 	protected ConsistencyToken pkgcnstkn;       // Consistency token for the first result set
  	protected String pkgid;              // package id
  	protected int pkgsn;		// section number
-	protected int withHoldCursor = -1;	 // hold cursor after commit attribute.
+	int withHoldCursor = -1;	 // hold cursor after commit attribute.
 	protected int isolationLevel;         //JCC isolation level for Statement
 	protected String cursorName;
 	protected int scrollType = ResultSet.TYPE_FORWARD_ONLY;			// Sensitive or Insensitive scroll attribute
@@ -510,11 +511,7 @@ class DRDAStatement
 			return ps;
 		}
 		parsePkgidToFindHoldability();
-		Connection conn = database.getConnection();
-		if (conn instanceof BrokeredConnection)
-			ps = conn.prepareStatement(sqlStmt, scrollType, concurType);
-		else
-			ps = prepareStatementJDBC3(sqlStmt, scrollType, concurType, 
+		ps = prepareStatementJDBC3(sqlStmt, scrollType, concurType, 
 									   withHoldCursor);
 		// beetle 3849  -  Need to change the cursor name to what
 		// JCC thinks it will be, since there is no way in the 
@@ -1459,17 +1456,18 @@ class DRDAStatement
 	{
 		if (withHoldCursor != -1)
 			return;
+        
 		//First, check if holdability was passed as a SQL attribute "WITH HOLD" for this prepare. If yes, then withHoldCursor
 		//should not get overwritten by holdability from package name and that is why the check for -1
 		if (isDynamicPkgid(pkgid))
-		{
+		{       
 			if(pkgid.charAt(4) == 'N')
 				withHoldCursor = JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
 			else  
 				withHoldCursor = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
 		}
 		else 
-		{
+		{            
 			withHoldCursor = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
 		
 		}
@@ -1477,10 +1475,8 @@ class DRDAStatement
 
 
 	/**
-	 *  prepare a statement using reflection so that server can run on jdk131
-	 *  and still pass holdability.  
-	 *  parameters are passed on to either the EmbedConnection or 
-	 *  BrokeredConnection prepareStatement() method.
+	 *  prepare a statement using EngineConnection.prepareStatement
+     *  so that server can run on jdk131 and still pass holdability.  
 	 *  @param sqlStmt - SQL statement text
 	 *  @param scrollType - scroll type
 	 *  @param concurType - concurrency type
@@ -1494,26 +1490,17 @@ class DRDAStatement
 													scrollType, int concurType,
 													int withHoldCursor) throws SQLException
 	{
-		PreparedStatement lps = null;
-
-		// If holdability is still uninitialized, default is HOLD_CURSORS_OVER_COMMIT
-		int resultSetHoldability = (withHoldCursor == -1) ? 
-			resultSetHoldability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT :
-			withHoldCursor;
-
-		//prepareStatement takes 4 parameters
-		Class[] PREP_STMT_PARAM = { String.class, Integer.TYPE, Integer.TYPE, Integer.TYPE };
-		Object[] PREP_STMT_ARG = { sqlStmt, new Integer(scrollType),
-								   new Integer(concurType), new Integer(resultSetHoldability)};
-		try {
-			//create a prepared statement with hold cursor over commit using reflection.
-			Method sh = database.getConnection().getClass().getMethod("prepareStatement", PREP_STMT_PARAM);
-			lps = (PreparedStatement) (sh.invoke(database.getConnection(), PREP_STMT_ARG));
-		} catch (Exception e) {
-			handleReflectionException(e);
-		} 
-
-		return lps;
+        EngineConnection conn = database.getConnection();
+        if (withHoldCursor == -1) {
+            // Holdability not explictly set, let the
+            // connection provide the default.
+            return conn.prepareStatement(sqlStmt,
+                    scrollType, concurType);
+        }
+        
+        // Holdability explictly set. 
+        return conn.prepareStatement(sqlStmt,
+                scrollType, concurType, withHoldCursor);
 	}
 
 	
