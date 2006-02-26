@@ -23,6 +23,9 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -80,7 +83,6 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 	 */
 	protected void bind(DDLStatementNode ddlNode, DataDictionary dd)	throws StandardException
 	{
-
 		super.bind(ddlNode, dd);
 
 		refTableSd = getSchemaDescriptor(refTableName.getSchemaName());
@@ -91,17 +93,50 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 		}
 
 		// check the referenced table, unless this is a self-referencing constraint
-		if (!refTableName.equals(ddlNode.getObjectName())) {
+		if (refTableName.equals(ddlNode.getObjectName()))
+			return;
 
-			// clear error when the referenced table does not exist
-			if (getTableDescriptor(refTableName.getTableName(), refTableSd) == null)
-				throw StandardException.newException(SQLState.LANG_INVALID_FK_NO_REF_TAB, 
+		// error when the referenced table does not exist
+		TableDescriptor td = getTableDescriptor(refTableName.getTableName(), refTableSd);
+		if (td == null)
+			throw StandardException.newException(SQLState.LANG_INVALID_FK_NO_REF_TAB, 
 												getConstraintMoniker(), 
 												refTableName.getTableName());
-			
-			// now check any other limitations
-			ddlNode.getTableDescriptor(refTableName);
+
+		// Verify if REFERENCES_PRIV is granted to columns referenced
+		getCompilerContext().pushCurrentPrivType(getPrivType());
+
+		// If references clause doesn't have columnlist, get primary key info
+		if (refRcl.size()==0 && (td.getPrimaryKey() != null))
+		{
+			// Get the primary key columns
+			int[] refCols = td.getPrimaryKey().getReferencedColumns();
+			for (int i=0; i<refCols.length; i++)
+			{
+				ColumnDescriptor cd = td.getColumnDescriptor(refCols[i]);
+				// Set tableDescriptor for this column descriptor. Needed for adding required table
+				// access permission. Column descriptors may not have this set already.
+				cd.setTableDescriptor(td);
+				getCompilerContext().addRequiredColumnPriv(cd);
+			}
+
 		}
+		else
+		{
+			for (int i=0; i<refRcl.size(); i++)
+			{
+				ResultColumn rc = (ResultColumn) refRcl.elementAt(i);
+				ColumnDescriptor cd = td.getColumnDescriptor(rc.getName());
+				if (cd != null)
+				{
+					// Set tableDescriptor for this column descriptor. Needed for adding required table
+					// access permission. Column descriptors may not have this set already.
+					cd.setTableDescriptor(td);
+					getCompilerContext().addRequiredColumnPriv(cd);
+				}
+			}
+		}
+		getCompilerContext().popCurrentPrivType();
 	}
 
 	public ConstraintInfo getReferencedConstraintInfo()
@@ -118,17 +153,8 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 
 	public	TableName	getRefTableName() { return refTableName; }
 
+	int getPrivType()
+	{
+		return Authorizer.REFERENCES_PRIV;
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -28,24 +28,46 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
- * This class describes a columnpermission used (required) by a statement.
+ * This class describes a column permission used (required) by a statement.
  */
 
 public class StatementColumnPermission extends StatementTablePermission
 {
 	private FormatableBitSet columns;
 
-	public StatementColumnPermission( UUID tableUUID, int privType, FormatableBitSet columns)
+	/**
+	 * Constructor for StatementColumnPermission. Creates an instance of column permission requested
+	 * for the given access.
+	 * 
+	 * @param tableUUID	UUID of the table
+	 * @param privType	Access privilege requested
+	 * @param columns	List of columns
+	 *
+	 */
+	public StatementColumnPermission(UUID tableUUID, int privType, FormatableBitSet columns)
 	{
 		super( tableUUID, privType);
 		this.columns = columns;
 	}
 
+	/**
+	 * Return list of columns that need access
+	 *
+	 * @return	FormatableBitSet of columns
+	 */
 	public FormatableBitSet getColumns()
 	{
 		return columns;
 	}
 
+	/**
+	 * Method to check if another instance of column access descriptor matches this.
+	 * Used to ensure only one access descriptor for a table/columns of given privilege is created.
+	 *
+	 * @param obj	Another instance of StatementPermission
+	 *
+	 * @return	true if match
+	 */
 	public boolean equals( Object obj)
 	{
 		if( obj instanceof StatementColumnPermission)
@@ -66,7 +88,7 @@ public class StatementColumnPermission extends StatementTablePermission
 	 *
 	 * @exception StandardException if the permission has not been granted
 	 */
-	public void check( TransactionController tc,
+	public void check(TransactionController tc,
 					   DataDictionary dd,
 					   String authorizationId,
 					   boolean forGrant)
@@ -102,6 +124,7 @@ public class StatementColumnPermission extends StatementTablePermission
 		{
 			if( permittedColumns != null && permittedColumns.get(i))
 				continue;
+
 			// No permission on this column.
 			TableDescriptor td = getTableDescriptor( dd);
 			ColumnDescriptor cd = td.getColumnDescriptor( i + 1);

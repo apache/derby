@@ -398,8 +398,9 @@ public class GenericLanguageConnectionFactory
 			if (value_s != null &&
 				!StringUtil.SQLEqualsIgnoreCase(value_s, Property.NO_ACCESS) &&
 				!StringUtil.SQLEqualsIgnoreCase(value_s, Property.READ_ONLY_ACCESS) &&
-				!StringUtil.SQLEqualsIgnoreCase(value_s, Property.FULL_ACCESS))
-				throw StandardException.newException(SQLState.AUTH_INVALID_AUTHORIZATION_PROPERTY					, key,value_s);
+				!StringUtil.SQLEqualsIgnoreCase(value_s, Property.FULL_ACCESS) &&
+				!StringUtil.SQLEqualsIgnoreCase(value_s, Property.SQL_STANDARD_ACCESS))
+				throw StandardException.newException(SQLState.AUTH_INVALID_AUTHORIZATION_PROPERTY, key, value_s);
 
 			return true;
 		}

@@ -27,6 +27,7 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.impl.sql.execute.FKInfo;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -186,6 +187,9 @@ public final class UpdateNode extends DMLModStatementNode
 
 	public QueryTreeNode bind() throws StandardException
 	{
+		// We just need select privilege on the expressions
+		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
+
 		FromList	fromList = (FromList) getNodeFactory().getNode(
 									C_NodeTypes.FROM_LIST,
 									getNodeFactory().doJoinOrderOptimization(),
@@ -340,10 +344,13 @@ public final class UpdateNode extends DMLModStatementNode
 
 		/* Bind the original result columns by column name */
 		normalizeCorrelatedColumns( resultSet.resultColumns, targetTable );
- 		resultSet.bindResultColumns(targetTableDescriptor,
-									targetVTI,
- 									resultSet.resultColumns, this,
- 									fromList);
+
+		getCompilerContext().pushCurrentPrivType(getPrivType()); // Update privilege
+		resultSet.bindResultColumns(targetTableDescriptor,
+					targetVTI,
+					resultSet.resultColumns, this,
+					fromList);
+		getCompilerContext().popCurrentPrivType();
 
 		LanguageConnectionContext lcc = getLanguageConnectionContext();
 		if (lcc.getAutoincrementUpdate() == false)
@@ -426,36 +433,44 @@ public final class UpdateNode extends DMLModStatementNode
 		*/
 		if (!allColumns && targetVTI == null)
 		{
- 			readColsBitSet = new FormatableBitSet();
-			FromBaseTable fbt = getResultColumnList(resultSet.getResultColumns());
-			afterColumns = resultSet.getResultColumns().copyListAndObjects();
+			getCompilerContext().pushCurrentPrivType( Authorizer.NULL_PRIV);
+			try
+			{
+				readColsBitSet = new FormatableBitSet();
+				FromBaseTable fbt = getResultColumnList(resultSet.getResultColumns());
+				afterColumns = resultSet.getResultColumns().copyListAndObjects();
 
-			readColsBitSet = getReadMap(dataDictionary, 
+				readColsBitSet = getReadMap(dataDictionary, 
 										targetTableDescriptor, 
 										afterColumns);
 
-			afterColumns = fbt.addColsToList(afterColumns, readColsBitSet);
-			resultColumnList = fbt.addColsToList(resultColumnList, readColsBitSet);
+				afterColumns = fbt.addColsToList(afterColumns, readColsBitSet);
+				resultColumnList = fbt.addColsToList(resultColumnList, readColsBitSet);
 
-			/*
-			** If all bits are set, then behave as if we chose all
-			** in the first place
-			*/
-			int i = 1;
-			int size = targetTableDescriptor.getMaxColumnID();
-			for (; i <= size; i++)
-			{
-				if (!readColsBitSet.get(i))
+				/*
+				** If all bits are set, then behave as if we chose all
+				** in the first place
+				*/
+				int i = 1;
+				int size = targetTableDescriptor.getMaxColumnID();
+				for (; i <= size; i++)
 				{
-					break;
+					if (!readColsBitSet.get(i))
+					{
+						break;
+					}
 				}
-			}
 
-			if (i > size)
+				if (i > size)
+				{
+					readColsBitSet = null;
+					allColumns = true;
+				}	
+			}
+			finally
 			{
-				readColsBitSet = null;
-				allColumns = true;
-			}	
+				getCompilerContext().popCurrentPrivType();
+			}
 		}
 
 		if (targetVTI == null)
@@ -505,7 +520,9 @@ public final class UpdateNode extends DMLModStatementNode
 		resultSet.setResultColumns(resultColumnList);
 
 		/* Bind the expressions */
+		getCompilerContext().pushCurrentPrivType(getPrivType()); // Update privilege
 		super.bindExpressions();
+		getCompilerContext().popCurrentPrivType();
 
 		/* Bind untyped nulls directly under the result columns */
 		resultSet.
@@ -587,8 +604,15 @@ public final class UpdateNode extends DMLModStatementNode
             }
         }
 
+		getCompilerContext().popCurrentPrivType();		
+
 		return this;
 	} // end of bind()
+
+	int getPrivType()
+	{
+		return Authorizer.UPDATE_PRIV;
+	}
 
 	/**
 	 * Return true if the node references SESSION schema tables (temporary or permanent)

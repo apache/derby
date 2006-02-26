@@ -578,6 +578,9 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 					columnReference.setNestingLevel(((FromTable) elementAt(0)).getLevel());
 					columnReference.setSourceLevel(currentLevel);
 					columnNameMatch = true;
+
+					CompilerContext cc = getCompilerContext();
+					cc.addRequiredColumnPriv( resultColumn.getTableColumnDescriptor());
 				}
 				else
 				{

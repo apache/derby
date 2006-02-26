@@ -38,6 +38,8 @@ import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 
+import org.apache.derby.iapi.sql.conn.Authorizer;
+
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -477,33 +479,40 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			return null;
 		}
 
-
-		getAllRelevantConstraints(dataDictionary, 	
+ 		// Donot need privileges to execute constraints
+		getCompilerContext().pushCurrentPrivType( Authorizer.NULL_PRIV);
+		try {
+			getAllRelevantConstraints(dataDictionary, 	
 											targetTableDescriptor, 
 											skipCheckConstraints,
 											changedColumnIds);
-		createConstraintDependencies(dataDictionary, relevantCdl, dependent);
-		generateFKInfo(relevantCdl, dataDictionary, targetTableDescriptor, readColsBitSet);
+			createConstraintDependencies(dataDictionary, relevantCdl, dependent);
+			generateFKInfo(relevantCdl, dataDictionary, targetTableDescriptor, readColsBitSet);
 
-		getAllRelevantTriggers(dataDictionary, targetTableDescriptor,
+			getAllRelevantTriggers(dataDictionary, targetTableDescriptor,
 							   changedColumnIds, includeTriggers);
-		createTriggerDependencies(relevantTriggers, dependent);
-		generateTriggerInfo(relevantTriggers, targetTableDescriptor, changedColumnIds);
+			createTriggerDependencies(relevantTriggers, dependent);
+			generateTriggerInfo(relevantTriggers, targetTableDescriptor, changedColumnIds);
 
-		if (skipCheckConstraints)
-		{
-			return null;
-		}
+			if (skipCheckConstraints)
+			{
+				return null;
+			}
 
-		checkConstraints = generateCheckTree(relevantCdl,
+			checkConstraints = generateCheckTree(relevantCdl,
 														targetTableDescriptor);
 
-		if (checkConstraints != null)
-		{
-			bindCheckConstraint(nodeFactory, 
+			if (checkConstraints != null)
+			{
+				bindCheckConstraint(nodeFactory, 
 								targetTableDescriptor,
 								sourceRCL,
 								checkConstraints);
+			}
+		}
+		finally
+		{
+			getCompilerContext().popCurrentPrivType();
 		}
 
 		return	checkConstraints;

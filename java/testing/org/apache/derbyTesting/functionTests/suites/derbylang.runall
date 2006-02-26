@@ -63,7 +63,7 @@ lang/floattypes.sql
 lang/forbitdata.java
 lang/forupdate.sql
 lang/functions.sql
-lang/grantRevoke.sql
+lang/grantRevokeDDL.sql
 lang/groupBy.sql
 lang/holdCursorIJ.sql
 lang/holdCursorJavaReflection.java

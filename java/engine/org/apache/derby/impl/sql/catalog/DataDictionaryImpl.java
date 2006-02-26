@@ -9633,7 +9633,7 @@ public final class	DataDictionaryImpl
     public RoutinePermsDescriptor getRoutinePermissions( UUID routineUUID, String authorizationId)
         throws StandardException
     {
-        RoutinePermsDescriptor key = new RoutinePermsDescriptor( this, authorizationId, (String) null);
+        RoutinePermsDescriptor key = new RoutinePermsDescriptor( this, authorizationId, (String) null, routineUUID);
 
         return (RoutinePermsDescriptor) getPermissions( key);
     } // end of getRoutinePermissions

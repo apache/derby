@@ -24,50 +24,38 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
- * This class describes a routine permission used (required) by a statement.
+ * This class describes a schema permission used (required) by a statement.
  */
 
-public class StatementRoutinePermission extends StatementPermission
+public class StatementSchemaPermission extends StatementPermission
 {
-	protected UUID routineUUID;
+	protected UUID schemaUUID;
 
-	public StatementRoutinePermission( UUID routineUUID)
+	public StatementSchemaPermission(UUID schemaUUID)
 	{
-		this.routineUUID = routineUUID;
+		this.schemaUUID = schemaUUID;
 	}
-									 
+
 	/**
 	 * @param tc the TransactionController
 	 * @param dd A DataDictionary
 	 * @param authorizationId A user
 	 * @param forGrant
 	 *
-	 * @exception StandardException if the permission has not been granted
+	 * @exception StandardException if schema authorization not granted
 	 */
-	public void check( TransactionController tc,
+	public void check(TransactionController tc,
 					   DataDictionary dd,
 					   String authorizationId,
 					   boolean forGrant) throws StandardException
 	{
-		RoutinePermsDescriptor perms = dd.getRoutinePermissions( routineUUID, authorizationId);
-		if( perms == null || ! perms.getHasExecutePermission())
-		{
-			AliasDescriptor ad = dd.getAliasDescriptor( routineUUID);
-			if( ad == null)
-				throw StandardException.newException( SQLState.AUTH_INTERNAL_BAD_UUID, "routine");
-			SchemaDescriptor sd = dd.getSchemaDescriptor( ad.getSchemaUUID(), tc);
-			if( sd == null)
-				throw StandardException.newException( SQLState.AUTH_INTERNAL_BAD_UUID, "schema");
-			throw StandardException.newException( forGrant ? SQLState.AUTH_NO_EXECUTE_PERMISSION_FOR_GRANT
-												  : SQLState.AUTH_NO_EXECUTE_PERMISSION,
-												  authorizationId,
-												  ad.getDescriptorType(),
-												  sd.getSchemaName(),
-												  ad.getDescriptorName());
-		}
-	} // end of check
+		SchemaDescriptor sd = dd.getSchemaDescriptor(schemaUUID, tc);
+		if (!authorizationId.equals(sd.getAuthorizationId()))
+			throw StandardException.newException(SQLState.AUTH_NO_ACCESS_NOT_OWNER,
+				 authorizationId, sd.getSchemaName());
+	}
 }

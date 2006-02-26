@@ -123,7 +123,7 @@ class PermissionsCacheable implements Cacheable
 																  routinePermsKey.getGrantee(),
 																  Authorizer.SYSTEM_AUTHORIZATION_ID,
 																  routinePermsKey.getRoutineUUID(),
-																  false);
+																  true);
 				}
 				catch( java.sql.SQLException sqle)
 				{

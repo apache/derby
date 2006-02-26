@@ -246,5 +246,8 @@ wisconsin_sed.properties
 xml_general.sql
 xmlBinding_app.properties
 xmlTestFiles/*
-grantRevoke.sql
+grantRevoke.java
 grantRevoke_app.properties
+grantRevoke_derby.properties
+grantRevokeDDL.sql
+grantRevokeDDL_app.properties

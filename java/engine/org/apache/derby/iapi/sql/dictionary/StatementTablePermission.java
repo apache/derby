@@ -35,22 +35,49 @@ public class StatementTablePermission extends StatementPermission
 	protected UUID tableUUID;
 	protected int privType; // One of Authorizer.SELECT_PRIV, UPDATE_PRIV, etc.
 
-	public StatementTablePermission( UUID tableUUID, int privType)
+	/**
+	 * Constructor for StatementTablePermission. Creates an instance of table permission requested
+	 * for the given access.
+	 * 
+	 * @param tableUUID	UUID of the table
+	 * @param privType	Access privilege requested
+	 *
+	 */
+	public StatementTablePermission(UUID tableUUID, int privType)
 	{
 		this.tableUUID = tableUUID;
 		this.privType = privType;
 	}
 
+	/**
+	 * Return privilege access requested for this access descriptor
+	 *
+	 * @return	Privilege access
+	 */
 	public int getPrivType()
 	{
 		return privType;
 	}
 
+	/**
+	 * Return table UUID for this access descriptor
+	 *
+	 * @return	Table UUID
+	 */
 	public UUID getTableUUID()
 	{
 		return tableUUID;
 	}
 
+	/**
+	 * Routine to check if another instance of access descriptor matches this.
+	 * Used to ensure only one access descriptor for a table of given privilege is created.
+	 * Otherwise, every column reference from a table may create a descriptor for that table.
+	 *
+	 * @param obj	Another instance of StatementPermission
+	 *
+	 * @return	true if match
+	 */
 	public boolean equals( Object obj)
 	{
 		if( obj == null)
@@ -63,6 +90,12 @@ public class StatementTablePermission extends StatementPermission
 		return false;
 	} // end of equals
 
+	/**
+	 * Return hash code for this instance
+	 *
+	 * @return	Hashcode
+	 *
+	 */
 	public int hashCode()
 	{
 		return privType + tableUUID.hashCode();
@@ -94,22 +127,25 @@ public class StatementTablePermission extends StatementPermission
 		}
 	} // end of check
 
-	protected TableDescriptor getTableDescriptor( DataDictionary dd)  throws StandardException
+	protected TableDescriptor getTableDescriptor(DataDictionary dd)  throws StandardException
 	{
 		TableDescriptor td = dd.getTableDescriptor( tableUUID);
 		if( td == null)
-			throw StandardException.newException( SQLState.AUTH_INTERNAL_BAD_UUID, "table");
+			throw StandardException.newException(SQLState.AUTH_INTERNAL_BAD_UUID, "table");
 		return td;
 	} // end of getTableDescriptor
 
-	protected boolean hasPermissionOnTable( DataDictionary dd, String authorizationId, boolean forGrant)
+	/*
+	 * Check if authorizationId has permission on the table
+	 */
+	protected boolean hasPermissionOnTable(DataDictionary dd, String authorizationId, boolean forGrant)
 		throws StandardException
 	{
 		return oneAuthHasPermissionOnTable( dd, Authorizer.PUBLIC_AUTHORIZATION_ID, forGrant)
 		  || oneAuthHasPermissionOnTable( dd, authorizationId, forGrant);
 	}
 
-	private boolean oneAuthHasPermissionOnTable( DataDictionary dd, String authorizationId, boolean forGrant)
+	private boolean oneAuthHasPermissionOnTable(DataDictionary dd, String authorizationId, boolean forGrant)
 		throws StandardException
 	{
 		TablePermsDescriptor perms = dd.getTablePermissions( tableUUID, authorizationId);
@@ -143,6 +179,11 @@ public class StatementTablePermission extends StatementPermission
 		return "Y".equals(priv) || (!forGrant) && "y".equals( priv);
 	} // end of hasPermissionOnTable
 
+	/**
+	 * Return privilege needed for this access as string
+	 *
+	 * @return	privilege string
+	 */
 	public String getPrivName( )
 	{
 		switch( privType)

@@ -25,6 +25,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -145,168 +146,169 @@ public class DeleteNode extends DMLModStatementNode
 
 	public QueryTreeNode bind() throws StandardException
 	{
-		FromList					fromList =
-								(FromList) getNodeFactory().getNode(
+		// We just need select privilege on the where clause tables
+		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
+		try
+		{
+			FromList	fromList = (FromList) getNodeFactory().getNode(
 									C_NodeTypes.FROM_LIST,
 									getNodeFactory().doJoinOrderOptimization(),
 									getContextManager());
-		ResultColumn				rowLocationColumn = null;
-		CurrentRowLocationNode		rowLocationNode;
-		TableName					cursorTargetTableName = null;
-		CurrentOfNode       		currentOfNode = null;
+			ResultColumn				rowLocationColumn = null;
+			CurrentRowLocationNode		rowLocationNode;
+			TableName					cursorTargetTableName = null;
+			CurrentOfNode       		currentOfNode = null;
 		
-                DataDictionary dataDictionary = getDataDictionary();
-		super.bindTables(dataDictionary);
+			DataDictionary dataDictionary = getDataDictionary();
+			super.bindTables(dataDictionary);
 
-		// wait to bind named target table until the underlying
-		// cursor is bound, so that we can get it from the
-		// cursor if this is a positioned delete.
+			// wait to bind named target table until the underlying
+			// cursor is bound, so that we can get it from the
+			// cursor if this is a positioned delete.
 
-		// for positioned delete, get the cursor's target table.
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(resultSet != null && resultSet instanceof SelectNode,
-			"Delete must have a select result set");
-
-		SelectNode sel;
-		sel = (SelectNode)resultSet;
-		targetTable = (FromTable) sel.fromList.elementAt(0);
-		if (targetTable instanceof CurrentOfNode)
-		{
-			currentOfNode = (CurrentOfNode) targetTable;
-
-			cursorTargetTableName = currentOfNode.getBaseCursorTargetTableName();
-			// instead of an assert, we might say the cursor is not updatable.
+			// for positioned delete, get the cursor's target table.
 			if (SanityManager.DEBUG)
-				SanityManager.ASSERT(cursorTargetTableName != null);
-		}
+				SanityManager.ASSERT(resultSet != null && resultSet instanceof SelectNode,
+				"Delete must have a select result set");
 
-		if (targetTable instanceof FromVTI)
-		{
-			targetVTI = (FromVTI) targetTable;
-			targetVTI.setTarget();
-		}
-		else
-		{
-			// positioned delete can leave off the target table.
-			// we get it from the cursor supplying the position.
-			if (targetTableName == null)
+			SelectNode sel;
+			sel = (SelectNode)resultSet;
+			targetTable = (FromTable) sel.fromList.elementAt(0);
+			if (targetTable instanceof CurrentOfNode)
 			{
-				// verify we have current of
+				currentOfNode = (CurrentOfNode) targetTable;
+
+				cursorTargetTableName = currentOfNode.getBaseCursorTargetTableName();
+				// instead of an assert, we might say the cursor is not updatable.
 				if (SanityManager.DEBUG)
-					SanityManager.ASSERT(cursorTargetTableName!=null);
+					SanityManager.ASSERT(cursorTargetTableName != null);
+			}
+
+			if (targetTable instanceof FromVTI)
+			{
+				targetVTI = (FromVTI) targetTable;
+				targetVTI.setTarget();
+			}
+			else
+			{
+				// positioned delete can leave off the target table.
+				// we get it from the cursor supplying the position.
+				if (targetTableName == null)
+				{
+					// verify we have current of
+					if (SanityManager.DEBUG)
+						SanityManager.ASSERT(cursorTargetTableName!=null);
 
 				targetTableName = cursorTargetTableName;
-			}
-			// for positioned delete, we need to verify that
-			// the named table is the same as the cursor's target (base table name).
-			else if (cursorTargetTableName != null)
-			{
-				// this match requires that the named table in the delete
-				// be the same as a base name in the cursor.
-				if ( !targetTableName.equals(cursorTargetTableName))
+				}
+				// for positioned delete, we need to verify that
+				// the named table is the same as the cursor's target (base table name).
+				else if (cursorTargetTableName != null)
 				{
-					throw StandardException.newException(SQLState.LANG_CURSOR_DELETE_MISMATCH, 
-						targetTableName,
-						currentOfNode.getCursorName());
+					// this match requires that the named table in the delete
+					// be the same as a base name in the cursor.
+					if ( !targetTableName.equals(cursorTargetTableName))
+					{
+						throw StandardException.newException(SQLState.LANG_CURSOR_DELETE_MISMATCH, 
+							targetTableName,
+							currentOfNode.getCursorName());
+					}
 				}
 			}
-
-
-		}
 		
-		// descriptor must exist, tables already bound.
-		verifyTargetTable();
+			// descriptor must exist, tables already bound.
+			verifyTargetTable();
 
-		/* Generate a select list for the ResultSetNode - CurrentRowLocation(). */
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT((resultSet.resultColumns == null),
+			/* Generate a select list for the ResultSetNode - CurrentRowLocation(). */
+			if (SanityManager.DEBUG)
+				SanityManager.ASSERT((resultSet.resultColumns == null),
 							  "resultColumns is expected to be null until bind time");
 
 
-		if (targetTable instanceof FromVTI)
-		{
-			getResultColumnList();
-			resultColumnList = targetTable.getResultColumnsForList(null, resultColumnList, null);
+			if (targetTable instanceof FromVTI)
+			{
+				getResultColumnList();
+				resultColumnList = targetTable.getResultColumnsForList(null, 
+								resultColumnList, null);
 
-			/* Set the new result column list in the result set */
-			resultSet.setResultColumns(resultColumnList);
-		}
-		else
-		{
-			/*
-			** Start off assuming no columns from the base table
-			** are needed in the rcl.
-			*/
+				/* Set the new result column list in the result set */
+				resultSet.setResultColumns(resultColumnList);
+			}
+			else
+			{
+				/*
+				** Start off assuming no columns from the base table
+				** are needed in the rcl.
+				*/
 
-			resultColumnList = new ResultColumnList();
+				resultColumnList = new ResultColumnList();
 
-			FromBaseTable fbt = getResultColumnList(resultColumnList);
+				FromBaseTable fbt = getResultColumnList(resultColumnList);
 
-			readColsBitSet = getReadMap(dataDictionary,
+				readColsBitSet = getReadMap(dataDictionary,
 										targetTableDescriptor);
 
-			resultColumnList = fbt.addColsToList(resultColumnList, readColsBitSet);
+				resultColumnList = fbt.addColsToList(resultColumnList, readColsBitSet);
 
-			/*
-			** If all bits are set, then behave as if we chose all
-			** in the first place
-			*/
-			int i = 1;
-			int size = targetTableDescriptor.getMaxColumnID();
-			for (; i <= size; i++)
-			{
-				if (!readColsBitSet.get(i))
+				/*
+				** If all bits are set, then behave as if we chose all
+				** in the first place
+				*/
+				int i = 1;
+				int size = targetTableDescriptor.getMaxColumnID();
+				for (; i <= size; i++)
 				{
-					break;
+					if (!readColsBitSet.get(i))
+					{
+						break;
+					}
 				}
-			}
 
-			if (i > size)
-			{
-				readColsBitSet = null;
-			}
+				if (i > size)
+				{
+					readColsBitSet = null;
+				}
 
-			/*
-			** Construct an empty heap row for use in our constant action.
-			*/
-			emptyHeapRow = targetTableDescriptor.getEmptyExecRow(getContextManager());
+				/*
+				** Construct an empty heap row for use in our constant action.
+				*/
+				emptyHeapRow = targetTableDescriptor.getEmptyExecRow(getContextManager());
 
-			/* Generate the RowLocation column */
-			rowLocationNode = (CurrentRowLocationNode) getNodeFactory().getNode(
+				/* Generate the RowLocation column */
+				rowLocationNode = (CurrentRowLocationNode) getNodeFactory().getNode(
 										C_NodeTypes.CURRENT_ROW_LOCATION_NODE,
 										getContextManager());
-			rowLocationColumn =
-				(ResultColumn) getNodeFactory().getNode(
+				rowLocationColumn =
+					(ResultColumn) getNodeFactory().getNode(
 									C_NodeTypes.RESULT_COLUMN,
 									COLUMNNAME,
 									rowLocationNode,
 									getContextManager());
-			rowLocationColumn.markGenerated();
+				rowLocationColumn.markGenerated();
 
-			/* Append to the ResultColumnList */
-			resultColumnList.addResultColumn(rowLocationColumn);
+				/* Append to the ResultColumnList */
+				resultColumnList.addResultColumn(rowLocationColumn);
 
-			/* Force the added columns to take on the table's correlation name, if any */
-			correlateAddedColumns( resultColumnList, targetTable );
+				/* Force the added columns to take on the table's correlation name, if any */
+				correlateAddedColumns( resultColumnList, targetTable );
 			
-			/* Set the new result column list in the result set */
-			resultSet.setResultColumns(resultColumnList);
-		}
+				/* Set the new result column list in the result set */
+				resultSet.setResultColumns(resultColumnList);
+			}
 
-		/* Bind the expressions before the ResultColumns are bound */
-		super.bindExpressions();
+			/* Bind the expressions before the ResultColumns are bound */
+			super.bindExpressions();
 
-		/* Bind untyped nulls directly under the result columns */
-		resultSet.
-			getResultColumns().
+			/* Bind untyped nulls directly under the result columns */
+			resultSet.getResultColumns().
 				bindUntypedNullsToResultColumns(resultColumnList);
 
-		if (! (targetTable instanceof FromVTI))
-		{
-			/* Bind the new ResultColumn */
-			rowLocationColumn.bindResultColumnToExpression();
+			if (! (targetTable instanceof FromVTI))
+			{
+				/* Bind the new ResultColumn */
+				rowLocationColumn.bindResultColumnToExpression();
 
-			bindConstraints(dataDictionary,
+				bindConstraints(dataDictionary,
 							getNodeFactory(),
 							targetTableDescriptor,
 							null,
@@ -316,82 +318,94 @@ public class DeleteNode extends DMLModStatementNode
 							false,
 							true);  /* we alway include triggers in core language */
 
-			/* If the target table is also a source table, then
-			 * the delete will have to be in deferred mode
-			 * For deletes, this means that the target table appears in a
-			 * subquery.  Also, self-referencing foreign key deletes
-		 	 * are deferred.  And triggers cause the delete to be deferred.
-			 */
-			if (resultSet.subqueryReferencesTarget(
+				/* If the target table is also a source table, then
+			 	* the delete will have to be in deferred mode
+			 	* For deletes, this means that the target table appears in a
+			 	* subquery.  Also, self-referencing foreign key deletes
+		 	 	* are deferred.  And triggers cause the delete to be deferred.
+			 	*/
+				if (resultSet.subqueryReferencesTarget(
 									targetTableDescriptor.getName(), true) ||
-				requiresDeferredProcessing())
-			{
-				deferred = true;
+					requiresDeferredProcessing())
+				{
+					deferred = true;
+				}
 			}
-		}
-		else
-		{
-            deferred = VTIDeferModPolicy.deferIt( DeferModification.DELETE_STATEMENT,
+			else
+			{
+            	deferred = VTIDeferModPolicy.deferIt( DeferModification.DELETE_STATEMENT,
                                                   targetVTI,
                                                   null,
                                                   sel.getWhereClause());
-		}
-        sel = null; // done with sel
+			}
+        	sel = null; // done with sel
 
-		/* Verify that all underlying ResultSets reclaimed their FromList */
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(fromList.size() == 0,
-				"fromList.size() is expected to be 0, not " +
-				fromList.size() +
-				" on return from RS.bindExpressions()");
-		}
-
-
-		//In case of cascade delete , create nodes for
-		//the ref action  dependent tables and bind them.
-		if(fkTableNames != null)
-		{
-			String currentTargetTableName =
-				targetTableDescriptor.getSchemaName() + "." + targetTableDescriptor.getName();
-
-			if(!isDependentTable){
-				//graph node
-				graphHashTable = new Hashtable();
+			/* Verify that all underlying ResultSets reclaimed their FromList */
+			if (SanityManager.DEBUG)
+			{
+				SanityManager.ASSERT(fromList.size() == 0,
+					"fromList.size() is expected to be 0, not " +
+					fromList.size() +
+					" on return from RS.bindExpressions()");
 			}
 
-			/*Check whether the current tatget is already been explored.
-			 *If we are seeing the same table name which we binded earlier
-			 *means we have cyclic references.
-			 */
-			if(!graphHashTable.containsKey(currentTargetTableName))
+			//In case of cascade delete , create nodes for
+			//the ref action  dependent tables and bind them.
+			if(fkTableNames != null)
 			{
-				cascadeDelete = true;
-				int noDependents = fkTableNames.length;
-				dependentNodes = new QueryTreeNode[noDependents];
-				graphHashTable.put(currentTargetTableName, new Integer(noDependents));
-				for(int i =0 ; i < noDependents ; i ++)
+				String currentTargetTableName = targetTableDescriptor.getSchemaName() +
+						 "." + targetTableDescriptor.getName();
+
+				if(!isDependentTable){
+					//graph node
+					graphHashTable = new Hashtable();
+				}
+
+				/*Check whether the current tatget is already been explored.
+			 	*If we are seeing the same table name which we binded earlier
+			 	*means we have cyclic references.
+			 	*/
+				if(!graphHashTable.containsKey(currentTargetTableName))
 				{
-					dependentNodes[i] = getDependentTableNode(fkTableNames[i],
+					cascadeDelete = true;
+					int noDependents = fkTableNames.length;
+					dependentNodes = new QueryTreeNode[noDependents];
+					graphHashTable.put(currentTargetTableName, new Integer(noDependents));
+					for(int i =0 ; i < noDependents ; i ++)
+					{
+						dependentNodes[i] = getDependentTableNode(fkTableNames[i],
 															  fkRefActions[i],
 															  fkColDescriptors[i]);
-					dependentNodes[i].bind();
+						dependentNodes[i].bind();
+					}
 				}
 			}
-		}else
-		{
-			//case where current dependent table does not have dependent tables
-			if(isDependentTable)
+			else
 			{
-				String currentTargetTableName =
-					targetTableDescriptor.getSchemaName() + "." + targetTableDescriptor.getName();
-				graphHashTable.put(currentTargetTableName, new Integer(0));
+				//case where current dependent table does not have dependent tables
+				if(isDependentTable)
+				{
+					String currentTargetTableName = targetTableDescriptor.getSchemaName()
+							 + "." + targetTableDescriptor.getName();
+					graphHashTable.put(currentTargetTableName, new Integer(0));
 
+				}
 			}
-
+			getCompilerContext().pushCurrentPrivType( getPrivType());
+			getCompilerContext().addRequiredTablePriv( targetTableDescriptor);
+			getCompilerContext().popCurrentPrivType();
+		}
+		finally
+		{
+			getCompilerContext().popCurrentPrivType();
 		}
 		return this;
 	} // end of bind
+
+	int getPrivType()
+	{
+		return Authorizer.DELETE_PRIV;
+	}
 
 	/**
 	 * Return true if the node references SESSION schema tables (temporary or permanent)

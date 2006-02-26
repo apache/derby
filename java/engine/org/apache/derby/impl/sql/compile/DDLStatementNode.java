@@ -192,6 +192,7 @@ abstract class DDLStatementNode extends StatementNode
 	* Get a schema descriptor for this DDL object.
 	* Uses this.objectName.  Always returns a schema,
 	* we lock in the schema name prior to execution.
+	* Checks if current authorizationID is owner of the schema.
 	*
 	* @return Schema Descriptor
 	*
@@ -199,6 +200,24 @@ abstract class DDLStatementNode extends StatementNode
 	*						that doesn't exist	
 	*/
 	protected final SchemaDescriptor getSchemaDescriptor() throws StandardException
+	{
+		return getSchemaDescriptor(true);
+	}
+
+	/**
+	* Get a schema descriptor for this DDL object.
+	* Uses this.objectName.  Always returns a schema,
+	* we lock in the schema name prior to execution.
+	*
+	* @param ownerCheck		If check for schema owner is needed
+	*
+	* @return Schema Descriptor
+	*
+	* @exception	StandardException	throws on schema name
+	*						that doesn't exist	
+	*/
+	protected final SchemaDescriptor getSchemaDescriptor(boolean ownerCheck)
+		 throws StandardException
 	{
 		String schemaName = objectName.getSchemaName();
 		//boolean needError = !(implicitCreateSchema || (schemaName == null));
@@ -214,6 +233,9 @@ abstract class DDLStatementNode extends StatementNode
 			sd  = new SchemaDescriptor(getDataDictionary(), schemaName,
 				(String) null, (UUID)null, false);
 		}
+
+		if (ownerCheck)
+			getCompilerContext().addRequiredSchemaPriv(sd);
 
 		/*
 		** Catch the system schema here.

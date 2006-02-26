@@ -91,7 +91,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		throws StandardException
 	{
 		Activation activation = source.getActivation();
-		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new InsertResultSet(source, checkGM, activation );
 	}
 
@@ -105,7 +105,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		throws StandardException
 	{
 		Activation activation = source.getActivation();
-		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new InsertVTIResultSet(source, vtiRS, activation );
 	}
 
@@ -117,7 +117,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		throws StandardException
 	{
 		Activation activation = source.getActivation();
-		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new DeleteVTIResultSet(source, activation);
 	}
 
@@ -129,7 +129,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		Activation activation = source.getActivation();
-		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new DeleteResultSet(source, activation );
 	}
 
@@ -145,7 +145,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		throws StandardException
 	{
 		Activation activation = source.getActivation();
-		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new DeleteCascadeResultSet(source, activation, 
 										  constantActionItem,
 										  dependentResultSets, 
@@ -174,7 +174,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		{
 			SanityManager.ASSERT(getAuthorizer(activation) != null, "Authorizer is null");
 		}
-		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new UpdateResultSet(source, checkGM, activation);
 	}
 
@@ -186,7 +186,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		Activation activation = source.getActivation();
-		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new UpdateVTIResultSet(source, activation);
 	}
 
@@ -203,7 +203,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		Activation activation = source.getActivation();
-		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
 		return new UpdateResultSet(source, checkGM, activation,
 								   constantActionItem, rsdItem);
 	}
@@ -217,7 +217,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 				Activation activation)
 			throws StandardException
 	{
-		getAuthorizer(activation).authorize(Authorizer.SQL_CALL_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_CALL_OP);
 		return new CallStatementResultSet(methodCall, activation);
 	}
 
@@ -927,7 +927,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	public ResultSet getSetTransactionResultSet(Activation activation) 
 		throws StandardException
 	{
-		getAuthorizer(activation).authorize(Authorizer.SQL_ARBITARY_OP);		
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_ARBITARY_OP);		
 		return new SetTransactionResultSet(activation);
 	}
 
@@ -1017,7 +1017,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	public ResultSet getDDLResultSet(Activation activation)
 					throws StandardException
 	{
-		getAuthorizer(activation).authorize(Authorizer.SQL_DDL_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_DDL_OP);
 		return getMiscResultSet( activation);
 	}
 
@@ -1028,7 +1028,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	public ResultSet getMiscResultSet(Activation activation)
 					throws StandardException
 	{
-		getAuthorizer(activation).authorize(Authorizer.SQL_ARBITARY_OP);
+		getAuthorizer(activation).authorize(activation, Authorizer.SQL_ARBITARY_OP);
 		return new MiscResultSet(activation);
 	}
 

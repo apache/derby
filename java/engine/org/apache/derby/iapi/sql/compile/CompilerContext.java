@@ -529,6 +529,13 @@ public interface CompilerContext extends Context
 	public void addRequiredTablePriv( TableDescriptor table);
 
 	/**
+	 * Add a schema privilege to the list of used privileges.
+	 *
+	 * @param schemaDescriptor
+	 */
+	public void addRequiredSchemaPriv( SchemaDescriptor sd);
+
+	/**
 	 * Add a routine execute privilege to the list of used routine privileges.
 	 *
 	 * @param routine

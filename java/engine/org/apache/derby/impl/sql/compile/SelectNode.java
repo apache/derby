@@ -26,6 +26,8 @@ import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
+import org.apache.derby.iapi.sql.conn.Authorizer;
+
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
@@ -542,6 +544,7 @@ public class SelectNode extends ResultSetNode
 												getContextManager());
 		if (whereClause != null)
 		{
+			getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
 			whereClause = whereClause.bindExpression(fromListParam, 
 										whereSubquerys,
 										whereAggregates);
@@ -570,6 +573,7 @@ public class SelectNode extends ResultSetNode
 				throw StandardException.newException(SQLState.LANG_NON_BOOLEAN_WHERE_CLAUSE, "PARAMETER" );
 			
 			whereClause = whereClause.checkIsBoolean();
+			getCompilerContext().popCurrentPrivType();
 		}
 
 		/* Restore fromList */

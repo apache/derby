@@ -146,9 +146,7 @@ implements Authorizer
 
         if( activation != null)
         {
-            List requiredPermissionsList = null;
-			// GrantRevoke TODO: Need this logic for enforcing permissions later.
-			// List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
+			List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
             if( requiredPermissionsList != null && ! requiredPermissionsList.isEmpty())
             {
                 DataDictionary dd = lcc.getDataDictionary();

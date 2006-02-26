@@ -71,6 +71,7 @@ import org.apache.derby.iapi.services.loader.GeneratedClass;
 
 import java.sql.Timestamp;
 import java.sql.SQLWarning;
+import java.util.List;
 
 /**
  * Basic implementation of prepared statement.
@@ -128,6 +129,7 @@ public class GenericPreparedStatement
 
 	protected ConstantAction	executionConstants;
 	protected Object[]	savedObjects;
+	protected List requiredPermissionsList;
 
 	// fields for dependency tracking
 	protected String UUIDString;
@@ -1187,5 +1189,15 @@ recompileOutOfDatePlan:
 
 	public boolean isStorable() {
 		return false;
+	}
+
+	public void setRequiredPermissionsList( List requiredPermissionsList)
+	{
+		this.requiredPermissionsList = requiredPermissionsList;
+	}
+
+	public List getRequiredPermissionsList()
+	{
+		return requiredPermissionsList;
 	}
 }

@@ -1587,9 +1587,10 @@ public abstract class QueryTreeNode implements Visitable
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "getAuthorizer",
 											 ClassName.Authorizer, 0);
 
+		acb.pushThisAsActivation(mb);
 		mb.push(sqlOperation);
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "authorize",
-											 "void", 1);
+											 "void", 2);
 	}
 	
 

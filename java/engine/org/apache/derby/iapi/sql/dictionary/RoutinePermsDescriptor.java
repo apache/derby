@@ -39,7 +39,7 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
                                    UUID routineUUID,
                                    boolean hasExecutePermission)
 	{
-		super (dd, grantor, grantee);
+        super (dd, grantee, grantor);
         this.routineUUID = routineUUID;
         this.hasExecutePermission = hasExecutePermission;
 	}
@@ -49,7 +49,7 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
                                    String grantor,
                                    UUID routineUUID)
 	{
-        this( dd, grantor, grantee, routineUUID, true);
+        this( dd, grantee, grantor, routineUUID, true);
 	}
 
     /**

@@ -1,7 +1,9 @@
-connect 'grantRevoke;create=true' user 'satheesh' as satConnection;
+connect 'grantRevokeDDL;create=true' user 'satheesh' as satConnection;
 
 -- Test table privileges
-create table satheesh.tsat(i int, j int);
+create table satheesh.tsat(i int not null primary key, j int);
+create index tsat_ind on satheesh.tsat(j);
+create table satheesh.table1 (a int, b int, c char(10));
 grant select on satheesh.tsat to public;
 grant insert on satheesh.tsat to foo;
 grant delete on satheesh.tsat to foo;
@@ -10,7 +12,7 @@ grant update(i) on satheesh.tsat to bar;
 
 select * from sys.systableperms;
 
-connect 'grantRevoke' user 'bar' as barConnection;
+connect 'grantRevokeDDL' user 'bar' as barConnection;
 
 -- Following revokes should fail. Only owner can revoke permissions
 revoke select on satheesh.tsat from public;
@@ -100,4 +102,78 @@ CREATE SCHEMA MYDODO AUTHORIZATION DODO;
 CREATE SCHEMA AUTHORIZATION DERBY;
 
 select * from sys.sysschemas where schemaname not like 'SYS%';
+
+-- Now connect as different user and try to do DDLs in schema owned by satheesh
+connect 'grantRevokeDDL;user=Swiper' as swiperConnection;
+
+set schema satheesh;
+
+-- All these DDLs should fail.
+
+create table NotMyTable (i int, j int);
+
+drop table tsat;
+drop index tsat_ind;
+
+create view myview as select * from satheesh.tsat;
+
+CREATE FUNCTION FuncNotMySchema(P1 INT)
+RETURNS INT NO SQL RETURNS NULL ON NULL INPUT
+EXTERNAL NAME 'java.lang.Math.abs'
+EXTERNAL SECURITY DEFINER
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+
+alter table tsat add column k int;
+
+-- Now create own schema
+create schema swiper;
+
+create table swiper.mytab ( i int, j int);
+
+set schema swiper;
+
+
+-- Some simple DML tests. Should all fail.
+select * from satheesh.tsat;
+insert into satheesh.tsat values (1, 2);
+update satheesh.tsat set i=j;
+
+create table my_tsat (i int not null, c char(10), constraint fk foreign key(i) references satheesh.tsat);
+
+-- Now grant some permissions to swiper
+
+set connection satConnection;
+
+grant select(i), update(j) on tsat to swiper;
+grant all privileges on table1 to swiper;
+
+grant references on tsat to swiper;
+
+set connection swiperConnection;
+
+-- Now some of these should pass
+
+select * from satheesh.tsat;
+
+select i from satheesh.tsat;
+select i from satheesh.tsat where j=2;
+select i from satheesh.tsat where 2 > (select count(i) from satheesh.tsat);
+select i from satheesh.tsat where 2 > (select count(j) from satheesh.tsat);
+select i from satheesh.tsat where 2 > (select count(*) from satheesh.tsat);
+
+update satheesh.tsat set j=j+1;
+update satheesh.tsat set j=2 where i=2;
+update satheesh.tsat set j=2 where j=1;
+
+select * from satheesh.table1;
+select c from satheesh.table1 t1, satheesh.tsat t2 where t1.a = t2.i;
+select b from satheesh.table1 t1, satheesh.tsat t2 where t1.a = t2.j;
+
+select * from satheesh.table1, (select i from satheesh.tsat) table2;
+select * from satheesh.table1, (select j from satheesh.tsat) table2;
+
+-- GrantRevoke TODO: This one should pass, but currently fails. Not sure how to handle this yet.
+update satheesh.tsat set j=i; 
+
+create table my_tsat (i int not null, c char(10), constraint fk foreign key(i) references satheesh.tsat);
 

@@ -37,6 +37,7 @@ import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.StatementTablePermission;
+import org.apache.derby.iapi.sql.dictionary.StatementSchemaPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementColumnPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
 
@@ -684,6 +685,7 @@ public class CompilerContextImpl extends ContextImpl
 		privTypeStack.clear();
 		requiredColumnPrivileges = null;
 		requiredTablePrivileges = null;
+		requiredSchemaPrivileges = null;
 		requiredRoutinePrivileges = null;
 		LanguageConnectionContext lcc = (LanguageConnectionContext)
 		getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
@@ -691,6 +693,7 @@ public class CompilerContextImpl extends ContextImpl
 		{
 			requiredColumnPrivileges = new HashMap();
 			requiredTablePrivileges = new HashMap();
+			requiredSchemaPrivileges = new HashMap();
 			requiredRoutinePrivileges = new HashMap();
 		}
 	} // end of initRequiredPriv
@@ -739,9 +742,9 @@ public class CompilerContextImpl extends ContextImpl
 			tableColumnPrivileges = new StatementColumnPermission( tableUUID,
 																   currPrivType,
 																   new FormatableBitSet( td.getNumberOfColumns()));
-			requiredColumnPrivileges.put( key, tableColumnPrivileges);
+			requiredColumnPrivileges.put(key, tableColumnPrivileges);
 		}
-		tableColumnPrivileges.getColumns().set( column.getPosition() - 1);
+		tableColumnPrivileges.getColumns().set(column.getPosition() - 1);
 	} // end of addRequiredColumnPriv
 
 	/**
@@ -755,7 +758,7 @@ public class CompilerContextImpl extends ContextImpl
 			return;
 
 		StatementTablePermission key = new StatementTablePermission( table.getUUID(), currPrivType);
-		requiredTablePrivileges.put( key, key);
+		requiredTablePrivileges.put(key, key);
 	}
 
 	/**
@@ -768,8 +771,26 @@ public class CompilerContextImpl extends ContextImpl
 		// routine == null for built in routines
 		if( requiredRoutinePrivileges == null || routine == null)
 			return;
-		if( requiredRoutinePrivileges.get( routine.getUUID()) == null)
-			requiredRoutinePrivileges.put( routine.getUUID(), ReuseFactory.getInteger(1));
+
+		/* GrantRevoke TODO: Implement routine privilege checks. Commented out for now.
+ 		if (requiredRoutinePrivileges.get(routine.getUUID()) == null)
+ 			requiredRoutinePrivileges.put(routine.getUUID(), ReuseFactory.getInteger(1));
+		*/
+	}
+
+	/**
+	 * Add a required schema privilege to the list privileges.
+	 *
+	 * @param SchemaDescriptor
+	 */
+	public void addRequiredSchemaPriv(SchemaDescriptor sd)
+	{
+		if( requiredSchemaPrivileges == null || sd == null)
+			return;
+
+		StatementSchemaPermission key = new StatementSchemaPermission(sd.getUUID());
+
+		requiredSchemaPrivileges.put(key, key);
 	}
 
 	/**
@@ -782,6 +803,8 @@ public class CompilerContextImpl extends ContextImpl
 			size += requiredRoutinePrivileges.size();
 		if( requiredTablePrivileges != null)
 			size += requiredTablePrivileges.size();
+		if( requiredSchemaPrivileges != null)
+			size += requiredSchemaPrivileges.size();
 		if( requiredColumnPrivileges != null)
 			size += requiredColumnPrivileges.size();
 		
@@ -798,6 +821,13 @@ public class CompilerContextImpl extends ContextImpl
 		if( requiredTablePrivileges != null)
 		{
 			for( Iterator itr = requiredTablePrivileges.values().iterator(); itr.hasNext();)
+			{
+				list.add( itr.next());
+			}
+		}
+		if( requiredSchemaPrivileges != null)
+		{
+			for( Iterator itr = requiredSchemaPrivileges.values().iterator(); itr.hasNext();)
 			{
 				list.add( itr.next());
 			}
@@ -857,5 +887,6 @@ public class CompilerContextImpl extends ContextImpl
 	private int currPrivType = Authorizer.NULL_PRIV;
 	private HashMap requiredColumnPrivileges;
 	private HashMap requiredTablePrivileges;
+	private HashMap requiredSchemaPrivileges;
 	private HashMap requiredRoutinePrivileges;
 } // end of class CompilerContextImpl

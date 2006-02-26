@@ -29,6 +29,8 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
+import java.util.List;
+
 /**
  * Execution extends prepared statement to add methods it needs
  * for execution purposes (that should not be on the Database API).
@@ -150,5 +152,11 @@ public interface ExecPreparedStatement
 	 * Indicate that the statement represents an SPS action
 	 */
 	void setSPSAction();
+
+	/**
+	 * @return the list of permissions required to execute this statement. May be null if
+	 *         the database does not use SQL standard authorization
+	 */
+	List getRequiredPermissionsList();
 }
 

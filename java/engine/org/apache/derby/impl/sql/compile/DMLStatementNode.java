@@ -29,6 +29,7 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ParameterValueSet;
@@ -147,14 +148,22 @@ abstract class DMLStatementNode extends StatementNode
 	public QueryTreeNode bind(DataDictionary dataDictionary)
 					 throws StandardException
 	{
-		/*
-		** Bind the tables before binding the expressions, so we can
-		** use the results of table binding to look up columns.
-		*/
-		bindTables(dataDictionary);
+		// We just need select privilege on most columns and tables
+		getCompilerContext().pushCurrentPrivType(getPrivType());
+		try {
+			/*
+			** Bind the tables before binding the expressions, so we can
+			** use the results of table binding to look up columns.
+			*/
+			bindTables(dataDictionary);
 
-		/* Bind the expressions */
-		bindExpressions();
+			/* Bind the expressions */
+			bindExpressions();
+		}
+		finally
+		{
+			getCompilerContext().popCurrentPrivType();
+		}
 
 		return this;
 	}
@@ -465,5 +474,16 @@ abstract class DMLStatementNode extends StatementNode
 		}
 
 		return this;
+	}
+
+	/**
+	 * Return default privilege needed for this node. Other DML nodes can override
+	 * this method to set their own default privilege.
+	 *
+	 * @return true if the statement is atomic
+	 */
+	int getPrivType()
+	{
+		return Authorizer.SELECT_PRIV;
 	}
 }

@@ -678,6 +678,7 @@ public class ResultColumn extends ValueNode
 
 		setColumnDescriptor(tableDescriptor, columnDescriptor);
 		setVirtualColumnId(columnId);
+		getCompilerContext().addRequiredColumnPriv( columnDescriptor);
 	}
 	
 	/**

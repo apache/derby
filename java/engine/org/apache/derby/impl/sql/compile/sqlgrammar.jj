@@ -12090,31 +12090,18 @@ List granteeList() throws StandardException :
 void
 grantee( List list)  throws StandardException :
 {
-	Token tok;
     String str;
 }
 {
-    tok = <IDENTIFIER>
+    str = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
     {
-        checkAuthorizationLength( tok.image);
-        list.add( tok.image);
+        checkAuthorizationLength(str);
+        list.add(str);
     }
 |
-    tok = <PUBLIC>
+    <PUBLIC>
     {
         list.add( Authorizer.PUBLIC_AUTHORIZATION_ID);
-    }
-|
-    str = delimitedIdentifier()
-    {
-        checkAuthorizationLength( str);
-        list.add( str);
-    }
-|
-    str = nonReservedKeyword()
-    {
-        checkAuthorizationLength( str);
-        list.add( str);
     }
 }
 

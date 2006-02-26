@@ -123,7 +123,7 @@ public final class PropertyInfo
 
 		try {
 		Authorizer a = lcc.getAuthorizer();
-		a.authorize(Authorizer.PROPERTY_WRITE_OP);
+		a.authorize((Activation) null, Authorizer.PROPERTY_WRITE_OP);
 
         // Get the current transaction controller
         TransactionController tc = lcc.getTransactionExecute();

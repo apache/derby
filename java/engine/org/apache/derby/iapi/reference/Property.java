@@ -628,6 +628,9 @@ public interface Property {
 	public static final String
 	FULL_ACCESS_USERS_PROPERTY = "derby.database.fullAccessUsers";
 
+	public static final String
+	SQL_AUTHORIZATION = "derby.database.sqlAuthorization";
+
 	/*
 	** Authentication
 	*/

@@ -281,6 +281,7 @@ public class StaticMethodCallNode extends MethodCallNode
 			}
 		}
 
+		getCompilerContext().addRequiredRoutinePriv(ad);
 		return this;
 	}
 

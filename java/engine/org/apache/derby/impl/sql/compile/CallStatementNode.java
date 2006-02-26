@@ -38,6 +38,7 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
@@ -157,8 +158,9 @@ public class CallStatementNode extends DMLStatementNode
 		DataDictionary dd = getDataDictionary();
 
 		if (SanityManager.DEBUG)
-		SanityManager.ASSERT((dd != null), "Failed to get data dictionary");
+			SanityManager.ASSERT((dd != null), "Failed to get data dictionary");
 
+		getCompilerContext().pushCurrentPrivType(getPrivType());
 		methodCall = (JavaToSQLValueNode) methodCall.bindExpression(
 							(FromList) getNodeFactory().getNode(
 								C_NodeTypes.FROM_LIST,
@@ -167,6 +169,7 @@ public class CallStatementNode extends DMLStatementNode
 							null,
 							null);
 
+		getCompilerContext().popCurrentPrivType();
 		return this;
 	}
 
@@ -297,5 +300,12 @@ public class CallStatementNode extends DMLStatementNode
 
 		return returnNode;
 	}
-}
 
+	/**
+	 * Set default privilege of EXECUTE for this node. 
+	 */
+	int getPrivType()
+	{
+		return Authorizer.EXECUTE_PRIV;
+	}
+}

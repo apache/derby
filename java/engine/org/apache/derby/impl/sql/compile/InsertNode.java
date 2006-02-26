@@ -32,6 +32,8 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
+import org.apache.derby.iapi.sql.conn.Authorizer;
+
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -225,6 +227,9 @@ public final class InsertNode extends DMLModStatementNode
 
 	public QueryTreeNode bind() throws StandardException
 	{
+		// We just need select privilege on the expressions
+		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
+
 		FromList	fromList = (FromList) getNodeFactory().getNode(
 									C_NodeTypes.FROM_LIST,
 									getNodeFactory().doJoinOrderOptimization(),
@@ -260,6 +265,7 @@ public final class InsertNode extends DMLModStatementNode
 		if (targetColumnList != null)
 		{
 			/* Bind the target column list */
+			getCompilerContext().pushCurrentPrivType( getPrivType());
 			if (targetTableDescriptor != null)
 			{
 				targetColumnList.bindResultColumnsByName(targetTableDescriptor,
@@ -270,7 +276,7 @@ public final class InsertNode extends DMLModStatementNode
 				targetColumnList.bindResultColumnsByName(targetVTI.getResultColumns(), targetVTI,
 														this);
 			}
-
+			getCompilerContext().popCurrentPrivType();
 		}
 
 		/* Verify that all underlying ResultSets reclaimed their FromList */
@@ -496,6 +502,10 @@ public final class InsertNode extends DMLModStatementNode
 
 			autoincRowLocation = 
 				dd.computeAutoincRowLocations(tc, targetTableDescriptor);
+
+			getCompilerContext().pushCurrentPrivType(getPrivType());
+			getCompilerContext().addRequiredTablePriv(targetTableDescriptor);
+			getCompilerContext().popCurrentPrivType();
 		}
 		else
 		{
@@ -505,7 +515,13 @@ public final class InsertNode extends DMLModStatementNode
                                                   resultSet);
 		}
         
+		getCompilerContext().popCurrentPrivType();
 		return this;
+	}
+
+	int getPrivType()
+	{
+		return Authorizer.INSERT_PRIV;
 	}
 
 	/**

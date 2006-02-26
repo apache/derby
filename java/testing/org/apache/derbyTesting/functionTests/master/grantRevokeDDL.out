@@ -1,6 +1,10 @@
-ij> connect 'grantRevoke;create=true' user 'satheesh' as satConnection;
+ij> connect 'grantRevokeDDL;create=true' user 'satheesh' as satConnection;
 ij> -- Test table privileges
-create table satheesh.tsat(i int, j int);
+create table satheesh.tsat(i int not null primary key, j int);
+0 rows inserted/updated/deleted
+ij> create index tsat_ind on satheesh.tsat(j);
+0 rows inserted/updated/deleted
+ij> create table satheesh.table1 (a int, b int, c char(10));
 0 rows inserted/updated/deleted
 ij> grant select on satheesh.tsat to public;
 0 rows inserted/updated/deleted
@@ -16,9 +20,9 @@ ij> select * from sys.systableperms;
 GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 PUBLIC                                                                                                                          |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
-foo                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|y|y|y|N|N
+FOO                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|y|y|y|N|N
 2 rows selected
-ij> connect 'grantRevoke' user 'bar' as barConnection;
+ij> connect 'grantRevokeDDL' user 'bar' as barConnection;
 ij(BARCONNECTION)> -- Following revokes should fail. Only owner can revoke permissions
 revoke select on satheesh.tsat from public;
 ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
@@ -46,7 +50,7 @@ select * from sys.systableperms;
 GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 PUBLIC                                                                                                                          |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
-foo                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|N|y|N|N|N
+FOO                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|N|y|N|N|N
 2 rows selected
 ij(SATCONNECTION)> revoke insert on satheesh.tsat from foo;
 0 rows inserted/updated/deleted
@@ -134,4 +138,96 @@ xxxxFILTERED-UUIDxxxx|AUTH_TEST                                                 
 xxxxFILTERED-UUIDxxxx|MYDODO                                                                                                                          |DODO                                                                                                                            
 xxxxFILTERED-UUIDxxxx|DERBY                                                                                                                           |DERBY                                                                                                                           
 7 rows selected
-ij(SATCONNECTION)> 
+ij(SATCONNECTION)> -- Now connect as different user and try to do DDLs in schema owned by satheesh
+connect 'grantRevokeDDL;user=Swiper' as swiperConnection;
+ij(SWIPERCONNECTION)> set schema satheesh;
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> -- All these DDLs should fail.
+create table NotMyTable (i int, j int);
+ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ij(SWIPERCONNECTION)> drop table tsat;
+ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ij(SWIPERCONNECTION)> drop index tsat_ind;
+ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ij(SWIPERCONNECTION)> create view myview as select * from satheesh.tsat;
+ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ij(SWIPERCONNECTION)> CREATE FUNCTION FuncNotMySchema(P1 INT)
+RETURNS INT NO SQL RETURNS NULL ON NULL INPUT
+EXTERNAL NAME 'java.lang.Math.abs'
+EXTERNAL SECURITY DEFINER
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ij(SWIPERCONNECTION)> alter table tsat add column k int;
+ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ij(SWIPERCONNECTION)> -- Now create own schema
+create schema swiper;
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> create table swiper.mytab ( i int, j int);
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> set schema swiper;
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> -- Some simple DML tests. Should all fail.
+select * from satheesh.tsat;
+ERROR 28508: User 'SWIPER' does not have select permission on column 'I' of table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> insert into satheesh.tsat values (1, 2);
+ERROR 28506: User 'SWIPER' does not have insert permission on table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> update satheesh.tsat set i=j;
+ERROR 28508: User 'SWIPER' does not have update permission on column 'I' of table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> create table my_tsat (i int not null, c char(10), constraint fk foreign key(i) references satheesh.tsat);
+ERROR 28508: User 'SWIPER' does not have references permission on column 'I' of table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> -- Now grant some permissions to swiper
+set connection satConnection;
+ij(SATCONNECTION)> grant select(i), update(j) on tsat to swiper;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant all privileges on table1 to swiper;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant references on tsat to swiper;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> set connection swiperConnection;
+ij(SWIPERCONNECTION)> -- Now some of these should pass
+select * from satheesh.tsat;
+ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> select i from satheesh.tsat;
+I          
+-----------
+0 rows selected
+ij(SWIPERCONNECTION)> select i from satheesh.tsat where j=2;
+ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> select i from satheesh.tsat where 2 > (select count(i) from satheesh.tsat);
+I          
+-----------
+0 rows selected
+ij(SWIPERCONNECTION)> select i from satheesh.tsat where 2 > (select count(j) from satheesh.tsat);
+ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> select i from satheesh.tsat where 2 > (select count(*) from satheesh.tsat);
+I          
+-----------
+0 rows selected
+ij(SWIPERCONNECTION)> update satheesh.tsat set j=j+1;
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> update satheesh.tsat set j=2 where i=2;
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> update satheesh.tsat set j=2 where j=1;
+ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> select * from satheesh.table1;
+A          |B          |C         
+----------------------------------
+0 rows selected
+ij(SWIPERCONNECTION)> select c from satheesh.table1 t1, satheesh.tsat t2 where t1.a = t2.i;
+C         
+----------
+0 rows selected
+ij(SWIPERCONNECTION)> select b from satheesh.table1 t1, satheesh.tsat t2 where t1.a = t2.j;
+ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> select * from satheesh.table1, (select i from satheesh.tsat) table2;
+A          |B          |C         |I          
+----------------------------------------------
+0 rows selected
+ij(SWIPERCONNECTION)> select * from satheesh.table1, (select j from satheesh.tsat) table2;
+ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> -- GrantRevoke TODO: This one should pass, but currently fails. Not sure how to handle this yet.
+update satheesh.tsat set j=i;
+ERROR 28508: User 'SWIPER' does not have update permission on column 'I' of table 'SATHEESH'.'TSAT'.
+ij(SWIPERCONNECTION)> create table my_tsat (i int not null, c char(10), constraint fk foreign key(i) references satheesh.tsat);
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> 

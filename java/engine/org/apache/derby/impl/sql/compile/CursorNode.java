@@ -24,6 +24,9 @@ import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -236,35 +239,43 @@ public class CursorNode extends DMLStatementNode
 			orderByList.pullUpOrderByColumns(resultSet);
 		}
 
-		FromList	fromList = (FromList) getNodeFactory().getNode(
-				C_NodeTypes.FROM_LIST,
-				getNodeFactory().doJoinOrderOptimization(),
-				getContextManager());
+		getCompilerContext().pushCurrentPrivType(getPrivType());
+		try {
+			FromList	fromList = (FromList) getNodeFactory().getNode(
+					C_NodeTypes.FROM_LIST,
+					getNodeFactory().doJoinOrderOptimization(),
+					getContextManager());
 
-		/* Check for ? parameters directly under the ResultColums */
-		resultSet.rejectParameters();
+			/* Check for ? parameters directly under the ResultColums */
+			resultSet.rejectParameters();
 
-		super.bind(dataDictionary);
+			super.bind(dataDictionary);
 
-		// bind the query expression
-		resultSet.bindResultColumns(fromList);
+			// bind the query expression
+			resultSet.bindResultColumns(fromList);
 
-		// this rejects any untyped nulls in the select list
-		// pass in null to indicate that we don't have any
-		// types for this node
-		resultSet.bindUntypedNullsToResultColumns(null);
+			// this rejects any untyped nulls in the select list
+			// pass in null to indicate that we don't have any
+			// types for this node
+			resultSet.bindUntypedNullsToResultColumns(null);
 
-		// Reject any XML values in the select list; JDBC doesn't
-		// define how we bind these out, so we don't allow it.
-		resultSet.rejectXMLValues();
+			// Reject any XML values in the select list; JDBC doesn't
+			// define how we bind these out, so we don't allow it.
+			resultSet.rejectXMLValues();
 
-		/* Verify that all underlying ResultSets reclaimed their FromList */
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(fromList.size() == 0,
+			/* Verify that all underlying ResultSets reclaimed their FromList */
+			if (SanityManager.DEBUG) {
+				SanityManager.ASSERT(fromList.size() == 0,
 					"fromList.size() is expected to be 0, not "
 							+ fromList.size()
 							+ " on return from RS.bindExpressions()");
+			}
 		}
+		finally
+		{
+			getCompilerContext().popCurrentPrivType();
+		}
+
 		// bind the order by
 		if (orderByList != null)
 		{

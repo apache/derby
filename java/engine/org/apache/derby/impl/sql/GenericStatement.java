@@ -503,6 +503,7 @@ public class GenericStatement
 					*/
 					preparedStmt.setConstantAction( qt.makeConstantAction() );
 					preparedStmt.setSavedObjects( cc.getSavedObjects() );
+					preparedStmt.setRequiredPermissionsList(cc.getRequiredPermissionsList());
 					preparedStmt.setActivationClass(ac);
 					preparedStmt.setNeedsSavepoint(qt.needsSavepoint());
 					preparedStmt.setCursorInfo((CursorInfo)cc.getCursorInfo());
