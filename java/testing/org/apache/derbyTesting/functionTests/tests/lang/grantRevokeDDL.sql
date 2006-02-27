@@ -172,8 +172,55 @@ select b from satheesh.table1 t1, satheesh.tsat t2 where t1.a = t2.j;
 select * from satheesh.table1, (select i from satheesh.tsat) table2;
 select * from satheesh.table1, (select j from satheesh.tsat) table2;
 
--- GrantRevoke TODO: This one should pass, but currently fails. Not sure how to handle this yet.
+-- GrantRevoke TODO: This one should pass, but currently fails. Bind update expression in two steps.
 update satheesh.tsat set j=i; 
 
 create table my_tsat (i int not null, c char(10), constraint fk foreign key(i) references satheesh.tsat);
+
+-- Some simple routine tests. See GrantRevoke.java for more tests
+set connection satConnection;
+
+values f_abs(-5);
+
+select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
+
+-- Same tests should fail
+set connection swiperConnection;
+set schema satheesh;
+
+values f_abs(-5);
+
+select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
+
+-- Now grant execute permission and try again
+
+set connection satConnection;
+
+grant execute on function f_abs to swiper;
+
+set connection swiperConnection;
+
+-- Should pass now
+values f_abs(-5);
+
+select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
+
+-- Now revoke permission and try
+
+set connection satConnection;
+revoke execute on function f_abs from swiper RESTRICT;
+
+set connection swiperConnection;
+values f_abs(-5);
+select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
+
+-- Now try public permission
+set connection satConnection;
+grant execute on function f_abs to public;
+set connection swiperConnection;
+
+-- Should pass again
+values f_abs(-5);
+
+select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
 

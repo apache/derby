@@ -117,8 +117,16 @@ class PermissionsCacheable implements Cacheable
 				{
 					AliasDescriptor ad = dd.getAliasDescriptor( routinePermsKey.getRoutineUUID());
 					SchemaDescriptor sd = dd.getSchemaDescriptor( ad.getSchemaUUID(),
-																  ConnectionUtil.getCurrentLCC().getTransactionExecute());
-					if( routinePermsKey.getGrantee().equals( sd.getAuthorizationId()))
+											  ConnectionUtil.getCurrentLCC().getTransactionExecute());
+					// GrantRevoke TODO: This needs to be changed. Shouldn't allow execute on all system
+					// routines.
+					if (sd.isSystemSchema())
+						permissions = new RoutinePermsDescriptor( dd,
+																  routinePermsKey.getGrantee(),
+                                                                  (String) null,
+																  routinePermsKey.getRoutineUUID(),
+																  true);
+					else if( routinePermsKey.getGrantee().equals( sd.getAuthorizationId()))
 						permissions = new RoutinePermsDescriptor( dd,
 																  routinePermsKey.getGrantee(),
 																  Authorizer.SYSTEM_AUTHORIZATION_ID,

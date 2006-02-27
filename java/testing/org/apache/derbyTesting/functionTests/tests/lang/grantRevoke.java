@@ -363,41 +363,41 @@ public class grantRevoke
         "  no sql called on null input"
     };
 
-    private static int s1F1()
+    public static int s1F1()
     {
         routineCalled = true;
         return 1;
     }
-    private static int s2F1a()
+    public static int s2F1a()
     {
         routineCalled = true;
         return 1;
     }
-    private static int s2F1b( String s)
+    public static int s2F1b( String s)
     {
         routineCalled = true;
         return 1;
     }
-    private static int s2F1c( String s1, String s2)
+    public static int s2F1c( String s1, String s2)
     {
         routineCalled = true;
         return 1;
     }
-    private static int s2F1d( int i)
+    public static int s2F1d( int i)
     {
         routineCalled = true;
         return 1;
     }
-    private static int s2F2()
+    public static int s2F2()
     {
         routineCalled = true;
         return 1;
     }
-    private static void s1F1P( )
+    public static void s1F1P( )
     {
         routineCalled = true;
     }
-    private static void s1P1( )
+    public static void s1P1( )
     {
         routineCalled = true;
     }
@@ -781,7 +781,7 @@ public class grantRevoke
          */
         "create procedure r1.f1()" +
         "  language java parameter style java" +
-        "  external name 'org.apache.derbyTesting.functionTests.tests.lang.grantRevoke.s1F1'" +
+        "  external name 'org.apache.derbyTesting.functionTests.tests.lang.grantRevoke.s1P1'" +
         "  no sql called on null input",
         "create function r2.f1() returns int" +
         "  language java parameter style java" +
@@ -1020,6 +1020,9 @@ public class grantRevoke
 
     private static final String[] tablePrivErrMsgFixedSegs
     = { "User '", "' does not have ", " permission on table '", "'.'", "'."};
+
+    private static final String[] executePrivErrMsgFixedSegs
+    = { "User '", "' does not have execute permission on ", " '", "'.'", "'."};
 
     private abstract class TablePrivCheck extends PrivCheck
     {
@@ -1452,7 +1455,7 @@ public class grantRevoke
 
         private void checkUser( User user, StringBuffer sb, String testLabel) throws SQLException
         {
-System.out.println("SelectPrivCheck: " + sb.toString());
+			System.out.println("SelectPrivCheck: " + sb.toString());
             PreparedStatement ps = user.getConnection().prepareStatement( sb.toString());
             try
             {
@@ -1592,7 +1595,7 @@ System.out.println("DeletePrivCheck: " + sb.toString());
             sb.append(")");
             boolean savedAutoCommit = user.getConnection().getAutoCommit();
             user.getConnection().setAutoCommit( false);
-System.out.println("InsertPrivCheck: " + sb.toString());
+            System.out.println("InsertPrivCheck: " + sb.toString());
             PreparedStatement ps = user.getConnection().prepareStatement( sb.toString());
             try
             {
@@ -1680,7 +1683,7 @@ System.out.println("InsertPrivCheck: " + sb.toString());
                     }
                     appendAColumnValue( sb, rs.getInt(5));
                     rs.close();
-System.out.println("UpdatePrivCheck: " + sb.toString());
+					System.out.println("UpdatePrivCheck: " + sb.toString());
                     PreparedStatement ps = user.getConnection().prepareStatement( sb.toString());
                     try
                     {
@@ -1877,8 +1880,65 @@ System.out.println("UpdatePrivCheck: " + sb.toString());
          */
         void checkUser( User user, String testLabel) throws SQLException
         {
-            // RESOLVE
+            StringBuffer sb = new StringBuffer();
+            if (isFunction)
+            	sb.append( "values \"");
+            else
+            	sb.append( "call \"");
+            sb.append(schema);
+            sb.append("\".\"");
+            sb.append(routine);
+            sb.append("\"");
+            sb.append("()");
+
+            boolean savedAutoCommit = user.getConnection().getAutoCommit();
+            user.getConnection().setAutoCommit(false);
+            System.out.println("ExecutePrivCheck: " + sb.toString());
+            PreparedStatement ps = user.getConnection().prepareStatement(sb.toString());
+            try
+            {
+		if (isFunction)
+		{
+                    ResultSet rs = ps.executeQuery();
+                    rs.close();
+		}
+                else
+                    ps.executeUpdate();
+                if( ! (privIsPublic || expectPriv))
+                    reportFailure( "An execute was performed without permission. (" + testLabel + ")");
+            }
+            catch( SQLException sqle)
+            {
+                checkExecutePermissionMsg( sqle, user, testLabel);
+            }
+            finally
+            {
+                try
+                {
+                    user.getConnection().rollback();
+                }
+                finally
+                {
+                    user.getConnection().setAutoCommit( savedAutoCommit);
+                }
+            }
         } // end of checkUser                   
+
+        /* Check that the error message looks right. It should be
+         * User '{user}' does not have {action} permission on table '{schema}'.'{table}'.
+         */
+        protected void checkExecutePermissionMsg( SQLException sqle,
+                                                User user,
+                                                String testLabel)
+        {
+            checkSQLException( sqle, ! expectPriv, "2850A", testLabel,
+                               executePrivErrMsgFixedSegs,
+                               new String[][]{ new String[] { user.name},
+                                               new String[] { (isFunction)?"FUNCTION":"PROCEDURE"},
+                                               new String[] { schema},
+                                               new String[] { routine}},
+                               new boolean[]{true, true, false, false});
+        } // end of checkTablePermissionMsg
     } // end of class ExecutePrivCheck
 }
 
@@ -1895,7 +1955,7 @@ class User
         this.name = name;
         this.password = password;
         isPublic = "public".equalsIgnoreCase( name);
-System.out.println("name = "+name+" password = "+password);
+		System.out.println("name = "+name+" password = "+password);
     }
 
     boolean isPublic()

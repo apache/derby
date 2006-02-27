@@ -225,9 +225,73 @@ A          |B          |C         |I
 0 rows selected
 ij(SWIPERCONNECTION)> select * from satheesh.table1, (select j from satheesh.tsat) table2;
 ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
-ij(SWIPERCONNECTION)> -- GrantRevoke TODO: This one should pass, but currently fails. Not sure how to handle this yet.
+ij(SWIPERCONNECTION)> -- GrantRevoke TODO: This one should pass, but currently fails. Bind update expression in two steps.
 update satheesh.tsat set j=i;
 ERROR 28508: User 'SWIPER' does not have update permission on column 'I' of table 'SATHEESH'.'TSAT'.
 ij(SWIPERCONNECTION)> create table my_tsat (i int not null, c char(10), constraint fk foreign key(i) references satheesh.tsat);
 0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> -- Some simple routine tests. See GrantRevoke.java for more tests
+set connection satConnection;
+ij(SATCONNECTION)> values f_abs(-5);
+1          
+-----------
+5          
+1 row selected
+ij(SATCONNECTION)> select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
+1          
+-----------
+4          
+4          
+2 rows selected
+ij(SATCONNECTION)> -- Same tests should fail
+set connection swiperConnection;
+ij(SWIPERCONNECTION)> set schema satheesh;
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> values f_abs(-5);
+ERROR 2850A: User 'SWIPER' does not have execute permission on FUNCTION 'SATHEESH'.'F_ABS'.
+ij(SWIPERCONNECTION)> select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
+ERROR 2850A: User 'SWIPER' does not have execute permission on FUNCTION 'SATHEESH'.'F_ABS'.
+ij(SWIPERCONNECTION)> -- Now grant execute permission and try again
+set connection satConnection;
+ij(SATCONNECTION)> grant execute on function f_abs to swiper;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> set connection swiperConnection;
+ij(SWIPERCONNECTION)> -- Should pass now
+values f_abs(-5);
+1          
+-----------
+5          
+1 row selected
+ij(SWIPERCONNECTION)> select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
+1          
+-----------
+4          
+4          
+2 rows selected
+ij(SWIPERCONNECTION)> -- Now revoke permission and try
+set connection satConnection;
+ij(SATCONNECTION)> revoke execute on function f_abs from swiper RESTRICT;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> set connection swiperConnection;
+ij(SWIPERCONNECTION)> values f_abs(-5);
+ERROR 2850A: User 'SWIPER' does not have execute permission on FUNCTION 'SATHEESH'.'F_ABS'.
+ij(SWIPERCONNECTION)> select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
+ERROR 2850A: User 'SWIPER' does not have execute permission on FUNCTION 'SATHEESH'.'F_ABS'.
+ij(SWIPERCONNECTION)> -- Now try public permission
+set connection satConnection;
+ij(SATCONNECTION)> grant execute on function f_abs to public;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> set connection swiperConnection;
+ij(SWIPERCONNECTION)> -- Should pass again
+values f_abs(-5);
+1          
+-----------
+5          
+1 row selected
+ij(SWIPERCONNECTION)> select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
+1          
+-----------
+4          
+4          
+2 rows selected
 ij(SWIPERCONNECTION)> 

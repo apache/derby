@@ -772,10 +772,8 @@ public class CompilerContextImpl extends ContextImpl
 		if( requiredRoutinePrivileges == null || routine == null)
 			return;
 
-		/* GrantRevoke TODO: Implement routine privilege checks. Commented out for now.
  		if (requiredRoutinePrivileges.get(routine.getUUID()) == null)
  			requiredRoutinePrivileges.put(routine.getUUID(), ReuseFactory.getInteger(1));
-		*/
 	}
 
 	/**

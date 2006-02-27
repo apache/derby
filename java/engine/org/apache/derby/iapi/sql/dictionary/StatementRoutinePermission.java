@@ -55,6 +55,9 @@ public class StatementRoutinePermission extends StatementPermission
 	{
 		RoutinePermsDescriptor perms = dd.getRoutinePermissions( routineUUID, authorizationId);
 		if( perms == null || ! perms.getHasExecutePermission())
+			perms = dd.getRoutinePermissions(routineUUID, Authorizer.PUBLIC_AUTHORIZATION_ID);
+
+		if( perms == null || ! perms.getHasExecutePermission())
 		{
 			AliasDescriptor ad = dd.getAliasDescriptor( routineUUID);
 			if( ad == null)
