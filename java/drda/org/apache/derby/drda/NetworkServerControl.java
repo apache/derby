@@ -62,8 +62,8 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 	</LI>
 
 	<LI>logconnections {on | off} [-h &lt;host>] [-p &lt;portnumber>]:  
-	This turns logging of connections and disconnections on and off.  
-	Connections and disconnections are logged to derby.log. 
+	This turns logging of connections on or off.  
+	Connections are logged to derby.log. 
 	Default is off.</LI>
 
 	<LI>maxthreads &lt;max> [-h &lt;host>][-p &lt;portnumber>]:  
@@ -110,7 +110,7 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 	all sessions. Default is tracing is off.</LI>
 
 	<LI>derby.drda.logConnections=true:  This property turns on logging
-	of connections and disconnections. Default is connections are not logged.</LI>
+	of connections. Default is connections are not logged.</LI>
 
 	<LI>derby.drda.minThreads=&lt;value>: If this property
 	is set, the &lt;value> number of threads will be created when the Network Server is
@@ -344,7 +344,7 @@ public class NetworkServerControl{
 	/**
 	 * Turn logging connections on or off. When logging is turned on a message is
 	 * written to the Derby error log each time a connection 
-	 * connects or disconnects.
+	 * is made.
 	 *
 	 * @param on			true to turn on, false to turn  off
 	 *

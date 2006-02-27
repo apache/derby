@@ -223,7 +223,7 @@ public final class NetworkServerControlImpl {
 	private Object traceAllSync = new Object();	// object to use for syncing reading
 										// and changing trace all
 	private Object serverStartSync = new Object();	// for syncing start of server.
-	private boolean logConnections;		// log connect and disconnects
+	private boolean logConnections;		// log connects
 	private Object logConnectionsSync = new Object(); // object to use for syncing 
 										// logConnections value
 	private int minThreads;				// default minimum number of connection threads
@@ -861,7 +861,7 @@ public final class NetworkServerControlImpl {
 
 	/**
 	 * Turn logging connections on or off. When logging is turned on a message is
-	 * written to derby.log each time a connection connects or disconnects.
+	 * written to derby.log each time a connection is made.
 	 *
 	 * @param on			true to turn on, false to turn  off
 	 *
