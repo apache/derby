@@ -71,7 +71,7 @@ public interface MessageId {
     String STORE_SHUTDOWN_MSG               = "D002";
     String STORE_BACKUP_STARTED             = "D004";
     String STORE_MOVED_BACKUP               = "D005";
-    String STORE_COPIED_DB_DIR              = "D006";
+    String STORE_DATA_SEG_BACKUP_COMPLETED  = "D006";
     String STORE_EDITED_SERVICEPROPS        = "D007";
     String STORE_ERROR_EDIT_SERVICEPROPS    = "D008";
     String STORE_COPIED_LOG                 = "D009";

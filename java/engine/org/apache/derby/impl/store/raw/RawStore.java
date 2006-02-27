@@ -140,6 +140,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     private static final int REGULAR_FILE_LIST_DIRECTORY_ACTION = 12;
     private static final int STORAGE_FILE_LIST_DIRECTORY_ACTION = 13;
     private static final int COPY_STORAGE_FILE_TO_REGULAR_ACTION = 14;
+    private static final int REGULAR_FILE_GET_CANONICALPATH_ACTION = 15;
+    private static final int STORAGE_FILE_GET_CANONICALPATH_ACTION = 16;
 
 	public RawStore() {
 	}
@@ -592,8 +594,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		File oldbackup = null;
 		File backupcopy = null;
 		OutputStreamWriter historyFile = null;
+        StorageFile dbHistoryFile = null;
+        File backupHistoryFile = null;
 		LogInstant backupInstant = logFactory.getFirstUnflushedInstant();
-
+        
 		try
 		{
 			// first figure out our name
@@ -604,14 +608,17 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 			// append to end of history file
 			historyFile = privFileWriter( storageFactory.newStorageFile( BACKUP_HISTORY), true);
+            
+			backupcopy = new File(backupDir, dbname);
 
 			logHistory(historyFile,
                         MessageService.getTextMessage(
-                            MessageId.STORE_BACKUP_STARTED, canonicalDbName));
+                            MessageId.STORE_BACKUP_STARTED, 
+                            canonicalDbName, 
+                            getFilePath(backupcopy)));
 
-			// if a backup copy of this database already exists,
-			backupcopy = new File(backupDir, dbname);
-
+            
+            // check if a backup copy of this database already exists,
             if (privExists(backupcopy))
 			{
 				// first make a backup of the backup
@@ -637,8 +644,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                         historyFile,
                         MessageService.getTextMessage(
                             MessageId.STORE_MOVED_BACKUP,
-                            backupcopy.getCanonicalPath(),
-                            oldbackup.getCanonicalPath()));
+                            getFilePath(backupcopy),
+                            getFilePath(oldbackup)));
 					renamed = true;
 				}
 			}
@@ -650,6 +657,15 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                     SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY,
                     (File) backupcopy);
             }
+
+            dbHistoryFile = storageFactory.newStorageFile(BACKUP_HISTORY);
+            backupHistoryFile = new File(backupcopy, BACKUP_HISTORY); 
+            // copy the history file into the backup. 
+            if(!privCopyFile(dbHistoryFile, backupHistoryFile))
+                throw StandardException. 
+                    newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                                 dbHistoryFile, backupHistoryFile);  
+
 
             // if they are any jar file stored in the database, copy them into
             // the backup. 
@@ -780,13 +796,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			// backup all the information in the data segment.
 			dataFactory.backupDataFiles(t, segBackup);
 
-			logHistory(historyFile,
-                MessageService.getTextMessage(
-                    MessageId.STORE_COPIED_DB_DIR,
-                    canonicalDbName,
-                    backupcopy.getCanonicalPath()));
+            logHistory(historyFile,
+                   MessageService.getTextMessage(
+                   MessageId.STORE_DATA_SEG_BACKUP_COMPLETED,
+                   getFilePath(segBackup)));
 
-		
+
             // copy the log that got generated after the backup started to
 			// backup location and tell the logfactory that backup has come to end.
 			logFactory.endLogBackup(logBackup);
@@ -794,8 +809,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			logHistory(historyFile,
                 MessageService.getTextMessage(
                     MessageId.STORE_COPIED_LOG,
-                    logdir.getCanonicalPath(),
-                    logBackup.getCanonicalPath()));
+                    getFilePath(logdir),
+                    getFilePath(logBackup)));
 
 			error = false;
 		}
@@ -841,13 +856,19 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 						logHistory(historyFile,
                             MessageService.getTextMessage(
                                 MessageId.STORE_REMOVED_BACKUP,
-                                oldbackup.getCanonicalPath()));
+                                getFilePath(oldbackup)));
  					}
 					logHistory(historyFile,
                         MessageService.getTextMessage(
                             MessageId.STORE_BACKUP_COMPLETED,
                             backupInstant));
 
+                    // copy the updated version of history file with current
+                    // backup information into the backup.
+                    if(!privCopyFile(dbHistoryFile, backupHistoryFile))
+                        throw StandardException. 
+                            newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                                         dbHistoryFile, backupHistoryFile);  
 				}
 
 				historyFile.close();
@@ -1172,6 +1193,48 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		historyFile.flush();
 	}
 
+    /*
+     * Get the file path. If the canonical path can be obtained then return the 
+     * canonical path, otherwise just return the abstract path. Typically if
+     * there are no permission to read user.dir when  running under security
+     * manager canonical path can not be obtained.
+     *
+     * This method is used to a write path name to error/status log file, where it
+     * would be nice to print full paths but not esstential that the user 
+     * grant permissions to read user.dir property.
+     */
+    private String getFilePath(StorageFile file) {
+        String path = privGetCanonicalPath(file);
+        if(path != null ) {
+            return path;
+        }else {
+            //can not get the canoncal path, 
+            // return the abstract path
+            return file.getPath();
+        }
+    }
+
+    /*
+     * Get the file path.  If the canonical path can be obtained then return the 
+     * canonical path, otherwise just return the abstract path. Typically if
+     * there are no permission to read user.dir when  running under security
+     * manager canonical path can not be obtained.
+     *
+     * This method is used to a write a file path name to error/status log file, 
+     * where it would be nice to print full paths but not esstential that the user
+     * grant permissions to read user.dir property.
+     *
+     */
+    private String getFilePath(File file) {
+        String path = privGetCanonicalPath(file);
+        if(path != null ) {
+            return path;
+        }else {
+            // can not get the canoncal path, 
+            // return the abstract path
+            return file.getPath();
+        }
+    }
 
 	protected boolean privCopyDirectory(StorageFile from, File to)
 	{
@@ -1472,7 +1535,41 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             actionStorageFile = null;
         }
     }
-    
+
+
+    private synchronized String privGetCanonicalPath(final StorageFile file)
+    {
+        actionCode = STORAGE_FILE_GET_CANONICALPATH_ACTION;
+        actionStorageFile = file;
+
+        try
+        {
+            return (String) AccessController.doPrivileged( this);
+        }
+        catch( PrivilegedActionException pae) { return null;} // does not throw an exception
+        finally
+        {
+            actionStorageFile = null;
+        }
+    }
+
+
+    private synchronized String privGetCanonicalPath(final File file)
+    {
+        actionCode = REGULAR_FILE_GET_CANONICALPATH_ACTION;
+        actionRegularFile = file;
+
+        try
+        {
+            return (String) AccessController.doPrivileged( this);
+        }
+        catch( PrivilegedActionException pae) { return null;} // does not throw an exception
+        finally
+        {
+            actionRegularFile = null;
+        }
+    }
+
 
     // PrivilegedExceptionAction method
     public final Object run() throws IOException
@@ -1545,8 +1642,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                            (WritableStorageFactory) storageFactory,
                                            actionStorageFile,
                                            actionRegularFile));
-
-
+            
+        case REGULAR_FILE_GET_CANONICALPATH_ACTION:
+            // SECURITY PERMISSION - MP1
+            return (String)(actionRegularFile.getCanonicalPath());
+            
+        case STORAGE_FILE_GET_CANONICALPATH_ACTION:
+            // SECURITY PERMISSION - MP1
+            return (String)(actionStorageFile.getCanonicalPath());
         }
         return null;
     } // end of run

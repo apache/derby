@@ -22,6 +22,11 @@ package org.apache.derbyTesting.functionTests.util;
 
 import java.io.FileWriter;
 import java.io.File;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+
 /**
   Convience functions for performing file manipulations
   in ij scripts.
@@ -50,40 +55,71 @@ public class FTFileUtil
 	}
 
 	/**
-	   rename a file
-	   @param location location of the file
-	   @param name the file's name
-	   @param newName the file's new name
+     * rename a file. 
+     * This method is  called by some tests through a SQL procedure:
+     * RENAME_FILE(LOCATION VARCHAR(32000), NAME VARCHAR(32000), 
+     *                                 NEW_NAME  VARCHAR(32000))
+     * @param location location of the file
+     * @param name the file's name
+	 * @param newName the file's new name
 	*/
-	public static void renameFile(String location, String name , String newName) throws Exception
+	public static void renameFile(String location, String name , 
+                                  String newName) throws Exception
 	{
-		File src = new File(location, name);
-		File dst = new File(location, newName);
-		if(!src.renameTo(dst))
-		{
-			throw new Exception("unable to rename File: " +
-								src.getAbsolutePath() +
-							    " To: " + dst.getAbsolutePath());
-		}
-	}
+		final File src = new File(location, name);
+		final File dst = new File(location, newName);
+        
+        // needs to run in a privileged block as it will be
+		// called through a SQL statement and thus a generated
+		// class. The generated class on the stack has no permissions
+		// granted to it.
+        AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                public Object run() throws Exception {
+                    if(!src.renameTo(dst))
+                    {
+                        throw new Exception("unable to rename File: " +
+                                            src.getAbsolutePath() +
+                                            " To: " + dst.getAbsolutePath());
+                    }
+                    
+                    return null; // nothing to return
+                }
+            });
+    }
 
 
     /**
      * Check if a file exists ?
+     *
+     * This method is  called by some tests through a SQL function:
+     * fileExists(fileName varchar(128))returns VARCHAR(100)
      *
      * @param name the file's name.
      * @return     <tt>"true"</tt> if the given file exists 
      *             <tt>"false"</tt> otherwise.
      * @exception Exception if any exception occurs 
      */
-    public static String fileExists(String fileName) throws Exception
+    public static String fileExists(String fileName) 
+        throws PrivilegedActionException
     {
-        File fl = new File(fileName);
-        if(fl.exists()) {
-            return "true";
-        }else {
-            return "false";
-        }
+        final File fl = new File(fileName);
+                
+        // needs to run in a privileged block as it will be
+		// called through a SQL statement and thus a generated
+		// class. The generated class on the stack has no permissions
+		// granted to it.
+
+        return (String) 
+            AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                public Object run()
+                {
+                    if(fl.exists()) {
+                        return "true";
+                    }else {
+                        return "false";
+                    }
+                }
+            });
     }
 
 
@@ -128,17 +164,32 @@ public class FTFileUtil
 	}
 
     /**
-     *	Remove a directory and all of its contents.
+     * Remove a directory and all of its contents.
+     * This method is  called by some tests through a SQL function:
+     * removeDirectory(fileName varchar(128)) returns VARCHAR(100)
      *   
-     *  @param name the file's name.
+     * @param name the file's name.
      * @return     <tt>"true"</tt> if the omplete directory was removed
      *             <tt>"false"</tt> otherwise.f false is returned then some of 
      *              the files in the directory may have been removed.
      */
 
-	public static String removeDirectory(String directory)
+	public static String removeDirectory(final String directory)
+        throws PrivilegedActionException
 	{
-	    return (removeDirectory(new File(directory)) ? "true" : "false");
+        // needs to run in a privileged block as it will be
+		// called through a SQL statement and thus a generated
+		// class. The generated class on the stack has no permissions
+		// granted to it.
+
+        return (String) 
+            AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                    public Object run()
+                    {
+                        return (removeDirectory(
+                               new File(directory)) ? "true" : "false");
+                    }
+                });
 	}
     
 }

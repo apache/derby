@@ -401,69 +401,83 @@ final class StorageFactoryService implements PersistentService
 		@exception StandardException Properties cannot be saved.
 	*/
 
-	public void saveServiceProperties(String serviceName, Properties properties, boolean replace)
+	public void saveServiceProperties(final String serviceName, 
+                                      final Properties properties, 
+                                      final boolean replace)
 		throws StandardException {
-		File backupFile = null;
 
-		File servicePropertiesFile = new File(serviceName, PersistentService.PROPERTIES_NAME);
+        try
+        {
+            AccessController.doPrivileged(
+                new PrivilegedExceptionAction()
+                {
+                    File backupFile = null;
+                    public Object run() throws StandardException
+                    {
+
+                        File servicePropertiesFile = 
+                            new File(serviceName, PersistentService.PROPERTIES_NAME);
+                        if (replace) {
+                            backupFile = 
+                                new File(serviceName, PersistentService.PROPERTIES_NAME.concat("old"));
+                            try {
+                                if(!servicePropertiesFile.renameTo(backupFile)) {
+                                    throw StandardException.newException(
+                                     SQLState.UNABLE_TO_RENAME_FILE, servicePropertiesFile, backupFile);
+                                }
+                            } catch (SecurityException se) {
+                                throw Monitor.exceptionStartingModule(se);
+                            }
+                        }
+
+                        FileOutputStream fos = null;
+                        try {
+
+                            fos = new FileOutputStream(servicePropertiesFile);
+                            properties.store(fos, 
+                                             serviceName + 
+                                             MessageService.getTextMessage(
+                                                  MessageId.SERVICE_PROPERTIES_DONT_EDIT));
+                            fos.getFD().sync();
+                            fos.close();
+                            fos = null;
+                        } catch (IOException ioe) {
+
+                            if (fos != null) {
+                                try {
+                                    fos.close();
+                                } catch (IOException ioe2) {
+                                }
+                                fos = null;
+                            }
+
+                            if (backupFile != null) {
+                                // need to re-name the old properties file back again
+                                try {
+                                    servicePropertiesFile.delete();
+                                    backupFile.renameTo(servicePropertiesFile);
+                                } catch (SecurityException se) {
+                                }
+                            }
+                            throw Monitor.exceptionStartingModule(ioe);
+                        }
 		
-		if (replace) {
-			backupFile = new File(serviceName, PersistentService.PROPERTIES_NAME.concat("old"));
-
-			try {
-				if(!servicePropertiesFile.renameTo(backupFile)) {
-					throw StandardException.newException(SQLState.UNABLE_TO_RENAME_FILE, servicePropertiesFile, backupFile);
-				}
-			} catch (SecurityException se) {
-				throw Monitor.exceptionStartingModule(se);
-			}
-		}
-
-		FileOutputStream fos = null;
-		try {
-
-			fos = new FileOutputStream(servicePropertiesFile);
-			properties.store(fos, serviceName + MessageService.getTextMessage(MessageId.SERVICE_PROPERTIES_DONT_EDIT));
-			fos.getFD().sync();
-			fos.close();
-			fos = null;
-
-			replace = false;
-
-
-		} catch (IOException ioe) {
-
-			if (fos != null) {
-				try {
-					fos.close();
-				} catch (IOException ioe2) {
-				}
-				fos = null;
-			}
-
-			if (backupFile != null) {
-				// need to re-name the old properties file back again
-				try {
-					servicePropertiesFile.delete();
-					backupFile.renameTo(servicePropertiesFile);
-				} catch (SecurityException se) {
-				}
-			}
-			throw Monitor.exceptionStartingModule(ioe);
-		}
 		
-		
-		if (backupFile != null) {
-			try {
-				backupFile.delete();
-				backupFile = null;
-			} catch (SecurityException se) {
-				// do nothing
-			}
-		}
-
-	}
-
+                        if (backupFile != null) {
+                            try {
+                                backupFile.delete();
+                                backupFile = null;
+                            } catch (SecurityException se) {
+                                // do nothing
+                            }
+                        }
+                        return null;
+                    }
+                }
+                );
+        }catch( PrivilegedActionException pae) { throw (StandardException) pae.getException();}
+    }
+                
     /*
 	**Recreates service root if required depending on which of the following
 	**attribute is specified on the conection URL:
