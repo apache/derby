@@ -41,6 +41,7 @@ import java.util.Enumeration;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.derby.impl.drda.DRDAXid;
 import  org.apache.derby.iapi.jdbc.BrokeredConnection;
+import org.apache.derby.iapi.jdbc.EngineConnection;
 
 class XADatabase extends Database {
 
@@ -62,7 +63,7 @@ class XADatabase extends Database {
 	 * Make a new connection using the database name and set 
 	 * the connection in the database
 	 **/
-	protected synchronized Connection makeConnection(Properties p) throws
+	synchronized void makeConnection(Properties p) throws
  SQLException
 	{
 		if (xaDataSource == null)
@@ -75,7 +76,7 @@ class XADatabase extends Database {
 		if (attrString != null)
 			xaDataSource.setConnectionAttributes(attrString);
 		
-		Connection conn = getConnection();
+		EngineConnection conn = getConnection();
 		// If we have no existing connection. this is a brand new XAConnection.
 		if (conn == null)
 		{
@@ -88,13 +89,13 @@ class XADatabase extends Database {
 		}
 		
 		// Get a new logical connection.
-		conn = xaConnection.getConnection();
+        // Contract between network server and embedded engine
+        // is that any connection returned implements EngineConnection.
+ 		conn = (EngineConnection) xaConnection.getConnection();
 		// Client will always drive the commits so connection should
 		// always be autocommit false on the server. DERBY-898/DERBY-899
 		conn.setAutoCommit(false);
-		setConnection(conn);
-		return conn;
-		
+		setConnection(conn);		
 	}
 
 	/** SetXAResource
@@ -103,38 +104,6 @@ class XADatabase extends Database {
 	protected void setXAResource (XAResource resource)
 	{
 		this.xaResource = resource;
-	}
-
-	/** Set DRDA id for this connection
-	 * @param drdaID
-	 */
-	protected void setDrdaID(String drdaID)
-	{
-		if (getConnection() != null)
-			((BrokeredConnection) getConnection()).setDrdaID(drdaID);
-	}
-
-
-	/**
-	 *  Set the internal isolation level to use for preparing statements.
-	 *  Subsequent prepares will use this isoalation level
-	 * @param level internal isolation level 
-	 *
-	 * @throws SQLException
-	 * @see BrokeredConnection#setPrepareIsolation
-	 * 
-	 */
-	protected void setPrepareIsolation(int level) throws SQLException
-	{
-		((BrokeredConnection) getConnection()).setPrepareIsolation(level);
-	}
-
-	/** get prepare isolation level for this connection.
-	 * 
-	 */
-	protected int getPrepareIsolation() throws SQLException
-	{
-		return ((BrokeredConnection) getConnection()).getPrepareIsolation();
 	}
 
 	/**

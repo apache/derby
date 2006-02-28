@@ -29,9 +29,10 @@ import java.sql.SQLException;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Properties;
+
+import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
-import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 /**
 	Database stores information about the current database
@@ -67,7 +68,10 @@ class Database
 											// occurred in this transaction
 	protected boolean sendTRGDFTRT = false; // Send package target default value
 
-	private Connection conn;			// Connection to the database
+    /**
+     * Connection to the database in the embedded engine.
+     */
+	private EngineConnection conn;
 	DRDAStatement defaultStatement;    // default statement used 
 													   // for execute imm
 	private DRDAStatement currentStatement; // current statement we are working on
@@ -112,7 +116,7 @@ class Database
 	 * @param conn Connection
 	 * @exception SQLException
 	 */
-	protected void setConnection(Connection conn)
+	final void setConnection(EngineConnection conn)
 		throws SQLException
 	{
 		this.conn = conn;
@@ -124,7 +128,7 @@ class Database
 	 *
 	 * @return connection
 	 */
-	protected Connection getConnection()
+	final EngineConnection getConnection()
 	{
 		return conn;
 	}
@@ -237,22 +241,24 @@ class Database
 	 * Make a new connection using the database name and set 
 	 * the connection in the database
 	 * @param p Properties for connection attributes to pass to connect
-	 * @return new local connection
 	 */
-	protected Connection makeConnection(Properties p) throws SQLException
+	void makeConnection(Properties p) throws SQLException
 	{
 		p.put(Attribute.USERNAME_ATTR, userId);
                 
                 // take care of case of SECMEC_USRIDONL
                 if(password != null) 
 		    p.put(Attribute.PASSWORD_ATTR, password);
-        Connection conn = NetworkServerControlImpl.getDriver().connect(Attribute.PROTOCOL
+                
+        // Contract between network server and embedded engine
+        // is that any connection returned implements EngineConnection.
+        EngineConnection conn = (EngineConnection)
+            NetworkServerControlImpl.getDriver().connect(Attribute.PROTOCOL
 							 + shortDbName + attrString, p);
 		if(conn != null){
 			conn.setAutoCommit(false);
 		}
 		setConnection(conn);
-		return conn;
 	}
 
 	// Create string to pass to DataSource.setConnectionAttributes
@@ -365,10 +371,10 @@ class Database
 		}
 	}
 
-	protected void setDrdaID(String drdaID)
+	final void setDrdaID(String drdaID)
 	{
 		if (conn != null)
-			((EmbedConnection)conn).setDrdaID(drdaID);
+			conn.setDrdaID(drdaID);
 	}
 
 	/**
@@ -377,17 +383,17 @@ class Database
 	 * @param level internal isolation level 
 	 *
 	 * @throws SQLException
-	 * @see EmbedConnection#setPrepareIsolation
+	 * @see EngineConnection#setPrepareIsolation
 	 * 
 	 */
-	protected void setPrepareIsolation(int level) throws SQLException
+	final void setPrepareIsolation(int level) throws SQLException
 	{
-		((EmbedConnection) conn).setPrepareIsolation(level);
+		conn.setPrepareIsolation(level);
 	}
 
-	protected int getPrepareIsolation() throws SQLException
+	final int getPrepareIsolation() throws SQLException
 	{
-		return ((EmbedConnection) conn).getPrepareIsolation();
+		return conn.getPrepareIsolation();
 	}
 
 	protected String buildRuntimeInfo(String indent, LocalizedResource localLangUtil)
