@@ -240,6 +240,9 @@ public class StaticMethodCallNode extends MethodCallNode
 		// return type, then we need to push a CAST node.
 		if (routineInfo != null)
 		{
+			if (methodParms != null) 
+				optimizeDomainValueConversion();
+			
 			TypeDescriptor returnType = routineInfo.getReturnType();
 			if (returnType != null)
 			{
@@ -283,6 +286,47 @@ public class StaticMethodCallNode extends MethodCallNode
 
 		getCompilerContext().addRequiredRoutinePriv(ad);
 		return this;
+	}
+
+	/**
+	 * If this SQL function has parameters which are SQLToJavaValueNode over
+	 * JavaToSQLValueNode and the java value node underneath is a SQL function
+	 * defined with CALLED ON NULL INPUT, then we can get rid of the wrapper
+	 * nodes over the java value node for such parameters. This is because
+	 * SQL functions defined with CALLED ON NULL INPUT need access to only
+	 * java domain values.
+	 * This can't be done for parameters which are wrappers over SQL function
+	 * defined with RETURN NULL ON NULL INPUT because such functions need
+	 * access to both sql domain value and java domain value. - Derby479
+	 */
+	private void optimizeDomainValueConversion() throws StandardException {
+		int		count = methodParms.length;
+		for (int parm = 0; parm < count; parm++)
+		{
+			if (methodParms[parm] instanceof SQLToJavaValueNode &&
+				((SQLToJavaValueNode)methodParms[parm]).getSQLValueNode() instanceof
+				JavaToSQLValueNode)
+			{
+				//If we are here, then it means that the parameter is
+				//SQLToJavaValueNode on top of JavaToSQLValueNode
+				JavaValueNode paramIsJavaValueNode =
+					((JavaToSQLValueNode)((SQLToJavaValueNode)methodParms[parm]).getSQLValueNode()).getJavaValueNode();
+				if (paramIsJavaValueNode instanceof StaticMethodCallNode)
+				{
+					//If we are here, then it means that the parameter has
+					//a MethodCallNode underneath it.
+					StaticMethodCallNode paramIsMethodCallNode = (StaticMethodCallNode)paramIsJavaValueNode;
+					//If the MethodCallNode parameter is defined as
+					//CALLED ON NULL INPUT, then we can remove the wrappers
+					//for the param and just set the parameter to the
+					//java value node.
+					if (paramIsMethodCallNode.routineInfo != null &&
+							paramIsMethodCallNode.routineInfo.calledOnNullInput())
+						methodParms[parm] =
+							((JavaToSQLValueNode)((SQLToJavaValueNode)methodParms[parm]).getSQLValueNode()).getJavaValueNode();
+				}
+			}
+		}
 	}
 
 	/**

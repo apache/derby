@@ -549,18 +549,39 @@ EXTERNAL NAME 'java.lang.Math.toRadians(double)'
 CALLED ON NULL INPUT
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
-ij> -- DERBY-479;
--- VALUES CAST( RN_COS(RN_RADIANS(90.0)) AS DECIMAL(3,2));
-VALUES CAST( CALL_COS(CALL_RADIANS(90.0)) AS DECIMAL(3,2));
+ij> -- Test cases for DERBY-479
+VALUES CAST( RN_COS(RN_RADIANS(null)) AS DECIMAL(3,2));
+1     
+------
+NULL  
+ij> VALUES CAST( RN_COS(RN_RADIANS(90.0)) AS DECIMAL(3,2));
 1     
 ------
 0.00  
-ij> -- DERBY-479;
--- VALUES CAST( CALL_COS(RN_RADIANS(90.0)) AS DECIMAL(3,2));
-VALUES CAST( RN_COS(CALL_RADIANS(90.0)) AS DECIMAL(3,2));
+ij> VALUES CAST( CALL_COS(CALL_RADIANS(90.0)) AS DECIMAL(3,2));
 1     
 ------
 0.00  
+ij> VALUES CAST( CALL_COS(CALL_RADIANS(null)) AS DECIMAL(3,2));
+1     
+------
+ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
+ij> VALUES CAST( CALL_COS(RN_RADIANS(null)) AS DECIMAL(3,2));
+1     
+------
+ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
+ij> VALUES CAST( CALL_COS(RN_RADIANS(90.0)) AS DECIMAL(3,2));
+1     
+------
+0.00  
+ij> VALUES CAST( RN_COS(CALL_RADIANS(90.0)) AS DECIMAL(3,2));
+1     
+------
+0.00  
+ij> VALUES CAST( RN_COS(CALL_RADIANS(null)) AS DECIMAL(3,2));
+1     
+------
+ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
 ij> DROP FUNCTION RN_COS;
 0 rows inserted/updated/deleted
 ij> DROP FUNCTION RN_RADIANS;

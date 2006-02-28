@@ -200,32 +200,18 @@ abstract class MethodCallNode extends JavaValueNode
 
 			qt = (QueryTreeNode) parameterList.elementAt(index);
 
-
-
 			/*
-			** If the parameter is a SQL ValueNode, there are two
-			** possibilities.  Either it is a JavaValueNode with
-			** a JavaToSQLValueNode on top of it, or it is a plain
-			** SQL ValueNode.  In the former case, just get rid of
-			** the JavaToSQLValueNode.  In the latter case, put a
-			** SQLToJavaValueNode on top of it.  In general, we
-			** want to avoid converting the same value back and forth
-			** between the SQL and Java domains.
+			** Since we need the parameter to be in Java domain format, put a
+			** SQLToJavaValueNode on top of the parameter node if it is a 
+			** SQLValueNode. But if the parameter is already in Java domain 
+			** format, then we don't need to do anything.
 			*/
 			if ( ! (qt instanceof JavaValueNode))
 			{
-				if (qt instanceof JavaToSQLValueNode)
-				{
-					qt = ((JavaToSQLValueNode) qt).getJavaValueNode();
-				}
-				else
-				{
-					qt = (SQLToJavaValueNode) getNodeFactory().
-							getNode(
-								C_NodeTypes.SQL_TO_JAVA_VALUE_NODE,
-								qt,
-								getContextManager());
-				}
+				qt = (SQLToJavaValueNode) getNodeFactory().getNode(
+						C_NodeTypes.SQL_TO_JAVA_VALUE_NODE, 
+						qt, 
+						getContextManager());
 			}
 
 			methodParms[index] = (JavaValueNode) qt;
@@ -545,9 +531,7 @@ abstract class MethodCallNode extends JavaValueNode
 				// In any other case the expression type must be assignable
 				// to the parameter type.
 				if (classInspector.primitiveType(parameterType)) {
-
 					mb.cast(parameterType);
-
 				} else {
 
 					// for a prodcedure
