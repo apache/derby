@@ -30,6 +30,7 @@ import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
+import org.apache.derby.iapi.jdbc.EngineConnection;
 
 
 import java.sql.Connection;
@@ -278,7 +279,8 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 
 	// called by ConnectionHandle when it needs to forward things to the
 	// underlying connection
-	public synchronized Connection getRealConnection() throws SQLException
+	public synchronized EngineConnection getRealConnection()
+       throws SQLException
 	{
 		checkActive();
 
@@ -428,41 +430,6 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	*/
 	public CallableStatement wrapStatement(CallableStatement cs, String sql) throws SQLException {
 		return cs;
-	}
-
-	/**
-	 * set DrdaId for this connection. 
-	 * Used by network server to identify connection.
-	 * @param  drdaID drda connection identifier
-	 */
-	public   void setDrdaID(String drdaID)
-	{
-		realConnection.setDrdaID(drdaID);
-	}
-
-	/**
-	 *  Set the internal isolation level to use for preparing statements.
-	 *  Subsequent prepares will use this isoalation level
-	 * @param level internal isolation level 
-	 *
-	 * @throws SQLException
-	 * @see BrokeredConnection#setPrepareIsolation
-	 * 
-	 */
-	public  void setPrepareIsolation(int level) throws SQLException
-	{
-		realConnection.setPrepareIsolation(level);
-	}
-	
-	/** 
-	 * Get prepare isolation level.
-	 * For network server this will be the isolation level at which statements
-	 * will be prepared.
-	 * @return isolation level
-	 */
-	public  int getPrepareIsolation() throws SQLException
-	{
-		return realConnection.getPrepareIsolation();
 	}
     
     /** 

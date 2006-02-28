@@ -27,6 +27,7 @@ import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.TransactionResourceImpl;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 
@@ -832,9 +833,9 @@ final class EmbedXAConnection extends EmbedPooledConnection
 		// do local work with conn
 		// need to create new connection here.
 	*/
-	public Connection getRealConnection() throws SQLException
+	public EngineConnection getRealConnection() throws SQLException
 	{
-		Connection rc = super.getRealConnection();
+        EngineConnection rc = super.getRealConnection();
 		if (rc != null)
 			return rc;
 

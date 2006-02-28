@@ -34,6 +34,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.jdbc.AuthenticationService;
+import org.apache.derby.iapi.jdbc.EngineConnection;
 
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
@@ -86,7 +87,7 @@ import java.util.Properties;
  * @see TransactionResourceImpl
  *
  */
-public class EmbedConnection implements java.sql.Connection
+public class EmbedConnection implements EngineConnection
 {
 
 	private static final StandardException exceptionClose = StandardException.closeException();

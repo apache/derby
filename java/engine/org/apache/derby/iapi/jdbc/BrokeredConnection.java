@@ -43,7 +43,7 @@ import org.apache.derby.iapi.error.StandardException;
  * This is a rudimentary connection that delegates
  * EVERYTHING to Connection.
  */
-public class BrokeredConnection implements Connection
+public class BrokeredConnection implements EngineConnection
 {
 	
 	// default for Derby
@@ -370,7 +370,7 @@ public class BrokeredConnection implements Connection
 	  *
 	  *	@return	the current connection
 	  */
-	protected final Connection getRealConnection() throws SQLException {
+	final EngineConnection getRealConnection() throws SQLException {
 		if (isClosed)
 			throw Util.noCurrentConnection();
 
@@ -387,20 +387,12 @@ public class BrokeredConnection implements Connection
 		with the state of this new handle.
 	*/
 	public void syncState() throws SQLException {
-		Connection conn = getRealConnection();
+		EngineConnection conn = getRealConnection();
 
 		stateIsolationLevel = conn.getTransactionIsolation();
 		stateReadOnly = conn.isReadOnly();
 		stateAutoCommit = conn.getAutoCommit();
-		// jdk13 does not have Connection.getHoldability method and hence using
-		// reflection to cover both jdk13 and higher jdks
-		try {
-			Method sh = conn.getClass().getMethod("getHoldability", null);
-			stateHoldability = ((Integer)sh.invoke(conn, null)).intValue();
-		} catch( Exception e)
-		{
-			throw PublicAPI.wrapStandardException( StandardException.plainWrapException( e));
-		}       
+        stateHoldability = conn.getHoldability(); 
 	}
 
 	/**
@@ -410,7 +402,7 @@ public class BrokeredConnection implements Connection
 		at the start and end of a global transaction.
 	*/
 	public void getIsolationUptoDate() throws SQLException {
-		if (control!=null && control.isIsolationLevelSetUsingSQLorJDBC()) {
+		if (control.isIsolationLevelSetUsingSQLorJDBC()) {
 			stateIsolationLevel = getRealConnection().getTransactionIsolation();
 			control.resetIsolationLevelFlag();
 		}
@@ -466,9 +458,15 @@ public class BrokeredConnection implements Connection
 	 *  @param drdaID  drdaID to be used for this connection
 	 *
 	 */
-	public void setDrdaID(String drdaID)
+	public final void setDrdaID(String drdaID)
 	{
-		control.setDrdaID(drdaID);
+        try {
+		    getRealConnection().setDrdaID(drdaID);
+        } catch (SQLException sqle)
+        {
+            // connection is closed, just ignore drdaId
+            // since connection cannot be used.
+        }
 	}
 
 	/**
@@ -479,9 +477,9 @@ public class BrokeredConnection implements Connection
 	 * @see EmbedConnection#setPrepareIsolation
 	 * 
 	 */
-	public void setPrepareIsolation(int level) throws SQLException
+	public final void setPrepareIsolation(int level) throws SQLException
 	{
-		control.setPrepareIsolation(level);
+        getRealConnection().setPrepareIsolation(level);
 	}
 
 	/**
@@ -492,9 +490,9 @@ public class BrokeredConnection implements Connection
 	 * @return current prepare isolation level 
 	 * @see EmbedConnection#getPrepareIsolation
 	 */
-	public int getPrepareIsolation() throws SQLException
+	public final int getPrepareIsolation() throws SQLException
 	{
-		return control.getPrepareIsolation();
+		return getRealConnection().getPrepareIsolation();
 	}
             
     /**
@@ -528,4 +526,41 @@ public class BrokeredConnection implements Connection
     }
 
 	protected int getJDBCLevel() { return 2;}
+
+    /*
+     * JDBC 3.0 methods that are exposed through EngineConnection.
+     */
+    
+    /**
+     * Prepare statement with explicit holdability.
+     */
+    public final PreparedStatement prepareStatement(String sql,
+            int resultSetType, int resultSetConcurrency,
+            int resultSetHoldability) throws SQLException {
+    	try {
+    		control.checkHoldCursors(resultSetHoldability);
+    		return control.wrapStatement(
+    			getRealConnection().prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability), sql, null);
+    	}
+    	catch (SQLException se)
+    	{
+    		notifyException(se);
+    		throw se;
+    	}
+    }
+
+    /**
+     * Get the holdability for statements created by this connection
+     * when holdability is not passed in.
+     */
+    public final int getHoldability() throws SQLException {
+    	try {
+    		return getRealConnection().getHoldability();
+    	}
+    	catch (SQLException se)
+    	{
+    		notifyException(se);
+    		throw se;
+    	}
+    }
 }
