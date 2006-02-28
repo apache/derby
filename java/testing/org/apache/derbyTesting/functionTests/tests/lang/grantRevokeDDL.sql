@@ -177,6 +177,43 @@ update satheesh.tsat set j=i;
 
 create table my_tsat (i int not null, c char(10), constraint fk foreign key(i) references satheesh.tsat);
 
+-- Some TRIGGER privilege checks. See GrantRevoke.java for more tests
+set connection swiperConnection;
+-- Should fail
+create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+
+-- Grant trigger privilege
+set connection satConnection;
+grant trigger on tsat to swiper;
+
+-- Try now
+set connection swiperConnection;
+create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+
+drop trigger trig_sat1;
+drop trigger trig_sat2;
+
+-- Now revoke and try again
+set connection satConnection;
+revoke trigger on tsat from swiper;
+
+set connection swiperConnection;
+create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+
+-- Now grant access to public and try again
+set connection satConnection;
+grant trigger on tsat to public;
+
+set connection swiperConnection;
+create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+
+drop trigger trig_sat1;
+drop trigger trig_sat2;
+
 -- Some simple routine tests. See GrantRevoke.java for more tests
 set connection satConnection;
 

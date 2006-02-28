@@ -1141,6 +1141,31 @@ public class grantRevoke
             }
         } // end of checkSQL
 
+	String getUserCurrentSchema(User user) throws SQLException
+	{
+            String schemaString = null;
+
+            Statement s = user.getConnection().createStatement();
+            ResultSet rs = s.executeQuery("values current schema");
+            while (rs.next())
+		schemaString = rs.getString(1);
+            return schemaString;
+	}
+
+	void setUserCurrentSchema(User user, String schema) throws SQLException
+	{
+            Statement s = user.getConnection().createStatement();
+            try {
+            	s.executeUpdate("set schema "+schema);
+	    } catch (SQLException sqle) {
+                // If schema not present, create it and try again
+                if (sqle.getSQLState() == "42Y07") {
+                     s.executeUpdate("create schema "+schema);
+            	     s.executeUpdate("set schema "+schema);
+		}
+            }
+	}
+
         private HashMap columnHash;
         
         FormatableBitSet getColBitSet( ) throws SQLException
@@ -1515,7 +1540,7 @@ public class grantRevoke
             sb.append( "\"");
             boolean savedAutoCommit = user.getConnection().getAutoCommit();
             user.getConnection().setAutoCommit( false);
-System.out.println("DeletePrivCheck: " + sb.toString());
+            System.out.println("DeletePrivCheck: " + sb.toString());
             PreparedStatement ps = user.getConnection().prepareStatement( sb.toString());
             try
             {
@@ -1793,9 +1818,51 @@ System.out.println("DeletePrivCheck: " + sb.toString());
          *
          * @exception SQLException Indicates a problem with the test program. Should not happen.
          */
-        void checkUser( User user, String testLabel) throws SQLException
+        void checkUser(User user, String testLabel) throws SQLException
         {
-            // RESOLVE
+            StringBuffer sb = new StringBuffer();
+            sb.append("create trigger ");
+            sb.append("\"");
+            sb.append(table+"Trig");
+            sb.append("\"");
+            sb.append(" after insert on ");
+
+            sb.append("\"");
+            sb.append(schema);
+            sb.append("\".\"");
+            sb.append(table);
+            sb.append("\"");
+            sb.append(" for each row mode db2sql values 1");
+
+            boolean savedAutoCommit = user.getConnection().getAutoCommit();
+            String currentSchema = getUserCurrentSchema(user);			
+            // DDLs can only be issued in their own schema
+            setUserCurrentSchema(user, user.toString());
+            user.getConnection().setAutoCommit(false);
+            System.out.println("TriggerPrivCheck: " + sb.toString());
+            PreparedStatement ps = user.getConnection().prepareStatement(sb.toString());
+            try
+            {
+                ps.executeUpdate();
+                if( ! (privIsPublic || expectPriv))
+                    reportFailure( "An execute was performed without permission. (" + testLabel + ")");
+            }
+            catch( SQLException sqle)
+            {
+                checkTablePermissionMsg( sqle, user, "trigger", testLabel);
+            }
+            finally
+            {
+                try
+                {
+                    user.getConnection().rollback();
+                }
+                finally
+                {
+                    user.getConnection().setAutoCommit( savedAutoCommit);
+                    setUserCurrentSchema(user, currentSchema);
+                }
+            }
         } // end of checkUser                   
     } // end of class TriggerPrivCheck
 
@@ -1925,7 +1992,7 @@ System.out.println("DeletePrivCheck: " + sb.toString());
         } // end of checkUser                   
 
         /* Check that the error message looks right. It should be
-         * User '{user}' does not have {action} permission on table '{schema}'.'{table}'.
+         * User '{user}' does not have execute permission on FUNCTION/PROCEDURE '{schema}'.'{table}'.
          */
         protected void checkExecutePermissionMsg( SQLException sqle,
                                                 User user,
@@ -1938,7 +2005,7 @@ System.out.println("DeletePrivCheck: " + sb.toString());
                                                new String[] { schema},
                                                new String[] { routine}},
                                new boolean[]{true, true, false, false});
-        } // end of checkTablePermissionMsg
+        } // end of checkExecutePermissionMsg
     } // end of class ExecutePrivCheck
 }
 

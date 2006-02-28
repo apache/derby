@@ -38,6 +38,7 @@ import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.depend.Dependent;
@@ -246,6 +247,10 @@ public class CreateTriggerNode extends DDLStatementNode
 		{
 				throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
 		}
+
+		compilerContext.pushCurrentPrivType(Authorizer.TRIGGER_PRIV);
+		compilerContext.addRequiredTablePriv(triggerTableDescriptor);
+		compilerContext.popCurrentPrivType();
 
 		/*
 		** Regenerates the actionText and actionNode if necessary.
