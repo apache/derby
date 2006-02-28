@@ -76,6 +76,7 @@
       <exclude name="${this.dir}/statementJdbc30.java"/>
       <exclude name="${this.dir}/savepointJdbc30.java"/>
       <exclude name="${this.dir}/xaJNDI.java"/>
+      <exclude name="${this.dir}/XATest.java"/>
     </javac>
   </target>
 
@@ -103,6 +104,7 @@
       <include name="${this.dir}/parameterMetaDataJdbc30.java"/>
       <include name="${this.dir}/resultsetJdbc30.java"/>
       <include name="${this.dir}/statementJdbc30.java"/>
+      <include name="${this.dir}/XATest.java"/>
     </javac>
   </target>
 
