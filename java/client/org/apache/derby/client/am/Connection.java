@@ -1192,6 +1192,15 @@ public abstract class Connection implements java.sql.Connection,
                 agent_.logWriter_.traceEntry(this, "setHoldability", holdability);
             }
             checkForClosedConnection();
+            // In an XA global transaction do not allow the
+            // holdability to be set to hold cursors across
+            // commits, as the engine does not support it.
+            if (this.isXAConnection_ && this.xaState_ == XA_T1_ASSOCIATED)
+            {
+                if (holdability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT)
+                    throw new SqlException(agent_.logWriter_, 
+                            new MessageId(SQLState.CANNOT_HOLD_CURSOR_XA));
+            }
             this.holdability = holdability;
             
        }
@@ -1442,6 +1451,15 @@ public abstract class Connection implements java.sql.Connection,
         checkForClosedConnection();
         resultSetType = downgradeResultSetType(resultSetType);
         resultSetConcurrency = downgradeResultSetConcurrency(resultSetConcurrency, resultSetType);
+        // In an XA global transaction do not allow the
+        // holdability to be set to hold cursors across
+        // commits, as the engine does not support it.
+        if (this.isXAConnection_ && this.xaState_ == XA_T1_ASSOCIATED)
+        {
+            if (resultSetHoldability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT)
+                throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.CANNOT_HOLD_CURSOR_XA));
+        }
         Statement s = newStatement_(resultSetType, resultSetConcurrency, resultSetHoldability);
         s.cursorAttributesToSendOnPrepare_ = s.cacheCursorAttributesToSendOnPrepare();
         openStatements_.add(s);

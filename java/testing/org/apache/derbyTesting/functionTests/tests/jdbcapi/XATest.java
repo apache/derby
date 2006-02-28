@@ -941,10 +941,41 @@ public class XATest {
                 TestUtil.dumpSQLExceptions(e, true);
             }
             pscc.executeQuery().close();
+                   
+            // Test we cannot switch the connection to holdable
+            // or create a statement with holdable.
+            try {
+                conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+                System.out.println("FAIL - set holdability in global xact.");
+            } catch (SQLException sqle)
+            {
+                TestUtil.dumpSQLExceptions(sqle, true);
+            }
             
+            try {
+                    conn.createStatement(
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY,
+                    ResultSet.HOLD_CURSORS_OVER_COMMIT);
+                    System.out.println("FAIL - Statement holdability in global xact.");
+            } catch (SQLException sqle) {
+                TestUtil.dumpSQLExceptions(sqle, true);
+            }
+            try {
+                conn.prepareStatement(
+                "SELECT * FROM APP.FOO",
+                ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY,
+                ResultSet.HOLD_CURSORS_OVER_COMMIT);
+                System.out.println("FAIL - PreparedStatement holdability in global xact.");
+        } catch (SQLException sqle) {
+            TestUtil.dumpSQLExceptions(sqle, true);
+        }
             xar.end(xid, XAResource.TMSUCCESS);
             if (xar.prepare(xid) != XAResource.XA_RDONLY)
                 System.out.println("FAIL prepare didn't indicate r/o");
+            
+            conn.close();
             
             System.out.println("derby966 complete");
                 
@@ -1050,4 +1081,77 @@ public class XATest {
         return s + Integer.toString(holdability);
     }
     
+    /*
+     * 5 interleaving transactions.
+     * Taken from the SQL test xaANotherTest.
+     * <code>
+xa_connect user 'mamta' password 'mamta' ;
+
+-- global connection 1
+xa_start xa_noflags 1;
+xa_getconnection;
+insert into APP.foo values (1);
+xa_end xa_suspend 1;
+
+-- global connection 2
+xa_start xa_noflags 2;
+insert into APP.foo values (2);
+xa_end xa_suspend 2;
+
+-- global connection 3
+xa_start xa_noflags 3;
+insert into APP.foo values (3);
+xa_end xa_suspend 3;
+
+-- global connection 4
+xa_start xa_noflags 4;
+insert into APP.foo values (4);
+xa_end xa_suspend 4;
+
+-- global connection 5
+xa_start xa_noflags 5;
+insert into APP.foo values (5);
+xa_end xa_suspend 5;
+
+xa_start xa_resume 1;
+insert into APP.foo values (11);
+xa_end xa_suspend 1;
+
+xa_start xa_resume 5;
+insert into APP.foo values (55);
+xa_end xa_suspend 5;
+
+xa_start xa_resume 2;
+insert into APP.foo values (22);
+xa_end xa_suspend 2;
+
+xa_start xa_resume 4;
+insert into APP.foo values (44);
+xa_end xa_suspend 4;
+
+xa_start xa_resume 3;
+insert into APP.foo values (33);
+xa_end xa_suspend 3;
+
+-- prepare all the global connections except the first one. This way, we will see all
+-- the global transactions prepared so far after the database shutdown and restart.
+xa_end xa_success 2;
+xa_prepare 2;
+xa_end xa_success 3;
+xa_prepare 3;
+xa_end xa_success 4;
+xa_prepare 4;
+xa_end xa_success 5;
+xa_prepare 5;
+
+     * </code>
+     */
+    private static void interleavingTransactions5(XADataSource xads) throws SQLException
+    {
+        System.out.println("interleavingTransactions5");
+        
+        XAConnection xac = xads.getXAConnection("mamta", "mamtapwd");
+        
+    }
+ 
 }

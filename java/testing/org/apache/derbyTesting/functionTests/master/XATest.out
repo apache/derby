@@ -176,5 +176,8 @@ EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COM
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 derby966 complete
 XATest complete
