@@ -1123,6 +1123,190 @@ public class BinaryRelationalOperatorNode
 		
 		return super.genSQLJavaSQLTree();
 	}
+
+	/**
+	 * Take a ResultSetNode and return a column reference that is scoped for
+	 * for the received ResultSetNode, where "scoped" means that the column
+	 * reference points to a specific column in the RSN.  This is used for
+	 * remapping predicates from an outer query down to a subquery. 
+	 *
+	 * For example, assume we have the following query:
+	 *
+	 *  select * from
+	 *    (select i,j from t1 union select i,j from t2) X1,
+	 *    (select a,b from t3 union select a,b from t4) X2
+	 *  where X1.j = X2.b;
+	 *
+	 * Then assume that this BinaryRelationalOperatorNode represents the
+	 * "X1.j = X2.b" predicate and that the childRSN we received as a
+	 * parameter represents one of the subqueries to which we want to push
+	 * the predicate; let's say it's:
+	 *
+	 *    select i,j from t1
+	 *
+	 * Then what we want to do in this method is map one of the operands
+	 * X1.j or X2.b (depending on the 'whichSide' parameter) to the childRSN,
+	 * if possible.  Note that in our example, "X2.b" should _NOT_ be mapped
+	 * because it doesn't apply to the childRSN for the subquery "select i,j
+	 * from t1"; thus we should leave it as it is.  "X1.j", however, _does_
+	 * need to be scoped, and so this method will return a ColumnReference
+	 * pointing to "T1.j" (or whatever the corresponding column in T1 is).
+	 *
+	 * ASSUMPTION: We should only get to this method if we know that
+	 * at least one operand in the predicate to which this operator belongs
+	 * can and should be mapped to the received childRSN. 
+	 *
+     * @param whichSide The operand are we trying to scope (LEFT or RIGHT)
+     * @param parentRSNsTables Set of all table numbers referenced by
+     *  the ResultSetNode that is _parent_ to the received childRSN.
+     *  We need this to make sure we don't scope the operand to a
+     *  ResultSetNode to which it doesn't apply.
+     * @param childRSN The result set node to which we want to create
+     *  a scoped predicate.
+     * @return A column reference scoped to the received childRSN, if possible.
+     *  If the operand is a ColumnReference that is not supposed to be scoped,
+	 *  we return a _clone_ of the reference--this is necessary because the
+	 *  reference is going to be pushed to two places (left and right children
+	 *  of the parentRSN) and if both children are referencing the same
+	 *  instance of the column reference, they'll interfere with each other
+	 *  during optimization.
+	 */
+	public ValueNode getScopedOperand(int whichSide,
+		JBitSet parentRSNsTables, ResultSetNode childRSN)
+		throws StandardException
+	{
+		ResultColumn rc = null;
+		ColumnReference cr = 
+			whichSide == LEFT
+				? (ColumnReference)leftOperand
+				: (ColumnReference)rightOperand;
+
+		// The first thing we need to do is see if this ColumnReference
+		// is supposed to be scoped for childRSN.  We do that by figuring
+		// out what underlying base table the column reference is pointing
+		// to and then seeing if that base table is included in the list of
+		// table numbers from the parentRSN.
+		JBitSet crTables = new JBitSet(parentRSNsTables.size());
+		BaseTableNumbersVisitor btnVis =
+			new BaseTableNumbersVisitor(crTables);
+		cr.accept(btnVis);
+
+		// If the column reference doesn't reference any tables,
+		// then there's no point in mapping it to the child result
+		// set; just return a clone of the operand.
+		if (crTables.getFirstSetBit() == -1)
+		{
+			return (ValueNode)cr.getClone();
+		}
+
+		/* If the column reference in question is not intended for
+		 * the received result set node, just leave the operand as
+		 * it is (i.e. return a clone).  In the example mentioned at
+		 * the start of this method, this will happen when the operand
+		 * is X2.b and childRSN is either "select i,j from t1" or
+		 * "select i,j from t2", in which case the operand does not
+		 * apply to childRSN.  When we get here and try to map the
+		 * "X1.j" operand, though, the following "contains" check will
+		 * return true and thus we can go ahead and return a scoped
+		 * version of that operand.
+		 */
+		if (!parentRSNsTables.contains(crTables))
+		{
+			return (ValueNode)cr.getClone();
+		}
+
+		// If the column reference is already pointing to the
+		// correct table, then there's no need to change it.
+		if ((childRSN.getReferencedTableMap() != null) &&
+			childRSN.getReferencedTableMap().get(cr.getTableNumber()))
+		{
+			return cr;
+		}
+
+		/* Find the target ResultColumn in the received result set.  At
+		 * this point we know that we do in fact need to scope the column
+		 * reference for childRSN, so go ahead and do it.  We get the
+		 * target column by column position instead of by name because
+		 * it's possible that the name given for the query doesn't match
+		 * the name of the actual column we're looking for.  Ex.
+		 *
+		 *  select * from
+		 *    (select i,j from t1 union select i,j from t2) X1 (x,y),
+		 *    (select a,b from t3 union select a,b from t4) X2
+		 *  where X1.x = X2.b;
+		 *
+		 * If we searched for "x" in the childRSN "select i,j from t1"
+		 * we wouldn't find it.  So we have to look based on position.
+		 */
+
+		rc = childRSN.getResultColumns().getResultColumn(cr.getColumnNumber());
+
+		// rc shouldn't be null; if there was no matching ResultColumn at all,
+		// then we shouldn't have made it this far.
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.ASSERT(rc != null,
+				"Failed to locate result column when trying to " +
+				"scope operand '" + cr.getTableName() + "." +
+				cr.getColumnName() + "'.");
+		}
+
+		/* If the ResultColumn we found has an expression that is a
+		 * ColumnReference, then that column reference has all of the info
+		 * we need, with one exception: the columnNumber.  Depending on our
+		 * depth in the tree, the ResultColumn's ColumnReference could be
+		 * pointing to a base column in the FromBaseTable.  In that case the
+		 * ColumnReference will hold the column position as it is with respect
+		 * to the FromBaseTable.  But when we're scoping a column reference,
+		 * we're scoping it to a ResultSetNode that sits (either directly or
+		 * indirectly) above a ProjectRestrictNode that in turn sits above the
+		 * FromBaseTable. This means that the scoped reference's columnNumber
+		 * needs to be with respect to the PRN that sits above the base table,
+		 * _not_ with respect to the FromBaseTable itself.  This is important
+		 * because column "1" in the PRN might not be column "1" in the
+		 * underlying base table. For example, if we have base table TT with
+		 * four columns (a int, b int, i int, j int) and the PRN above it only
+		 * projects out columns (i,j), then column "1" for the PRN is "i", but
+		 * column "1" for base table TT is "a".  On the flip side, column "3"
+		 * for base table TT is "i", but if we search the PRN's result columns
+		 * (which match the result columns for the ResultSetNode to which
+		 * we're scoping) for column "3", we won't find it.
+		 *
+		 * So what does all of that mean?  It means that if the ResultColumn
+		 * we found has an expression that's a ColumnReference, we can simply
+		 * return that ColumnReference IF we set it's columnNumber correctly.
+		 * Thankfully the column reference we're trying to scope ("cr") came
+		 * from further up the tree and so it knows what the correct column
+		 * position (namely, the position w.r.t the ProjectRestrictNode above
+		 * the FromBaseTable) needs to be.  So that's the column number we
+		 * use.
+		 */
+		if (rc.getExpression() instanceof ColumnReference)
+		{
+			// Make sure the ColumnReference's columnNumber is correct,
+			// then just return that reference.  Note: it's okay to overwrite
+			// the columnNumber directly because when it eventually makes
+			// it down to the PRN over the FromBaseTable, it will be remapped
+			// for the FromBaseTable and the columnNumber will then be set
+			// correctly.  That remapping is done in the pushOptPredicate()
+			// method of ProjectRestrictNode.
+			ColumnReference cRef = (ColumnReference)rc.getExpression();
+			cRef.setColumnNumber(cr.getColumnNumber());
+			return cRef;
+		}
+
+		/* We can get here if the ResultColumn's expression isn't a
+		 * ColumnReference.  For example, the expression would be a
+		 * constant expression if childRSN represented something like:
+		 *
+		 *   select 1, 1 from t1
+		 *
+		 * In this case we just return the column reference as it is
+		 * because it's scoped as far as we can take it.
+		 */
+		return cr;
+	}
+
 }	
 
 

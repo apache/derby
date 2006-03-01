@@ -499,6 +499,18 @@ public class ColumnReference extends ValueNode
 	}
 
 	/**
+	 * Set the column number for this ColumnReference.  This is
+	 * used when scoping predicates for pushdown.
+	 *
+	 * @param columnName	The new column number.
+	 */
+
+	public void setColumnNumber(int colNum)
+	{
+		this.columnNumber = colNum;
+	}
+
+	/**
 	 * Get the source this columnReference
 	 *
 	 * @return	The source of this columnReference
@@ -672,6 +684,17 @@ public class ColumnReference extends ValueNode
 		origName = null;
 		tableNumber = origTableNumber;
 		columnNumber = origColumnNumber;
+	}
+
+	/**
+	 * Returns true if this ColumnReference has been remapped; false
+	 * otherwise.
+	 *
+	 * @return Whether or not this ColumnReference has been remapped.
+	 */
+	protected boolean hasBeenRemapped()
+	{
+		return (origSource != null);
 	}
 
 	/*
@@ -873,7 +896,7 @@ public class ColumnReference extends ValueNode
 		{
 			if (sourceResultSetNumber < 0)
 			{
-				SanityManager.THROWASSERT("sourceResultSetNumber expected to be >= 0");
+				SanityManager.THROWASSERT("sourceResultSetNumber expected to be >= 0 for " + getTableName() + "." + getColumnName());
 			}
 		}
 
