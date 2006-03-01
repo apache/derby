@@ -83,6 +83,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.security.PrivilegedExceptionAction;
+import java.lang.SecurityException;
+
 
 /**
 	A Raw store that implements the RawStoreFactory module by delegating all the
@@ -1546,7 +1548,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         {
             return (String) AccessController.doPrivileged( this);
         }
-        catch( PrivilegedActionException pae) { return null;} // does not throw an exception
+        catch( PrivilegedActionException pae) { 
+            return null;
+        } // does not throw an exception
+        catch(SecurityException se) {
+            // there are no permission to get canonical path 
+            // just return null.
+            return null;
+        }
         finally
         {
             actionStorageFile = null;
@@ -1563,7 +1572,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         {
             return (String) AccessController.doPrivileged( this);
         }
-        catch( PrivilegedActionException pae) { return null;} // does not throw an exception
+        catch( PrivilegedActionException pae) { 
+            return null;
+        } // does not throw an exception
+        catch(SecurityException se) { 
+            // there are no permission to get canonical path 
+            // just return null.
+            return null;
+        }
         finally
         {
             actionRegularFile = null;

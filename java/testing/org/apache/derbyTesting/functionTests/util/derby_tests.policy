@@ -39,7 +39,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
 
   // Import/export and other support files from these locations in tests
   permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
-  permission java.io.FilePermission "${user.dir}${/}extinout${/}-", "read, write";
+  permission java.io.FilePermission "${user.dir}${/}extinout${/}-", "read,  write, delete";
   permission java.io.FilePermission "${user.dir}${/}extout${/}-", "write";
   permission java.io.FilePermission "${user.dir}${/}extinout", "read,write";
   
