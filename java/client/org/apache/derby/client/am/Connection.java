@@ -831,7 +831,9 @@ public abstract class Connection implements java.sql.Connection,
                     "Transaction isolation level " + level + " is an invalid argument for java.sql.Connection.setTransactionIsolation()." +
                     " See Javadoc specification for a list of valid arguments.", "XJ045");
         }
-        if (setTransactionIsolationStmt == null) {
+        if (setTransactionIsolationStmt == null  ||
+            !(setTransactionIsolationStmt.openOnClient_ &&
+              setTransactionIsolationStmt.openOnServer_)) {
             setTransactionIsolationStmt =
                     createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
                             java.sql.ResultSet.CONCUR_READ_ONLY,
