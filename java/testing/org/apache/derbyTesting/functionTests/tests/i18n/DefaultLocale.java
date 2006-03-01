@@ -50,12 +50,14 @@ public class DefaultLocale {
 	// used in urlLocale test
 	public static void checkRDefaultLocale() throws SQLException
 	{
-		System.out.println(savedLocale);
-		if (!savedLocale.equals("en_US"))
+		String dbLocale = org.apache.derby.iapi.db.Factory.getDatabaseOfConnection().getLocale().toString();
+		//System.out.println(savedLocale);
+		//System.out.println(dbLocale);
+		if (!savedLocale.equals(dbLocale))
 			throw new SQLException("wrong_locale");
 	}
 
-	// used in messageLocale test
+	// used in urlLocale test and messageLocale test
 	public static void checkDatabaseLocale(String Locale) throws SQLException
 	{
 		String dbLocale = org.apache.derby.iapi.db.Factory.getDatabaseOfConnection().getLocale().toString();

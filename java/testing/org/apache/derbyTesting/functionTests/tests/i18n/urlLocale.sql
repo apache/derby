@@ -6,7 +6,6 @@
 create procedure checkDatabaseLoc(in locale char(12)) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.i18n.DefaultLocale.checkDatabaseLocale';
 create procedure checkRDefaultLoc() parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.i18n.DefaultLocale.checkRDefaultLocale';
 -- this current database was created with the default locale
-call checkDatabaseLoc('en_US');
 call checkRDefaultLoc();
 
 disconnect;
