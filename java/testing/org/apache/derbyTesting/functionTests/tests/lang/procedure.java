@@ -478,6 +478,8 @@ public class procedure
             se.printStackTrace(System.out);
         }
 
+        // Call setupStatementReuse which will make the server to reuse an existing statement. 
+        setupStatementReuse(conn);
         CallableStatement cSt = conn.prepareCall("call TEST_PROC_JIRA_491(?)");
         cSt.setInt(1, 3);
         try {
@@ -1834,6 +1836,9 @@ public class procedure
 		stmt.execute("create procedure jira821 (name varchar(50)) " +
 					 "parameter style java language java external name " +
 					 "'" + proc + "' dynamic result sets 1 reads sql data");
+		
+        // Call setupStatementReuse which will make the server to reuse an existing statement.
+		setupStatementReuse(conn);
 		CallableStatement cs = conn.prepareCall("call jira821 (?)");
 		cs.setString(1, "derby821");
 		cs.execute();
@@ -1862,6 +1867,67 @@ public class procedure
 		conn.setAutoCommit(savedAutoCommit);
 	}
 
+    /**
+     * This method is used to set up an environment which can be used to test 
+     * DERBY-1002. It creates statements and closes them to provoke the client
+     * driver to re-use sections which in turn will make the network server to
+     * re-use statements and result sets. It does not test anything by itself.
+     * It just sets up an environment where the statements used in this test 
+     * will be re-used in later tests. It is called from methods 
+     * 'jira_491_492' and 'testImplicitClose'. When the re-use was not happening 
+     * correctly, 'jira_491_492' and 'testImplicitClose' were giving following 
+     * errors:
+     * 
+     * 1. In the test for jira491, client expects a QRYDTA for the CNTQRY request. 
+     * Instead, it recieves a QRYNOPRM reply because server closes the query 
+     * wrongly.
+     * 2. In testImplicitClose, the query is not supposed to be closed in case
+     * of EXCSQLSTT commands. If re-use happens wrongly, server closes the query 
+     * for EXCSQLSTT commands too.
+     *   
+     * @param conn Connection
+     */
+    private static void setupStatementReuse(Connection conn)
+    							throws SQLException{
+    	
+    	Statement stmt = conn.createStatement();
+		try {
+			stmt.execute("drop table test_table_jira_1002");
+		} catch (SQLException se) { }
+
+		try {
+			stmt.execute("drop procedure test_proc_jira_1002");
+		} catch (SQLException se) { }
+
+		stmt.execute("create table test_table_jira_1002(id int)");
+		stmt.execute("insert into test_table_jira_1002 values(1) , (2)");
+
+		//create a procedure which returns a result set
+		stmt.execute("create procedure test_proc_jira_1002(name varchar(50)) " +
+					"language java parameter style java external name " +
+					"'org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows'" +
+					"dynamic result sets 1");
+    	
+    	
+		// Create a select statement to make currentDrdaRs.qryclsimp=CodePoint.QRYCLSIMP_YES
+    	Statement st_opnqry = conn.createStatement();
+		ResultSet rs_opnqry = st_opnqry.executeQuery("SELECT * FROM TEST_TABLE_JIRA_1002");
+		rs_opnqry.next();
+		// Close st_opnqry so that cSt1 will reuse same DRDAStatement
+		st_opnqry.close();
+
+		// Use up the next statement's result set to make currentDrdaRs.hasdata=false
+		CallableStatement cSt1 = conn.prepareCall("call test_proc_jira_1002(?)");
+		cSt1.setString(1, "test_table_jira_1002");
+		cSt1.execute();
+		ResultSet rs1 = cSt1.getResultSet();
+		rs1.next();
+		// Close cSt1 so that a statement created after a call to this method 
+		// will cause the server to use same DRDAStatement.
+		cSt1.close();
+    	
+    }    
+    
     /**
      * Checks to see if there is a lock on a table by attempting to modify the
      * same table. If the first connection was serializable then it will 

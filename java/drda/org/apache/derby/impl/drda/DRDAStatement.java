@@ -50,7 +50,12 @@ import org.apache.derby.impl.jdbc.Util;
 class DRDAStatement
 {
 
-
+	//NOTE!
+	//
+	// Since DRDAStatements are reused, ALL variables (except those noted in 
+	// the comments for reset method) should be set to their default values 
+	// in reset().
+	
 
 	protected String typDefNam;		//TYPDEFNAM for this statement
 	protected int byteOrder;		//deduced from typDefNam, save String comparisons
@@ -462,7 +467,13 @@ class DRDAStatement
 	}
 
 	/**
-	 * Initialize for reuse
+	 * This method is used to initialize the default statement of the database
+	 * for re-use. It is different from reset() method since default statements
+	 * get initiliazed differently. e.g: stmt variable used in default statement
+	 * is created only once in Database.makeConnection. 
+	 * TODO: Need to see what exactly it means to initialize the default 
+	 * statement. (DERBY-1002)
+	 * 
 	 */
 	protected void initialize() 
 	{
@@ -949,9 +960,11 @@ class DRDAStatement
 		return currentDrdaRs.wasExplicitlyClosed();
 	}
 
-	/** 
-	 * Clean up statements and resultSet
+	/**
+	 * This method closes the JDBC objects and frees up all references held by
+	 * this object.
 	 * 
+	 * @throws SQLException
 	 */
 	protected void close()  throws SQLException
 	{
@@ -959,29 +972,71 @@ class DRDAStatement
 			ps.close();
 		if (stmt != null)
 			stmt.close();
-		rsClose();
+		currentDrdaRs.close();
 		resultSetTable = null;
 		resultSetKeyList = null;
-		numResultSets = 0;
 		ps = null;
 		stmtPmeta = null;
 		stmt = null;
-		scrollType = ResultSet.TYPE_FORWARD_ONLY;	
-		concurType = ResultSet.CONCUR_READ_ONLY;;
-		withHoldCursor = -1;
-		rowCount = 0;
 		rslsetflg = null;
-		maxrslcnt = 0;
 		procName = null;
 		outputTypes = null;
-		outputExpected = false;
-		isCall = false;
-		explicitlyPrepared = false;
 		cliParamDrdaTypes = null;
 		cliParamLens = null;
 		cliParamExtPositions = null;
 
-	}	
+	}
+	
+	/**
+	 * This method resets the state of this DRDAStatement object so that it can
+	 * be re-used. This method should reset all variables of this class except 
+	 * the following:
+     * 1. database - This variable gets initialized in the constructor and by
+     * call to setDatabase.
+     * 2. members which get initialized in setPkgnamcsn (pkgnamcsn, pkgcnstkn, 
+     * pkgid, pkgsn, isolationLevel, cursorName). pkgnamcsn is the key used to 
+     * find if the DRDAStatement can be re-used. Hence its value will not change 
+     * when the object is re-used.
+	 * 
+	 */
+	protected void reset() 
+	{
+		setTypDefValues();
+		
+		withHoldCursor = -1;
+		scrollType = ResultSet.TYPE_FORWARD_ONLY;	
+		concurType = ResultSet.CONCUR_READ_ONLY;;
+		rowCount = 0;
+		rslsetflg = null;
+		maxrslcnt = 0;
+		ps = null;
+		stmtPmeta = null;
+		isCall = false;
+		procName = null;
+		outputTypes = null;
+		outputExpected = false;
+		stmt = null;
+		
+		currentDrdaRs.reset();
+		resultSetTable = null;
+		resultSetKeyList = null;
+		numResultSets = 0;
+		
+		cliParamDrdaTypes = new Vector();
+		cliParamLens = new Vector();
+		cliParamExtPositions = null;
+		
+		nbrrow = 0;
+		qryrowset = 0;	
+		blksize = 0;		
+		maxblkext = 0;	
+		outovropt = 0;	
+		qryrfrtbl = false;
+		qryprctyp = CodePoint.QRYBLKCTL_DEFAULT;
+
+		needsToSendParamData = false;
+		explicitlyPrepared = false;
+	}
 
 	/**
 	 * is Statement closed
