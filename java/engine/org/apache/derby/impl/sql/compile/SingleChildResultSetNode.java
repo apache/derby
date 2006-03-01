@@ -164,6 +164,29 @@ abstract class SingleChildResultSetNode extends FromTable
 	}
 
 	/**
+	 * @see Optimizable#addOrLoadBestPlanMapping
+	 *
+	 * Makes a call to add/load the plan mapping for this node,
+	 * and then makes the necessary call to recurse on this node's
+	 * child, in order to ensure that we have a full plan mapped.
+	 */
+	public void addOrLoadBestPlanMapping(boolean doAdd,
+		Optimizer optimizer) throws StandardException
+	{
+		super.addOrLoadBestPlanMapping(doAdd, optimizer);
+		if (childResult instanceof Optimizable)
+		{
+			((Optimizable)childResult).
+				addOrLoadBestPlanMapping(doAdd, optimizer);
+		}
+		else
+		{
+			childResult.getOptimizerImpl().
+				addOrLoadBestPlanMappings(doAdd, optimizer);
+		}
+	}
+
+	/**
 	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
 	 * how tree printing is supposed to work.
 	 *

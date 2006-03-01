@@ -231,14 +231,45 @@ public interface Optimizable {
 	public int convertAbsoluteToRelativeColumnPosition(int absolutePosition);
 
 	/**
+	 * When remembering "truly the best" access path for an Optimizable, we
+	 * have to keep track of which OptimizerImpl the "truly the best" access
+	 * is for.  In most queries there will only be one OptimizerImpl in
+	 * question, but in cases where there are nested subqueries, there will be
+	 * one OptimizerImpl for every level of nesting, and each OptimizerImpl
+	 * might have its own idea of what this Optimizable's "truly the best path"
+	 * access path really is.  So whenever we save a "truly the best" path,
+	 * we take note of which Optimizer told us to do so.  Then as each level
+	 * of subquery finishes optimization, the corresponding OptimizerImpl
+	 * can load its preferred access path into this Optimizable's
+	 * trulyTheBestAccessPath field and pass it up the tree, until eventually
+	 * the outer-most OptimizerImpl can choose to either use the best path
+	 * that it received from below (by calling "rememberAsBest()") or else
+	 * use the path that it found to be "best" for itself.
+	 *
+	 * This method is what allows us to keep track of which OptimizerImpl
+	 * saved which "best plan", and allows us to load the appropriate plans
+	 * after each round of optimization.
+	 * 
+	 * @param doAdd True if we're saving a best plan for the OptimizerImpl,
+	 *  false if we're loading/retrieving the best plan for the OptimizerImpl.
+	 * @param optimizer The OptimizerImpl for which we're saving/loading
+	 *  the "truly the best" path.
+	 */
+	public void addOrLoadBestPlanMapping(boolean doAdd,
+		Optimizer optimizer) throws StandardException;
+
+	/**
 	 * Remember the current access path as the best one (so far).
 	 *
 	 * @param planType	The type of plan (one of Optimizer.NORMAL_PLAN
 	 *					or Optimizer.SORT_AVOIDANCE_PLAN)
+	 * @param optimizer The OptimizerImpl that is telling this Optimizable
+	 *	to remember its current path as "truly the best".
 	 *
 	 * @exception StandardException thrown on error.
 	 */
-	public void rememberAsBest(int planType) throws StandardException;
+	public void rememberAsBest(int planType, Optimizer optimizer)
+		throws StandardException;
 
 	/**
 	 * Begin the optimization process for this Optimizable.  This can be

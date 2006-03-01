@@ -1608,7 +1608,24 @@ public abstract class ResultSetNode extends QueryTreeNode
 								getLanguageConnectionContext());
 		}
 
+		((OptimizerImpl)optimizer).prepForNextRound();
 		return optimizer;
+	}
+
+	/**
+	 * Get the optimizer for this result set; assumption is that
+	 * this.optimizer has already been created by the getOptimizer()
+	 * method above.
+	 */
+	protected OptimizerImpl getOptimizerImpl() {
+
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(optimizer != null,
+				"Tried to retrieve optimizer for a result set, but no such " +
+				"optimizer existed.");
+		}
+
+		return (OptimizerImpl)optimizer;
 	}
 
 	/**

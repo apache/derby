@@ -7244,7 +7244,7 @@ Negate comparison result: false
 									next time (milliseconds) = 0
 									close time (milliseconds) = 0
 								Left result set:
-									Table Scan ResultSet for CLASSIFICATION_VALUES at serializable isolation level using share table locking chosen by the optimizer
+									Index Scan ResultSet for REPOSITORYOBJECTRESOURCE using constraint ROR_CURRENTVERSION at serializable isolation level using share table locking chosen by the optimizer
 									Number of opens = 0
 									Rows seen = 0
 									Rows filtered = 0
@@ -7255,11 +7255,13 @@ Negate comparison result: false
 										close time (milliseconds) = 0
 									scan information: 
 										start position: 
-null										stop position: 
-null										qualifiers:
+	None
+										stop position: 
+	None
+										qualifiers:
 None
 								Right result set:
-									Hash Scan ResultSet for REPOSITORYOBJECTRESOURCE using constraint ROR_CURRENTVERSION at serializable isolation level using share table locking: 
+									Hash Scan ResultSet for CLASSIFICATION_VALUES at serializable isolation level using share table locking: 
 									Number of opens = 0
 									Hash table size = 0
 									Hash key is column number 0
@@ -7271,10 +7273,8 @@ None
 										close time (milliseconds) = 0
 									scan information: 
 										start position: 
-	None
-										stop position: 
-	None
-										scan qualifiers:
+null										stop position: 
+null										scan qualifiers:
 None
 										next qualifiers:
 Column[0][0] Id: 0

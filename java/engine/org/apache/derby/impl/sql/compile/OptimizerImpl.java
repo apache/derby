@@ -48,6 +48,7 @@ import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.StringUtil;
 
 import java.util.Properties;
+import java.util.HashMap;
 
 /**
  * This will be the Level 1 Optimizer.
@@ -138,6 +139,22 @@ public class OptimizerImpl implements Optimizer
 	// max memory use per table
 	protected int maxMemoryPerTable;
 
+	// Whether or not we need to reload the best plan for an Optimizable
+	// when we "pull" it.  If the latest complete join order was the
+	// best one so far, then the Optimizable will already have the correct
+	// best plan loaded so we don't need to do the extra work.  But if
+	// the most recent join order was _not_ the best, then this flag tells
+	// us that we need to reload the best plan when pulling.
+	private boolean reloadBestPlan;
+
+	// Set of optimizer->bestJoinOrder mappings used to keep track of which
+	// of this OptimizerImpl's "bestJoinOrder"s was the best with respect to a
+	// a specific outer query; the outer query is represented by an instance
+	// of Optimizer.  Each outer query could potentially have a different
+	// idea of what this OptimizerImpl's "best join order" is, so we have
+	// to keep track of them all.
+	private HashMap savedJoinOrders;
+
 	protected  OptimizerImpl(OptimizableList optimizableList, 
 				  OptimizablePredicateList predicateList,
 				  DataDictionary dDictionary,
@@ -213,6 +230,27 @@ public class OptimizerImpl implements Optimizer
 
 		/* Get the time that optimization starts */
 		timeOptimizationStarted = System.currentTimeMillis();
+		reloadBestPlan = false;
+		savedJoinOrders = null;
+	}
+
+	/**
+	 * This method is called before every "round" of optimization, where
+	 * we define a "round" to be the period between the last time a call to
+	 * getOptimizer() (on either a ResultSetNode or an OptimizerFactory)
+	 * returned _this_ OptimizerImpl and the time a call to this OptimizerImpl's
+	 * getNextPermutation() method returns FALSE.  Any re-initialization
+	 * of state that is required before each round should be done in this
+	 * method.
+	 */
+	protected void prepForNextRound()
+	{
+		// We initialize reloadBestPlan to false so that if we end up
+		// pulling an Optimizable before we find a best join order
+		// (which can happen if there is no valid join order for this
+		// round) we won't inadvertently reload the best plans based
+		// on some previous round.
+		reloadBestPlan = false;
 	}
 
     public int getMaxMemoryPerTable()
@@ -700,6 +738,33 @@ public class OptimizerImpl implements Optimizer
 				*/
 				pullMe.pullOptPredicates(predicateList);
 
+				/*
+				** When we pull an Optimizable we need to go through and
+				** load whatever best path we found for that Optimizable
+				** with respect to _this_ OptimizerImpl.  An Optimizable
+				** can have different "best paths" for different Optimizer
+				** Impls if there are subqueries beneath it; we need to make
+				** sure that when we pull it, it's holding the best path as
+				** as we determined it to be for _us_.
+				**
+				** NOTE: We we only reload the best plan if it's necessary
+				** to do so--i.e. if the best plans aren't already loaded.
+				** The plans will already be loaded if the last complete
+				** join order we had was the best one so far, because that
+				** means we called "rememberAsBest" on every Optimizable
+				** in the list and, as part of that call, we will run through
+				** and set trulyTheBestAccessPath for the entire subtree.
+				** So if we haven't tried any other plans since then,
+				** we know that every Optimizable (and its subtree) already
+				** has the correct best plan loaded in its trulyTheBest
+				** path field.  It's good to skip the load in this case
+				** because 'reloading best plans' involves walking the
+				** entire subtree of _every_ Optimizable in the list, which
+				** can be expensive if there are deeply nested subqueries.
+				*/
+				if (reloadBestPlan)
+					pullMe.addOrLoadBestPlanMapping(false, this);
+
 				/* Mark current join position as unused */
 				proposedJoinOrder[joinPosition] = -1;
 			}
@@ -835,6 +900,11 @@ public class OptimizerImpl implements Optimizer
 				}
 				if (finishedCycle)
 				{
+					// We just set proposedJoinOrder[joinPosition] above, so
+					// if we're done we need to put it back to -1 to indicate
+					// that it's an empty slot.  Then we rewind and pull any
+					// other Optimizables at positions < joinPosition.
+					proposedJoinOrder[joinPosition] = -1;
 					joinPosition--;
 					if (joinPosition >= 0)
 					{
@@ -890,6 +960,8 @@ public class OptimizerImpl implements Optimizer
 				optimizableList.getOptimizable(
 									proposedJoinOrder[joinPosition]);
 			pullMe.pullOptPredicates(predicateList);
+			if (reloadBestPlan)
+				pullMe.addOrLoadBestPlanMapping(false, this);
 			proposedJoinOrder[joinPosition] = -1;
 			if (joinPosition == 0) break;
 		}
@@ -1145,7 +1217,14 @@ public class OptimizerImpl implements Optimizer
 				if ((! foundABestPlan) || currentCost.compare(bestCost) < 0)
 				{
 					rememberBestCost(currentCost, Optimizer.NORMAL_PLAN);
+
+					// Since we just remembered all of the best plans,
+					// no need to reload them when pulling Optimizables
+					// from this join order.
+					reloadBestPlan = false;
 				}
+				else
+					reloadBestPlan = true;
 
 				/* Subtract cost of sorting from non-sort-avoidance cost */
 				if (requiredRowOrdering != null)
@@ -1230,7 +1309,8 @@ public class OptimizerImpl implements Optimizer
 		}
 		for (int i = 0; i < numOptimizables; i++)
 		{
-			optimizableList.getOptimizable(bestJoinOrder[i]).rememberAsBest(planType);
+			optimizableList.getOptimizable(bestJoinOrder[i]).
+				rememberAsBest(planType, this);
 		}
 
 		/* Remember if a sort is not needed for this plan */
@@ -1951,4 +2031,72 @@ public class OptimizerImpl implements Optimizer
 	
 	/** @see Optimizer#useStatistics */
 	public boolean useStatistics() { return useStatistics && optimizableList.useStatistics(); }
+
+	/**
+	 * Remember the current best join order as the best one for
+	 * some outer query, represented by another OptimizerImpl. Then
+	 * iterate through our optimizableList and tell each Optimizable
+	 * to remember its best plan with respect to the outer query.
+	 * See Optimizable.addOrLoadBestPlan() for more on why this is
+	 * necessary.
+	 *
+	 * @param doAdd True if we're adding a mapping, false if we're loading.
+	 * @param outerOptimizer OptimizerImpl corresponding to an outer
+	 *  query; we will use this as the key for the mapping.
+	 */
+	protected void addOrLoadBestPlanMappings(boolean doAdd,
+		Optimizer outerOptimizer) throws StandardException
+	{
+		// First we save this OptimizerImpl's best join order.
+		int [] joinOrder = null;
+		if (doAdd)
+		{
+			// If the savedJoinOrder map already exists, search for the
+			// join order for the target optimizer and reuse that.
+			if (savedJoinOrders == null)
+				savedJoinOrders = new HashMap();
+			else
+				joinOrder = (int[])savedJoinOrders.get(outerOptimizer);
+
+			// If we don't already have a join order array for the optimizer,
+			// create a new one.
+			if (joinOrder == null)
+				joinOrder = new int[numOptimizables];
+
+			// Now copy current bestJoinOrder and save it.
+			for (int i = 0; i < bestJoinOrder.length; i++)
+				joinOrder[i] = bestJoinOrder[i];
+
+			savedJoinOrders.put(outerOptimizer, joinOrder);
+		}
+		else
+		{
+			// If we get here, we want to load the best join order from our
+			// map into this OptimizerImpl's bestJoinOrder array.
+
+			// If we don't have any join orders saved, then there's nothing to
+			// load.  This can happen if the optimizer tried some join order
+			// for which there was no valid plan.
+			if (savedJoinOrders == null)
+				return;
+
+			joinOrder = (int[])savedJoinOrders.get(outerOptimizer);
+			if (joinOrder == null)
+				return;
+
+			// Load the join order we found into our bestJoinOrder array.
+			for (int i = 0; i < joinOrder.length; i++)
+				bestJoinOrder[i] = joinOrder[i];
+		}
+
+		// Now iterate through all Optimizables in this OptimizerImpl's list
+	 	// and add/load the best plan "mapping" for each one, as described in
+	 	// in Optimizable.addOrLoadBestPlanMapping().
+		for (int i = optimizableList.size() - 1; i >= 0; i--)
+		{
+			optimizableList.getOptimizable(i).
+				addOrLoadBestPlanMapping(doAdd, outerOptimizer);
+		}
+	}
+
 }

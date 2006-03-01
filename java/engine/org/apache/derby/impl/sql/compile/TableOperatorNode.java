@@ -156,6 +156,41 @@ public abstract class TableOperatorNode extends FromTable
 	}
 
 	/**
+	 * @see Optimizable#addOrLoadBestPlanMapping
+	 *
+	 * Makes a call to add/load the plan mapping for this node,
+	 * and then makes the necessary call to recurse on this node's
+	 * left and right child, in order to ensure that we have a
+	 * full plan mapped.
+	 */
+	public void addOrLoadBestPlanMapping(boolean doAdd,
+		Optimizer optimizer) throws StandardException
+	{
+		super.addOrLoadBestPlanMapping(doAdd, optimizer);
+		if (leftResultSet instanceof Optimizable)
+		{
+			((Optimizable)leftResultSet).
+				addOrLoadBestPlanMapping(doAdd, optimizer);
+		}
+		else
+		{
+			leftResultSet.getOptimizerImpl().
+				addOrLoadBestPlanMappings(doAdd, optimizer);
+		}
+
+		if (rightResultSet instanceof Optimizable)
+		{
+			((Optimizable)rightResultSet).
+				addOrLoadBestPlanMapping(doAdd, optimizer);
+		}
+		else
+		{
+			rightResultSet.getOptimizerImpl().
+				addOrLoadBestPlanMappings(doAdd, optimizer);
+		}
+	}
+
+	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
 	 *
@@ -742,6 +777,7 @@ public abstract class TableOperatorNode extends FromTable
 													(RequiredRowOrdering) null,
 													getCompilerContext().getNumTables(),
 													  lcc);
+			((OptimizerImpl)optimizer).prepForNextRound();
 
 			if (sourceResultSet == leftResultSet)
 			{
