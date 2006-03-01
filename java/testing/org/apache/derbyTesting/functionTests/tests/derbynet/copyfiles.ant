@@ -14,6 +14,9 @@ runtimeinfo_app.properties
 runtimeinfo_sed.properties
 sysinfo_app.properties
 sysinfo_sed.properties
+sysinfo_withproperties_app.properties
+sysinfo_withproperties_sed.properties
+sysinfo_withproperties_derby.properties
 testij.sql
 testclientij.sql
 testconnection_app.properties

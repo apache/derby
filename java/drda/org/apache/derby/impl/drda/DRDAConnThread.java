@@ -1571,27 +1571,44 @@ class DRDAConnThread extends Thread {
 					securityMechanism = reader.readNetworkShort();
 					if (SanityManager.DEBUG)
 						trace("Security mechanism = " + securityMechanism);
-					// for plain text userid,password USRIDPWD, and USRIDONL
-				        // no need of decryptionManager
-					if (securityMechanism != CodePoint.SECMEC_USRIDPWD &&
-					    securityMechanism != CodePoint.SECMEC_USRIDONL)
-					{
-						//this is the only other one we understand
-						if (securityMechanism != CodePoint.SECMEC_EUSRIDPWD) 
-							securityCheckCode = CodePoint.SECCHKCD_NOTSUPPORTED;
-						else
-						{
-							try {
-								if (decryptionManager == null)
-									decryptionManager = new DecryptionManager();
-								myPublicKey = decryptionManager.obtainPublicKey();
-							} catch (SQLException e) {
-								println2Log(null, session.drdaID, e.getMessage());
-								// Local security service non-retryable error.
-								securityCheckCode = CodePoint.SECCHKCD_0A;
-							}
-						}
-					}
+                    
+                    // if Property.DRDA_PROP_SECURITYMECHANISM has been set, then
+                    // network server only accepts connections which use that
+                    // security mechanism. No other types of connections 
+                    // are accepted.
+                    // Make check to see if this property has been set.
+                    // if set, and if the client requested security mechanism 
+                    // is not the same, then return a security check code 
+                    // that the server does not support/allow this security 
+                    // mechanism
+                    if ( (server.getSecurityMechanism() != 
+                        NetworkServerControlImpl.INVALID_OR_NOTSET_SECURITYMECHANISM)
+                            && securityMechanism != server.getSecurityMechanism())
+                        securityCheckCode = CodePoint.SECCHKCD_NOTSUPPORTED;
+                    else
+                    {
+                        // for plain text userid,password USRIDPWD, and USRIDONL
+                        // no need of decryptionManager
+                        if (securityMechanism != CodePoint.SECMEC_USRIDPWD &&
+                                securityMechanism != CodePoint.SECMEC_USRIDONL)
+                        {
+                            //this is the only other one we understand
+                            if (securityMechanism != CodePoint.SECMEC_EUSRIDPWD) 
+                                securityCheckCode = CodePoint.SECCHKCD_NOTSUPPORTED;
+                            else
+                            {
+                                try {
+                                    if (decryptionManager == null)
+                                        decryptionManager = new DecryptionManager();
+                                    myPublicKey = decryptionManager.obtainPublicKey();
+                                } catch (SQLException e) {
+                                    println2Log(null, session.drdaID, e.getMessage());
+                                    // Local security service non-retryable error.
+                                    securityCheckCode = CodePoint.SECCHKCD_0A;
+                                }
+                            }
+                        }
+                    }
 					break;
 				//optional (currently required for Cloudscape - may need to revisit)
 				case CodePoint.RDBNAM:
@@ -2487,10 +2504,25 @@ class DRDAConnThread extends Thread {
 			writer.writeScalar2Bytes(CodePoint.SECMEC, database.securityMechanism);
 		else
 		{ 
-			// these are the ones we know about
-			writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRIDPWD);
-			writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_EUSRIDPWD);
-			writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRIDONL);
+            // if server doesnt recognize or allow the client requested security mechanism,
+            // then need to return the list of security mechanisms supported/allowed by the server
+            
+            // check if server is set to accept connections from client at a certain 
+            // security mechanism, if so send only the security mechanism  that the 
+            // server will accept, to the client
+            if ( server.getSecurityMechanism() != NetworkServerControlImpl.INVALID_OR_NOTSET_SECURITYMECHANISM )
+                writer.writeScalar2Bytes(CodePoint.SECMEC,server.getSecurityMechanism());
+            else
+            {
+                // note: per the DDM manual , ACCSECRD response is of 
+                // form SECMEC (value{value..})  
+                // Need to fix the below to send a list of supported security 
+                // mechanisms for value of one SECMEC codepoint (JIRA 926)
+                // these are the ones we know about
+                writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRIDPWD);
+                writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_EUSRIDPWD);
+                writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRIDONL);
+            }
 		}
 		if (securityCheckCode != 0)
 		{

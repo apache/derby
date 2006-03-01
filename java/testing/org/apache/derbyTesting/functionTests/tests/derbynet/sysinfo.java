@@ -96,7 +96,12 @@ public class sysinfo
 	}
 
 
-	public static void main (String args[]) throws Exception
+    /*
+     * Test calling server's sysinfo 
+     * 
+     */
+	public static void test (String args[])
+        throws Exception
 	{
 		if ((System.getProperty("java.vm.name") != null) && System.getProperty("java.vm.name").equals("J9"))
 			jvm = jvm.getJvm("j9_13");
@@ -137,5 +142,11 @@ public class sysinfo
 			e.printStackTrace();
 		}
 	}
+    
+    public static void main(String[] args)
+        throws Exception
+    {
+       test(args);
+    }
 
 }

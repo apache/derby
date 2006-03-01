@@ -762,6 +762,29 @@ public interface Property {
 	public final static String DRDA_PROP_TIMESLICE = "derby.drda.timeSlice";
 
     /**
+     * derby.drda.securityMechanism
+     *<BR>
+     * This property can be set to one of the following values
+     * USER_ONLY_SECURITY
+     * CLEAR_TEXT_PASSWORD_SECURITY
+     * ENCRYPTED_USER_AND_PASSWORD_SECURITY
+     * <BR>
+     * if derby.drda.securityMechanism is set to a valid mechanism, then
+     * the Network Server accepts only connections which use that
+     * security mechanism. No other types of connections are accepted.
+     * <BR>
+     * if the derby.drda.securityMechanism is not set at all, then the
+     * Network Server accepts any connection which uses a valid
+     * security mechanism.
+     * <BR> 
+     * E.g derby.drda.securityMechanism=USER_ONLY_SECURITY
+     * This property is static. Server must be restarted for the property to take effect.
+     * Default value for this property is as though it is not set - in which case
+     * the server will allow clients with supported security mechanisms to connect
+     */
+    public final static String DRDA_PROP_SECURITYMECHANISM = "derby.drda.securityMechanism";
+
+    /**
      * derby.drda.portNumber
      *<BR>
      * The port number used by the network server.

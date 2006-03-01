@@ -53,6 +53,15 @@ public class testSecMec extends dataSourcePermissions_net
 
 {
 
+    // Need this to keep track of database has been created or not
+    // to avoid case of DERBY-300
+    private static boolean dbNotCreated = true;
+
+    // values for derby.drda.securityMechanism property
+    private static String[] derby_drda_securityMechanism = { null, //not set
+            "USER_ONLY_SECURITY", "CLEAR_TEXT_PASSWORD_SECURITY",
+            "ENCRYPTED_USER_AND_PASSWORD_SECURITY", "INVALID_VALUE", "" };
+
 	private static int NETWORKSERVER_PORT;
 
 	private static NetworkServerControl networkServer = null;
@@ -113,52 +122,82 @@ public class testSecMec extends dataSourcePermissions_net
 		System.setOut( consoleLogStream );
 		System.setErr( consoleErrLogStream );
 
-		// Start the NetworkServer on another thread, unless it's a remote host
-		if (hostName.equals("localhost"))
+           
+        // Start server with a specific value for derby.drda.securityMechanism
+        // and run tests. Note connections will be successful or not depending on
+        // derby.drda.securityMechanism property specified on the server (DERBY-928)
+        // @see
+        // org.apache.derby.iapi.reference.Property#DRDA_PROP_SECURITYMECHANISM
+		for ( int i = 0; i < derby_drda_securityMechanism.length; i++)
 		{
-			networkServer = new NetworkServerControl(InetAddress.getByName(hostName),NETWORKSERVER_PORT);
-			networkServer.start(null);
-
-			// Wait for the NetworkServer to start.
-			if (!isServerStarted(networkServer, 60))
-				System.exit(-1);
-		}
-		
-		// Now, go ahead and run the test.
-		try {
-			testSecMec tester = 
-			    new testSecMec(consoleLogStream,
-					   originalStream,
-					   shutdownLogStream,
-					   consoleErrLogStream,
-					   originalErrStream,
-					   shutdownErrLogStream);
-			tester.runTest();
-
-		} catch (Exception e) {
-		// if we catch an exception of some sort, we need to make sure to
-		// close our streams before returning; otherwise, we can get
-		// hangs in the harness.  SO, catching all exceptions here keeps
-		// us from exiting before closing the necessary streams.
-			System.out.println("FAIL - Exiting due to unexpected error: " +
-				e.getMessage());
-			e.printStackTrace();
-		}
-
-		// Shutdown the server.
-		if (hostName.equals("localhost"))
+		    if (derby_drda_securityMechanism[i]!=null)
+		        System.setProperty("derby.drda.securityMechanism",derby_drda_securityMechanism[i]);
+		    
+		    System.out.println("----------------------------------------------");
+		    System.out.println("Testing with derby.drda.securityMechanism="+
+		            System.getProperty("derby.drda.securityMechanism"));
+		    // Start the NetworkServer on another thread, unless it's a remote host
+		    if (hostName.equals("localhost"))
 		    {
-			consoleLogStream.switchOutput( shutdownLogStream );
-			consoleErrLogStream.switchOutput( shutdownErrLogStream );
-
-			networkServer.shutdown();
-			// how do we do this with the new api?
-			//networkServer.join();
-			Thread.sleep(5000);
-
-			consoleLogStream.switchOutput( originalStream );
-			consoleErrLogStream.switchOutput( originalErrStream );
-
+		        try
+		        {
+		            networkServer = new NetworkServerControl(InetAddress.getByName(hostName),NETWORKSERVER_PORT);
+		            networkServer.start(null);
+		        }catch(Exception e)
+		        {
+		            if ( derby_drda_securityMechanism[i].equals("INVALID_VALUE")||
+		                    derby_drda_securityMechanism[i].equals("")) 
+		            {
+		                System.out.println("EXPECTED EXCEPTION "+ e.getMessage());
+		                continue;
+		            }
+		        }
+		        
+		        // Wait for the NetworkServer to start.
+		        if (!isServerStarted(networkServer, 60))
+		            System.exit(-1);
+		    }
+		    
+		    // Now, go ahead and run the test.
+		    try {
+		        testSecMec tester = 
+		            new testSecMec(consoleLogStream,
+		                    originalStream,
+		                    shutdownLogStream,
+		                    consoleErrLogStream,
+		                    originalErrStream,
+		                    shutdownErrLogStream);
+                // Now run the test, note connections will be successful or 
+                // throw an exception depending on derby.drda.securityMechanism 
+                // property specified on the server
+		        tester.runTest();
+		        
+		    } catch (Exception e) {
+		        // if we catch an exception of some sort, we need to make sure to
+		        // close our streams before returning; otherwise, we can get
+		        // hangs in the harness.  SO, catching all exceptions here keeps
+		        // us from exiting before closing the necessary streams.
+		        System.out.println("FAIL - Exiting due to unexpected error: " +
+		                e.getMessage());
+		        e.printStackTrace();
+		    }
+		    
+		    // Shutdown the server.
+		    if (hostName.equals("localhost"))
+		    {
+		        consoleLogStream.switchOutput( shutdownLogStream );
+		        consoleErrLogStream.switchOutput( shutdownErrLogStream );
+		        
+		        networkServer.shutdown();
+		        consoleLogStream.flush();
+		        // how do we do this with the new api?
+		        //networkServer.join();
+		        Thread.sleep(5000);
+		        
+		        consoleLogStream.switchOutput( originalStream );
+		        consoleErrLogStream.switchOutput( originalErrStream );
+		        
+		    }
 		}
 		System.out.println("Completed testSecMec");
 
@@ -200,6 +239,11 @@ public class testSecMec extends dataSourcePermissions_net
 	 *  Test with datasource as well as DriverManager
 	 *  T8 - user,password security mechanism set to SECMEC_USRIDONL   PASS
 	 *  Test with datasource as well as DriverManager
+     * Note, that with DERBY928, the pass/fail for the connections 
+     * will depend on the security mechanism specified at the server by property
+     * derby.drda.securityMechanism.  Please check out the following html file 
+     * http://issues.apache.org/jira/secure/attachment/12322971/Derby928_Table_SecurityMechanisms..htm
+     * for a combination of url/security mechanisms and the expected results 
 	 */
 
 	protected void runTest()
@@ -208,7 +252,18 @@ public class testSecMec extends dataSourcePermissions_net
 		// different security mechanisms.
 		// Network server supports SECMEC_USRIDPWD, SECMEC_USRIDONL,SECMEC_EUSRIDPWD
 		System.out.println("Checking security mechanism authentication with DriverManager");
-		getConnectionUsingDriverManager(getJDBCUrl("wombat;create=true","user=neelima;password=lee;securityMechanism="+SECMEC_USRIDPWD),"T4:");
+        
+        // DERBY-300; Creation of SQLWarning on a getConnection causes hang on 
+        // 131 vms when server and client are in same vm.
+        // To avoid hitting this case with 1.3.1 vms, dont try to send create=true
+        // if database is already created as otherwise it will lead to a SQLWarning
+        if ( dbNotCreated )
+        {
+            getConnectionUsingDriverManager(getJDBCUrl("wombat;create=true","user=neelima;password=lee;securityMechanism="+SECMEC_USRIDPWD),"T4:");
+            dbNotCreated = false;
+        }
+        else
+            getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee;securityMechanism="+SECMEC_USRIDPWD),"T4:");
 		getConnectionUsingDriverManager(getJDBCUrl("wombat",null),"T1:");
 		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=max"),"T2:");
 		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee"),"T3:");

@@ -243,6 +243,11 @@ public final class NetworkServerControlImpl {
 	private boolean cleanupOnStart = false;	// Should we clean up when starting the server?
 	private boolean restartFlag = false;
 
+    protected final static int INVALID_OR_NOTSET_SECURITYMECHANISM = -1; 
+    // variable to store value set to derby.drda.securityMechanism
+    // default value is -1 which indicates that this property isnt set or
+    // the value is invalid
+    private int allowOnlySecurityMechanism = INVALID_OR_NOTSET_SECURITYMECHANISM;
 	//
 	// variables for a client command session
 	//
@@ -2484,8 +2489,60 @@ public final class NetworkServerControlImpl {
 		if (propval != null  && StringUtil.SQLEqualsIgnoreCase(propval, "true"))
 			debugOutput = true;
 
+        propval = PropertyUtil.getSystemProperty( 
+                Property.DRDA_PROP_SECURITYMECHANISM);
+        if (propval != null){
+            setSecurityMechanism(propval);
+        }
+
 	}
 
+    /**
+     * Retrieve the SECMEC integer value from the
+     * user friendly security mechanism name
+     * @param s  security mechanism name
+     * @return integer value , return the SECMEC value for 
+     * the security mechanism as defined by DRDA spec
+     * or INVALID_OR_NOTSET_SECURITYMECHANISM if 's'
+     * passed is invalid  or not supported security 
+     * mechanism
+     */
+    private int getSecMecValue(String s)
+    {
+        int secmec = INVALID_OR_NOTSET_SECURITYMECHANISM;
+        if( StringUtil.SQLEqualsIgnoreCase(s,"USER_ONLY_SECURITY"))
+                secmec = CodePoint.SECMEC_USRIDONL;
+        else if( StringUtil.SQLEqualsIgnoreCase(s,"CLEAR_TEXT_PASSWORD_SECURITY"))
+                secmec = CodePoint.SECMEC_USRIDPWD;
+        else if( StringUtil.SQLEqualsIgnoreCase(s,"ENCRYPTED_USER_AND_PASSWORD_SECURITY"))
+                secmec = CodePoint.SECMEC_EUSRIDPWD;
+        
+        return secmec;
+    }
+
+    /**
+     * Retrieve the string name for the integer
+     * secmec value
+     * @param secmecVal   secmec value
+     * @return String - return the string name corresponding 
+     * to the secmec value if recognized else returns null
+     */
+    private String getStringValueForSecMec(int secmecVal)
+    {
+        switch(secmecVal)
+        {
+            case CodePoint.SECMEC_USRIDONL:
+                return "USER_ONLY_SECURITY";
+            
+            case CodePoint.SECMEC_USRIDPWD:
+                return "CLEAR_TEXT_PASSWORD_SECURITY";
+            
+            case CodePoint.SECMEC_EUSRIDPWD:
+                return "ENCRYPTED_USER_AND_PASSWORD_SECURITY";
+        }
+        return null;
+    }
+   
 	/**
 	 * Get integer property values
 	 *
@@ -2819,6 +2876,38 @@ public final class NetworkServerControlImpl {
 	}
 
 	/**
+     * Set the security mechanism for derby.drda.securityMechanism
+     * If this property is set, server will only allow connections
+     * from client with this security mechanism.
+     * This method will map the user friendly string representing 
+     * the security mechanism to the corresponding drda secmec value
+	 * @param s security mechanism string value
+	 * @throws Exception if  value to set is invalid
+     * @see Property#DRDA_PROP_SECURITYMECHANISM 
+	 */
+    private void setSecurityMechanism(String s)
+        throws Exception
+    {
+       allowOnlySecurityMechanism = getSecMecValue(s);
+       
+       if (allowOnlySecurityMechanism == INVALID_OR_NOTSET_SECURITYMECHANISM)
+           consolePropertyMessage("DRDA_InvalidValue.U", new String [] 
+                       {s, Property.DRDA_PROP_SECURITYMECHANISM});
+    }
+    
+    /**
+     * get the security mechanism (secmec value) that the server
+     * will accept connections from.
+     * @return the securitymechanism value. It is value that 
+     * the derby.drda.securityMechanism was set to, if it is not set, then
+     * it is equal to INVALID_OR_NOTSET_SECURITYMECHANISM
+     * @see Property#DRDA_PROP_SECURITYMECHANISM 
+     */
+    protected int getSecurityMechanism()
+    {
+        return allowOnlySecurityMechanism;
+    }
+	/**
 	 * Set the trace on/off for all sessions, or one session, depending on
 	 * whether we got -s argument.
 	 *
@@ -2990,6 +3079,8 @@ public final class NetworkServerControlImpl {
 			traceDirectory = value;
 		}
 	}
+
+    
 
 	/**
 	 * Connect to a database to test whether a connection can be made
@@ -3172,6 +3263,12 @@ public final class NetworkServerControlImpl {
 		
 		retval.put(Property.START_DRDA, (startDRDA == null)? "false" : startDRDA);
 
+        // if Property.DRDA_PROP_SECURITYMECHANISM has been set on server
+        // then put it in retval else the default behavior is as though 
+        // it is not set
+        if ( getSecurityMechanism() != INVALID_OR_NOTSET_SECURITYMECHANISM )
+            retval.put( Property.DRDA_PROP_SECURITYMECHANISM, getStringValueForSecMec(getSecurityMechanism()));
+        
 		//get the trace value for each session if tracing for all is not set
 		if (!getTraceAll())
 		{
