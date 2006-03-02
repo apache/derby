@@ -502,7 +502,7 @@ public class ColumnReference extends ValueNode
 	 * Set the column number for this ColumnReference.  This is
 	 * used when scoping predicates for pushdown.
 	 *
-	 * @param columnName	The new column number.
+	 * @param colNum The new column number.
 	 */
 
 	public void setColumnNumber(int colNum)
