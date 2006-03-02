@@ -2204,13 +2204,20 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     }
 
     private boolean getMetaDataInfoInt_SupportsResultSetConcurrency(int infoCallIndex, int type, int concurrency) throws SQLException {
-        // The stored procured will return a String containg a list of concurrency and list of resultSet types which support
-        // a perticular concurrency
-        // For eg. if the database supports concurrency CONCUR_READ_ONLY(1007) in ResultSet type TYPE_FORWARD_ONLY(1003),
-        // TYPE_SCROLL_INSENSITIVE(1004), TYPE_SCROLL_SENSITIVE(1005) and
-        // supports concurrency CONCUR_UPDATBLE(1008) in resultSet TYPE_SCROLL_SENSITIVE(1005)
-        // then stored procedure will return a string "1007,1003,1004,1005;1008,1005"
-        // see how concurrency and supported result set types are seperated by ";"
+        // The stored procured will return a String containing a list
+        // of lists: For each result set type in the outer list, an
+        // inner list gives the allowed concurrencies for that type:
+	// The encoding syntax is reproduced here from the server file
+	// 'metadata_net.properties (please keep in synch!):  
+	//
+        // String syntax:  
+	// <type> { "," <concurrency>}* { ";" <type> { "," <concurrency>}* }}*
+	//
+	// <type> ::= <the integer value for that type from interface java.sql.Resultset
+	//             i.e. TYPE_FORWARD_ONLY is 1003>
+	// <concurrency> ::= <the integer value for that concurrency
+	//                    from interface java.sql.Resultset, i.e.
+	//                    CONCUR_UPDATABLE is 1008>
         try
         {
             String returnedFromSP = null;
@@ -2222,10 +2229,11 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             }
             java.util.StringTokenizer st = new java.util.StringTokenizer(returnedFromSP, ";");
             while (st.hasMoreTokens()) {
-                java.util.StringTokenizer stForType = new java.util.StringTokenizer(st.nextToken(), ",");
-                if ((new Integer(stForType.nextToken())).intValue() == concurrency) {
-                    while (st.hasMoreTokens()) {
-                        if ((new Integer(st.nextToken())).intValue() == type) {
+                java.util.StringTokenizer stForConc = 
+		    new java.util.StringTokenizer(st.nextToken(), ",");
+                if ((new Integer(stForConc.nextToken())).intValue() == type) {
+                    while (stForConc.hasMoreTokens()) {
+                        if ((new Integer(stForConc.nextToken())).intValue() == concurrency) {
                             return true;
                         }
                     }

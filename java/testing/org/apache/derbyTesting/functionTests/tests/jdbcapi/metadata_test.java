@@ -668,6 +668,32 @@ public abstract class metadata_test {
 			System.out.println("othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
 			System.out.println("othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
 
+			if (!TestUtil.isJCCFramework()) { // gives false on all.. bug
+				int[] types = {ResultSet.TYPE_FORWARD_ONLY, 
+							   ResultSet.TYPE_SCROLL_INSENSITIVE,
+							   ResultSet.TYPE_SCROLL_SENSITIVE};
+	 
+				int[] conc  = {ResultSet.CONCUR_READ_ONLY, 
+							   ResultSet.CONCUR_UPDATABLE};
+
+				String[] typesStr = {"TYPE_FORWARD_ONLY", 
+									 "TYPE_SCROLL_INSENSITIVE",
+									 "TYPE_SCROLL_SENSITIVE"};
+			
+				String[] concStr  = {"CONCUR_READ_ONLY", 
+									 "CONCUR_UPDATABLE"};
+	 
+				for (int i = 0; i < types.length ; i++) {
+					for (int j = 0; j < conc.length; j++) {
+						System.out.println
+							("SupportsResultSetConcurrency: " +
+							 typesStr[i] + "," + concStr[j] + ": " +
+							 met.supportsResultSetConcurrency(types[i], 
+															  conc[j]));
+					}
+				}
+			}
+
 			System.out.println("getConnection(): "+
 					   ((met.getConnection()==con)?"same connection":"different connection") );
 			System.out.println("getProcedureColumns():");

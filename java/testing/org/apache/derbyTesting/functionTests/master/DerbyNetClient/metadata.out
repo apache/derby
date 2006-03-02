@@ -179,6 +179,12 @@ Derby does not yet implement scroll sensitive resultsets and hence following met
 othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
 othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
 othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
+SupportsResultSetConcurrency: TYPE_FORWARD_ONLY,CONCUR_READ_ONLY: true
+SupportsResultSetConcurrency: TYPE_FORWARD_ONLY,CONCUR_UPDATABLE: true
+SupportsResultSetConcurrency: TYPE_SCROLL_INSENSITIVE,CONCUR_READ_ONLY: true
+SupportsResultSetConcurrency: TYPE_SCROLL_INSENSITIVE,CONCUR_UPDATABLE: false
+SupportsResultSetConcurrency: TYPE_SCROLL_SENSITIVE,CONCUR_READ_ONLY: false
+SupportsResultSetConcurrency: TYPE_SCROLL_SENSITIVE,CONCUR_UPDATABLE: false
 getConnection(): same connection
 getProcedureColumns():
 PROCEDURE_CAT[VARCHAR],PROCEDURE_SCHEM[VARCHAR],PROCEDURE_NAME[VARCHAR],COLUMN_NAME[VARCHAR],COLUMN_TYPE[SMALLINT],DATA_TYPE[SMALLINT],TYPE_NAME[VARCHAR],PRECISION[INTEGER],LENGTH[INTEGER],SCALE[SMALLINT],RADIX[SMALLINT],NULLABLE[SMALLINT],REMARKS[VARCHAR],METHOD_ID[SMALLINT],PARAMETER_ID[SMALLINT]
