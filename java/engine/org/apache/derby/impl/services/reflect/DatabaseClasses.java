@@ -207,7 +207,24 @@ abstract class DatabaseClasses
 
 	public final Class loadApplicationClass(String className)
 		throws ClassNotFoundException {
-
+        
+        if (className.startsWith("org.apache.derby.")) {
+            // Assume this is an engine class, if so
+            // try to load from this class loader,
+            // this ensures in strange class loader
+            // environments we do not get ClassCastExceptions
+            // when an engine class is loaded through a different
+            // class loader to the rest of the engine.
+            try {
+                return Class.forName(className);
+            } catch (ClassNotFoundException cnfe)
+            {
+                // fall through to the code below,
+                // could be client or tools class
+                // in a different loader.
+            }
+        }
+ 
 		Throwable loadError;
 		try {
 			try {
