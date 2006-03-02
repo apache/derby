@@ -56,7 +56,6 @@ public class AggregateClassLoading {
 		// Find the location of the code for the Derby connection.
 		// The rest of the engine will be at the same location!
 		URL derbyURL = conn.getClass().getProtectionDomain().getCodeSource().getLocation();
-		System.out.println("derbyURL" + derbyURL.toExternalForm());
 		
 		// Create a new loader that loads from the same location as the engine.
 		// Create it without a parent, otherwise the parent
@@ -82,6 +81,7 @@ public class AggregateClassLoading {
 		testAggregate(s, "select COUNT(i) from t");
 		testAggregate(s, "select COUNT(*) from t");
 		
+        s.execute("drop table t");
 	    s.close();
 		conn.close();
 		

@@ -3,6 +3,7 @@ jdbcapi/metadataMultiConn.java
 jdbcapi/odbc_metadata.java
 junitTests/lang/LangSuite.java
 lang/AIjdbc.java
+lang/AggregateClassLoading.java
 lang/CharUTF8.java
 lang/DB2IsolationLevels.sql
 lang/LOB.sql
