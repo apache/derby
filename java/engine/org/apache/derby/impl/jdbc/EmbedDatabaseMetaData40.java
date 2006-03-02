@@ -66,13 +66,32 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
     public boolean providesQueryObjectGenerator() throws SQLException {
         return false;
     }
-    
+
+    /**
+     * Implements DatabaseMetaData.getFunctions() for an
+     * embedded database. Queries the database to get information
+     * about functions (procedures returning values). Executes the
+     * 'getFunctions' query from metadata.properties to obtain the
+     * ResultSet to return.
+     * @param catalog limit the search to functions in this catalog 
+     * (not used)
+     * @param schemaPattern limit the search to functions in schemas 
+     * matching this pattern
+     * @param functionNamePattern limit the search to functions 
+     * matching this pattern
+     * @return a ResultSet with metadata information
+     * @throws SQLException if any of the underlying jdbc methods fail
+     */
     public ResultSet getFunctions(java.lang.String catalog,
-                       java.lang.String schemaPattern,
-                       java.lang.String functionNamePattern)
-                       throws SQLException
+                                  java.lang.String schemaPattern,
+                                  java.lang.String functionNamePattern)
+        throws SQLException
     {
-        return getSimpleQuery("getFunctions");
+        PreparedStatement s = getPreparedQuery("getFunctions");
+        s.setString(1, swapNull(catalog));
+        s.setString(2, swapNull(schemaPattern));
+        s.setString(3, swapNull(functionNamePattern));
+        return s.executeQuery();
     }
     
     public ResultSet getFunctionParameters(java.lang.String catalog,

@@ -79,9 +79,37 @@ public class TestDbMetaData {
 
 			checkEmptyRS(met.getClientInfoProperties());
 
-			checkEmptyRS(met.getFunctions(null,null,null));
-        
+			// Create some functions in the default schema (app) to make the output
+			// from getFunctions() and getFunctionParameters more interesting
+			s.execute("CREATE FUNCTION DUMMY1 ( X SMALLINT ) RETURNS SMALLINT "+
+					  "PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL "+
+					  "NAME 'java.some.func'");
+			s.execute("CREATE FUNCTION DUMMY2 ( X INTEGER, Y SMALLINT ) RETURNS"+
+					  " INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA "+
+					  "EXTERNAL NAME 'java.some.func'");
+			s.execute("CREATE FUNCTION DUMMY3 ( X VARCHAR(16), Y INTEGER ) "+
+					  "RETURNS VARCHAR(16) PARAMETER STYLE JAVA NO SQL LANGUAGE"+
+					  " JAVA EXTERNAL NAME 'java.some.func'");
+			s.execute("CREATE FUNCTION DUMMY4 ( X VARCHAR(128), Y INTEGER ) "+
+					  "RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE "+
+					  "JAVA EXTERNAL NAME 'java.some.func'");
+
 			checkEmptyRS(met.getFunctionParameters(null,null,null,null));
+
+			// Any function in any schema in any catalog
+			dumpRS(met.getFunctions(null, null, null));
+			// Any function in any schema in "Dummy
+			// Catalog". Same as above since the catalog
+			// argument is ignored (is always null)
+			dumpRS(met.getFunctions("Dummy Catalog", null, null));
+			// Any function in a schema starting with "SYS"
+			dumpRS(met.getFunctions(null, "SYS%", null));
+			// All functions containing "GET" in any schema 
+			// (and any catalog)
+			dumpRS(met.getFunctions(null, null, "%GET%"));
+			// Any function that belongs to NO schema and 
+			// NO catalog (none)
+			checkEmptyRS(met.getFunctions("", "", null));
             
             // 
             // Test the new getSchemas() with no schema qualifiers
