@@ -40,6 +40,8 @@ public class ConnectionHandling {
         new org.apache.derby.jdbc.EmbeddedDriver();
         
         Connection conn = DriverManager.getConnection("jdbc:derby:wombat;create=true");
+        conn.close();
+        conn = null;
         
         ArrayList list = new ArrayList();
         
@@ -107,11 +109,16 @@ public class ConnectionHandling {
         System.out.println("Failed Throwable    : " + fail_bad);
         
         System.out.println("closing connections : " + list.size());
+        int alreadyClosed = 0;
         for (int i = 0; i < list.size(); i++)
         {
-            ((Connection) list.get(i)).close();
+            Connection c = (Connection) list.get(i);
+            list.set(i, null);
+            if (c.isClosed())
+                alreadyClosed++;
+            
+            c.close();
         }
-        
-        conn.close();
- }
+        System.out.println("already closed      : " + alreadyClosed);        
+  }
 }
