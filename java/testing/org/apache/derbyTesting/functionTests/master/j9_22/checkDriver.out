@@ -31,3 +31,10 @@ getURL() = jdbc:derby:testpropdb
 getUserName() = testuser
 CURRENT SCHEMA = TESTUSER
 Expected Exception:08006:Database 'testcreatedb1' shutdown.
+START testDbNameWithSpaces ...
+Connection info for connect(jdbc:derby:db name with spaces;create=true, null)
+getURL() = jdbc:derby:db name with spaces
+getUserName() = APP
+CURRENT SCHEMA = APP
+PASSED:Connection Successful with url: jdbc:derby:db name with spaces;create=true
+testDbNameWithSpaces PASSED - Database created successfully

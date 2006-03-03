@@ -317,7 +317,8 @@ public class ClientDriver implements java.sql.Driver {
     private static String tokenizeDatabase(java.util.StringTokenizer urlTokenizer,
                                            String url) throws SqlException {
         try {
-            String databaseName = urlTokenizer.nextToken(" \t\n\r\f;");
+        	// DERBY-618 - database name can contain spaces in the path
+            String databaseName = urlTokenizer.nextToken("\t\n\r\f;");
             return databaseName;
         } catch (java.util.NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
