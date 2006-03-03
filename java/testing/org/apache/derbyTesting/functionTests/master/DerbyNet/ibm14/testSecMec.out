@@ -5,7 +5,7 @@ T4: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;create=tr
 T1: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION null userid not supported
 T2: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=max; - EXCEPTION null password not supported
 T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;
-T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.lang.ClassNotFoundException is caught when initializing EncryptionManager 'IBMJCE'
+T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9;
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4;
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4;
 SECMEC_USRIDPWD: OK
@@ -16,7 +16,7 @@ T4: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T1: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION null userid not supported
 T2: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=max; - EXCEPTION null password not supported
 T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.lang.ClassNotFoundException is caught when initializing EncryptionManager 'IBMJCE'
+T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4;
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4;
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
@@ -27,7 +27,7 @@ T4: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T1: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION null userid not supported
 T2: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=max; - EXCEPTION null password not supported
 T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;
-T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.lang.ClassNotFoundException is caught when initializing EncryptionManager 'IBMJCE'
+T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 SECMEC_USRIDPWD: OK
@@ -38,7 +38,7 @@ T4: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T1: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION null userid not supported
 T2: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=max; - EXCEPTION null password not supported
 T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.lang.ClassNotFoundException is caught when initializing EncryptionManager 'IBMJCE'
+T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9;
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported

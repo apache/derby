@@ -5,11 +5,11 @@ T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;create=true;u
 T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat
 T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max
 T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee
-T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9
 T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4
 T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4
 SECMEC_USRIDPWD: OK
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
+SECMEC_EUSRIDPWD: OK
 -----
 Testing with derby.drda.securityMechanism=USER_ONLY_SECURITY
 Checking security mechanism authentication with DriverManager
@@ -17,11 +17,11 @@ T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;
 T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat
 T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max
 T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4
 T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
+SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
 -----
 Testing with derby.drda.securityMechanism=CLEAR_TEXT_PASSWORD_SECURITY
 Checking security mechanism authentication with DriverManager
@@ -29,11 +29,11 @@ T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;
 T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee
-T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4
 SECMEC_USRIDPWD: OK
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
+SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
 -----
 Testing with derby.drda.securityMechanism=ENCRYPTED_USER_AND_PASSWORD_SECURITY
 Checking security mechanism authentication with DriverManager
@@ -41,11 +41,11 @@ T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;
 T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9
 T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
+SECMEC_EUSRIDPWD: OK
 -----
 Testing with derby.drda.securityMechanism=INVALID_VALUE
 EXPECTED EXCEPTION DRDA_InvalidValue.U:Invalid value, INVALID_VALUE, for derby.drda.securityMechanism.

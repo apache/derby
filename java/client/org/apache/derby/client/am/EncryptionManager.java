@@ -98,9 +98,6 @@ public class EncryptionManager {
             }
             provider = list[0];
             providerName = provider.getName();
-
-            java.security.Security.addProvider((java.security.Provider) provider);
-
             paramSpec_ = new javax.crypto.spec.DHParameterSpec(modulus__, base__, exponential_length__);
             keyPairGenerator_ = java.security.KeyPairGenerator.getInstance("DH", providerName);
             keyPairGenerator_.initialize(paramSpec_);

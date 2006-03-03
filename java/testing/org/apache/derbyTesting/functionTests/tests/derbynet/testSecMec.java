@@ -267,9 +267,14 @@ public class testSecMec extends dataSourcePermissions_net
 		getConnectionUsingDriverManager(getJDBCUrl("wombat",null),"T1:");
 		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=max"),"T2:");
 		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee"),"T3:");
-                // Disable because ibm142 doesnt support DiffieHelman prime of 32 bytes
-                // Also Sun JCE doesnt support it.
-		//getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee;securityMechanism="+SECMEC_EUSRIDPWD),"T5:");
+
+        // Please note: EUSRIDPWD security mechanism in DRDA uses Diffie-Helman for generation of shared keys.
+        // The spec specifies the prime to use for DH which is 32 bytes and this needs to be used as is.
+        // Sun JCE does not support a prime of 32 bytes for Diffie Helman and some 
+        // older versions of IBM JCE ( 1.4.2) also do not support it.
+        // Hence the following call to get connection might not be successful when 
+        // client is running in JVM  where the JCE does not support the DH (32 byte prime)
+		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee;securityMechanism="+SECMEC_EUSRIDPWD),"T5:");
 		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;securityMechanism="+SECMEC_USRIDONL),"T6:");
                 
                 // disable as ibm142 and sun jce doesnt support DH prime of 32 bytes
@@ -290,10 +295,21 @@ public class testSecMec extends dataSourcePermissions_net
 		//testSecurityMechanism("sarah",null,new Short(SECMEC_USRIDONL),"SECMEC_USRIDONL:");
 		testSecurityMechanism("john","sarah",new Short(SECMEC_USRIDPWD),"SECMEC_USRIDPWD:");
                 
-		// Disable this test because ibm142, sun jce does not Diffie Helman prime of 32 bytes
-                // and so this security mechanism wont work in that case
-		//testSecurityMechanism("john","sarah",new Short(SECMEC_EUSRIDPWD),"SECMEC_EUSRIDPWD:");
-
+        // Possible bug in JCC, hence disable this test for JCC framework only
+        // the security mechanism when set on JCC datasource does not seem to 
+        // have an effect. JCC driver is sending a secmec of 3( USRIDPWD) to 
+        // the server even though the security mechanism on datasource is set to 
+        // EUSRIDPWD (9)
+        if (!TestUtil.isJCCFramework())
+        {
+            // Please note: EUSRIDPWD security mechanism in DRDA uses Diffie-Helman for generation of shared keys.
+            // The spec specifies the prime to use for DH which is 32 bytes and this needs to be used as is.
+            // Sun JCE does not support a prime of 32 bytes for Diffie Helman and some 
+            // older versions of IBM JCE ( 1.4.2)  also do not support it.
+            // Hence the following call to get connection might not be successful when 
+            // client is running in JVM  where the JCE does not support the DH (32 byte prime)
+            testSecurityMechanism("john","sarah",new Short(SECMEC_EUSRIDPWD),"SECMEC_EUSRIDPWD:");
+        }
 	}
 
 	public void testSecurityMechanism(String user, String password,Short secmec,String msg)
@@ -313,10 +329,20 @@ public class testSecMec extends dataSourcePermissions_net
 			conn.close();
 			System.out.println(msg +" OK");
 		}
-		catch (Exception e)
+		catch (SQLException sqle)
 		{
-			System.out.println(msg +"EXCEPTION testSecurityMechanism()  " + e.getMessage());
+            // Exceptions expected in certain cases depending on JCE used for 
+            // running the test. hence printing message instead of stack traces
+            // here.
+            System.out.println(msg +"EXCEPTION testSecurityMechanism()  " + sqle.getMessage());
+            dumpSQLException(sqle.getNextException());
 		}
+        catch (Exception e)
+        {
+            System.out.println("UNEXPECTED EXCEPTION!!!" +msg);
+            e.printStackTrace();
+        }
+        
 	}
 
 	public void getConnectionUsingDriverManager(String dbUrl, String msg)
@@ -329,9 +355,29 @@ public class testSecMec extends dataSourcePermissions_net
 		}
 		catch(SQLException sqle)
 		{
+            // Ideally - we would print stack trace of nested SQLException for
+            // any unexpected exception.
+            // But in this testcase, one test can give an exception in one JCE
+            // implementation and in some JCE's the test can pass. 
+            // Hence printing the messages instead of stack traces.
 			System.out.println(msg +" "+dbUrl +" - EXCEPTION "+ sqle.getMessage());
+            dumpSQLException(sqle.getNextException());
 		}
 	}
 
+
+    /**
+     * Dump SQLState and message for the complete nested chain of SQLException 
+     * @param sqle SQLException whose complete chain of exceptions is traversed and sqlstate and 
+     * message is printed out
+     */
+    public static void dumpSQLException(SQLException sqle)
+    {
+        while ( sqle != null)
+        {
+            System.out.println("SQLSTATE("+sqle.getSQLState()+"): " + sqle.getMessage());
+            sqle = sqle.getNextException();
+        }
+    }
 
 }
