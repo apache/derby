@@ -698,14 +698,36 @@ public abstract class TableOperatorNode extends FromTable
 			if (leftOptimizer != null)
 				leftOptimizer.modifyAccessPaths();
 			else
-				leftResultSet = leftResultSet.modifyAccessPaths();
+			{
+				// If this is a SetOperatorNode then we may have pushed
+				// predicates down to the children.  If that's the case
+				// then we need to pass those predicates down as part
+				// of the modifyAccessPaths call so that they can be
+				// pushed one last time, in prep for generation.
+				if (this instanceof SetOperatorNode)
+				{
+					SetOperatorNode setOp = (SetOperatorNode)this;
+					leftResultSet = leftResultSet.modifyAccessPaths(
+						setOp.getLeftOptPredicateList());
+				}
+				else
+					leftResultSet = leftResultSet.modifyAccessPaths();
+			}
 		}
 		if (!rightModifyAccessPathsDone)
 		{
 			if (rightOptimizer != null)
 				rightOptimizer.modifyAccessPaths();
 			else
-				rightResultSet = rightResultSet.modifyAccessPaths();
+			{
+				if (this instanceof SetOperatorNode) {
+					SetOperatorNode setOp = (SetOperatorNode)this;
+					rightResultSet = rightResultSet.modifyAccessPaths(
+						setOp.getRightOptPredicateList());
+				}
+				else
+					rightResultSet = rightResultSet.modifyAccessPaths();
+			}
 		}
 		return this;
 	}

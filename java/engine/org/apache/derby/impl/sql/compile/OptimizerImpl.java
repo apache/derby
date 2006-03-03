@@ -2121,46 +2121,51 @@ public class OptimizerImpl implements Optimizer
 	protected void addOrLoadBestPlanMappings(boolean doAdd,
 		Optimizer outerOptimizer) throws StandardException
 	{
-		// First we save this OptimizerImpl's best join order.
-		int [] joinOrder = null;
-		if (doAdd)
+		// First we save this OptimizerImpl's best join order.  If there's
+		// only one optimizable in the list, then there's only one possible
+		// join order, so don't bother.
+		if (numOptimizables > 1)
 		{
-			// If the savedJoinOrder map already exists, search for the
-			// join order for the target optimizer and reuse that.
-			if (savedJoinOrders == null)
-				savedJoinOrders = new HashMap();
+			int [] joinOrder = null;
+			if (doAdd)
+			{
+				// If the savedJoinOrder map already exists, search for the
+				// join order for the target optimizer and reuse that.
+				if (savedJoinOrders == null)
+					savedJoinOrders = new HashMap();
+				else
+					joinOrder = (int[])savedJoinOrders.get(outerOptimizer);
+
+				// If we don't already have a join order array for the optimizer,
+				// create a new one.
+				if (joinOrder == null)
+					joinOrder = new int[numOptimizables];
+
+				// Now copy current bestJoinOrder and save it.
+				for (int i = 0; i < bestJoinOrder.length; i++)
+					joinOrder[i] = bestJoinOrder[i];
+
+				savedJoinOrders.put(outerOptimizer, joinOrder);
+			}
 			else
+			{
+				// If we get here, we want to load the best join order from our
+				// map into this OptimizerImpl's bestJoinOrder array.
+
+				// If we don't have any join orders saved, then there's nothing to
+				// load.  This can happen if the optimizer tried some join order
+				// for which there was no valid plan.
+				if (savedJoinOrders == null)
+					return;
+
 				joinOrder = (int[])savedJoinOrders.get(outerOptimizer);
+				if (joinOrder == null)
+					return;
 
-			// If we don't already have a join order array for the optimizer,
-			// create a new one.
-			if (joinOrder == null)
-				joinOrder = new int[numOptimizables];
-
-			// Now copy current bestJoinOrder and save it.
-			for (int i = 0; i < bestJoinOrder.length; i++)
-				joinOrder[i] = bestJoinOrder[i];
-
-			savedJoinOrders.put(outerOptimizer, joinOrder);
-		}
-		else
-		{
-			// If we get here, we want to load the best join order from our
-			// map into this OptimizerImpl's bestJoinOrder array.
-
-			// If we don't have any join orders saved, then there's nothing to
-			// load.  This can happen if the optimizer tried some join order
-			// for which there was no valid plan.
-			if (savedJoinOrders == null)
-				return;
-
-			joinOrder = (int[])savedJoinOrders.get(outerOptimizer);
-			if (joinOrder == null)
-				return;
-
-			// Load the join order we found into our bestJoinOrder array.
-			for (int i = 0; i < joinOrder.length; i++)
-				bestJoinOrder[i] = joinOrder[i];
+				// Load the join order we found into our bestJoinOrder array.
+				for (int i = 0; i < joinOrder.length; i++)
+					bestJoinOrder[i] = joinOrder[i];
+			}
 		}
 
 		// Now iterate through all Optimizables in this OptimizerImpl's list
@@ -2171,6 +2176,54 @@ public class OptimizerImpl implements Optimizer
 			optimizableList.getOptimizable(i).
 				addOrLoadBestPlanMapping(doAdd, outerOptimizer);
 		}
+	}
+
+	/**
+	 * Add predicates to this optimizer's predicateList. This method
+	 * is intended for use during the modifyAccessPath() phase of
+	 * compilation, as it allows nodes (esp. SelectNodes) to add to the
+	 * list of predicates available for the final "push" before code
+	 * generation.  Just as the constructor for this class allows a
+	 * caller to specify a predicate list to use during the optimization
+	 * phase, this method allows a caller to specify a predicate list to
+	 * use during the modify-access-paths phase.
+	 *
+	 * Before adding the received predicates, this method also
+	 * clears out any scoped predicates that might be sitting in
+	 * OptimizerImpl's list from the last round of optimizing.
+	 *
+	 * @param pList List of predicates to add to this OptimizerImpl's
+	 *  own list for pushing.
+	 */
+	protected void addPredicatesToList(PredicateList pList)
+		throws StandardException
+	{
+		if ((pList == null) || (pList == predicateList))
+		// nothing to do.
+			return;
+
+		if (predicateList == null)
+		// in this case, there is no 'original' predicateList, so we
+		// can just create one.
+			predicateList = new PredicateList();
+
+		// First, we need to go through and remove any predicates in this
+		// optimizer's list that may have been pushed here from outer queries
+		// during the previous round(s) of optimization.  We know if the
+		// predicate was pushed from an outer query because it will have
+		// been scoped to the node for which this OptimizerImpl was
+		// created.
+		Predicate pred = null;
+		for (int i = predicateList.size() - 1; i >= 0; i--) {
+			pred = (Predicate)predicateList.getOptPredicate(i);
+			if (pred.isScopedForPush())
+				predicateList.removeOptPredicate(i);
+		}
+
+		// Now transfer all of the received predicates into this
+		// OptimizerImpl's list.
+		pList.transferAllPredicates(predicateList);
+		return;
 	}
 
 }

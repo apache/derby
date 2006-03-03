@@ -101,6 +101,7 @@ lang/paramij.sql
 lang/partdml.sql
 lang/positionedDelUpd.sql
 lang/precedence.sql
+lang/predicatePushdown.sql
 lang/predicatesIntoViews.sql
 lang/primarykey.sql
 lang/procedure.java

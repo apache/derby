@@ -24,7 +24,12 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
+import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
+import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -33,6 +38,8 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.util.JBitSet;
+
+import java.util.HashMap;
 
 /**
  * A SetOperatorNode represents a UNION, INTERSECT, or EXCEPT in a DML statement. Binding and optimization
@@ -54,6 +61,18 @@ public abstract class SetOperatorNode extends TableOperatorNode
 
 	OrderByList orderByList;
 
+	// List of scoped predicates for pushing during optimization.
+	PredicateList leftOptPredicates;
+	PredicateList rightOptPredicates;
+
+	// List of original (unscoped) predicates that we tried to push
+	// during the most recent phase of optimization.
+	PredicateList pushedPredicates;
+
+	// Mapping of original predicates to scoped predicates, used to
+	// avoid re-scoping predicates unnecessarily.
+	HashMap leftScopedPreds;
+	HashMap rightScopedPreds;
 
 	/**
 	 * Initializer for a SetOperatorNode.
@@ -83,6 +102,359 @@ public abstract class SetOperatorNode extends TableOperatorNode
 		 * column types at that time, as expected.)
 		 */
 		resultColumns = leftResultSet.getResultColumns().copyListAndObjects();
+	}
+
+	/**
+	 * @see Optimizable#modifyAccessPath
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public Optimizable modifyAccessPath(JBitSet outerTables,
+		PredicateList predList) throws StandardException
+	{
+		// When we optimized this node we attempted to push predicates down to
+		// the children, which means the best access path for the children
+		// might depend on those predicates.  So now that we're preparing
+		// to generate the best paths, we have to push those same predicates
+		// down again (this is the last time) so that the children can use
+		// them as appropriate.
+		if (predList != null) 
+		{
+			for (int i = predList.size() - 1; i >= 0; i--)
+				if (pushOptPredicate(predList.getOptPredicate(i)))
+					predList.removeOptPredicate(i);
+		}
+
+		/*
+		 * It's possible that we tried to push a predicate down to this node's
+		 * children but failed to do so.  This can happen if this node's
+		 * children both match the criteria for pushing a predicate (namely,
+		 * they reference base tables) but the children's children do not.
+		 * Ex.
+		 *  select * from
+		 *    (select i,j from t2 UNION
+		 *      values (1,1),(2,2),(3,3),(4,4) UNION
+		 *      select i,j from t1
+		 *    ) x0 (i,j),
+		 *    t5 where x0.i = t5.i;
+		 *
+		 * This will yield a tree resembling the following:
+		 *
+		 *                     UNION
+		 *                    /     \
+		 *               UNION     SELECT (T1)
+		 *              /     \
+		 *        SELECT (T2)  VALUES
+		 *
+		 * In this case the top UNION ("this") will push the predicate down,
+		 * but the second UNION will _not_ push the predicate because
+		 * it can't be pushed to the VALUES clause.  This means that
+		 * after we're done modifying the paths for "this" node (the top
+		 * UNION), the predicate will still be sitting in our leftOptPredicates
+		 * list.  If that's the case, then we have to make sure the predicate,
+		 * which was _not_ enforced in the left child, is enforced at this
+		 * level.  We do that by generating a ProjectRestrictNode above this
+		 * node.  Yes, this means the predicate will actually be applied
+		 * twice to the right child (in this case), but that's okay as it
+		 * won't affect the results.
+		 */
+
+		// Get the cost estimate for this node so that we can put it in
+		// the new ProjectRestrictNode, if one is needed.
+		CostEstimate ce = getFinalCostEstimate();
+
+		// Modify this node's access paths.
+		ResultSetNode topNode = (ResultSetNode)modifyAccessPath(outerTables);
+
+		// Now see if there are any left over predicates; if so, then we
+		// have to generate a ProjectRestrictNode.
+		if (((leftOptPredicates != null) && (leftOptPredicates.size() > 0)) ||
+			((rightOptPredicates != null) && (rightOptPredicates.size() > 0)))
+		{
+			// When we generate the project restrict node, we pass in the
+			// "pushedPredicates" list because that has the predicates in
+			// _unscoped_ form, which means they are intended for _this_
+			// node instead of this node's children.  That's exactly what
+			// we want.
+			ResultSetNode prnRSN = (ResultSetNode) getNodeFactory().getNode(
+				C_NodeTypes.PROJECT_RESTRICT_NODE,
+				topNode,					// Child ResultSet
+				topNode.getResultColumns(),	// Projection
+				null,						// Restriction
+				pushedPredicates,			// Restriction as PredicateList
+				null,						// Subquerys in Projection
+				null,						// Subquerys in Restriction
+				null,						// Table properties
+				getContextManager());
+			prnRSN.costEstimate = ce.cloneMe();
+			prnRSN.setReferencedTableMap(topNode.getReferencedTableMap());
+			topNode = prnRSN;
+		}
+
+		return (Optimizable)topNode;
+	}
+
+	/**
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#pushOptPredicate
+	 *
+	 * Take a predicate and push it down to both the left AND right result
+	 * sets.  Return "true" if we successfully pushed it to both sides,
+	 * and "false" otherwise.  The assumption is that if we return "true",
+	 * the caller will take the predicate and remove it from its own list
+	 * of predicates to evaluate; if we return false, then the predicate
+	 * will be evaluated at the level of the caller.  So returning "false"
+	 * means that the left and right result sets for this node will be fully
+	 * returned, and then the predicate will be evaluated against the
+	 * <set-operator> of those result sets (as of DERBY-805, the only set
+	 * operator calling this method is UnionNode).  If we can push the
+	 * predicate down to both children, though, we can evaluate it closer
+	 * to store, which means that each child result set returns only the
+	 * correctly qualified rows, and thus the calling set operator will
+	 * have a smaller result set on which to operate, which can boost
+	 * performance.
+	 *
+	 * That said, if we can't push the predicate to _both_ sides, we don't
+	 * push it at all.  The reason is that if we push to one side but not
+	 * to the other, we would have to ask the question of whether we should
+	 * return "true" (meaning that the predicate would be removed from the
+	 * caller's list and thus would _not_ be evaluated at the <set-operator>
+	 * level) or "false" (meaning that the caller would keep the predicate
+	 * and evaluate it at the <set-operator> level).  Depending on the query
+	 * in question, both answers could end up returning incorrect results.
+	 *
+	 * For example, if we push it to the right but not to the left, then
+	 * leave it in the caller's list, the optimizer for the caller might
+	 * decide to use the predicate to do a hash join with some outer result
+	 * set (if the predicate is an equijoin predicate).  That would result
+	 * in materialization of the calling node and of its children--but since
+	 * we pushed a predicate that depends on the outer table down into the
+	 * right child, materialization of the right child will only return the
+	 * rows that join with the _first_ row of the outer result set, which 
+	 * is wrong.
+	 *
+	 * If, on the other hand, we push the predicate to one side and then tell
+	 * the caller to remove it from its list, the side to which we did _not_
+	 * push the predicate could return rows that aren't qualified.  Then,
+	 * since the caller removed the predicate from its list, it (the caller)
+	 * will not evaluate the predicate on its own result set--and thus we
+	 * can end up returning rows that we weren't supposed to return.
+	 * 
+	 * So all of that said, only push (and return "true") if we think we
+	 * can push the predicate to both sides.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public boolean pushOptPredicate(OptimizablePredicate optimizablePredicate)
+		throws StandardException
+	{
+		// This method was added to SetOperatorNode as part of DERBY-805,
+		// which was only targeted for UnionNodes.  So for now, we don't
+		// do anything if "this" isn't a Union.  This check can be removed
+		// when support for other SetOperators is added.
+		if (!(this instanceof UnionNode))
+			return false;
+
+		// We only handle certain types of predicates here; if the received
+		// predicate doesn't qualify, then don't push it.
+		Predicate pred = (Predicate)optimizablePredicate;
+		if (!pred.pushableToSubqueries())
+			return false;
+
+		// Check to see if the child nodes reference any base tables; if either
+		// child does not reference at least one base table, then we don't try
+		// to push the predicate.
+		boolean canPush = false;
+
+		JBitSet tableNums = new JBitSet(getReferencedTableMap().size());
+		BaseTableNumbersVisitor btnVis =
+			new BaseTableNumbersVisitor(tableNums);
+
+		// Check the left child.
+		leftResultSet.accept(btnVis);
+		canPush = (tableNums.getFirstSetBit() != -1);
+
+		/* If we can't push it to _both_ children, then we don't push at all.
+		 * RESOLVE: We can add the ability to push a predicate to one side
+		 * only by putting a ProjectRestrictNode between the union node and
+		 * the child as a place to park the predicate. To make things simple,
+		 * we might want to always put ProjectRestrictNodes under both sides
+		 * of the union during preprocessing (i.e. after binding but before
+		 * optimization). In some cases the extra nodes won't be needed, but
+		 * PRNs (and the corresponding ProjectRestrictResultSets) are cheap.
+		 * Also, we could eliminate unnecessary ProjectRestrictNodes at the
+		 * end of optimization (possibly in modifyAccessPaths()).  Until all
+		 * of that is implemented, though, we only push if we can push to
+		 * both sides...
+		 */
+		if (!canPush)
+			return false;
+
+		// Check the right child.
+		tableNums.clearAll();
+		rightResultSet.accept(btnVis);
+		canPush = (tableNums.getFirstSetBit() != -1);
+		if (!canPush)
+			return false;
+
+		BinaryRelationalOperatorNode opNode =
+			(BinaryRelationalOperatorNode)pred.getAndNode().getLeftOperand();
+
+		// Note: we assume we only get here for predicates with col refs on
+		// both sides; if that ever changes, the following cast will need
+		// to be updated accordingly.
+		boolean opWasRemapped = 
+			((ColumnReference)opNode.getLeftOperand()).hasBeenRemapped();
+
+		/* If there is a ProjectRestrictNode directly above this node,
+		 * then the predicate in question may have been remapped to this
+		 * SetOperatorNode before we got here (see pushOptPredicate() in
+		 * ProjectRestrictNode).  If we leave it mapped when we try to
+		 * get scoped predicates for the left and right result sets, the
+		 * underlying column references of the scoped predicates will
+		 * effectively be doubly-mapped (i.e. mapped more than once), which
+		 * can cause problems at code generation time.  So we 1) un-remap
+		 * the predicate here, 2) get the scoped predicates, and then
+		 * 3) remap the predicate again at the end of this method.
+		 */
+		RemapCRsVisitor rcrv = null;
+		if (opWasRemapped)
+		{
+			rcrv = new RemapCRsVisitor(false);
+			pred.getAndNode().accept(rcrv);
+		}
+
+		// Get a list of all of the underlying base tables that this node
+		// references.  We pass this down when scoping so that we can tell
+		// if the operands are actually supposed to be scoped to _this_
+		// node's children.  Note that in order for the predicate to
+		// have been pushed this far, at least one of its operands must
+		// apply to this node--we don't know which one it is, though,
+		// so we use this tableNums info to figure that out.
+		tableNums.clearAll();
+		this.accept(btnVis);
+
+		/* What we want to do here is push the predicate to the left/right
+		 * child.  That means that we need to find the equivalent column(s)
+		 * in each child.
+		 * Ex:
+		 * 
+		 *  select * from
+		 *    (select i,j from t1 union select i,j from t2) X1,
+		 *    (select a,b from t3 union select a,b from t4) X2
+		 *  where X1.j = X2.b;
+		 *
+		 * In this example, X1.j maps to "t1" for the left side of the
+		 * union (X1) and "t2" for the right side of the union.  So we have
+		 * to get versions of the predicate that are appropriate to each
+		 * side.  That's what the call to getPredScopedForResultSet()
+		 * in the following code does.
+		 */
+
+		// See if we already have a scoped version of the predicate cached,
+		// and if so just use that.
+		Predicate scopedPred = null;
+		if (leftScopedPreds == null)
+			leftScopedPreds = new HashMap();
+		else
+			scopedPred = (Predicate)leftScopedPreds.get(pred);
+		if (scopedPred == null)
+		{
+			scopedPred = pred.getPredScopedForResultSet(
+				tableNums, leftResultSet);
+			leftScopedPreds.put(pred, scopedPred);
+		}
+
+		// Add the scoped predicate to our list for the left child.
+		getLeftOptPredicateList().addOptPredicate(scopedPred);
+
+		scopedPred = null;
+		if (rightScopedPreds == null)
+			rightScopedPreds = new HashMap();
+		else
+			scopedPred = (Predicate)rightScopedPreds.get(pred);
+		if (scopedPred == null)
+		{
+			scopedPred = pred.getPredScopedForResultSet(
+				tableNums, rightResultSet);
+			rightScopedPreds.put(pred, scopedPred);
+		}
+
+		// Add the scoped predicate to our list for the right child.
+		getRightOptPredicateList().addOptPredicate(scopedPred);
+
+		// Restore the original predicate to the way it was before we got
+		// here--i.e. remap it again if needed.
+		if (opWasRemapped)
+		{
+			rcrv = new RemapCRsVisitor(true);
+			pred.getAndNode().accept(rcrv);
+		}
+
+		// Add the predicate (in its original form) to our list of predicates
+		// that we've pushed during this phase of optimization.  We need to
+		// keep this list of pushed predicates around so that we can do
+		// a "pull" of them later, if needed.  We also need this list for
+		// cases where predicates are not pushed all the way down; see
+		// modifyAccessPaths() in this class for more.
+		if (pushedPredicates == null)
+			pushedPredicates = new PredicateList();
+
+		pushedPredicates.addOptPredicate(pred);
+		return true;
+	}
+
+	/**
+	 * @see Optimizable#pullOptPredicates
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void pullOptPredicates(
+		OptimizablePredicateList optimizablePredicates)
+		throws StandardException
+	{
+		if (pushedPredicates == null)
+		// we didn't push anything, so nothing to pull.
+			return;
+
+		// It's possible that we tried to push a predicate down to this
+		// SetOperatorNode's children but weren't actually able to do so
+		// (see modifyAccessPaths() in this class for details on when that
+		// can happen).  In that case the predicates will still be sitting
+		// in the left/right predicate list; we can ignore them here by
+		// just discarding them.  When it comes time to modifyAccessPaths,
+		// though, we'll handle them correctly--i.e. we'll generate a
+		// ProjectRestrictNode over this node to ensure the predicates are
+		// enforced.
+
+		if (leftOptPredicates != null)
+			leftOptPredicates.removeAllElements();
+
+		if (rightOptPredicates != null)
+			rightOptPredicates.removeAllElements();
+
+		/* Note that predicates which have been explicitly scoped should
+		 * not be pulled.  The reason is that a scoped predicate can only
+		 * be pushed to a specific, target result set.  When it comes time
+		 * to pull the predicate up, there's no need to pull the scoped
+		 * predicate because it, by definition, was only intended for this
+		 * specific result set and therefore cannot be pushed anywhere else.
+		 * So at "pull" time, we can just discard the scoped predicates.  We
+		 * do, however, need to pull the original, unscoped predicate from
+		 * which the scoped predicate was created because we can potentially
+		 * push that predicate elsewhere
+		 */
+		Predicate pred = null;
+		for (int i = 0; i < pushedPredicates.size(); i++)
+		{
+			pred = (Predicate)pushedPredicates.getOptPredicate(i);
+			if (pred.isScopedForPush())
+				continue;
+			optimizablePredicates.addOptPredicate(pred);
+		}
+
+		// We're done with the pushedPredicates list, so clear it out
+		// in preparation for another phase of optimization.
+		pushedPredicates.removeAllElements();
 	}
 
 	/**
@@ -631,4 +1003,41 @@ public abstract class SetOperatorNode extends TableOperatorNode
      * @return the operator name: "UNION", "INTERSECT", or "EXCEPT"
      */
     abstract String getOperatorName();
+
+	/**
+	 * Retrieve the list of optimizable predicates that are
+	 * targeted for the left child.  Create a new (empty)
+	 * list if the list is null.
+	 */
+	protected PredicateList getLeftOptPredicateList()
+		throws StandardException
+	{
+		if (leftOptPredicates == null) {
+			leftOptPredicates =
+				(PredicateList) getNodeFactory().getNode(
+					C_NodeTypes.PREDICATE_LIST,
+					getContextManager());
+		}
+
+		return leftOptPredicates;
+	}
+
+	/**
+	 * Retrieve the list of optimizable predicates that are
+	 * targeted for the right child.  Create a new (empty)
+	 * list if the list is null.
+	 */
+	protected PredicateList getRightOptPredicateList()
+		throws StandardException
+	{
+		if (rightOptPredicates == null) {
+			rightOptPredicates =
+				(PredicateList) getNodeFactory().getNode(
+					C_NodeTypes.PREDICATE_LIST,
+					getContextManager());
+		}
+
+		return rightOptPredicates;
+	}
+
 }

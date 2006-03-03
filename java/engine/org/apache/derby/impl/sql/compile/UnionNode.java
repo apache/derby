@@ -213,17 +213,32 @@ public class UnionNode extends SetOperatorNode
 		*/
 
 		/* optimize() both resultSets */
-		/* RESOLVE - don't try to push predicates through for now */
+
+		// If we have predicates from an outer block, we want to try
+		// to push them down to this node's children.  However, we can't
+		// just push the predicates down as they are; instead, we
+		// need to scope them for the child result sets first, and
+		// then push the scoped versions.  This is all done in the
+		// call to pushOptPredicate() here; for more, see that method's
+		// definition in SetOperatorNode.
+		if (predList != null)
+		{
+			for (int i = predList.size() - 1; i >= 0; i--) {
+				if (pushOptPredicate(predList.getOptPredicate(i)))
+					predList.removeOptPredicate(i);
+			}
+		}
+
 		leftResultSet = optimizeSource(
 							optimizer,
 							leftResultSet,
-							(PredicateList) null,
+							getLeftOptPredicateList(),
 							outerCost);
 
 		rightResultSet = optimizeSource(
 							optimizer,
 							rightResultSet,
-							(PredicateList) null,
+							getRightOptPredicateList(),
 							outerCost);
 
 		CostEstimate costEstimate = getCostEstimate(optimizer);

@@ -881,6 +881,23 @@ public abstract class ResultSetNode extends QueryTreeNode
 		return this;
 	}
 
+	/**
+	 * Modify the access paths according to the decisions the optimizer
+	 * made.  This can include adding project/restrict nodes,
+	 * index-to-base-row nodes, etc.
+	 *
+	 * @param predList A list of optimizable predicates that should
+	 *  be pushed to this ResultSetNode, as determined by optimizer.
+	 * @return The modified query tree
+	 * @exception StandardException        Thrown on error
+	 */
+	public ResultSetNode modifyAccessPaths(PredicateList predList)
+		throws StandardException
+	{
+		// Default behavior is to call the no-arg version of this method.
+		return modifyAccessPaths();
+	}
+
 	ResultColumnDescriptor[] makeResultDescriptors(ExecutionContext ec)
 	{
 	    return resultColumns.makeResultDescriptors(ec);

@@ -501,6 +501,11 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	{
 		if (restrictionList != null)
 		{
+			// Pull up any predicates that may have been pushed further
+			// down the tree during optimization.
+			if (childResult instanceof UnionNode)
+				((UnionNode)childResult).pullOptPredicates(restrictionList);
+
 			RemapCRsVisitor rcrv = new RemapCRsVisitor(false);
 			for (int i = restrictionList.size() - 1; i >= 0; i--)
 			{
@@ -588,9 +593,26 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			{
 				trulyTheBestAccessPath = (AccessPathImpl) ((Optimizable) childResult).getTrulyTheBestAccessPath();
 			}
-			childResult = 
-				(ResultSetNode)
-					((FromTable) childResult).modifyAccessPath(outerTables);
+
+			// If the childResult is a SetOperatorNode (esp. a UnionNode),
+			// then it's possible that predicates in our restrictionList are
+			// supposed to be pushed further down the tree (as of DERBY-805).
+			// We passed the restrictionList down when we optimized the child
+			// so that the relevant predicates could be pushed further as part
+			// of the optimization process; so now that we're finalizing the
+			// paths, we need to do the same thing: i.e. pass restrictionList
+			// down so that the predicates that need to be pushed further
+			// _can_ be pushed further.
+			if (childResult instanceof SetOperatorNode) {
+				childResult = (ResultSetNode)
+					((SetOperatorNode) childResult).modifyAccessPath(
+						outerTables, restrictionList);
+			}
+			else {
+				childResult = 
+					(ResultSetNode) ((FromTable) childResult).
+						modifyAccessPath(outerTables);
+			}
 		}
 
 		if (restrictionList != null)

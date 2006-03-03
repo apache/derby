@@ -158,6 +158,8 @@ partdml.sql
 partdml_app.properties
 positionedDelUpd.sql
 precedence.sql
+predicatePushdown.sql
+predicatePushdown_derby.properties
 predicatesIntoViews.sql
 predicatesIntoViews_derby.properties
 primarykey.sql
