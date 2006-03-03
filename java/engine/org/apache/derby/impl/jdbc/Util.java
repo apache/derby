@@ -64,22 +64,28 @@ import java.io.PrintWriter;
 //the actual changes made.
 public abstract class Util  {
 
+
+    private static SQLExceptionFactory exceptionFactory = 
+                                    new SQLExceptionFactory ();
+
 	/*
 	** Methods of Throwable
 	*/
 
 	// class implementation
 
-	/**
-		This looks up the message and sqlstate values and generates
-		the appropriate exception off of them.
-	 */
+    /**
+     * This looks up the message and sqlstate values and calls
+     * the SQLExceptionFactory method to generate
+     * the appropriate exception off of them.
+     */
 
 	private static SQLException newEmbedSQLException(String messageId,
 			Object[] args, SQLException next, int severity, Throwable t) {
-		return new EmbedSQLException(
-			MessageService.getCompleteMessage(messageId, args),
-			messageId, next, severity, t, args);
+        String message = MessageService.getCompleteMessage
+                                        (messageId, args);
+        return exceptionFactory.getSQLException (
+			    message, messageId, next, severity, t, args);
 	}
 
 	public static SQLException newEmbedSQLException(String messageId,
@@ -192,9 +198,10 @@ public abstract class Util  {
 	}
 
 	public static SQLException generateCsSQLException(StandardException se) {
-		return new EmbedSQLException(
-            	se.getMessage(), se.getMessageId(), null, se.getSeverity(), se, se.getArguments());
-	}
+        return exceptionFactory.getSQLException(
+                se.getMessage(), se.getMessageId(), (SQLException) null,
+                se.getSeverity(), se, se.getArguments());
+    }
 
 	public static SQLException noCurrentConnection() {
 		return newEmbedSQLException(SQLState.NO_CURRENT_CONNECTION,
@@ -241,6 +248,15 @@ public abstract class Util  {
 			new Object[] {typeName(targetSQLType)},
                 StandardException.getSeverityFromIdentifier(SQLState.TYPE_MISMATCH));
 	}
+
+    /**
+     * this method is called to replace the exception factory to be 
+     * used to generate the SQLException or the subclass
+     */
+
+    public static void setExceptionFactory (SQLExceptionFactory factory) {
+        exceptionFactory = factory;
+    }
 
 
   public static String typeName(int jdbcType) {

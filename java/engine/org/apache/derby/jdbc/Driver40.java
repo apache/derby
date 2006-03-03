@@ -26,6 +26,7 @@ import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.BrokeredConnection40;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.EmbedConnection30;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement40;
@@ -35,11 +36,14 @@ import org.apache.derby.impl.jdbc.EmbedConnection40;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.jdbc.EmbedResultSet40;
 import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData40;
+import org.apache.derby.impl.jdbc.SQLExceptionFactory40;
+import org.apache.derby.impl.jdbc.Util;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.util.Properties;
+
 
 
 public class Driver40 extends Driver30 {
@@ -108,6 +112,17 @@ public class Driver40 extends Driver30 {
     
     public EmbedRowId newEmbedRowId() throws SQLException {
         return new EmbedRowId();
+    }
+    
+    /**
+     * Overwriting the super class boot method to set exception factory
+     * @see InternalDriver.boot
+     */
+
+	public void boot(boolean create, Properties properties) 
+          throws StandardException {
+        Util.setExceptionFactory (new SQLExceptionFactory40 ());
+        super.boot (create, properties);
     }
 
     public DatabaseMetaData newEmbedDatabaseMetaData(EmbedConnection conn, String dbname) 

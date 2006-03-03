@@ -7,3 +7,7 @@ TestDbMetaData_app.properties
 aclob.txt
 littleclob.txt
 short.txt
+TestConnectionMethods_app.properties
+TestResultSetMethods_app.properties
+TestDbMetaData_app.properties
+TestJDBC40Exception_app.properties
