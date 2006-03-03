@@ -43,29 +43,37 @@ public class ConnectionHandling {
         
         ArrayList list = new ArrayList();
         
-        try {
-            while (true)
-            {
-                Connection c = DriverManager.getConnection("jdbc:derby:wombat");
-                list.add(c);
-                if ((list.size() % 1000) == 0) {
-                    System.out.println(list.size() + " connections ...");
-                    System.out.println("FREE " + Runtime.getRuntime().freeMemory());
+        while (true) {
+            Connection c;
+            try {
+
+                c = DriverManager.getConnection("jdbc:derby:wombat");
+            } catch (SQLException e) {
+                if ("08004".equals(e.getSQLState()))
+                    System.out.println("FIRST OOME: " + e.getSQLState() + " "
+                            + e.getMessage());
+                else {
+                    System.out.println("UNKNOWN ERROR " + e.getSQLState() + " "
+                            + e.getMessage());
+                    e.printStackTrace(System.out);
                 }
+                break;
+            } catch (Throwable t) {
+                System.out.println("UNKNOWN ERROR " + t);
+                t.printStackTrace(System.out);
+                break;
             }
-        } catch (SQLException e) {
-            if ("08004".equals(e.getSQLState()))
-                System.out.println("FIRST OOME: " + e.getSQLState() + " " + e.getMessage());
-            else {
-                System.out.println("UNKNOWN ERROR " + e.getSQLState() + " " + e.getMessage());
-                e.printStackTrace(System.out);
+            list.add(c);
+            if ((list.size() % 1000) == 0) {
+                System.out.println(list.size() + " connections ...");
+                System.out.println("FREE " + Runtime.getRuntime().freeMemory());
             }
-        } catch (Throwable t) {
-            System.out.println("UNKNOWN ERROR " + t);
-            t.printStackTrace(System.out);
         }
+
         
         System.out.println(list.size() + " successful connections");
+        
+        list.ensureCapacity(list.size() + 500);
         
         // try to make 500 more connection requests.
         int fail_sqloome = 0;
@@ -75,12 +83,9 @@ public class ConnectionHandling {
         for (int i = 0; i < 500; i++)
         {
             try {
-                while (true)
-                {
-                    Connection c = DriverManager.getConnection("jdbc:derby:wombat");
-                    list.add(c);
-                    ok++;
-                }
+                  Connection c = DriverManager.getConnection("jdbc:derby:wombat");
+                  list.add(c);
+                  ok++;
             } catch (SQLException e) {
                 if ("08004".equals(e.getSQLState()))
                     fail_sqloome++;
