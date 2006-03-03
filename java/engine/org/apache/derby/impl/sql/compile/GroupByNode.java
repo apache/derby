@@ -789,11 +789,8 @@ public class GroupByNode extends SingleChildResultSetNode
 		 */
 		assignResultSetNumber();
 
-		// Get the cost estimate from the child if we don't have one yet
-		if (costEstimate == null)
-		{
-			costEstimate = childResult.getFinalCostEstimate();
-		}
+		// Get the final cost estimate from the child.
+		costEstimate = childResult.getFinalCostEstimate();
 
 		/*
 		** Get the column ordering for the sort.  Note that

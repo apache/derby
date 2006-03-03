@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -1615,6 +1616,9 @@ public class SelectNode extends ResultSetNode
 		*/
 		optimizer.modifyAccessPaths();
 
+		// Load the costEstimate for the final "best" join order.
+		costEstimate = optimizer.getFinalCost();
+
 		selectSubquerys.modifyAccessPaths();
 
 		if (whereSubquerys != null && whereSubquerys.size() > 0)
@@ -1690,6 +1694,18 @@ public class SelectNode extends ResultSetNode
 		return genProjectRestrict(origFromListSize);
 	}
 
+	/**
+	 * Get the final CostEstimate for this SelectNode.
+	 *
+	 * @return	The final CostEstimate for this SelectNode, which is
+	 * 			the final cost estimate for the best join order of
+	 *          this SelectNode's optimizer.
+	 */
+	public CostEstimate getFinalCostEstimate()
+		throws StandardException
+	{
+		return optimizer.getFinalCost();
+	}
 
 	/**
 		Determine if this select is updatable or not, for a cursor.

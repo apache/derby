@@ -577,6 +577,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * 			the final cost estimate for the child node.
 	 */
 	public CostEstimate getFinalCostEstimate()
+		throws StandardException
 	{
 		/*
 		** The cost estimate will be set here if either optimize() or

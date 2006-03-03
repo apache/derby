@@ -662,6 +662,29 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		return null;
 	}
 
+	/**
+	 * Get the final CostEstimate for this FromTable.
+	 *
+	 * @return	The final CostEstimate for this FromTable, which is
+	 *  the costEstimate of trulyTheBestAccessPath if there is one.
+	 *  If there's no trulyTheBestAccessPath for this node, then
+	 *  we just return the value stored in costEstimate as a default.
+	 */
+	public CostEstimate getFinalCostEstimate()
+		throws StandardException
+	{
+		// If we already found it, just return it.
+		if (finalCostEstimate != null)
+			return finalCostEstimate;
+
+		if (getTrulyTheBestAccessPath() == null)
+			finalCostEstimate = costEstimate;
+		else
+			finalCostEstimate = getTrulyTheBestAccessPath().getCostEstimate();
+
+		return finalCostEstimate;
+	}
+
 	/** @see Optimizable#isBaseTable */
 	public boolean isBaseTable()
 	{

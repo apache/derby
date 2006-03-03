@@ -155,6 +155,14 @@ public class OptimizerImpl implements Optimizer
 	// to keep track of them all.
 	private HashMap savedJoinOrders;
 
+	// Value used to figure out when/if we've timed out for this
+	// Optimizable.
+	protected double timeLimit;
+
+	// Cost estimate for the final "best join order" that we chose--i.e.
+	// the one that's actually going to be generated.
+	CostEstimate finalCostEstimate;
+
 	protected  OptimizerImpl(OptimizableList optimizableList, 
 				  OptimizablePredicateList predicateList,
 				  DataDictionary dDictionary,
@@ -232,6 +240,7 @@ public class OptimizerImpl implements Optimizer
 		timeOptimizationStarted = System.currentTimeMillis();
 		reloadBestPlan = false;
 		savedJoinOrders = null;
+		timeLimit = Double.MAX_VALUE;
 	}
 
 	/**
@@ -243,7 +252,7 @@ public class OptimizerImpl implements Optimizer
 	 * of state that is required before each round should be done in this
 	 * method.
 	 */
-	protected void prepForNextRound()
+	public void prepForNextRound()
 	{
 		// We initialize reloadBestPlan to false so that if we end up
 		// pulling an Optimizable before we find a best join order
@@ -251,6 +260,30 @@ public class OptimizerImpl implements Optimizer
 		// round) we won't inadvertently reload the best plans based
 		// on some previous round.
 		reloadBestPlan = false;
+
+		/* Since we're preparing for a new round, we have to clear
+		 * out the "bestCost" from the previous round to ensure that,
+		 * when this round of optimizing is done, bestCost will hold
+		 * the best cost estimate found _this_ round, if there was
+		 * one.  If there was no best cost found (which can happen if
+		 * there is no feasible join order) then bestCost will remain
+		 * at Double.MAX_VALUE.  Then when outer queries check the
+		 * cost and see that it is so high, they will reject whatever
+		 * outer join order they're trying in favor of something that's
+		 * actually valid (and therefore cheaper).
+		 *
+		 * Note that we do _not_ reset the "foundABestPlan" variable nor
+		 * the "bestJoinOrder" array.  This is because it's possible that
+		 * a "best join order" may not exist for the current round, in
+		 * which case this OptimizerImpl must know whether or not it found
+		 * a best join order in a previous round (foundABestPlan) and if
+		 * so what the corresponding join order was (bestJoinOrder).  This
+		 * information is required so that the correct query plan can be
+		 * generated after optimization is complete, even if that best
+		 * plan was not found in the most recent round.
+		 */
+		bestCost = getNewCostEstimate(
+			Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 	}
 
     public int getMaxMemoryPerTable()
@@ -299,8 +332,7 @@ public class OptimizerImpl implements Optimizer
 			** the current best cost.
 			*/
 			currentTime = System.currentTimeMillis();
-			timeExceeded = (currentTime - timeOptimizationStarted) >
-									bestCost.getEstimatedCost();
+			timeExceeded = (currentTime - timeOptimizationStarted) > timeLimit;
 
 			if (optimizerTrace && timeExceeded)
 			{
@@ -1296,6 +1328,15 @@ public class OptimizerImpl implements Optimizer
 		/* Remember the current cost as best */
 		bestCost.setCost(currentCost);
 
+		// Our time limit for optimizing this round is the time we think
+		// it will take us to execute the best join order that we've 
+		// found so far (across all rounds of optimizing).  In other words,
+		// don't spend more time optimizing this OptimizerImpl than we think
+		// it's going to take to execute the best plan.  So if we've just
+		// found a new "best" join order, use that to update our time limit.
+		if (bestCost.getEstimatedCost() < timeLimit)
+			timeLimit = bestCost.getEstimatedCost();
+
 		/*
 		** Remember the current join order and access path
 		** selections as best.
@@ -1882,6 +1923,39 @@ public class OptimizerImpl implements Optimizer
 	public CostEstimate getOptimizedCost()
 	{
 		return bestCost;
+	}
+
+	/**
+	 * @see Optimizer#getFinalCost
+	 *
+	 * Sum up the cost of all of the trulyTheBestAccessPaths
+	 * for the Optimizables in our list.  Assumption is that
+	 * we only get here after optimization has completed--i.e.
+	 * while modifying access paths.
+	 */
+	public CostEstimate getFinalCost()
+	{
+		// If we already did this once, just return the result.
+		if (finalCostEstimate != null)
+			return finalCostEstimate;
+
+		// The total cost is the sum of all the costs, but the total
+		// number of rows is the number of rows returned by the innermost
+		// optimizable.
+		finalCostEstimate = getNewCostEstimate(0.0d, 0.0d, 0.0d);
+		CostEstimate ce = null;
+		for (int i = 0; i < bestJoinOrder.length; i++)
+		{
+			ce = optimizableList.getOptimizable(bestJoinOrder[i])
+					.getTrulyTheBestAccessPath().getCostEstimate();
+
+			finalCostEstimate.setCost(
+				finalCostEstimate.getEstimatedCost() + ce.getEstimatedCost(),
+				ce.rowCount(),
+				ce.singleScanRowCount());
+		}
+
+		return finalCostEstimate;
 	}
 
 	/** @see Optimizer#setOuterRows */

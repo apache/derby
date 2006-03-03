@@ -306,11 +306,8 @@ public class DistinctNode extends SingleChildResultSetNode
 		 */
 		assignResultSetNumber();
 
-		// Get the cost estimate from the child if we don't have one yet
-		if (costEstimate == null)
-		{
-			costEstimate = childResult.getFinalCostEstimate();
-		}
+		// Get the final cost estimate based on the child's cost.
+		costEstimate = childResult.getFinalCostEstimate();
 
 		/*
 			create the orderItem and stuff it in.

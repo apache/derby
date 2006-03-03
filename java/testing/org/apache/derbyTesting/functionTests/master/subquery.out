@@ -869,4 +869,151 @@ ij> drop table ttt;
 0 rows inserted/updated/deleted
 ij> drop table u;
 0 rows inserted/updated/deleted
+ij> -- DERBY-1007: Optimizer for subqueries can return incorrect cost estimates
+-- leading to sub-optimal join orders for the outer query.  Before the patch
+-- for that isssue, the following query plan will show T3 first and then T1--
+-- but that's determined by the optimizer to be the "bad" join order.  After
+-- the fix, the join order will show T1 first, then T3, which is correct
+-- (based on the optimizer's estimates).
+create table t1 (i int, j int);
+0 rows inserted/updated/deleted
+ij> insert into T1 values (1,1), (2,2), (3,3), (4,4), (5,5);
+5 rows inserted/updated/deleted
+ij> create table t3 (a int, b int);
+0 rows inserted/updated/deleted
+ij> insert into T3 values (1,1), (2,2), (3,3), (4,4);
+4 rows inserted/updated/deleted
+ij> insert into t3 values (6, 24), (7, 28), (8, 32), (9, 36), (10, 40);
+5 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 20000;
+ij> select x1.j, x2.b from
+  (select distinct i,j from t1) x1,
+  (select distinct a,b from t3) x2
+where x1.i = x2.a;
+J          |B          
+-----------------------
+4          |4          
+3          |3          
+2          |2          
+1          |1          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select x1.j, x2.b from
+  (select distinct i,j from t1) x1,
+  (select distinct a,b from t3) x2
+where x1.i = x2.a
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (5):
+Number of opens = 1
+Rows seen = 4
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Nested Loop Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 5
+	Rows seen from the right = 4
+	Rows filtered = 0
+	Rows returned = 4
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Distinct Scan ResultSet for T1 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+		Number of opens = 1
+		Hash table size = 5
+		Distinct columns are column numbers (0,1)
+		Rows seen = 5
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=5
+			Number of rows visited=5
+			Scan type=heap
+			start position:
+	None
+			stop position:
+	None
+			scan qualifiers:
+None
+			next qualifiers:
+None
+	Right result set:
+		Project-Restrict ResultSet (4):
+		Number of opens = 5
+		Rows seen = 45
+		Rows filtered = 41
+		restriction = true
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Distinct Scan ResultSet for T3 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+			Number of opens = 5
+			Hash table size = 9
+			Distinct columns are column numbers (0,1)
+			Rows seen = 45
+			Rows filtered = 0
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=9
+				Number of rows visited=9
+				Scan type=heap
+				start position:
+	None
+				stop position:
+	None
+				scan qualifiers:
+None
+				next qualifiers:
+None
+ij> -- clean up.
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
 ij> 

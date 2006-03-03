@@ -545,6 +545,9 @@ public class UnionNode extends SetOperatorNode
 		 */
 		assignResultSetNumber();
 
+		// Get our final cost estimate based on the child estimates.
+		costEstimate = getFinalCostEstimate();
+
 		// build up the tree.
 
 		acb.pushGetResultSetFactoryExpression(mb); // instance for getUnionResultSet
@@ -593,6 +596,34 @@ public class UnionNode extends SetOperatorNode
 		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUnionResultSet", ClassName.NoPutResultSet, 6);
+	}
+
+	/**
+	 * @see ResultSetNode#getFinalCostEstimate
+	 *
+	 * Get the final CostEstimate for this UnionNode.
+	 *
+	 * @return	The final CostEstimate for this UnionNode, which is
+	 *  the sum of the two child costs.
+	 */
+	public CostEstimate getFinalCostEstimate()
+		throws StandardException
+	{
+		// If we already found it, just return it.
+		if (finalCostEstimate != null)
+			return finalCostEstimate;
+
+		CostEstimate leftCE = leftResultSet.getFinalCostEstimate();
+		CostEstimate rightCE = rightResultSet.getFinalCostEstimate();
+
+		finalCostEstimate = getNewCostEstimate();
+		finalCostEstimate.setCost(leftCE.getEstimatedCost(),
+							 leftCE.rowCount(),
+							 leftCE.singleScanRowCount() +
+							 rightCE.singleScanRowCount());
+
+		finalCostEstimate.add(rightCE, finalCostEstimate);
+		return finalCostEstimate;
 	}
 
     String getOperatorName()

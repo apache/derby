@@ -408,3 +408,31 @@ drop table tt;
 drop table ttt;
 drop table u;
 
+-- DERBY-1007: Optimizer for subqueries can return incorrect cost estimates
+-- leading to sub-optimal join orders for the outer query.  Before the patch
+-- for that isssue, the following query plan will show T3 first and then T1--
+-- but that's determined by the optimizer to be the "bad" join order.  After
+-- the fix, the join order will show T1 first, then T3, which is correct
+-- (based on the optimizer's estimates).
+
+create table t1 (i int, j int);
+insert into T1 values (1,1), (2,2), (3,3), (4,4), (5,5);
+create table t3 (a int, b int);
+insert into T3 values (1,1), (2,2), (3,3), (4,4);
+insert into t3 values (6, 24), (7, 28), (8, 32), (9, 36), (10, 40);
+
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+maximumdisplaywidth 20000;
+
+select x1.j, x2.b from
+  (select distinct i,j from t1) x1,
+  (select distinct a,b from t3) x2
+where x1.i = x2.a;
+
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+-- clean up.
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
+drop table t1;
+drop table t3;
+

@@ -97,6 +97,11 @@ public abstract class ResultSetNode extends QueryTreeNode
 	CostEstimate		scratchCostEstimate;
 	Optimizer			optimizer;
 
+	// Final cost estimate for this result set node, which is the estimate
+	// for this node with respect to the best join order for the top-level
+	// query. Subclasses will set this value where appropriate.
+	CostEstimate		finalCostEstimate;
+
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
@@ -180,17 +185,18 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @return	The final CostEstimate for this ResultSetNode.
 	 */
 	public CostEstimate getFinalCostEstimate()
+		throws StandardException
 	{
 		if (SanityManager.DEBUG)
 		{
-			if (costEstimate == null)
+			if (finalCostEstimate == null)
 			{
 				SanityManager.THROWASSERT(
-					"costEstimate is not expected to be null for " +
+					"finalCostEstimate is not expected to be null for " +
 					getClass().getName());
 			}
 		}
-		return costEstimate;
+		return finalCostEstimate;
 	}
 
 	/**
@@ -1608,7 +1614,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 								getLanguageConnectionContext());
 		}
 
-		((OptimizerImpl)optimizer).prepForNextRound();
+		optimizer.prepForNextRound();
 		return optimizer;
 	}
 

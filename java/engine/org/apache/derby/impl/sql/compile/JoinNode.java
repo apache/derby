@@ -1567,16 +1567,8 @@ public class JoinNode extends TableOperatorNode
 		rightResultSet.generate(acb, mb); // arg 3
 		mb.push(rightResultSet.resultColumns.size()); // arg 4
 
-		// Get the cost estimate if we don't have one yet
-		if (costEstimate == null)
-		{
-			costEstimate = getNewCostEstimate();
-			costEstimate.setCost(
-				leftResultSet.getFinalCostEstimate().getEstimatedCost() +
-				rightResultSet.getFinalCostEstimate().getEstimatedCost(),
-				rightResultSet.getFinalCostEstimate().rowCount(),
-				rightResultSet.getFinalCostEstimate().rowCount());
-		}
+		// Get our final cost estimate based on child estimates.
+		costEstimate = getFinalCostEstimate();
 
 		// for the join clause, we generate an exprFun
 		// that evaluates the expression of the clause
@@ -1652,6 +1644,34 @@ public class JoinNode extends TableOperatorNode
 
 		return numArgs;
 
+	}
+
+	/**
+	 * @see ResultSetNode#getFinalCostEstimate
+	 *
+	 * Get the final CostEstimate for this JoinNode.
+	 *
+	 * @return	The final CostEstimate for this JoinNode, which is sum
+	 *  the costs for the inner and outer table.  The number of rows,
+	 *  though, is that for the inner table only.
+	 */
+	public CostEstimate getFinalCostEstimate()
+		throws StandardException
+	{
+		// If we already found it, just return it.
+		if (finalCostEstimate != null)
+			return finalCostEstimate;
+
+		CostEstimate leftCE = leftResultSet.getFinalCostEstimate();
+		CostEstimate rightCE = rightResultSet.getFinalCostEstimate();
+
+		finalCostEstimate = getNewCostEstimate();
+		finalCostEstimate.setCost(
+			leftCE.getEstimatedCost() + rightCE.getEstimatedCost(),
+			rightCE.rowCount(),
+			rightCE.rowCount());
+
+		return finalCostEstimate;
 	}
 
 	protected void oneRowRightSide(ActivationClassBuilder acb,

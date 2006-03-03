@@ -777,7 +777,7 @@ public abstract class TableOperatorNode extends FromTable
 													(RequiredRowOrdering) null,
 													getCompilerContext().getNumTables(),
 													  lcc);
-			((OptimizerImpl)optimizer).prepForNextRound();
+			optimizer.prepForNextRound();
 
 			if (sourceResultSet == leftResultSet)
 			{

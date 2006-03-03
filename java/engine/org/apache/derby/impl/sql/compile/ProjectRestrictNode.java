@@ -1117,19 +1117,22 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * 			the final cost estimate for the child node.
 	 */
 	public CostEstimate getFinalCostEstimate()
+		throws StandardException
 	{
-		/*
-		** The cost estimate will be set here if either optimize() or
-		** optimizeIt() was called on this node.  It's also possible
-		** that optimization was done directly on the child node,
-		** in which case the cost estimate will be null here.
-		*/
-		if (costEstimate == null)
-			return childResult.getFinalCostEstimate();
+		if (finalCostEstimate != null)
+		// we already set it, so just return it.
+			return finalCostEstimate;
+
+		// If the child result set is an Optimizable, then this node's
+		// final cost is that of the child.  Otherwise, this node must
+		// hold "trulyTheBestAccessPath" for it's child so we pull
+		// the final cost from there.
+		if (childResult instanceof Optimizable)
+			finalCostEstimate = childResult.getFinalCostEstimate();
 		else
-		{
-			return costEstimate;
-		}
+			finalCostEstimate = getTrulyTheBestAccessPath().getCostEstimate();
+
+		return finalCostEstimate;
 	}
 
     /**
@@ -1308,11 +1311,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			restrictSubquerys.setPointOfAttachment(resultSetNumber);
 		}
 
-		/* Drop our cost estimate if it is uninitialized. */
-		if (costEstimate != null && costEstimate.isUninitialized())
-		{
-			costEstimate = childResult.getFinalCostEstimate();
-		}
+		// Load our final cost estimate.
+		costEstimate = getFinalCostEstimate();
 
 		// if there is no restriction, we just want to pass null.
 		if (restriction == null)
@@ -1417,8 +1417,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		mb.push(mapArrayItem);
 		mb.push(resultColumns.reusableResult());
 		mb.push(doesProjection);
-		mb.push(getFinalCostEstimate().rowCount());
-		mb.push(getFinalCostEstimate().getEstimatedCost());
+		mb.push(costEstimate.rowCount());
+		mb.push(costEstimate.getEstimatedCost());
 		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getProjectRestrictResultSet",

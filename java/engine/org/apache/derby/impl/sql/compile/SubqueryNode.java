@@ -1822,6 +1822,10 @@ public class SubqueryNode extends ValueNode
 				mb.conditionalIfNull();
 
 				ResultSetNode materialSubNode = new MaterializeSubqueryNode(subRS);
+
+				// Propagate the resultSet's cost estimate to the new node.
+				materialSubNode.costEstimate = resultSet.getFinalCostEstimate();
+
 				((ProjectRestrictNode) resultSet).setChildResult(materialSubNode);
 
 				/* Evaluate subquery resultset here first.  Next time when we come to
