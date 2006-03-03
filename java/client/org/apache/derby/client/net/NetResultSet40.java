@@ -65,14 +65,6 @@ public class NetResultSet40 extends NetResultSet{
         throw SQLExceptionFactory.notImplemented ("updateRowId (String, RowId)");
     }
     
-    public int getHoldability() throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("getHoldability ()");
-    }
-    
-    public boolean isClosed() throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("isClosed ()");
-    }
-    
     public void updateNString(int columnIndex, String nString) throws SQLException {
         throw SQLExceptionFactory.notImplemented ("updateNString (int, String)");
     }

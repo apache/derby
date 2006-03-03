@@ -25,7 +25,11 @@ import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import org.apache.derby.iapi.sql.ResultSet;
+import java.sql.Statement;
 
+/**
+ * Implementation of JDBC 4 specific ResultSet methods.
+ */
 public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet20{
     
     /** Creates a new instance of EmbedResultSet40 */
@@ -56,12 +60,40 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
         throw Util.notImplemented();
     }
     
-    public int getHoldability() throws SQLException {
-        throw Util.notImplemented();
+    /**
+     * Retrieves the holdability for this <code>ResultSet</code>
+     * object.
+     *
+     * @return either <code>ResultSet.HOLD_CURSORS_OVER_COMMIT</code>
+     * or <code>ResultSet.CLOSE_CURSORS_AT_COMMIT</code>
+     * @exception SQLException if a database error occurs
+     */
+    public final int getHoldability() throws SQLException {
+        checkIfClosed("getHoldability");
+        Statement statement = getStatement();
+        if (statement == null) {
+            // If statement is null, the result set is an internal
+            // result set created by getNewRowSet() or getOldRowSet()
+            // in InternalTriggerExecutionContext. These result sets
+            // are not exposed to the JDBC applications. Returning
+            // CLOSE_CURSORS_AT_COMMIT since the result set will be
+            // closed when the trigger has finished.
+            return CLOSE_CURSORS_AT_COMMIT;
+        }
+        return statement.getResultSetHoldability();
     }
     
-    public boolean isClosed() throws SQLException {
-        throw Util.notImplemented();
+    /**
+     * Checks whether this <code>ResultSet</code> object has been
+     * closed, either automatically or because <code>close()</code>
+     * has been called.
+     *
+     * @return <code>true</code> if the <code>ResultSet</code> is
+     * closed, <code>false</code> otherwise
+     * @exception SQLException if a database error occurs
+     */
+    public final boolean isClosed() throws SQLException {
+        return isClosed;
     }
     
     public void updateNString(int columnIndex, String nString) throws SQLException {

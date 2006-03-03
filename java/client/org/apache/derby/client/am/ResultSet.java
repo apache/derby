@@ -5243,4 +5243,49 @@ public abstract class ResultSet implements java.sql.ResultSet,
             "JDBC 3 method called - not yet supported").getSQLException();
     }
     
+    // -------------------------- JDBC 4.0 --------------------------
+
+    /**
+     * Retrieves the holdability for this <code>ResultSet</code>
+     * object.
+     *
+     * @return either <code>ResultSet.HOLD_CURSORS_OVER_COMMIT</code>
+     * or <code>ResultSet.CLOSE_CURSORS_AT_COMMIT</code>
+     * @exception SQLException if a database error occurs
+     */
+    public final int getHoldability() throws SQLException {
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceEntry(this, "getHoldability");
+        }
+        try {
+            checkForClosedResultSet();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceExit(this, "getHoldability",
+                                        resultSetHoldability_);
+        }
+        return resultSetHoldability_;
+    }
+    
+    /**
+     * Checks whether this <code>ResultSet</code> object has been
+     * closed, either automatically or because <code>close()</code>
+     * has been called.
+     *
+     * @return <code>true</code> if the <code>ResultSet</code> is
+     * closed, <code>false</code> otherwise
+     * @exception SQLException if a database error occurs
+     */
+    public final boolean isClosed() throws SQLException {
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceEntry(this, "isClosed");
+        }
+        final boolean isClosed = !openOnClient_;
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceExit(this, "isClosed", isClosed);
+        }
+        return isClosed;
+    }
 }
