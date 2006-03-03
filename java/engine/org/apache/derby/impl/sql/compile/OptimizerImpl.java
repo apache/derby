@@ -284,6 +284,43 @@ public class OptimizerImpl implements Optimizer
 		 */
 		bestCost = getNewCostEstimate(
 			Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+
+		/* If we have predicates that were pushed down to this OptimizerImpl
+		 * from an outer query, then we reset the timeout state to prepare for
+		 * the next round of optimization.  Otherwise if we timed out during
+		 * a previous round and then we get here for another round, we'll
+		 * immediately "timeout" again before optimizing any of the Optimizables
+		 * in our list.  This is okay if we don't have any predicates from
+		 * outer queries because in that case the plan we find this round
+		 * will be the same one we found in the previous round, in which
+		 * case there's no point in resetting the timeout state and doing
+		 * the work a second time.  But if we have predicates from an outer
+		 * query, those predicates could help us find a much better plan
+		 * this round than we did in previous rounds--so we reset the timeout
+		 * state to ensure that we have a chance to consider plans that
+		 * can take advantage of the pushed predicates.
+		 */
+		boolean resetTimer = false;
+		if ((predicateList != null) && (predicateList.size() > 0))
+		{
+			for (int i = predicateList.size() - 1; i >= 0; i--)
+			{
+				// If the predicate is "scoped", then we know it was pushed
+				// here from an outer query.
+				if (((Predicate)predicateList.
+					getOptPredicate(i)).isScopedForPush())
+				{
+					resetTimer = true;
+					break;
+				}
+			}
+		}
+
+		if (resetTimer)
+		{
+			timeOptimizationStarted = System.currentTimeMillis();
+			timeExceeded = false;
+		}
 	}
 
     public int getMaxMemoryPerTable()
