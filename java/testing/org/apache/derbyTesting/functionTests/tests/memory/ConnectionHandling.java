@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Properties;
 
 /**
  * Test opening connections until a failure due to out of memory
@@ -44,12 +45,15 @@ public class ConnectionHandling {
         conn = null;
         
         ArrayList list = new ArrayList();
+        list.ensureCapacity(30000);
+        
+        Properties p = new Properties();
         
         while (true) {
             Connection c;
             try {
 
-                c = DriverManager.getConnection("jdbc:derby:wombat");
+                c = DriverManager.getConnection("jdbc:derby:wombat", p);
             } catch (SQLException e) {
                 if ("08004".equals(e.getSQLState()))
                     System.out.println("FIRST OOME: " + e.getSQLState() + " "
@@ -67,11 +71,11 @@ public class ConnectionHandling {
             }
             list.add(c);
             if ((list.size() % 1000) == 0) {
-                System.out.println(list.size() + " connections ...");
-                System.out.println("FREE " + Runtime.getRuntime().freeMemory());
+                System.out.print(".");
             }
         }
-
+        
+        System.out.println("");
         
         System.out.println(list.size() + " successful connections");
         
@@ -85,7 +89,7 @@ public class ConnectionHandling {
         for (int i = 0; i < 500; i++)
         {
             try {
-                  Connection c = DriverManager.getConnection("jdbc:derby:wombat");
+                  Connection c = DriverManager.getConnection("jdbc:derby:wombat", p);
                   list.add(c);
                   ok++;
             } catch (SQLException e) {
@@ -116,8 +120,8 @@ public class ConnectionHandling {
             list.set(i, null);
             if (c.isClosed())
                 alreadyClosed++;
-            
-            c.close();
+            else 
+                c.close();
         }
         System.out.println("already closed      : " + alreadyClosed);        
   }
