@@ -19,6 +19,10 @@
 # derbynet/maxthreads - tries to use NetworkServerControl statements
 # derbynet/runtimeinfo - tries to use NetworkServerControl statements
 # derbynet/sysinfo - tries to use NetworkServerControl statements
+# derbynet/sysinfo_withproperties - tries to use NetworkServerControl statements and for the test, server needs to be
+# started with specific property set - DERBY928 for reference 
+# derbynet/testSecMec - this test requires property to be set when server is started with derby.drda.securityMechanism
+# thus not suitable for remote server testing in its current form. - DERBY-928
 # derbynet/testProperties - tries to use NetworkServerControl statements
 # derbynet/timeslice - tries to use NetworkServerControl statements
 # derbynet/DerbyNetAutoStart - tries to start networkserver
@@ -41,7 +45,9 @@ derbynet/DataSourcePermissions_net.java
 derbynet/maxthreads.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java
+derbynet/sysinfo_withproperties.java
 derbynet/testProperties.java
+derbynet/testSecMec.java
 derbynet/timeslice.java
 derbynet/DerbyNetAutoStart.java
 derbynet/DerbyNetNewServer.java

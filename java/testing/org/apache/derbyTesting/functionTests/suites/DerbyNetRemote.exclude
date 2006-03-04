@@ -20,8 +20,12 @@
 # derbynet/runtimeinfo - tries to use NetworkServerControl statements
 # derbynet/sysinfo - tries to use NetworkServerControl statements
 # derbynet/testProperties - tries to use NetworkServerControl statements
+# derbynet/testSecMec - this test requires property to be set when server is started with derby.drda.securityMechanism
+# thus not suitable for remote server testing in its current form. - DERBY-928
 # derbynet/timeslice - tries to use NetworkServerControl statements
 # derbynet/DerbyNetAutoStart - tries to start networkserver
+# derbynet/sysinfo_withproperties - tries to use NetworkServerControl statements and test requires server to 
+# be started with a specific property. see DERBY-928 for reference
 # derbynet/DerbyNetNewServer - tries to start networkserver and uses local connections to the db.
 # tools/ieptests - names files in extin dir, but they are on the server
 # tools/importExport - tries to confirm correct export by file-comparing the exported files,
@@ -41,7 +45,9 @@ derbynet/DataSourcePermissions_net.java
 derbynet/maxthreads.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java
+derbynet/sysinfo_withproperties.java
 derbynet/testProperties.java
+derbynet/testSecMec.java
 derbynet/timeslice.java
 derbynet/DerbyNetAutoStart.java
 derbynet/DerbyNetNewServer.java
