@@ -111,7 +111,7 @@ ij> create view yyunion as select all ii, jj, kk, aa from yy1 union all select i
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 0 rows inserted/updated/deleted
-ij> maximumdisplaywidth 15000;
+ij> maximumdisplaywidth 20000;
 ij> -- Predicate push-down should occur for next two queries.  Thus we
 -- we should see Index scans for T3 and T4--and this should be the
 -- case regardless of the order of the FROM list.
@@ -6062,7 +6062,17 @@ None
 									Number of deleted rows visited=0
 									Number of pages visited=1
 									Number of rows qualified=1
-									Number of row&
+									Number of rows visited=2
+									Scan type=btree
+									Tree height=1
+									start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+									stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+									qualifiers:
+None
 ij> -- Predicates pushed from outer queries shouldn't interfere with inner
 -- predicates for subqueries.  Mostly checking for correct results here.
 select * from
