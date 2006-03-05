@@ -1817,19 +1817,48 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     // ----------------Advanced features -----------------------------------------
 
-    public final java.sql.SQLWarning getWarnings() {
+    /**
+     * Returns the first <code>SQLWarning</code> reported on this
+     * <code>ResultSet</code> object, or <code>null</code> if there
+     * are no warnings. Subsequent warnings are chained on the
+     * returned object.
+     *
+     * @return the first <code>SQLWarning</code> in the chain, or
+     * <code>null</code> if no warnings are reported
+     * @exception SQLException if a database error occurs or the
+     * result set is closed
+     */
+    public final java.sql.SQLWarning getWarnings() throws SQLException {
+        try {
+            checkForClosedResultSet();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getWarnings", warnings_);
         }
         return warnings_ == null ? null : warnings_.getSQLWarning();
     }
 
+    /**
+     * Clear all warnings on this <code>ResultSet</code> and make
+     * subsequent calls to <code>getWarnings()</code> return
+     * <code>null</code> until a new warning is reported.
+     *
+     * @exception SQLException if a database error occurs or the
+     * result set is closed
+     */
     public final void clearWarnings() throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "clearWarnings");
             }
-            warnings_ = null;
+            try {
+                checkForClosedResultSet();
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+            clearWarningsX();
         }
     }
 
@@ -3676,7 +3705,22 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public java.sql.Statement getStatement() {
+    /**
+     * Retrieves the <code>Statement</code> object that produced this
+     * object, or <code>null</code> if the <code>ResultSet</code> was
+     * not produced by a <code>Statement</code> object.
+     *
+     * @return the <code>Statement</code> that produced this object or
+     * <code>null</code>
+     * @exception SQLException if a database error occurs or the
+     * result set is closed
+     */
+    public java.sql.Statement getStatement() throws SQLException {
+        try {
+            checkForClosedResultSet();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getStatement", statement_);
         }

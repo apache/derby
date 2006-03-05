@@ -1676,9 +1676,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * 
 	 * @return the Statment that produced the result set, or null if the result
 	 *         was produced some other way.
+	 * @exception SQLException if a database error occurs or the
+	 * result set is closed
 	 */
-	public final Statement getStatement()
+	public final Statement getStatement() throws SQLException
     {
+            checkIfClosed("getStatement");
             return applicationStmt;
     }
     
@@ -1837,6 +1840,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs.
 	 */
 	public int getRow() throws SQLException {
+		checkIfClosed("getRow");
+
 		// getRow() is only allowed on scroll cursors
 		checkScrollCursor("getRow()");
 
@@ -1946,6 +1951,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                is TYPE_FORWARD_ONLY and direction is not FETCH_FORWARD.
 	 */
 	public void setFetchDirection(int direction) throws SQLException {
+		checkIfClosed("setFetchDirection");
 		checkScrollCursor("setFetchDirection()");
 		/*
 		 * FetchDirection is meaningless to us. We just save it off and return
@@ -1963,6 +1969,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public int getFetchDirection() throws SQLException {
+		checkIfClosed("getFetchDirection");
 		if (fetchDirection == 0) {
 			// value is not set at the result set level
 			// get it from the statement level
@@ -1988,6 +1995,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                rows <= this.getMaxRows() is not satisfied.
 	 */
 	public void setFetchSize(int rows) throws SQLException {
+		checkIfClosed("setFetchSize");
 		if (rows < 0 || (stmt.getMaxRows() != 0 && rows > stmt.getMaxRows())) {
 			throw Util.generateCsSQLException(SQLState.INVALID_FETCH_SIZE,
 					new Integer(rows));
@@ -2006,6 +2014,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public int getFetchSize() throws SQLException {
+		checkIfClosed("getFetchSize");
 		if (fetchSize == 0) {
 			// value is not set at the result set level
 			//  get the default value from the statement
@@ -2026,6 +2035,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public int getType() throws SQLException {
+		checkIfClosed("getType");
 		return stmt.getResultSetType();
 	}
 
@@ -2047,6 +2057,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public int getConcurrency() throws SQLException {
+		checkIfClosed("getConcurrency");
 		return concurrencyOfThisResultSet;
 	}
 
@@ -2068,6 +2079,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @see EmbedDatabaseMetaData#updatesAreDetected
 	 */
 	public boolean rowUpdated() throws SQLException {
+		checkIfClosed("rowUpdated");
 		return false;
 	}
 
@@ -2084,6 +2096,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @see EmbedDatabaseMetaData#insertsAreDetected
 	 */
 	public boolean rowInserted() throws SQLException {
+		checkIfClosed("rowInserted");
 		return false;
 	}
 
@@ -2102,6 +2115,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @see EmbedDatabaseMetaData#deletesAreDetected
 	 */
 	public boolean rowDeleted() throws SQLException {
+		checkIfClosed("rowDeleted");
 		return false;
 	}
 
@@ -2128,17 +2142,17 @@ public abstract class EmbedResultSet extends ConnectionChild
 	}
 
 	//do following few checks before accepting updateRow or deleteRow
-	//1)Make sure this is an updatable ResultSet
-	//2)Make sure JDBC ResultSet is not closed
+	//1)Make sure JDBC ResultSet is not closed
+	//2)Make sure this is an updatable ResultSet
 	//3)Make sure JDBC ResultSet is positioned on a row
 	//4)Make sure underneath language resultset is not closed
 	protected void checksBeforeUpdateOrDelete(String methodName, int columnIndex) throws SQLException {
 
-      //1)Make sure this is an updatable ResultSet
-      checkUpdatableCursor(methodName);
-
-      //2)Make sure JDBC ResultSet is not closed
+      //1)Make sure JDBC ResultSet is not closed
       checkIfClosed(methodName);
+
+      //2)Make sure this is an updatable ResultSet
+      checkUpdatableCursor(methodName);
 
       //3)Make sure JDBC ResultSet is positioned on a row
       checkOnRow(); // first make sure there's a current row
@@ -2165,18 +2179,18 @@ public abstract class EmbedResultSet extends ConnectionChild
 	}
 
     /* do following few checks before accepting insertRow
-     * 1) Make sure this is an updatable ResultSet
-     * 2) Make sure JDBC ResultSet is not closed
+     * 1) Make sure JDBC ResultSet is not closed
+     * 2) Make sure this is an updatable ResultSet
      * 3) Make sure JDBC ResultSet is positioned on insertRow
      * 4) Make sure underneath language resultset is not closed
      */
     protected void checksBeforeInsert() throws SQLException {
-        // 1)Make sure this is an updatable ResultSet
+        // 1)Make sure JDBC ResultSet is not closed
+        checkIfClosed("insertRow");
+
+        // 2)Make sure this is an updatable ResultSet
         // if not updatable resultset, then throw exception
         checkUpdatableCursor("insertRow");
-
-        // 2)Make sure JDBC ResultSet is not closed
-        checkIfClosed("insertRow");
 
         // 3)Make sure JDBC ResultSet is positioned on insertRow
         if (!isOnInsertRow) {
@@ -3568,10 +3582,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                not updatable
 	 */
 	public void moveToInsertRow() throws SQLException {
+		checkExecIfClosed("moveToInsertRow");
+
 		// if not updatable resultset, then throw exception
 		checkUpdatableCursor("moveToInsertRow");
-
-		checkExecIfClosed("moveToInsertRow");
 
 		synchronized (getConnectionSynchronization()) {
 			try {
@@ -3617,10 +3631,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                not updatable
 	 */
 	public void moveToCurrentRow() throws SQLException {
+		checkExecIfClosed("moveToCurrentRow");
+
 		// if not updatable resultset, then throw exception
 		checkUpdatableCursor("moveToCurrentRow");
-
-		checkExecIfClosed("moveToCurrentRow");
 
 		synchronized (getConnectionSynchronization()) {
 			try {

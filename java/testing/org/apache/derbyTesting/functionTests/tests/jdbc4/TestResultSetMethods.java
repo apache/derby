@@ -32,6 +32,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.derby.shared.common.reference.SQLState;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+
 /**
  * This class is used to test the implementations of the JDBC 4.0 methods
  * in the ResultSet interface
@@ -342,6 +346,78 @@ public class TestResultSetMethods {
     
     void t_updateSQLXML2() {
     }
+
+    /**
+     * Test that an exception is thrown when methods are called
+     * on a closed result set (DERBY-1060).
+     */
+    private void testExceptionWhenClosed() {
+        try {
+            // create a result set and close it
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("values(1)");
+            rs.close();
+
+            // maps method name to parameter list
+            HashMap<String, Class[]> params = new HashMap<String, Class[]>();
+            // maps method name to argument list
+            HashMap<String, Object[]> args = new HashMap<String, Object[]>();
+
+            // methods with no parameters
+            String[] zeroArgMethods = {
+                "getWarnings", "clearWarnings", "getStatement",
+                "getMetaData", "getConcurrency", "getHoldability",
+                "getRow", "getType", "rowDeleted", "rowInserted",
+                "rowUpdated", "getFetchDirection", "getFetchSize",
+            };
+            for (String name : zeroArgMethods) {
+                params.put(name, null);
+                args.put(name, null);
+            }
+
+            // methods with a single int parameter
+            for (String name : new String[] { "setFetchDirection",
+                                              "setFetchSize" }) {
+                params.put(name, new Class[] { Integer.TYPE });
+                args.put(name, new Integer[] { 0 });
+            }
+
+            // invoke the methods
+            for (String name : params.keySet()) {
+                try {
+                    Method method =
+                        rs.getClass().getMethod(name, params.get(name));
+                    try {
+                        method.invoke(rs, args.get(name));
+                    } catch (InvocationTargetException ite) {
+                        Throwable cause = ite.getCause();
+                        if (cause instanceof SQLException) {
+                            SQLException sqle = (SQLException) cause;
+                            String state = sqle.getSQLState();
+                            // Should get SQL state XCL16 when the
+                            // result set is closed, but client driver
+                            // sends null.
+                            if (state == null ||
+                                state.equals("XCL16")) {
+                                continue;
+                            }
+                        }
+                        throw cause;
+                    }
+                    System.out.println("no exception thrown for " + name +
+                                       "() when ResultSet is closed");
+                } catch (Throwable t) {
+                    System.out.println("Unexpected exception when " +
+                                       "invoking " + name + "():");
+                    t.printStackTrace(System.out);
+                }
+            }
+            stmt.close();
+        } catch (SQLException e) {
+            System.out.println("Unexpected exception caught:");
+            e.printStackTrace(System.out);
+        }
+    }
     
     void startTestResultSetMethods(Connection conn_in,PreparedStatement ps_in,ResultSet rs_in) {
         conn = conn_in;
@@ -371,6 +447,8 @@ public class TestResultSetMethods {
         
         t_updateSQLXML1();
         t_updateSQLXML2();
+
+        testExceptionWhenClosed();
     }
     
     /**
