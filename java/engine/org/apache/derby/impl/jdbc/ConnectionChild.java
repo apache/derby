@@ -31,10 +31,6 @@ import java.sql.SQLException;
 
 abstract class ConnectionChild {
 
-	// parameters to handleException
-	static final boolean CLOSE = true;
-	static final boolean NOCLOSE = false;
-
 	/*
 	** Local connection is the current EmbedConnection
 	** object that we use for all our work.
@@ -84,15 +80,6 @@ abstract class ConnectionChild {
 		return localConn.handleException(t);
 	}
 
-	/**
-		Handle any exception.
-		@see EmbedConnection#handleException
-		@exception SQLException thrown if can't handle
-	*/
-	final SQLException handleException(Throwable t, boolean close)
-			throws SQLException {
-		return localConn.handleException(t, close);
-	}
 	/**
 		If Autocommit is on, note that a commit is needed.
 		@see EmbedConnection#needCommit
