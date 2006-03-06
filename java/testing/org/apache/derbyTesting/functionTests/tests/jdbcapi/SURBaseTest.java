@@ -39,6 +39,13 @@ abstract public class SURBaseTest extends TestCase {
     /** Creates a new instance of SURBaseTest */
     public SURBaseTest(String name) {
         super(name);
+        recordCount = SURDataModelSetup.recordCount;  
+    }
+
+    /** Creates a new instance of SURBaseTest*/
+    public SURBaseTest(String name, int records) {
+        super(name);
+        recordCount = records;  
     }
     
     /**
@@ -278,7 +285,7 @@ abstract public class SURBaseTest extends TestCase {
     }
     
     protected Connection con = null; // Connection established in setUp()
-    final static int recordCount = SURDataModelSetup.recordCount;  
+    final int recordCount;
     
        
     /**

@@ -50,14 +50,16 @@ public class SURDataModelSetup extends TestSetup
         super(test);
         this.model = model;       
     }
-    
-    /**
+
+     /**
      * Creates a datamodel for testing Scrollable Updatable ResultSets
      * and populates the database model with data.
      * @param model enumerator for which model to use
      * @param con connection to database
+     * @param records number of records in the data model
      */
-    public static void createDataModel(SURDataModel model, Connection con) 
+    public static void createDataModel(SURDataModel model, Connection con,
+                                       int records) 
         throws SQLException
     {
         try { 
@@ -94,7 +96,7 @@ public class SURDataModelSetup extends TestSetup
         PreparedStatement ps = con.
             prepareStatement("insert into t1 values (?,?,?,?)");
         
-        for (int i=0; i<recordCount; i++) {
+        for (int i=0; i<records; i++) {
             ps.setInt(1, i);
             ps.setInt(2, i);
             ps.setInt(3, i*2 + 17);
@@ -103,6 +105,20 @@ public class SURDataModelSetup extends TestSetup
         }
         ps.executeBatch();
         con.commit();
+    }
+    
+    /**
+     * Creates a datamodel for testing Scrollable Updatable ResultSets
+     * and populates the database model with data.
+     * The model will be set up with the number of records as defined by
+     * the recordCount attribute.
+     * @param model enumerator for which model to use
+     * @param con connection to database
+     */
+    public static void createDataModel(SURDataModel model, Connection con) 
+        throws SQLException
+    {
+        createDataModel(model, con, recordCount);
     }
     
     /**
