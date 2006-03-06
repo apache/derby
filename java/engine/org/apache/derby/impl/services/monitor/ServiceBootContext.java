@@ -28,7 +28,7 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 	A context that is used during a service boot to
 	stop cleanup on the stack at this point.
 */
-class ServiceBootContext extends ContextImpl {
+final class ServiceBootContext extends ContextImpl {
 
 	ServiceBootContext(ContextManager cm) {
 		super(cm, "ServiceBoot");

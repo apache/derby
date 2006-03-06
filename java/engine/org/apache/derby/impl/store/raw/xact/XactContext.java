@@ -44,13 +44,13 @@ context manager (ie. typically a single user) for a single RawStoreFactory.
 
 **/
 
-public class XactContext extends ContextImpl {
+final class XactContext extends ContextImpl {
 
 	private		RawTransaction	xact;
 	private     RawStoreFactory factory;
 	private		boolean   abortAll; // true if any exception causes this transaction to be aborted.
 
-	public XactContext(ContextManager cm, String name, Xact xact, boolean abortAll, RawStoreFactory factory) {
+	XactContext(ContextManager cm, String name, Xact xact, boolean abortAll, RawStoreFactory factory) {
 		super(cm, name);
 
 		this.xact = xact;
@@ -143,15 +143,15 @@ public class XactContext extends ContextImpl {
 
 	}
 
-	public RawTransaction getTransaction() {
+	RawTransaction getTransaction() {
 		return xact;
 	}
 
-	protected RawStoreFactory getFactory() {
+	RawStoreFactory getFactory() {
 		return factory;
 	}
 
-	public void substituteTransaction(Xact newTran)
+	void substituteTransaction(Xact newTran)
 	{
 		// disengage old tran from this xact context
 		Xact oldTran = (Xact)xact;

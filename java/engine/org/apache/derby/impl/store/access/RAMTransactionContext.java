@@ -27,7 +27,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.error.ExceptionSeverity;
-public class RAMTransactionContext extends ContextImpl
+final class RAMTransactionContext extends ContextImpl
 {
 	/**
 	The transaction this context is managing.
@@ -110,7 +110,7 @@ public class RAMTransactionContext extends ContextImpl
 	// this constructor is called with the transaction
 	// controller to be saved when the context
 	// is created (when the first statement comes in, likely).
-	public RAMTransactionContext(
+	RAMTransactionContext(
     ContextManager  cm,
     String          context_id,
     RAMTransaction  theTransaction, 

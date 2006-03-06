@@ -38,7 +38,7 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
  * for statement errors or higher. The outer data dictionary context
  * is not popped by cleanupOnError.
  */
-public class DataDictionaryContextImpl 
+class DataDictionaryContextImpl 
 	extends ContextImpl
 	implements DataDictionaryContext
 {
@@ -81,7 +81,7 @@ public class DataDictionaryContextImpl
 	// to be saved when the context
 	// is created
 	
-	public DataDictionaryContextImpl(ContextManager cm, DataDictionary dataDictionary,
+	DataDictionaryContextImpl(ContextManager cm, DataDictionary dataDictionary,
 									 boolean nested)
 	{
 		super(cm, DataDictionaryContext.CONTEXT_ID);

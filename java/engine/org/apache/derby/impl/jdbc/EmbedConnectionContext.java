@@ -36,7 +36,7 @@ import java.util.Enumeration;
 /**
 	@author djd
  */
-public class EmbedConnectionContext extends ContextImpl 
+class EmbedConnectionContext extends ContextImpl 
 		implements ConnectionContext
 {
 

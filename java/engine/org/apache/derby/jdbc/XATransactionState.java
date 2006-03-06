@@ -34,7 +34,7 @@ import javax.transaction.xa.XAException;
 
 /** 
 */
-public final class XATransactionState extends ContextImpl {
+final class XATransactionState extends ContextImpl {
 
 	/** Rollback-only due to deadlock */
 	final static int TRO_DEADLOCK				= -2;
@@ -45,7 +45,7 @@ public final class XATransactionState extends ContextImpl {
 	// final static int T2_ASSOCIATION_SUSPENDED	= 2;
 	final static int TC_COMPLETED				= 3; // rollback/commit called
 
-	public final EmbedConnection	conn;
+	final EmbedConnection	conn;
 	final EmbedXAConnection creatingResource;
 	private EmbedXAConnection  associatedResource;	// owning XAResource
 	final XAXactId			xid;	

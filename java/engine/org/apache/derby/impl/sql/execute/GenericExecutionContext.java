@@ -48,7 +48,7 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
  *
  * @author ames
  */
-public class GenericExecutionContext
+class GenericExecutionContext
 	extends ContextImpl 
 	implements ExecutionContext {
 
@@ -57,9 +57,9 @@ public class GenericExecutionContext
 	//
 	// class implementation
 	//
-	protected ResultSetFactory rsFactory;
-	protected ResultSetStatisticsFactory rssFactory;
-	protected ExecutionFactory execFactory;
+	private ResultSetFactory rsFactory;
+	private ResultSetStatisticsFactory rssFactory;
+	private ExecutionFactory execFactory;
 
 	//
 	// ExecutionContext interface
@@ -178,7 +178,7 @@ public class GenericExecutionContext
 	//
 	// class interface
 	//
-	public	GenericExecutionContext(
+	GenericExecutionContext(
 		    ResultSetFactory rsf,
 			ContextManager cm,
 			ExecutionFactory ef)
