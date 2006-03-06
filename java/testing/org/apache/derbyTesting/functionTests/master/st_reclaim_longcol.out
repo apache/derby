@@ -1,0 +1,4 @@
+Beginning test: test1:insert/delete of 20 rows with blob(250000)
+Ending test: test1:insert/delete of 20 rows with blob(250000)
+Beginning test: test2:queue of 5 rows with blob(250000), total_work = 500
+Ending test: test2:queue of 5 rows with blob(250000), total_work = 500

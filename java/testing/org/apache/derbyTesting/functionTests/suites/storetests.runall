@@ -1,4 +1,5 @@
 storetests/st_schema.sql
+storetests/st_reclaim_longcol.java
 storetests/st_derby715.java
 storetests/st_1.sql
 storetests/st_b5772.sql

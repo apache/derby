@@ -204,11 +204,11 @@ public abstract class GenericConglomerateController
 
             // try to reclaim rows when the page is only full of deleted rows,
             // or in the special case of the first page when all rows except the
-            // "control row" are deleted.
-            if ((pos.current_page.nonDeletedRecordCount() == 0) ||
-                ((pos.current_page.nonDeletedRecordCount() == 1) && 
-                 (pos.current_page.getPageNumber() == 
-                  ContainerHandle.FIRST_PAGE_NUMBER)))
+            // "control row" are deleted.  Or if the row we just deleted is
+            // a long row or has a long column.
+            if (pos.current_page.shouldReclaimSpace(
+                pos.current_page.getPageNumber() == 1 ? 1 : 0,
+                pos.current_slot))
             {
                 queueDeletePostCommitWork(pos);
             }

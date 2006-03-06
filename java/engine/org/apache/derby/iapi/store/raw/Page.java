@@ -317,10 +317,6 @@ public interface Page
     int                 overflowThreshold)
 		throws StandardException;
 
-	/**
-		Update the complete record identified by the record handle.
-
-	*/
     /**
      * Update the record identified by the record handle.
      * <p>
@@ -548,10 +544,6 @@ public interface Page
 	int getNextSlotNumber(RecordHandle handle) 
         throws StandardException;
 
-	/**
-		Insert a record at the specified slot. 
-		<P>
-	 */
     /**
      * Insert a record at the specified slot. 
      * <p>
@@ -618,10 +610,6 @@ public interface Page
     int                     overflowThreshold)
 		throws StandardException;
 
-	/**
-		Values for insertFlag:
-		
-	*/
     /**
      * Values for insertFlag.
      * <p>
@@ -661,14 +649,14 @@ public interface Page
      * 4. If INSERT_DEFAULT, INSERT_OVERFLOW both are not set, then, default 
      *    insert action will be taken, i.e. no overflow will be allowed.
      **/
-	static final byte INSERT_INITIAL =		   (byte) 0x00;	// init the flag
-	static final byte INSERT_DEFAULT =		   (byte) 0x01;	// default flag
+	static final byte INSERT_INITIAL         = (byte) 0x00;	// init the flag
+	static final byte INSERT_DEFAULT         = (byte) 0x01;	// default flag
 	static final byte INSERT_UNDO_WITH_PURGE = (byte) 0x02;	// purge row on undo
-	static final byte INSERT_CONDITIONAL =     (byte) 0x04;	// conditional 
+	static final byte INSERT_CONDITIONAL     = (byte) 0x04;	// conditional 
                                                             // insert
-	static final byte INSERT_OVERFLOW =		   (byte) 0x08;	// insert with 
+	static final byte INSERT_OVERFLOW        = (byte) 0x08;	// insert with 
                                                             // possible overflow
-	static final byte INSERT_FOR_SPLIT =	   (byte) 0x10;	// rawstore only
+	static final byte INSERT_FOR_SPLIT       = (byte) 0x10;	// rawstore only
 
 
     /**
@@ -1135,6 +1123,40 @@ public interface Page
 	*/
 
 	public int nonDeletedRecordCount() throws StandardException;
+
+    /**
+     * Is this page/deleted row a candidate for immediate reclaim space.
+     * <p>
+     * Used by access methods after executing a delete on "slot_just_deleted"
+     * to ask whether a post commit should be queued to try to reclaim space
+     * after the delete commits.  
+     * <p>
+     * Will return true if the number of non-deleted rows on the page is
+     * <= "num_non_deleted_rows".  For instance 0 means schedule reclaim
+     * only if all rows are deleted, 1 if all rows but one are deleted.  
+     * <p>
+     * Will return true if the row just deleted is either a long row or long
+     * column.  In this case doing a reclaim space on the single row may
+     * reclaim multiple pages of free space, so better to do it now rather
+     * than wait for all rows on page to be deleted.  This case is to address
+     * the worst case scenario of all rows with long columns, but very short
+     * rows otherwise.  In this case there could be 1000's of rows on the 
+     * main page with many gigabytes of data on overflow pages in deleted space
+     * that would not be reclaimed until all rows on the page were deleted.
+     *
+	 * @return true if a reclaim space should be scheduled post commit on this
+     *         page, false otherwise.
+     *
+     * @param num_non_deleted_rows threshold number of non-deleted rows to
+     *                             schedule reclaim space.
+     * @param slot_just_deleted    row on page to check for long row/long column
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public boolean shouldReclaimSpace(
+    int     num_non_deleted_rows,
+    int     slot_just_deleted)
+        throws StandardException;
 
 	/**
 	  Set the aux object for this page.

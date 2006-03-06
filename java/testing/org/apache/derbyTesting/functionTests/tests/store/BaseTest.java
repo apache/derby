@@ -43,7 +43,8 @@ up access to utility routines - see OnlineCompressTest.java as an example.
 **/
 public abstract class BaseTest
 {
-    private static boolean debug_system_procedures_created = false;
+    private   static boolean debug_system_procedures_created = false;
+    protected static boolean verbose = false;
 
     abstract public void testList(Connection conn) throws SQLException;
 
@@ -357,4 +358,117 @@ public abstract class BaseTest
 
         return(lock_output);
     }
+
+    /**
+     * create given table on the input connection.
+     * <p>
+     * Takes care of dropping the table if it exists already.
+     * <p>
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public void createTable(
+    Connection  conn,
+    String      tbl_name,
+    String      create_str)
+		throws SQLException
+    {
+        Statement  stmt = conn.createStatement();
+
+        // drop table, ignore table does not exist error.
+
+        try
+        {
+            stmt.executeUpdate("drop table " + tbl_name);
+        }
+        catch (Exception e)
+        {
+            // ignore drop table errors.
+        }
+
+        stmt.executeUpdate(create_str);
+    }
+
+    /**
+     * call the space table vti.
+     * <p>
+     * Utility test function to call the space table vti to get information
+     * about allocated and free pages.  Information is passed back in an
+     * int array as follows:
+     *   is_index                 = ret_info[0];
+     *   num_alloc                = ret_info[1];
+     *   num_free                 = ret_info[2];
+     *   page_size                = ret_info[3];
+     *   estimate_space_savings   = ret_info[4];
+     * <p>
+     *
+	 * @return the space information about the table.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    protected static final int SPACE_INFO_IS_INDEX          = 0;
+    protected static final int SPACE_INFO_NUM_ALLOC         = 1;
+    protected static final int SPACE_INFO_NUM_FREE          = 2;
+    protected static final int SPACE_INFO_PAGE_SIZE         = 3;
+    protected static final int SPACE_INFO_ESTIMSPACESAVING  = 4;
+    protected int[] getSpaceInfo(
+    Connection  conn,
+    String      schemaName,
+    String      tableName,
+    boolean     commit_xact)
+		throws SQLException
+    {
+        String stmt_str = 
+            "select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving from new org.apache.derby.diag.SpaceTable('" +
+            tableName + "') t where isindex = 0";
+        PreparedStatement space_stmt = conn.prepareStatement(stmt_str);
+        ResultSet rs = space_stmt.executeQuery();
+
+        if (!rs.next())
+        {
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT(
+                    "No rows returned from space table query on table: " +
+                    schemaName + "." + tableName);
+            }
+        }
+
+        int[] ret_info = new int[5];
+        String conglomerate_name        = rs.getString(1);
+        for (int i = 0; i < 5; i++)
+        {
+            ret_info[i] = rs.getInt(i + 2);
+        }
+
+        if (rs.next())
+        {
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT(
+                    "More than one row returned from space query on table: " +
+                    schemaName + "." + tableName);
+            }
+        }
+
+        if (verbose)
+        {
+            System.out.println(
+                "Space information for " + schemaName + "." + tableName + ":");
+            System.out.println("isindex = " + ret_info[SPACE_INFO_IS_INDEX]);
+            System.out.println("num_alloc = " + ret_info[SPACE_INFO_NUM_ALLOC]);
+            System.out.println("num_free = " + ret_info[SPACE_INFO_NUM_FREE]);
+            System.out.println("page_size = " + ret_info[SPACE_INFO_PAGE_SIZE]);
+            System.out.println(
+                "estimspacesaving = " + ret_info[SPACE_INFO_ESTIMSPACESAVING]);
+        }
+
+        rs.close();
+
+        if (commit_xact)
+            conn.commit();
+
+        return(ret_info);
+    }
+
 }

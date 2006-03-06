@@ -70,8 +70,8 @@ public final class StoredRecordHeader
      * RECORD_OVERFLOW			- used to indicate the record has been 
      *                            overflowed, it will point to the overflow 
      *                            page and ID
-     * RECORD_HAS_FIRST_FIELD	- used to indicate that firstField is stored 
-     *                            will be stored.  When RECORD_OVERFLOW and 
+     * RECORD_HAS_FIRST_FIELD	- used to indicate that firstField is stored. 
+     *                            When RECORD_OVERFLOW and 
      *                            RECORD_HAS_FIRST_FIELD both are set, part of 
      *                            record is on the page, the record header 
      *                            also stores the overflow point to the next 

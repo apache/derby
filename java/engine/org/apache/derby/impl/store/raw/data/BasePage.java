@@ -1496,6 +1496,62 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 
 	}
 
+    /**
+     * Is this page/deleted row a candidate for immediate reclaim space.
+     * <p>
+     * Used by access methods after executing a delete on "slot_just_deleted"
+     * to ask whether a post commit should be queued to try to reclaim space
+     * after the delete commits.  
+     * <p>
+     * Will return true if the number of non-deleted rows on the page is
+     * <= "num_non_deleted_rows".  For instance 0 means schedule reclaim
+     * only if all rows are deleted, 1 if all rows but one are deleted.  
+     * <p>
+     * Will return true if the row just deleted is either a long row or long
+     * column.  In this case doing a reclaim space on the single row may
+     * reclaim multiple pages of free space, so better to do it now rather
+     * than wait for all rows on page to be deleted.  This case is to address
+     * the worst case scenario of all rows with long columns, but very short
+     * rows otherwise.  In this case there could be 1000's of rows on the 
+     * main page with many gigabytes of data on overflow pages in deleted space
+     * that would not be reclaimed until all rows on the page were deleted.
+     *
+	 * @return true if a reclaim space should be scheduled post commit on this
+     *         page, false otherwise.
+     *
+     * @param num_non_deleted_rows threshold number of non-deleted rows to
+     *                             schedule reclaim space.
+     * @param slot_just_deleted    row on page to check for long row/long column
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public boolean shouldReclaimSpace(
+    int     num_non_deleted_rows,
+    int     slot_just_deleted)
+        throws StandardException
+    {
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.ASSERT(isLatched());
+        }
+
+        boolean ret_val = false;
+
+        if (internalNonDeletedRecordCount() <= num_non_deleted_rows)
+        {
+            ret_val = true;
+        }
+        else 
+        {
+            if (!entireRecordOnPage(slot_just_deleted))
+            {
+                ret_val = true;
+            }
+        }
+
+        return(ret_val);
+    }
+
 	// no need to check for slot on page, call already checked
 	protected final boolean isDeletedOnPage(int slot)
 	{
