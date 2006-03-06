@@ -232,12 +232,12 @@ public final class TransactionResourceImpl
 	 * XAResource, which uses the xa_commit or xa_rollback interface as a 
 	 * safeguard. 
 	 */
-	protected void commit() throws StandardException
+	void commit() throws StandardException
 	{
 		lcc.userCommit();
 	}		
 
-	protected void rollback() throws StandardException
+	void rollback() throws StandardException
 	{
 		// lcc may be null if this is called in close.
 		if (lcc != null)
@@ -260,12 +260,12 @@ public final class TransactionResourceImpl
 	/**
 	 * Resolve: probably superfluous
 	 */
-	protected void clearLcc()
+	void clearLcc()
 	{
 		lcc = null;
 	}
 
-	protected final void setupContextStack()
+	final void setupContextStack()
 	{
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(cm != null, "setting up null context manager stack");
@@ -274,7 +274,7 @@ public final class TransactionResourceImpl
 			csf.setCurrentContextManager(cm);
 	}
 
-	protected final void restoreContextStack() {
+	final void restoreContextStack() {
 
 		if ((csf == null) || (cm == null))
 			return;
@@ -288,7 +288,7 @@ public final class TransactionResourceImpl
 	/*
 	 * clean up the error and wrap the real exception in some SQLException.
 	 */
-	protected final SQLException handleException(Throwable thrownException,
+	final SQLException handleException(Throwable thrownException,
 									   boolean autoCommit,	
 									   boolean rollbackOnAutoCommit)
 			throws SQLException 
@@ -415,7 +415,7 @@ public final class TransactionResourceImpl
 		return  username;
 	}
 
-	public boolean cleanupOnError(Throwable e)
+	boolean cleanupOnError(Throwable e)
 	{
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT(cm != null, "cannot cleanup on error with null context manager");
@@ -423,7 +423,7 @@ public final class TransactionResourceImpl
 		return cm.cleanupOnError(e);
 	}
 
-	public boolean isIdle()
+	boolean isIdle()
 	{
 		// If no lcc, there is no transaction.
 		return (lcc == null || lcc.getTransactionExecute().isIdle());

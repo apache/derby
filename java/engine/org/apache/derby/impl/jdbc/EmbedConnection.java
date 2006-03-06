@@ -944,7 +944,7 @@ public class EmbedConnection implements EngineConnection
 	//
 	// NOTE: This method is not part of JDBC specs.
 	//
-    private void close(Exception e) throws SQLException {
+    private void close(StandardException e) throws SQLException {
 		
 		synchronized(getConnectionSynchronization())
 		{
@@ -1287,7 +1287,7 @@ public class EmbedConnection implements EngineConnection
 
 	//EmbedConnection30 overrides this method so it can release the savepoints array if
 	//the exception severity is transaction level
-	public SQLException handleException(Throwable thrownException)
+	SQLException handleException(Throwable thrownException)
 			throws SQLException
 	{
 		/*
