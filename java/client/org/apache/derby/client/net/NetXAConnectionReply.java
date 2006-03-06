@@ -81,7 +81,7 @@ public class NetXAConnectionReply extends NetResultSetReply {
         endOfSameIdChainData();
 
         NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
-        if (synctype == NetXAResource.XARETVAL_XARDONLY) { // xaretval of read-only, make sure flag agrees
+        if (synctype == XAResource.XA_RDONLY) { // xaretval of read-only, make sure flag agrees
             callInfo.setReadOnlyTransactionFlag(true);
         } else { // xaretval NOT read-only, make sure flag agrees
             callInfo.setReadOnlyTransactionFlag(false);
