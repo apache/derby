@@ -209,7 +209,7 @@ abstract class BaseMonitor
 			dontGC.notifyAll();
 		}
 
-		contextService.stop();
+		ContextService.stop();
 		Monitor.clearMonitor();
 	}
 
