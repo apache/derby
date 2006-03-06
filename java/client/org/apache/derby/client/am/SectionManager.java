@@ -145,7 +145,7 @@ public class SectionManager {
     // A positioned update section must come from the same package as its query section.
     Section getPositionedUpdateSection(Section querySection) throws SqlException {
         Connection connection = agent_.connection_;
-        return getDynamicSection(connection.resultSetHoldability_);
+        return getDynamicSection(connection.holdability());
     }
 
     // Get a section for a jdbc 1 positioned update/delete for the corresponding query.

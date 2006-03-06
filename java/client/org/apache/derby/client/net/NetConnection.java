@@ -267,9 +267,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 securityMechanism_ = ds.getSecurityMechanism();
             }
             resetConnectionAtFirstSql_ = false;
-            if (resultSetHoldability_ == 0) {
-                ((org.apache.derby.client.net.NetDatabaseMetaData) databaseMetaData_).setDefaultResultSetHoldability();
-            }
+
         }
         if (password != null) {
             deferredResetPassword_ = null;
@@ -319,10 +317,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 securityMechanism_ = ds.getSecurityMechanism();
             }
             resetConnectionAtFirstSql_ = false;
-
-            if (resultSetHoldability_ == 0) {
-                ((org.apache.derby.client.net.NetDatabaseMetaData) databaseMetaData_).setDefaultResultSetHoldability();
-            }
         }
         // properties prddta_ and crrtkn_ will be initialized by
         // calls to constructPrddta() and constructCrrtkn()
@@ -1375,7 +1369,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     // Allow local COMMIT/ROLLBACK only if we are not in an XA transaction
     protected boolean allowLocalCommitRollback_() throws org.apache.derby.client.am.SqlException {
        
-    	if (xaState_ == XA_T0_NOT_ASSOCIATED) {
+    	if (getXAState() == XA_T0_NOT_ASSOCIATED) {
             return true;
         }
         return false;

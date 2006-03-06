@@ -52,7 +52,13 @@ public abstract class Connection implements java.sql.Connection,
     public transient String user_;
     public boolean retrieveMessageText_;
     protected boolean jdbcReadOnly_;
-    public int resultSetHoldability_;
+    /**
+     * Holdabilty for created statements.
+     * Only access through the holdability method
+     * to ensure the correct value is returned for an
+     * XA connection.
+     */
+    private int holdability = ClientDataSource.HOLD_CURSORS_OVER_COMMIT;
     public String databaseName_;
 
     // Holds the Product-Specific Identifier which specifies
@@ -107,7 +113,7 @@ public abstract class Connection implements java.sql.Connection,
     //public static final int XA_RECOVER = 14;
 
 
-    protected int xaState_ = XA_T0_NOT_ASSOCIATED;
+    private int xaState_ = XA_T0_NOT_ASSOCIATED;
 
     // XA Host Type
     public int xaHostVersion_ = 0;
@@ -338,7 +344,7 @@ public abstract class Connection implements java.sql.Connection,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "createStatement");
         }
-        Statement s = createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, resultSetHoldability_);
+        Statement s = createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, holdability());
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "createStatement", s);
         }
@@ -352,7 +358,7 @@ public abstract class Connection implements java.sql.Connection,
         PreparedStatement ps = prepareStatementX(sql,
                 java.sql.ResultSet.TYPE_FORWARD_ONLY,
                 java.sql.ResultSet.CONCUR_READ_ONLY,
-                resultSetHoldability_,
+                holdability(),
                 java.sql.Statement.NO_GENERATED_KEYS,
                 null);
         if (agent_.loggingEnabled()) {
@@ -383,7 +389,7 @@ public abstract class Connection implements java.sql.Connection,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "prepareCall", sql);
         }
-        CallableStatement cs = prepareCallX(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, resultSetHoldability_);
+        CallableStatement cs = prepareCallX(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, holdability());
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "prepareCall", cs);
         }
@@ -391,7 +397,7 @@ public abstract class Connection implements java.sql.Connection,
     }
 
     synchronized PreparedStatement prepareDynamicCatalogQuery(String sql) throws SqlException {
-        PreparedStatement ps = newPreparedStatement_(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, resultSetHoldability_, java.sql.Statement.NO_GENERATED_KEYS, null);
+        PreparedStatement ps = newPreparedStatement_(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, holdability(), java.sql.Statement.NO_GENERATED_KEYS, null);
         ps.isCatalogQuery_ = true;
         ps.prepare();
         openStatements_.add(ps);
@@ -837,7 +843,7 @@ public abstract class Connection implements java.sql.Connection,
             setTransactionIsolationStmt =
                     createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
                             java.sql.ResultSet.CONCUR_READ_ONLY,
-                            resultSetHoldability_);
+                            holdability());
         }
         setTransactionIsolationStmt.executeUpdate("SET CURRENT ISOLATION = " + levelString);
 
@@ -926,7 +932,7 @@ public abstract class Connection implements java.sql.Connection,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "createStatement", resultSetType, resultSetConcurrency);
         }
-        Statement s = createStatementX(resultSetType, resultSetConcurrency, resultSetHoldability_);
+        Statement s = createStatementX(resultSetType, resultSetConcurrency, holdability());
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "createStatement", s);
         }
@@ -942,7 +948,7 @@ public abstract class Connection implements java.sql.Connection,
         PreparedStatement ps = prepareStatementX(sql,
                 resultSetType,
                 resultSetConcurrency,
-                resultSetHoldability_,
+                holdability(),
                 java.sql.Statement.NO_GENERATED_KEYS,
                 null);
         if (agent_.loggingEnabled()) {
@@ -957,7 +963,7 @@ public abstract class Connection implements java.sql.Connection,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "prepareCall", sql, resultSetType, resultSetConcurrency);
         }
-        CallableStatement cs = prepareCallX(sql, resultSetType, resultSetConcurrency, resultSetHoldability_);
+        CallableStatement cs = prepareCallX(sql, resultSetType, resultSetConcurrency, holdability());
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "prepareCall", cs);
         }
@@ -967,7 +973,7 @@ public abstract class Connection implements java.sql.Connection,
     synchronized public CallableStatement prepareMessageProc(String sql) throws SqlException {
         checkForClosedConnection();
 
-        CallableStatement cs = prepareCallX(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, resultSetHoldability_);
+        CallableStatement cs = prepareCallX(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, holdability());
         return cs;
     }
 
@@ -1019,15 +1025,15 @@ public abstract class Connection implements java.sql.Connection,
             agent_.logWriter_.traceEntry(this, "setHoldability", holdability);
         }
         checkForClosedConnection();
-        resultSetHoldability_ = holdability;
+        this.holdability = holdability;
     }
 
     public int getHoldability() throws SqlException {
         checkForClosedConnection();
         if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceExit(this, "getHoldability", resultSetHoldability_);
+            agent_.logWriter_.traceExit(this, "getHoldability", holdability());
         }
-        return resultSetHoldability_;
+        return holdability();
     }
 
     public int dncGeneratedSavepointId_;
@@ -1074,7 +1080,7 @@ public abstract class Connection implements java.sql.Connection,
         try {
             stmt = (Statement) createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
                     java.sql.ResultSet.CONCUR_READ_ONLY,
-                    resultSetHoldability_);
+                    holdability());
             String savepointName;
             try {
                 savepointName = savepoint.getSavepointName();
@@ -1126,7 +1132,7 @@ public abstract class Connection implements java.sql.Connection,
         try {
             stmt = createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
                     java.sql.ResultSet.CONCUR_READ_ONLY,
-                    resultSetHoldability_);
+                    holdability());
             String savepointName;
             try {
                 savepointName = ((Savepoint) savepoint).getSavepointName();
@@ -1177,7 +1183,7 @@ public abstract class Connection implements java.sql.Connection,
         try {
             stmt = (Statement) createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
                     java.sql.ResultSet.CONCUR_READ_ONLY,
-                    resultSetHoldability_);
+                    holdability());
             String savepointName;
             try {
                 savepointName = ((Savepoint) savepoint).getSavepointName();
@@ -1322,7 +1328,7 @@ public abstract class Connection implements java.sql.Connection,
         PreparedStatement ps = prepareStatementX(sql,
                 java.sql.ResultSet.TYPE_FORWARD_ONLY,
                 java.sql.ResultSet.CONCUR_READ_ONLY,
-                resultSetHoldability_,
+                holdability(),
                 autoGeneratedKeys,
                 null);
         if (agent_.loggingEnabled()) {
@@ -1346,7 +1352,7 @@ public abstract class Connection implements java.sql.Connection,
         PreparedStatement ps = prepareStatementX(sql,
                 java.sql.ResultSet.TYPE_FORWARD_ONLY,
                 java.sql.ResultSet.CONCUR_READ_ONLY,
-                resultSetHoldability_,
+                holdability(),
                 java.sql.Statement.RETURN_GENERATED_KEYS,
                 columnNames);
         if (agent_.loggingEnabled()) {
@@ -1644,5 +1650,16 @@ public abstract class Connection implements java.sql.Connection,
     public void setInUnitOfWork(boolean inUnitOfWork) {
         inUnitOfWork_ = inUnitOfWork;
     }
-
+    /**
+     * Return the holdabilty for the Connection. Matches the
+     * embedded driver in the restriction that while in a
+     * global (XA) transaction the holdability is CLOSE_CURSORS_AT_COMMIT.
+     * Otherwise return the holdability set by the user.
+     */
+    final int holdability()
+    {
+        if (this.isXAConnection_ && this.xaState_ == XA_T1_ASSOCIATED)
+            return ClientDataSource.CLOSE_CURSORS_AT_COMMIT;
+        return holdability;
+    }
 }

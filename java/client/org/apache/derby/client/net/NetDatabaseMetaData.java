@@ -62,16 +62,6 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
     // if (productLevel_.greaterThanOrEqualTo(11,1,0))
     //  supportsTheBestThingEver = true
     protected void computeFeatureSet_() {
-        if (connection_.resultSetHoldability_ == 0)  // property not set
-        {
-            setDefaultResultSetHoldability();
-        }
 
     }
-
-
-    public void setDefaultResultSetHoldability() {
-        connection_.resultSetHoldability_ = org.apache.derby.jdbc.ClientDataSource.HOLD_CURSORS_OVER_COMMIT;
-    }
-
 }
