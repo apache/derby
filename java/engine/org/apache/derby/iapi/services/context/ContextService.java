@@ -171,7 +171,13 @@ public final class ContextService //OLD extends Hashtable
 
 
 	/**
-	 * Get current Context Manager
+	 * Get current Context Manager linked to the current Thread.
+     * See setCurrentContextManager for details.
+     * Note that this call can be expensive and is only
+     * intended to be used in "stateless" situations.
+     * Ideally code has a reference to the correct
+     * ContextManager from another Object, such as a pushed Context.
+     * 
 	 * @return ContextManager current Context Manager
 	 */
 	public ContextManager getCurrentContextManager() {
@@ -218,6 +224,11 @@ public final class ContextService //OLD extends Hashtable
 		return null;
 */	}
 
+    /**
+     * Break the link between the current Thread and the passed
+     * in ContextManager. Called in a pair with setCurrentContextManager,
+     * see that method for details.
+     */
 	public void resetCurrentContextManager(ContextManager cm) {
 		ThreadLocal tcl = threadContextList;
 
@@ -348,6 +359,28 @@ public final class ContextService //OLD extends Hashtable
 	}
 
 	/**
+     * Link the current thread to the passed in Contextmanager
+     * so that a subsequent call to getCurrentContextManager by
+     * the current Thread will return cm.
+     * ContextManagers are tied to a Thread while the thread
+     * is executing Derby code. For example on most JDBC method
+     * calls the ContextManager backing the Connection object
+     * is tied to the current Thread at the start of the method
+     * and reset at the end of the method. Once the Thread
+     * has completed its Derby work the method resetCurrentContextManager
+     * must be called with the same ContextManager to break the link.
+     * Note that a subsquent use of the ContextManager may be on
+     * a separate Thread, the Thread is only linked to the ContextManager
+     * between the setCurrentContextManager and resetCurrentContextManager calls.
+     * <BR>
+     * ContextService supports nesting of calls by a single Thread, either
+     * with the same ContextManager or a different ContextManager.
+     * <UL>
+     * <LI>The same ContextManager would be pushed during a nested JDBC call in
+     * a procedure or function.
+     * <LI>A different ContextManager would be pushed during a call on
+     * a different embedded JDBC Connection in a procedure or function.
+     * </UL>
 	 */
 	public void setCurrentContextManager(ContextManager cm) {
 
