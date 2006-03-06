@@ -141,9 +141,10 @@ public class PropertyUtil {
 	}
 	
 	/**
-		Find a system wide property. Search order is
+		Find a system wide property.
 
 		@return the value of the property or null if it does not exist.
+		@see #getSystemProperty(String,String)
 	*/
 	public static String getSystemProperty(String key) {
 		return PropertyUtil.getSystemProperty(key, (String) null);

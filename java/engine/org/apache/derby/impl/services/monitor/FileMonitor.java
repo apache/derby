@@ -81,7 +81,7 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 	/**
 		SECURITY WARNING.
 
-		This method is run in a privledged block in a Java 2 environment.
+		This method is run in a privileged block in a Java 2 environment.
 
 		Set the system home directory.  Returns false if it couldn't for
 		some reason.
@@ -142,11 +142,11 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 	/**
 		SECURITY WARNING.
 
-		This method is run in a privledged block in a Java 2 environment.
+		This method is run in a privileged block in a Java 2 environment.
 
 		Return a property from the JVM's system set.
-		In a Java2 environment this will be executed as a privliged block
-		if and only if the property starts with db2j.
+		In a Java2 environment this will be executed as a privileged block
+		if and only if the property starts with 'derby.'.
 		If a SecurityException occurs, null is returned.
 	*/
 	private String PBgetJVMProperty(String key) {
