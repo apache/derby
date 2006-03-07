@@ -63,7 +63,7 @@ public class XATestUtil {
                 "create view XATESTUTIL.global_xactTable as " +
                 "select  cast(global_xid as char(2)) as gxid," +
                 " status, " +
-                " case when first_instant is NULL then 'NULL' else 'false' end as readOnly, " +
+                " CAST (case when first_instant is NULL then 'NULL' else 'false' end AS VARCHAR(8)) as readOnly, " +
                 " cast (username as char(10)) as username, type " +
                 " from new org.apache.derby.diag.TransactionTable() As transaction_table");
         s.close();
