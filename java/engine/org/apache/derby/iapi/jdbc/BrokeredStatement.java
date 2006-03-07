@@ -44,12 +44,12 @@ public class BrokeredStatement implements Statement
 		when calling a check method. This will result in the correct exception
 		being thrown if the statement is already closed.
 	*/
-	protected final BrokeredStatementControl control;
+	final BrokeredStatementControl control;
 
-	protected final int jdbcLevel;
-	protected final int resultSetType;
-	protected final int resultSetConcurrency;
-	protected final int resultSetHoldability;
+	final int jdbcLevel;
+	final int resultSetType;
+	final int resultSetConcurrency;
+	final int resultSetHoldability;
 
 	/**
 		My state
@@ -57,7 +57,7 @@ public class BrokeredStatement implements Statement
 	private String cursorName;
 	private Boolean escapeProcessing;
 
-    protected BrokeredStatement(BrokeredStatementControl control, int jdbcLevel) throws SQLException
+    BrokeredStatement(BrokeredStatementControl control, int jdbcLevel) throws SQLException
     {
 		this.control = control;
 		this.jdbcLevel = jdbcLevel;
@@ -497,7 +497,7 @@ public class BrokeredStatement implements Statement
 		return newStatement;
 	}
 
-	protected void setStatementState(Statement oldStatement, Statement newStatement) throws SQLException {
+	void setStatementState(Statement oldStatement, Statement newStatement) throws SQLException {
 		if (cursorName != null)
 			newStatement.setCursorName(cursorName);
 		if (escapeProcessing != null)
@@ -513,8 +513,18 @@ public class BrokeredStatement implements Statement
 	public Statement getStatement() throws SQLException {
 		return control.getRealStatement();
 	}
-	protected final ResultSet wrapResultSet(ResultSet rs) {
-		return control.wrapResultSet(rs);
+    
+    /**
+     * Provide the control access to every ResultSet we return.
+     * If required the control can wrap the ResultSet, but
+     * it (the control) must ensure a underlying ResultSet is
+     * only wrapped once, if say java.sql.Statement.getResultSet
+     * is returned twice.
+     * 
+     * @param rs ResultSet being returned, can be null.
+     */
+	final ResultSet wrapResultSet(ResultSet rs) {
+		return control.wrapResultSet(this, rs);
 	}
 
 	/**
@@ -522,7 +532,7 @@ public class BrokeredStatement implements Statement
 		Obtained indirectly to ensure that the correct exception is
 		thrown if the Statement has been closed.
 	*/
-	protected final BrokeredStatementControl controlCheck() throws SQLException
+	final BrokeredStatementControl controlCheck() throws SQLException
 	{
 		// simplest method that will throw an exception if the Statement is closed
 		getStatement().getConnection();

@@ -26,6 +26,7 @@ import org.apache.derby.iapi.jdbc.BrokeredStatement;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.jdbc.BrokeredCallableStatement;
 import org.apache.derby.impl.jdbc.EmbedConnection;
+import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.jdbc.EmbedStatement;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
 
@@ -182,7 +183,14 @@ final class XAStatementControl implements BrokeredStatementControl {
 		return realCallableStatement;
 	}
 
-	public ResultSet wrapResultSet(ResultSet rs) {
+    /**
+     * Don't need to wrap the ResultSet but do need to update its
+     * application Statement reference to be the one the application
+     * used to create the ResultSet.
+     */
+	public ResultSet wrapResultSet(Statement s, ResultSet rs) {
+        if (rs != null)
+            ((EmbedResultSet) rs).setApplicationStatement(s);
 		return rs;
 	}
 
