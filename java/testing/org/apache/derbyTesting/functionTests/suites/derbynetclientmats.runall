@@ -1,2 +1,3 @@
 jdbcapi/xaSimplePositive.sql
 jdbcapi/xaStateTran.sql
+jdbcapi/XATest.java
