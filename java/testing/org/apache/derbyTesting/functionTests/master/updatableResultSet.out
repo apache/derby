@@ -2892,11 +2892,9 @@ Got expected exception: This method cannot be invoked unless the cursor is posit
 Positive test 41 - try to insertRow from all posible positions
 Positive test 42 - InsertRow leaving a nullable columns = NULL
 Positive and negative tests 43 - Commit while on insertRow
-This exception is expected with jdk 1.3
-null
+This exception is expected with jdk 1.3: holdability not supported with jdk131 /ibm131 based jvms
 Positive test 43 - Commit while on insertRow with holdable cursor
-This exception is expected with jdk 1.3
-null
+This exception is expected with jdk 1.3: holdability not supported with jdk131 /ibm131 based jvms
 Negative test 43 - Commit while on insertRow with not holdable cursor
 Negative test 44 - Closed RS
 Negative test 44.a - try insertRow on closed RS

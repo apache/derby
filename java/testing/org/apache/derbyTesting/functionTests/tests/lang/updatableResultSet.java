@@ -2618,8 +2618,13 @@ public class updatableResultSet {
 			try {
 				conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
 			} catch (Throwable e) {
-				System.out.println("This exception is expected with jdk 1.3\n" +
-						e.getMessage());
+				if (JVMInfo.JDK_ID <= 2) {
+					System.out.println("This exception is expected with jdk 1.3: " +
+							"holdability not supported with jdk131 /ibm131 based jvms");
+
+				} else {
+					System.out.println("Got unexpected exception: " + e.getMessage());
+				}
 			}
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			System.out.println("Positive test 43 - Commit while on insertRow " +
@@ -2640,8 +2645,12 @@ public class updatableResultSet {
 			try {
 				conn.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
 			} catch (Throwable e) {
-				System.out.println("This exception is expected with jdk 1.3\n" +
-						e.getMessage());
+				if (JVMInfo.JDK_ID <= 2) {
+					System.out.println("This exception is expected with jdk 1.3: " +
+							"holdability not supported with jdk131 /ibm131 based jvms");
+				} else {
+					System.out.println("Got unexpected exception: " + e.getMessage());
+				}
 			}
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			System.out.println("Negative test 43 - Commit while on insertRow " +
