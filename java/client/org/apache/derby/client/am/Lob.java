@@ -66,7 +66,7 @@ public abstract class Lob implements UnitOfWorkListener {
     //-----------------------event callback methods-------------------------------
 
     public void listenToUnitOfWork() {
-        agent_.connection_.CommitAndRollbackListeners_.add(this);
+        agent_.connection_.CommitAndRollbackListeners_.put(this,null);
     }
 
     public void completeLocalCommit(java.util.Iterator listenerIterator) {

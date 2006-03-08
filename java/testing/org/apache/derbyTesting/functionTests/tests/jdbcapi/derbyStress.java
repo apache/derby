@@ -88,9 +88,6 @@ public class derbyStress {
 	// user (DERBY-210)
 	private static void prepStmtTest(Connection conn, int numRows, int numPreparedStmts) throws Exception
 	{
-		// Don't run under DerbyNetClient until DERBY-210 is fixed
-		if (TestUtil.isDerbyNetClientFramework()) return;
-
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		conn.setAutoCommit(false);

@@ -2320,13 +2320,22 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         return connection_;
     }
 
-    // Only called on positioned upate statements
+    // This was being called only on positioned update statements. When working 
+    // on DERBY-210, it was found that result sets of all statements (not just
+    // positioned update statements) get added to the table. So, this is called
+    // for all statements. Otherwise, this will cause memory leaks when statements
+    // are not explicitly closed in the application. 
     void resetCursorNameAndRemoveFromWhereCurrentOfMappings() {
         // Remove client/server cursorName -> ResultSet mapping from the hashtable.
         // If Statement.close() is called before ResultSet.close(), then statement_.section is null.
         if (section_ != null) {
             agent_.sectionManager_.removeCursorNameToResultSetMapping(cursorName_,
                     section_.getServerCursorNameForPositionedUpdate());
+
+            // remove resultset mapping for other cursors (other than positioned
+            // update statements) - DERBY-210
+            agent_.sectionManager_.removeCursorNameToResultSetMapping(cursorName_,
+                    section_.getServerCursorName());
 
             // Remove client and server cursorName -> QuerySection mapping from the hashtable
             // if one exists
