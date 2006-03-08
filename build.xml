@@ -301,6 +301,7 @@
   
   <target name="drda" depends="engine">
     <ant dir="${derby.drda.src.dir}"/>
+    <ant dir="${derby.tools.src.dir}" target="tools_run"/>
   </target>
 
   <target name="client" depends="engine,shared">
@@ -695,8 +696,8 @@
 <!--                               Jar targets                           -->
 <!-- =================================================================== -->
 
-  <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbywar,derbylocalejars,derbytestingjar"/>
-  <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbywar,derbylocalejars,derbytestingjar"/>
+  <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"/>
+  <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"/>
 
   <target name="initjars" depends="setsanityname,getsvnversion">
     <property name="derby.jar.dir" value="${basedir}/jars/${sanity.name}"/>
@@ -951,16 +952,11 @@
       <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
     </copy>
 
-    <manifest file="${derby.jar.dir}/lists/smftools.mf">
-      <attribute name="Main-Class" value="org.apache.derby.iapi.tools.run"/>
-    </manifest> 
- 	
     <delete file="${derby.jar.dir}/derbytools.jar"/>
     <jar destfile="${derby.jar.dir}/derbytools.jar"
          basedir="${out.dir}"
          includesfile="${derby.jar.dir}/lists/derbytools.list"
          compress="true"
-         manifest="${derby.jar.dir}/lists/smftools.mf"
          filesonly="true"/>
     <jar destfile="${derby.jar.dir}/derbytools.jar"
          compress="true"
@@ -1080,16 +1076,47 @@
     	 manifest="${derby.jar.dir}/lists/smfclient.mf">
       <fileset dir="${out.dir}"
                includes="org/apache/derby/client/**,
-			org/apache/derby/client/jdbc/Client**,org/apache/derby/jdbc/Client**,org/apache/derby/iapi/services/info/**,
+		 	 org/apache/derby/client/jdbc/Client**,
+                         org/apache/derby/jdbc/Client**,
+                         org/apache/derby/iapi/services/info/**,
                          org/apache/derby/shared/**,
                          org/apache/derby/info/dnc.properties,
                          org/apache/derby/loc/clientmessages*.properties"
-               excludes="org/apache/derby/shared/common/reference/**"/>
+               excludes="org/apache/derby/iapi/services/info/JVMInfo.class,
+                         org/apache/derby/shared/common/reference/**"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>
   </target>
 
+<!-- - - - - - - - - - - - - - derbyrun.jar target  - - - - - - - - - -->
+   
+  <target name="derbyrunjar" depends="setsanityname,initjars">
+
+    <echo message="Beginning derbyrun.jar build"/>
+
+    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
+    <copy todir="${derby.jar.dir}/lists/META-INF">
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
+    </copy>
+    
+    <manifest file="${derby.jar.dir}/lists/smfcmd.mf">
+      <attribute name="Main-Class" value="org.apache.derby.iapi.tools.run"/>
+      <attribute name="Class-Path" value="derby.jar derbyclient.jar derbytools.jar derbynet.jar"/>
+    </manifest> 
+ 	
+    <jar destfile="${derby.jar.dir}/derbyrun.jar"
+         compress="true"
+         filesonly="true"
+         update="true"
+    	 manifest="${derby.jar.dir}/lists/smfcmd.mf">
+      <fileset dir="${out.dir}"
+               includes="org/apache/derby/iapi/tools/**"/>
+      <fileset dir="${derby.jar.dir}/lists"
+               includes="META-INF/**"/>
+    </jar>
+
+  </target>
 <!-- - - - - - - - - - - - - - derby.war target - - - - - - - - - - - -->
 
  <target name="derbywar" depends="initjars">

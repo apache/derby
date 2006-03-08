@@ -46,6 +46,9 @@
     <ant dir="${derby.tools.dir}/loc"/>
   </target>
 
+  <target name="tools_run">
+    <ant dir="${derby.tools.dir}/iapi/tools" target="compile_tools_iapi_run"/>
+  </target>
 
 <!--             ============= End Targets ==============                -->
 

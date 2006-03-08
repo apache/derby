@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.tools.iapi.run
+   Derby - Class org.apache.derby.iapi.tools.run
 
    Copyright 2006 The Apache Software Foundation or its licensors, as applicable.
 
@@ -21,6 +21,7 @@
 package org.apache.derby.iapi.tools;
 
 import java.io.IOException;
+import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.tools.dblook;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.sysinfo;
@@ -30,9 +31,10 @@ import org.apache.derby.iapi.tools.i18n.LocalizedResource;
   The run class facilitates running the various Derby utilities with the
   java -jar command. For example:
 
-  java -jar derbytools.jar ij
-  java -jar derbytools.jar sysinfo
-  java -jar derbytools.jar dblook
+  java -jar derbyrun.jar ij
+  java -jar derbyrun.jar sysinfo
+  java -jar derbyrun.jar dblook
+  java -jar derbyrun.jar NetworkServerControl
 */
 public class run {
 
@@ -49,6 +51,8 @@ public class run {
           sysinfo.main(trimArgs(args));
       } else if (args[0].equals("dblook")) {
           dblook.main(trimArgs(args));
+      } else if (args[0].equals("NetworkServerControl")) {
+          NetworkServerControl.main(trimArgs(args));
       } else printUsage();
   }
 
