@@ -30,6 +30,7 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.memory.LowMemory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -91,6 +92,21 @@ public class EmbedConnection implements EngineConnection
 {
 
 	private static final StandardException exceptionClose = StandardException.closeException();
+    
+    /**
+     * Static exception to be thrown when a Connection request can not
+     * be fulfilled due to lack of memory. A static exception as the lack
+     * of memory would most likely cause another OutOfMemoryException and
+     * if there is not enough memory to create the OOME exception then something
+     * like the VM dying could occur. Simpler just to throw a static.
+     */
+    public static final SQLException NO_MEM =
+        Util.generateCsSQLException(SQLState.LOGIN_FAILED, "java.lang.OutOfMemoryError");
+    
+    /**
+     * Low memory state object for connection requests.
+     */
+    public static final LowMemory memoryState = new LowMemory();
 
 	//////////////////////////////////////////////////////////
 	// OBJECTS SHARED ACROSS CONNECTION NESTING
@@ -250,11 +266,26 @@ public class EmbedConnection implements EngineConnection
 				throw tr.shutdownDatabaseException();
 			}
 
-		} catch (Throwable t) {
+		}
+        catch (OutOfMemoryError noMemory)
+		{
+			//System.out.println("freeA");
+			restoreContextStack();
+			tr.lcc = null;
+			tr.cm = null;
+			
+			//System.out.println("free");
+			//System.out.println(Runtime.getRuntime().freeMemory());
+            memoryState.setLowMemory();
+			
+			//noMemory.printStackTrace();
+			// throw Util.generateCsSQLException(SQLState.LOGIN_FAILED, noMemory.getMessage(), noMemory);
+			throw NO_MEM;
+		}
+		catch (Throwable t) {
 			throw handleException(t);
 		} finally {
 			restoreContextStack();
-			info = null;
 		}
 	}
 

@@ -88,6 +88,10 @@ public class ConnectionHandling {
         int ok = 0;
         for (int i = 0; i < 500; i++)
         {
+            // Sleep for 10 secs as we know the implementation
+            // of the low meory watermark resets after 5 seconds.
+            if (i == 300)
+                Thread.sleep(10000L);
             try {
                   Connection c = DriverManager.getConnection("jdbc:derby:wombat", p);
                   list.add(c);

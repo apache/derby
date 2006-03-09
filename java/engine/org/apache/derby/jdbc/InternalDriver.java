@@ -1,3 +1,4 @@
+
 /*
 
    Derby - Class org.apache.derby.jdbc.InternalDriver
@@ -55,7 +56,7 @@ import java.util.StringTokenizer;
 */
 
 public abstract class InternalDriver implements ModuleControl {
-
+    
 	private static final Object syncMe = new Object();
 	private static InternalDriver activeDriver;
 
@@ -113,8 +114,16 @@ public abstract class InternalDriver implements ModuleControl {
 		 throws SQLException 
 	{
 		if (!acceptsURL(url)) { return null; }
-
-			
+		
+        /**
+         * If we are below the low memory watermark for obtaining
+         * a connection, then don't even try. Just throw an exception.
+         */
+		if (EmbedConnection.memoryState.isLowMemory())
+		{
+			throw EmbedConnection.NO_MEM;
+		}
+        			
 		/*
 		** A url "jdbc:default:connection" means get the current
 		** connection.  From within a method called from JSQL, the
@@ -142,9 +151,12 @@ public abstract class InternalDriver implements ModuleControl {
 
 		// convert the ;name=value attributes in the URL into
 		// properties.
-		FormatableProperties finfo = getAttributes(url, info);
-		info = null; // ensure we don't use this reference directly again.
+		FormatableProperties finfo = null;
+        
 		try {
+            
+            finfo = getAttributes(url, info);
+            info = null; // ensure we don't use this reference directly again.
 
 			/*
 			** A property "shutdown=true" means shut the system or database down
@@ -194,9 +206,15 @@ public abstract class InternalDriver implements ModuleControl {
 
 			return conn;
 		}
+		catch (OutOfMemoryError noMemory)
+		{
+			EmbedConnection.memoryState.setLowMemory();
+			throw EmbedConnection.NO_MEM;
+		}
 		finally {
 			// break any link with the user's Properties set.
-			finfo.clearDefaults();
+            if (finfo != null)
+			    finfo.clearDefaults();
 		}
 	}
 
