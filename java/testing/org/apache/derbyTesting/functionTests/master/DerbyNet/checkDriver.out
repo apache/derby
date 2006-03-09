@@ -5,3 +5,10 @@ checking acceptsURL(jdbc:derby:wombat;create=true)
 checking acceptsURL(jdbc:derby://localhost:1527/wombat;create=true)
 checking acceptsURL(jdbc:derby:net://localhost:1527/wombat;create=true)
 checking acceptsURL(jdbc:db2j:wombat;create=true)
+START testDbNameWithSpaces ...
+Connection info for connect(jdbc:derby:net://localhost:1527/db name with spaces;create=true, {user=tester, password=testpass})
+getURL() = jdbc:derby:net://localhost:1527/db name with spaces;create=true
+getUserName() = tester
+CURRENT SCHEMA = TESTER
+PASSED:Connection Successful with url: jdbc:derby:net://localhost:1527/db name with spaces;create=true
+testDbNameWithSpaces PASSED - Database created successfully

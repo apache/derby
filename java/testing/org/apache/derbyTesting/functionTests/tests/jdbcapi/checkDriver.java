@@ -62,6 +62,15 @@ public class checkDriver {
 	private static String CLIENT_URL_WITH_SINGLE_QUOTES2 = 
 		"jdbc:derby://localhost:1527/'wombat';create=true";
 	
+	// DERBY-618 - Database name with spaces
+	private static String DB_NAME_WITH_SPACES = "db name with spaces";
+	private static String EMBEDDED_URL_WITH_SPACES = "jdbc:derby:" + 
+										DB_NAME_WITH_SPACES + ";create=true";
+	private static String CLIENT_URL_WITH_SPACES =
+		"jdbc:derby://localhost:1527/" + DB_NAME_WITH_SPACES + ";create=true";
+	private static String JCC_URL_WITH_SPACES =
+		"jdbc:derby:net://localhost:1527/" + DB_NAME_WITH_SPACES + ";create=true";
+	
 	// URLS to check.  New urls need to also be added to the acceptsUrl table
 	private static String[] urls = new String[]
 	{
@@ -126,6 +135,7 @@ public class checkDriver {
 			testEmbeddedAttributes(driver);
 			testClientAttributes(driver);
 			doClientURLTest(driver);
+			testDbNameWithSpaces(driver);
 		}
 		catch (SQLException se)
 		{
@@ -371,6 +381,53 @@ public class checkDriver {
 			}
 		}
 	}	
+	
+	/**
+	 * Tests URL with spaces in database name to check create and connect works. 
+	 * (DERBY-618). Make sure that the specified database gets created. We need 
+	 * to check this because even without the patch for DERBY-618, no exception
+	 * gets thrown when we try to connect to a database name with spaces. 
+	 * Instead, client driver extracts the database name as the string before 
+	 * the first occurence of space separator. Hence the database which gets 
+	 * created is wrong. e.g, if we specified database name as 
+	 * "db name with spaces", the database that got created by client driver 
+	 * was "db", which was wrong. The URL returned by call to 
+	 * conn.getMetaData().getURL() was also wrong.      
+	 * 
+	 * @param driver
+	 * @throws SQLException
+	 */
+	private static void testDbNameWithSpaces(Driver driver) throws SQLException {
+		System.out.println("START testDbNameWithSpaces ...");
+		
+		Connection conn = null;
+		Properties info = null;
+		String url = null;
+		
+		if(TestUtil.isEmbeddedFramework())
+			url = EMBEDDED_URL_WITH_SPACES;
+		else if(TestUtil.isDerbyNetClientFramework()) 
+			url = CLIENT_URL_WITH_SPACES;
+		else if(TestUtil.isJCCFramework()) {
+			url = JCC_URL_WITH_SPACES;
+			// JCC requires user and password
+			info =  new Properties();
+			info.put("user", "tester");
+			info.put("password", "testpass");
+		}
+		
+		conn = testConnect(driver, url, info);
+		if(conn != null)
+			System.out.println("PASSED:Connection Successful with url: " + url );
+		
+		// Check that the specified database (with spaces) is created
+		File file = new File(DERBY_SYSTEM_HOME + File.separator + DB_NAME_WITH_SPACES);
+		if(file.exists())
+			System.out.println("testDbNameWithSpaces PASSED - Database created successfully");
+		else
+			System.out.println("testDbNameWithSpaces FAILED - Database not created correctly");
+		
+	}
 	
 	/**
 	 * Make  java.sql.Driver.connect(String url, Properties info call) and print the status of

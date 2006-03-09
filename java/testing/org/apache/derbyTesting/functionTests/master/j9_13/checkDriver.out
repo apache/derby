@@ -14,7 +14,7 @@ Connection info for connect(jdbc:derby:testcreatedb2;create=true, null)
 getURL() = jdbc:derby:testcreatedb2
 getUserName() = APP
 CURRENT SCHEMA = APP
-Connection info for connect(jdbc:derby:testpropdb, {user=APP, password=xxxx})
+Connection info for connect(jdbc:derby:testpropdb, {password=xxxx, user=APP})
 getURL() = jdbc:derby:testpropdb
 getUserName() = APP
 CURRENT SCHEMA = APP

@@ -51,3 +51,10 @@ getURL() = jdbc:derby://localhost:1527/'wombat';create=true
 getUserName() = APP
 CURRENT SCHEMA = APP
 PASSED:Connection Successful with url: jdbc:derby://localhost:1527/'wombat';create=true
+START testDbNameWithSpaces ...
+Connection info for connect(jdbc:derby://localhost:1527/db name with spaces;create=true, null)
+getURL() = jdbc:derby://localhost:1527/db name with spaces;create=true
+getUserName() = APP
+CURRENT SCHEMA = APP
+PASSED:Connection Successful with url: jdbc:derby://localhost:1527/db name with spaces;create=true
+testDbNameWithSpaces PASSED - Database created successfully
