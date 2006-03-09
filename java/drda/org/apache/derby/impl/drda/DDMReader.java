@@ -1225,6 +1225,30 @@ class DDMReader
 	}
 
 	/**
+	 * Read string value into a <code>DRDAString</code> object.
+	 *
+	 * @param dst  destination for the read string
+	 * @param size size (in bytes) of string to read
+	 * @param unpad if true, remove padding (trailing spaces)
+	 *
+	 * @exception DRDAProtocolException
+	 */
+	protected void readString(DRDAString dst, int size, boolean unpad)
+		throws DRDAProtocolException
+	{
+		ensureBLayerDataInBuffer(size, ADJUST_LENGTHS);
+		int startPos = pos;
+		pos += size;
+		if (unpad) {
+			while ((size > 0) &&
+				   (buffer[startPos + size - 1] == ccsidManager.space)) {
+				--size;
+			}
+		}
+		dst.setBytes(buffer, startPos, size);
+	}
+
+	/**
 	 * Read encoded string value
 	 * @param length  - length of string to read
 	 * @return value

@@ -75,7 +75,7 @@ class Database
 	DRDAStatement defaultStatement;    // default statement used 
 													   // for execute imm
 	private DRDAStatement currentStatement; // current statement we are working on
-	Hashtable stmtTable;		// Hash table for storing statements
+	private Hashtable stmtTable;		// Hash table for storing statements
 
 	boolean forXA = false;
 
@@ -160,7 +160,7 @@ class Database
 	 * @param pkgnamcsn package/ section # for statement
 	 * @return DRDAStatement
 	 */
-	protected DRDAStatement getDefaultStatement(String pkgnamcsn) 
+	protected DRDAStatement getDefaultStatement(Pkgnamcsn pkgnamcsn) 
 	{
 		currentStatement = defaultStatement;
 		currentStatement.setPkgnamcsn(pkgnamcsn);
@@ -173,7 +173,7 @@ class Database
 	 * @param pkgnamcsn - key to access statement
 	 * @return prepared statement
 	 */
-	protected PreparedStatement getPreparedStatement(String pkgnamcsn) 
+	protected PreparedStatement getPreparedStatement(Pkgnamcsn pkgnamcsn) 
 		throws SQLException
 	{
 		currentStatement = getDRDAStatement(pkgnamcsn);
@@ -190,7 +190,7 @@ class Database
 	 * @param pkgnamcsn  Package name and section
 	 * @return DRDAStatement  
 	 */
-	protected DRDAStatement newDRDAStatement(String pkgnamcsn)
+	protected DRDAStatement newDRDAStatement(Pkgnamcsn pkgnamcsn)
 	throws SQLException
 	{
 		DRDAStatement stmt = getDRDAStatement(pkgnamcsn);
@@ -211,30 +211,14 @@ class Database
 	 * @param pkgnamcsn - key to access statement
 	 * @return DRDAStatement
 	 */
-	protected DRDAStatement getDRDAStatement(String pkgnamcsn) 
-		throws SQLException
-	{
-		// Need to get the short version because resultSets have different
-		// corelation ids.
-		String key = getStmtKey(pkgnamcsn);
-		DRDAStatement newStmt = null;
-
-		// If our current statement doesn't match,retrieve the statement
-		// and make it current if not null.
-		if (currentStatement == null || 
-			!key.equals(getStmtKey(currentStatement.getPkgnamcsn())));
-			{
-				newStmt  = (DRDAStatement) stmtTable.get(key);				
-			}
-			
-			if (newStmt != null)	 // don't blow away currentStatement if we can't find this one
-				currentStatement = newStmt;
-			else
-				return null;
-
-		// Set the correct result set.
-		currentStatement.setCurrentDrdaResultSet(pkgnamcsn);
-		return currentStatement;
+	protected DRDAStatement getDRDAStatement(Pkgnamcsn pkgnamcsn) {
+		DRDAStatement newStmt =
+			(DRDAStatement) stmtTable.get(pkgnamcsn.getStatementKey());
+		if (newStmt != null) {
+			currentStatement = newStmt;
+			currentStatement.setCurrentDrdaResultSet(pkgnamcsn);
+		}
+		return newStmt;
 	}
 
 	/**
@@ -283,7 +267,7 @@ class Database
 	 * @param pkgnamcsn - key to access prepared statement
 	 * @return result set
 	 */
-	protected ResultSet getResultSet(String pkgnamcsn) throws SQLException
+	protected ResultSet getResultSet(Pkgnamcsn pkgnamcsn) throws SQLException
 	{
 		return getDRDAStatement(pkgnamcsn).getResultSet();
 	}
@@ -302,12 +286,12 @@ class Database
 	 */
 	protected void storeStatement(DRDAStatement stmt) throws SQLException
 	{
-		stmtTable.put(getStmtKey(stmt.getPkgnamcsn()), stmt);
+		stmtTable.put(stmt.getPkgnamcsn().getStatementKey(), stmt);
 	}
 
 	protected void removeStatement(DRDAStatement stmt) throws SQLException
 	{
-		stmtTable.remove(stmt.getPkgnamcsn());
+		stmtTable.remove(stmt.getPkgnamcsn().getStatementKey());
 		stmt.close();
 	}
 	
@@ -413,14 +397,6 @@ class Database
 																		 +"\t") +"\n";
 				}
 		return s;
-	}
-
-
-	private String getStmtKey(String pkgnamcsn)
-	{
-		if (pkgnamcsn == null)
-			return null;
-		return  pkgnamcsn.substring(0,pkgnamcsn.length() - CodePoint.PKGCNSTKN_LEN);
 	}
 }
 

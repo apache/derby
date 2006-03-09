@@ -62,10 +62,10 @@ class DRDAStatement
 	protected String ccsidMBCEncoding;	//Java encoding for CCSIDMBC
 
 	protected Database database;		// Database this statement is created for
-	private   String pkgnamcsn;         // Package name/section # and  consistency token
-	protected String pkgcnstknStr;       // Consistency token for the first result set
+	private   Pkgnamcsn pkgnamcsn;		// Package name/section # and  consistency token
+	protected ConsistencyToken pkgcnstkn;       // Consistency token for the first result set
  	protected String pkgid;              // package id
- 	protected String sectionNumber;      // section number
+ 	protected int pkgsn;		// section number
 	int withHoldCursor = -1;	 // hold cursor after commit attribute.
 	protected int isolationLevel;         //JCC isolation level for Statement
 	protected String cursorName;
@@ -624,16 +624,13 @@ class DRDAStatement
 	 * (see getStaticPackageIsolation)
 	 * @param pkgnamcsn  package id section number and token from the client
 	 */
-	protected void setPkgnamcsn(String pkgnamcsn)
+	protected void setPkgnamcsn(Pkgnamcsn pkgnamcsn)
 	{
 		this.pkgnamcsn =  pkgnamcsn;
 		// Store the consistency string for the first ResultSet.
 		// this will be used to calculate consistency strings for the 
 		// other result sets.
-		StringTokenizer st = new StringTokenizer(pkgnamcsn);
-		st.nextToken();   // rdbnam (disregard)
-		st.nextToken();   // rdbcolid (disregard)
-		pkgid = st.nextToken();   // pkgid
+		pkgid = pkgnamcsn.getPkgid();
 
 		if (isDynamicPkgid(pkgid))
 		{
@@ -657,15 +654,15 @@ class DRDAStatement
 			// cursor name
 			// trim the SYS off the pkgid so it wont' be in the cursor name
 			String shortPkgid = pkgid.substring(pkgid.length() -5 , pkgid.length());
-			sectionNumber = st.nextToken() ;
-			this.cursorName = "SQL_CUR" +  shortPkgid + "C" + sectionNumber ;
+			pkgsn = pkgnamcsn.getPkgsn();
+			this.cursorName = "SQL_CUR" +  shortPkgid + "C" + pkgsn ;
 		}
 		else // static package
 		{
 			isolationLevel = getStaticPackageIsolation(pkgid);
 		}
 
-		this.pkgcnstknStr = st.nextToken();
+		this.pkgcnstkn = pkgnamcsn.getPkgcnstkn();
 
 	}
 
@@ -691,7 +688,7 @@ class DRDAStatement
 	 *
 	 * @return pkgnamcsn
 	 */
-	protected String getPkgnamcsn() 
+	protected Pkgnamcsn getPkgnamcsn() 
 	{
 		return pkgnamcsn;
 
@@ -722,7 +719,7 @@ class DRDAStatement
 			return currentDrdaRs.getResultSet();
 		else
 		{
-			String key = (String) resultSetKeyList.get(rsNum);
+			ConsistencyToken key = (ConsistencyToken) resultSetKeyList.get(rsNum);
 			return ((DRDAResultSet) (resultSetTable.get( key))).getResultSet();
 		}
 	}
@@ -758,8 +755,8 @@ class DRDAStatement
 	 */
 	protected void setCurrentDrdaResultSet(int rsNum)
 	{
-		String consistToken = getResultSetPkgcnstknStr(rsNum);
-		if (currentDrdaRs.pkgcnstknStr == consistToken)
+		ConsistencyToken consistToken = getResultSetPkgcnstkn(rsNum);
+		if (currentDrdaRs.pkgcnstkn == consistToken)
 			return;
 		currentDrdaRs = getDrdaResultSet(consistToken);
 
@@ -772,9 +769,11 @@ class DRDAStatement
 	 *                    consistency token
 	 *                 
 	 */
-	protected void setCurrentDrdaResultSet(String pkgnamcsn)
+	protected void setCurrentDrdaResultSet(Pkgnamcsn pkgnamcsn)
 	{
-		String consistToken = extractPkgcnstknStr(pkgnamcsn);
+		pkgid = pkgnamcsn.getPkgid();
+		pkgsn = pkgnamcsn.getPkgsn();
+		ConsistencyToken consistToken = pkgnamcsn.getPkgcnstkn();
 		DRDAResultSet newDrdaRs = getDrdaResultSet(consistToken);
 		if (newDrdaRs != null)
 			currentDrdaRs = newDrdaRs;
@@ -785,11 +784,11 @@ class DRDAStatement
 	 * get DRDAResultSet by consistency token
 	 *
 	 */
-	private DRDAResultSet getDrdaResultSet(String consistToken)
+	private DRDAResultSet getDrdaResultSet(ConsistencyToken consistToken)
 	{
 		if ( resultSetTable   == null || 
 			 (currentDrdaRs != null &&
-			  currentDrdaRs.pkgcnstknStr == consistToken ))
+			  currentDrdaRs.pkgcnstkn == consistToken ))
 		{
 			return currentDrdaRs;
 		}
@@ -806,22 +805,8 @@ class DRDAStatement
 	 */
 	private DRDAResultSet getDrdaResultSet(int rsNum)
 	{
-		String consistToken = getResultSetPkgcnstknStr(rsNum);
+		ConsistencyToken consistToken = getResultSetPkgcnstkn(rsNum);
 		return getDrdaResultSet(consistToken);
-	}
-
-
-	/*
-	 *  get consistency token from pkgnamcsn
-	 */
-	private String extractPkgcnstknStr(String pkgnamcsn)
-	{
-		StringTokenizer st = new StringTokenizer(pkgnamcsn);
-		st.nextToken();   // rdbnam (disregard)
-		st.nextToken();   // rdbcolid (disregard)
-		pkgid = st.nextToken();           // pkgid
-		sectionNumber = st.nextToken() ;  // secno
-		return st.nextToken();
 	}
 
 	/** Add a new resultSet to this statement.
@@ -833,13 +818,13 @@ class DRDAStatement
 	 *            For a single resultSet that is the same as the statement's 
 	 *            For multiple resultSets just the consistency token is changed 
 	 */
-	protected String  addResultSet(ResultSet value, int holdValue) throws SQLException
+	protected ConsistencyToken addResultSet(ResultSet value, int holdValue) throws SQLException
 	{
 
 		DRDAResultSet newDrdaRs = null;
 
 		int rsNum = numResultSets;
-		String newRsPkgcnstknStr = calculateResultSetPkgcnstknStr(rsNum);
+		ConsistencyToken newRsPkgcnstkn = calculateResultSetPkgcnstkn(rsNum);
 
 		if (rsNum == 0)
 			newDrdaRs = currentDrdaRs;
@@ -855,22 +840,22 @@ class DRDAStatement
 				// before we store our new resultSet.
 				// For just a single resultSet we don't ever create the Hashtable.
 				resultSetTable = new Hashtable();
-				resultSetTable.put(pkgcnstknStr,currentDrdaRs);
+				resultSetTable.put(pkgcnstkn, currentDrdaRs);
 				resultSetKeyList = new ArrayList();
-				resultSetKeyList.add(0,pkgcnstknStr);
+				resultSetKeyList.add(0, pkgcnstkn);
 			}
 
-			resultSetTable.put(newRsPkgcnstknStr,newDrdaRs);
-			resultSetKeyList.add(rsNum, newRsPkgcnstknStr);
+			resultSetTable.put(newRsPkgcnstkn, newDrdaRs);
+			resultSetKeyList.add(rsNum, newRsPkgcnstkn);
 		}
 
 		newDrdaRs.setResultSet(value);
-		newDrdaRs.setPkgcnstknStr(newRsPkgcnstknStr);
+		newDrdaRs.setPkgcnstkn(newRsPkgcnstkn);
 		newDrdaRs.withHoldCursor = holdValue;
 		setRsDefaultOptions(newDrdaRs);
 		newDrdaRs.suspend();
 		numResultSets++;
-		return newRsPkgcnstknStr;
+		return newRsPkgcnstkn;
 	}
 
 	/**
@@ -887,12 +872,12 @@ class DRDAStatement
 	 * @param rsNum result set starting with 0
 	 * @return  consistency token (key) for the result set	 
 	 */
-	protected String getResultSetPkgcnstknStr(int rsNum)
+	protected ConsistencyToken getResultSetPkgcnstkn(int rsNum)
 	{
 		if (rsNum == 0)
-			return pkgcnstknStr;
+			return pkgcnstkn;
 		else 
-			return (String) resultSetKeyList.get(rsNum);			   
+			return (ConsistencyToken) resultSetKeyList.get(rsNum);			   
 	}
 
 
@@ -1252,7 +1237,7 @@ class DRDAStatement
 			s += indent + ps;
 		else
 		{
-			s += indent + pkgid + sectionNumber ;
+			s += indent + pkgid + pkgsn ;
 			s += "\t" + getSQLText();
 		}
 		return s;
@@ -1267,24 +1252,19 @@ class DRDAStatement
 	 * @return  Consistency token for result set
 	 */
 
-	protected String calculateResultSetPkgcnstknStr(int rsNum)
+	protected ConsistencyToken calculateResultSetPkgcnstkn(int rsNum)
 	{	
-		String consistToken = pkgcnstknStr;
+		ConsistencyToken consistToken = pkgcnstkn;
 
-		if (rsNum == 0 || pkgcnstknStr == null)
+		if (rsNum == 0 || pkgcnstkn == null)
 			return consistToken;
 		else
 		{
-			try {
-				BigInteger  consistTokenBi = 
-					new BigInteger(consistToken.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING));
-				BigInteger rsNumBi = BigInteger.valueOf(rsNum);
-				consistTokenBi = consistTokenBi.subtract(rsNumBi);
-				consistToken = new String(consistTokenBi.toByteArray(),NetworkServerControlImpl.DEFAULT_ENCODING);
-			}
-			catch (UnsupportedEncodingException e)
-			{// Default encoding always supported
-			}
+			BigInteger consistTokenBi =
+				new BigInteger(consistToken.getBytes());
+			BigInteger rsNumBi = BigInteger.valueOf(rsNum);
+			consistTokenBi = consistTokenBi.subtract(rsNumBi);
+			consistToken = new ConsistencyToken(consistTokenBi.toByteArray());
 		}
 		return consistToken;
 	}

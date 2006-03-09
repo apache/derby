@@ -133,11 +133,19 @@ public class DRDAConnThread extends Thread {
 	private SQLException databaseAccessException;
 
 	// these fields are needed to feed back to jcc about a statement/procedure's PKGNAMCSN
-	private String rdbnam;
-	private String rdbcolid;
-	private String pkgid;
-	private String pkgcnstknStr;
-	private int secnumber;
+	/** The value returned by the previous call to
+	 * <code>parsePKGNAMCSN()</code>. */
+	private Pkgnamcsn prevPkgnamcsn = null;
+	/** Current RDB Package Name. */
+	private DRDAString rdbnam = new DRDAString(ccsidManager);
+	/** Current RDB Collection Identifier. */
+	private DRDAString rdbcolid = new DRDAString(ccsidManager);
+	/** Current RDB Package Identifier. */
+	private DRDAString pkgid = new DRDAString(ccsidManager);
+	/** Current RDB Package Consistency Token. */
+	private DRDAString pkgcnstkn = new DRDAString(ccsidManager);
+	/** Current RDB Package Section Number. */
+	private int pkgsn;
 
 	// this flag is for an execute statement/procedure which actually returns a result set;
 	// do not commit the statement, otherwise result set is closed
@@ -700,7 +708,7 @@ public class DRDAConnThread extends Thread {
 							writeOPNQFLRM(null);
 							break;
 						}
-						String pkgnamcsn = parseOPNQRY();
+						Pkgnamcsn pkgnamcsn = parseOPNQRY();
 						if (pkgnamcsn != null)
 						{
 							stmt = database.getDRDAStatement(pkgnamcsn);
@@ -1639,12 +1647,12 @@ public class DRDAConnThread extends Thread {
 	 *  QRYROWSET - Query Rowset Size - optional - level 7
 	 *  MONITOR - Monitor events - optional.
 	 *
-	 * @return package name consistency token
+	 * @return RDB Package Name, Consistency Token, and Section Number
 	 * @exception DRDAProtocolException
 	 */
-	private String parseOPNQRY() throws DRDAProtocolException, SQLException
+	private Pkgnamcsn parseOPNQRY() throws DRDAProtocolException, SQLException
 	{
-		String pkgnamcsn = null;
+		Pkgnamcsn pkgnamcsn = null;
 		boolean gotQryblksz = false;
 		int blksize = 0;
 		int qryblkctl = CodePoint.QRYBLKCTL_DEFAULT;
@@ -1964,34 +1972,42 @@ public class DRDAConnThread extends Thread {
 	 *
 	 * @exception throws DRDAProtocolException
 	 */
-	private void writePKGNAMCSN(String pkgcnstknStr) throws DRDAProtocolException
+	private void writePKGNAMCSN(byte[] pkgcnstkn) throws DRDAProtocolException
 	{
 		writer.startDdm(CodePoint.PKGNAMCSN);
-		if (rdbcolid.length() == CodePoint.RDBCOLID_LEN && rdbnam.length() <= CodePoint.RDBNAM_LEN)
-		{	//fixed format
+		if (rdbnam.length() <= CodePoint.RDBNAM_LEN &&
+			rdbcolid.length() <= CodePoint.RDBCOLID_LEN &&
+			pkgid.length() <= CodePoint.PKGID_LEN)
+		{	// if none of RDBNAM, RDBCOLID and PKGID have a length of
+			// more than 18, use fixed format
 			writer.writeScalarPaddedString(rdbnam, CodePoint.RDBNAM_LEN);
 			writer.writeScalarPaddedString(rdbcolid, CodePoint.RDBCOLID_LEN);
 			writer.writeScalarPaddedString(pkgid, CodePoint.PKGID_LEN);
-			writer.writeScalarPaddedString(pkgcnstknStr, CodePoint.PKGCNSTKN_LEN);
-			writer.writeShort(secnumber);
+			writer.writeScalarPaddedBytes(pkgcnstkn,
+										  CodePoint.PKGCNSTKN_LEN, (byte) 0);
+			writer.writeShort(pkgsn);
 		}
 		else	// extended format
 		{
-			writer.writeShort(rdbnam.length());
-			writer.writeScalarPaddedString(rdbnam, rdbnam.length());
-			writer.writeShort(rdbcolid.length());
-			writer.writeScalarPaddedString(rdbcolid, rdbcolid.length());
-			writer.writeShort(pkgid.length());
-			writer.writeScalarPaddedString(pkgid, pkgid.length());
-			writer.writeScalarPaddedString(pkgcnstknStr, CodePoint.PKGCNSTKN_LEN);
-			writer.writeShort(secnumber);
+			int len = Math.max(CodePoint.RDBNAM_LEN, rdbnam.length());
+			writer.writeShort(len);
+			writer.writeScalarPaddedString(rdbnam, len);
+			len = Math.max(CodePoint.RDBCOLID_LEN, rdbcolid.length());
+			writer.writeShort(len);
+			writer.writeScalarPaddedString(rdbcolid, len);
+			len = Math.max(CodePoint.PKGID_LEN, pkgid.length());
+			writer.writeShort(len);
+			writer.writeScalarPaddedString(pkgid, len);
+			writer.writeScalarPaddedBytes(pkgcnstkn,
+										  CodePoint.PKGCNSTKN_LEN, (byte) 0);
+			writer.writeShort(pkgsn);
 		}
 		writer.endDdm();
 	}
 
 	private void writePKGNAMCSN() throws DRDAProtocolException
 	{
-		writePKGNAMCSN(pkgcnstknStr);
+		writePKGNAMCSN(pkgcnstkn.getBytes());
 	}
 
 	/**
@@ -2019,7 +2035,7 @@ public class DRDAConnThread extends Thread {
 	private DRDAStatement parseCNTQRY() throws DRDAProtocolException, SQLException
 	{
 		byte val;
-		String pkgnamcsn = null;
+		Pkgnamcsn pkgnamcsn = null;
 		boolean gotQryblksz = false;
 		boolean qryrelscr = true;
 		long qryrownbr = 1;
@@ -3070,7 +3086,7 @@ public class DRDAConnThread extends Thread {
 	 * Parse PRPSQLSTT - Prepare SQL Statement
 	 * Instance Variables
 	 *   RDBNAM - Relational Database Name - optional
-	 *   PKGNAMCAN - RDB Package Name, Consistency Token, and Section Number - required
+	 *   PKGNAMCSN - RDB Package Name, Consistency Token, and Section Number - required
 	 *   RTNSQLDA - Return SQL Descriptor Area - optional
 	 *   MONITOR - Monitor events - optional.
 	 *   
@@ -3084,7 +3100,7 @@ public class DRDAConnThread extends Thread {
 		boolean rtnsqlda = false;
 		boolean rtnOutput = true; 	// Return output SQLDA is default
 		String typdefnam;
-		String pkgnamcsn = null;
+		Pkgnamcsn pkgnamcsn = null;
 
 		DRDAStatement stmt = null;  
 		Database databaseToSet = null;
@@ -3295,7 +3311,7 @@ public class DRDAConnThread extends Thread {
 	{
 		int codePoint;
 		boolean rtnOutput = true;	// default
-		String pkgnamcsn = null;
+		Pkgnamcsn pkgnamcsn = null;
 		reader.markCollection();
 
 		codePoint = reader.getCodePoint();
@@ -3361,7 +3377,7 @@ public class DRDAConnThread extends Thread {
 
 		codePoint = reader.getCodePoint();
 		boolean outputExpected = false;
-		String pkgnamcsn = null;
+		Pkgnamcsn pkgnamcsn = null;
 		int numRows = 1;	// default value
 		int blkSize =  0;
  		int maxrslcnt = 0; 	// default value
@@ -3777,7 +3793,7 @@ public class DRDAConnThread extends Thread {
 		writer.startDdm(CodePoint.PKGSNLST);
 		
 		for (int i = 0; i < numResults; i++)
-			writePKGNAMCSN(stmt.getResultSetPkgcnstknStr(i));
+			writePKGNAMCSN(stmt.getResultSetPkgcnstkn(i).getBytes());
 		writer.endDdm();
 		writer.endDdmAndDss();
 	}
@@ -4277,7 +4293,7 @@ public class DRDAConnThread extends Thread {
 	{
 		int codePoint;
 		reader.markCollection();
-		String pkgnamcsn = null;
+		Pkgnamcsn pkgnamcsn = null;
 		codePoint = reader.getCodePoint();
 		while (codePoint != -1)
 		{
@@ -4360,7 +4376,7 @@ public class DRDAConnThread extends Thread {
 					// NOTE: This codepoint is not in the DDM spec for 'EXCSQLSET',
 					// but since it DOES get sent by jcc1.2, we have to have
 					// a case for it...
-					String pkgnamcsn = parsePKGNAMCSN();
+					Pkgnamcsn pkgnamcsn = parsePKGNAMCSN();
 					break;
 				default:
 					invalidCodePoint(codePoint);
@@ -4580,72 +4596,91 @@ public class DRDAConnThread extends Thread {
 	 *   PKGCNSTKN - RDB Package Consistency Token
 	 *   PKGSN - RDB Package Section Number
 	 *
-	 * @exception throws DRDAProtocolException
+	 * @return <code>Pkgnamcsn</code> value
+	 * @throws DRDAProtocolException
 	 */
-	private String parsePKGNAMCSN() throws DRDAProtocolException
+	private Pkgnamcsn parsePKGNAMCSN() throws DRDAProtocolException
 	{
-		rdbnam = null;
-		rdbcolid = null;
-		pkgid = null;
-		secnumber = 0;
-
 		if (reader.getDdmLength() == CodePoint.PKGNAMCSN_LEN)
 		{
 			// This is a scalar object with the following fields
-			rdbnam = reader.readString(CodePoint.RDBNAM_LEN);
+			reader.readString(rdbnam, CodePoint.RDBNAM_LEN, true);
 			if (SanityManager.DEBUG) 
 				trace("rdbnam = " + rdbnam);
 
-			rdbcolid = reader.readString(CodePoint.RDBCOLID_LEN);
+			reader.readString(rdbcolid, CodePoint.RDBCOLID_LEN, true);
 			if (SanityManager.DEBUG) 
 				trace("rdbcolid = " + rdbcolid);
 
-			pkgid = reader.readString(CodePoint.PKGID_LEN);
+			reader.readString(pkgid, CodePoint.PKGID_LEN, true);
 			if (SanityManager.DEBUG)
 				trace("pkgid = " + pkgid);
 
 			// we need to use the same UCS2 encoding, as this can be
 			// bounced back to jcc (or keep the byte array)
-			pkgcnstknStr = reader.readString(CodePoint.PKGCNSTKN_LEN);
+			reader.readString(pkgcnstkn, CodePoint.PKGCNSTKN_LEN, false);
 			if (SanityManager.DEBUG) 
-				trace("pkgcnstkn = " + pkgcnstknStr);
+				trace("pkgcnstkn = " + pkgcnstkn);
 
-			secnumber = reader.readNetworkShort();
+			pkgsn = reader.readNetworkShort();
 			if (SanityManager.DEBUG)
-				trace("secnumber = " + secnumber);
+				trace("pkgsn = " + pkgsn);
 		}
 		else	// extended format
 		{
 			int length = reader.readNetworkShort();
 			if (length < CodePoint.RDBNAM_LEN || length > CodePoint.MAX_NAME)
 				badObjectLength(CodePoint.RDBNAM);
-			rdbnam = reader.readString(length);
+			reader.readString(rdbnam, length, true);
 			if (SanityManager.DEBUG)
 				trace("rdbnam = " + rdbnam);
 
 			//RDBCOLID can be variable length in this format
 			length = reader.readNetworkShort();
-			rdbcolid = reader.readString(length);
+			reader.readString(rdbcolid, length, true);
 			if (SanityManager.DEBUG) 
 				trace("rdbcolid = " + rdbcolid);
 
 			length = reader.readNetworkShort();
 			if (length != CodePoint.PKGID_LEN)
 				badObjectLength(CodePoint.PKGID);
-			pkgid = reader.readString(CodePoint.PKGID_LEN);
+			reader.readString(pkgid, CodePoint.PKGID_LEN, true);
 			if (SanityManager.DEBUG) 
 				trace("pkgid = " + pkgid);
 
-			pkgcnstknStr = reader.readString(CodePoint.PKGCNSTKN_LEN);
+			reader.readString(pkgcnstkn, CodePoint.PKGCNSTKN_LEN, false);
 			if (SanityManager.DEBUG) 
-				trace("pkgcnstkn = " + pkgcnstknStr);
+				trace("pkgcnstkn = " + pkgcnstkn);
 
-			secnumber = reader.readNetworkShort();
+			pkgsn = reader.readNetworkShort();
 			if (SanityManager.DEBUG) 
-				trace("secnumber = " + secnumber);
+				trace("pkgsn = " + pkgsn);
 		}
-		// Note: This string  is parsed by DRDAStatement.buildDB2CursorName()
-		return rdbnam + " " + rdbcolid + " " + pkgid + " " + secnumber + " " + pkgcnstknStr;
+
+		// In most cases, the pkgnamcsn object is equal to the
+		// previously returned object. To avoid allocation of a new
+		// object in these cases, we first check to see if the old
+		// object can be reused.
+		if ((prevPkgnamcsn == null) ||
+			rdbnam.wasModified() ||
+			rdbcolid.wasModified() ||
+			pkgid.wasModified() ||
+			pkgcnstkn.wasModified() ||
+			(prevPkgnamcsn.getPkgsn() != pkgsn))
+		{
+			// The byte array returned by pkgcnstkn.getBytes() might
+			// be modified by DDMReader.readString() later, so we have
+			// to create a copy of the array.
+			byte[] token = new byte[pkgcnstkn.length()];
+			System.arraycopy(pkgcnstkn.getBytes(), 0, token, 0, token.length);
+
+			prevPkgnamcsn =
+				new Pkgnamcsn(rdbnam.toString(), rdbcolid.toString(),
+							  pkgid.toString(), pkgsn,
+							  new ConsistencyToken(token));
+		}
+
+		return prevPkgnamcsn;
 	}
 
 	/**
@@ -4809,7 +4844,7 @@ public class DRDAConnThread extends Thread {
 	 */
 	private DRDAStatement parseCLSQRY() throws DRDAProtocolException, SQLException
 	{
-		String pkgnamcsn = null;
+		Pkgnamcsn pkgnamcsn = null;
 		reader.markCollection();
 		long qryinsid = 0;
 		boolean gotQryinsid = false;
