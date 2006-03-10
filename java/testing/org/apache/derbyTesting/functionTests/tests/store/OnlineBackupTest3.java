@@ -40,6 +40,7 @@ import java.util.Properties;
 public class OnlineBackupTest3 {
 
     private static final String TEST_DATABASE_NAME = "wombat" ;
+    private static final String BACKUP_PATH = "extinout/onlinebackuptest3";
 
     public static void main(String[] argv) throws Throwable {
 
@@ -58,7 +59,7 @@ public class OnlineBackupTest3 {
     /*
      * Test online backup with unlogged jar operations running in parallel. 
      */
-    private void runTest() throws SQLException, Exception {
+    private void runTest() throws Exception{
         logMessage("Begin Online Backup Test3");
         Connection conn = ij.startJBMS();
         conn.setAutoCommit(false);
@@ -168,7 +169,7 @@ public class OnlineBackupTest3 {
     /*
      * Test install jar running in parallel to backup and vice versa. 
      */
-    void installJarTest() throws SQLException, Exception{
+    void installJarTest() throws Exception{
         logMessage("Begin Install Jar Test");
         Connection conn1 = getConnection();
         conn1.setAutoCommit(false);
@@ -194,7 +195,7 @@ public class OnlineBackupTest3 {
         // operation to install  'brtestjar.jar to commit.
         
         // start a  thread to perform online backup
-        OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME);
+        OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME, BACKUP_PATH);
         Thread backupThread = new Thread(backup, "BACKUP1");
         backupThread.start();
         // wait for the backup to start
@@ -236,7 +237,7 @@ public class OnlineBackupTest3 {
         conn1_stmt.execute("insert into t1 values(6)");
         
         // start a  thread to perform online backup
-        backup = new OnlineBackup(TEST_DATABASE_NAME);
+        backup = new OnlineBackup(TEST_DATABASE_NAME, BACKUP_PATH);
         backupThread = new Thread(backup, "BACKUP2");
         backupThread.start();
         // wait for the backup to start
@@ -343,7 +344,7 @@ public class OnlineBackupTest3 {
     /*
      * Test remove jar running in parallel to backup and vice versa. 
      */
-    void removeJarTest() throws SQLException, Exception{
+    void removeJarTest() throws Exception{
         logMessage("Begin Remove Jar Test");
         Connection conn1 = getConnection();
         conn1.setAutoCommit(false);
@@ -390,7 +391,7 @@ public class OnlineBackupTest3 {
         // the above remove jar  to commit.
         
         // start a  thread to perform online backup
-        OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME);
+        OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME, BACKUP_PATH);
         Thread backupThread = new Thread(backup, "BACKUP3");
         backupThread.start();
         // wait for the backup to start
@@ -427,7 +428,7 @@ public class OnlineBackupTest3 {
         conn1_stmt.execute("insert into t1 values(12)");
         
         // start a  thread to perform online backup
-        backup = new OnlineBackup(TEST_DATABASE_NAME);
+        backup = new OnlineBackup(TEST_DATABASE_NAME, BACKUP_PATH);
         backupThread = new Thread(backup, "BACKUP4");
         backupThread.start();
         // wait for the backup to start

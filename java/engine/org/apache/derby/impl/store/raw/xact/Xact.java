@@ -1911,10 +1911,6 @@ public class Xact extends RawTransaction implements Limit  {
 
 		setIdleState();
 
-		// any backup blocking operations (like unlogged ops) in this 
-		// transaction are done with post commit/abort work by now, 
-		// unblock the backup.
-		unblockBackup();
 		inComplete = null;
 	}
 
@@ -2095,6 +2091,11 @@ public class Xact extends RawTransaction implements Limit  {
 			postCommitWorks.clear();
 
 		}
+
+        // any backup blocking operations (like unlogged ops) in this 
+        // transaction are done with post commit/abort work that needs be
+        // done in the same trasaction,  unblock the backup.
+        unblockBackup();
 	}
 
 	/**

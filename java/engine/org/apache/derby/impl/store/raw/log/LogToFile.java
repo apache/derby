@@ -1576,9 +1576,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				truncateLog(currentCheckpoint);
 			}
 
-			//delete the committted container drop stubs that are no longer
-			//required during recovery.
-			df.removeDroppedContainerFileStubs(redoLWM);
+			// delete the committted container drop stubs 
+            // that are no longer required during recovery. 
+            // If a backup is in progress don't delete the stubs until 
+            // it is done. Backup needs to copy all the stubs that 
+            // are needed to recover from the backup checkpoint on restore.
+            if(!backupInProgress)
+                df.removeDroppedContainerFileStubs(redoLWM);
 		
 		}
 		catch (IOException ioe)

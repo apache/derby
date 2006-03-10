@@ -37,14 +37,16 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class OnlineBackup implements Runnable{
 
-	private static final String backupPath = "extinout/onlinebackuptest";
-	
 	private String dbName; // name of the database to backup
 	private boolean beginBackup = false;
 	private boolean endBackup = false;
+    private boolean backupFailed = false;
+    private Throwable backupError = null;
+    private String backupPath;
 
-	OnlineBackup(String dbName) {
+	OnlineBackup(String dbName, String backupPath) {
 		this.dbName = dbName;
+        this.backupPath = backupPath;
 	}
 
 	/**
@@ -55,12 +57,20 @@ public class OnlineBackup implements Runnable{
 	 * 
 	 */
 	public void run()	{
+        backupFailed = false;
 		try {
 			performBackup();
-		} catch (SQLException sqle) {
-			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
-			sqle.printStackTrace(System.out);
-		}
+		} catch (Throwable error) {
+            synchronized(this) {
+                // inform threads that may be waiting for backup to 
+                // start/end that it failed. 
+                backupFailed = true;
+                backupError = error;
+                notifyAll();
+            }
+			org.apache.derby.tools.JDBCDisplayUtil.ShowException(System.out, error);
+			error.printStackTrace(System.out);
+        }
 	}
 
 	/**
@@ -93,10 +103,16 @@ public class OnlineBackup implements Runnable{
 	 * Wait for the backup to start.
 	 */
 
-	public void waitForBackupToBegin() throws InterruptedException{
+	public void waitForBackupToBegin() throws Exception{
 		synchronized(this) {
 			//wait for backup to begin
-			while(!beginBackup) {
+			while (!beginBackup) {
+                // if the backup failed for some reason throw error, don't go
+                // into wait state.
+                if (backupFailed)
+                    throw new Exception("BACKUP FAILED:" + 
+                                        backupError.getMessage());
+                else
 					wait();
 			}
 		}
@@ -105,7 +121,7 @@ public class OnlineBackup implements Runnable{
 	/*
 	 * Wait for the backup to finish.
 	 */
-	public void waitForBackupToEnd() throws InterruptedException{
+	public void waitForBackupToEnd() throws Exception{
 		synchronized(this) {
 			if (!endBackup) {
 				// check if a backup has actually started by the test
@@ -114,8 +130,15 @@ public class OnlineBackup implements Runnable{
 				} else {
 
 					//wait for backup to finish
-					while(!endBackup) {
-						wait();
+					while (!endBackup) 
+                    {
+                        // if the backup failed for some reason throw error, don't go
+                        // into wait state.
+                        if (backupFailed)
+                            throw new Exception("BACKUP FAILED:" + 
+                                                backupError.getMessage());
+                        else
+                            wait();
 					}
 				}
 			}

@@ -43,6 +43,7 @@ public class OnlineBackupTest1 {
 	private static final String TEST_TABLE_NAME   =    "emp";
     private static final String TEST_TABLE_NAME_1 =    "emp_1";
     private static final String TEST_TABLE_NAME_2 =    "emp_2";
+    private static final String BACKUP_PATH = "extinout/onlinebackuptest1";
 
 	public static void main(String[] argv) throws Throwable {
 		
@@ -64,7 +65,7 @@ public class OnlineBackupTest1 {
 	 * the database from the backup and performs consistency checks on the
 	 * database to make sure backup was good one.  
 	 */
-	private void runTest() throws SQLException, Exception {
+	private void runTest() throws Exception {
 		logMessage("Begin Online Backup Test1");
 		Connection conn = ij.startJBMS();
 		conn.setAutoCommit(false);
@@ -85,58 +86,69 @@ public class OnlineBackupTest1 {
 		DatabaseActions dbActions1 = new DatabaseActions(conn1);
 		dbActions1.startUnloggedAction(TEST_TABLE_NAME_2);
 		logMessage("Second Transaction with Unlogged Operation Started");
-        
 
-		// start a  thread to perform online backup
-		OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME);
+        // setup threads.
+        // start a  thread to perform online backup
+		OnlineBackup backup = new OnlineBackup(TEST_DATABASE_NAME, BACKUP_PATH);
 		Thread backupThread = new Thread(backup, "BACKUP");
-		backupThread.start();	
-		// wait for the backup to start
-		backup.waitForBackupToBegin();
-		logMessage("BACKUP STARTED");
-
+        
         // run some dml actions in another thread
         Connection dmlConn = getConnection();
         DatabaseActions dmlActions = 
             new DatabaseActions(DatabaseActions.DMLACTIONS, dmlConn);
 		Thread dmlThread = new Thread(dmlActions, "DML_THREAD");
-		dmlThread.start();
-
+        
         // run some DDL create/drop tables in another thread
         Connection ddlConn = getConnection();
         
         DatabaseActions ddlActions = 
             new DatabaseActions(DatabaseActions.CREATEDROPS, ddlConn);
         Thread ddlThread = new Thread(ddlActions, "DDL_THREAD");
-        ddlThread.start();
 
-        // sleep for few seconds just to make sure backup thread is actually
-		// gone to a wait state for unlogged actions to commit and there is
-        // some ddl and dml activity in progress. 
-		java.lang.Thread.sleep(50000);
+        try {
+            // start a  thread to perform online backup
+            backupThread.start();	
+            // wait for the backup to start
+            backup.waitForBackupToBegin();
+            logMessage("BACKUP STARTED");
+
+            // run some dml actions in another thread
+            dmlThread.start();
+
+            // run some DDL create/drop tables in another thread
+            ddlThread.start();
+
+            // sleep for few seconds just to make sure backup thread is actually
+            // gone to a wait state for unlogged actions to commit and there is
+            // some ddl and dml activity in progress. 
+            java.lang.Thread.sleep(50000);
 			
-		// backup should not even start doing real work before the
-		// unlogged transaction is commited
-		if(!backup.isRunning())
-			logMessage("Backup is not waiting for unlogged actions to commit");
+            // backup should not even start doing real work before the
+            // unlogged transaction is commited
+            if(!backup.isRunning())
+                logMessage("Backup is not waiting for unlogged actions to commit");
 
-		// end the unlogged work transaction.
-		dbActions.endUnloggedAction(TEST_TABLE_NAME_1);
-        // end the unlogged work transaction.
-		dbActions1.endUnloggedAction(TEST_TABLE_NAME_2);
+            // end the unlogged work transaction.
+            dbActions.endUnloggedAction(TEST_TABLE_NAME_1);
+            // end the unlogged work transaction.
+            dbActions1.endUnloggedAction(TEST_TABLE_NAME_2);
         
-		backup.waitForBackupToEnd();
-		backupThread.join();
-		dmlActions.stopActivity();
-        ddlActions.stopActivity(); 
-		dmlThread.join();
-        ddlThread.join(); 
-        
+            backup.waitForBackupToEnd();
+
+        }finally {
+            //stop all threads activities.
+            backupThread.join();
+            dmlActions.stopActivity();
+            ddlActions.stopActivity(); 
+            dmlThread.join();
+            ddlThread.join(); 
+        }        
         // close the connections.
         conn.close();
         conn1.close();
         dmlConn.close();
         ddlConn.close() ;
+
 
 		//shutdown the test db 
 		shutdown(TEST_DATABASE_NAME);

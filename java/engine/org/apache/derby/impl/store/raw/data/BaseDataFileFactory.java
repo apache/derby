@@ -2418,9 +2418,11 @@ public final class BaseDataFileFactory
 
 	/**
      * get all the names of the files in seg 0.
-	 * @return An array of all the file names in seg0.
+     * MT - This method needs to be synchronized to avoid conflicts 
+     * with other privileged actions execution in this class.
+     * @return An array of all the file names in seg0.
      **/
-	private String[] getContainerNames()
+	private synchronized String[] getContainerNames()
 	{
         actionCode = GET_CONTAINER_NAMES_ACTION;
         try{
