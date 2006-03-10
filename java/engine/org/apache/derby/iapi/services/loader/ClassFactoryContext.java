@@ -23,29 +23,42 @@ package org.apache.derby.iapi.services.loader;
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.property.PersistentSet;
+import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
-/**
-*/
 
+/**
+ * Context that provides the correct ClassFactory for the
+ * current service. Allows stateless code to obtain the
+ * correct class loading scheme.
+*/
 public abstract class ClassFactoryContext extends ContextImpl {
 
 	public static final String CONTEXT_ID = "ClassFactoryContext";
 
 	private final ClassFactory cf;
 
-	public ClassFactoryContext(ContextManager cm, ClassFactory cf) {
+	protected ClassFactoryContext(ContextManager cm, ClassFactory cf) {
 
 		super(cm, CONTEXT_ID);
 
 		this.cf = cf;
 	}
 
-	public ClassFactory getClassFactory() {
+	public final ClassFactory getClassFactory() {
 		return cf;
 	}
 
+    /**
+     * Get the lock compatibility space to use for the
+     * transactional nature of the class loading lock.
+     * Used when the classpath changes or a database
+     * jar file is installed, removed or replaced.
+     */
 	public abstract Object getLockSpace() throws StandardException;
 
+    /**
+     * Get the set of properties stored with this service.
+    */
 	public abstract PersistentSet getPersistentSet() throws StandardException;
 
 	/**
@@ -54,5 +67,17 @@ public abstract class ClassFactoryContext extends ContextImpl {
 	*/
 	public abstract JarReader getJarReader();
 
-	public void cleanupOnError(Throwable error) {}
+    /**
+     * Handle any errors. Only work here is to pop myself
+     * on a session or greater severity error.
+     */
+	public final void cleanupOnError(Throwable error) {
+        if (error instanceof StandardException) {
+
+            StandardException se = (StandardException) error;
+            
+            if (se.getSeverity() >= ExceptionSeverity.SESSION_SEVERITY)
+                popMe();
+        }
+    }
 }

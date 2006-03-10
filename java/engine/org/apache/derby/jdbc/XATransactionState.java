@@ -88,6 +88,11 @@ final class XATransactionState extends ContextImpl {
 		if (t instanceof StandardException) {
 
 			StandardException se = (StandardException) t;
+            
+            if (se.getSeverity() >= ExceptionSeverity.SESSION_SEVERITY) {
+                popMe();
+                return;
+            }
 
 			if (se.getSeverity() == ExceptionSeverity.TRANSACTION_SEVERITY) {
 

@@ -42,6 +42,8 @@ final class SystemContext extends ContextImpl
 			int severity = se.getSeverity();
 			if (severity < ExceptionSeverity.SESSION_SEVERITY)
 				return;
+            
+            popMe();
 
 			if (severity >= ExceptionSeverity.SYSTEM_SEVERITY)
 				doShutdown = true;

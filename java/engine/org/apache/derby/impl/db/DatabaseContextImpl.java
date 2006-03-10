@@ -33,7 +33,7 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 /**
 	A context that shutdowns down the database on a databsae exception.
 */
-class DatabaseContextImpl extends ContextImpl implements DatabaseContext
+final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
 {
 
 	private final Database	db;
@@ -46,10 +46,18 @@ class DatabaseContextImpl extends ContextImpl implements DatabaseContext
 	public void cleanupOnError(Throwable t) {
 		if (!(t instanceof StandardException)) return;
 		StandardException se = (StandardException)t;
-		if (se.getSeverity() != ExceptionSeverity.DATABASE_SEVERITY) return;
-		popMe();
-		ContextService.getFactory().notifyAllActiveThreads(this);
-		Monitor.getMonitor().shutdown(db);
+
+        // Ensure the context is popped if the session is
+        // going away.
+        if (se.getSeverity() < ExceptionSeverity.SESSION_SEVERITY)
+            return;
+
+        popMe();
+        
+        if (se.getSeverity() == ExceptionSeverity.DATABASE_SEVERITY) {
+		    ContextService.getFactory().notifyAllActiveThreads(this);
+		    Monitor.getMonitor().shutdown(db);
+        }
 	}
 
 	public boolean equals(Object other) {

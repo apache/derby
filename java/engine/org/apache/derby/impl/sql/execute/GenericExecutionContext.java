@@ -160,8 +160,16 @@ class GenericExecutionContext
 		if (error instanceof StandardException) {
 
 			StandardException se = (StandardException) error;
-			if (se.getSeverity() > ExceptionSeverity.STATEMENT_SEVERITY)
-				return;
+            int severity = se.getSeverity();
+            if (severity >= ExceptionSeverity.SESSION_SEVERITY)
+            {
+               popMe();
+               return;
+            }
+			if (severity > ExceptionSeverity.STATEMENT_SEVERITY)
+            {
+ 				return;
+            }
 
 
 			if (sourceRS != null)

@@ -87,6 +87,13 @@ public interface Context
 	 * context manager. If there are no other references
 	 * to the context, removing itself from the manager
 	 * equates to freeing it.
+     * <BR>
+     * On an exception that is session severity or greater
+     * the Context must push itself off the stack. This is
+     * to ensure that after a session has been closed there
+     * are no Contexts on the stack that potentially hold
+     * references to objects, thus delaying their garbage
+     * collection.
 	 * <p>
 	 * Contexts must release all their resources before
 	 * removing themselves from their context manager.
