@@ -36,6 +36,7 @@ import java.sql.NClob;
 import java.sql.ResultSet;
 import java.sql.SQLXML;
 import java.sql.Statement;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.tools.ij;
 /**
@@ -45,8 +46,9 @@ import org.apache.derby.tools.ij;
 
 public class TestPreparedStatementMethods {
     
-    static Connection conn=null;
-    PreparedStatement ps=null;
+    static Connection conn = null;
+    PreparedStatement ps = null;
+    boolean stmtIsClosed = false;
     
     String filepath;
     String sep;
@@ -427,30 +429,54 @@ public class TestPreparedStatementMethods {
     }
     void t_setPoolable() {
         try {
+            // Set the poolable statement hint to false
             ps.setPoolable(false);
-            System.out.println("UnImplemented Exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
+            if (ps.isPoolable())
+                System.out.println("Expected a non-poolable statement");
+            // Set the poolable statement hint to true
+            ps.setPoolable(true);
+            if (!ps.isPoolable())
+                System.out.println("Expected a poolable statement");
+        } catch(SQLException sqle) {
+            // Check which SQLException state we've got and if it is
+            // expected, do not print a stackTrace
+            // FIXME: Note that the test for stmtIsClosed boolean can
+            // be removed _once_ the client driver reports the same
+            // SQLState as the embedded driver does - See JIRA-254.
+            if (ExceptionUtil.getSQLStateFromIdentifier(
+                        SQLState.ALREADY_CLOSED).equals(sqle.getSQLState()) ||
+                stmtIsClosed) {
+                // All is good and is expected
+            } else {
+                System.out.println("Unexpected SQLException " + sqle);
+                sqle.printStackTrace();
             }
-            
         } catch(Exception e) {
-            System.out.println("Unexpected exception thrown in method"+e);
+            System.out.println("Unexpected exception thrown in method " + e);
             e.printStackTrace();
         }
     }
     void t_isPoolable() {
         try {
-            boolean b;
-            b = ps.isPoolable();
-            System.out.println("UnImplemented Exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
+            // By default a prepared statement is poolable
+            if (!ps.isPoolable())
+                System.out.println("Expected a poolable statement");
+        } catch(SQLException sqle) {
+            // Check which SQLException state we've got and if it is
+            // expected, do not print a stackTrace
+            // FIXME: Note that the test for stmtIsClosed boolean can
+            // be removed _once_ the client driver reports the same
+            // SQLState as the embedded driver does - See JIRA-254.
+            if (ExceptionUtil.getSQLStateFromIdentifier(
+                        SQLState.ALREADY_CLOSED).equals(sqle.getSQLState()) ||
+                stmtIsClosed) {
+                // All is good and is expected
+            } else {
+                System.out.println("Unexpected SQLException " + sqle);
+                sqle.printStackTrace();
             }
-            
         } catch(Exception e) {
-            System.out.println("Unexpected exception thrown in method"+e);
+            System.out.println("Unexpected exception thrown in method " + e);
             e.printStackTrace();
         }
     }
@@ -458,8 +484,9 @@ public class TestPreparedStatementMethods {
      * Start the tests for the JDBC4.0 methods on the client side
      */
     void startClientTestMethods() {
-        Connection conn_main=null;
-        PreparedStatement ps_main=null;
+        Connection conn_main = null;
+        PreparedStatement ps_main = null;
+        stmtIsClosed = false;
         
         try {
             Class.forName("org.apache.derby.jdbc.ClientDriver");
@@ -478,8 +505,16 @@ public class TestPreparedStatementMethods {
             t_setBlob();
             t_setNClob2();
             t_setSQLXML();
-            t_setPoolable();
             t_isPoolable();
+            t_setPoolable();
+            // Close the prepared statement and verify the poolable hint
+            // cannot be set or retrieved
+            ps.close();
+            stmtIsClosed = true; // This until JIRA-953 is addressed then
+                                 // stmt.isClosed() can be called in the
+                                 // poolable hint set/get test methods below
+            t_isPoolable();
+            t_setPoolable();
         } catch(SQLException sqle) {
             sqle.printStackTrace();
         } catch(ClassNotFoundException cnfe) {
@@ -496,8 +531,9 @@ public class TestPreparedStatementMethods {
      * Start the tests for testing the JDBC4.0 methods on the embedded side
      */
     void startEmbeddedTestMethods() {
-        Connection conn_main=null;
-        PreparedStatement ps_main=null;
+        Connection conn_main = null;
+        PreparedStatement ps_main = null;
+        stmtIsClosed = false;
         
         try {
             Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
@@ -509,12 +545,13 @@ public class TestPreparedStatementMethods {
             File file = new File("extin/short.txt");
             int fileLength = (int) file.length();
             InputStream fin = new FileInputStream(file);
-            PreparedStatement ps = conn_main.prepareStatement("INSERT INTO " +
+            ps = conn_main.prepareStatement("INSERT INTO " +
                     "clobtable3 " +
                     "VALUES (?, ?)");
             ps.setInt(1, 1000);
             ps.setAsciiStream(2, fin, fileLength);
             ps.execute();
+            ps.close();
             
             Statement s1 = conn_main.createStatement();
             s1.execute("create table blobtable3 (n int,blobcol BLOB)");
@@ -541,8 +578,16 @@ public class TestPreparedStatementMethods {
             t_setNClob1();
             t_setNClob2();
             t_setSQLXML();
-            t_setPoolable();
             t_isPoolable();
+            t_setPoolable();
+            // Close the prepared statement and verify the poolable hint
+            // cannot be set or retrieved
+            ps.close();
+            stmtIsClosed = true; // This until JIRA-953 is addressed then
+                                 // stmt.isClosed() can be called in the
+                                 // poolable hint set/get test methods below
+            t_isPoolable();
+            t_setPoolable();
         }
         catch(SQLException sqle) {
             sqle.printStackTrace();

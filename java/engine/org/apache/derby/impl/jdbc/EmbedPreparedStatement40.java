@@ -30,7 +30,10 @@ import java.sql.Types;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 
-public class EmbedPreparedStatement40 extends  EmbedPreparedStatement30{
+public class EmbedPreparedStatement40 extends  EmbedPreparedStatement30 {
+
+    // By default a PreparedStatement is poolable when it is created
+    private boolean isPoolable = true;
     
     public EmbedPreparedStatement40(EmbedConnection conn, String sql, boolean forMetaData,
         int resultSetType, int resultSetConcurrency, int resultSetHoldability,
@@ -116,13 +119,35 @@ public class EmbedPreparedStatement40 extends  EmbedPreparedStatement30{
         throw Util.notImplemented();
     }
     
+    /**
+     * Requests that a PreparedStatement be pooled or not.
+     *
+     * @param poolable requests that the statement be pooled if true and that the
+     *                 statement not be pooled if false
+     * @throws SQLException if the PreparedStatement has been closed.
+     */
+
     public void setPoolable(boolean poolable)
-    throws SQLException{
-        throw Util.notImplemented();
+    throws SQLException {
+        // Assert the statement is still active (not closed)
+        checkStatus();
+
+        isPoolable = poolable;
     }
     
+    /**
+     * Returns the value of the statements poolable hint, indicating whether
+     * pooling of the statement is requested.
+     *
+     * @return The value of the statement's poolable hint.
+     * @throws SQLException if the PreparedStatement has been closed.
+     */
+
     public boolean isPoolable()
-    throws SQLException{
-        throw Util.notImplemented();
+    throws SQLException {
+        // Assert the statement is still active (not closed)
+        checkStatus();
+
+        return isPoolable;
     }
 }

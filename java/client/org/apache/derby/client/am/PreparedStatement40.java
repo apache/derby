@@ -29,6 +29,9 @@ import java.io.InputStream;
 
 public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedStatement{
     
+    // By default a PreparedStatement is poolable when it is created
+    private boolean isPoolable = true;
+
     public PreparedStatement40(Agent agent,
         Connection connection,
         String sql,
@@ -133,13 +136,59 @@ public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedSt
         throw SQLExceptionFactory.notImplemented ("setSQLXML (int, SQLXML)");
     }
     
+    /**
+     * Requests that a PreparedStatement be pooled or not.
+     *
+     * @param poolable requests that the statement be pooled if true and that the
+     *                 statement not be pooled if false
+     * @throws SQLException if the PreparedStatement has been closed.
+     */
+    
     public void setPoolable(boolean poolable)
-    throws SQLException{
-        throw SQLExceptionFactory.notImplemented ("setPoolable (boolean)");
+    throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setPoolable", poolable);
+                }
+                // Assert the statement has not been closed
+                checkForClosedStatement();
+            
+                isPoolable = poolable;        
+            }
+        }
+        catch (SqlException se)
+        {
+            throw se.getSQLException();
+        }
     }
     
+    /**
+     * Returns the value of the statements poolable hint, indicating whether
+     * pooling of the statement is requested.
+     *
+     * @return The value of the statement's poolable hint.
+     * @throws SQLException if the PreparedStatement has been closed.
+     */
+
     public boolean isPoolable()
     throws SQLException{
-        throw SQLExceptionFactory.notImplemented ("isPoolable ()");
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "isPoolable");
+                }
+                // Assert the statement has not been closed
+                checkForClosedStatement();
+            
+                return isPoolable;
+            }
+        }
+        catch (SqlException se)
+        {
+            throw se.getSQLException();
+        }
     }
 }
