@@ -162,17 +162,17 @@ public class mtTestCase
             if (("true").equalsIgnoreCase(p.getProperty("encryption"))) 
             {
                String encryptUrl = "dataEncryption=true;bootPassword=Thursday";
-               String dbUrl = p.getProperty("database");
+               String dbUrl = p.getProperty("ij.database");
                String encryptionAlgorithm = p.getProperty("encryptionAlgorithm");
                if (encryptionAlgorithm != null)
                {
                    p.setProperty(
-                       "database",
+                       "ij.database",
                        dbUrl + ";" + encryptUrl + ";" + encryptionAlgorithm);
                }
                else
                {
-                   p.setProperty("database",dbUrl + ";"+encryptUrl);
+                   p.setProperty("ij.database",dbUrl + ";"+encryptUrl);
                }
             }
             
