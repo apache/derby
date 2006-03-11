@@ -31,71 +31,127 @@ import java.sql.RowIdLifetime;
 import org.apache.derby.tools.ij;
 
 /**
- * Test of database meta-data for new methods in jdbc 30. This program simply calls
- * each of the new meta-data methods in jdbc30, one by one, and prints the results.
- *
- * @author mamta
+ * Test of database metadata for new methods in JDBC 40.
  */
-
 public class TestDbMetaData { 
 
 	public static void main(String[] args) {
-		DatabaseMetaData met;
-		Connection con;
-		Statement  s;
-    
 		try
 		{
-            // Using this for now instead of ij because ij.startJBMS()
-            // returns null for classes built against JDK 1.6
-            con = new TestConnection().createEmbeddedConnection();
+            // Using TestConnection for now instead of ij because
+            // ij.startJBMS() returns null for classes built against
+            // JDK 1.6
+            runTests(new TestConnection().createEmbeddedConnection());
+            runTests(new TestConnection().createClientConnection());
+        }
+        catch (SQLException e) {
+            dumpSQLExceptions(e);
+        }
+        catch (Throwable e) {
+            System.out.println("FAIL -- unexpected exception:");
+            e.printStackTrace(System.out);
+        }
+    }
 
-			con.setAutoCommit(true); // make sure it is true
+    // Run all the tests.
+    private static void runTests(Connection con) throws Exception {
+        testDatabaseMetaDataMethods(con);
+    }
 
-			s = con.createStatement();
-            
-			met = con.getMetaData();
+    // Simply call each new metadata method and print the result.
+    private static void testDatabaseMetaDataMethods(Connection con)
+        throws Exception
+    {
+        con.setAutoCommit(true); // make sure it is true
+        Statement s = con.createStatement();
+        DatabaseMetaData met = con.getMetaData();
 
-            if ( ! met.supportsStoredFunctionsUsingCallSyntax() ) {
-                throw new Exception("FAIL: supportsStoredFunctionsUsingCallSyntax() " +
-                    "should return true");
+        try {
+            if (!met.supportsStoredFunctionsUsingCallSyntax()) {
+                System.out.println
+                    ("FAIL: supportsStoredFunctionsUsingCallSyntax() " +
+                     "should return true");
             }
-            
-            if ( met.autoCommitFailureClosesAllResultSets() ) {
-                throw new Exception("FAIL: autoCommitFailureClosesAllResultSets() " +
-                    "should return false");
+        } catch (SQLException e) {
+            // TODO: remove try/catch once method is implemented!
+            System.out.println("supportsStoredFunctionsUsingCallSyntax():");
+            dumpSQLExceptions(e);
+        }
+
+        try {
+            if (met.autoCommitFailureClosesAllResultSets()) {
+                System.out.println
+                    ("FAIL: autoCommitFailureClosesAllResultSets() " +
+                     "should return false");
             }
-            
-            if ( met.providesQueryObjectGenerator() ) {
-                throw new Exception("FAIL: providesQueryObjectGenerator() should " +
-                    "return false");
+        } catch (SQLException e) {
+            // TODO: remove try/catch once method is implemented!
+            System.out.println("autoCommitFailureClosesAllResultSets():");
+            dumpSQLExceptions(e);
+        }
+
+        try {
+            if (met.providesQueryObjectGenerator()) {
+                System.out.println
+                    ("FAIL: providesQueryObjectGenerator() should " +
+                     "return false");
             }
-            
+        } catch (SQLException e) {
+            // TODO: remove try/catch once method is implemented!
+            System.out.println("providesQueryObjectGenerator():");
+            dumpSQLExceptions(e);
+        }
+
+        try {
             RowIdLifetime lifetime = met.getRowIdLifetime();
-            if ( lifetime != RowIdLifetime.ROWID_UNSUPPORTED ) {
-                throw new Exception("FAIL: getRowIdLifetime() should return " +
-                    "ROWID_UNSUPPORTED, but got " + lifetime );
+            if (lifetime != RowIdLifetime.ROWID_UNSUPPORTED) {
+                System.out.println("FAIL: getRowIdLifetime() should return " +
+                                   "ROWID_UNSUPPORTED, but got " + lifetime);
             }
+        } catch (SQLException e) {
+            // TODO: remove try/catch once method is implemented!
+            System.out.println("getRowIdLifetime():");
+            dumpSQLExceptions(e);
+        }
 
+        try {
 			checkEmptyRS(met.getClientInfoProperties());
+        } catch (SQLException e) {
+            // TODO: remove try/catch once method is implemented!
+            System.out.println("getClientInfoProperties():");
+            dumpSQLExceptions(e);
+        }
 
-			// Create some functions in the default schema (app) to make the output
-			// from getFunctions() and getFunctionParameters more interesting
-			s.execute("CREATE FUNCTION DUMMY1 ( X SMALLINT ) RETURNS SMALLINT "+
-					  "PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL "+
-					  "NAME 'java.some.func'");
-			s.execute("CREATE FUNCTION DUMMY2 ( X INTEGER, Y SMALLINT ) RETURNS"+
-					  " INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA "+
-					  "EXTERNAL NAME 'java.some.func'");
-			s.execute("CREATE FUNCTION DUMMY3 ( X VARCHAR(16), Y INTEGER ) "+
-					  "RETURNS VARCHAR(16) PARAMETER STYLE JAVA NO SQL LANGUAGE"+
-					  " JAVA EXTERNAL NAME 'java.some.func'");
-			s.execute("CREATE FUNCTION DUMMY4 ( X VARCHAR(128), Y INTEGER ) "+
-					  "RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE "+
-					  "JAVA EXTERNAL NAME 'java.some.func'");
+        // Create some functions in the default schema (app) to make
+        // the output from getFunctions() and getFunctionParameters
+        // more interesting
+        s.execute("CREATE FUNCTION DUMMY1 ( X SMALLINT ) RETURNS SMALLINT "+
+                  "PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL "+
+                  "NAME 'java.some.func'");
+        s.execute("CREATE FUNCTION DUMMY2 ( X INTEGER, Y SMALLINT ) RETURNS"+
+                  " INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA "+
+                  "EXTERNAL NAME 'java.some.func'");
+        s.execute("CREATE FUNCTION DUMMY3 ( X VARCHAR(16), Y INTEGER ) "+
+                  "RETURNS VARCHAR(16) PARAMETER STYLE JAVA NO SQL LANGUAGE"+
+                  " JAVA EXTERNAL NAME 'java.some.func'");
+        s.execute("CREATE FUNCTION DUMMY4 ( X VARCHAR(128), Y INTEGER ) "+
+                  "RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE "+
+                  "JAVA EXTERNAL NAME 'java.some.func'");
 
+        try {
 			checkEmptyRS(met.getFunctionParameters(null,null,null,null));
+        } catch (SQLException e) {
+            // TODO: remove try/catch once method is implemented!
+            System.out.println("getFunctionParameters():");
+            dumpSQLExceptions(e);
+        } catch (AbstractMethodError ame) {
+            // TODO: No implementation on client yet, so catch
+            // AbstractMethodError for now. Remove when implemented.
+            System.out.println("getFunctionParameters():");
+            ame.printStackTrace(System.out);
+        }
 
+        try {
 			// Any function in any schema in any catalog
 			dumpRS(met.getFunctions(null, null, null));
 			// Any function in any schema in "Dummy
@@ -111,6 +167,18 @@ public class TestDbMetaData {
 			// NO catalog (none)
 			checkEmptyRS(met.getFunctions("", "", null));
             
+        } catch (SQLException e) {
+            // TODO: remove try/catch once method is implemented!
+            System.out.println("getFunctions():");
+            dumpSQLExceptions(e);
+        } catch (AbstractMethodError ame) {
+            // TODO: No implementation on client yet, so catch
+            // AbstractMethodError for now. Remove when implemented.
+            System.out.println("getClientInfoProperties():");
+            ame.printStackTrace(System.out);
+        }
+
+        try {
             // 
             // Test the new getSchemas() with no schema qualifiers
             //
@@ -131,19 +199,16 @@ public class TestDbMetaData {
             // set when a schema is passed with no match
             //
             checkEmptyRS(met.getSchemas(null, "BLAH"));
-        
-			s.close();
+        } catch (SQLException e) {
+            // TODO: remove try/catch once method is implemented!
+            System.out.println("getSchemas():");
+            dumpSQLExceptions(e);
+        }
 
-			con.close();
+        s.close();
 
-		}
-		catch (SQLException e) {
-			dumpSQLExceptions(e);
-		}
-		catch (Throwable e) {
-			System.out.println("FAIL -- unexpected exception:");
-			e.printStackTrace(System.out);
-		}
+        con.close();
+
     }
 
 	static private void dumpSQLExceptions (SQLException se) {
