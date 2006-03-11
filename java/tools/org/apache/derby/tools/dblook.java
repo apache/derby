@@ -49,36 +49,34 @@ import org.apache.derby.impl.tools.dblook.DB_Trigger;
 import org.apache.derby.impl.tools.dblook.DB_View;
 import org.apache.derby.impl.tools.dblook.Logs;
 
-public class dblook {
+public final class dblook {
 
 	// DB2 enforces a maximum of 30 tables to be specified as part of
 	// the table list.
-	public static final int DB2_MAX_NUMBER_OF_TABLES = 30;
+	private static final int DB2_MAX_NUMBER_OF_TABLES = 30;
 
 	private Connection conn;
 	private static PreparedStatement getColNameFromNumberQuery;
 
 	// Mappings from id to name for schemas and tables (for ease
 	// of reference).
-	protected static HashMap schemaMap;
-	protected static HashMap tableIdToNameMap;
+	private static HashMap schemaMap;
+	private static HashMap tableIdToNameMap;
 
 	// Command-line Parameters.
-	protected static String sourceDBUrl;
-	protected static String ddlFileName;
-	protected static String stmtDelimiter;
-	protected static boolean appendLogs;
-	protected static ArrayList tableList;
-	protected static String schemaParam;
-	protected static String targetSchema;
-	protected static boolean skipViews;
-	protected static boolean verbose;
+	private static String sourceDBUrl;
+	private static String ddlFileName;
+	private static String stmtDelimiter;
+	private static boolean appendLogs;
+	private static ArrayList tableList;
+	private static String schemaParam;
+	private static String targetSchema;
+	private static boolean skipViews;
+	private static boolean verbose;
 	private static String sourceDBName;
 
 	private static String lookLogName = "dblook.log";
 
-	private final static String DEFAULT_LOCALE= "en";
-	private final static String DEFAULT_LOCALE_COUNTRY="US";
 	private static LocalizedResource langUtil;
 
 	/* ************************************************
@@ -341,7 +339,7 @@ public class dblook {
 	 *  path, if provided) that is referenced by the url.
 	 ****/
 
-	protected String extractDBNameFromUrl(String dbUrl) {
+	private String extractDBNameFromUrl(String dbUrl) {
 
 		if (dbUrl == null)
 		// shouldn't happen; ignore it here, as an error
@@ -804,7 +802,7 @@ public class dblook {
 	 *  false otherwise;
 	 ****/
 
-    public static final String[] ignorableSchemaNames = {
+    private static final String[] ignorableSchemaNames = {
         "SYSIBM",
         "SYS",
         "SYSVISUAL",
