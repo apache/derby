@@ -179,7 +179,7 @@ public interface DataDictionary
 	 *
 	 * @param nested true iff this is a nested data dictionary context.
 	 */
-	DataDictionaryContext pushDataDictionaryContext(ContextManager cm, boolean nested);
+	DataDictionaryContext pushDataDictionaryContext(ContextManager cm);
 
 	/**
 	 * Clear all of the DataDictionary caches.

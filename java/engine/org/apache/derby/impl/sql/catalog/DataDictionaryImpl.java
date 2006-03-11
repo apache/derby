@@ -617,7 +617,7 @@ public final class	DataDictionaryImpl
 			SanityManager.ASSERT((cm != null), "Failed to get current ContextManager");
 
 		/* push a datadictionary context onto this stack */
-		pushDataDictionaryContext(cm, false);
+		pushDataDictionaryContext(cm);
 
 		// RESOLVE other non-StandardException errors.
 		bootingTC = null;
@@ -1157,11 +1157,10 @@ public final class	DataDictionaryImpl
 	/**
 	 * @see DataDictionary#pushDataDictionaryContext
 	 */
-	public DataDictionaryContext pushDataDictionaryContext(ContextManager contextManager,
-														   boolean nested)
+	public DataDictionaryContext pushDataDictionaryContext(ContextManager contextManager)
 	{
 		DataDictionaryContextImpl dataDictionaryContextImpl =
-			new DataDictionaryContextImpl(contextManager, this, nested);
+			new DataDictionaryContextImpl(contextManager, this);
 
 		return dataDictionaryContextImpl;
 	}

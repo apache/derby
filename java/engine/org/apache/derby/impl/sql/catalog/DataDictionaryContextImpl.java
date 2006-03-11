@@ -43,11 +43,6 @@ class DataDictionaryContextImpl
 	implements DataDictionaryContext
 {
 	//
-	// True means this is a nested data dictionary. We pop a nested data dictionary
-	// when we clean up an error.
-	private final boolean nested;
-
-	//
 	// DataDictionaryContext interface
 	//
 	// we might want these to refuse to return
@@ -61,17 +56,13 @@ class DataDictionaryContextImpl
 
 	public void cleanupOnError(Throwable error)
 	{
-		if (!nested) return;
 		if (error instanceof StandardException)
 		{
 			StandardException se = (StandardException)error;
-		 	if (se.getSeverity() >= ExceptionSeverity.STATEMENT_SEVERITY)
-				popMe();
+		 	if (se.getSeverity() < ExceptionSeverity.SESSION_SEVERITY)
+				return;
 		}
-		else
-		{
-			popMe();
-		}
+		popMe();
 	}
 
 	//
@@ -81,14 +72,12 @@ class DataDictionaryContextImpl
 	// to be saved when the context
 	// is created
 	
-	DataDictionaryContextImpl(ContextManager cm, DataDictionary dataDictionary,
-									 boolean nested)
+	DataDictionaryContextImpl(ContextManager cm, DataDictionary dataDictionary)
 	{
 		super(cm, DataDictionaryContext.CONTEXT_ID);
 
 		this.dataDictionary = dataDictionary;
-		this.nested = nested;
 	}
 
-	DataDictionary			dataDictionary;
+	final DataDictionary			dataDictionary;
 }

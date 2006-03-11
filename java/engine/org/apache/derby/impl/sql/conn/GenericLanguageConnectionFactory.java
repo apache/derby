@@ -273,7 +273,7 @@ public class GenericLanguageConnectionFactory
 
 	protected void pushDataDictionaryContext(ContextManager cm) {
 		// we make sure there is a data dictionary context in place.
-		dd.pushDataDictionaryContext(cm, false);
+		dd.pushDataDictionaryContext(cm);
 	}
 
 	/*
