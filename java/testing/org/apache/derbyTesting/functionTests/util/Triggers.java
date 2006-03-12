@@ -30,11 +30,7 @@ import java.math.BigInteger;
  */
 public class Triggers
 {
-
-	// used for threading test
-	static TriggerThread triggerThread;
-
-	public Triggers()
+	private Triggers()
 	{
 	}
 
@@ -197,32 +193,6 @@ public class Triggers
 		s.close();
 	}
 
-	// WARNING: will deadlock unless on a separate
-	// connection
-	public static void notifyDMLDone() throws Throwable
-	{
-		if (triggerThread == null)
-		{
-			System.out.println("ERROR: no triggerThread object, has beginInvalidRefToTECTest() been executed?");
-		}
-		else
-		{
-			triggerThread.goForIt();
-			while (!triggerThread.done())
-			{
-				try {Thread.sleep(1000L); } catch (InterruptedException e) {}
-			}
-			triggerThread = null;
-		}
-	}
-
-	public static String beginInvalidRefToTECTest() throws Throwable
-	{
-		triggerThread = new TriggerThread();
-		triggerThread.start();
-		return "";
-	}
-
 	public static long returnPrimLong(long  x)
 	{
 		return x;
@@ -234,104 +204,4 @@ public class Triggers
 	}
 
 
-}
-
-// class for testing valid tec accesses	
-class TriggerThread extends Thread
-{	
-	private TriggerExecutionContext tec;
-	private ResultSet rs;
-	private boolean start; 
-	private boolean done; 
-
-	public TriggerThread() throws Throwable
-	{
-		this.tec = Factory.getTriggerExecutionContext();
-		if (tec == null)
-		{
-			System.out.println("ERROR: no tec found, no trigger appears to be active");
-			return;
-		}
-	
-		this.rs = (tec.getNewRowSet() == null) ?
-			tec.getOldRowSet() :
-			tec.getNewRowSet();
-	}
-
-	public void goForIt()
-	{
-		start = true;
-	}
-
-	public boolean done()
-	{
-		return done;
-	}
-
-	public void run() 
-	{
-		boolean gotException = false;
-	
-		int i;	
-		for (i = 0; !start && i < 1000; i++)
-		{
-			try {Thread.sleep(50L); } catch (InterruptedException e) {}
-		} 
-		if (i == 1000)
-		{
-			System.out.println("ERROR: start never received");
-			return;
-		}
-		// let the other thread get to its pause point
-		try {Thread.sleep(5000L); } catch (InterruptedException e) {}
-
-		System.out.println("...nested thread running using expired tec");
-		try
-		{
-			System.out.println("...trying to loop through stale result set");
-			Triggers.zipThroughRs(rs);
-		} catch (SQLException e)
-		{
-			gotException = true;	
-			System.out.println("Got expected exception: "+e);
-		}
-		if (!gotException)
-		{
-			System.out.println("ERROR: no exception when trying to do next on stale ResultSet");
-		}
-		gotException = false;
-
-		try
-		{	
-			tec.getNewRowSet();
-		} catch (SQLException e)
-		{
-			gotException = true;	
-			System.out.println("Got expected exception: "+e);
-		}
-
-		if (!gotException)
-		{
-			System.out.println("ERROR: getNewRowSet() didn't throw an exception on stale tec");
-		}
-
-		gotException = false;
-
-		try
-		{	
-			tec.getOldRowSet();
-		} catch (SQLException e)
-		{
-			gotException = true;	
-			System.out.println("Got expected exception: "+e);
-		}
-
-		if (!gotException)
-		{
-			System.out.println("ERROR: getOldRowSet() didn't throw an exception on stale tec");
-		}
-
-		// signal that we are done
-		done = true;
-	}
 }

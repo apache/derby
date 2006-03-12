@@ -7,12 +7,6 @@ create function triggerFiresMin(s varchar(128)) returns varchar(1) PARAMETER STY
 ij> create function triggerFires(s varchar(128)) returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
   EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.triggerFires';
 0 rows inserted/updated/deleted
-ij> create function begInvRefToTECTest() returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
-  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.beginInvalidRefToTECTest';
-0 rows inserted/updated/deleted
-ij> create procedure notifyDMLDone() PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
-  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.notifyDMLDone';
-0 rows inserted/updated/deleted
 ij> drop table x;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'X' because it does not exist.
 ij> create table x (x int, y int, z int, constraint ck1 check (x > 0));
@@ -682,36 +676,6 @@ ij> drop table trigtable1;
 0 rows inserted/updated/deleted
 ij> drop table trighistory;
 0 rows inserted/updated/deleted
-ij> -- 
--- Lets make sure that the tec cannot be accessed once
--- the dml that caused it to be pushed is finished.
---
-drop table t;
-0 rows inserted/updated/deleted
-ij> create table t (x int);
-0 rows inserted/updated/deleted
-ij> create trigger t no cascade before insert on t for each statement mode db2sql
-	values app.begInvRefToTECTest();
-0 rows inserted/updated/deleted
-ij> -- causes the trigger to fire, which causes a thread
--- to be cranked up
-insert into t values 1;
-1 row inserted/updated/deleted
-ij> -- tell the background thread that dml is done,
--- it will now try to do some stuff with the stale
--- tec.  We MUST do this in a different thread lest
--- we block the background thread on connection 
--- synchronization
-connect 'wombat' as conn2;
-ij(CONN2)> call app.notifyDMLDone();
-...nested thread running using expired tec
-...trying to loop through stale result set
-Got expected exception: SQL Exception: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
-Got expected exception: java.sql.SQLException: Statement closed.
-Got expected exception: java.sql.SQLException: Statement closed.
-0 rows inserted/updated/deleted
-ij(CONN2)> disconnect;
-ij> set connection connection0;
 ij> -- Test for bug 3495 - triggers were causing deferred insert, which
 -- caused the insert to use a TemporaryRowHolderImpl. This was not
 -- being re-initialized properly when closed, and it was trying to

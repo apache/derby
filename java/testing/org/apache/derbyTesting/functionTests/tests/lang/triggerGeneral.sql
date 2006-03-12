@@ -6,10 +6,6 @@ create function triggerFiresMin(s varchar(128)) returns varchar(1) PARAMETER STY
   EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.triggerFiresMinimal';
 create function triggerFires(s varchar(128)) returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
   EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.triggerFires';
-create function begInvRefToTECTest() returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
-  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.beginInvalidRefToTECTest';
-create procedure notifyDMLDone() PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
-  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.notifyDMLDone';
 
 drop table x;
 create table x (x int, y int, z int, constraint ck1 check (x > 0));
@@ -369,30 +365,6 @@ update trigtable1 set c1 = 11, c2 = 11;
 select * from trighistory;
 drop table trigtable1;
 drop table trighistory;
-
--- 
--- Lets make sure that the tec cannot be accessed once
--- the dml that caused it to be pushed is finished.
---
-drop table t;
-create table t (x int);
-create trigger t no cascade before insert on t for each statement mode db2sql
-	values app.begInvRefToTECTest();
-
--- causes the trigger to fire, which causes a thread
--- to be cranked up
-insert into t values 1;
-
--- tell the background thread that dml is done,
--- it will now try to do some stuff with the stale
--- tec.  We MUST do this in a different thread lest
--- we block the background thread on connection 
--- synchronization
-connect 'wombat' as conn2;
-call app.notifyDMLDone();
-disconnect;
-
-set connection connection0;
 
 -- Test for bug 3495 - triggers were causing deferred insert, which
 -- caused the insert to use a TemporaryRowHolderImpl. This was not
