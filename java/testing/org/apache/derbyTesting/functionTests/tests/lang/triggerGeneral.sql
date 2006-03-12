@@ -2,8 +2,6 @@
 -- General trigger test
 --
 
-create function printTriggerInfo() returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
-  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.printTriggerInfo';
 create function triggerFiresMin(s varchar(128)) returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
   EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Triggers.triggerFiresMinimal';
 create function triggerFires(s varchar(128)) returns varchar(1) PARAMETER STYLE JAVA LANGUAGE JAVA NO SQL
@@ -154,43 +152,7 @@ set schema app;
 -- ok this time
 drop schema test restrict;
 
---
--- Test the information in the trigger information context
---
 create table t (x int, y int, c char(1));
-create trigger t1 NO CASCADE before insert on t for each statement mode db2sql
-	values app.printTriggerInfo();
-insert into t values (1,1,'1');
-
-delete from t;
-drop trigger t1;
-create trigger t1 after insert on t for each statement mode db2sql
-	values app.printTriggerInfo();
-insert into t values (1,1,'1');
-
-drop trigger t1;
-create trigger t1 NO CASCADE before update on t for each statement mode db2sql
-	values app.printTriggerInfo();
-update t set x = 2;
-update t set y = 2, c = '2';
-
-drop trigger t1;
-create trigger t1 after update on t for each statement mode db2sql
-	values app.printTriggerInfo();
-update t set x = 3;
-update t set y = 3, c = '3';
-
-drop trigger t1;
-create trigger t1 no cascade before delete on t for each statement mode db2sql
-	values app.printTriggerInfo();
-delete from t;
-drop trigger t1;
-
-insert into t values(3,3,'3');
-create trigger t1 after delete on t for each statement mode db2sql
-	values app.printTriggerInfo();
-delete from t;
-drop trigger t1;
 
 --
 -- Test trigger firing order
@@ -265,40 +227,6 @@ delete from t;
 drop trigger t1;
 drop trigger t2;
 drop table x;
-
-
---
--- After alter table, should pick up the new columns
---
-create table talt(c1 int);
-create trigger tins after insert on talt for each statement mode db2sql
-	values app.printTriggerInfo();
-create trigger tdel no cascade before delete on talt for each row mode db2sql
-	values app.printTriggerInfo();
-create trigger tupd after update on talt for each statement mode db2sql
-	values app.printTriggerInfo();
-insert into talt values (1);
-alter table talt add column cnew int default null;
-select * from talt;
-
-insert into talt values (2,2);
-delete from talt;
-insert into talt values (3,3);
-update talt set cnew = 666;
-drop trigger tins;
-drop trigger tdel;
-drop trigger tupd;
-
--- make sure update w/ columns doesn't pick up new col
-create trigger tupd after update of c1 on talt for each statement mode db2sql
-	values app.printTriggerInfo();
-alter table talt add column cnew2 int default null;
-insert into talt values (1,1,1);
-update talt set cnew2 = 666;
-
--- clean up
-drop table talt;
-
 
 --
 -- Trigger ordering wrt constraints
