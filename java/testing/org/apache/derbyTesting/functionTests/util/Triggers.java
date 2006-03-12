@@ -118,33 +118,12 @@ public class Triggers
 	}
 
 	// used for performance numbers
-	public static void zipThroughTriggerResultSets() throws SQLException
-	{
-		TriggerExecutionContext tec = Factory.getTriggerExecutionContext();
-		zipThroughRs(tec.getOldRowSet());
-		zipThroughRs(tec.getNewRowSet());
-	}
-
-	// used for performance numbers
 	static void zipThroughRs(ResultSet s) throws SQLException
 	{
 		if (s == null)
 			return;
 		
 		while (s.next()) ;
-	}
-
-	public static void barfOnInsertEquals(int value) throws Throwable
-	{
-		TriggerExecutionContext tec = Factory.getTriggerExecutionContext();
-		ResultSet rs = tec.getNewRowSet();
-		while (rs.next())
-		{
-			if (rs.getInt(1) == value)
-			{
-				throw new SQLException("barfing because of "+value+" in BeforeResultSet","38001");
-			}
-		}
 	}
 
 	private static void printTriggerChanges() throws Throwable
@@ -237,63 +216,6 @@ public class Triggers
 		}
 	}
 
-	public static void simpleTrigger() throws Throwable
-	{
-		Long ai;
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
-		
-		PreparedStatement lastai = conn.prepareStatement("values org.apache.derby.iapi.db.ConnectionInfo::lastAutoincrementValue('APP', 'TRIGTEST', 'S1') ");
-		
-		ResultSet rs = lastai.executeQuery();
-		rs.next();
-		ai = (Long)rs.getObject(1);
-		rs.close();
-		System.out.println("autoincrement value is " + ai);
-	}
-	/**
-	 */
-	public static void insertIntoTab1(Integer level)
-	      throws Throwable	
-	{
-		Long entry, exit;
-		int levelValue = level.intValue();
-		long entryValue, exitValue;
-
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
-		
-		PreparedStatement lastai = conn.prepareStatement("values (org.apache.derby.iapi.db.ConnectionInfo::lastAutoincrementValue('APP','TAB1','S1'))");
-		ResultSet rs = lastai.executeQuery();
-		rs.next();
-		entry = (Long)rs.getObject(1);
-		rs.close();
-
-		System.out.println("coming in with level = " + levelValue + 
-						   " and autoincrement = " + entry.longValue());
-		
-		if (levelValue == 3)
-			return;
-
-		
-		PreparedStatement ps = 
-			conn.prepareStatement("insert into tab1 (lvl) values (?)");
-		// insert one higher value into tab1.
-		ps.setInt(1, levelValue + 1);
-		ps.execute();
-		
-		rs = lastai.executeQuery();
-		rs.next();
-		exit = (Long)rs.getObject(1);
-		rs.close();
-
-		// When we get out of this trigger, subsequent firings of the trigger by the
-		// insert statement in this routine shouldn't be returned by
-		// lastautoincrement value.
-
-		System.out.println("going out with level = " + levelValue + 
-						   " and autoincrement = " + exit.longValue());
-
-	}
-
 	public static String beginInvalidRefToTECTest() throws Throwable
 	{
 		triggerThread = new TriggerThread();
@@ -311,58 +233,6 @@ public class Triggers
 		return x;
 	}
 
-	// used to test binding
-	public static void allTypesMethodPrimitive
-	(
-		int 		i,
-		byte		by,	
-		short		s,
-		long		l,
-		String		s1,
-		String		s2,
-		String		s3,
-		boolean		bl,
-		double		db,
-		float		f1,
-		double		db2,
-		Date		dt,
-		Time		t,
-		Timestamp	ts,
-		byte[]		b1,
-		byte[]		b2,
-		byte[]		b3,
-		double		bd1,
-		double		bd2,
-		BigInteger	bi
-	)
-	{
-	}
-
-	public static void allTypesMethodObject
-	(
-		Integer		i,
-		Integer		by,	
-		Integer		s,
-		Long		l,
-		String		s1,
-		String		s2,
-		String		s3,
-		Boolean		bl,
-		Double		db,
-		Float		f1,
-		Double		db2,
-		Date		dt,
-		Time		t,
-		Timestamp	ts,
-		byte[]		b1,
-		byte[]		b2,
-		byte[]		b3,
-		BigDecimal	bd1,
-		BigDecimal	bd2,
-		BigInteger	bi
-	)
-	{
-	}
 
 }
 
