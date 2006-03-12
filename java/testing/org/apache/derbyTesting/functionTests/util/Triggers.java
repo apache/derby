@@ -40,7 +40,6 @@ public class Triggers
 
 	public static String triggerFiresMinimal(String string) throws Throwable
 	{
-		TriggerExecutionContext tec = Factory.getTriggerExecutionContext();
 		System.out.println("TRIGGER: " + "<"+string+">");
 		return "";
 	}
@@ -154,91 +153,6 @@ public class Triggers
 						"TARGET: workUnitFires" : isReplicationSource() ?
 								"SOURCE: workUnitFires" : 
 								"<error, not in rep context?!?>"));
-	}
-
-	public static String printTriggerInfo() throws Throwable
-	{
-		TriggerExecutionContext tec = Factory.getTriggerExecutionContext();
-		int eventType = tec.getEventType();
-		String eventName;
-
-		switch (eventType)
-		{
-			case TriggerExecutionContext.UPDATE_EVENT: 
-					eventName = "UPDATE";
-					break;
-
-			case TriggerExecutionContext.DELETE_EVENT: 
-					eventName = "DELETE";
-					break;
-
-			case TriggerExecutionContext.INSERT_EVENT: 
-					eventName = "INSERT";
-					break;
-			default:
-				throw new Throwable("unexpected event type: "+eventType);
-		}			
-
-		StringBuffer strbuf = new StringBuffer("TriggerInformation\n------------------\n");
-		strbuf.append("getEventStatetmentText(): "+tec.getEventStatementText());
-		strbuf.append("\ngetEventType(): "+eventName);
-		strbuf.append("\ngetModifiedColumns(): {");
-
-		String[] modifiedCols = tec.getModifiedColumns();
-		if (modifiedCols == null)
-		{
-			strbuf.append(" <all> }");
-		}
-		else
-		{
-			for (int i = 0; i < modifiedCols.length; i++)
-			{
-				if (i > 0)
-					strbuf.append(", ");
-				strbuf.append(modifiedCols[i]);
-			}
-			strbuf.append("}");
-		}
-		strbuf.append("\n");
-		strbuf.append(getModifiedColumnsCheckInfo(tec));
-		System.out.println(strbuf.toString());
-		printTriggerChanges();
-		return "";
-	}
-
-	private static String getModifiedColumnsCheckInfo(TriggerExecutionContext tec) throws Throwable
-	{
-		ResultSet rs = (tec.getNewRowSet() == null) ?
-					tec.getOldRowSet() :
-					tec.getNewRowSet();
-
-		ResultSetMetaData rsmd = rs.getMetaData();
-
-		// Get the number of columns in the result set
-		int numCols = rsmd.getColumnCount();
-
-		StringBuffer msg = new StringBuffer("wasColumnModified() on each column\n\t");
-		for (int i=1; i<=numCols; i++) 
-		{
-			if (i > 1) 
-			{
-				msg.append("\n\t");
-			}
-			msg.append(rsmd.getColumnLabel(i));
-			msg.append(":\t");
-			boolean wasModified = tec.wasColumnModified(rsmd.getColumnLabel(i));
-			if (wasModified != tec.wasColumnModified(i))
-			{
-				msg.append("ERROR: tec.wasColumnModifed(String) = "+wasModified);
-				msg.append("and tec.wasColumnModifed(int) = "+(!wasModified));
-			}
-			else
-			{
-				msg.append(wasModified);
-			}
-		}
-		msg.append("\n");
-		return msg.toString();
 	}
 
 	// used for performance numbers
