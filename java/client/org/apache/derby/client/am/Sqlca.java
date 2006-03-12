@@ -24,7 +24,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 public abstract class Sqlca {
     transient protected Connection connection_;
-    java.sql.SQLException exceptionThrownOnStoredProcInvocation_;
+    SqlException exceptionThrownOnStoredProcInvocation_;
     boolean messageTextRetrievedContainsTokensOnly_ = true;
 
     // data corresponding to SQLCA fields
@@ -262,7 +262,7 @@ public abstract class Sqlca {
                 return getMessage();
             } catch (SqlException e) {
                 // Invocation of stored procedure fails, so we return error message tokens directly.
-                exceptionThrownOnStoredProcInvocation_ = e.getSQLException();
+                exceptionThrownOnStoredProcInvocation_ = e;
                 chainDeferredExceptionsToAgentOrAsConnectionWarnings((SqlException) e);
                 return getUnformattedMessage();
             }

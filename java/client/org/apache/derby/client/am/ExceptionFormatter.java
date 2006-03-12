@@ -65,7 +65,7 @@ public class ExceptionFormatter {
                         if (!sqlca.messageTextRetrievedContainsTokensOnly_) { // got the message text.
                             printWriter.println(header + " Message    = " + message);
                         } else { // got only message tokens.
-                            java.sql.SQLException mysteryException = sqlca.exceptionThrownOnStoredProcInvocation_;
+                            SqlException mysteryException = sqlca.exceptionThrownOnStoredProcInvocation_;
                             if (mysteryException != null &&
                                     (mysteryException.getErrorCode() == -440 || mysteryException.getErrorCode() == -444)) {
                                 printWriter.println(header + " Unable to obtain message text from server." +
