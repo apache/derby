@@ -52,27 +52,6 @@ public class Triggers
 		return "";
 	}
 
-	public static void triggerFiresRep(String string) throws Throwable
-	{	
-		String preface = isReplicationTarget() ? 
-						"TARGET: " : isReplicationSource() ?
-								"SOURCE: " : "<not in rep context>" ;
-		TriggerExecutionContext tec = Factory.getTriggerExecutionContext();
-		System.out.println(preface + "<"+string+"> on statement "+tec.getEventStatementText());
-		printTriggerChanges();
-	}
-
-	public static boolean isReplicationTarget() throws Throwable
-	{
-		String repTargetProp = PropertyInfo.getDatabaseProperty("derby.engineType");
-		return (repTargetProp != null && repTargetProp.equals("8"));
-	}
-	public static boolean isReplicationSource() throws Throwable
-	{
-		String repSourceProp = PropertyInfo.getDatabaseProperty("derby.engineType");
-		return (repSourceProp != null && repSourceProp.equals("4"));
-	}
-
 	public static int doNothingInt() throws Throwable
 	{
 		return 1;
@@ -136,23 +115,6 @@ public class Triggers
 		}
 		stmt.close();
 		conn.close();
-	}
-
-	public static void doConnStmt(String text, boolean targetOnly) throws Throwable
-	{
-		if (isReplicationTarget() == targetOnly)
-		{
-			System.out.println("Trigger Executing: "+text);
-			doConnStmt(text);
-		}
-	}
-
-	public static void workUnitFires() throws Throwable
-	{
-		System.out.println((isReplicationTarget() ? 
-						"TARGET: workUnitFires" : isReplicationSource() ?
-								"SOURCE: workUnitFires" : 
-								"<error, not in rep context?!?>"));
 	}
 
 	// used for performance numbers
@@ -330,18 +292,6 @@ public class Triggers
 		System.out.println("going out with level = " + levelValue + 
 						   " and autoincrement = " + exit.longValue());
 
-	}
-
-
-	public static void aiWorkUnit(String s)
-	       	      throws Throwable	
-	{
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
-		String query = "insert into watab (s) values (?)";
-		PreparedStatement ps = conn.prepareStatement(query);
-		System.out.println("in work unit with s=" + s);
-		ps.setString(1, s);
-		ps.execute();
 	}
 
 	public static String beginInvalidRefToTECTest() throws Throwable
