@@ -21,7 +21,6 @@
 package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -33,29 +32,45 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 public class StatementSchemaPermission extends StatementPermission
 {
-	protected UUID schemaUUID;
+	protected String schemaName;
+	protected String aid;
+	protected boolean privType;
 
-	public StatementSchemaPermission(UUID schemaUUID)
+	public StatementSchemaPermission(String schemaName, String aid, boolean privType)
 	{
-		this.schemaUUID = schemaUUID;
+		this.schemaName = schemaName;
+		this.aid 	= aid;
+		this.privType	= privType;
 	}
 
 	/**
-	 * @param tc the TransactionController
-	 * @param dd A DataDictionary
-	 * @param authorizationId A user
+	 * @param tc		the TransactionController
+	 * @param dd 		A DataDictionary
+	 * @param authid	authorizationId
 	 * @param forGrant
 	 *
 	 * @exception StandardException if schema authorization not granted
 	 */
 	public void check(TransactionController tc,
 					   DataDictionary dd,
-					   String authorizationId,
+					   String authid,
 					   boolean forGrant) throws StandardException
 	{
-		SchemaDescriptor sd = dd.getSchemaDescriptor(schemaUUID, tc);
-		if (!authorizationId.equals(sd.getAuthorizationId()))
-			throw StandardException.newException(SQLState.AUTH_NO_ACCESS_NOT_OWNER,
-				 authorizationId, sd.getSchemaName());
+		if (privType == Authorizer.MODIFY_SCHEMA_PRIV)
+		{
+			SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, true);
+			if (!authid.equals(sd.getAuthorizationId()))
+				throw StandardException.newException(
+					SQLState.AUTH_NO_ACCESS_NOT_OWNER, authid, schemaName);
+		}
+		else
+		{
+			// Non-DBA Users can only create schemas that match their authid
+			// Also allow only DBA to set authid to another user
+			// Note that for DBA, check interface wouldn't be called at all
+			if (!schemaName.equals(authid) || (aid != null && !aid.equals(authid)))
+				throw StandardException.newException(
+					SQLState.AUTH_NOT_DATABASE_OWNER, authid, schemaName);
+		}
 	}
 }

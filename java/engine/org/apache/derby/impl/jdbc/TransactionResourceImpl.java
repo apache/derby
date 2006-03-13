@@ -37,6 +37,7 @@ import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.iapi.util.IdUtil;
 
 import java.util.Properties;
 import java.sql.SQLException;
@@ -142,10 +143,7 @@ public final class TransactionResourceImpl
 		// into the properties if its getConnection(url, string, string)
 		// interface is used.  Thus, we look there first.
 		// Default to APP.
-		username = info.getProperty(Attribute.USERNAME_ATTR,
-									Property.DEFAULT_USER_NAME);
-		if (username.equals(""))
-			username = Property.DEFAULT_USER_NAME;
+		username = IdUtil.getUserNameFromURLProps(info);
 
 		drdaID = info.getProperty(Attribute.DRDAID_ATTR, null);
 

@@ -27,6 +27,7 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -227,15 +228,18 @@ abstract class DDLStatementNode extends StatementNode
 		if (sd == null) {
 			/* Disable creating schemas starting with SYS */
 			if (schemaName.startsWith("SYS"))
-				throw StandardException.newException(SQLState.LANG_NO_USER_DDL_IN_SYSTEM_SCHEMA,
-					statementToString(), schemaName);
+				throw StandardException.newException(
+					SQLState.LANG_NO_USER_DDL_IN_SYSTEM_SCHEMA,
+					statementToString(),
+					schemaName);
 
 			sd  = new SchemaDescriptor(getDataDictionary(), schemaName,
 				(String) null, (UUID)null, false);
 		}
 
 		if (ownerCheck)
-			getCompilerContext().addRequiredSchemaPriv(sd);
+			getCompilerContext().addRequiredSchemaPriv(sd.getSchemaName(), null,
+						Authorizer.MODIFY_SCHEMA_PRIV);
 
 		/*
 		** Catch the system schema here.

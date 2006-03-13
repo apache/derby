@@ -259,6 +259,13 @@ public interface DataDictionary
 	public DataDescriptorGenerator	getDataDescriptorGenerator();
 
 	/**
+	 * Get authorizationID of DBA
+	 *
+	 * @return	authorizationID
+	 */
+	public String getAuthorizationDBA();
+
+	/**
  	  *	Get the tabinfo of a system catalog. Paw through the tabinfo arrays looking for the tabinfo
  	  *	corresponding to this table name.
  	  *

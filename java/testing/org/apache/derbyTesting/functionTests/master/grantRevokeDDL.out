@@ -130,8 +130,8 @@ ij(SATCONNECTION)> CREATE SCHEMA AUTHORIZATION DERBY;
 ij(SATCONNECTION)> select * from sys.sysschemas where schemaname not like 'SYS%';
 SCHEMAID                            |SCHEMANAME                                                                                                                      |AUTHORIZATIONID                                                                                                                 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-xxxxFILTERED-UUIDxxxx|NULLID                                                                                                                          |DBA                                                                                                                             
-xxxxFILTERED-UUIDxxxx|SQLJ                                                                                                                            |DBA                                                                                                                             
+xxxxFILTERED-UUIDxxxx|NULLID                                                                                                                          |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|SQLJ                                                                                                                            |SATHEESH                                                                                                                        
 xxxxFILTERED-UUIDxxxx|APP                                                                                                                             |APP                                                                                                                             
 xxxxFILTERED-UUIDxxxx|SATHEESH                                                                                                                        |SATHEESH                                                                                                                        
 xxxxFILTERED-UUIDxxxx|AUTH_TEST                                                                                                                       |SATHEESH                                                                                                                        
@@ -337,4 +337,86 @@ ij(SWIPERCONNECTION)> select f_abs(-4) from sys.systables where tablename like '
 4          
 4          
 2 rows selected
-ij(SWIPERCONNECTION)> 
+ij(SWIPERCONNECTION)> -- Test schema creation authorization checks
+set connection swiperConnection;
+ij(SWIPERCONNECTION)> -- Negative tests. Should all fail
+create schema myFriend;
+ERROR 2850E: User 'SWIPER' can not create schema 'MYFRIEND'. Only database owner could issue this statement.
+ij(SWIPERCONNECTION)> create schema mySchema authorization me;
+ERROR 2850E: User 'SWIPER' can not create schema 'MYSCHEMA'. Only database owner could issue this statement.
+ij(SWIPERCONNECTION)> create schema myschema authorization swiper;
+ERROR 2850E: User 'SWIPER' can not create schema 'MYSCHEMA'. Only database owner could issue this statement.
+ij(SWIPERCONNECTION)> connect 'grantRevokeDDL;user=sam';
+ij(CONNECTION0)> create schema sam authorization swiper;
+ERROR 2850E: User 'SAM' can not create schema 'SAM'. Only database owner could issue this statement.
+ij(CONNECTION0)> -- Should pass
+create schema authorization sam;
+0 rows inserted/updated/deleted
+ij(CONNECTION0)> connect 'grantRevokeDDL;user=george';
+ij(CONNECTION1)> create schema george;
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> -- Now try as DBA (satheesh)
+set connection satConnection;
+ij(SATCONNECTION)> create schema myFriend;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> create schema mySchema authorization me;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> create schema authorization testSchema;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> select * from sys.sysschemas;
+SCHEMAID                            |SCHEMANAME                                                                                                                      |AUTHORIZATIONID                                                                                                                 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+xxxxFILTERED-UUIDxxxx|SYSIBM                                                                                                                          |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|SYS                                                                                                                             |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|SYSCAT                                                                                                                          |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|SYSFUN                                                                                                                          |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|SYSPROC                                                                                                                         |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|SYSSTAT                                                                                                                         |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|NULLID                                                                                                                          |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|SQLJ                                                                                                                            |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|SYSCS_DIAG                                                                                                                      |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|SYSCS_UTIL                                                                                                                      |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|APP                                                                                                                             |APP                                                                                                                             
+xxxxFILTERED-UUIDxxxx|SATHEESH                                                                                                                        |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|AUTH_TEST                                                                                                                       |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|MYDODO                                                                                                                          |DODO                                                                                                                            
+xxxxFILTERED-UUIDxxxx|DERBY                                                                                                                           |DERBY                                                                                                                           
+xxxxFILTERED-UUIDxxxx|SWIPER                                                                                                                          |SWIPER                                                                                                                          
+xxxxFILTERED-UUIDxxxx|SAM                                                                                                                             |SAM                                                                                                                             
+xxxxFILTERED-UUIDxxxx|GEORGE                                                                                                                          |GEORGE                                                                                                                          
+xxxxFILTERED-UUIDxxxx|MYFRIEND                                                                                                                        |SATHEESH                                                                                                                        
+xxxxFILTERED-UUIDxxxx|MYSCHEMA                                                                                                                        |ME                                                                                                                              
+xxxxFILTERED-UUIDxxxx|TESTSCHEMA                                                                                                                      |TESTSCHEMA                                                                                                                      
+21 rows selected
+ij(SATCONNECTION)> -- Check if DBA can ignore all privilege checks
+set connection swiperConnection;
+ij(SWIPERCONNECTION)> set schema swiper;
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> create table swiperTab (i int, j int);
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> insert into swiperTab values (1,1);
+1 row inserted/updated/deleted
+ij(SWIPERCONNECTION)> revoke select on swiperTab from satheesh;
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> revoke insert on swiperTab from satheesh;
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> set connection satConnection;
+ij(SATCONNECTION)> -- Should still work, as satheesh is DBA
+select * from swiper.swiperTab;
+I          |J          
+-----------------------
+1          |1          
+1 row selected
+ij(SATCONNECTION)> insert into swiper.swiperTab values (2,2);
+1 row inserted/updated/deleted
+ij(SATCONNECTION)> select * from swiper.swiperTab;
+I          |J          
+-----------------------
+1          |1          
+2          |2          
+2 rows selected
+ij(SATCONNECTION)> grant select on swiper.swiperTab to sam;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> revoke insert on swiper.swiperTab from satheesh;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> 

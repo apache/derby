@@ -48,6 +48,7 @@ import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.util.IdUtil;
 
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
@@ -203,8 +204,9 @@ public	class DD_Version implements	Formatable
 		tc.commit();
 
 		if (performMajorUpgrade) {
-			// real upgrade changes.
-			doFullUpgrade( tc, dictionaryVersion.majorVersionNumber );
+			// real upgrade changes. Get user name of current user.
+			String userName = IdUtil.getUserNameFromURLProps(startParams);
+			doFullUpgrade(tc, dictionaryVersion.majorVersionNumber,IdUtil.getUserAuthorizationId(userName));
 		}
 
 		if (!minorOnly && !isReadOnly) {
@@ -301,10 +303,11 @@ public	class DD_Version implements	Formatable
 	  *
 	  * @param	tc	transaction controller
 	  * @param	fromMajorVersionNumber	version of the on-disk database
+	  * @param	aid						AuthorizationID of current user to be made DBA
 	  *
 	  *	@exception StandardException  Standard Cloudscape error policy.
 	  */
-	private	void	doFullUpgrade(TransactionController tc, int fromMajorVersionNumber)
+	private	void	doFullUpgrade(TransactionController tc, int fromMajorVersionNumber, String aid)
 		throws StandardException
 	{
 		// Only supports upgrade from Derby 10.0 releases onwards
@@ -360,11 +363,17 @@ public	class DD_Version implements	Formatable
                 tc, 
                 bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
 
+			if (SanityManager.DEBUG)
+				SanityManager.ASSERT((aid != null), "Failed to get new DBA authorization");
+
 			// Add new system catalogs created for grant and revoke
 			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSTABLEPERMS_CATALOG_NUM);
 			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSCOLPERMS_CATALOG_NUM);
 			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSROUTINEPERMS_CATALOG_NUM);
 			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSREQUIREDPERM_CATALOG_NUM);
+
+			// Change system schemas to be owned by aid
+			bootingDictionary.updateSystemSchemaAuthorization(aid, tc);
         }
         
 	}

@@ -31,6 +31,9 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
@@ -98,6 +101,20 @@ public class CreateSchemaNode extends DDLStatementNode
 		}
 	}
 
+	/**
+	 * Bind this createSchemaNode. Main work is to create a StatementPermission
+	 * object to require CREATE_SCHEMA_PRIV at execution time.
+	 */
+	public QueryTreeNode bind() throws StandardException
+	{
+		super.bind();
+
+		CompilerContext cc = getCompilerContext();
+		cc.addRequiredSchemaPriv(name, aid, Authorizer.CREATE_SCHEMA_PRIV);
+
+		return this;
+	}
+	
 	public String statementToString()
 	{
 		return "CREATE SCHEMA";

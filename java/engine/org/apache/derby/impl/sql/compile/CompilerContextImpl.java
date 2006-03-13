@@ -786,12 +786,13 @@ public class CompilerContextImpl extends ContextImpl
 	 *
 	 * @param SchemaDescriptor
 	 */
-	public void addRequiredSchemaPriv(SchemaDescriptor sd)
+	public void addRequiredSchemaPriv(String schemaName, String aid, boolean privType)
 	{
-		if( requiredSchemaPrivileges == null || sd == null)
+		if( requiredSchemaPrivileges == null || schemaName == null)
 			return;
 
-		StatementSchemaPermission key = new StatementSchemaPermission(sd.getUUID());
+		StatementSchemaPermission key = new 
+				StatementSchemaPermission(schemaName, aid, privType);
 
 		requiredSchemaPrivileges.put(key, key);
 	}

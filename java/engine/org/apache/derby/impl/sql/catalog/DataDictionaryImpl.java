@@ -132,6 +132,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.locks.ShExLockable;
 import org.apache.derby.iapi.services.locks.ShExQual;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.iapi.util.IdUtil;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -327,6 +328,8 @@ public final class	DataDictionaryImpl
 	private DD_Version  dictionaryVersion;
 	/** Dictionary version of the currently running engine */
 	private DD_Version  softwareVersion;
+
+	private String authorizationDBA;
 
 	/*
 	** This property and value are written into the database properties
@@ -636,7 +639,9 @@ public final class	DataDictionaryImpl
 			DataDescriptorGenerator ddg = getDataDescriptorGenerator();
 	
 			if (create) {
-
+				String userName = IdUtil.getUserNameFromURLProps(startParams);
+				authorizationDBA = IdUtil.getUserAuthorizationId(userName);
+			
 				// create any required tables.
 				createDictionaryTables(startParams, bootingTC, ddg);
 				//create procedures for network server metadata
@@ -662,8 +667,14 @@ public final class	DataDictionaryImpl
 			} else {
 				// Get the ids for non-core tables
 				loadDictionaryTables(bootingTC, ddg, startParams);
+				SchemaDescriptor sd = locateSchemaRow(SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME,
+								 bootingTC);
+				authorizationDBA = sd.getAuthorizationId();
 			}
 					
+			if (SanityManager.DEBUG)
+				SanityManager.ASSERT((authorizationDBA != null), "Failed to get DBA authorization");
+
 			/* Commit & destroy the create database */
 			bootingTC.commit();
 			cm.getContext(ExecutionContext.CONTEXT_ID).popMe(); // done with ctx
@@ -1131,6 +1142,16 @@ public final class	DataDictionaryImpl
 	public DataDescriptorGenerator	getDataDescriptorGenerator()
 	{
 		return dataDescriptorGenerator;
+	}
+
+	/**
+	 * Get authorizationID of DBA
+	 *
+	 * @return	authorizationID
+	 */
+	public String getAuthorizationDBA()
+	{
+		return authorizationDBA;
 	}
 
 	/**
@@ -5355,6 +5376,78 @@ public final class	DataDictionaryImpl
 	}
 
 	/**
+	 * Update all system schemas to have new authorizationId. This is needed
+	 * while upgrading pre-10.2 databases to 10.2 or later versions. From 10.2,
+	 * all system schemas would be owned by database owner's authorizationId.
+	 *
+	 * @param aid							AuthorizationID of DBA
+	 * @param tc							TransactionController to use
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void updateSystemSchemaAuthorization(String aid,
+												TransactionController tc)
+		throws StandardException
+	{
+		updateSchemaAuth(SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME, aid, tc);
+		updateSchemaAuth(SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME, aid, tc);
+
+		updateSchemaAuth(SchemaDescriptor.IBM_SYSTEM_CAT_SCHEMA_NAME, aid, tc);
+		updateSchemaAuth(SchemaDescriptor.IBM_SYSTEM_FUN_SCHEMA_NAME, aid, tc);
+		updateSchemaAuth(SchemaDescriptor.IBM_SYSTEM_PROC_SCHEMA_NAME, aid, tc);
+		updateSchemaAuth(SchemaDescriptor.IBM_SYSTEM_STAT_SCHEMA_NAME, aid, tc);
+		updateSchemaAuth(SchemaDescriptor.IBM_SYSTEM_NULLID_SCHEMA_NAME, aid, tc);
+
+		updateSchemaAuth(SchemaDescriptor.STD_SQLJ_SCHEMA_NAME, aid, tc);
+		updateSchemaAuth(SchemaDescriptor.STD_SYSTEM_DIAG_SCHEMA_NAME, aid, tc);
+		updateSchemaAuth(SchemaDescriptor.STD_SYSTEM_UTIL_SCHEMA_NAME, aid, tc);
+	}
+
+	/**
+	 * Update authorizationId of specified schemaName
+	 *
+	 * @param schemaName			Schema Name of system schema
+	 * @param authorizationId		authorizationId of new schema owner
+	 * @param tc					The TransactionController to use
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void updateSchemaAuth(String schemaName,
+								 String authorizationId,
+								 TransactionController tc)
+		throws StandardException
+	{
+		ExecIndexRow				keyRow;
+		DataValueDescriptor			schemaNameOrderable;
+		TabInfo						ti = coreInfo[SYSSCHEMAS_CORE_NUM];
+
+		/* Use schemaNameOrderable in both start 
+		 * and stop position for index 1 scan. 
+		 */
+		schemaNameOrderable = dvf.getVarcharDataValue(schemaName);
+
+		/* Set up the start/stop position for the scan */
+		keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
+		keyRow.setColumn(1, schemaNameOrderable);
+
+		SYSSCHEMASRowFactory	rf = (SYSSCHEMASRowFactory) ti.getCatalogRowFactory();
+		ExecRow row = rf.makeEmptyRow();
+
+		row.setColumn(SYSSCHEMASRowFactory.SYSSCHEMAS_SCHEMAAID,
+					  dvf.getVarcharDataValue(authorizationId));
+
+		boolean[] bArray = {false, true};
+
+		int[] colsToUpdate = {SYSSCHEMASRowFactory.SYSSCHEMAS_SCHEMAAID};
+
+		ti.updateRow(keyRow, row,
+					 SYSSCHEMASRowFactory.SYSSCHEMAS_INDEX2_ID,
+					 bArray,
+					 colsToUpdate,
+					 tc);
+	}
+
+	/**
 	 * Update the conglomerateNumber for an array of ConglomerateDescriptors.
 	 * In case of more than one ConglomerateDescriptor, they are for duplicate
 	 * indexes sharing one conglomerate.
@@ -6139,7 +6232,7 @@ public final class	DataDictionaryImpl
             new SchemaDescriptor(
                 this, 
                 convertIdToLower ? schema_name.toLowerCase() : schema_name, 
-                SchemaDescriptor.SA_USER_NAME,
+                authorizationDBA,
                 uuidFactory.recreateUUID(schema_uuid),
                 true);
 
@@ -8103,7 +8196,7 @@ public final class	DataDictionaryImpl
         return new SchemaDescriptor(
                 this,
                 name,
-                SchemaDescriptor.SA_USER_NAME,
+                authorizationDBA,
                 uuidFactory.recreateUUID(uuid),
                 true);
     }
@@ -8112,7 +8205,7 @@ public final class	DataDictionaryImpl
     {
         return new SchemaDescriptor(this,
                                         name,
-                                        SchemaDescriptor.SA_USER_NAME,
+                						authorizationDBA,
                                         (UUID) null,
                                         false);
     }

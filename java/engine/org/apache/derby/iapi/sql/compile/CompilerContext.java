@@ -533,7 +533,7 @@ public interface CompilerContext extends Context
 	 *
 	 * @param schemaDescriptor
 	 */
-	public void addRequiredSchemaPriv( SchemaDescriptor sd);
+	public void addRequiredSchemaPriv(String schema, String aid, boolean privType);
 
 	/**
 	 * Add a routine execute privilege to the list of used routine privileges.

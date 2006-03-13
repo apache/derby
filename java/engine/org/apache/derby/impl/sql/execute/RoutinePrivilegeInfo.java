@@ -66,7 +66,8 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 		// Check that the current user has permission to grant the privileges.
 		checkOwnership( currentUser,
 						aliasDescriptor,
-						dd.getSchemaDescriptor( aliasDescriptor.getSchemaUUID(), tc));
+						dd.getSchemaDescriptor( aliasDescriptor.getSchemaUUID(), tc),
+						dd);
 		
 		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 

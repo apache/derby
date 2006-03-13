@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.execute;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.reference.SQLState;
@@ -49,24 +50,28 @@ public abstract class PrivilegeInfo
 		throws StandardException;
 
 	/**
-	 * Determines whether a user is the owner of an object (table, function, or procedure).
+	 * Determines whether a user is the owner of an object
+	 * (table, function, or procedure).
 	 *
 	 * @param user
 	 * @param objectDescriptor
 	 * @param sd
+	 * @param DataDictionary
 	 *
 	 * @exception StandardException if user does not own the object
 	 */
 	protected void checkOwnership( String user,
 								   TupleDescriptor objectDescriptor,
-								   SchemaDescriptor sd)
+								   SchemaDescriptor sd,
+								   DataDictionary dd)
 		throws StandardException
 	{
-		if( ! user.equals( sd.getAuthorizationId()))
-			throw StandardException.newException( SQLState.AUTH_NOT_OWNER,
-												  user,
-												  objectDescriptor.getDescriptorType(),
-												  sd.getSchemaName(),
-												  objectDescriptor.getDescriptorName());
+		if (!user.equals(sd.getAuthorizationId()) &&
+				!user.equals(dd.getAuthorizationDBA()))
+			throw StandardException.newException(SQLState.AUTH_NOT_OWNER,
+									  user,
+									  objectDescriptor.getDescriptorType(),
+									  sd.getSchemaName(),
+									  objectDescriptor.getDescriptorName());
 	}
 }

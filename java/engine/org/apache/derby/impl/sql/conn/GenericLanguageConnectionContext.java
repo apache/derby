@@ -309,7 +309,11 @@ public class GenericLanguageConnectionContext
 									Property.DEFAULT_CONNECTION_MODE_PROPERTY);
 		if (modeS != null &&
 			 StringUtil.SQLEqualsIgnoreCase(modeS, Property.SQL_STANDARD_ACCESS))
+		{
+			// Raise error if DD version is not less than 10.2
+			getDataDictionary().checkVersion(DataDictionary.DD_VERSION_DERBY_10_2, "sqlAuthorization");
 			usesSqlPermissions = true;
+		}
 
 		setRunTimeStatisticsMode(logQueryPlan);
 
@@ -331,7 +335,7 @@ public class GenericLanguageConnectionContext
 	{
 		//
 		//Creating the authorizer authorizes the connection.
-		authorizer = new GenericAuthorizer(getAuthorizationId(userName),this, sqlConnection);
+		authorizer = new GenericAuthorizer(IdUtil.getUserAuthorizationId(userName),this, sqlConnection);
 
 		//we can ignore the following if this is a database connection
 		//associated with internal thread such as logSniffer and StageTrunc
@@ -3098,19 +3102,6 @@ public class GenericLanguageConnectionContext
 	public Activation getLastActivation()
 	{
 		return (Activation)acts.lastElement();
-	}
-
-	/**
-		Set the authorization identifier for this user.
-	*/
-	protected String getAuthorizationId(String userName)
-		throws StandardException {
-		try {
-			return IdUtil.parseId(userName);
-		}
-		catch (StandardException se) {
-			throw StandardException.newException(SQLState.AUTH_INVALID_USER_NAME, userName);
-		}
 	}
 
 	public StringBuffer appendErrorInfo() {

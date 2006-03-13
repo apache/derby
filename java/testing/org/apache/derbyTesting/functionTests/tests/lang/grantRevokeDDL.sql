@@ -261,3 +261,52 @@ values f_abs(-5);
 
 select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
 
+-- Test schema creation authorization checks
+
+set connection swiperConnection;
+
+-- Negative tests. Should all fail
+create schema myFriend;
+create schema mySchema authorization me;
+create schema myschema authorization swiper;
+
+connect 'grantRevokeDDL;user=sam';
+create schema sam authorization swiper;
+
+-- Should pass
+create schema authorization sam;
+
+connect 'grantRevokeDDL;user=george';
+create schema george;
+
+-- Now try as DBA (satheesh)
+set connection satConnection;
+
+create schema myFriend;
+create schema mySchema authorization me;
+create schema authorization testSchema;
+
+select * from sys.sysschemas;
+
+-- Check if DBA can ignore all privilege checks
+
+set connection swiperConnection;
+
+set schema swiper;
+create table swiperTab (i int, j int);
+insert into swiperTab values (1,1);
+
+revoke select on swiperTab from satheesh;
+
+revoke insert on swiperTab from satheesh;
+
+set connection satConnection;
+
+-- Should still work, as satheesh is DBA
+select * from swiper.swiperTab;
+insert into swiper.swiperTab values (2,2);
+select * from swiper.swiperTab;
+
+grant select on swiper.swiperTab to sam;
+revoke insert on swiper.swiperTab from satheesh;
+

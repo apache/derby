@@ -90,7 +90,7 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 		TransactionController tc = lcc.getTransactionExecute();
 
 		// Check that the current user has permission to grant the privileges.
-		checkOwnership( currentUser, td, td.getSchemaDescriptor());
+		checkOwnership( currentUser, td, td.getSchemaDescriptor(), dd);
 		
 		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 

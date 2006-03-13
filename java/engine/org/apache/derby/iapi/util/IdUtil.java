@@ -20,12 +20,16 @@
 
 package org.apache.derby.iapi.util;
 
+import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.error.StandardException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Vector;
 import java.util.HashSet;
+import java.util.Properties;
+
 /**
   Utility class for parsing and producing string representations of
   ids. This class supports both delimited and un-delimited ids.
@@ -463,6 +467,36 @@ public abstract class IdUtil
 			return mkIdList(a);
 		else
 			return mkIdListAsEntered(a);
+	}
+
+	/**
+	 * Map userName to authorizationId
+	 * 
+	 * @exception StandardException on error
+	 */
+	public static String getUserAuthorizationId(String userName) throws StandardException
+	{
+		try {
+			return parseId(userName);
+		}
+		catch (StandardException se) {
+			throw StandardException.newException(SQLState.AUTH_INVALID_USER_NAME, userName);
+		}
+	}
+
+	/**
+	 * Get user name from URL properties. Handles the case of "" user.
+	 * 
+	 * @exception StandardException on error
+	 */
+	public static String getUserNameFromURLProps(Properties params)
+	{
+		String userName = params.getProperty(Attribute.USERNAME_ATTR,
+							Property.DEFAULT_USER_NAME);
+		if (userName.equals(""))
+			userName = Property.DEFAULT_USER_NAME;
+
+		return userName;
 	}
 
 	/**

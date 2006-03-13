@@ -143,13 +143,15 @@ implements Authorizer
 			if (SanityManager.DEBUG)
 				SanityManager.THROWASSERT("Bad operation code "+operation);
 		}
-
         if( activation != null)
         {
-			List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
-            if( requiredPermissionsList != null && ! requiredPermissionsList.isEmpty())
+            List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
+            DataDictionary dd = lcc.getDataDictionary();
+
+            // DBA can access any object. Ignore requiredPermissionsList for DBA
+            if( requiredPermissionsList != null && ! requiredPermissionsList.isEmpty() && 
+				!authorizationId.equals(dd.getAuthorizationDBA()))
             {
-                DataDictionary dd = lcc.getDataDictionary();
                 TransactionController tc = activation.getTransactionController();
                 for( Iterator iter = requiredPermissionsList.iterator();
                      iter.hasNext();)

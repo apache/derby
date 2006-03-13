@@ -58,6 +58,10 @@ public interface Authorizer
 	public static final int EXECUTE_PRIV = 6;
 	public static final int PRIV_TYPE_COUNT = 7;
 
+	/* Used to check who can create schemas or who can modify objects in schema */
+	public static final boolean CREATE_SCHEMA_PRIV = false;
+	public static final boolean MODIFY_SCHEMA_PRIV = true;
+
 	/**
 	 * The system authorization ID is defined by the SQL2003 spec as the grantor
 	 * of privileges to object owners.
