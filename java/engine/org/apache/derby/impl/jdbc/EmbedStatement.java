@@ -275,7 +275,7 @@ public class EmbedStatement extends ConnectionChild
 
 	// allow sub-classes to execute additional close
 	// logic while holding the synchronization.
-	protected void closeActions() throws SQLException {
+	void closeActions() throws SQLException {
 	}
 
     //----------------------------------------------------------------------
@@ -939,8 +939,10 @@ public class EmbedStatement extends ConnectionChild
 		checkStatus();
 
     	java.sql.Connection appConn = getEmbedConnection().getApplicationConnection();
-		if ((appConn != applicationConnection) || (appConn == null))
+		if ((appConn != applicationConnection) || (appConn == null)) {
+
 			throw Util.noCurrentConnection();
+        }
 		return appConn;
     }
 
@@ -995,8 +997,7 @@ public class EmbedStatement extends ConnectionChild
 
 
 				try {
-					if (!lrs.isClosed)
-						lrs.close();
+					lrs.close();
 				} catch (SQLException sqle) {
 					if (se == null)
 						se = sqle;
@@ -1241,7 +1242,7 @@ public class EmbedStatement extends ConnectionChild
 
 	//check the status of this statement, if it has already been closed,
     //we throw an exception, need to be called by every public method
-    protected final void checkStatus() throws SQLException {
+    final void checkStatus() throws SQLException {
 
 		if (!active)
 			throw newSQLException(SQLState.ALREADY_CLOSED, "Statement");
@@ -1261,7 +1262,7 @@ public class EmbedStatement extends ConnectionChild
 		// getConnection() checks if the Statement is closed
 		if (!getConnection().isClosed())
 			return;
-	
+              	
 		throw Util.noCurrentConnection();
 	}
 
@@ -1305,8 +1306,7 @@ public class EmbedStatement extends ConnectionChild
 					continue;
 
 				try {
-					if (!lrs.isClosed)
-						lrs.close();
+					lrs.close();
 				} catch (SQLException sdynamic) {
 					if (sqle == null)
 						sqle = sdynamic;

@@ -102,7 +102,17 @@ public abstract class EmbedResultSet extends ConnectionChild
 	//deleteRow & updateRow make rowData null so that ResultSet is not positioned on deleted/updated row.
 	private DataValueDescriptor[] rowData;
 	protected boolean wasNull;
-	protected boolean isClosed;
+    
+    /**
+     * Set if this ResultSet is definitely closed.
+     * If the connection has been closed, or the database
+     *  or system shutdown but the ResultSet has not been
+     *  closed explictly then this may be false. Once
+     *  this object detects the connection is closed
+     *  isClosed will be set to true.
+     */
+    boolean isClosed;
+    
 	private boolean isOnInsertRow;
 	private ExecRow currentRowBeforeInsert;
 	private ExecRow insertRow = null;
@@ -3966,7 +3976,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * Documented behaviour for streams is that they are implicitly closed on
 	 * the next get*() method call.
 	 */
-	protected final void closeCurrentStream() {
+	private final void closeCurrentStream() {
 
 		if (currentStream != null) {
 			try {
@@ -3995,20 +4005,33 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *
 	 * @exception SQLException		Thrown if this ResultSet is closed.
 	 */
-	protected final void checkIfClosed(String operation) throws SQLException {
+	final void checkIfClosed(String operation) throws SQLException {
 		if (isClosed) {
 			throw newSQLException(SQLState.LANG_RESULT_SET_NOT_OPEN, operation);
 		}
 	}
 
-	protected final void checkExecIfClosed(String operation) throws SQLException {
+    /**
+     * Throw an exception if this ResultSet is closed or its
+     * Connection has been closed. If the ResultSet has not
+     * been explictly closed but the Connection is closed,
+     * then this ResultSet will be marked as closed.
+     */
+	final void checkExecIfClosed(String operation) throws SQLException {
 		
 		checkIfClosed(operation);
 
 		java.sql.Connection appConn = getEmbedConnection().getApplicationConnection();
 
-		if ((appConn == null) || appConn.isClosed())
+        // Currently disconnected, i.e. a detached gobal transaction
+        if (appConn == null)
+            throw Util.noCurrentConnection();
+            
+		if (appConn.isClosed()) {
+            closeCurrentStream();
+            isClosed = true;
 			throw Util.noCurrentConnection();
+        }
 	}
     
 	/**
@@ -4045,7 +4068,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	/*
 	 * close result set if we have a transaction level error 
 	 */
-	protected final SQLException closeOnTransactionError(Throwable thrownException) throws SQLException
+	final SQLException closeOnTransactionError(Throwable thrownException) throws SQLException
 	{
 		SQLException sqle = handleException(thrownException);
 		if (thrownException instanceof StandardException)

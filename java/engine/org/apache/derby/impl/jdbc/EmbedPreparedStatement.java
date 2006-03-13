@@ -200,7 +200,7 @@ public abstract class EmbedPreparedStatement
 
 		@exception SQLException	thrown on failure
 	 */
-	protected void closeActions() throws SQLException {
+	void closeActions() throws SQLException {
 
 		//we release the resource for preparedStatement
 		preparedStatement = null;
