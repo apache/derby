@@ -113,8 +113,10 @@ public class CompilerContextImpl extends ContextImpl
 			// REVISIT: do we want instead to remove it,
 			// so the cache doesn't get full of garbage input
 			// that won't even parse?
+            
+            int severity = se.getSeverity();
 
-			if (se.getSeverity() < ExceptionSeverity.SYSTEM_SEVERITY) 
+			if (severity < ExceptionSeverity.SYSTEM_SEVERITY) 
 			{
 				if (currentDependent != null)
 				{
@@ -126,6 +128,9 @@ public class CompilerContextImpl extends ContextImpl
 			}
 			// anything system or worse, or non-DB errors,
 			// will cause the whole system to shut down.
+            
+            if (severity >= ExceptionSeverity.SESSION_SEVERITY)
+                popMe();
 		}
 
 	}

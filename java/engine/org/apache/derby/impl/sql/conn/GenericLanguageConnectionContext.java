@@ -181,8 +181,8 @@ public class GenericLanguageConnectionContext
 	 * invocation, though we still push and pop it as needed.  All other
      * statement contexts will allocated and pushed and popped on demand.
      */
-	protected StatementContext[] statementContexts = new StatementContext[2];
-	protected int     statementDepth;
+	private final StatementContext[] statementContexts = new StatementContext[2];
+	private int     statementDepth;
 	protected int	  outermostTrigger = -1;
 
     protected Authorizer authorizer;
@@ -2037,9 +2037,14 @@ public class GenericLanguageConnectionContext
 				if (statementDepth <= 0)
 					SanityManager.THROWASSERT(
 						"statement depth expected to be >0, was "+statementDepth);
+                
+                if (getContextManager().getContext(statementContext.getIdName()) != statementContext)
+                {
+                    SanityManager.THROWASSERT("trying to pop statement context from middle of stack");
+                }
 			}
 
-			getContextManager().getContext(org.apache.derby.iapi.reference.ContextId.LANG_STATEMENT).popMe();		
+            statementContext.popMe();		
 		}
 
 	}
@@ -2615,16 +2620,23 @@ public class GenericLanguageConnectionContext
 		if (statementContexts[0] != null)
 		{
 			statementContexts[0].clearInUse();
+            
+            // Force the StatementContext that's normally
+            // left on the stack for optimization to be popped
+            // when the session is closed. Ensures full cleanup
+            // and no hanging refrences in the ContextManager.
+            if (severity >= ExceptionSeverity.SESSION_SEVERITY)
+                statementContexts[0].popMe();
 		}
 		if (statementContexts[1] != null)
 		{
-			statementContexts[1].clearInUse();
+			statementContexts[1].clearInUse();                
 		}
 
 		// closing the activations closes all the open cursors.
 		// the activations are, for all intents and purposes, the
 		// cursors.
-		if (severity == ExceptionSeverity.SESSION_SEVERITY) 
+		if (severity >= ExceptionSeverity.SESSION_SEVERITY) 
 		{
 			for (int i = acts.size() - 1; i >= 0; i--) {
 				// it maybe the case that a reset()/close() ends up closing
@@ -2636,11 +2648,7 @@ public class GenericLanguageConnectionContext
 				a.reset();
 				a.close();
 			}
-			popMe();
-		}
-
-		else if (severity > ExceptionSeverity.SESSION_SEVERITY)
-		{
+                       
 			popMe();
 		}
 
