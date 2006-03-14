@@ -1262,7 +1262,11 @@ public class EmbedStatement extends ConnectionChild
 		// getConnection() checks if the Statement is closed
 		if (!getConnection().isClosed())
 			return;
-              	
+        
+        // Now this connection is closed for all
+        // future use.
+        active = false;
+        	
 		throw Util.noCurrentConnection();
 	}
 
