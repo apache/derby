@@ -352,8 +352,8 @@ abstract class BaseMonitor
 				addDebugFlags(applicationProperties.getProperty(Monitor.DEBUG_TRUE), true);
 			}
 
-			addDebugFlags(System.getProperty(Monitor.DEBUG_FALSE), false);
-			addDebugFlags(System.getProperty(Monitor.DEBUG_TRUE), true);
+			addDebugFlags(PropertyUtil.getSystemProperty(Monitor.DEBUG_FALSE), false);
+			addDebugFlags(PropertyUtil.getSystemProperty(Monitor.DEBUG_TRUE), true);
 		}
 
 		try {

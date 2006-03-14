@@ -82,10 +82,6 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   // BUG DERBY-622 derbynet/sysinfo.java
   permission java.io.FilePermission "${derbyTesting.codedir}${/}*", "read";
   
-  // BUG DERBY-623 - sane=true
-  permission java.util.PropertyPermission "derby.monitor.verbose", "read";
-  permission java.util.PropertyPermission "derby.debug.*", "read";
-  
   // sane=true, jdbcapi/secureUsers1.sql
   permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
 
