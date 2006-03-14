@@ -371,6 +371,30 @@ class Database
 				}
 		return s;
 	}
+
+    /**
+     * This method resets the state of this Database object so that it can
+     * be re-used.
+     * Note: currently this method resets the variables related to security
+     * mechanisms that have been investigated as needing a reset.  
+     * TODO: Investigate what all variables in this class need to be 
+     * reset when this database object is re-used on a connection pooling or
+     * transaction pooling. see DRDAConnThread.parseACCSEC (CodePoint.RDBNAM)
+     * where database object is re-used on a connection reset.
+     */
+    public void reset()
+    {
+        // Reset variables for connection re-use. Currently only takes care
+        // of reset the variables that affect EUSRIDPWD security mechanism.  (DERBY-1080)
+        decryptedUserId = null;
+        decryptedPassword = null;
+        publicKeyIn = null;
+        publicKeyOut = null;
+        userId = null;
+        password = null;
+        securityMechanism = 0;
+    }
+        
 }
 
 

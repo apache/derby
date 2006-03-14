@@ -28,6 +28,8 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.DriverManager;
 import javax.sql.DataSource;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
 
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.tools.ij;
@@ -43,11 +45,39 @@ import java.lang.reflect.*;
 /**
  * This class tests the security mechanisms supported by Network Server
  * Network server supports SECMEC_EUSRIDPWD, SECMEC_USRIDPWD, SECMEC_USRIDONL
- * Note  - currently the SECMEC_EUSRIDPWD does not work with all versions of ibm142
- * because of the following reason
- * The DiffieHelman algorithm that is used here uses a prime of 32bytes and this is not 
- * supported by Sun JCE , but is supported in ibm141 and some latest versions of ibm142
- *
+ * 
+ * Key points: 
+ * 1)Server and client support encrypted userid/password (EUSRIDPWD) via the
+ * use of Diffie Helman key-agreement protocol - however current Open Group DRDA
+ * specifications imposes small prime and base generator values (256 bits) that
+ * prevents other JCE's to be used as java cryptography providers - typical
+ * minimum security requirements is usually of 1024 bits (512-bit absolute
+ * minimum) when using DH key-agreement protocol to generate a session key.
+ * 
+ * (Reference: DDM manual, page 281 and 282. Section: Generating the shared
+ * private key. DRDA's diffie helman agreed public values for prime are 256
+ * bits. The spec gives the public values for the prime, generator and the size
+ * of exponent required for DH . These values must be used as is to generate a
+ * shared private key.)
+ * 
+ * Encryption is done using JCE. Hence JCE support of the necessary algorithm is
+ * required for a particular security mechanism to work. Thus even though the
+ * server and client have code to support EUSRIDPWD, this security mechanism
+ * will not work in all JVMs.
+ * 
+ * JVMs where support for DH(32byte prime) is not available and thus EUSRIDPWD
+ * wont work are Sun JVM (versions 1.3.1,1.4.1,1.4.2,1.5) and IBM JVM (versions
+ * 1.3.1 and some old versions of 1.4.2 (in 2004) )
+ * 
+ * JVMs where support for DH(32bytes prime) is available and thus EUSRIDPWD will
+ * work are IBM JVM [versions 1.4.1, later versions of 1.4.2 (from 2005), 1.5]
+ * 
+ * #2) JCC 2.6 client does some automatic upgrade of security mechanism in one
+ * case. Logic is  as follows:
+ * If client sends USRIDPWD to server and server rejects this
+ * and says it accepts only EUSRIDPWD, in that case JCC 2.6 will upgrade the 
+ * security mechanism to EUSRIDPWD and retry the request with EUSRIDPWD.
+ * This switching will also override the security mechanism specified by user.
  */
 public class testSecMec extends dataSourcePermissions_net
 
@@ -283,6 +313,8 @@ public class testSecMec extends dataSourcePermissions_net
 
 		getConnectionUsingDataSource();
 
+        // regression test for DERBY-1080
+        testDerby1080();
 	}
 
         /*
@@ -380,4 +412,147 @@ public class testSecMec extends dataSourcePermissions_net
         }
     }
 
+    /**
+     * Test a deferred connection reset. When connection pooling is done
+     * and connection is reset, the client sends EXCSAT,ACCSEC and followed
+     * by SECCHK and ACCRDB. Test if the security mechanism related information
+     * is correctly reset or not. This method was added to help simulate regression 
+     * test for DERBY-1080. It is called from testDerby1080   
+     * @param user username 
+     * @param password password for connection
+     * @param secmec security mechanism for datasource
+     * @throws Exception
+     */
+    public void testSecMecWithConnPooling(String user, String password,
+            Short secmec) throws Exception
+    {
+        System.out.println("withConnectionPooling");
+        Connection conn;
+        String securityMechanismProperty = "SecurityMechanism";
+        Class[] argType = { Short.TYPE };
+        String methodName = TestUtil.getSetterName(securityMechanismProperty);
+        Object[] args = new Short[1];
+        args[0] = secmec;
+        
+        ConnectionPoolDataSource cpds = getCPDS("wombat", user,password);
+        
+        // call setSecurityMechanism with secmec.
+        Method sh = cpds.getClass().getMethod(methodName, argType);
+        sh.invoke(cpds, args);
+        
+        // simulate case when connection will be re-used by getting 
+        // a connection, closing it and then the next call to
+        // getConnection will re-use the previous connection.  
+        PooledConnection pc = cpds.getPooledConnection();
+        conn = pc.getConnection();
+        conn.close();
+        conn = pc.getConnection();
+        test(conn);
+        conn.close();
+        System.out.println("OK");
+    }
+    /**
+     * Test a connection by executing a sample query
+     * @param   conn    database connection
+     * @throws Exception if there is any error
+     */
+    public void test(Connection conn)
+        throws Exception
+    {
+
+      Statement stmt = null;
+      ResultSet rs = null;
+      try
+      {
+        // To test our connection, we will try to do a select from the system catalog tables
+        stmt = conn.createStatement();
+        rs = stmt.executeQuery("select count(*) from sys.systables");
+        while(rs.next())
+            System.out.println(" query ok ");
+
+      }
+      catch(SQLException sqle)
+      {
+          System.out.println("SQLException when querying on the database connection; "+ sqle);
+          throw sqle;
+      }
+      finally
+      {
+          if(rs != null)
+            rs.close();
+          if(stmt != null)
+            stmt.close();
+      }
+    }
+
+    
+    
+    /**
+     * This is a regression test for DERBY-1080 - where some variables required
+     * only for the EUSRIDPWD security mechanism case were not getting reset on
+     * connection re-use and resulting in protocol error.
+     * 
+     * Read class level comments (#1) to understand what is specified by drda
+     * spec for EUSRIDPWD.  
+     * <br>
+     * Encryption is done using JCE. Hence JCE support of the necessary
+     * algorithm is required for EUSRIDPWD security mechanism to work. Thus
+     * even though the server and client have code to support EUSRIDPWD, this
+     * security mechanism will not work in all JVMs. 
+     * 
+     * JVMs where support for DH(32byte prime) is not available and thus EUSRIDPWD 
+     * wont work are Sun JVM (versions 1.3.1,1.4.1,1.4.2,1.5) and 
+     * IBM JVM (versions 1.3.1 and some old versions of 1.4.2 (in 2004) )
+     * 
+     * Expected behavior for this test:
+     * If no regression has occurred, this test should work OK, given the 
+     * expected exception in following cases:
+     * 1) When EUSRIDPWD is not supported in JVM the test is running, a CNFE
+     * with initializing EncryptionManager will happen. This will happen for 
+     * Sun JVM (versions 1.3.1,1.4.1,1.4.2,1.5) and 
+     * IBM JVM (versions 1.3.1 and some old versions of 1.4.2 (in 2004) )
+     * For JCC clients, error message is   
+     * "java.lang.ClassNotFoundException is caught when initializing
+     * EncryptionManager 'IBMJCE'"
+     * For derby client, the error message is 
+     * "Security exception encountered, see next exception for details."
+     * 2)If server does not accept EUSRIDPWD security mechanism from clients,then
+     * error message will be "Connection authorization failure
+     * occurred. Reason: security mechanism not supported"
+     * Note: #2 can happen if server is started with derby.drda.securityMechanism
+     * and thus restricts what security mechanisms the client can connect with.
+     * This will happen for the test run when derby.drda.securityMechanism is set and 
+     * to some valid value other than ENCRYPTED_USER_AND_PASSWORD_SECURITY.
+     * <br>
+     * See RunTest where this method is called to test for regression for DERBY-1080.
+     * Also see main method to check if server is using the derby.drda.securityMechanism to 
+     * restrict client connections based on security mechanism.
+     */
+    public void testDerby1080()
+    {
+        try
+        {
+            System.out.println("Test DERBY-1080");
+            // simulate connection re-set using connection pooling on a pooled datasource
+            // set security mechanism to use encrypted userid and password.
+            testSecMecWithConnPooling("peter","neelima",new Short(SECMEC_EUSRIDPWD));
+        }
+        catch (SQLException sqle)
+        {
+            // Exceptions expected in certain case hence printing message instead of stack traces
+            // here. 
+            // - For cases where the jvm does not support EUSRIDPWD.
+            // - For case if server doesnt accept connection with this security mechanism
+            // Please see javadoc comments for this test method for more details of expected
+            // exceptions.
+            System.out.println("DERBY-1080  EXCEPTION ()  " + sqle.getMessage());
+            dumpSQLException(sqle.getNextException());
+        }
+        catch (Exception e)
+        {
+            System.out.println("UNEXPECTED EXCEPTION!!!" );
+            e.printStackTrace();
+        }
+
+    }
 }

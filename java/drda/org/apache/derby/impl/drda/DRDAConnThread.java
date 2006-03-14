@@ -1617,7 +1617,12 @@ class DRDAConnThread extends Thread {
 					if (d == null)
 						addDatabase(dbname);
 					else
+                    {
+                        
+                        // reset database for connection re-use 
+                        d.reset();
 						database = d;
+                    }
 					break;
 				//optional - depending on security Mechanism 
 				case CodePoint.SECTKN:

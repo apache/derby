@@ -9,6 +9,10 @@ T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4;
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4;
 SECMEC_USRIDPWD: OK
+Test DERBY-1080
+withConnectionPooling
+ query ok 
+OK
 -----
 Testing with derby.drda.securityMechanism=USER_ONLY_SECURITY
 Checking security mechanism authentication with DriverManager
@@ -20,6 +24,9 @@ T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4;
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4;
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+Test DERBY-1080
+withConnectionPooling
+DERBY-1080  EXCEPTION ()  Connection authorization failure occurred.  Reason: security mechanism not supported
 -----
 Testing with derby.drda.securityMechanism=CLEAR_TEXT_PASSWORD_SECURITY
 Checking security mechanism authentication with DriverManager
@@ -31,6 +38,9 @@ T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 SECMEC_USRIDPWD: OK
+Test DERBY-1080
+withConnectionPooling
+DERBY-1080  EXCEPTION ()  Connection authorization failure occurred.  Reason: security mechanism not supported
 -----
 Testing with derby.drda.securityMechanism=ENCRYPTED_USER_AND_PASSWORD_SECURITY
 Checking security mechanism authentication with DriverManager
@@ -42,6 +52,10 @@ T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+Test DERBY-1080
+withConnectionPooling
+ query ok 
+OK
 -----
 Testing with derby.drda.securityMechanism=INVALID_VALUE
 EXPECTED EXCEPTION DRDA_InvalidValue.U:Invalid value, INVALID_VALUE, for derby.drda.securityMechanism.
