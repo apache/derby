@@ -823,6 +823,20 @@ public class scrollCursors2 {
 		rs.close();
 
 
+		// Empty result set tests (DERBY-992)
+		rs = s_i_r.executeQuery("select * from t where 1=0");
+		rs.afterLast();
+		if (rs.isAfterLast()) {
+			System.out.println("afterLast() on empty RS should be no-op");
+		}
+		
+		rs.beforeFirst(); 
+		if (rs.isBeforeFirst()) {
+			System.out.println("beforeFirst() on empty RS should be no-op");
+		}
+
+		rs.close();
+
 		// Scroll insensitive and updatable
 		s_i_u = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 									 ResultSet.CONCUR_UPDATABLE);

@@ -239,6 +239,10 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
                     return null;
 		}
 
+		if (seenLast && row > lastPosition) {
+		   return setAfterLastRow();
+		}		
+
 		if (row > 0)
 		{
 			// position is from the start of the result set
@@ -423,6 +427,10 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		if (!isOpen)
 			throw StandardException.newException(SQLState.LANG_RESULT_SET_NOT_OPEN, "next");
 
+		if (seenLast && currentPosition == lastPosition) {
+		   return setAfterLastRow();
+		}
+
 		/* Should we get the next row from the source or the hash table? */
 		if (currentPosition == positionInSource)
 		{
@@ -600,8 +608,15 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		{
 			getLastRow();
 		}
-		currentPosition = lastPosition + 1;
-		afterLast = true;
+		if (lastPosition == 0) {
+		   // empty rs special case
+		   currentPosition = 0;
+		   afterLast = false;
+		} else {
+		   currentPosition = lastPosition + 1;
+		   afterLast = true;
+		}
+
 		beforeFirst = false;
 		currentRow = null;
 		return null;
