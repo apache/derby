@@ -1,0 +1,198 @@
+initial Connection holdable HOLD_CURSORS_OVER_COMMIT 1
+singleConnectionOnePhaseCommit
+XA Connection holdable CLOSE_CURSORS_AT_COMMIT 2
+XA Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+A          
+-----
+0          
+GXID |STATUS |READONLY |USERNAME |TYPE                          
+-----
+(0 |ACTIVE |false |APP |UserTransaction               
+interleavingTransactions
+GXID |STATUS |READONLY |USERNAME |TYPE                          
+-----
+(1 |ACTIVE |false |SKU |UserTransaction               
+(2 |ACTIVE |false |SKU |UserTransaction               
+GXID |STATUS |READONLY |USERNAME |TYPE                          
+-----
+(1 |ACTIVE |false |SKU |UserTransaction               
+(2 |ACTIVE |false |SKU |UserTransaction               
+GXID |STATUS |READONLY |USERNAME |TYPE                          
+-----
+(1 |PREPARED |false |SKU |UserTransaction               
+(2 |PREPARED |false |SKU |UserTransaction               
+recovered start 2
+recovered 0
+recovered end 0
+GXID |STATUS |READONLY |USERNAME |TYPE                          
+-----
+(3 |IDLE |NULL |SKU |UserTransaction               
+A          
+-----
+0          
+1          
+3          
+noTransaction
+morph
+GXID |STATUS |READONLY |USERNAME |TYPE                          
+-----
+GXID |STATUS |READONLY |USERNAME |TYPE                          
+-----
+GXID |STATUS |READONLY |USERNAME |TYPE                          
+-----
+(1 |IDLE |NULL |APP |UserTransaction               
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction. : 
+Statement created in global has holdabilty: false
+A          
+-----
+2001       
+2002       
+2003       
+DERBY-1004 Call conn.close to avoid exception with client
+GXID |STATUS |READONLY |USERNAME |TYPE                          
+-----
+(1 |PREPARED |false |APP |UserTransaction               
+(1 |IDLE |NULL |APP |UserTransaction               
+GXID |STATUS |READONLY |USERNAME |TYPE                          
+-----
+A          
+-----
+2001       
+2002       
+2003       
+2005       
+2007       
+A          
+-----
+DERBY-1004 Call conn.rollback to avoid exception with client
+A          
+-----
+2001       
+2002       
+2003       
+2005       
+2007       
+Correct XAException on starting a global transaction with an active local transaction (autocommit false)
+DERBY-341 - Client skipping XAConnection with active local transaction
+A          
+-----
+A          
+-----
+2001       
+2002       
+2003       
+2005       
+2007       
+derby966
+Local Connection holdable HOLD_CURSORS_OVER_COMMIT 1
+Local(held) default Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+FAIL - mismatched statement & Connection
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
+  BC A=0
+  AC A=1
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(held) default PreparedStatement holdable HOLD_CURSORS_OVER_COMMIT 1
+FAIL - mismatched statement & Connection
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
+  BC A=0
+  AC A=1
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(held) held Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+FAIL - mismatched statement & Connection
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
+  BC A=0
+  AC A=1
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(held) held PreparedStatement holdable HOLD_CURSORS_OVER_COMMIT 1
+FAIL - mismatched statement & Connection
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
+  BC A=0
+  AC A=1
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(held) close Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+FAIL - mismatched statement & Connection
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
+  BC A=0
+Non-held ResultSet correctly closed after commit
+Local(held) close PreparedStatement holdable CLOSE_CURSORS_AT_COMMIT 2
+FAIL - mismatched statement & Connection
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
+  BC A=0
+Non-held ResultSet correctly closed after commit
+Local(close) default Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+FAIL - mismatched statement & Connection
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
+  BC A=0
+Non-held ResultSet correctly closed after commit
+Local(close) default PreparedStatement holdable CLOSE_CURSORS_AT_COMMIT 2
+FAIL - mismatched statement & Connection
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
+  BC A=0
+Non-held ResultSet correctly closed after commit
+Local(close) held Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+FAIL - mismatched statement & Connection
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
+  BC A=0
+  AC A=1
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(close) held PreparedStatement holdable HOLD_CURSORS_OVER_COMMIT 1
+FAIL - mismatched statement & Connection
+ResultSet HOLD_CURSORS_OVER_COMMIT 1
+  BC A=0
+  AC A=1
+  AC A=3
+  AC A=2001
+  AC A=2002
+  AC A=2003
+  AC A=2005
+  AC A=2007
+Local(close) close Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+FAIL - mismatched statement & Connection
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
+  BC A=0
+Non-held ResultSet correctly closed after commit
+Local(close) close PreparedStatement holdable CLOSE_CURSORS_AT_COMMIT 2
+FAIL - mismatched statement & Connection
+ResultSet CLOSE_CURSORS_AT_COMMIT 2
+  BC A=0
+Non-held ResultSet correctly closed after commit
+BGBC 0
+BGAC 1
+DERBY-1025 Call conn.commit to avoid exception with client
+START GLOBAL TRANSACTION
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction. : 
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction. : 
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction. : 
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction. : 
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction. : 
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction. : 
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction. : 
+derby966 complete
+XATest complete

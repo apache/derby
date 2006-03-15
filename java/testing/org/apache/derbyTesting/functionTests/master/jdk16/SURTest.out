@@ -1,0 +1,68 @@
+.............E.E.E.E.E.E.E.E......F.E.F.E.E.E.E.........
+....E.E.E.E.E.E.E.E......F.E.F.E.E.E.E.............E.E.E.E.E.
+E.E.E......F.E.F.E.E.E.E.............E.E.E.E.E.E.E.E......F.
+E.F.E.E.E.E
+There were 52 errors:
+1) testIndexedScrollInsensitiveUpdateCursorWithoutForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+2) testIndexedScrollInsensitiveUpdateCursorWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+3) testPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+4) testOtherPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+5) testOtherAndOwnPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+6) testMultipleKeyUpdates(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+7) testSecondaryIndexKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+8) testOtherSecondaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+9) testScrollInsensitiveConcurUpdatableWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+10) testScrollInsensitiveConcurUpdatableWithForUpdate3(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+11) testScrollInsensitiveConcurUpdatableWithoutForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+12) testScrollInsensitiveConcurUpdatableWithoutForUpdate2(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+13) testScrollInsensitiveConcurUpdatableWithoutForUpdate3(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+14) testIndexedScrollInsensitiveUpdateCursorWithoutForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+15) testIndexedScrollInsensitiveUpdateCursorWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+16) testPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+17) testOtherPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+18) testOtherAndOwnPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+19) testMultipleKeyUpdates(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+20) testSecondaryIndexKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+21) testOtherSecondaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+22) testScrollInsensitiveConcurUpdatableWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+23) testScrollInsensitiveConcurUpdatableWithForUpdate3(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+24) testScrollInsensitiveConcurUpdatableWithoutForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+25) testScrollInsensitiveConcurUpdatableWithoutForUpdate2(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+26) testScrollInsensitiveConcurUpdatableWithoutForUpdate3(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+27) testIndexedScrollInsensitiveUpdateCursorWithoutForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+28) testIndexedScrollInsensitiveUpdateCursorWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+29) testPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+30) testOtherPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+31) testOtherAndOwnPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+32) testMultipleKeyUpdates(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+33) testSecondaryIndexKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+34) testOtherSecondaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+35) testScrollInsensitiveConcurUpdatableWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+36) testScrollInsensitiveConcurUpdatableWithForUpdate3(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+37) testScrollInsensitiveConcurUpdatableWithoutForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+38) testScrollInsensitiveConcurUpdatableWithoutForUpdate2(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+39) testScrollInsensitiveConcurUpdatableWithoutForUpdate3(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+40) testIndexedScrollInsensitiveUpdateCursorWithoutForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+41) testIndexedScrollInsensitiveUpdateCursorWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+42) testPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+43) testOtherPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+44) testOtherAndOwnPrimaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+45) testMultipleKeyUpdates(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+46) testSecondaryIndexKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+47) testOtherSecondaryKeyUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+48) testScrollInsensitiveConcurUpdatableWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+49) testScrollInsensitiveConcurUpdatableWithForUpdate3(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+50) testScrollInsensitiveConcurUpdatableWithoutForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+51) testScrollInsensitiveConcurUpdatableWithoutForUpdate2(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+52) testScrollInsensitiveConcurUpdatableWithoutForUpdate3(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)java.sql.SQLException: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
+There were 8 failures:
+1) testScrollablePositionedUpdateWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)junit.framework.AssertionFailedError: Expected row to be updated by own change,  however did not get updated value for column a expected:<666> but was:<0>
+2) testScrollInsensitiveConcurUpdatableWithForUpdate2(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)junit.framework.AssertionFailedError: Invalid resultset concurrency on statement expected:<1008> but was:<1007>
+3) testScrollablePositionedUpdateWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)junit.framework.AssertionFailedError: Expected row to be updated by own change,  however did not get updated value for column a expected:<666> but was:<0>
+4) testScrollInsensitiveConcurUpdatableWithForUpdate2(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)junit.framework.AssertionFailedError: Invalid resultset concurrency on statement expected:<1008> but was:<1007>
+5) testScrollablePositionedUpdateWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)junit.framework.AssertionFailedError: Expected row to be updated by own change,  however did not get updated value for column a expected:<666> but was:<0>
+6) testScrollInsensitiveConcurUpdatableWithForUpdate2(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)junit.framework.AssertionFailedError: Invalid resultset concurrency on statement expected:<1008> but was:<1007>
+7) testScrollablePositionedUpdateWithForUpdate1(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)junit.framework.AssertionFailedError: Expected row to be updated by own change,  however did not get updated value for column a expected:<666> but was:<0>
+8) testScrollInsensitiveConcurUpdatableWithForUpdate2(org.apache.derbyTesting.functionTests.tests.jdbcapi.SURTest)junit.framework.AssertionFailedError: Invalid resultset concurrency on statement expected:<1008> but was:<1007>
+FAILURES!!!
+Tests run: 128,  Failures: 8,  Errors: 52
