@@ -19,6 +19,7 @@
 package org.apache.derby.shared.common.i18n;
 
 import org.apache.derby.shared.common.error.ExceptionSeverity;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.MissingResourceException;
@@ -214,6 +215,7 @@ public class MessageUtil
         Object[] arguments, boolean composeDefault) {
 
         String message = null;
+        String badArgsMessage = null;
         
         if (arguments == null)
             arguments = new Object[0];
@@ -222,16 +224,32 @@ public class MessageUtil
 
             try {
                 message = bundle.getString(messageId);
+                
+                
+                // Ensure that the right number of arguments are passed in.
+                if ( SanityManager.DEBUG )
+                {
+                    int numExpected = countParams(message);
+                    SanityManager.ASSERT(numExpected == arguments.length,
+                        "Number of parameters expected for message id " +
+                        messageId + "(" + numExpected +
+                        ") does not match number of arguments received (" +
+                        arguments.length + ")");
+                }
 
                 try {
                     return MessageFormat.format(message, arguments);
                 }
                 catch (IllegalArgumentException iae) {
+                    if ( !composeDefault )
+                        throw iae;
                 }
                 catch (NullPointerException npe) {
                     //
                     //null arguments cause a NullPointerException. 
                     //This improves reporting.
+                    if ( !composeDefault )
+                        throw npe;
                 }
 
             } catch (MissingResourceException mre) {
@@ -241,7 +259,32 @@ public class MessageUtil
             } 
         }
 
-        return composeDefaultMessage(messageId, arguments);
+        return composeDefaultMessage("UNKNOWN MESSAGE, id " + messageId, arguments);
+    }
+    
+    /**
+     * Count the number of substituation parameters in the message
+     */
+    private static int countParams(String message)
+    {
+        boolean openFound = false;
+        int numparams = 0;
+        
+        for ( int i = 0 ; i < message.length() ; i++ )
+        {
+            char ch = message.charAt(i);
+            if ( ch == '{' ) {
+                openFound = true;
+            }
+            
+            if ( ch == '}' && openFound )
+            {
+                numparams++;
+                openFound = false;
+            }
+        }
+        
+        return numparams;
     }
 
     /**
@@ -257,7 +300,7 @@ public class MessageUtil
      */
     public static String composeDefaultMessage(String message, Object[] arguments)
     {
-           if (message == null)
+        if (message == null)
         {
             message = "UNKNOWN";
         }

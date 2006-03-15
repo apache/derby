@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.iapi.services.sanity.AssertFailure
 
-   Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1997, 2006 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,61 +20,21 @@
 
 package org.apache.derby.iapi.services.sanity;
 
-import java.io.*;
-
 /**
- * AssertFailure is raised when an ASSERT check fails.
- * Because assertions are not used in production code,
- * are never expected to fail, and recovering from their
- * failure is expected to be hard, they are under
- * RuntimeException so that no one needs to list them
- * in their throws clauses.  An AssertFailure at the
- * outermost system level will result in system shutdown.
+ * A refactoring wrapper around the shared location
  **/
-public class AssertFailure extends RuntimeException
+public class AssertFailure
+    extends org.apache.derby.shared.common.sanity.AssertFailure
 {
-	private Throwable nestedException;
-
-	/**
-	 * This constructor takes the pieces of information
-	 * expected for each error.
-	 *
-	 * @param message the message associated with
-	 * the error.
-	 *
-	 * @param nestedError errors can be nested together;
-	 * if this error has another error associated with it,
-	 * it is specified here. The 'outermost' error should be
-	 * the most sever error; inner errors should be providing
-	 * additional information about what went wrong.
-	 **/
 	public AssertFailure(String message, Throwable nestedError)
 	{
-		super(message);
-		nestedException = nestedError;
+		super(message, nestedError);
 	}
 
 	/**
 	 * This constructor expects no arguments or nested error.
 	 **/
-	public AssertFailure(String message)
-	{
-		super(message);
-	}
-
-	public void printStackTrace() {
-		super.printStackTrace();
-		if (nestedException != null)
-			nestedException.printStackTrace();
-	}
-	public void printStackTrace(PrintStream s) {
-		super.printStackTrace(s);
-		if (nestedException != null)
-			nestedException.printStackTrace(s);
-	}
-	public void printStackTrace(PrintWriter s) {
-		super.printStackTrace(s);
-		if (nestedException != null)
-			nestedException.printStackTrace(s);
-	}
+	public AssertFailure(String message) {
+        super(message);
+    }
 }

@@ -1,0 +1,37 @@
+This directory contains scripts to generate a test class for 
+testing whether we are correctly creating internationalized messages.
+This is the only real way we can catch misuses of message formatting,
+such as using a message id that has no matching message or using
+the incorrect number of parameters for the message.
+
+This script should be run by a user who (a) has access to /bin/sh
+and sed and (b) wants to verify the validity of our internationalized 
+messages.  You should run this *BEFORE* you do a build, as it generates
+a test source file that should then be compiled.
+
+It is generally expected that this be done as part of nightly regression
+and release tests on one or more platforms that support /bin/sh.  This
+test should be run with the sane build as it makes use of ASSERTs within the
+internationalization framework.
+
+Files in this directory
+=======================
+generateClientMessageTest.sh
+  This file is a shell script used to generate a test class for
+  client messages.  The file generated is 
+  functionTests/tests/i18n/TestClientMessages.java
+
+  This test is basically a copy of each construction of SqlException
+  that uses the MessageId class.  These copies are cleaned up so they
+  can be run out of context, and then sanity code in the message
+  construction utility class makes sure that the message id has a
+  matching message string available to the client and that the right
+  number of parameters are being used.
+
+genClient1.sed
+  A sed script used by generateClientMessageTest.sh to create the 
+  test file
+
+genClient2.sed
+  A sed script used by generateClientMessageTest.sh to create the 
+  test file

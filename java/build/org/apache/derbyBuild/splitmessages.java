@@ -51,6 +51,7 @@ public class splitmessages {
     {
         // Add message ids that don't start with XJ here
         clientMessageIds.add(SQLState.NO_CURRENT_CONNECTION);
+        clientMessageIds.add(SQLState.NOT_IMPLEMENTED);
     }
 
 	public static void main(String[] args) throws Exception {

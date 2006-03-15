@@ -1,4 +1,4 @@
-package org.apache.derby.iapi.services.sanity;
+package org.apache.derby.shared.common.sanity;
 
 /*
  **
@@ -13,6 +13,6 @@ package org.apache.derby.iapi.services.sanity;
 
 public class SanityState
 {
-	public static final boolean ASSERT=@SANE@ ;
-	public static final boolean DEBUG=@SANE@ ;
+	public static final boolean ASSERT=true ;
+	public static final boolean DEBUG=true ;
 }

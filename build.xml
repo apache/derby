@@ -295,7 +295,7 @@
     <ant dir="${derby.tools.src.dir}"/>
   </target>
 
-  <target name="shared" depends="init">
+  <target name="shared" depends="init,state">
     <ant dir="${derby.shared.src.dir}"/>
   </target>
   
@@ -507,7 +507,7 @@
     <propertyfile file="${state.file}" comment="${header}">
       <entry key="sanity" value="true" type="string"/>
     </propertyfile>
-    <delete file="${sanity.dir}/SanityState.java"/>
+    <delete file="${sanity.dir}/SanityState.java"/> 
     <delete dir="${sanity.out.dir}"/>
   </target>
   <target name="insane">
@@ -1079,6 +1079,7 @@
 		 	 org/apache/derby/client/jdbc/Client**,
                          org/apache/derby/jdbc/Client**,
                          org/apache/derby/iapi/services/info/**,
+                         org/apache/derby/iapi/services/sanity/SanityManager.class,
                          org/apache/derby/shared/**,
                          org/apache/derby/info/dnc.properties,
                          org/apache/derby/loc/clientmessages*.properties"
