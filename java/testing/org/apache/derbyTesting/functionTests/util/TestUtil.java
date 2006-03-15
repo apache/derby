@@ -750,26 +750,66 @@ public class TestUtil {
      * @throws InstantiationException on failure to load driver.
      * @throws IllegalAccessException on failure to load driver.
      */
-    public static Connection getConnection(String databaseName, 
-    									   String connAttrs) 
-    	throws SQLException, ClassNotFoundException, 
-				InstantiationException, IllegalAccessException {
-    	
-    	Connection conn;
-    	if(TestUtil.HAVE_DRIVER_CLASS) {
-    		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
-    		Class.forName(driver).newInstance();
-    		conn = DriverManager.getConnection("jdbc:derby:" + databaseName 
-												+ ";" + connAttrs );
+    public static Connection getConnection(String databaseName, String connAttrs)
+    	throws SQLException {
+        try {
+            Connection conn;
+            if(TestUtil.HAVE_DRIVER_CLASS) {
+                // following is like loadDriver(), but
+                // that method throws Exception, we want finer granularity
+                String driverName;
+                int framework = getFramework();
+                switch (framework)
+                {
+                    case EMBEDDED_FRAMEWORK:
+                        driverName =  "org.apache.derby.jdbc.EmbeddedDriver";
+                        break;
+                    case DERBY_NET_FRAMEWORK:
+                    case OLD_NET_FRAMEWORK:				
+                    case DB2JCC_FRAMEWORK:				
+                        driverName = "com.ibm.db2.jcc.DB2Driver";
+                        break;
+                    case DERBY_NET_CLIENT_FRAMEWORK:
+                        driverName = "org.apache.derby.jdbc.ClientDriver";
+                        break;
+                    default:
+                        driverName =  "org.apache.derby.jdbc.EmbeddedDriver";
+                        break;
+                } 
+                // q: do we need a privileged action here, like in loadDriver?
+                Class.forName(driverName).newInstance();
+				
+                String url = getJdbcUrlPrefix() + databaseName;
+                if (connAttrs != null) url += ";" + connAttrs;
+                if (framework == DERBY_NET_FRAMEWORK)
+                {
+                    if (( connAttrs == null) || ((connAttrs != null) && (connAttrs.indexOf("user") < 0)))
+                        url += ":" + "user=me;password=mine;retrieveMessagesFromServerOnGetMessage=true;";
+                }
+                conn = DriverManager.getConnection(url);
+    	    }
+    	    else {
+    		    //Use DataSource for JSR169
+	    	    Properties prop = new Properties();
+	            prop.setProperty("databaseName", databaseName);
+    		    if (connAttrs != null)
+	                prop.setProperty("connectionAttributes", connAttrs);
+	            conn = getDataSourceConnection(prop);
+    	    }
+            return conn;
+    	} catch (ClassNotFoundException cnfe) { 
+		    System.out.println("FAILure: Class not found!");
+		    cnfe.printStackTrace();
+		    return null;
+    	} catch (InstantiationException inste) {
+    		System.out.println("FAILure: Cannot instantiate class");
+    		inste.printStackTrace();
+    		return null;
+    	} catch (IllegalAccessException ille) {
+    		System.out.println("FAILure: Not allowed to use class");
+    		ille.printStackTrace();
+    		return null;
     	}
-    	else {
-    		//Use DataSource for JSR169
-	    	Properties prop = new Properties();
-	        prop.setProperty("databaseName", databaseName);
-	        prop.setProperty("connectionAttributes", connAttrs);
-	        conn = getDataSourceConnection(prop);
-    	}
-        return conn;
     }
     
     public static Connection getDataSourceConnection (Properties prop) throws SQLException {

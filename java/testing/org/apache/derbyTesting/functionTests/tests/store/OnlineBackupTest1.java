@@ -20,14 +20,12 @@
 
 package org.apache.derbyTesting.functionTests.tests.store;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import java.util.Properties;
 
 /*
  * This class tests online backup when dml/ddl actions
@@ -93,13 +91,13 @@ public class OnlineBackupTest1 {
 		Thread backupThread = new Thread(backup, "BACKUP");
         
         // run some dml actions in another thread
-        Connection dmlConn = getConnection();
+        Connection dmlConn = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         DatabaseActions dmlActions = 
             new DatabaseActions(DatabaseActions.DMLACTIONS, dmlConn);
 		Thread dmlThread = new Thread(dmlActions, "DML_THREAD");
         
         // run some DDL create/drop tables in another thread
-        Connection ddlConn = getConnection();
+        Connection ddlConn = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         
         DatabaseActions ddlActions = 
             new DatabaseActions(DatabaseActions.CREATEDROPS, ddlConn);
@@ -169,7 +167,7 @@ public class OnlineBackupTest1 {
 	 * @param  dbName  consistency checks are performed on this database.
 	 */
 	void runConsistencyChecker(String dbName) throws SQLException {
-        Connection conn = getConnection();
+        Connection conn = TestUtil.getConnection(dbName, null);
 		Statement stmt = conn.createStatement();
 		stmt.execute("values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP',  'EMP')");
         //check the data in the EMP table.
@@ -191,10 +189,7 @@ public class OnlineBackupTest1 {
 
 		try{
 			//shutdown
-			if(TestUtil.HAVE_DRIVER_CLASS)
-				DriverManager.getConnection("jdbc:derby:" + dbName + ";shutdown=true");
-			else 
-				TestUtil.shutdownUsingDataSource(dbName);
+			TestUtil.getConnection(dbName, "shutdown=true");
 		}catch(SQLException se){
 			if (se.getSQLState() != null && se.getSQLState().equals("08006"))
 				System.out.println("database shutdown properly");
@@ -202,23 +197,6 @@ public class OnlineBackupTest1 {
 				dumpSQLException(se);
 		}
 	}
-
-    /*
-     * get connection to the test database
-     */
-    Connection getConnection() throws SQLException 
-    {
-    	Connection conn;
-    	if(TestUtil.HAVE_DRIVER_CLASS)
-			conn = DriverManager.getConnection("jdbc:derby:" + TEST_DATABASE_NAME );
-    	else {
-	    	Properties prop = new Properties();
-	        prop.setProperty("databaseName", TEST_DATABASE_NAME);
-	        conn = TestUtil.getDataSourceConnection(prop);
-    	}
-        return conn;
-    }
-
 
 	/**
 	 * Write message to the standard output.

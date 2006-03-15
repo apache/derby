@@ -27,7 +27,6 @@ import java.math.BigDecimal;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,7 +34,6 @@ import java.sql.Statement;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import java.util.Properties;
 
 /**
  * Test of backup restore through java program JDBC calls.
@@ -123,13 +121,7 @@ public class backupRestore1
 		//shutdown the database ..
 		try{
 			//shutdown
-			//Need to use if loop because DataSource does not work with j9_13.
-			//javax.naming.Referenceable class is not available in j9_13
-			if(TestUtil.HAVE_DRIVER_CLASS) {
-				Connection conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
-			} else { 
-				TestUtil.shutdownUsingDataSource("wombat");
-			}
+			TestUtil.getConnection("wombat", "shutdown=true");
 		}catch(SQLException se){
 				if (se.getSQLState() != null && se.getSQLState().equals("08006"))
 					System.out.println("database shutdown properly");
@@ -141,17 +133,8 @@ public class backupRestore1
 
 		System.out.println("testing rollforward recovery");
 		try{
-			Connection conn;
 			//perform rollforward recovery and do some inserts again
-			if(TestUtil.HAVE_DRIVER_CLASS) {
-				conn = DriverManager.getConnection(
-				  "jdbc:derby:wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat");
-			} else {
-				Properties prop = new Properties();
-				prop.setProperty("databaseName","wombat");
-				prop.setProperty("connectionAttributes", "rollForwardRecoveryFrom=extinout/mybackup/wombat");
-				conn = TestUtil.getDataSourceConnection(prop);
-			}
+			Connection conn = TestUtil.getConnection("wombat", "rollForwardRecoveryFrom=extinout/mybackup/wombat");
 			//run consistenct checker
 			Statement stmt = conn.createStatement();
 			stmt.execute("VALUES (ConsistencyChecker())");
@@ -165,12 +148,7 @@ public class backupRestore1
 
             conn.commit();
 			conn.close();
-			
-			if(TestUtil.HAVE_DRIVER_CLASS) {
-				conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
-			} else {
-				TestUtil.shutdownUsingDataSource("wombat");
-			}
+			TestUtil.getConnection("wombat", "shutdown=true");
 		}
         catch( SQLException se)
         {
@@ -188,14 +166,7 @@ public class backupRestore1
 		RandomAccessFile rfs = null;
 		boolean alreadyShutdown = false;
 		try{
-			Connection conn;
-			if(TestUtil.HAVE_DRIVER_CLASS) {
-				conn = DriverManager.getConnection("jdbc:derby:wombat");
-			} else {
-				Properties prop = new Properties();
-				prop.setProperty("databaseName","wombat");
-				conn = TestUtil.getDataSourceConnection(prop);
-			}
+			Connection conn = TestUtil.getConnection("wombat", null);
 								
 			//just open to a file in existing backup, so that rename will fail on
 			//next backup
@@ -209,11 +180,7 @@ public class backupRestore1
             backupStmt.execute();
             backupStmt.close();
 			conn.close();
-			if(TestUtil.HAVE_DRIVER_CLASS) {
-				conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
-			} else {
-				TestUtil.shutdownUsingDataSource("wombat");
-			}
+			TestUtil.getConnection("wombat", "shutdown=true");
 		}catch(SQLException se)
 		{
 			if (se.getSQLState() != null && se.getSQLState().equals("XSRS4"))
@@ -238,11 +205,7 @@ public class backupRestore1
 		{
 			try{
 				//shutdown 
-				if(TestUtil.HAVE_DRIVER_CLASS) {
-					Connection conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
-				} else {
-					TestUtil.shutdownUsingDataSource("wombat");
-				}
+				TestUtil.getConnection("wombat", "shutdown=true");
 			}catch(SQLException se){
 				if (se.getSQLState() != null && se.getSQLState().equals("08006"))
 					System.out.println("database shutdown properly");
@@ -258,27 +221,15 @@ public class backupRestore1
 			//close the earlier opened file in backup dir
 			if(rfs != null )
 				rfs.close();
-			
-			Connection conn;
-			if(TestUtil.HAVE_DRIVER_CLASS) {
-				conn = DriverManager.getConnection("jdbc:derby:wombat;restoreFrom=extinout/mybackup/wombat");
-			} else {
-				Properties prop = new Properties();
-				prop.setProperty("databaseName","wombat");
-				prop.setProperty("connectionAttributes","restoreFrom=extinout/mybackup/wombat");
-				conn = TestUtil.getDataSourceConnection(prop);
-			}
+
+			Connection conn = TestUtil.getConnection("wombat", "restoreFrom=extinout/mybackup/wombat");
 			
 			//run consistenct checker
 			Statement stmt = conn.createStatement();
 			stmt.execute("VALUES (ConsistencyChecker())");
 			conn.close();
 			//shutdown the backup db;
-			if(TestUtil.HAVE_DRIVER_CLASS) {
-				conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
-			} else {
-				TestUtil.shutdownUsingDataSource("wombat");
-			}
+			TestUtil.getConnection("wombat", "shutdown=true");
 		}catch(SQLException se)
 		{
 			if (se.getSQLState() != null && se.getSQLState().equals("08006"))
@@ -291,14 +242,7 @@ public class backupRestore1
 
 		//now take a backup again , just to make all is well in the system.
 		try{
-			Connection conn;
-			if(TestUtil.HAVE_DRIVER_CLASS) {
-				conn = DriverManager.getConnection("jdbc:derby:wombat");
-			} else {
-				Properties prop = new Properties();
-				prop.setProperty("databaseName","wombat");
-				conn = TestUtil.getDataSourceConnection(prop);
-			}
+			Connection conn = TestUtil.getConnection("wombat", null);
 			
             CallableStatement backupStmt = conn.prepareCall(
                 "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
@@ -309,11 +253,7 @@ public class backupRestore1
 			Statement stmt = conn.createStatement();
 			stmt.execute("VALUES (ConsistencyChecker())");
 			conn.close();
-			if(TestUtil.HAVE_DRIVER_CLASS) {
-				conn = DriverManager.getConnection("jdbc:derby:wombat;shutdown=true");
-			} else {
-				TestUtil.shutdownUsingDataSource("wombat");
-			}
+			TestUtil.getConnection("wombat", "shutdown=true");
 		}catch(SQLException se)
 		{
 			if (se.getSQLState() != null && se.getSQLState().equals("08006"))

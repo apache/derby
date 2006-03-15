@@ -26,7 +26,6 @@ import java.io.*;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import java.util.Properties;
 
 /**
  * Demonstrate subselect behavior with prepared statement. 
@@ -54,22 +53,11 @@ public class logStream {
 		System.out.println("derby.log has content ?  " + (derbyLog.length() > 0));
 
 		System.out.println("SHUTDOWN Derby");
-		if(TestUtil.HAVE_DRIVER_CLASS){
-			try {
-				DriverManager.getConnection("jdbc:derby:;shutdown=true");
-				System.out.println("FAIL - shutdown returned connection");
-			} catch (SQLException sqle) {
-				System.out.println("SHUTDOWN :" + sqle.getMessage());
-			}
-		}
-		else{	
-			//Call helper method which shuts down Derby using Datasource
-			try {
-				TestUtil.shutdownUsingDataSource("");
-				System.out.println("FAIL - shutdown returned connection");
-			} catch (SQLException sqle) {
-				System.out.println("SHUTDOWN :" + sqle.getMessage());
-			}
+		try {
+			TestUtil.getConnection("","shutdown=true");
+			System.out.println("FAIL - shutdown returned connection");
+		} catch (SQLException sqle) {
+			System.out.println("SHUTDOWN :" + sqle.getMessage());
 		}
 
 		System.out.println("derby.log exists ?       " + derbyLog.exists());

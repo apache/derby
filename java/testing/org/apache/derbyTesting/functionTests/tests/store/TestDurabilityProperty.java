@@ -124,11 +124,7 @@ public class TestDurabilityProperty {
 
         try {
             conn.close();
-            if(TestUtil.HAVE_DRIVER_CLASS) {
-                DriverManager.getConnection("jdbc:derby:;shutdown=true");
-            } else {
-            	TestUtil.shutdownUsingDataSource("");
-            }
+            TestUtil.getConnection("","shutdown=true");
         } catch (SQLException sqle) {
             if ("XJ015".equals(sqle.getSQLState())) {
             }// ok database shutdown

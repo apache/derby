@@ -21,9 +21,7 @@ Derby - Class org.apache.derbyTesting.functionTests.store.OnlineBackup
 package org.apache.derbyTesting.functionTests.tests.store;
 import java.sql.Connection;
 import java.sql.CallableStatement;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
@@ -77,7 +75,7 @@ public class OnlineBackup implements Runnable{
 	 * Backup the database
 	 */
 	void performBackup() throws SQLException {
-        Connection conn = getConnection(dbName , "");
+		Connection conn = TestUtil.getConnection(dbName , "");
 		CallableStatement backupStmt = 	
 			conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
 		backupStmt.setString(1, backupPath);
@@ -161,7 +159,7 @@ public class OnlineBackup implements Runnable{
 	 */
 	public void createFromBackup(String newDbName) throws SQLException {
 		
-        Connection conn = getConnection(newDbName,  
+        Connection conn = TestUtil.getConnection(newDbName,  
                                         "createFrom=" +
                                         backupPath + "/" + 
                                         dbName);
@@ -175,36 +173,11 @@ public class OnlineBackup implements Runnable{
      */
     public void restoreFromBackup() throws SQLException {
        
-        Connection conn = getConnection(dbName,  
+        Connection conn = TestUtil.getConnection(dbName,  
                                         "restoreFrom=" +
                                         backupPath + "/" + 
                                         dbName);
 
 		conn.close();
-    }
-
-    
-    /**
-     * Get connection to the given database.
-     *
-     * @param databaseName the name of the database 
-	 * @param connAttrs  connection Attributes.
-     *
-     */
-    private Connection getConnection(String databaseName, 
-                                     String connAttrs) 
-        throws SQLException 
-    {
-    	Connection conn;
-    	if(TestUtil.HAVE_DRIVER_CLASS)
-			conn = DriverManager.getConnection("jdbc:derby:" + databaseName 
-												+ ";" + connAttrs );
-    	else {
-	    	Properties prop = new Properties();
-	        prop.setProperty("databaseName", databaseName);
-	        prop.setProperty("connectionAttributes", connAttrs);
-	        conn = TestUtil.getDataSourceConnection(prop);
-    	}
-        return conn;
     }
 }

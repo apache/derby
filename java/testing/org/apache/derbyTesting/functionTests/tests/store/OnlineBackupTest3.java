@@ -20,14 +20,12 @@
 
 package org.apache.derbyTesting.functionTests.tests.store;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import java.util.Properties;
 
 /*
  * This class tests online backup when jar actions
@@ -107,10 +105,7 @@ public class OnlineBackupTest3 {
 
         try{
             //shutdown
-            if(TestUtil.HAVE_DRIVER_CLASS)
-                DriverManager.getConnection("jdbc:derby:" + dbName + ";shutdown=true");
-            else 
-                TestUtil.shutdownUsingDataSource(dbName);
+            TestUtil.getConnection(dbName, "shutdown=true");
         }catch(SQLException se){
             if (se.getSQLState() != null && se.getSQLState().equals("08006"))
                 System.out.println("database shutdown properly");
@@ -118,23 +113,6 @@ public class OnlineBackupTest3 {
                 dumpSQLException(se);
         }
     }
-
-    /*
-     * get connection to the test database
-     */
-    Connection getConnection() throws SQLException 
-    {
-        Connection conn;
-        if(TestUtil.HAVE_DRIVER_CLASS)
-            conn = DriverManager.getConnection("jdbc:derby:" + TEST_DATABASE_NAME );
-        else {
-            Properties prop = new Properties();
-            prop.setProperty("databaseName", TEST_DATABASE_NAME);
-            conn = TestUtil.getDataSourceConnection(prop);
-        }
-        return conn;
-    }
-
 
     /**
      * Write message to the standard output.
@@ -171,10 +149,10 @@ public class OnlineBackupTest3 {
      */
     void installJarTest() throws Exception{
         logMessage("Begin Install Jar Test");
-        Connection conn1 = getConnection();
+        Connection conn1 = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         conn1.setAutoCommit(false);
         Statement conn1_stmt = conn1.createStatement();
-        Connection conn2 = getConnection();
+        Connection conn2 = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         conn2.setAutoCommit(false);
         Statement conn2_stmt = conn2.createStatement();
 
@@ -310,7 +288,7 @@ public class OnlineBackupTest3 {
         // restore the database from the backup and run some checks 
         backup.restoreFromBackup();
         logMessage("Restored From the Backup");
-        Connection conn = getConnection();
+        Connection conn = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         Statement stmt = conn.createStatement();
         logMessage("No of rows in table t1: " + countRows(conn, "T1"));
         logMessage("No of rows in table customer: " + 
@@ -346,10 +324,10 @@ public class OnlineBackupTest3 {
      */
     void removeJarTest() throws Exception{
         logMessage("Begin Remove Jar Test");
-        Connection conn1 = getConnection();
+        Connection conn1 = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         conn1.setAutoCommit(false);
         Statement conn1_stmt = conn1.createStatement();
-        Connection conn2 = getConnection();
+        Connection conn2 = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         conn2.setAutoCommit(false);
         Statement conn2_stmt = conn2.createStatement();
         try {
@@ -491,7 +469,7 @@ public class OnlineBackupTest3 {
         // restore the database from the backup and run some checks 
         backup.restoreFromBackup();
         logMessage("Restored From the Backup");
-        Connection conn = getConnection();
+        Connection conn = TestUtil.getConnection(TEST_DATABASE_NAME, null);
         Statement stmt = conn.createStatement();
         logMessage("No of rows in table t1: " + countRows(conn, "T1"));
         logMessage("No of rows in table customer: " + 

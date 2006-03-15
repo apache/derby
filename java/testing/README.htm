@@ -1210,7 +1210,7 @@ master file found.</p>
   <li>
     <p style="margin-bottom: 0in;">create the test file (e.g.
 newfunctest.java or newfunctest.sql) in the appropriate tests
-subdirectory </p>
+subdirectory</p>
   </li>
   <li>
     <p style="margin-bottom: 0in;">list any files needed that are not
@@ -1239,7 +1239,42 @@ for the master directory, all .out files are automatically copied. </p>
     <p style="margin-bottom: 0in;">run the test again. Investigate if
 any differences need to be masked out using a test specific
 sed.properties file (e.g. newfunctest_sed.properties). If so, ensure
-this is added to copyfiles.ant. </p>
+this is added to copyfiles.ant.</p>
+  </li>
+</ul>
+<ul>
+  <li>
+    <p>ensure the test cleans up any testobjects created. This is
+important for running the tests in suites with a remote server, or with
+useprocess=false, because
+in those cases, tests run against databases in the same
+directory.&nbsp; Even if you do not anticipate your test to run in
+those configurations, it makes good practice.&nbsp;You may also want to
+protect your test from other tests leaving things behind by removing
+them before running also. The class
+org.apache.derbyTesting.functionTests.util.TestUtil has a cleanUpTest
+method that may be useful.</p>
+  </li>
+  <li>
+    <p>ensure that connections can be made with all supported jvms.
+This
+includes the J2ME/CDC/JSR169 configuration, which only has
+java.sql.Datasource available, no java.sql.DriverManager. One can use
+the method ij.startJBMS() to get an appropriate connection, or
+TestUtil.getConnection() if one needs to specify connection properties
+different from what is defined in the &lt;test&gt;_app.properties file.
+For instance, to shutdown a database one can use:</p>
+  </li>
+</ul>
+<div style="margin-left: 80px;">TestUtil.getConnection("wombat","shutdown=true");</div>
+<ul>
+  <ul>
+  </ul>
+  <li>
+    <p style="margin-bottom: 0in;">ensure the test does not have hard
+coded 'localhost' for network
+connections. Instead, use the method TestUtil.getHostName() to find if
+a hostName was specified for remote server testing.</p>
   </li>
   <li>
     <p style="margin-bottom: 0in;">add the test to a specific

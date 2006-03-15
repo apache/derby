@@ -21,7 +21,6 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,7 +28,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.util.Properties;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
@@ -61,23 +59,6 @@ public class closed implements Runnable {
 			// make the initial connection.
 			ij.getPropertyArg(args);
 			conn = ij.startJBMS();
-			
-			
-			String url = new String();
-			try{
-				url = conn.getMetaData().getURL();
-			}
-			catch (NoSuchMethodError msme)
-			{
-				// DatabaseMetaData.getURL not present - correct for JSR169
-				if(!TestUtil.HAVE_DRIVER_CLASS)
-					jsr169_test = true;
-				else
-					passed = false;
-				
-			} catch (Throwable err) {
-			    System.out.println("%%getURL() gave the exception: " + err);
-			}
 
 			passed = testDerby62(conn) && passed;
 
@@ -100,11 +81,11 @@ public class closed implements Runnable {
 
 			// shutdown the database
 			System.out.println("Test database shutdown ...");
-			passed = shutdownTest(url, url + ";shutdown=true", "wombat");
+			passed = shutdownTest("wombat", "shutdown=true");
 
 			// shutdown the system
 			System.out.println("Test system shutdown ...");
-			passed = shutdownTest(url, "jdbc:derby:;shutdown=true", "");
+			passed = shutdownTest("", "shutdown=true");
 			
 
 
@@ -119,28 +100,15 @@ public class closed implements Runnable {
 		System.out.println("Test closed finished");
 	}
 
-	static boolean shutdownTest(String url, String shutdownUrl, String databaseName) throws SQLException {
+	static boolean shutdownTest(String databaseName, String shutdownString) throws SQLException {
+	//	static boolean shutdownTest(String databaseName, String shutdownString) throws SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException {
 
 		boolean passed = true;
 
-		Connection c1;
-		Connection c2;
-		Connection c3a;
-		Connection c3b;
-		
-		if(!jsr169_test) {
-			c1 = DriverManager.getConnection(url);
-			c2 = DriverManager.getConnection(url);
-			c3a = DriverManager.getConnection(url);
-			c3b = DriverManager.getConnection(url);
-		} else {
-			Properties prop = new Properties();
-			prop.setProperty("databaseName", "wombat");
-			c1 = TestUtil.getDataSourceConnection(prop);
-			c2 = TestUtil.getDataSourceConnection(prop);
-			c3a = TestUtil.getDataSourceConnection(prop);
-			c3b = TestUtil.getDataSourceConnection(prop);
-		}
+		Connection c1 = TestUtil.getConnection("wombat",null);
+		Connection c2 = TestUtil.getConnection("wombat",null);
+		Connection c3a = TestUtil.getConnection("wombat",null);
+		Connection c3b = TestUtil.getConnection("wombat",null);
 		
 		try {
 			c3a.createStatement().execute("DROP TABLE CLOSED.LOCKME");
@@ -173,10 +141,7 @@ public class closed implements Runnable {
 
 		SQLException s = null;
 		try {
-			if(!jsr169_test) 
-				DriverManager.getConnection(shutdownUrl);
-			else 
-				TestUtil.shutdownUsingDataSource(databaseName);
+			TestUtil.getConnection(databaseName, shutdownString); 
 		} catch (SQLException sqle) {
 			s = sqle;
 		}
@@ -200,12 +165,12 @@ public class closed implements Runnable {
 
 		if (!c1.isClosed()) {
 			passed = false;
-			System.out.println("FAIL -- connection not shutdown " + shutdownUrl);
+			System.out.println("FAIL -- connection not shutdown " + databaseName + ";" + shutdownString);
 			c1.close();
 		}
 		if (!c2.isClosed()) {
 			passed = false;
-			System.out.println("FAIL -- active connection not shutdown " + shutdownUrl);
+			System.out.println("FAIL -- active connection not shutdown " + databaseName + ";" + shutdownString);
 			c2.close();
 		}
 
