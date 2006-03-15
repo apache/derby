@@ -399,6 +399,12 @@ public class TestUtil {
 		try {
 		ds  = Class.forName(classname).newInstance();
 
+		// for remote server testing, check whether the hostName is set for the test
+		// if so, and serverName is not yet set explicitly for the datasource, set it now
+		String hostName = getHostName();
+		if ( (!isEmbeddedFramework()) && (hostName != null ) && (attrs.getProperty("serverName") == null) )
+			attrs.setProperty("serverName", hostName);
+
 		for (Enumeration propNames = attrs.propertyNames(); 
 			 propNames.hasMoreElements();)
 		{

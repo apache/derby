@@ -74,6 +74,10 @@ public class XATest {
         // DERBY-966 holdability testing
         derby966(dsx);
 
+        // for cleaning up, make a clean new connection
+        Connection dmc2 = ij.startJBMS();
+        cleanUp(dmc2);
+
         System.out.println("XATest complete");
     }
 
@@ -1152,6 +1156,16 @@ xa_prepare 5;
         
         XAConnection xac = xads.getXAConnection("mamta", "mamtapwd");
         
+    }
+
+    private static void cleanUp(Connection conn) throws SQLException
+    {
+        String testObjects[] = { "view XATESTUTIL.global_xactTable", 
+                                 "schema XATESTUTIL restrict", "table app.foo", "table foo" };
+        Statement stmt = conn.createStatement();
+        TestUtil.cleanUpTest(stmt, testObjects);
+        conn.commit();
+        stmt.close();
     }
  
 }
