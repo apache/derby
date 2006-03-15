@@ -47,15 +47,28 @@ public final class ContextService //OLD extends Hashtable
 		<UL>
 		<LI> null - the thread no affiliation with a context manager.
 
-		<LI> ContextManager - the thread created and possibly was used to execute this context manager.
-			This is a strong reference as it can be disassociated from the thread when the context is closed.
+		<LI> ContextManager - the current thread has used or is using
+            this context manager. If ContextManager.activeThread equals
+            the current thread then the thread is currently active with
+            the ContextManager. In this case ContextManager.activeCount
+            will be greater than zero and represent the level of nested
+            setCurrentContextmanager calls.
+            If ContextManager.activeThread is null then no other thread
+            is using the Contextmanager, if ContextManager.activeThread
+            is not-null and not equal to the current thread then some
+            other thread is using the context. It is assumed that
+            only a single thread can be using a ContextManager at any time
+            and this is enforced by synchronization outside the ContextManager.
+            E.g for JDBC connections, synchronization at the JDBC level.
 
-		<LI> WeakReference containing a ContextManager - the thread was used to execute this context manager.
-			This is a weak reference to allow the context to be closed and garbage collected without having
-			to track every single thread that used it or having to modify this list when resetting the current
-			context manager.
-
-		<LI> WeakHashMap (key = ContextManager, value = Integer) - the thread has created and possibly executed any number of context managers.
+		<LI> java.util.Stack containing ContextManagers - the current
+        thread is actively using multiple different ContextManagers,
+        with nesting. All ContextManagers in the stack will have
+        activeThread set to the current thread, and their activeCount
+        set to -1. This is beacause nesting is soley represented by
+        the stack, with the current context manager on top of the stack.
+        This supports multiple levels of nesting across two stacks, e.g.
+        C1->C2->C2->C1->C2.
 		</UL>
 
 		This thread local is used to find the current context manager. Basically it provides
@@ -63,7 +76,7 @@ public final class ContextService //OLD extends Hashtable
 		equal to the current thread then it is the current context manager.
 
 		If the thread has pushed multiple contexts (e.g. open a new non-nested Cloudscape connection
-		from a server side method) then threadContextList will contain a WeakHashMap. The value for each cm
+		from a server side method) then threadContextList will contain a Stack. The value for each cm
 		will be a push order, with higher numbers being more recently pushed.
 
 		To support the case where a single context manager is pushed twice (nested connection),
@@ -77,23 +90,72 @@ public final class ContextService //OLD extends Hashtable
 		<LI> Typical JDBC client program where there a Connection is always executed using a single thread.
 			In this case this variable will contain the Connection's context manager 
 		<LI> Typical application server pooled connection where a single thread may use a connection from a pool
-		for the lifetime of the request. In this case this varibale will contain a  WeakReference.
+		for the lifetime of the request. In this case this variable will contain a  WeakReference.
 		</UL>
-		
-
-		Need to support
-			CM1					OPTIMIZE
-			CM1,CM1				OPTIMIZE
-			CM1,CM1,CM1,CM1		OPTIMIZE
-			CM1,CM1,CM2
-			CM1,CM2,CM1,CM2
-			CM1,CM2,CM3,CM1
-			etc.
-
-
-			STACK for last 3
+        <BR>
+        Single thread for Connection exection.
+        <pre>
+        threadContextList.get() == cm
+        // while in JDBC engine code
+        cm.activeThread == Thread.currentThread();
+        cm.activeCount = 1;
+        </pre>
+        
+        <BR>
+        J2EE single thread for lifetime of execution.
+        <pre>
+        // thread executing request
+         threadContextList.get() == cm
+        // while in JDBC engine code
+        cm.activeThread == Thread.currentThread();
+        cm.activeCount = 1;
+        
+        // other threads that have recently executed
+        // the same connection can have
+        threadContextList.get() == cm
+        cm.activeThread != Thread.currentThread();
+       </pre>
+        
+        <BR>
+        Nested routine calls within single connection
+        <pre>
+        threadContextList.get() == cm
+        // Within server-side JDBC code in a
+        // function called from another function/procedure
+        // called from an applications's statement
+        // (three levels of nesting)
+        cm.activeThread == Thread.currentThread();
+        cm.activeCount = 3;         
+        </pre>
+        
+        <BR>
+        Nested routine calls with the inner routine
+        using a different connection to access a Derby database.
+        Note nesting of orignal Contextmanager cm is changed
+        from an activeCount of 2 to nesting within the stack
+        once multiple ContextManagers are involved.
+        <pre>
+        threadContextList.get() == stack {cm2,cm,cm}
+        cm.activeThread == Thread.currentThread();
+        cm.activeCount = -1; // nesting in stack
+        cm2.activeThread == Thread.currentThread();
+        cm2.activeCount = -1; // nesting in stack
+        </pre> 
+        
+        <BR>
+        Nested multiple ContextManagers, the code supports
+        this, though it may not be possible currently
+        to have a stack like this from SQL/JDBC.
+        <pre>
+        threadContextList.get() == stack {cm3,cm2,cm,cm2,cm,cm}
+        cm.activeThread == Thread.currentThread();
+        cm.activeCount = -1; // nesting in stack
+        cm2.activeThread == Thread.currentThread();
+        cm2.activeCount = -1; // nesting in stack
+        cm3.activeThread == Thread.currentThread();
+        cm3.activeCount = -1; // nesting in stack
+        </pre>   
 	*/
-
 	private ThreadLocal threadContextList = new ThreadLocal();
 
 	private HashSet allContexts;
@@ -182,8 +244,6 @@ public final class ContextService //OLD extends Hashtable
 	 */
 	public ContextManager getCurrentContextManager() {
 
-		Thread me = Thread.currentThread();
-
 		ThreadLocal tcl = threadContextList;
 		if (tcl == null) {
 			// The context service is already stopped.
@@ -193,6 +253,8 @@ public final class ContextService //OLD extends Hashtable
 		Object list = tcl.get();
 
 		if (list instanceof ContextManager) {
+            
+            Thread me = Thread.currentThread();
 			
 			ContextManager cm = (ContextManager) list;
 			if (cm.activeThread == me)
@@ -206,23 +268,7 @@ public final class ContextService //OLD extends Hashtable
 		java.util.Stack stack = (java.util.Stack) list;
 		return (ContextManager) (stack.peek());
 
-
-	//	if (list == null)
-	//		return null;
-
-		/*		Thread me = Thread.currentThread();
-		
-		synchronized (this) {
-			for (Iterator i = allContexts.iterator(); i.hasNext(); ) {
-
-				ContextManager cm = (ContextManager) i.next();
-				if (cm.activeThread == me)
-					return cm;
-			}
-		}
-		//OLDreturn (ContextManager) get(me);
-		return null;
-*/	}
+	}
 
     /**
      * Break the link between the current Thread and the passed
@@ -300,6 +346,18 @@ public final class ContextService //OLD extends Hashtable
 		}
 	}
 
+    /**
+     * The current thread (passed in a me) is setting associateCM
+     * to be its current context manager. Sets the thread local
+     * variable threadContextList to reflect associateCM being
+     * the current ContextManager.
+     * 
+     * @return True if the nesting level is to be represented in
+     * the ContextManager.activeCount field. False if not.
+     * 
+     * @see ContextManager#activeCount
+     * @see ContextManager#activeThread
+    */
 	private boolean addToThreadList(Thread me, ContextManager associateCM) {
 
 		ThreadLocal tcl = threadContextList;
@@ -311,27 +369,44 @@ public final class ContextService //OLD extends Hashtable
 
 		Object list = tcl.get();
 
+        // Already set up to reflect associateCM ContextManager
 		if (associateCM == list)
 			return true;
 
+        // Not currently using any ContextManager
 		if (list == null)
 		{
 			tcl.set(associateCM);
 			return true;
 		}
 
-		java.util.Stack stack;
+ 		java.util.Stack stack;
 		if (list instanceof ContextManager) {
+            
+            // Could be two situations:
+            // 1. Single ContextManager not in use by this thread
+            // 2. Single ContextManager in use by this thread (nested call)
+            
 			ContextManager threadsCM = (ContextManager) list;
 			if (me == null)
 				me = Thread.currentThread();
+            
 			if (threadsCM.activeThread != me) {
+                // Not nested, just a CM left over
+                // from a previous execution.
 				tcl.set(associateCM);
 				return true;
 			}
+            
+            // Nested, need to create a Stack of ContextManagers,
+            // the top of the stack will be the active one.
 			stack = new java.util.Stack();
 			tcl.set(stack);
-
+            
+            // The stack represents the true nesting
+            // of ContextManagers, splitting out nesting
+            // of a single ContextManager into multiple
+            // entries in the stack.
 			for (int i = 0; i < threadsCM.activeCount; i++)
 			{
 				stack.push(threadsCM);
@@ -340,6 +415,8 @@ public final class ContextService //OLD extends Hashtable
 		}
 		else
 		{
+            // existing stack, nesting represented
+            // by stack entries, not activeCount.
 			stack = (java.util.Stack) list;
 		}
 
@@ -392,10 +469,6 @@ public final class ContextService //OLD extends Hashtable
 				SanityManager.THROWASSERT("setCurrentContextManager - mismatch threads - current " + me + " - cm's " + cm.activeThread);
 			}
 
-/*			if ((cm.activeCount <0) || (cm.activeThread == null && cm.activeCount != 0) || (cm.activeThread != null && cm.activeCount == 0)) {
-				SanityManager.THROWASSERT("resetCurrentContextManager - invalid count - owner " + cm.activeThread + " - count " + cm.activeCount);
-			}
-*/
 		}
 
 		Thread me = null;
@@ -405,14 +478,7 @@ public final class ContextService //OLD extends Hashtable
 		}
 		if (addToThreadList(me, cm))
 			cm.activeCount++;
-
-/*OLD
-		if (cm == null)
-			// don't bother storing it if it is null
-			remove(me);
-		else
-			put(me, cm);
-*/	}
+    }
 
 	/**
 	 * It's up to the caller to track this context manager and set it
@@ -463,20 +529,6 @@ public final class ContextService //OLD extends Hashtable
 					active.interrupt();
 			}
 		}
-
-/*
-		synchronized (this) {
-			for (Enumeration e = keys(); e.hasMoreElements(); ) {
-				Thread t = (Thread) e.nextElement();
-				if (t == me)
-					continue;
-
-				ContextManager him = (ContextManager) get(t);
-
-				if (him.setInterrupted(c))
-					t.interrupt();
-			}
-		} */
 	}
 
     synchronized void removeContext( ContextManager cm)

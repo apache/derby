@@ -22,7 +22,6 @@ package org.apache.derby.iapi.services.context;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
 
 import org.apache.derby.iapi.error.PassThroughException;
 
@@ -33,9 +32,7 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
-import java.io.PrintWriter;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -518,6 +515,36 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 	private boolean shutdown;
 	private LocaleFinder finder;
 
+    /**
+     * The thread that owns this ContextManager, set by
+     * ContextService.setCurrentContextManager and reset
+     * by resetCurrentContextManager. Only a single
+     * thread can be active in a ContextManager at any time,
+     * and the thread only "owns" the ContextManager while
+     * it is executing code within Derby. In the JDBC case
+     * setCurrentContextManager is called at the start of
+     * a JBDC method and resetCurrentContextManager on completion.
+     * Nesting within the same thread is supported, such as server-side
+     * JDBC calls in a Java routine or procedure. In that case
+     * the activeCount will represent the level of nesting, in
+     * some situations.
+     * <BR>
+
+     * @see ContextService#setCurrentContextManager(ContextManager)
+     * @see ContextService#resetCurrentContextManager(ContextManager)
+     * @see #activeCount
+     */
 	Thread	activeThread;
+    
+    /**
+     * Count of the number of setCurrentContextManager calls
+     * by a single thread, for nesting situations with a single
+     * active Contextmanager. If nesting is occuring with multiple
+     * different ContextManagers then this value is set to -1
+     * and nesting is represented by entries in a stack in the
+     * ThreadLocal variable, threadContextList.
+     * 
+     * @see ContextService#threadContextList
+     */
 	int		activeCount;
 }
