@@ -51,12 +51,13 @@ public abstract class PrivilegeInfo
 
 	/**
 	 * Determines whether a user is the owner of an object
-	 * (table, function, or procedure).
+	 * (table, function, or procedure). Note that DBA can access
+	 * database objects without needing to be their owner
 	 *
-	 * @param user
-	 * @param objectDescriptor
-	 * @param sd
-	 * @param DataDictionary
+	 * @param user					authorizationId of current user
+	 * @param objectDescriptor		object being checked against
+	 * @param sd					SchemaDescriptor
+	 * @param dd					DataDictionary
 	 *
 	 * @exception StandardException if user does not own the object
 	 */

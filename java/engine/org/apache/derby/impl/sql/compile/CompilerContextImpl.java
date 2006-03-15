@@ -755,7 +755,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * Add a table or view privilege to the list of used table privileges.
 	 *
-	 * @param table
+	 * @see CompilerContext#addRequiredRoutinePriv
 	 */
 	public void addRequiredTablePriv( TableDescriptor table)
 	{
@@ -769,7 +769,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * Add a routine execute privilege to the list of used routine privileges.
 	 *
-	 * @param routine
+	 * @see CompilerContext#addRequiredRoutinePriv
 	 */
 	public void addRequiredRoutinePriv( AliasDescriptor routine)
 	{
@@ -784,7 +784,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * Add a required schema privilege to the list privileges.
 	 *
-	 * @param SchemaDescriptor
+	 * @see CompilerContext#addRequiredSchemaPriv
 	 */
 	public void addRequiredSchemaPriv(String schemaName, String aid, boolean privType)
 	{

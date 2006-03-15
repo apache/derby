@@ -531,7 +531,9 @@ public interface CompilerContext extends Context
 	/**
 	 * Add a schema privilege to the list of used privileges.
 	 *
-	 * @param schemaDescriptor
+	 * @param schema	Schema name of the object that is being accessed
+	 * @param aid		Requested authorizationId for new schema
+	 * @param privType	Either CREATE_SCHEMA_PRIV or MODIFY_SCHEMA_PRIV
 	 */
 	public void addRequiredSchemaPriv(String schema, String aid, boolean privType);
 

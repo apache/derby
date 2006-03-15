@@ -119,7 +119,6 @@ public class CreateAliasNode extends DDLStatementNode
 				// 6 - Short - SQL control
 				// 7 - Boolean - CALLED ON NULL INPUT (always TRUE for procedures)
 				// 8 - TypeDescriptor - return type (always NULL for procedures)
-				// 9 - Boolean - externalSecurity (false for invoker, true for definer)
 
 				Object[] routineElements = (Object[]) aliasSpecificInfo;
 				Object[] parameters = (Object[]) routineElements[0];
@@ -191,9 +190,6 @@ public class CreateAliasNode extends DDLStatementNode
 					calledOnNullInput = true;
 				else
 					calledOnNullInput = calledOnNullInputO.booleanValue();
-
-				// GrantRevoke TODO: Figure out how to save external security info. Putting this in
-				// RoutineAliasInfo may not be the best long term solution
 
 				aliasInfo = new RoutineAliasInfo(this.methodName, paramCount, names, types, modes, drs,
 						((Short) routineElements[5]).shortValue(),	// parameter style

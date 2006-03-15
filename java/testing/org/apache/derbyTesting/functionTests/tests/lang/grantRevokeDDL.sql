@@ -70,25 +70,10 @@ create synonym mySym for satheesh.tsat;
 grant select on mySym to bar;
 grant insert on mySym to foo;
 
--- Test for external security clause
--- Expected to fail
 CREATE FUNCTION F_ABS(P1 INT)
 RETURNS INT NO SQL
 RETURNS NULL ON NULL INPUT
 EXTERNAL NAME 'java.lang.Math.abs'
-EXTERNAL SECURITY DEFINOR
-LANGUAGE JAVA PARAMETER STYLE JAVA;
-
-CREATE PROCEDURE AUTH_TEST.addUserUtility(IN userName VARCHAR(50), IN permission VARCHAR(22)) 
-LANGUAGE JAVA PARAMETER STYLE JAVA
-EXTERNAL SECURITY INVOKER
-EXTERNAL NAME 'org.apache.derby.database.UserUtility.add';
-
-CREATE FUNCTION F_ABS(P1 INT)
-RETURNS INT NO SQL
-RETURNS NULL ON NULL INPUT
-EXTERNAL NAME 'java.lang.Math.abs'
-EXTERNAL SECURITY DEFINER
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 
 values f_abs(-5);
@@ -120,7 +105,6 @@ create view myview as select * from satheesh.tsat;
 CREATE FUNCTION FuncNotMySchema(P1 INT)
 RETURNS INT NO SQL RETURNS NULL ON NULL INPUT
 EXTERNAL NAME 'java.lang.Math.abs'
-EXTERNAL SECURITY DEFINER
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 
 alter table tsat add column k int;

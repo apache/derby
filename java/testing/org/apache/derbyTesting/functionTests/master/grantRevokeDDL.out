@@ -94,25 +94,10 @@ grant select on mySym to bar;
 ERROR 42X05: Table 'MYSYM' does not exist.
 ij(SATCONNECTION)> grant insert on mySym to foo;
 ERROR 42X05: Table 'MYSYM' does not exist.
-ij(SATCONNECTION)> -- Test for external security clause
--- Expected to fail
-CREATE FUNCTION F_ABS(P1 INT)
-RETURNS INT NO SQL
-RETURNS NULL ON NULL INPUT
-EXTERNAL NAME 'java.lang.Math.abs'
-EXTERNAL SECURITY DEFINOR
-LANGUAGE JAVA PARAMETER STYLE JAVA;
-ERROR 42X01: Syntax error: Encountered "DEFINOR" at line 7, column 19.
-ij(SATCONNECTION)> CREATE PROCEDURE AUTH_TEST.addUserUtility(IN userName VARCHAR(50), IN permission VARCHAR(22)) 
-LANGUAGE JAVA PARAMETER STYLE JAVA
-EXTERNAL SECURITY INVOKER
-EXTERNAL NAME 'org.apache.derby.database.UserUtility.add';
-0 rows inserted/updated/deleted
 ij(SATCONNECTION)> CREATE FUNCTION F_ABS(P1 INT)
 RETURNS INT NO SQL
 RETURNS NULL ON NULL INPUT
 EXTERNAL NAME 'java.lang.Math.abs'
-EXTERNAL SECURITY DEFINER
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> values f_abs(-5);
@@ -134,10 +119,9 @@ xxxxFILTERED-UUIDxxxx|NULLID                                                    
 xxxxFILTERED-UUIDxxxx|SQLJ                                                                                                                            |SATHEESH                                                                                                                        
 xxxxFILTERED-UUIDxxxx|APP                                                                                                                             |APP                                                                                                                             
 xxxxFILTERED-UUIDxxxx|SATHEESH                                                                                                                        |SATHEESH                                                                                                                        
-xxxxFILTERED-UUIDxxxx|AUTH_TEST                                                                                                                       |SATHEESH                                                                                                                        
 xxxxFILTERED-UUIDxxxx|MYDODO                                                                                                                          |DODO                                                                                                                            
 xxxxFILTERED-UUIDxxxx|DERBY                                                                                                                           |DERBY                                                                                                                           
-7 rows selected
+6 rows selected
 ij(SATCONNECTION)> -- Now connect as different user and try to do DDLs in schema owned by satheesh
 connect 'grantRevokeDDL;user=Swiper' as swiperConnection;
 ij(SWIPERCONNECTION)> set schema satheesh;
@@ -154,7 +138,6 @@ ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
 ij(SWIPERCONNECTION)> CREATE FUNCTION FuncNotMySchema(P1 INT)
 RETURNS INT NO SQL RETURNS NULL ON NULL INPUT
 EXTERNAL NAME 'java.lang.Math.abs'
-EXTERNAL SECURITY DEFINER
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
 ij(SWIPERCONNECTION)> alter table tsat add column k int;
@@ -378,7 +361,6 @@ xxxxFILTERED-UUIDxxxx|SYSCS_DIAG                                                
 xxxxFILTERED-UUIDxxxx|SYSCS_UTIL                                                                                                                      |SATHEESH                                                                                                                        
 xxxxFILTERED-UUIDxxxx|APP                                                                                                                             |APP                                                                                                                             
 xxxxFILTERED-UUIDxxxx|SATHEESH                                                                                                                        |SATHEESH                                                                                                                        
-xxxxFILTERED-UUIDxxxx|AUTH_TEST                                                                                                                       |SATHEESH                                                                                                                        
 xxxxFILTERED-UUIDxxxx|MYDODO                                                                                                                          |DODO                                                                                                                            
 xxxxFILTERED-UUIDxxxx|DERBY                                                                                                                           |DERBY                                                                                                                           
 xxxxFILTERED-UUIDxxxx|SWIPER                                                                                                                          |SWIPER                                                                                                                          
@@ -387,7 +369,7 @@ xxxxFILTERED-UUIDxxxx|GEORGE                                                    
 xxxxFILTERED-UUIDxxxx|MYFRIEND                                                                                                                        |SATHEESH                                                                                                                        
 xxxxFILTERED-UUIDxxxx|MYSCHEMA                                                                                                                        |ME                                                                                                                              
 xxxxFILTERED-UUIDxxxx|TESTSCHEMA                                                                                                                      |TESTSCHEMA                                                                                                                      
-21 rows selected
+20 rows selected
 ij(SATCONNECTION)> -- Check if DBA can ignore all privilege checks
 set connection swiperConnection;
 ij(SWIPERCONNECTION)> set schema swiper;

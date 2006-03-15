@@ -9366,14 +9366,13 @@ unique() throws StandardException :
 	6 - Short - SQL allowed.
 	7 - Boolean - CALLED ON NULL INPUT (always TRUE for procedures)
 	8 - TypeDescriptor - return type (always NULL for procedures)
-	9 - External security - invoker/definer
 */
 
 QueryTreeNode
 procedureDefinition() throws StandardException :
 {
 	TableName procedureName;
-	Object[] procedureElements = new Object[10];
+	Object[] procedureElements = new Object[9];
 }
 {
 		<PROCEDURE> procedureName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
@@ -9411,7 +9410,6 @@ void routineElement(boolean isProcedure, Object[] routineElements) throws Standa
 	|
 		<LANGUAGE>  <JAVA> { clauseValue = "JAVA"; clausePosition = 3; }
 	|
-		LOOKAHEAD({(getToken(1).kind == EXTERNAL && getToken(2).kind == NAME)})
 		<EXTERNAL> <NAME> clauseValue = string() { clausePosition = 4; }
 	|
 		<PARAMETER> <STYLE> clauseValue = parameterStyle() { clausePosition = 5; }
@@ -9427,9 +9425,6 @@ void routineElement(boolean isProcedure, Object[] routineElements) throws Standa
 		}
 
 	|   clauseValue = calledOnNullInput(isProcedure) { clausePosition = 7; }
-	|
-		LOOKAHEAD({(getToken(1).kind == EXTERNAL && getToken(2).kind == SECURITY)})	
-		clauseValue = externalSecurity() { clausePosition = 9; }
 	)
 
 	{
@@ -9547,7 +9542,7 @@ QueryTreeNode
 functionDefinition() throws StandardException :
 {
 	TableName functionName;
-	Object[] functionElements = new Object[10];
+	Object[] functionElements = new Object[9];
 }
 {
 		<FUNCTION> functionName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
@@ -11836,40 +11831,6 @@ truncateTableStatement() throws StandardException :
 }
 
 /*
- * <A NAME="external-security clause">externalSecurity</A>
- */
-Boolean
-externalSecurity() throws StandardException :
-{
-	Boolean invocationType;
-}
-{
-	<EXTERNAL> <SECURITY>
-	{
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "EXTERNAL SECURITY");
-		checkSqlStandardAccess( "EXTERNAL SECURITY");
-	}
-	( invocationType = securityDefinerInvoker())
-	{
-		return invocationType;
-	}
-}
-
-Boolean
-securityDefinerInvoker() :
-{}
-{
-	<DEFINER>
-	{
-		return Boolean.FALSE;
-	}
-	| <INVOKER>
-	{
-		return Boolean.TRUE;
-	}
-}
-
-/*
  * <A NAME="grantStatement">grantStatement</A>
  */
 QueryTreeNode
@@ -12534,7 +12495,6 @@ nonReservedKeyword()  :
 	|	tok = <DYNAMIC>
     |   tok = <DATABASE>
 	|	tok = <DB2SQL>
-	|	tok = <DEFINER>
 	|	tok = <DOCUMENT>
 	|	tok = <EACH>
 	|	tok = <EXCLUSIVE>
@@ -12547,7 +12507,6 @@ nonReservedKeyword()  :
 	|	tok = <INITIAL>
 // SQL92 says it is reserved, but we want it to be non-reserved.
 	|	tok = <INTERVAL>
-	|	tok = <INVOKER>
 	|   tok = <JAVA>
 	|	tok = <LANGUAGE>
 	|	tok = <LARGE>
@@ -12606,7 +12565,6 @@ nonReservedKeyword()  :
 	|	tok = <SCALE>
 	|	tok = <SAVEPOINT>
 	|	tok = <SEQUENTIAL>
-	|	tok = <SECURITY>
 	|	tok = <SERIALIZABLE>
 	|	tok = <SETS>
 	|	tok = <SHARE>

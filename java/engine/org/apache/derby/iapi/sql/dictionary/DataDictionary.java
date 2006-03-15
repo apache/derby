@@ -177,7 +177,7 @@ public interface DataDictionary
 	 * Push a data dictionary context onto the
 	 * current context manager.
 	 *
-	 * @param nested true iff this is a nested data dictionary context.
+	 * @param cm Context manager
 	 */
 	DataDictionaryContext pushDataDictionaryContext(ContextManager cm);
 
