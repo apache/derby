@@ -184,6 +184,8 @@ public abstract class metadata_test {
 
 		try
 		{
+			//Cleanup any leftover database objects from previous test run
+			cleanUp(s);
 
 			// test decimal type and other numeric types precision, scale,
 			// and display width after operations, beetle 3875, 3906
