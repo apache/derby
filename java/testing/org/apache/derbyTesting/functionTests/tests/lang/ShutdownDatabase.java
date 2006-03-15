@@ -60,7 +60,6 @@ package org.apache.derbyTesting.functionTests.tests.lang;
    @author Tomohito Nakayama
 */
 
-import java.util.Properties;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -70,7 +69,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.impl.tools.ij.util;
+
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -81,25 +81,13 @@ public class ShutdownDatabase{
 	
 	public static void main(String[] args) {
 		try{
-			util.getPropertyArg(args);
+//			util.getPropertyArg(args);
 
 			testShutDownWithCommitedTransaction();
 			testShutDownWithRollbackedTransaction();
 			testShutDownWithLeftTransaction();
 			
-		}catch(IOException e){
-			e.printStackTrace();
-			
 		}catch(SQLException e){
-			e.printStackTrace();
-			
-		}catch(ClassNotFoundException e){
-			e.printStackTrace();
-			
-		}catch(InstantiationException e){
-			e.printStackTrace();
-
-		}catch(IllegalAccessException e){
 			e.printStackTrace();
 			
 		}catch(Throwable t){
@@ -522,12 +510,10 @@ public class ShutdownDatabase{
 	
 
 	private static Connection openConnectionToNewDatabase(String databaseName)
-		throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+//		throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+		throws SQLException {
 		
-		System.setProperty("database",
-				   databaseName + ";create=true");
-		
-		Connection conn = util.startJBMS();
+		Connection conn = TestUtil.getConnection(databaseName, "create=true");
 		
 		System.out.println("A connection to " + databaseName + " was opened.");
 
@@ -537,12 +523,10 @@ public class ShutdownDatabase{
 
 
 	private static Connection reopenConnectionToDatabase(String databaseName)
-		throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+//		throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+		throws SQLException {
 		
-		System.setProperty("database",
-				   databaseName);
-
-		return util.startJBMS();
+		return TestUtil.getConnection(databaseName, null);
 		
 	}
 	
@@ -550,12 +534,9 @@ public class ShutdownDatabase{
 	private static void shutdownDatabase(String databaseName)
 		throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
-		System.setProperty("database",
-				   databaseName + ";shutdown=true");
+		TestUtil.getConnection(databaseName, "shutdown=true");
 		
-		util.startJBMS();
-		
-		System.out.println(databaseName + " was shutted down.");
+		System.out.println(databaseName + " was shut down.");
 		
 	}
 	
