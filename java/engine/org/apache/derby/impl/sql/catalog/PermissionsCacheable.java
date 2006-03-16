@@ -118,9 +118,7 @@ class PermissionsCacheable implements Cacheable
 					AliasDescriptor ad = dd.getAliasDescriptor( routinePermsKey.getRoutineUUID());
 					SchemaDescriptor sd = dd.getSchemaDescriptor( ad.getSchemaUUID(),
 											  ConnectionUtil.getCurrentLCC().getTransactionExecute());
-					// GrantRevoke TODO: This needs to be changed. Shouldn't allow execute on all system
-					// routines.
-					if (sd.isSystemSchema())
+					if (sd.isSystemSchema() && !sd.isSchemaWithGrantableRoutines())
 						permissions = new RoutinePermsDescriptor( dd,
 																  routinePermsKey.getGrantee(),
                                                                   (String) null,

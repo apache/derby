@@ -8298,9 +8298,11 @@ public final class	DataDictionaryImpl
      * @param return_type   null for procedure.  For functions the return type
      *                      of the function.
      *
+     * @return UUID 		UUID of system routine that got created.
+     *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    private final void createSystemProcedureOrFunction(
+    private final UUID createSystemProcedureOrFunction(
     String                  routine_name,
     UUID                    schema_uuid,
     String[]                arg_names,
@@ -8358,10 +8360,11 @@ public final class	DataDictionaryImpl
                 true,                               // true - calledOnNullInput
                 return_type);
 
+		UUID routine_uuid = getUUIDFactory().createUUID();
         AliasDescriptor ads = 
             new AliasDescriptor(
                 this,
-                getUUIDFactory().createUUID(),
+                routine_uuid,
                 routine_name,
                 schema_uuid,
                 procClass,	
@@ -8376,6 +8379,8 @@ public final class	DataDictionaryImpl
 
         addDescriptor(
             ads, null, DataDictionary.SYSALIASES_CATALOG_NUM, false, tc);
+
+		return routine_uuid;
     }
 
     /**
@@ -8399,6 +8404,7 @@ public final class	DataDictionaryImpl
 		** SYSCS_UTIL routines.
 		*/
 
+		UUID routine_uuid = null;
         // used to put procedure into the SYSCS_UTIL schema
 		UUID sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
 
@@ -8449,7 +8455,7 @@ public final class	DataDictionaryImpl
 
             };
 
-            createSystemProcedureOrFunction(
+            routine_uuid = createSystemProcedureOrFunction(
                 "SYSCS_COMPRESS_TABLE",
                 sysUtilUUID,
                 arg_names,
@@ -8459,6 +8465,8 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 (TypeDescriptor) null,
                 tc);
+
+			createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
 
         // void SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()
@@ -8586,7 +8594,7 @@ public final class	DataDictionaryImpl
                     Types.SMALLINT)
             };
 
-            createSystemProcedureOrFunction(
+            routine_uuid = createSystemProcedureOrFunction(
                 "SYSCS_SET_RUNTIMESTATISTICS",
                 sysUtilUUID,
                 arg_names,
@@ -8596,6 +8604,8 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 (TypeDescriptor) null,
                 tc);
+
+			createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
 
         // void SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(smallint)
@@ -8609,7 +8619,7 @@ public final class	DataDictionaryImpl
                     Types.SMALLINT)
             };
 
-            createSystemProcedureOrFunction(
+            routine_uuid = createSystemProcedureOrFunction(
                 "SYSCS_SET_STATISTICS_TIMING",
                 sysUtilUUID,
                 arg_names,
@@ -8619,6 +8629,8 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 (TypeDescriptor) null,
                 tc);
+
+			createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
 
 
@@ -8683,7 +8695,7 @@ public final class	DataDictionaryImpl
         // CLOB SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
         {
 
-            createSystemProcedureOrFunction(
+            routine_uuid = createSystemProcedureOrFunction(
                 "SYSCS_GET_RUNTIMESTATISTICS",
                 sysUtilUUID,
                 null,
@@ -8701,6 +8713,8 @@ public final class	DataDictionaryImpl
                     Types.CLOB, Limits.DB2_LOB_MAXWIDTH),
                 */
                 tc);
+
+			createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
 
 
@@ -9471,6 +9485,30 @@ public final class	DataDictionaryImpl
 
 	}
 
+	/**
+	 * Create RoutinePermDescriptor to grant access to PUBLIC for
+	 * this system routine. Currently only SYSUTIL routines need access
+	 * granted to execute them when a database is created.
+	 *
+	 * @param routineUUID   uuid of the routine
+	 * @param tc			TransactionController to use
+	 *
+	 * @exception  StandardException  Standard exception policy.
+	 */
+	void createRoutinePermPublicDescriptor(
+	UUID routineUUID,
+	TransactionController tc) throws StandardException
+	{
+		RoutinePermsDescriptor routinePermDesc =
+			new RoutinePermsDescriptor(
+				this,
+				"PUBLIC",
+				authorizationDBA,
+				routineUUID);
+
+		addDescriptor(
+   			routinePermDesc, null, DataDictionary.SYSROUTINEPERMS_CATALOG_NUM, false, tc);
+	}
 
     /**
      * Create system procedures added in version 10.1.
@@ -9488,6 +9526,8 @@ public final class	DataDictionaryImpl
     UUID                    sysUtilUUID)
 		throws StandardException
     {
+
+		UUID routine_uuid = null;
 
         // void SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(
         //     IN SCHEMANAME        VARCHAR(128), 
@@ -9519,7 +9559,7 @@ public final class	DataDictionaryImpl
                     Types.SMALLINT)
             };
 
-            createSystemProcedureOrFunction(
+            routine_uuid = createSystemProcedureOrFunction(
                 "SYSCS_INPLACE_COMPRESS_TABLE",
                 sysUtilUUID,
                 arg_names,
@@ -9529,6 +9569,8 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 (TypeDescriptor) null,
                 tc);
+
+			createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
     }
 

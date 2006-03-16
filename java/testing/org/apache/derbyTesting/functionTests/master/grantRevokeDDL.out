@@ -124,6 +124,10 @@ xxxxFILTERED-UUIDxxxx|DERBY                                                     
 6 rows selected
 ij(SATCONNECTION)> -- Now connect as different user and try to do DDLs in schema owned by satheesh
 connect 'grantRevokeDDL;user=Swiper' as swiperConnection;
+ij(SWIPERCONNECTION)> create table swiperTab (i int, j int);
+0 rows inserted/updated/deleted
+ij(SWIPERCONNECTION)> insert into swiperTab values (1,1);
+1 row inserted/updated/deleted
 ij(SWIPERCONNECTION)> set schema satheesh;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> -- All these DDLs should fail.
@@ -142,9 +146,6 @@ LANGUAGE JAVA PARAMETER STYLE JAVA;
 ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
 ij(SWIPERCONNECTION)> alter table tsat add column k int;
 ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
-ij(SWIPERCONNECTION)> -- Now create own schema
-create schema swiper;
-0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> create table swiper.mytab ( i int, j int);
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> set schema swiper;
@@ -370,14 +371,22 @@ xxxxFILTERED-UUIDxxxx|MYFRIEND                                                  
 xxxxFILTERED-UUIDxxxx|MYSCHEMA                                                                                                                        |ME                                                                                                                              
 xxxxFILTERED-UUIDxxxx|TESTSCHEMA                                                                                                                      |TESTSCHEMA                                                                                                                      
 20 rows selected
-ij(SATCONNECTION)> -- Check if DBA can ignore all privilege checks
+ij(SATCONNECTION)> -- Test implicit creation of schemas.. Should fail
+set connection swiperConnection;
+ij(SWIPERCONNECTION)> create table mywork.t1(i int);
+ERROR 2850E: User 'SWIPER' can not create schema 'MYWORK'. Only database owner could issue this statement.
+ij(SWIPERCONNECTION)> create view mywork.v1 as select * from swiper.swiperTab;
+ERROR 2850E: User 'SWIPER' can not create schema 'MYWORK'. Only database owner could issue this statement.
+ij(SWIPERCONNECTION)> -- Implicit schema creation should only work if creating own schema
+connect 'grantRevokeDDL;user=monica' as monicaConnection;
+ij(MONICACONNECTION)> create table mywork.t1 ( i int);
+ERROR 2850E: User 'MONICA' can not create schema 'MYWORK'. Only database owner could issue this statement.
+ij(MONICACONNECTION)> create table monica.shouldPass(c char(10));
+0 rows inserted/updated/deleted
+ij(MONICACONNECTION)> -- Check if DBA can ignore all privilege checks
 set connection swiperConnection;
 ij(SWIPERCONNECTION)> set schema swiper;
 0 rows inserted/updated/deleted
-ij(SWIPERCONNECTION)> create table swiperTab (i int, j int);
-0 rows inserted/updated/deleted
-ij(SWIPERCONNECTION)> insert into swiperTab values (1,1);
-1 row inserted/updated/deleted
 ij(SWIPERCONNECTION)> revoke select on swiperTab from satheesh;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> revoke insert on swiperTab from satheesh;
@@ -401,4 +410,81 @@ ij(SATCONNECTION)> grant select on swiper.swiperTab to sam;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> revoke insert on swiper.swiperTab from satheesh;
 0 rows inserted/updated/deleted
+ij(SATCONNECTION)> -- Test system routines. Some don't need explicit grant and others do
+-- allowing for only DBA use by default
+set connection satConnection;
+ij(SATCONNECTION)> -- Try granting or revoking from system tables. Should fail
+grant select on sys.systables to sam;
+ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYS.SYSTABLES'.
+ij(SATCONNECTION)> grant delete on sys.syscolumns to sam;
+ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYS.SYSCOLUMNS'.
+ij(SATCONNECTION)> grant update(alias) on sys.sysaliases to swiper;
+ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYS.SYSALIASES'.
+ij(SATCONNECTION)> revoke all privileges on sys.systableperms from public;
+ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYS.SYSTABLEPERMS'.
+ij(SATCONNECTION)> revoke trigger on sys.sysroutineperms from sam;
+ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYS.SYSROUTINEPERMS'.
+ij(SATCONNECTION)> -- Try granting or revoking from system routines that is expected fail
+grant execute on procedure sysibm.sqlprocedures to sam;
+ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYSIBM.SQLPROCEDURES'.
+ij(SATCONNECTION)> revoke execute on procedure sysibm.sqlcamessage from public restrict;
+ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYSIBM.SQLCAMESSAGE'.
+ij(SATCONNECTION)> -- Try positive tests
+connect 'grantRevokeDDL;user=sam' as samConnection;
+ij(SAMCONNECTION)> create table samTable(i int);
+0 rows inserted/updated/deleted
+ij(SAMCONNECTION)> insert into samTable values 1,2,3,4,5,6,7;
+7 rows inserted/updated/deleted
+ij(SAMCONNECTION)> -- Following should pass... PUBLIC should have access to these
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij(SAMCONNECTION)> call SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(1);
+0 rows inserted/updated/deleted
+ij(SAMCONNECTION)> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	call SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(1)
+Parse Time: 0
+Bind Time: 0
+Optimize Tim&
+1 row selected
+ij(SAMCONNECTION)> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SAM', 'SAMTABLE', 1);
+0 rows inserted/updated/deleted
+ij(SAMCONNECTION)> call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SAM', 'SAMTABLE', 1, 1, 1);
+0 rows inserted/updated/deleted
+ij(SAMCONNECTION)> -- Try compressing tables not owned...
+-- INPLACE_COMPRESS currently passes, pending DERBY-1062
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SWIPER', 'MYTAB', 1);
+ERROR 38000: The exception 'SQL Exception: User 'SAM' can not perform the operation in schema 'SWIPER'.' was thrown while evaluating an expression.
+ERROR 2850D: User 'SAM' can not perform the operation in schema 'SWIPER'.
+ij(SAMCONNECTION)> call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SWIPER', 'MYTAB', 1, 1, 1);
+0 rows inserted/updated/deleted
+ij(SAMCONNECTION)> -- Try other system routines. All should fail
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', 'SAMTABLE' , 'table.dat', null, null, null);
+ERROR 2850A: User 'SAM' does not have execute permission on PROCEDURE 'SYSCS_UTIL'.'SYSCS_EXPORT_TABLE'.
+ij(SAMCONNECTION)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+ERROR 2850A: User 'SAM' does not have execute permission on PROCEDURE 'SYSCS_UTIL'.'SYSCS_SET_DATABASE_PROPERTY'.
+ij(SAMCONNECTION)> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storage.pageSize');
+ERROR 2850A: User 'SAM' does not have execute permission on FUNCTION 'SYSCS_UTIL'.'SYSCS_GET_DATABASE_PROPERTY'.
+ij(SAMCONNECTION)> -- Try after DBA grants permissions
+set connection satConnection;
+ij(SATCONNECTION)> grant execute on procedure SYSCS_UTIL.SYSCS_EXPORT_TABLE to public;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant execute on procedure SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY to sam;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant execute on function SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY to sam;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> -- Now these should pass
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', 'SAMTABLE' , 'table.dat', null, null, null);
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storage.pageSize');
+1                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------
+4096                                                                                                                            
+1 row selected
 ij(SATCONNECTION)> 

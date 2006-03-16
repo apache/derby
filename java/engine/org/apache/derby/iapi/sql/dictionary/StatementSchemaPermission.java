@@ -58,7 +58,11 @@ public class StatementSchemaPermission extends StatementPermission
 	{
 		if (privType == Authorizer.MODIFY_SCHEMA_PRIV)
 		{
-			SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, true);
+			SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, false);
+			// If schema hasn't been created already, no need to check
+			if (sd == null)
+				return;
+
 			if (!authid.equals(sd.getAuthorizationId()))
 				throw StandardException.newException(
 					SQLState.AUTH_NO_ACCESS_NOT_OWNER, authid, schemaName);

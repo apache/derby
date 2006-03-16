@@ -322,6 +322,22 @@ public class SchemaDescriptor extends TupleDescriptor
 		return(isSystem);
 	}
 
+	/**
+	 * Indicate whether this is a system schema with grantable routines
+	 *
+	 * @return true/false
+	 */
+	public boolean isSchemaWithGrantableRoutines()
+	{
+		if (!isSystem)
+			return true;
+
+		if (name.equals(STD_SQLJ_SCHEMA_NAME) || name.equals(STD_SYSTEM_UTIL_SCHEMA_NAME))
+			return true;
+
+		return false;
+	}
+
 	public boolean isSYSIBM()
 	{
 		return isSYSIBM;

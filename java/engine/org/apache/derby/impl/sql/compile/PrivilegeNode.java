@@ -110,6 +110,9 @@ public class PrivilegeNode extends QueryTreeNode
         case TABLE_PRIVILEGES:
             TableName tableName = (TableName) objectOfPrivilege;
             sd = getSchemaDescriptor( tableName.getSchemaName(), true);
+            if (sd.isSystemSchema())
+                throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, tableName.getFullTableName());
+				
             TableDescriptor td = getTableDescriptor( tableName.getTableName(), sd);
             if( td == null)
                 throw StandardException.newException( SQLState.LANG_TABLE_NOT_FOUND, tableName);
@@ -127,6 +130,9 @@ public class PrivilegeNode extends QueryTreeNode
             RoutineDesignator rd = (RoutineDesignator) objectOfPrivilege;
             sd = getSchemaDescriptor( rd.name.getSchemaName(), true);
 
+            if (!sd.isSchemaWithGrantableRoutines())
+                throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, rd.name.getFullTableName());
+				
             AliasDescriptor proc = null;
             RoutineAliasInfo routineInfo = null;
             java.util.List list = getDataDictionary().getRoutineList(

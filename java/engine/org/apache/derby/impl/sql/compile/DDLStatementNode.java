@@ -27,6 +27,7 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
@@ -224,6 +225,7 @@ abstract class DDLStatementNode extends StatementNode
 		//boolean needError = !(implicitCreateSchema || (schemaName == null));
 		boolean needError = !implicitCreateSchema;
 		SchemaDescriptor sd = getSchemaDescriptor(schemaName, needError);
+		CompilerContext cc = getCompilerContext();
 
 		if (sd == null) {
 			/* Disable creating schemas starting with SYS */
@@ -235,10 +237,12 @@ abstract class DDLStatementNode extends StatementNode
 
 			sd  = new SchemaDescriptor(getDataDictionary(), schemaName,
 				(String) null, (UUID)null, false);
+
+			cc.addRequiredSchemaPriv(schemaName, null, Authorizer.CREATE_SCHEMA_PRIV);
 		}
 
 		if (ownerCheck)
-			getCompilerContext().addRequiredSchemaPriv(sd.getSchemaName(), null,
+			cc.addRequiredSchemaPriv(sd.getSchemaName(), null,
 						Authorizer.MODIFY_SCHEMA_PRIV);
 
 		/*

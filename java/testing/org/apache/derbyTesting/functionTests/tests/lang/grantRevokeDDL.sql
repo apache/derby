@@ -91,6 +91,9 @@ select * from sys.sysschemas where schemaname not like 'SYS%';
 -- Now connect as different user and try to do DDLs in schema owned by satheesh
 connect 'grantRevokeDDL;user=Swiper' as swiperConnection;
 
+create table swiperTab (i int, j int);
+insert into swiperTab values (1,1);
+
 set schema satheesh;
 
 -- All these DDLs should fail.
@@ -108,9 +111,6 @@ EXTERNAL NAME 'java.lang.Math.abs'
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 
 alter table tsat add column k int;
-
--- Now create own schema
-create schema swiper;
 
 create table swiper.mytab ( i int, j int);
 
@@ -272,13 +272,21 @@ create schema authorization testSchema;
 
 select * from sys.sysschemas;
 
+-- Test implicit creation of schemas.. Should fail
+set connection swiperConnection;
+create table mywork.t1(i int);
+create view mywork.v1 as select * from swiper.swiperTab;
+
+-- Implicit schema creation should only work if creating own schema
+connect 'grantRevokeDDL;user=monica' as monicaConnection;
+create table mywork.t1 ( i int);
+create table monica.shouldPass(c char(10));
+
 -- Check if DBA can ignore all privilege checks
 
 set connection swiperConnection;
 
 set schema swiper;
-create table swiperTab (i int, j int);
-insert into swiperTab values (1,1);
 
 revoke select on swiperTab from satheesh;
 
@@ -293,4 +301,59 @@ select * from swiper.swiperTab;
 
 grant select on swiper.swiperTab to sam;
 revoke insert on swiper.swiperTab from satheesh;
+
+
+-- Test system routines. Some don't need explicit grant and others do
+-- allowing for only DBA use by default
+
+set connection satConnection;
+
+-- Try granting or revoking from system tables. Should fail
+
+grant select on sys.systables to sam;
+grant delete on sys.syscolumns to sam;
+grant update(alias) on sys.sysaliases to swiper;
+revoke all privileges on sys.systableperms from public;
+revoke trigger on sys.sysroutineperms from sam;
+
+-- Try granting or revoking from system routines that is expected fail
+
+grant execute on procedure sysibm.sqlprocedures to sam;
+revoke execute on procedure sysibm.sqlcamessage from public restrict;
+
+-- Try positive tests
+connect 'grantRevokeDDL;user=sam' as samConnection;
+
+create table samTable(i int);
+insert into samTable values 1,2,3,4,5,6,7;
+
+-- Following should pass... PUBLIC should have access to these
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+call SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(1);
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SAM', 'SAMTABLE', 1);
+call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SAM', 'SAMTABLE', 1, 1, 1);
+
+-- Try compressing tables not owned...
+-- INPLACE_COMPRESS currently passes, pending DERBY-1062
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SWIPER', 'MYTAB', 1);
+call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SWIPER', 'MYTAB', 1, 1, 1);
+
+-- Try other system routines. All should fail
+
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', 'SAMTABLE' , 'table.dat', null, null, null);
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storage.pageSize');
+
+-- Try after DBA grants permissions
+set connection satConnection;
+
+grant execute on procedure SYSCS_UTIL.SYSCS_EXPORT_TABLE to public;
+grant execute on procedure SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY to sam;
+grant execute on function SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY to sam;
+
+-- Now these should pass
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', 'SAMTABLE' , 'table.dat', null, null, null);
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storage.pageSize');
 

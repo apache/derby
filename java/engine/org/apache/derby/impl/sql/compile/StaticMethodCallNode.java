@@ -235,6 +235,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 
 		alreadyBound = true;
+		getCompilerContext().addRequiredRoutinePriv(ad);
 
 		// If this is a function call with a variable length
 		// return type, then we need to push a CAST node.
@@ -284,7 +285,6 @@ public class StaticMethodCallNode extends MethodCallNode
 			}
 		}
 
-		getCompilerContext().addRequiredRoutinePriv(ad);
 		return this;
 	}
 
@@ -1097,5 +1097,13 @@ public class StaticMethodCallNode extends MethodCallNode
 			}
 
 		}
+	}
+
+	/**
+	 * Set default privilege of EXECUTE for this node. 
+	 */
+	int getPrivType()
+	{
+		return Authorizer.EXECUTE_PRIV;
 	}
 }
