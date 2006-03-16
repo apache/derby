@@ -146,7 +146,7 @@ abstract class DDLStatementNode extends StatementNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			return objectName.toString() + super.toString();
+			return ((objectName==null)?"":objectName.toString()) + super.toString();
 		}
 		else
 		{
