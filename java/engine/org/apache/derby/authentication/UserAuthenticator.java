@@ -54,22 +54,25 @@ public interface UserAuthenticator
 	 * Authenticate a user's credentials.
      * <BR>
      * E.g. if connection url is 
-     * <code>jdbc:derby:testdb;create=true;user=Fred;password=p</code>
-     * then the userName will be Fred
+     * <code>jdbc:derby:testdb;user=Fred;password=ScT7dmM2</code>
+     * then the userName will be Fred and within the Derby user authorization 
+     * system, Fred becomes a case-insensitive authorization identifier and 
+     * is known as FRED
      *<BR>
      * if connection url is 
-     * <code>jdbc:derby:testdb;create=true;user="Fred";password=p</code>
-     * then the userName will be "Fred"
+     * <code>jdbc:derby:testdb;user="Fred";password=ScT7dmM2</code>
+     * then the userName will be "Fred" and within the Derby user authorization
+     * system, Fred becomes a case-sensitive authorization identifier and is
+     * known as Fred
      * <BR>
 	 *
 	 * @param userName		The user's name for the connection request. May be 
      *                      null.  The user name is passed in as is from the 
-     *                      connection url.  For example if user attribute 
-     *                      value in connection url is delimited with quotes, 
-     *                      then the userName passed here will also have the 
-     *                      delimiter quotes. Derby will pass in the user name 
-     *                      that is set on connection url, without changing the
-     *                      casing. 
+     *                      connection request.
+     *                      Derby will pass in the user name that is set on
+     *                      connection request as is, without changing the 
+     *                      casing and without removing the delimiter quotes 
+     *                      if any.
      *
 	 * @param userPassword	The user's password for the connection request. 
      *                      May be null.
