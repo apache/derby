@@ -56,6 +56,9 @@ public class TestDbMetaData {
     // Run all the tests.
     private static void runTests(Connection con) throws Exception {
         testDatabaseMetaDataMethods(con);
+        testStoredProcEscapeSyntax(con);
+        testAutoCommitFailure(con);
+        con.close();
     }
 
     // Simply call each new metadata method and print the result.
@@ -66,52 +69,28 @@ public class TestDbMetaData {
         Statement s = con.createStatement();
         DatabaseMetaData met = con.getMetaData();
 
-        try {
-            if (!met.supportsStoredFunctionsUsingCallSyntax()) {
-                System.out.println
-                    ("FAIL: supportsStoredFunctionsUsingCallSyntax() " +
-                     "should return true");
-            }
-        } catch (SQLException e) {
-            // TODO: remove try/catch once method is implemented!
-            System.out.println("supportsStoredFunctionsUsingCallSyntax():");
-            dumpSQLExceptions(e);
+        if (!met.supportsStoredFunctionsUsingCallSyntax()) {
+            System.out.println
+                ("FAIL: supportsStoredFunctionsUsingCallSyntax() " +
+                 "should return true");
         }
 
-        try {
-            if (met.autoCommitFailureClosesAllResultSets()) {
-                System.out.println
-                    ("FAIL: autoCommitFailureClosesAllResultSets() " +
-                     "should return false");
-            }
-        } catch (SQLException e) {
-            // TODO: remove try/catch once method is implemented!
-            System.out.println("autoCommitFailureClosesAllResultSets():");
-            dumpSQLExceptions(e);
+        if (met.autoCommitFailureClosesAllResultSets()) {
+            System.out.println
+                ("FAIL: autoCommitFailureClosesAllResultSets() " +
+                 "should return false");
         }
 
-        try {
-            if (met.providesQueryObjectGenerator()) {
-                System.out.println
-                    ("FAIL: providesQueryObjectGenerator() should " +
-                     "return false");
-            }
-        } catch (SQLException e) {
-            // TODO: remove try/catch once method is implemented!
-            System.out.println("providesQueryObjectGenerator():");
-            dumpSQLExceptions(e);
+        if (met.providesQueryObjectGenerator()) {
+            System.out.println
+                ("FAIL: providesQueryObjectGenerator() should " +
+                 "return false");
         }
 
-        try {
-            RowIdLifetime lifetime = met.getRowIdLifetime();
-            if (lifetime != RowIdLifetime.ROWID_UNSUPPORTED) {
-                System.out.println("FAIL: getRowIdLifetime() should return " +
-                                   "ROWID_UNSUPPORTED, but got " + lifetime);
-            }
-        } catch (SQLException e) {
-            // TODO: remove try/catch once method is implemented!
-            System.out.println("getRowIdLifetime():");
-            dumpSQLExceptions(e);
+        RowIdLifetime lifetime = met.getRowIdLifetime();
+        if (lifetime != RowIdLifetime.ROWID_UNSUPPORTED) {
+            System.out.println("FAIL: getRowIdLifetime() should return " +
+                               "ROWID_UNSUPPORTED, but got " + lifetime);
         }
 
         try {
@@ -206,9 +185,85 @@ public class TestDbMetaData {
         }
 
         s.close();
+    }
 
-        con.close();
+    /**
+     * Test supportsStoredFunctionsUsingCallSyntax() by checking
+     * whether calling a stored procedure using the escape syntax
+     * succeeds.
+     *
+     * @param con <code>Connection</code> object used in test
+     * @exception SQLException if an unexpected database error occurs
+     */
+    private static void testStoredProcEscapeSyntax(Connection con)
+        throws SQLException
+    {
+        con.setAutoCommit(false);
+        String call = "{CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)}";
+        Statement stmt = con.createStatement();
 
+        boolean success;
+        try {
+            stmt.execute(call);
+            success = true;
+        } catch (SQLException e) {
+            success = false;
+        }
+
+        DatabaseMetaData dmd = con.getMetaData();
+        boolean supported = dmd.supportsStoredFunctionsUsingCallSyntax();
+        if (success != supported) {
+            System.out.println("supportsStoredFunctionsUsingCallSyntax() " +
+                               "returned " + supported + ", but executing " +
+                               call + (success ? " succeeded." : " failed."));
+        }
+        stmt.close();
+        con.rollback();
+    }
+
+    /**
+     * Test autoCommitFailureClosesAllResultSets() by checking whether
+     * a failure in auto-commit mode will close all result sets, even
+     * holdable ones.
+     *
+     * @param con <code>Connection</code> object used in test
+     * @exception SQLException if an unexpected database error occurs
+     */
+    private static void testAutoCommitFailure(Connection con)
+        throws SQLException
+    {
+        DatabaseMetaData dmd = con.getMetaData();
+        boolean shouldBeClosed = dmd.autoCommitFailureClosesAllResultSets();
+
+        con.setAutoCommit(true);
+
+        Statement s1 =
+            con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                ResultSet.CONCUR_READ_ONLY,
+                                ResultSet.HOLD_CURSORS_OVER_COMMIT);
+        ResultSet resultSet = s1.executeQuery("VALUES (1, 2), (3, 4)");
+
+        Statement s2 = con.createStatement();
+        try {
+            String query =
+                "SELECT dummy, nonexistent, phony FROM imaginarytable34521";
+            s2.execute(query);
+            System.out.println("\"" + query + "\" is expected to fail, " +
+                               "but it didn't.");
+        } catch (SQLException e) {
+            // should fail, but we don't care how
+        }
+
+        boolean isClosed = resultSet.isClosed();
+        if (isClosed != shouldBeClosed) {
+            System.out.println("autoCommitFailureClosesAllResultSets() " +
+                               "returned " + shouldBeClosed +
+                               ", but ResultSet is " +
+                               (isClosed ? "closed." : "not closed."));
+        }
+        resultSet.close();
+        s1.close();
+        s2.close();
     }
 
 	static private void dumpSQLExceptions (SQLException se) {

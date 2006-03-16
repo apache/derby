@@ -2312,6 +2312,50 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
+    // ------------------- JDBC 4.0 -------------------------
+
+    /**
+     * Retrieves whether this database supports invoking user-defined
+     * or vendor functions using the stored procedure escape syntax.
+     *
+     * @return <code>true</code>, since Derby supports the escape syntax
+     * @exception SQLException if a database access error occurs
+     */
+    public final boolean supportsStoredFunctionsUsingCallSyntax()
+        throws SQLException
+    {
+        checkForClosedConnection();
+        return true;
+    }
+
+    /**
+     * Retrieves whether an <code>SQLException</code> will cause all
+     * open <code>ResultSet</code>s to be closed when auto-commit is
+     * <code>true</code>.
+     *
+     * @return <code>false</code>, since Derby does not close all open
+     * result sets when an error occurs
+     * @exception SQLException if a database access error occurs
+     */
+    public final boolean autoCommitFailureClosesAllResultSets()
+        throws SQLException
+    {
+        checkForClosedConnection();
+        return false;
+    }
+
+    /**
+     * Retrieves whether this JDBC driver provides its own
+     * <code>QueryObjectGenerator</code>.
+     *
+     * @return <code>false</code>, since Derby does not provide its
+     * own generator
+     * @exception SQLException if a database access error occurs
+     */
+    public final boolean providesQueryObjectGenerator() throws SQLException {
+        checkForClosedConnection();
+        return false;
+    }
 
     //----------------------------helper methods----------------------------------
 
@@ -2334,7 +2378,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * SQLException instead of SqlException.  In particular this is used
      * by all the DatabaseMetadata methods
      */
-    private void checkForClosedConnection() throws SQLException
+    protected void checkForClosedConnection() throws SQLException
     {
         try {
             checkForClosedConnectionX();

@@ -32,32 +32,25 @@ public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDataba
         super(netAgent,netConnection);
     }
     
+    /**
+     * Indicates whether or not this data source supports the SQL
+     * <code>ROWID</code> type. Since Derby does not support the
+     * <code>ROWID</code> type, return <code>ROWID_UNSUPPORTED</code>.
+     *
+     * @return <code>ROWID_UNSUPPORTED</code>
+     * @exception SQLException if a database access error occurs
+     */
     public RowIdLifetime getRowIdLifetime() throws SQLException {
-	throw SQLExceptionFactory.notImplemented ("getRowIdLifetime ()");
-        
+        checkForClosedConnection();
+        return RowIdLifetime.ROWID_UNSUPPORTED;
     }
     
     public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
         throw SQLExceptionFactory.notImplemented ("getSchemas (String, String)");
     }
     
-    
-    public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
-        throw SQLExceptionFactory.notImplemented (
-                "supportsStoredFunctionsUsingCallSyntax ()");
-    }
-    
-    public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
-        throw SQLExceptionFactory.notImplemented (
-                "autoCommitFailureClosesAllResultSets ()");
-    }
-    
     public ResultSet getClientInfoProperties()
     throws SQLException {
         throw SQLExceptionFactory.notImplemented ("getClientInfoProperties ()");
-    }
-    
-    public boolean providesQueryObjectGenerator() throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("providesQueryObjectGenerator ()");
     }
 }

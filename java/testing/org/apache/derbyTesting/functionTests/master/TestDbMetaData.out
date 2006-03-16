@@ -44,26 +44,6 @@ SYSPROC,null
 SYSSTAT,null
 TABLE_SCHEM,TABLE_CATALOG
 APP,null
-supportsStoredFunctionsUsingCallSyntax():
-FAIL -- unexpected exception
-SQLSTATE(0A000):java.sql.SQLException: 0A000.S : [0] supportsStoredFunctionsUsingCallSyntax ()
-Caused by: org.apache.derby.client.am.SqlException: 0A000.S : [0] supportsStoredFunctionsUsingCallSyntax ()
-	... 4 more
-autoCommitFailureClosesAllResultSets():
-FAIL -- unexpected exception
-SQLSTATE(0A000):java.sql.SQLException: 0A000.S : [0] autoCommitFailureClosesAllResultSets ()
-Caused by: org.apache.derby.client.am.SqlException: 0A000.S : [0] autoCommitFailureClosesAllResultSets ()
-	... 4 more
-providesQueryObjectGenerator():
-FAIL -- unexpected exception
-SQLSTATE(0A000):java.sql.SQLException: 0A000.S : [0] providesQueryObjectGenerator ()
-Caused by: org.apache.derby.client.am.SqlException: 0A000.S : [0] providesQueryObjectGenerator ()
-	... 4 more
-getRowIdLifetime():
-FAIL -- unexpected exception
-SQLSTATE(0A000):java.sql.SQLException: 0A000.S : [0] getRowIdLifetime ()
-Caused by: org.apache.derby.client.am.SqlException: 0A000.S : [0] getRowIdLifetime ()
-	... 4 more
 getClientInfoProperties():
 FAIL -- unexpected exception
 SQLSTATE(0A000):java.sql.SQLException: 0A000.S : [0] getClientInfoProperties ()
