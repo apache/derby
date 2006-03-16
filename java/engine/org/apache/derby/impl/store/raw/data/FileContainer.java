@@ -154,6 +154,12 @@ abstract class FileContainer
 	protected long			estimatedRowCount;    // value is changed unlogged
 	protected LogInstant    lastLogInstant;       // last time this container 
                                                   // object was touched.
+	/** 
+	 * The sequence number for reusable recordIds . 
+	 * As long as this number does not change, recordIds will be stable within
+	 * the container.
+	 **/
+	private long reusableRecordIdSequenceNumber;
 
 
 	/**
@@ -274,10 +280,10 @@ abstract class FileContainer
 		8 bytes	long	first Allocation page offset
 		8 bytes	long	container version
 		8 bytes long	estimated number of rows
-		8 bytes long	spare2
+		8 bytes long	reusable recordId sequence number
 		8 bytes long	spare3
 		8 bytes	long	checksum
-		container info size is 80 bytes, with 20 bytes of spare space
+		container info size is 80 bytes, with 10 bytes of spare space
 	*/
 	protected static final int CONTAINER_INFO_SIZE = 
 		CONTAINER_FORMAT_ID_SIZE+4+4+4+4+2+2+8+8+8+8+CHECKSUM_SIZE+8+8;
@@ -755,6 +761,7 @@ abstract class FileContainer
 		firstAllocPageOffset = -1;
 		containerVersion = 0;
 		estimatedRowCount = 0;
+		reusableRecordIdSequenceNumber = 0;
 
 		setDroppedState(false);
 		setCommittedDropState(false);
@@ -806,12 +813,12 @@ abstract class FileContainer
 		firstAllocPageOffset = inStream.readLong();
 		containerVersion = inStream.readLong();
 		estimatedRowCount = inStream.readLong();
+		reusableRecordIdSequenceNumber = inStream.readLong();
 		lastLogInstant = null;
 
 		if (PreAllocSize == 0)	// pre 2.0, we don't store this.
 			PreAllocSize = DEFAULT_PRE_ALLOC_SIZE;
 
-		long spare2 = inStream.readLong();	// read spare long
 		long spare3 = inStream.readLong();	// read spare long
 
 		// upgrade - if this is a container that was created before
@@ -965,7 +972,7 @@ abstract class FileContainer
 		outStream.writeLong(firstAllocPageOffset);
 		outStream.writeLong(containerVersion);
 		outStream.writeLong(estimatedRowCount);
-		outStream.writeLong(0);		//Write spare2
+		outStream.writeLong(reusableRecordIdSequenceNumber);
 		outStream.writeLong(0);		//Write spare3
 
 		checksum.reset();
@@ -1431,6 +1438,33 @@ abstract class FileContainer
             // all pages.
             pageCache.discard(identity);
         }
+	}
+
+	/**
+	 * Get the reusable RecordId sequence number for the container.
+	 * @see BaseContainer#getReusableRecordIdSequenceNumber
+	 * @return reusable RecordId sequence number for the container.
+	 */
+	public final long getReusableRecordIdSequenceNumber() {
+		synchronized(this) {
+			return reusableRecordIdSequenceNumber;
+		}
+	}
+	
+	/**
+	 * Increment the reusable RecordId version sequence number.
+	 */
+	protected final void incrementReusableRecordIdSequenceNumber()
+	{
+		final boolean readOnly = dataFactory.isReadOnly();
+		
+		synchronized (this) {
+			reusableRecordIdSequenceNumber++;
+			if (!readOnly)
+			{
+				isDirty = true;
+			}
+		}
 	}
 
 	/**

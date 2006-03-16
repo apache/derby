@@ -191,6 +191,19 @@ public abstract class GenericScanController
      */
     private int         scan_state;
 
+         
+    /**
+     * If this flag is set to true, a RowLocation returned from this controller
+     * may have been reused for another row.
+     */
+    protected boolean rowLocationsInvalidated = false;
+    
+    /**
+     * This is the sequence number for when a record id can be
+     * reused. If it has been changed in the container, a RowLocation
+     * may be reused for another row.
+     */
+    private long reusableRecordIdSequenceNumber = 0;
     
     /**
      * The position for the current scan.  The can be maintained in any
@@ -597,7 +610,7 @@ public abstract class GenericScanController
         }
         else if (this.scan_state == SCAN_HOLD_INPROGRESS)
         {
-            open_conglom.reopen();
+            reopenAfterEndTransaction();
 
             if (SanityManager.DEBUG)
             {
@@ -616,7 +629,7 @@ public abstract class GenericScanController
         }
         else if (this.scan_state == SCAN_HOLD_INIT)
         {
-            open_conglom.reopen();
+            reopenAfterEndTransaction();
 
             positionAtStartForForwardScan(scan_position);
 
@@ -918,6 +931,9 @@ public abstract class GenericScanController
             stopKeyValue,
             stopSearchOperator,
             scan_position);
+        
+        reusableRecordIdSequenceNumber = 
+                    open_conglom.getContainer().getReusableRecordIdSequenceNumber();
     }
 
 
@@ -1007,6 +1023,45 @@ public abstract class GenericScanController
 
         closeScan();
 	}
+
+    /**
+     * Reopens the scan after it has been closed as part of a commit.
+     * This method will check the reusableRecordIdSequenceNumber of the 
+     * container, and will set the rowLocationsInvalidated flag if it has 
+     * changed.
+     * @return true if the conglomerate has been reopened
+     * @exception StandardException Derby standard exception
+     */
+    protected final boolean reopenAfterEndTransaction() 
+        throws StandardException
+    {
+        // Only reopen if holdable
+        if (!open_conglom.getHold()) 
+        {
+            return(false);
+        }
+        
+        ContainerHandle container = open_conglom.reopen();
+        switch (scan_state) {
+        case SCAN_INPROGRESS:
+        case SCAN_HOLD_INPROGRESS:
+        case SCAN_DONE:
+            if (container.getReusableRecordIdSequenceNumber() != 
+                reusableRecordIdSequenceNumber) 
+            {
+                rowLocationsInvalidated = true;
+            }
+            break;
+        case SCAN_INIT: 
+        case SCAN_HOLD_INIT:
+            reusableRecordIdSequenceNumber = 
+                container.getReusableRecordIdSequenceNumber();
+            break;
+        default:
+            break; 
+        }
+        return(true);
+    }
 
     public boolean closeForEndTransaction(
     boolean closeHeldScan)

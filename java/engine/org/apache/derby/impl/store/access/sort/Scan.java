@@ -319,6 +319,16 @@ public abstract class Scan implements ScanManager, ScanInfo
                 SQLState.SORT_IMPROPER_SCAN_METHOD);
 	}
 
+    /**
+     *@see ScanController#positionAtRowLocation
+     */
+    public boolean positionAtRowLocation(RowLocation rl) 
+        throws StandardException 
+    {
+        throw StandardException.newException(
+                SQLState.SORT_IMPROPER_SCAN_METHOD);
+    }
+
 	/*
 	** Methods of ScanManager
 	*/

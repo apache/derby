@@ -289,6 +289,24 @@ public interface ScanController extends GenericScanController
 		throws StandardException;
 
     /**
+     * Positions the scan at row location and locks the row. 
+     * If the scan is not opened, it will be reopened if this is a holdable 
+     * scan and there has not been any operations which causes RowLocations 
+     * to be invalidated.
+     * @param rl RowLocation for the new position for the scan. The 
+     *           RowLocation submitted should be a RowLocation which has 
+     *           previously been returned by this ScanController.
+     * @return true if the scan has been positioned at the RowLocation.
+     *         false if the scan could not be positioned.
+     * 
+     * @exception StandardException Standard exception policy.
+     *
+     */
+    boolean positionAtRowLocation(RowLocation rl) 
+        throws StandardException;
+
+
+    /**
     Replace the (partial) row at the current position of the scan.
 
     @return true if the replace was successful,

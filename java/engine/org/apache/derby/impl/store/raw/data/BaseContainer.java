@@ -217,6 +217,7 @@ abstract class BaseContainer implements Lockable {
 
 		try
 		{
+            incrementReusableRecordIdSequenceNumber();						
             compressContainer(ntt, allocHandle);
 		}
 		finally
@@ -226,6 +227,24 @@ abstract class BaseContainer implements Lockable {
 			ntt.close();
 		}
     }
+
+	/**
+	 * Get the reusable RecordId sequence number for the
+	 * container. This sequence number should be incremented every time
+	 * there is an operation which may cause RecorIds to be reused.
+	 * This method can be used by clients to check if a RecordId they 
+	 * obtained is still guaranteed to be valid.
+	 * If the sequence number has changed, the RecordId may have been
+	 * reused for another row.
+	 * @return sequence number for reusable RecordId
+	 */
+	public abstract long getReusableRecordIdSequenceNumber();
+
+	/**
+	 * Increment the reusable RecordId sequence number.
+	 */
+	protected abstract void incrementReusableRecordIdSequenceNumber();
+	
 
 	/**
 		Add a page to this container.

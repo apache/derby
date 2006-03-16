@@ -164,6 +164,7 @@ public class phaseTester {
 
 		if (conn != null && !conn.isClosed()) {
 
+			passed = caseReusableRecordIdSequenceNumber(conn, phase, dbMajor, dbMinor, isBeta) && passed;
 			passed = caseInitialize(conn, phase, dbMajor, dbMinor, isBeta) && passed;
 			passed = caseProcedures(conn, phase, dbMajor, dbMinor, isBeta) && passed;
 
@@ -340,7 +341,68 @@ public class phaseTester {
 		return count == 1;
 	}
 
-
+	/**
+	 * In 10.2: We will write a ReusableRecordIdSequenceNumber in the 
+	 * header of a FileContaienr.
+	 * 
+	 * Verify here that a 10.1 Database does not malfunction from this.
+	 * 10.1 Databases should ignore the field.
+	 */
+	static boolean caseReusableRecordIdSequenceNumber(Connection conn, 
+											   int phase, 
+											   int dbMajor, int dbMinor, 
+											   boolean isBeta)
+		throws SQLException
+	{
+		boolean runCompress = dbMajor>10 || dbMajor==10 && dbMinor>=1;
+		final boolean passed;
+		switch(phase) {
+		case PH_CREATE: {
+			Statement s = conn.createStatement();
+			s.execute("create table CT1(id int)");
+			s.execute("insert into CT1 values 1,2,3,4,5,6,7,8,9,10");
+			conn.commit();
+			passed = true;
+			break;
+		}
+		case PH_SOFT_UPGRADE:
+			if (runCompress) {
+				System.out.println("Running compress");
+				PreparedStatement ps = conn.prepareStatement
+					("call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(?,?,?,?,?)");
+				ps.setString(1, "APP"); // schema
+				ps.setString(2, "CT1");  // table name
+				ps.setInt(3, 1); // purge
+				ps.setInt(4, 1); // defragment rows
+				ps.setInt(5, 1); // truncate end
+				ps.executeUpdate();
+				conn.commit();
+			}
+			passed = true;
+			break;
+		case PH_POST_SOFT: {
+			// We are now back to i.e 10.1
+			Statement s = conn.createStatement();
+			ResultSet rs = s.executeQuery("select * from CT1");
+			while (rs.next()) {
+				rs.getInt(1);
+			}
+			s.execute("insert into CT1 values 11,12,13,14,15,16,17,18,19");
+			conn.commit();
+			passed = true;
+			break;
+		}
+		case PH_HARD_UPGRADE:
+			passed = true;
+			break;
+		default:
+			passed = false;
+			break;
+		}
+		System.out.println("complete caseReusableRecordIdSequenceNumber  - passed " + passed);
+		return passed;
+	}
+	
 	/*
 	** Procedures
 	*  10.1 - Check that a procedure with a signature can not be added if the

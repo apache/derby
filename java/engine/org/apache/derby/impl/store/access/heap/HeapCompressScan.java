@@ -158,7 +158,7 @@ class HeapCompressScan
         }
         else if (getScanState() == SCAN_HOLD_INPROGRESS)
         {
-            open_conglom.reopen();
+            reopenAfterEndTransaction();
 
             if (SanityManager.DEBUG)
             {
@@ -177,7 +177,7 @@ class HeapCompressScan
         }
         else if (getScanState() == SCAN_HOLD_INIT)
         {
-            open_conglom.reopen();
+            reopenAfterEndTransaction();
 
             positionAtStartForForwardScan(scan_position);
 

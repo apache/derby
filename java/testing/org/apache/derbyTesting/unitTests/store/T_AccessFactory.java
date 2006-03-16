@@ -134,6 +134,7 @@ public class T_AccessFactory extends T_Generic
 				&& readUncommitted(tc)
                 && updatelocks(tc)
 				&& nestedUserTransaction(tc)
+                && positionAtRowLocation(tc)
                 && sortCost(tc)
                 && storeCost(tc)
                 && partialScan(tc)
@@ -3746,6 +3747,193 @@ public class T_AccessFactory extends T_Generic
 		REPORT("(holdCursor) succeeded");
 		return true;
 	}
+
+    // test position at row location, in terms of holdability
+    protected boolean positionAtRowLocation(TransactionController tc)
+        throws StandardException, T_Fail
+    {
+        REPORT("(positionAtRowLocation)");
+        
+        // Create a conglomerate with one row:
+        long base_id = createAConglom(tc, 0, false);
+        
+        // Open it.
+        ConglomerateController cc = 
+            tc.openConglomerate(base_id, 
+                                false,
+                                TransactionController.OPENMODE_FORUPDATE, 
+                                TransactionController.MODE_RECORD,
+                                TransactionController.ISOLATION_SERIALIZABLE);
+        
+        T_AccessRow  accessRow  = null;
+        for (int i = 1; i < 5; i++) 
+        {
+            // Create a row.
+            accessRow  = new T_AccessRow(1);
+            SQLLongint c1  = new SQLLongint(i);
+            accessRow.setCol(0, c1);
+            
+            // Insert the row and remember its location.
+            cc.insert(accessRow.getRowArray());
+        }
+        tc.commit();
+        cc.close();
+        
+        // Open scan on the table:
+        ScanController base_scan = 
+            tc.openScan(base_id,
+                        true, // do hold
+                        TransactionController.OPENMODE_FORUPDATE, // for update
+                        TransactionController.MODE_RECORD,
+                        TransactionController.ISOLATION_SERIALIZABLE,
+                        (FormatableBitSet) null, // all columns, all as objects
+                        null, // start position - first row in conglomerate
+                        0,    // unused if start position is null.
+                        null, // qualifier - accept all rows
+                        null, // stop position - last row in conglomerate
+                        0);   // unused if stop position is null.
+        
+        
+        // Move to the first row
+        base_scan.next();
+                
+        // Get the RowLocation for the first row:
+        RowLocation firstRow = base_scan.newRowLocationTemplate();
+        base_scan.fetchLocation(firstRow);
+        base_scan.fetch(accessRow.getRowArray());        
+        long key_value = ((SQLLongint) accessRow.getCol(0)).getLong();
+        if (key_value != 0) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_1) 1st row is not 0 it is:" + 
+                 key_value);
+        }
+                
+        // Move to some other rows:
+        base_scan.next();        
+        base_scan.fetch(accessRow.getRowArray());
+        key_value =  ((SQLLongint) accessRow.getCol(0)).getLong();
+        if (key_value != 1) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_2) 2nd row is not 1 it is:" + 
+                 key_value);
+        }
+        
+        base_scan.next();
+        base_scan.fetch(accessRow.getRowArray());
+        key_value = ((SQLLongint) accessRow.getCol(0)).getLong();        
+        if (key_value != 2) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_3) 3d row is not 2 it is:" + 
+                 key_value);
+        }
+        
+        if (!base_scan.positionAtRowLocation(firstRow)) 
+        {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_4) Failed to position at RowLocation");
+        }        
+        base_scan.fetch(accessRow.getRowArray());        
+        key_value = ((SQLLongint) accessRow.getCol(0)).getLong();
+        if (key_value != 0) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_5) 1st row is not 0 it is:" + 
+                 key_value);
+        }
+        
+        // Commit and check holdability:
+        tc.commit();        
+        base_scan.next();        
+        base_scan.fetch(accessRow.getRowArray());
+        key_value =  ((SQLLongint) accessRow.getCol(0)).getLong();
+        if (key_value != 1) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_6) 2nd row is not 1 it is:" + 
+                 key_value);
+        }
+        
+        base_scan.next();        
+        base_scan.fetch(accessRow.getRowArray());
+        key_value =  ((SQLLongint) accessRow.getCol(0)).getLong();
+        if (key_value != 2) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_7) 3d row is not 2 it is:" + 
+                 key_value);
+        }
+        
+        if (!base_scan.positionAtRowLocation(firstRow)) 
+        {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_8) Failed to position at " +
+                 "RowLocation after commit");
+        }        
+        base_scan.fetch(accessRow.getRowArray());
+        key_value =  ((SQLLongint) accessRow.getCol(0)).getLong();        
+        if (key_value != 0) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_9) 1st row is not 0 it is:" + 
+                 key_value);
+        }
+
+        base_scan.next();        
+        base_scan.fetch(accessRow.getRowArray());
+        key_value =  ((SQLLongint) accessRow.getCol(0)).getLong();
+        if (key_value != 1) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_10) 2nd row is not 1 it is:" + 
+                 key_value);
+        }
+        
+        base_scan.next();        
+        base_scan.fetch(accessRow.getRowArray());
+        key_value =  ((SQLLongint) accessRow.getCol(0)).getLong();
+        if (key_value != 2) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_10) 3d row is not 2 it is:" + 
+                 key_value);
+        }
+        
+        // Using reopenScanByRowLocation(..) 
+        // instead of positionAtRowLocation(..):
+        base_scan.reopenScanByRowLocation(firstRow, null);
+        base_scan.next();
+        base_scan.fetch(accessRow.getRowArray());
+        key_value =  ((SQLLongint) accessRow.getCol(0)).getLong();
+        if (key_value != 0) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_11) 1st row is not 0 it is:" + 
+                 key_value);
+        }
+        
+        tc.commit();
+        
+        // Compress the conglomerate
+        tc.compressConglomerate(base_id);                
+        tc.commit();
+
+        base_scan.next();
+        base_scan.fetch(accessRow.getRowArray());
+        key_value =  ((SQLLongint) accessRow.getCol(0)).getLong();
+        if (key_value != 1) {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_12) 2nd row is not 1 it is:" + 
+                 key_value);
+        }
+        
+        // Position at RowLocation should now fail. We cannot guarantee
+        // that they are holdable
+        if (base_scan.positionAtRowLocation(firstRow)) 
+        {
+            throw T_Fail.testFailMsg
+                ("(positionAtRowLocation_err_12) Unexpectedly succeeded at " + 
+                 "positioning at RowLocation after compress");
+        }
+        
+        
+        base_scan.close();
+        
+        REPORT("(positionAtRowLocation) succeeded");
+        return true;
+    }
 
     /**
      * Test critical cases for read uncommitted.

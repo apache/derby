@@ -170,6 +170,54 @@ class HeapScan
     }
 
     /**
+     * Reposition the current scan and sets the necessary locks.
+     *
+     * @param rh An existing RecordHandle within the conglomerate,
+     * at which to position the start of the scan.  The scan will begin at this
+     * location and continue forward until the end of the conglomerate.  
+     * Positioning at a non-existent RowLocation (ie. an invalid one or one that
+     * had been deleted), will result in an exception being thrown when the 
+     * first next operation is attempted.
+     * @return true if the scan was successfully repositioned
+     *
+     * @exception StandardException Standard exception policy.
+     */
+    private boolean reopenScanByRecordHandleAndSetLocks (RecordHandle rh) 
+            throws StandardException 
+    {
+        if (rh == null) 
+        {
+            return (false);
+        }
+        
+        // Unlock current position
+        if (scan_position.current_rh != null) 
+        {
+            open_conglom.unlockPositionAfterRead(scan_position);
+        }
+        
+        // Position scan at new row
+        scan_position.current_rh = rh;
+        scan_position.current_rh_qualified = false;
+        
+        // Latch page and reposition scan
+        final boolean rowLocationDisappeared = 
+            open_conglom.latchPageAndRepositionScan(scan_position);
+        
+        if (!rowLocationDisappeared)
+        {
+            setScanState(SCAN_INPROGRESS);
+            open_conglom.lockPositionForRead
+                (scan_position, null, true, true);
+        }
+        
+        // Unlatch page
+        scan_position.unlatch();
+        
+        return (!rowLocationDisappeared);
+    }
+
+    /**
     Fetch the row at the next position of the Scan.
 
     If there is a valid next position in the scan then
@@ -240,6 +288,25 @@ class HeapScan
         return(ret_val);
 	}
 
+    /**
+     * @see ScanController#positionAtRowLocation
+     */
+    public boolean positionAtRowLocation(RowLocation rl) throws StandardException {
+        if (open_conglom.isClosed() && !rowLocationsInvalidated) 
+        {
+            reopenAfterEndTransaction();
+        }
+        
+        if (rowLocationsInvalidated) 
+        {
+            return(false);
+            
+        } else {
+            return(reopenScanByRecordHandleAndSetLocks
+                (((HeapRowLocation)rl).
+                 getRecordHandle(open_conglom.getContainer())));
+        }
+    }
 
     /**************************************************************************
      * Public Methods of ScanController interface:

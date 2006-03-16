@@ -205,6 +205,12 @@ public interface ContainerHandle
 	*/
 	public void compressContainer() throws StandardException;
 
+	/**
+	 * Get the reusable recordId sequence number.
+	 * @return version sequence number
+	 * @exception StandardException	Standard Derby error policy
+	 */
+	public long getReusableRecordIdSequenceNumber() throws StandardException;
 
 	/**	
 		Add an empty page to the container and obtain exclusive access to it.

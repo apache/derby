@@ -22,8 +22,8 @@ jvm=java
 
 # classpaths
 
-ocp="${ocs}/derby.jar;${ncs}/derbyTesting.jar"
-ncp="${ncs}/derby.jar;${ncs}/derbyTesting.jar"
+ocp="${ocs}/derby.jar:${ncs}/derbyTesting.jar"
+ncp="${ncs}/derby.jar:${ncs}/derbyTesting.jar"
 
 # database name
 dbdir=updtest_${omajor}_${ominor}

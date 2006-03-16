@@ -1674,6 +1674,17 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         return(true);
     }
 
+    /**
+     * @see ScanController#positionAtRowLocation
+     *
+     * Not implemented for this class
+     */
+    public boolean positionAtRowLocation (RowLocation rLoc) 
+        throws StandardException 
+    {
+        throw StandardException.newException(
+                SQLState.BTREE_UNIMPLEMENTED_FEATURE);        
+    }
 
     /**
     Move to the next position in the scan.

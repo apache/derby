@@ -197,6 +197,19 @@ public class BaseContainerHandle extends Observable
 	}
 
 	/**
+	 * Get the reusable recordId sequence number.
+	 * @return version sequence number
+	 * @exception StandardException	Standard Derby error policy
+	 * @see ContainerHandle#getReusableRecordIdSequenceNumber
+	 */
+	public long getReusableRecordIdSequenceNumber() throws StandardException
+	{
+		checkOpen();
+		
+		return container.getReusableRecordIdSequenceNumber();
+	}
+
+	/**
 		Add a page to the container, if flag == ContainerHandle.ADD_PAGE_BULK,
 		tell the container about it.
 
