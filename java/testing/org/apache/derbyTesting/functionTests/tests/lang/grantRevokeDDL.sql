@@ -341,7 +341,7 @@ call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SWIPER', 'MYTAB', 1, 1, 1);
 
 -- Try other system routines. All should fail
 
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', 'SAMTABLE' , 'table.dat', null, null, null);
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', 'SAMTABLE' , 'extinout/table.dat', null, null, null);
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
 values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storage.pageSize');
 
@@ -353,7 +353,7 @@ grant execute on procedure SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY to sam;
 grant execute on function SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY to sam;
 
 -- Now these should pass
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', 'SAMTABLE' , 'table.dat', null, null, null);
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', 'SAMTABLE' , 'extinout/table.dat', null, null, null);
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
 values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storage.pageSize');
 

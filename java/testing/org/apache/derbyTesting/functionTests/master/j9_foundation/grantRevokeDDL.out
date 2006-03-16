@@ -1,28 +1,28 @@
 ij> connect 'grantRevokeDDL;create=true' user 'satheesh' as satConnection;
-ij> -- Test table privileges
+ij(SATCONNECTION)> -- Test table privileges
 create table satheesh.tsat(i int not null primary key, j int);
 0 rows inserted/updated/deleted
-ij> create index tsat_ind on satheesh.tsat(j);
+ij(SATCONNECTION)> create index tsat_ind on satheesh.tsat(j);
 0 rows inserted/updated/deleted
-ij> create table satheesh.table1 (a int, b int, c char(10));
+ij(SATCONNECTION)> create table satheesh.table1 (a int, b int, c char(10));
 0 rows inserted/updated/deleted
-ij> grant select on satheesh.tsat to public;
+ij(SATCONNECTION)> grant select on satheesh.tsat to public;
 0 rows inserted/updated/deleted
-ij> grant insert on satheesh.tsat to foo;
+ij(SATCONNECTION)> grant insert on satheesh.tsat to foo;
 0 rows inserted/updated/deleted
-ij> grant delete on satheesh.tsat to foo;
+ij(SATCONNECTION)> grant delete on satheesh.tsat to foo;
 0 rows inserted/updated/deleted
-ij> grant update on satheesh.tsat to foo;
+ij(SATCONNECTION)> grant update on satheesh.tsat to foo;
 0 rows inserted/updated/deleted
-ij> grant update(i) on satheesh.tsat to bar;
+ij(SATCONNECTION)> grant update(i) on satheesh.tsat to bar;
 0 rows inserted/updated/deleted
-ij> select * from sys.systableperms;
+ij(SATCONNECTION)> select * from sys.systableperms;
 GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 PUBLIC                                                                                                                          |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
 FOO                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|y|y|y|N|N
 2 rows selected
-ij> connect 'grantRevokeDDL' user 'bar' as barConnection;
+ij(SATCONNECTION)> connect 'grantRevokeDDL' user 'bar' as barConnection;
 ij(BARCONNECTION)> -- Following revokes should fail. Only owner can revoke permissions
 revoke select on satheesh.tsat from public;
 ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
@@ -331,15 +331,15 @@ ERROR 2850E: User 'SWIPER' can not create schema 'MYSCHEMA'. Only database owner
 ij(SWIPERCONNECTION)> create schema myschema authorization swiper;
 ERROR 2850E: User 'SWIPER' can not create schema 'MYSCHEMA'. Only database owner could issue this statement.
 ij(SWIPERCONNECTION)> connect 'grantRevokeDDL;user=sam';
-ij(CONNECTION0)> create schema sam authorization swiper;
+ij(CONNECTION1)> create schema sam authorization swiper;
 ERROR 2850E: User 'SAM' can not create schema 'SAM'. Only database owner could issue this statement.
-ij(CONNECTION0)> -- Should pass
+ij(CONNECTION1)> -- Should pass
 create schema authorization sam;
 0 rows inserted/updated/deleted
-ij(CONNECTION0)> connect 'grantRevokeDDL;user=george';
-ij(CONNECTION1)> create schema george;
+ij(CONNECTION1)> connect 'grantRevokeDDL;user=george';
+ij(CONNECTION2)> create schema george;
 0 rows inserted/updated/deleted
-ij(CONNECTION1)> -- Now try as DBA (satheesh)
+ij(CONNECTION2)> -- Now try as DBA (satheesh)
 set connection satConnection;
 ij(SATCONNECTION)> create schema myFriend;
 0 rows inserted/updated/deleted
