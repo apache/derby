@@ -1,0 +1,211 @@
+/*
+ *
+ * Derby - Class TestConfiguration
+ *
+ * Copyright 2006 The Apache Software Foundation or its 
+ * licensors, as applicable.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, 
+ * software distributed under the License is distributed on an 
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ * either express or implied. See the License for the specific 
+ * language governing permissions and limitations under the License.
+ */
+package org.apache.derbyTesting.functionTests.util;
+
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Properties;
+
+/**
+ * Class which holds information about the configuration of a Test.
+ */
+public class TestConfiguration {
+    
+    /**
+     * Default Derby test configuration object.
+     */
+    public static final TestConfiguration DERBY_TEST_CONFIG = 
+        new TestConfiguration(getSystemProperties());
+    
+    /**
+     * This constructor creates a TestConfiguration from a Properties object.
+     *
+     * @throws NumberFormatException if the port specification is not an integer.
+     */
+    private TestConfiguration(Properties props) 
+        throws NumberFormatException {
+        dbName = props.getProperty(KEY_DBNAME, DEFAULT_DBNAME);
+        userName = props.getProperty(KEY_USER_NAME, DEFAULT_USER_NAME);
+        userPassword = props.getProperty(KEY_USER_PASSWORD, 
+                                         DEFAULT_USER_PASSWORD);
+        hostName = props.getProperty(KEY_HOSTNAME, DEFAULT_HOSTNAME);
+        isVerbose = Boolean.valueOf(props.getProperty(KEY_VERBOSE)).booleanValue();
+        String portStr = props.getProperty(KEY_PORT);
+        if (portStr != null) {
+            try {
+                port = Integer.parseInt(portStr);
+            } catch (NumberFormatException nfe) {
+                // We lose stacktrace here, but it is not important. 
+                throw new NumberFormatException(
+                        "Port number must be an integer. Value: " + portStr); 
+            }
+        } else {
+            port = DEFAULT_PORT;
+        }
+        
+        String framework = props.getProperty(KEY_FRAMEWORK, DEFAULT_FRAMEWORK);
+        
+        if ("DerbyNetClient".equals(framework)) {
+            jdbcClient = JDBCClient.DERBYNETCLIENT;
+        } else if ("DerbyNet".equals(framework)) {
+            jdbcClient = JDBCClient.DERBYNET;
+        } else {
+            jdbcClient = JDBCClient.EMBEDDED;
+        }
+        url = createJDBCUrlWithDatabaseName(dbName);
+    }
+
+    /**
+     * Get the system properties in a privileged block.
+     *
+     * @return the system properties.
+     */
+    private static final Properties getSystemProperties() {
+        // Fetch system properties in a privileged block.
+        Properties sysProps = (Properties)AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run() {
+                        return System.getProperties();
+                    }
+                });
+        return sysProps;
+    }
+
+    /**
+     * Create JDBC connection url, including the name of the database.
+     *
+     * @return JDBC connection url, without attributes.
+     */
+    private String createJDBCUrlWithDatabaseName(String name) {
+        if (jdbcClient == JDBCClient.EMBEDDED) {
+            return jdbcClient.getUrlBase() + dbName;
+        } else {
+            return jdbcClient.getUrlBase() + hostName + ":" + port + "/" + name;
+        }
+    }
+
+    /**
+     * Get configured JDBCClient object.
+     *
+     * @return JDBCClient
+     */
+    public JDBCClient getJDBCClient() {
+        return jdbcClient;
+    }
+    
+    
+    /**
+     * Return the jdbc url for connecting to the default database.
+     *
+     * @return JDBC url.
+     */
+    public String getJDBCUrl() {
+        return url;
+    }
+
+    /**
+     * Return the jdbc url for a connecting to the database.
+     * 
+     * @param databaseName name of database.
+     * @return JDBC connection url, including database name.
+     */
+    public String getJDBCUrl(String databaseName) {
+        return createJDBCUrlWithDatabaseName(databaseName);
+    }
+    
+    /**
+     * Return the default database name.
+     * 
+     * @return default database name.
+     */
+    public String getDatabaseName() {
+        return dbName;
+    }
+    
+    /**
+     * Return the user name.
+     * 
+     * @return user name.
+     */
+    public String getUserName() {
+        return userName;
+    }
+    
+    /**
+     * Return the user password.
+     * 
+     * @return user password.
+     */
+    public String getUserPassword() {
+        return userPassword;
+    }
+
+    /**
+     * Get port number for network server.
+     * 
+     * @return port number.
+     */
+    public int getPort() {
+        return port;
+    }
+    
+    /**
+     * Return verbose flag.
+     *
+     * @return verbose flag.
+     */
+    public boolean isVerbose() {
+        return isVerbose;
+    }
+    
+    /**
+     * Immutable data members in test configuration
+     */
+    private final String dbName;
+    private final String url;
+    private final String userName; 
+    private final String userPassword; 
+    private final int port;
+    private final String hostName;
+    private final JDBCClient jdbcClient;
+    private final boolean isVerbose;
+    
+    /**
+     * Default values for configurations
+     */
+    private final static String DEFAULT_DBNAME = "wombat";
+    private final static String DEFAULT_USER_NAME = "APP";
+    private final static String DEFAULT_USER_PASSWORD = "APP";
+    private final static int    DEFAULT_PORT = 1527;
+    private final static String DEFAULT_FRAMEWORK = "embedded";
+    private final static String DEFAULT_HOSTNAME = "localhost";
+            
+    /**
+     * Keys to use to look up values in properties files.
+     */
+    private final static String KEY_DBNAME = "databaseName";
+    private final static String KEY_FRAMEWORK = "framework";
+    private final static String KEY_USER_PASSWORD = "password";
+    private final static String KEY_USER_NAME = "user";
+    private final static String KEY_HOSTNAME = "hostName";
+    private final static String KEY_PORT = "port";
+    private final static String KEY_VERBOSE = "derby.tests.debug";
+
+}
