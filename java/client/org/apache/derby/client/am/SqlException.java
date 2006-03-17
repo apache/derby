@@ -114,6 +114,8 @@ public class SqlException extends Exception implements Diagnosable {
                 args),
             ExceptionUtil.getSQLStateFromIdentifier(msgid.msgid),
             ExceptionUtil.getSeverityFromIdentifier(msgid.msgid));
+        
+        this.setThrowable(cause);
     }
 
     public SqlException(LogWriter logWriter, MessageId messageId, Throwable cause)
@@ -286,7 +288,8 @@ public class SqlException extends Exception implements Diagnosable {
             getErrorCode());
 
         // If we're in a runtime that supports chained exceptions, set the cause 
-        // of the SQLException to be this SqlException.
+        // of the SQLException to be this SqlException.  Otherwise the stack
+        // trace is lost.
          if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14 )
         {
             sqle.initCause(this);
