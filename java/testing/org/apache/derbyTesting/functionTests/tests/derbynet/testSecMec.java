@@ -46,6 +46,14 @@ import java.lang.reflect.*;
  * This class tests the security mechanisms supported by Network Server
  * Network server supports SECMEC_EUSRIDPWD, SECMEC_USRIDPWD, SECMEC_USRIDONL
  * 
+ * -----------------------------------------------------------------
+ * Security Mechanism | secmec codepoint value | User friendly name
+ * -----------------------------------------------------------------
+ * USRIDONL           | 0x04                   | USER_ONLY_SECURITY
+ * USRIDPWD           | 0x03                   | CLEAR_TEXT_PASSWORD_SECURITY
+ * EUSRIDPWD          | 0x09                   | ENCRYPTED_USER_AND_PASSWORD_SECURITY
+ * -----------------------------------------------------------------
+ * 
  * Key points: 
  * 1)Server and client support encrypted userid/password (EUSRIDPWD) via the
  * use of Diffie Helman key-agreement protocol - however current Open Group DRDA
@@ -78,6 +86,40 @@ import java.lang.reflect.*;
  * and says it accepts only EUSRIDPWD, in that case JCC 2.6 will upgrade the 
  * security mechanism to EUSRIDPWD and retry the request with EUSRIDPWD.
  * This switching will also override the security mechanism specified by user.
+ * Thus if JCC client is running with Sun JVM 1.4.2 and even though Sun JCE
+ * does not have support for algorithms needed for  EUSRIDPWD, the JCC client
+ * will still try to switch to  EUSRIDPWD and throw an exception with 
+ * ClassNotFoundException for the IBM JCE.
+ *
+ * - Default security mechanism is USRIDPWD(0x03)
+ * - If securityMechanism is not explicitly specified on connection request 
+ *  and if no user specified, an exception is thrown - Null userid not supported
+ * - If securityMechanism is not explicitly specified on connection request, 
+ * and if no password is specified, an exception is thrown - null password not supported
+ * If securityMechanism is explicitly specified to be USRIDONL,  then a password 
+ * is not required. But in other cases (EUSRIDPWD,USRIDPWD)  if password is null,
+ *  - an exception with the message 'a null password not valid' will be thrown.
+ * - On datasource, setting a security mechanism works. It also allows a security 
+ * mechanism of USRIDONL to be set on datasource unlike jcc 2.4.
+ * 
+ * #3)JCC 2.4 client behavior 
+ *  Default security mechanism used is USRIDPWD (0x03)
+ *  If securityMechanism is not explicitly specified on connection request,
+ *  and if no user is specified, an exception is thrown. - Null userid not supported.
+ *  If securityMechanism is not explicitly specified on connection request, 
+ *  and if no password is specified, an exception is thrown - null password not supported
+ *  If security mechanism is specified, jcc client will not override the security mechanism.
+ *  If securityMechanism is explicitly specified to be USRIDONL,  then a password
+ *  is not required. But in other cases (EUSRIDPWD,USRIDPWD)  if password is null
+ *  - an exception with the message 'a null password not valid' will be thrown.
+ * On datasource, setting a security mechanism does not work (bug). It defaults
+ * to USRIDPWD.  Setting a value of USRIDONL or EUSRIDPWD does not seem to have an effect.
+ * 
+ * #4) Note, if  server restricts the client connections based on security mechanism 
+ * by setting derby.drda.securityMechanism, in that case the clients will see an 
+ * error similar to this
+ * "Connection authorization failure occurred. Reason: security mechanism not supported"
+ * 
  */
 public class testSecMec extends dataSourcePermissions_net
 
@@ -91,6 +133,14 @@ public class testSecMec extends dataSourcePermissions_net
     private static String[] derby_drda_securityMechanism = { null, //not set
             "USER_ONLY_SECURITY", "CLEAR_TEXT_PASSWORD_SECURITY",
             "ENCRYPTED_USER_AND_PASSWORD_SECURITY", "INVALID_VALUE", "" };
+
+    // possible interesting combinations with respect to security mechanism
+    // upgrade logic for user attribute
+    private static String[] USER_ATTRIBUTE = {"calvin",null};
+ 
+    // possible interesting combinations with respect to security mechanism
+    // upgrade logic for password attribute
+    private static String[] PWD_ATTRIBUTE = {"hobbes",null};
 
 	private static int NETWORKSERVER_PORT;
 
@@ -254,6 +304,12 @@ public class testSecMec extends dataSourcePermissions_net
 
 	  // Indicates userid/password security mechanism.
 	  static final short SECMEC_USRIDPWD = 0x03;
+      
+	  // client and server recognize these secmec values
+	  private static short[] SECMEC_ATTRIBUTE = { SECMEC_USRIDONL,
+	          SECMEC_USRIDPWD,
+	          SECMEC_EUSRIDPWD
+	  };
 
 
 	/**
@@ -315,6 +371,8 @@ public class testSecMec extends dataSourcePermissions_net
 
         // regression test for DERBY-1080
         testDerby1080();
+        // test for DERBY-962
+        testAllCombinationsOfUserPasswordSecMecInput();
 	}
 
         /*
@@ -397,6 +455,250 @@ public class testSecMec extends dataSourcePermissions_net
 		}
 	}
 
+	/**
+	 * Test different interesting combinations of user,password, security mechanism
+	 * for testing security mechanism upgrade logic. This test has been added 
+     * as part of DERBY-962.  Two things have been fixed in DERBY-962, affects
+     * only client behavior.
+	 * 1)Upgrade logic should not override security mechanism if it has been 
+     * explicitly set in connection request (either via DriverManager or 
+     * using DataSource)
+     * 2)Upgrade security mechanism to a more secure one , ie preferably 
+     * to encrypted userid and password if the JVM in which the client is 
+     * running has support for it.
+     * Details are:  
+     * If security mechanism is not specified as part of the connection request,
+     * then client will do an automatic switching (upgrade) of
+     * security mechanism to use.  The logic is as follows :
+     * if password is available, and if the JVM in which the client is running 
+     * supports EUSRIDPWD mechanism, in that case the security mechanism is 
+     * upgraded to EUSRIDPWD.
+     * if password is available, and if the JVM in which the client is running 
+     * does not support EUSRIDPWD mechanism, in that case the security mechanism is
+     * upgraded to USRIDPWD
+     * Also see DERBY-962 http://issues.apache.org/jira/browse/DERBY-962
+     * <BR>
+     * To understand which JVMs support EUSRIDPWD or not, please see class level 
+     * comments (#1)
+     * <BR>
+     * The expected output from this test will depend on the following
+     * -- the client behavior (JCC 2.4, JCC2.6 or derby client).For the derby client,
+     * the table below represents what security mechanism the client will send 
+     * to server. 
+     * -- See class level comments (#2,#3) to understand the JCC2.6 and JCC2.4 
+     * behavior
+     * -- Note: in case of derby client, if no user  is specified, user defaults to APP.
+     * -- Will depend on if the server has been started with derby.drda.securityMechanism
+     * and to the value it is set to.  See main method to check if server is using the 
+     * derby.drda.securityMechanism to restrict client connections based on
+     * security mechanism. 
+     * 
+     TABLE with all different combinations of userid,password,
+     security mechanism of derby client that is covered by this testcase if test
+     is run against IBM15 and JDK15. 
+          
+     IBM15 supports eusridpwd, whereas SunJDK15 doesnt support EUSRIDPWD
+     
+     Security Mechanisms supported by derby server and client
+     ====================================================================
+     |SecMec     |codepoint value|   User friendly name                  |
+     ====================================================================
+     |USRIDONL   |   0x04        |   USER_ONLY_SECURITY                  |
+     |USRIDPWD   |   0x03        |   CLEAR_TEXT_PASSWORD_SECURITY        |
+     |EUSRIDPWD  |   0x09        |   ENCRYPTED_USER_AND_PASSWORD_SECURITY|
+     =====================================================================
+	 Explanation of columns in table. 
+	 
+	 a) Connection request specifies a user or not.
+	 Note: if no user is specified, client defaults to APP
+	 b) Connection request specifies a password or not
+	 c) Connection request specifies securityMechanism or not. the valid
+	 values are 4(USRIDONL), 3(USRIDPWD), 9(EUSRIDPWD).
+	 d) support eusridpwd means whether this jvm supports encrypted userid/
+	 password security mechanism or not.  A value of Y means it supports
+	 and N means no.
+	 The next three columns specify what the client sends to the server
+	 e) Does client send user information 
+	 f) Does client send password information
+	 g) What security mechanism value (secmec value) is sent to server.
+	 
+	 SecMec refers to securityMechanism.
+	 Y means yes, N means No,  - or blank means not specified.
+	 Err stands for error.
+	 Err(1) stands for null password not supported
+	 Err(2) stands for case when the JCE does not support encrypted userid and
+	 password security mechanism. 
+	 ----------------------------------------------------------------
+	 | url connection      | support   | Client sends to Server      |
+	 |User |Pwd    |secmec |eusridpwd  |User   Pwd    SecMec         |
+	 |#a   |#b     |#c     |#d         |#e     #f      #g            |
+	 |---------------------------------------------------------------|
+	 =================================================================
+     |SecMec not specified on connection request                    
+	 =================================================================
+	 |Y    |Y     |-       |Y         |Y        Y       9            |
+	 |----------------------------------------------------------------
+	 |     |Y     |-       |Y         |Y        Y       9            |
+	 -----------------------------------------------------------------
+	 |Y    |      |-       |Y         |Y        N       4            |
+	 -----------------------------------------------------------------
+	 |     |      |-       |Y         |Y        N       4            |
+	 =================================================================
+     |Y    |Y     |-       |N         |Y        Y       3            |
+     |----------------------------------------------------------------
+     |     |Y     |-       |N         |Y        Y       3            |
+     -----------------------------------------------------------------
+     |Y    |      |-       |N         |Y        N       4            |
+     -----------------------------------------------------------------
+     |     |      |-       |N         |Y        N       4            |
+     =================================================================
+	 SecMec specified to 3 (clear text userid and password)
+	 =================================================================
+     |Y    |Y     |3       |Y         |Y        Y       3            |
+     |----------------------------------------------------------------
+     |     |Y     |3       |Y         |Y        Y       3            |
+     -----------------------------------------------------------------
+     |Y    |      |3       |Y         |-        -       Err1         |
+     -----------------------------------------------------------------
+     |     |      |3       |Y         |-        -       Err1         |
+     =================================================================
+     |Y    |Y     |3       |N         |Y        Y       3            |
+     |----------------------------------------------------------------
+     |     |Y     |3       |N         |Y        Y       3            |
+     -----------------------------------------------------------------
+     |Y    |      |3       |N         |-        -       Err1         |
+     -----------------------------------------------------------------
+     |     |      |3       |N         |-        -       Err1         |
+     =================================================================
+	 SecMec specified to 9 (encrypted userid/password)
+     =================================================================
+     |Y    |Y     |9       |Y         |Y        Y       9            |
+     |----------------------------------------------------------------
+     |     |Y     |9       |Y         |Y        Y       9            |
+     -----------------------------------------------------------------
+     |Y    |      |9       |Y         | -       -       Err1         |
+     -----------------------------------------------------------------
+     |     |      |9       |Y         | -       -       Err1         |
+     =================================================================
+     |Y    |Y     |9       |N         | -       -       Err2         |
+     |----------------------------------------------------------------
+     |     |Y     |9       |N         | -       -       Err2         |
+     -----------------------------------------------------------------
+     |Y    |      |9       |N         | -       -       Err1         |
+     -----------------------------------------------------------------
+     |     |      |9       |N         | -       -       Err1         |
+     =================================================================
+	 SecMec specified to 4 (userid only security)
+     =================================================================
+     |Y    |Y     |4       |Y         |Y        N       4            |
+     |----------------------------------------------------------------
+     |     |Y     |4       |Y         |Y        N       4            |
+     -----------------------------------------------------------------
+     |Y    |      |4       |Y         |Y        N       4            |
+     -----------------------------------------------------------------
+     |     |      |4       |Y         |Y        N       4            |
+     =================================================================
+     |Y    |Y     |4       |N         |Y        N       4            |
+     |----------------------------------------------------------------
+     |     |Y     |4       |N         |Y        N       4            |
+     -----------------------------------------------------------------
+     |Y    |      |4       |N         |Y        N       4            |
+     -----------------------------------------------------------------
+     |     |      |4       |N         |Y        N       4            |
+     =================================================================
+ 
+	 */
+    public void testAllCombinationsOfUserPasswordSecMecInput() {
+        // Try following combinations:
+        // user { null, user attribute given}
+        // password {null, pwd specified}
+        // securityMechanism attribute specified and not specified.
+        // try with different security mechanism values - {encrypted
+        // useridpassword, userid only, clear text userid &password)
+        String urlAttributes = null;
+
+        System.out.println("******testAllCombinationsOfUserPasswordsSecMecInput***");
+        for (int k = 0; k < USER_ATTRIBUTE.length; k++) {
+            for (int j = 0; j < PWD_ATTRIBUTE.length; j++) {
+                urlAttributes = "";
+                if (USER_ATTRIBUTE[k] != null)
+                    urlAttributes += "user=" + USER_ATTRIBUTE[k] +";";
+                if (PWD_ATTRIBUTE[j] != null)
+                    urlAttributes += "password=" + PWD_ATTRIBUTE[j] +";";
+               
+                // removing the last semicolon that we added here, because 
+                // on call to getJDBCUrl in dataSourcePermissions_net, another
+                // semicolon will get added for jcc and jcc will not like it.
+                if (urlAttributes.length() >= 1)
+                    urlAttributes = urlAttributes.substring(0,urlAttributes.length()-1);
+
+                // case - do not specify securityMechanism explicitly in the url
+                // get connection via driver manager and datasource.
+                getConnectionUsingDriverManager(getJDBCUrl("wombat",
+                        urlAttributes), "Test:");
+                getDataSourceConnection(USER_ATTRIBUTE[k],PWD_ATTRIBUTE[j],
+                        "TEST_DS("+urlAttributes+")");
+                
+                for (int i = 0; i < SECMEC_ATTRIBUTE.length; i++) {
+                    // case - specify securityMechanism attribute in url
+                    // get connection using DriverManager
+                    getConnectionUsingDriverManager(getJDBCUrl("wombat",  
+                            urlAttributes + ";securityMechanism="
+                                    + SECMEC_ATTRIBUTE[i]), "#");
+                    // case - specify security mechanism on datasource
+                    testSecurityMechanism(USER_ATTRIBUTE[k],PWD_ATTRIBUTE[j],
+                            new Short(SECMEC_ATTRIBUTE[i]),"TEST_DS ("+urlAttributes+
+                            ",securityMechanism="+SECMEC_ATTRIBUTE[i]+")");
+                    
+                }
+            }
+        }
+
+
+    }
+
+    /**
+     * Helper method to get connection from datasource and to print
+     * the exceptions if any when getting a connection. This method 
+     * is used in testAllCombinationsOfUserPasswordSecMecInput.
+     * For explanation of exceptions that might arise in this method,
+     * please check testAllCombinationsOfUserPasswordSecMecInput
+     * javadoc comment.
+     * get connection from datasource
+     * @param user username
+     * @param password password
+     * @param msg message to print for testcase
+     */
+    public void getDataSourceConnection(String user, String password,String msg)
+    {
+        Connection conn;
+        try {
+            
+            // get connection via datasource without setting securityMechanism
+            DataSource ds = getDS("wombat", user,password);
+            conn = ds.getConnection();
+            conn.close();
+            System.out.println(msg +" OK");
+        }
+        catch (SQLException sqle)
+        {
+            // Exceptions expected in certain case hence printing message instead of stack traces
+            // here. 
+            // - For cases when userid is null or password is null and by default 
+            // JCC does not allow a null password or null userid.
+            // - For case when JVM does not support EUSRIDPWD and JCC 2.6 tries to do
+            // autoswitching of security mechanism.
+            // - For case if server doesnt accept connection with this security mechanism
+            System.out.println(msg +"EXCEPTION getDataSourceConnection()  " + sqle.getMessage());
+            dumpSQLException(sqle.getNextException());
+        }
+        catch (Exception e)
+        {
+            System.out.println("UNEXPECTED EXCEPTION!!!" +msg);
+            e.printStackTrace();
+        }
+        
+    }
 
     /**
      * Dump SQLState and message for the complete nested chain of SQLException 

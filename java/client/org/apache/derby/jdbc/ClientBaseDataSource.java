@@ -47,6 +47,37 @@ import org.apache.derby.client.ClientDataSourceFactory;
  */
 public abstract class ClientBaseDataSource implements Serializable, Referenceable {
     private static final long serialVersionUID = -7660172643035173692L;
+
+    // Spec requires DH algorithm with 32bytes prime to be used 
+    // Not all JCE implementations have support for this. E.g.
+    // Sun JCE does not support DH(prime of 32bytes).
+    // store information if client JVM has JCE loaded that 
+    // can support the necessary algorithms required for EUSRIDPWD
+    // (encrypted userid and password) security mechanism
+    // this information is needed to decide if security mechanism 
+    // can be upgraded to EUSRIDPWD or not
+    // @see getUpgradedSecurityMechanism()
+    static boolean SUPPORTS_EUSRIDPWD = false;
+    
+    static
+    {
+        try
+        {
+            // The EncryptionManager class will instantiate objects of the required 
+            // security algorithms that are needed for EUSRIDPWD
+            // An exception will be thrown if support is not available
+            // in the JCE implementation in the JVM in which the client
+            // is loaded.
+            new org.apache.derby.client.am.EncryptionManager(null);
+            SUPPORTS_EUSRIDPWD = true;
+        }catch(Exception e)
+        {
+            // if an exception is thrown, ignore exception.
+            // set SUPPORTS_EUSRIDPWD to false indicating that the client 
+            // does not support EUSRIDPWD security mechanism
+            SUPPORTS_EUSRIDPWD = false;
+        }
+    }
     
     // The loginTimeout jdbc 2 data source property is not supported as a jdbc 1 connection property,
     // because loginTimeout is set by the jdbc 1 api via java.sql.DriverManager.setLoginTimeout().
@@ -184,7 +215,23 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // Both user and password need to be set for all security mechanism except USER_ONLY_SECURITY
     // When using USER_ONLY_SECURITY, only the user property needs to be specified.
     //
-    protected short securityMechanism = propertyDefault_securityMechanism;
+    
+    // constant to indicate that the security mechanism has not been 
+    // explicitly set, either on connection request when using DriverManager 
+    // or on the Client DataSource object
+    private final static short SECMEC_HAS_NOT_EXPLICITLY_SET = 0;
+    
+    // Security Mechanism can be specified explicitly either when obtaining a 
+    // connection via a DriverManager or via Datasource. 
+    // Via DriverManager, securityMechanism can be set on the connection request using 
+    // the 'securityMechanism' attribute. 
+    // Via DataSource, securityMechanism can be set by calling setSecurityMechanism()
+    // on the ClientDataSource
+    // If the security mechanism is not explicitly set as mentioned above, in that case
+    // the Client will try to upgrade the security mechanism to a more secure one, if possible.
+    // @see #getUpgradedSecurityMechanism
+    // Therefore, need to keep track if the seurityMechanism has been explicitly set 
+    protected short securityMechanism = SECMEC_HAS_NOT_EXPLICITLY_SET;
     // TODO default  should be  USER_ONLY_SECURITY. Change when working on
     // Network Server
     //  public final static short propertyDefault_securityMechanism = (short)
@@ -193,26 +240,69 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static String propertyKey_securityMechanism = "securityMechanism";
 
 
+    
     // We use the NET layer constants to avoid a mapping for the NET driver.
+    /**
+     * Return security mechanism if it is set, else upgrade the security mechanism
+     * if possible and return the upgraded security mechanism
+     * @param properties Look in the properties if securityMechanism is set or not
+     * if set, return this security mechanism
+     * @return security mechanism 
+     */
     public static short getSecurityMechanism(Properties properties) {
+        short secmec;
         String securityMechanismString = properties.getProperty(propertyKey_securityMechanism);
-        String passwordString = properties.getProperty(propertyKey_password);
-        short setSecurityMechanism = parseShort(securityMechanismString, propertyDefault_securityMechanism);
-        return getUpgradedSecurityMechanism(setSecurityMechanism, passwordString);
+        if ( securityMechanismString != null )
+        {
+            // security mechanism has been set, do not override, but instead return
+            // the security mechanism that has been set (DERBY-962)
+            secmec = Short.parseShort(securityMechanismString);
+        }
+        else
+        {
+            // if securityMechanismString is null, this means that 
+            // security mechanism has not been set explicitly and not available in 
+            // properties. Hence, do an upgrade of security mechanism if possible
+            // The logic for upgrade of security mechanism uses information about 
+            // if password is available or not, so pass this information also.
+            String passwordString = properties.getProperty(propertyKey_password);
+            secmec = getUpgradedSecurityMechanism(passwordString);
+        }
+        return secmec;
     }
 
-
     /**
-     * Upgrade the security mechansim to USRIDPWD if it is set to USRIDONL but we have a password.
+     * This method has logic to upgrade security mechanism to a better (more secure) one 
+     * if it is possible.   Currently derby server only has support for USRIDPWD,USRIDONL,
+     * EUSRIDPWD and this method only considers these possibilities. 
+     * USRIDPWD, EUSRIDPWD require a password, USRIDONL is the only security mechanism
+     * which does not require password.
+     * 1. if password is not available, then security mechanism possible is USRIDONL
+     * 2. if password is available, if client supports EUSRIDPWD, then EUSRIDPWD is 
+     * returned
+     * 3. if password is available, if client does not support EUSRIDPWD, then USRIDPWD
+     * is returned.
+     * @param password password argument 
+     * @return upgraded security mechanism if possible
      */
-    public static short getUpgradedSecurityMechanism(short securityMechanism, String password) {
-        // if securityMechanism is USER_ONLY (the default) we may need
-        // to change it to CLEAR_TEXT_PASSWORD in order to send the password.
-        if ((password != null) && (securityMechanism == NetConfiguration.SECMEC_USRIDONL)) {
-            return (short) NetConfiguration.SECMEC_USRIDPWD;
-        } else {
-            return securityMechanism;
-        }
+    public static short getUpgradedSecurityMechanism(String password) {
+        // if password is null, in that case the only acceptable security 
+        // mechanism is USRIDONL, which is the default security mechanism. 
+        if ( password == null )
+            return propertyDefault_securityMechanism;
+
+        // if password is available, then a security mechanism is picked in following
+        // order if support is available
+        // 1. EUSRIDPWD
+        // 2. USRIDPWD
+        // when we have support for more security mechanisms on server 
+        // and client, we should update this upgrade logic to pick 
+        // secure security mechanisms before trying out the USRIDPWD
+        
+        if (SUPPORTS_EUSRIDPWD)
+            return (short)NetConfiguration.SECMEC_EUSRIDPWD;
+        else 
+            return (short)NetConfiguration.SECMEC_USRIDPWD;
     }
 
     // ---------------------------- getServerMessageTextOnGetMessage -----------------------------------
@@ -705,12 +795,42 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static short ENCRYPTED_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_USRENCPWD;
     public final static short ENCRYPTED_USER_AND_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_EUSRIDPWD;
 
+    /**
+     * sets the security mechanism
+     * @param securityMechanism to set
+     */
     synchronized public void setSecurityMechanism(short securityMechanism) {
         this.securityMechanism = securityMechanism;
     }
 
+    /**
+     * return the security mechanism 
+     * if security mechanism has not been set explicitly on datasource
+     * then upgrade the security mechanism to a more secure one if possible
+     * @see #getUpgradedSecurityMechanism()
+     * @return the security mechanism
+     */
     public short getSecurityMechanism() {
-        return getUpgradedSecurityMechanism(securityMechanism, password);
+        return getSecurityMechanism(getPassword());
+    }
+
+    /**
+     * return the security mechanism for this datasource object 
+     * if security mechanism has not been set explicitly on datasource
+     * then upgrade the security mechanism to a more secure one if possible
+     * @param password  password of user
+     * @see #getUpgradedSecurityMechanism()
+     * @return the security mechanism
+     */
+    public short getSecurityMechanism(String password) {
+        
+        // if security mechanism has not been set explicitly on
+        // datasource, then upgrade the security mechanism if possible
+        // DERBY-962
+        if ( securityMechanism == SECMEC_HAS_NOT_EXPLICITLY_SET )
+            return getUpgradedSecurityMechanism(password);
+        
+        return securityMechanism;
     }
 
     protected String connectionAttributes = null;

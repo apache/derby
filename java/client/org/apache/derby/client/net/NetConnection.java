@@ -234,7 +234,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                             org.apache.derby.jdbc.ClientDataSource dataSource,
                             int rmId,
                             boolean isXAConn) throws SqlException {
-        securityMechanism_ = dataSource.getSecurityMechanism();
+        securityMechanism_ = dataSource.getSecurityMechanism(password);
 
         setDeferredResetPassword(password);
         checkDatabaseName();
@@ -267,7 +267,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             targetPublicKey_ = null;
             targetSecmec_ = 0;
             if (ds != null && securityMechanism_ == 0) {
-                securityMechanism_ = ds.getSecurityMechanism();
+                securityMechanism_ = ds.getSecurityMechanism(password);
             }
             resetConnectionAtFirstSql_ = false;
 
@@ -371,10 +371,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         netAgent_.targetTypdef_ = new Typdef(netAgent_);
         netAgent_.originalTargetTypdef_ = netAgent_.targetTypdef_;
         setDeferredResetPassword(password);
-
-        // If password is not null, change security mechanism from
-        // SECMEC_USRIDONL to SECMEC_USRIDPWD
-        securityMechanism = ClientBaseDataSource.getUpgradedSecurityMechanism((short) securityMechanism, password);
         try {
             switch (securityMechanism) {
             case NetConfiguration.SECMEC_USRIDPWD: // Clear text user id and password
