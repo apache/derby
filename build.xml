@@ -732,6 +732,15 @@
   </target>
 
 
+  <target name="jdbc4_classlist_edit" if="jdk16">
+    <!-- uncomment jdbc4 classes if jdk 1.6 is available -->
+    <echo message="uncommenting jdbc4 classes"/>
+    <replaceregexp file="${derby.jar.dir}/lists/otherDerbyClasses.properties"
+     match="^#jdbc4_optional_(.*)"
+     replace="\1"
+     byline="true"/>
+  </target>
+
 <!-- - - - - - - - - - - - - - - derby.jar target - - - - - - - - - - - -->
 
   <target name="derbyjar" depends="initjars">
@@ -741,6 +750,8 @@
     <concat destfile="${derby.jar.dir}/lists/otherDerbyClasses.properties">
       <fileset dir="${basedir}/tools/jar" includes="*DBMS*.properties"/>
     </concat>
+
+    <antcall target="jdbc4_classlist_edit"/>
 
     <mkdir dir="${derby.jar.dir}/lists/org/apache/derby"/>
     <java classname="org.apache.derbyBuild.propertyconfig">
