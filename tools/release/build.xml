@@ -58,13 +58,18 @@
       <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
                   prefix="${derby.bin}/"/>
       <!-- demo -->
-      <zipfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo" excludes="**/build.xml"/>
+      <zipfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo/programs" 
+                  excludes="**/build.xml,toursdb/toursdb**,toursdb/derby.log"/>
+      <zipfileset file="${derby.demo.src.dir}/toursdb/toursdb.xml"
+                  fullpath="${derby.bin}/demo/programs/toursdb/build.xml"/>
       <zipfileset dir="${basedir}/classes" includes="SimpleApp.class"
-                  prefix="${derby.bin}/demo/simple"/>
+                  prefix="${derby.bin}/demo/programs/simple"/>
       <zipfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
-                  prefix="${derby.bin}/demo/nserverdemo"/>
+                  prefix="${derby.bin}/demo/programs/nserverdemo"/>
       <zipfileset dir="${basedir}/classes/nserverdemo" includes="*.class"
-                  prefix="${derby.bin}/demo/nserverdemo"/>
+                  prefix="${derby.bin}/demo/programs/nserverdemo"/>
+      <zipfileset dir="${basedir}/java/demo/toursdb" includes="toursdb/**,toursdb.jar"
+                  prefix="${derby.bin}/demo/databases"/>
       <!-- docs -->
       <zipfileset dir="${docs.out}" includes="**/*.html"
                   prefix="${derby.bin}/docs/html"/>
@@ -88,13 +93,18 @@
       <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
                   prefix="${derby.bin}/"/>
       <!-- demo -->
-      <tarfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo" excludes="**/build.xml"/>
+      <tarfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo/programs" 
+                  excludes="**/build.xml,toursdb/toursdb**,toursdb/derby.log"/>
+      <tarfileset file="${derby.demo.src.dir}/toursdb/toursdb.xml"
+                  fullpath="${derby.bin}/demo/programs/toursdb/build.xml"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleApp.class"
-                  prefix="${derby.bin}/demo/simple"/>
+                  prefix="${derby.bin}/demo/programs/simple"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
-                  prefix="${derby.bin}/demo/nserverdemo"/>
+                  prefix="${derby.bin}/demo/programs/nserverdemo"/>
       <tarfileset dir="${basedir}/classes/nserverdemo" includes="*.class"
-                  prefix="${derby.bin}/demo/nserverdemo"/>
+                  prefix="${derby.bin}/demo/programs/nserverdemo"/>
+      <tarfileset dir="${basedir}/java/demo/toursdb" includes="toursdb/**,toursdb.jar"
+                  prefix="${derby.bin}/demo/databases"/>
       <!-- docs -->
       <tarfileset dir="${docs.out}" includes="**/*.html"
 		          prefix="${derby.bin}/docs/html"/>
@@ -138,7 +148,7 @@
     <zip destfile="${release.dir}/${derby.src}.zip">
       <zipfileset dir="${basedir}" prefix="${derby.src}"
                   includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
-         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties"/>
+         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**"/>
     </zip>
   </target>
   <target name="src.tgz">
@@ -146,7 +156,7 @@
          compression="gzip" longfile="gnu">
       <tarfileset dir="${basedir}" prefix="${derby.src}"
                   includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
-         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties"/>
+         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**"/>
     </tar>
   </target>
 

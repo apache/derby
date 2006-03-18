@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+
+<project default="toursdb" basedir=".">
+
+<!-- Set Properties -->
+  <property name="lib.dir" value="../../../lib"/>
+
+<!-- Targets -->
+
+  <target name="toursdb" depends="compile,buildschema,loadtables,jarup"/>
+
+  <target name="compile">
+    <echo message="Begin building toursdb"/>
+    <javac srcdir="..">
+      <include name="toursdb/insertMaps.java"/>
+    </javac>
+  </target>
+
+  <target name="buildschema">
+    <java classname="org.apache.derby.tools.ij"
+          output="toursdb.out"
+          failonerror="true"
+          dir="." fork="true">
+      <classpath>
+        <pathelement path="${lib.dir}/derby.jar"/>
+        <pathelement path="${lib.dir}/derbytools.jar"/>
+      </classpath>
+      <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+      <sysproperty key="ij.database" value="jdbc:derby:toursdb;create=true"/>
+      <arg value="ToursDB_schema.sql"/>
+    </java>
+  </target>
+
+  <target name="loadtables">
+    <java classname="org.apache.derby.tools.ij"
+          output="toursdb.out" append="true"
+          failonerror="true"
+          dir="." fork="true">
+      <classpath>
+        <pathelement path="${lib.dir}/derby.jar"/>
+        <pathelement path="${lib.dir}/derbytools.jar"/>
+      </classpath>
+      <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+      <sysproperty key="ij.database" value="jdbc:derby:toursdb;create=true"/>
+      <arg value="loadTables.sql"/>
+    </java>
+    <java classname="toursdb.insertMaps"
+          output="toursdb.out" append="true"
+          failonerror="true"
+          dir="." fork="true">
+      <classpath>
+        <pathelement path="${lib.dir}/derby.jar"/>
+        <pathelement path="${lib.dir}/derbytools.jar"/>
+        <pathelement path=".."/>
+      </classpath>
+    </java>
+    <java classname="org.apache.derby.tools.ij"
+          output="toursdb.out" append="true"
+          failonerror="true"
+          dir="." fork="true">
+      <classpath>
+        <pathelement path="${lib.dir}/derby.jar"/>
+        <pathelement path="${lib.dir}/derbytools.jar"/>
+      </classpath>
+      <arg value="disconnect.sql"/>
+    </java>
+  </target>
+
+  <target name="jarup"> 
+    <zip destfile="toursdb.jar"
+         basedir="toursdb"/>
+    <echo message="Finished building toursdb"/>
+  </target>
+
+</project>

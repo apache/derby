@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+
+<project default="toursdb" basedir=".">
+
+<!-- Set Properties -->
+  <!-- User settings -->
+  <property file="${user.home}/ant.properties"/>
+  <!-- Set property lib dir -->
+  <property name="properties.dir" value="${ant.home}/properties"/>
+  <!-- Significant dirs -->
+  <property file="${properties.dir}/dirs.properties"/>
+  <!-- Compiler settings -->
+  <property file="${properties.dir}/${build.compiler}.properties"/>
+  <!-- Compile-time classpath properties files -->
+  <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
+
+
+<!-- Targets -->
+
+  <target name="toursdb" depends="compile,buildschema,loadtables,jarup,copyfiles"/>
+
+  <target name="compile">
+    <echo message="Begin building toursdb"/>
+    <javac
+      bootclasspath="${empty}"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.demo.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <include name="toursdb/insertMaps.java"/>
+    </javac>
+  </target>
+
+  <target name="buildschema">
+    <java classname="org.apache.derby.tools.ij"
+          output="toursdb.out"
+          failonerror="true"
+          dir="${derby.demo.src.dir}/toursdb" fork="true">
+      <classpath>
+        <pathelement path="${out.dir}"/>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+      <sysproperty key="ij.database" value="jdbc:derby:toursdb;create=true"/>
+      <arg value="ToursDB_schema.sql"/>
+    </java>
+  </target>
+
+  <target name="loadtables">
+    <java classname="org.apache.derby.tools.ij"
+          output="toursdb.out" append="true"
+          failonerror="true"
+          dir="${derby.demo.src.dir}/toursdb" fork="true">
+      <classpath>
+        <pathelement path="${out.dir}"/>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+      <sysproperty key="ij.database" value="jdbc:derby:toursdb;create=true"/>
+      <arg value="loadTables.sql"/>
+    </java>
+    <java classname="toursdb.insertMaps"
+          output="toursdb.out" append="true"
+          failonerror="true"
+          dir="${derby.demo.src.dir}/toursdb" fork="true">
+      <classpath>
+        <pathelement path="${out.dir}"/>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+    </java>
+    <java classname="org.apache.derby.tools.ij"
+          output="toursdb.out" append="true"
+          failonerror="true"
+          dir="${derby.demo.src.dir}/toursdb" fork="true">
+      <classpath>
+        <pathelement path="${out.dir}"/>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <arg value="disconnect.sql"/>
+    </java>
+  </target>
+
+  <target name="jarup"> 
+    <zip destfile="${derby.demo.src.dir}/toursdb/toursdb.jar"
+         basedir="${derby.demo.src.dir}/toursdb/toursdb"/>
+    <echo message="Finished building toursdb"/>
+  </target>
+
+  <target name="copyfiles">
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/demo">
+      <fileset dir="${derby.demo.src.dir}/toursdb"
+               includes="*.sql,BART.gif,Caltrain.gif,LightRail.gif"/>
+    </copy>
+  </target>
+
+</project>

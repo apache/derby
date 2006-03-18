@@ -16,7 +16,7 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="demo" depends="compile"/>
+  <target name="demo" depends="compile,checktoursdb,toursdb"/>
 
   <target name="compile">
     <javac
@@ -70,6 +70,19 @@
         <pathelement path="${java13compile.classpath};${jcc};${jta1_2}"/>
       </classpath>
     </javac>
+  </target>
+
+  <target name="checktoursdb">
+    <condition property="toursdb.available">
+      <and>
+        <available file="${derby.demo.src.dir}/toursdb/toursdb.jar"/>
+        <available file="${derby.demo.src.dir}/toursdb/toursdb"/>
+      </and>
+    </condition>
+  </target>
+
+  <target name="toursdb" unless="toursdb.available">
+    <ant dir="${derby.demo.src.dir}/toursdb"/>
   </target>
 
 </project>

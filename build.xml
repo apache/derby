@@ -367,7 +367,7 @@
 <!-- =================================================================== -->
 <!--                 Remove all built objects (except jars)              -->
 <!-- =================================================================== -->
-  <target name="clobber" depends="clean,cleanstate,cleanparsers,cleancatalog"/>
+  <target name="clobber" depends="clean,cleanstate,cleanparsers,cleancatalog,cleantoursdb"/>
 
 <!-- =================================================================== -->
 <!--                       Remove output tree                            -->
@@ -497,6 +497,18 @@
   <target name="cleancatalog"
           description="Remove the generated catalog java file.">
     <delete file="${derby.engine.dir}/iapi/services/cache/ClassSizeCatalog.java"/>
+  </target>
+
+<!-- =================================================================== -->
+<!--                          Remove toursdb.jar                         -->
+<!-- =================================================================== -->
+
+  <target name="cleantoursdb"
+          description="Remove the generated sample database.">
+    <delete file="${derby.demo.src.dir}/toursdb/toursdb.jar"/>
+    <delete file="${derby.demo.src.dir}/toursdb/toursdb.out"/>
+    <delete file="${derby.demo.src.dir}/toursdb/derby.log"/>
+    <delete dir="${derby.demo.src.dir}/toursdb/toursdb"/>
   </target>
 
 <!-- =================================================================== -->
