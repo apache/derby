@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import java.io.InputStream;
+import java.io.Reader;
 import java.sql.SQLException;
 
 public class PreparedStatement extends Statement
@@ -47,6 +49,10 @@ public class PreparedStatement extends Statement
 
     boolean[] parameterSet_;
     boolean[] parameterRegistered_;
+    
+    // By default a PreparedStatement is poolable when it is created
+    //required for jdbc4.0 methods
+    private boolean isPoolable = true;    
 
     void setInput(int parameterIndex, Object input) {
         parameters_[parameterIndex - 1] = input;
@@ -2015,5 +2021,123 @@ public class PreparedStatement extends Statement
         if(removeListener)
         	connection_.CommitAndRollbackListeners_.remove(this);
     }
+    
+    //jdbc 4.0 methods
+   /**
+     * Sets the designated parameter to a Reader object.
+     *
+     * @param parameterIndex index of the first parameter is 1, the second is 2, ...
+     * @param reader An object that contains the data to set the parameter value to.
+     * @param length the number of characters in the parameter data.
+     * @throws SQLException if parameterIndex does not correspond to a parameter
+     * marker in the SQL statement, or if the length specified is less than zero.
+     *
+     */
+    
+    public void setClob(int parameterIndex, Reader reader, long length)
+    throws SQLException{
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setClob",
+                        parameterIndex, reader, new Long(length));
+            }
+            if(length > Integer.MAX_VALUE)
+                throw new SQLException("CLOB length exceeds maximum " +
+                        "possible limit");
+            else
+                setInput(parameterIndex, new Clob(agent_, reader, (int)length));
+        }
+    }
+
+    /**
+     * Sets the designated parameter to a InputStream object.
+     *
+     * @param parameterIndex index of the first parameter is 1,
+     * the second is 2, ...
+     * @param inputStream An object that contains the data to set the parameter
+     * value to.
+     * @param length the number of bytes in the parameter data.
+     * @throws SQLException if parameterIndex does not correspond
+     * to a parameter marker in the SQL statement,  if the length specified
+     * is less than zero or if the number of bytes in the inputstream does not match
+     * the specfied length.
+     *
+     */
+    
+    public void setBlob(int parameterIndex, InputStream inputStream, long length)
+    throws SQLException{
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setBlob", parameterIndex,
+                        inputStream, new Long(length));
+            }
+            if(length > Integer.MAX_VALUE)
+                throw new SQLException("BLOB length exceeds maximum " +
+                        "possible limit");
+            else {
+                try {
+                    setBinaryStreamX(parameterIndex, inputStream, (int)length);
+                } catch(SqlException se){
+                    throw se.getSQLException();
+                }
+            }
+        }
+    }    
+    
+    /**
+     * Requests that a PreparedStatement be pooled or not.
+     *
+     * @param poolable requests that the statement be pooled if true and that the
+     *                 statement not be pooled if false
+     * @throws SQLException if the PreparedStatement has been closed.
+     */
+    
+    public void setPoolable(boolean poolable)
+    throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setPoolable", poolable);
+                }
+                // Assert the statement has not been closed
+                checkForClosedStatement();
+            
+                isPoolable = poolable;        
+            }
+        }
+        catch (SqlException se)
+        {
+            throw se.getSQLException();
+        }
+    }
+    
+    /**
+     * Returns the value of the statements poolable hint, indicating whether
+     * pooling of the statement is requested.
+     *
+     * @return The value of the statement's poolable hint.
+     * @throws SQLException if the PreparedStatement has been closed.
+     */
+
+    public boolean isPoolable()
+    throws SQLException{
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "isPoolable");
+                }
+                // Assert the statement has not been closed
+                checkForClosedStatement();
+            
+                return isPoolable;
+            }
+        }
+        catch (SqlException se)
+        {
+            throw se.getSQLException();
+        }
+    }    
 
 }

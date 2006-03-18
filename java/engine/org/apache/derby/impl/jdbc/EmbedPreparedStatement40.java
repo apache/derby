@@ -31,9 +31,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 
 public class EmbedPreparedStatement40 extends  EmbedPreparedStatement30 {
-
-    // By default a PreparedStatement is poolable when it is created
-    private boolean isPoolable = true;
     
     public EmbedPreparedStatement40(EmbedConnection conn, String sql, boolean forMetaData,
         int resultSetType, int resultSetConcurrency, int resultSetHoldability,
@@ -56,59 +53,7 @@ public class EmbedPreparedStatement40 extends  EmbedPreparedStatement30 {
     
     public void setNClob(int index, NClob value) throws SQLException{
         throw Util.notImplemented();
-    }
-    
-    
-    /**
-     * Sets the designated parameter to a Reader object.
-     *
-     * @param parameterIndex index of the first parameter is 1, the second is 2, ...
-     * @param reader An object that contains the data to set the parameter value to.
-     * @param length the number of characters in the parameter data.
-     * @throws SQLException if parameterIndex does not correspond to a parameter
-     * marker in the SQL statement, or if the length specified is less than zero.
-     *
-     */
-
-    
-    public void setClob(int parameterIndex, Reader reader, long length)
-    throws SQLException{
-        int colType;
-        synchronized(getConnectionSynchronization()) {
-            colType = getParameterJDBCType(parameterIndex);
-            if(colType != Types.CLOB)
-                throw dataTypeConversion(parameterIndex, "java.sql.Clob");
-            
-            setCharacterStreamInternal(parameterIndex,reader,length);
-        }
-    }
-
-    /**
-     * Sets the designated parameter to a InputStream object.
-     *
-     * @param parameterIndex index of the first parameter is 1,
-     * the second is 2, ...
-     * @param inputStream An object that contains the data to set the parameter
-     * value to.
-     * @param length the number of bytes in the parameter data.
-     * @throws SQLException if parameterIndex does not correspond
-     * to a parameter marker in the SQL statement,  if the length specified
-     * is less than zero or if the number of bytes in the inputstream does not match
-     * the specfied length.
-     */
-
-    
-    public void setBlob(int parameterIndex, InputStream inputStream, long length)
-    throws SQLException{
-        int colType;
-        synchronized (getConnectionSynchronization()) {
-            colType = getParameterJDBCType(parameterIndex);
-            if (colType != Types.BLOB)
-                throw dataTypeConversion(parameterIndex, "java.sql.Blob");
-            
-            setBinaryStreamInternal(parameterIndex,inputStream,length);
-        }
-    }
+    }    
 
     public void setNClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
@@ -118,36 +63,5 @@ public class EmbedPreparedStatement40 extends  EmbedPreparedStatement30 {
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException{
         throw Util.notImplemented();
     }
-    
-    /**
-     * Requests that a PreparedStatement be pooled or not.
-     *
-     * @param poolable requests that the statement be pooled if true and that the
-     *                 statement not be pooled if false
-     * @throws SQLException if the PreparedStatement has been closed.
-     */
+}    
 
-    public void setPoolable(boolean poolable)
-    throws SQLException {
-        // Assert the statement is still active (not closed)
-        checkStatus();
-
-        isPoolable = poolable;
-    }
-    
-    /**
-     * Returns the value of the statements poolable hint, indicating whether
-     * pooling of the statement is requested.
-     *
-     * @return The value of the statement's poolable hint.
-     * @throws SQLException if the PreparedStatement has been closed.
-     */
-
-    public boolean isPoolable()
-    throws SQLException {
-        // Assert the statement is still active (not closed)
-        checkStatus();
-
-        return isPoolable;
-    }
-}

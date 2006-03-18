@@ -28,18 +28,13 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 
 
-public class CallableStatement40 extends org.apache.derby.client.am.CallableStatement {
-    
-    
-    private org.apache.derby.client.am.PreparedStatement40 ps;
-    
+public class CallableStatement40 extends org.apache.derby.client.am.CallableStatement {       
     
     public CallableStatement40(Agent agent,
         Connection connection,
         String sql,
         int type, int concurrency, int holdability) throws SqlException {
-        super(agent, connection, sql, type, concurrency, holdability);
-        ps = new PreparedStatement40(agent, connection, sql, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, null);
+        super(agent, connection, sql, type, concurrency, holdability);        
     }
     
     
@@ -117,42 +112,26 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
      * The methods from PreparedStatement for JDBC 4.0
      *********************************************************************************************************/
     public void setNString(int index, String value) throws SQLException {
-        ps.setNString(index,value);
+        throw SQLExceptionFactory.notImplemented ("setNString (int, String)");
     }
     
     public void setNCharacterStream(int index, Reader value, long length) throws SQLException {
-        ps.setNCharacterStream(index,value,length);
+        throw SQLExceptionFactory.notImplemented ("setNCharacterStream " +
+                "(int,Reader,long)");
     }
     
     public void setNClob(int index, NClob value) throws SQLException {
-        ps.setNClob(index,value);
+        throw SQLExceptionFactory.notImplemented ("setNClob (int, NClob)");
     }
     
-    public void setClob(int parameterIndex, Reader reader, long length)
-    throws SQLException {
-        ps.setClob(parameterIndex,reader,length);
-    }
-    
-    public void setBlob(int parameterIndex, InputStream inputStream, long length)
-    throws SQLException {
-        ps.setBlob(parameterIndex,inputStream,length);
-    }
     public void setNClob(int parameterIndex, Reader reader, long length)
     throws SQLException {
-        ps.setNClob(parameterIndex,reader,length);
+        throw SQLExceptionFactory.notImplemented ("setNClob (int, " +
+                "Reader, long)");
     }
     
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
-        ps.setSQLXML(parameterIndex,xmlObject);
+        throw SQLExceptionFactory.notImplemented ("setSQLXML (int, SQLXML)");
     }
     
-    public void setPoolable(boolean poolable)
-    throws SQLException {
-        ps.setPoolable(poolable);
-    }
-    
-    public boolean isPoolable()
-    throws SQLException {
-        return ps.isPoolable();
-    }
 }
