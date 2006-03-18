@@ -613,6 +613,15 @@ public interface Property {
 	public static final String DEFAULT_USER_NAME = "APP";
 	public static final String DATABASE_MODULE = "org.apache.derby.database.Database";
 
+	/*
+		Property to enable Grant & Revoke SQL authorization. Introduced in Derby 10.2
+		release. New databases and existing databases (in Derby 10.2) still use legacy
+		authorization by default and by setting this property to true could request for
+		SQL standard authorization model.
+	 */
+	public static final String
+	SQL_AUTHORIZATION_PROPERTY = "derby.database.sqlAuthorization";
+
 	public static final String
 	DEFAULT_CONNECTION_MODE_PROPERTY = "derby.database.defaultConnectionMode";
 
@@ -620,16 +629,12 @@ public interface Property {
 	public static final String READ_ONLY_ACCESS = "readOnlyAccess";
 	public static final String FULL_ACCESS = "fullAccess";
 	public static final String DEFAULT_ACCESS = FULL_ACCESS;
-	public static final String SQL_STANDARD_ACCESS = "sqlStandard";
 
 	public static final String
 	READ_ONLY_ACCESS_USERS_PROPERTY = "derby.database.readOnlyAccessUsers";
 
 	public static final String
 	FULL_ACCESS_USERS_PROPERTY = "derby.database.fullAccessUsers";
-
-	public static final String
-	SQL_AUTHORIZATION = "derby.database.sqlAuthorization";
 
 	/*
 	** Authentication

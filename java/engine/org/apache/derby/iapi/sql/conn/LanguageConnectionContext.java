@@ -1116,5 +1116,5 @@ public interface LanguageConnectionContext extends Context {
 	 *
 	 * @return True if SQL standard permissions are being used
 	 */
-	public boolean usesSqlStandardPermissions();
+	public boolean usesSqlAuthorization();
 }

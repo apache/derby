@@ -35,8 +35,8 @@ connect 'jdbc:derby:wombat';
 ij> create table mytab(i int);
 0 rows inserted/updated/deleted
 ij> grant select on mytab to satheesh;
-ERROR 42Z60: GRANT not allowed unless database property derby.database.defaultConnectionMode has value 'sqlStandard'.
+ERROR 42Z60: GRANT not allowed unless database property derby.database.sqlAuthorization has value 'TRUE'.
 ij> revoke select on mytab to satheesh;
-ERROR 42Z60: REVOKE not allowed unless database property derby.database.defaultConnectionMode has value 'sqlStandard'.
+ERROR 42Z60: REVOKE not allowed unless database property derby.database.sqlAuthorization has value 'TRUE'.
 ij> disconnect;
 ij> 

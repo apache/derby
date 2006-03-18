@@ -23,8 +23,10 @@ package org.apache.derby.impl.sql;
 import org.apache.derby.iapi.services.property.PropertySetCallback;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -47,6 +49,18 @@ public class LanguageDbPropertySetter implements PropertySetCallback
 		Dictionary		p
 	) throws StandardException 
 	{
+		// Disallow changing sqlAuthorization from true to false or null after
+		// switching to Standard authorization
+		if (key.trim().equals(Property.SQL_AUTHORIZATION_PROPERTY))
+		{
+			LanguageConnectionContext lcc = (LanguageConnectionContext)
+					ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+
+			if (lcc.usesSqlAuthorization() && !Boolean.valueOf((String)value).booleanValue())
+				throw StandardException.newException(SQLState.PROPERTY_UNSUPPORTED_CHANGE,
+					key, value);
+		}
+
 		if (key.equals(Property.LANGUAGE_STALE_PLAN_CHECK_INTERVAL)) {
 			PropertyUtil.intPropertyValue(
 						Property.LANGUAGE_STALE_PLAN_CHECK_INTERVAL,

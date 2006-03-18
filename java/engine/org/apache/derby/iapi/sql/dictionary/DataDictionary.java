@@ -266,6 +266,13 @@ public interface DataDictionary
 	public String getAuthorizationDBA();
 
 	/**
+	 * Get authorization model in force, SqlStandard or legacy mode
+	 *
+	 * @return	Whether sqlAuthorization is being used
+	 */
+	public boolean usesSqlAuthorization();
+
+	/**
  	  *	Get the tabinfo of a system catalog. Paw through the tabinfo arrays looking for the tabinfo
  	  *	corresponding to this table name.
  	  *

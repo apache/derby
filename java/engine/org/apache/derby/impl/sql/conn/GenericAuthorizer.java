@@ -48,7 +48,6 @@ implements Authorizer
 	private static final int NO_ACCESS = 0;
 	private static final int READ_ACCESS = 1;
 	private static final int FULL_ACCESS = 2;
-	private static final int SQL_STANDARD_ACCESS = 3;
 	
 	//
 	//Configurable userAccessLevel - derived from Database level
@@ -227,8 +226,6 @@ implements Authorizer
 			return READ_ACCESS;
 		else if(StringUtil.SQLEqualsIgnoreCase(modeS, Property.FULL_ACCESS))
 			return FULL_ACCESS;
-		else if(StringUtil.SQLEqualsIgnoreCase(modeS, Property.SQL_STANDARD_ACCESS))
-            return FULL_ACCESS; 
 		else
 		{
 			if (SanityManager.DEBUG)

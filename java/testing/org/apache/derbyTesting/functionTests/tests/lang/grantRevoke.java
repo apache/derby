@@ -63,8 +63,8 @@ public class grantRevoke
             dbmd = owner.getConnection().getMetaData();
 // GrantRevoke TODO: Enable standard access tests
 // checkStandardAccess( );
-            owner.stmt.executeUpdate( "call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.defaultConnectionMode',"
-                                      + " 'sqlStandard')");
+//            owner.stmt.executeUpdate( "call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.sqlAuthorization',"
+//                                      + " 'true')");
 
             runGrantTests();
             // We can't test much of REVOKE unless GRANT works

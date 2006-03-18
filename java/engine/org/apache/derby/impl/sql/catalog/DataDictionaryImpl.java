@@ -330,6 +330,7 @@ public final class	DataDictionaryImpl
 	private DD_Version  softwareVersion;
 
 	private String authorizationDBA;
+	private boolean usesSqlAuthorization;
 
 	/*
 	** This property and value are written into the database properties
@@ -664,12 +665,28 @@ public final class	DataDictionaryImpl
                     DataDictionary.CREATE_DATA_DICTIONARY_VERSION,
                     dictionaryVersion, true);
 
+				// If SqlAuthorization is set as system property during database
+				// creation, set it as database property also, so it gets persisted.
+				if (PropertyUtil.getSystemBoolean(Property.SQL_AUTHORIZATION_PROPERTY))
+				{
+					bootingTC.setProperty(Property.SQL_AUTHORIZATION_PROPERTY,"true",true);
+					usesSqlAuthorization=true;
+				}
+
 			} else {
 				// Get the ids for non-core tables
 				loadDictionaryTables(bootingTC, ddg, startParams);
 				SchemaDescriptor sd = locateSchemaRow(SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME,
 								 bootingTC);
 				authorizationDBA = sd.getAuthorizationId();
+				String sqlAuth = PropertyUtil.getDatabaseProperty(bootingTC,
+										Property.SQL_AUTHORIZATION_PROPERTY);
+				if (Boolean.valueOf(sqlAuth).booleanValue())
+				{
+					// SQL authorization requires 10.2 or higher database
+					checkVersion(DataDictionary.DD_VERSION_DERBY_10_2, "sqlAuthorization");
+					usesSqlAuthorization=true;
+				}
 			}
 					
 			if (SanityManager.DEBUG)
@@ -1152,6 +1169,14 @@ public final class	DataDictionaryImpl
 	public String getAuthorizationDBA()
 	{
 		return authorizationDBA;
+	}
+
+	/**
+	 * @see DataDictionary#usesSqlAuthorization
+	 */
+	public boolean usesSqlAuthorization()
+	{
+		return usesSqlAuthorization;
 	}
 
 	/**

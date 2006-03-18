@@ -326,13 +326,13 @@ public class SQLParser
     */
 	private void checkSqlStandardAccess( String command) throws StandardException
 	{
-		if( getLanguageConnectionContext().usesSqlStandardPermissions())
+		if( getLanguageConnectionContext().usesSqlAuthorization())
 			return;
 
 		throw StandardException.newException(SQLState.LANG_GRANT_REVOKE_WITH_LEGACY_ACCESS,
 											command,
-											Property.DEFAULT_CONNECTION_MODE_PROPERTY,
-											Property.SQL_STANDARD_ACCESS);
+											Property.SQL_AUTHORIZATION_PROPERTY,
+											"TRUE");
 	}
 
 	/*
