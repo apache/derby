@@ -131,6 +131,7 @@ public class derbyStress {
 			ResultSet rs = stmt.executeQuery("values(1)");
 			// How silly! I forgot to close the result set.
 		}
+		TestUtil.cleanUpTest(stmt, testObjects);
 		stmt.close();
 		conn.close();
 		System.out.println("PASSED");
