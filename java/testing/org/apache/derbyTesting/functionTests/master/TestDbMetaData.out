@@ -46,8 +46,8 @@ TABLE_SCHEM,TABLE_CATALOG
 APP,null
 getClientInfoProperties():
 FAIL -- unexpected exception
-SQLSTATE(0A000):java.sql.SQLException: 0A000.S : [0] getClientInfoProperties ()
-Caused by: org.apache.derby.client.am.SqlException: 0A000.S : [0] getClientInfoProperties ()
+SQLSTATE(0A000):java.sql.SQLException: Feature not implemented: getClientInfoProperties ().
+Caused by: org.apache.derby.client.am.SqlException: Feature not implemented: getClientInfoProperties ().
 	... 4 more
 getFunctionParameters():
 java.lang.AbstractMethodError
@@ -55,6 +55,6 @@ getClientInfoProperties():
 java.lang.AbstractMethodError
 getSchemas():
 FAIL -- unexpected exception
-SQLSTATE(0A000):java.sql.SQLException: 0A000.S : [0] getSchemas (String, String)
-Caused by: org.apache.derby.client.am.SqlException: 0A000.S : [0] getSchemas (String, String)
+SQLSTATE(0A000):java.sql.SQLException: Feature not implemented: getSchemas (String, String).
+Caused by: org.apache.derby.client.am.SqlException: Feature not implemented: getSchemas (String, String).
 	... 4 more
