@@ -31,6 +31,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * This class provides the base for read-only stream implementations of the StorageFile interface. It is used with the
@@ -417,4 +419,11 @@ abstract class InputStreamFile implements StorageFile
     {
         return path;
     }
+    
+	/**
+	 * @see org.apache.derby.io.StorageFile#getURL()
+	 */
+	public URL getURL() throws MalformedURLException {
+		throw new MalformedURLException(toString());
+	}
 }

@@ -30,6 +30,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -136,5 +138,18 @@ class JarDBFile extends InputStreamFile
     public String toString()
     {
         return path;
+    }
+	/**
+     * Return a URL for this file (resource). Returns a URL according to the
+     * spec for java.net.JarURLConnection
+     * 
+     * @see org.apache.derby.io.StorageFile#getURL()
+     */
+    public URL getURL() throws MalformedURLException {
+        File pathFile = new File(storageFactory.zipData.getName());
+
+        String pathFileURL = pathFile.toURL().toString();
+
+        return new URL("jar:" + pathFileURL + "!/" + path);
     }
 }

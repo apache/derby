@@ -33,6 +33,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * This class provides a disk based implementation of the StorageFile interface. It is used by the
@@ -261,4 +263,12 @@ class DirFile extends File implements StorageFile
         }
         return delete();
     } // end of deleteAll
+
+	/**
+	 * @see org.apache.derby.io.StorageFile#getURL()
+	 */
+	public URL getURL() throws MalformedURLException {
+		
+		return toURL();
+	}
 }

@@ -25,6 +25,8 @@ import org.apache.derby.io.StorageFile;
 import java.io.InputStream;
 
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * This class provides a class path based implementation of the StorageFile interface. It is used by the
@@ -66,24 +68,7 @@ class CPFile extends InputStreamFile
      */
     public boolean exists()
     {
-    	ClassLoader cl = Thread.currentThread().getContextClassLoader();
-    	if (cl != null)
-    		if (cl.getResource(path) != null)
-    			return true;
-    	// don't assume the context class loader is tied
-    	// into the class loader that loaded this class.
-    	cl = getClass().getClassLoader();
-		// Javadoc indicates implementations can use
-		// null as a return from Class.getClassLoader()
-		// to indicate the system/bootstrap classloader.
-    	if (cl != null)
-    	{
-    		return (cl.getResource(path) != null);
-    	}
-    	else
-    	{
-    		return ClassLoader.getSystemResource(path) != null;
-    	}
+    	return getURL() != null;
     } // end of exists
 
     /**
@@ -130,4 +115,32 @@ class CPFile extends InputStreamFile
     	return is;
     	
     } // end of getInputStream
+    
+	/**
+     * Return a URL for this file (resource).
+     * 
+     * @see org.apache.derby.io.StorageFile#getURL()
+     */
+    public URL getURL() {
+
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        URL myURL;
+        if (cl != null) {
+            myURL = cl.getResource(path);
+            if (myURL != null)
+                return myURL;
+        }
+
+        // don't assume the context class loader is tied
+        // into the class loader that loaded this class.
+        cl = getClass().getClassLoader();
+        // Javadoc indicates implementations can use
+        // null as a return from Class.getClassLoader()
+        // to indicate the system/bootstrap classloader.
+        if (cl != null) {
+            return cl.getResource(path);
+        } else {
+            return ClassLoader.getSystemResource(path);
+        }
+    }
 }

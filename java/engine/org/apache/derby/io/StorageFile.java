@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 /**
  * This interface abstracts file naming. Any method in this interface
@@ -126,6 +128,14 @@ public interface StorageFile
      * @return The last segment in the path name, "" if the path name sequence is empty.
      */
     public String getName();
+    
+    /**
+     * Get a URL representing this file. A valid URL does not indicate the file exists,
+     * it may just be a URL that will fail on opening. Some implementations
+     * return null if the file does not exist. 
+     * @throws MalformedURLException File cannot be represented as a URL.
+     */
+    public URL getURL() throws MalformedURLException;
     
     /**
      * If the named file does not already exist then create it as an empty normal file.
@@ -277,11 +287,4 @@ public interface StorageFile
      * @see <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/io/RandomAccessFile.html">java.io.RandomAccessFile</a>
      */
     public StorageRandomAccessFile getRandomAccessFile( String mode) throws FileNotFoundException;
-
-    /**
-     * Get the file name for diagnostic purposes. Usually the same as getPath().
-     *
-     * @return the file name
-     */
-    public String toString();
 }
