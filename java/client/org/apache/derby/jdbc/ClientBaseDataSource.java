@@ -56,7 +56,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // (encrypted userid and password) security mechanism
     // this information is needed to decide if security mechanism 
     // can be upgraded to EUSRIDPWD or not
-    // @see getUpgradedSecurityMechanism()
+    // See getUpgradedSecurityMechanism()
     static boolean SUPPORTS_EUSRIDPWD = false;
     
     static
@@ -807,7 +807,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * return the security mechanism 
      * if security mechanism has not been set explicitly on datasource
      * then upgrade the security mechanism to a more secure one if possible
-     * @see #getUpgradedSecurityMechanism()
+     * @see #getUpgradedSecurityMechanism(String)
      * @return the security mechanism
      */
     public short getSecurityMechanism() {
@@ -819,7 +819,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * if security mechanism has not been set explicitly on datasource
      * then upgrade the security mechanism to a more secure one if possible
      * @param password  password of user
-     * @see #getUpgradedSecurityMechanism()
+     * @see #getUpgradedSecurityMechanism(String)
      * @return the security mechanism
      */
     public short getSecurityMechanism(String password) {
