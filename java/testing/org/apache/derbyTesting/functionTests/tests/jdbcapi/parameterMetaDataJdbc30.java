@@ -138,7 +138,12 @@ public class parameterMetaDataJdbc30 {
       dumpParameterMetaData(paramMetaData);
       ps.execute();
 
-      // variation, and also test out empty string in the escape (jira 44). 
+      // DERBY-44 added support for SELECT ... WHERE column LIKE ? ESCAPE ?
+      // This test case tests
+      //   a) that such a statement compiles, and
+      //   b) that we get the correct error message if the escape
+      //      sequence is an empty string (at one point this would
+      //      lead to a StringIndexOutOfBoundsException)
       System.out.println("variation 1, testing jira 44");
       ps = con.prepareStatement("select * from sys.systables where tablename like ? escape ?");
       ps.setString (1, "SYS%");
@@ -146,7 +151,17 @@ public class parameterMetaDataJdbc30 {
       paramMetaData = ps.getParameterMetaData();
       System.out.println("parameters count for prepared statement is " + paramMetaData.getParameterCount());
       dumpParameterMetaData(paramMetaData);
-      ps.execute();
+      try {
+          ResultSet rs = ps.executeQuery();
+          rs.next();
+          System.out.println("Jira 44 failed (didn't get SQLSTATE 22019)");
+          rs.close();
+      } catch (SQLException e) {
+          if (!"22019".equals(e.getSQLState())) {
+              System.out.println("Jira 44 failed.");
+              e.printStackTrace(System.out);
+          }
+      }
 
       // the test no longer tests 4552, but kept as an interesting test scenario 
       // bug 4552 - no parameters would be returned for execute statement using

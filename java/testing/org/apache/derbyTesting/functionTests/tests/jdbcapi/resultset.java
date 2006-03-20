@@ -780,6 +780,16 @@ public class resultset {
 			return;
 		}
 
+		// This might look strange, but we want to know that the first
+		// call to next() is successful before we get meta data and
+		// display column headings. If a driver is pre-fetching data,
+		// an exception might be thrown in Statement.executeQuery(),
+		// but a driver without pre-fetching will not get the
+		// exception until ResultSet.next() is called (hence column
+		// headings are printed). With this early call to next(), we
+		// get the same output regardless of pre-fetching.
+		boolean hasData = s.next();
+
 		ResultSetMetaData rsmd = s.getMetaData();
 		SecurityCheck.inspect(rsmd, "java.sql.ResultSetMetaData");
 
@@ -821,7 +831,7 @@ public class resultset {
 
 		StringBuffer row = new StringBuffer();
 		// Display data, fetching until end of the result set
-		while (s.next())
+		while (hasData)
 		{
 			row.append("\t{");
 			// Loop through each column, getting the
@@ -838,6 +848,7 @@ public class resultset {
 				}
 			}
 			row.append("}\n");
+			hasData = s.next();
 		}
 		System.out.println(row.toString());
 		s.close();

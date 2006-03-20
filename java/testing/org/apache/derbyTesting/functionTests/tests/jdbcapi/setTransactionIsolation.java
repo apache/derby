@@ -241,6 +241,9 @@ public class setTransactionIsolation{
 					System.out.println(sql);					
 					ps.execute();
 					ResultSet rs = ps.getResultSet();
+					// fetch data so that we get the same errors with
+					// and without pre-fetching in execute()
+					rs.next();
 					showScanStatistics(rs,con);
 
 					// Now execute again and look at the locks

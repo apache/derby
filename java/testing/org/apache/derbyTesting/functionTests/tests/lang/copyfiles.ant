@@ -187,6 +187,7 @@ repeat_app.properties
 repeat_derby.properties
 schemas.sql
 scrollCursors1.sql
+scrollCursors1_sed.properties
 scrollCursors3.sql
 scrollCursors3_app.properties
 select.sql

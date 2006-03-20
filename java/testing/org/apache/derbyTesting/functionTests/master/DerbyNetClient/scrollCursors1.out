@@ -577,8 +577,8 @@ End Execution Timestamp : null
 Statement Execution Plan Text: 
 Scroll Insensitive ResultSet:
 Number of opens = 1
-Rows seen = 11
-Number of reads from hash table = 15
+<filtered rows seen>
+<filtered number of reads from hash table>
 Number of writes to hash table = 12
 	constructor time (milliseconds) = 0
 	open time (milliseconds) = 0
@@ -587,7 +587,7 @@ Number of writes to hash table = 12
 Source result set:
 	Table Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 	Number of opens = 1
-	Rows seen = 12
+	<filtered rows seen>
 	Rows filtered = 0
 	Fetch Size = 16
 		constructor time (milliseconds) = 0
