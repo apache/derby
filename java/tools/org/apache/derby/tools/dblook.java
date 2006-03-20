@@ -47,6 +47,7 @@ import org.apache.derby.impl.tools.dblook.DB_Schema;
 import org.apache.derby.impl.tools.dblook.DB_Alias;
 import org.apache.derby.impl.tools.dblook.DB_Trigger;
 import org.apache.derby.impl.tools.dblook.DB_View;
+import org.apache.derby.impl.tools.dblook.DB_GrantRevoke;
 import org.apache.derby.impl.tools.dblook.Logs;
 
 public final class dblook {
@@ -78,6 +79,8 @@ public final class dblook {
 	private static String lookLogName = "dblook.log";
 
 	private static LocalizedResource langUtil;
+
+	private static boolean sqlAuthorization;
 
 	/* ************************************************
 	 * main:
@@ -535,6 +538,8 @@ public final class dblook {
 
 			DB_Trigger.doTriggers(this.conn);
 
+			DB_GrantRevoke.doAuthorizations(this.conn);
+
 			// That's it; we're done.
 			if (getColNameFromNumberQuery != null)
 				getColNameFromNumberQuery.close();
@@ -604,6 +609,16 @@ public final class dblook {
 				addQuotes(expandDoubleQuotes(rs.getString(2))));
 		}
 
+		// Check if sqlAuthorization mode is on. If so, need to generate
+		// authorization statements.
+		rs = stmt.executeQuery("VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY" +
+						"('derby.database.sqlAuthorization')");
+		if (rs.next())
+		{
+			String sqlAuth = rs.getString(1);
+			if (Boolean.valueOf(sqlAuth).booleanValue())
+				sqlAuthorization = true;
+		}
 		stmt.close();
 
 		// Load default property values.
@@ -725,6 +740,15 @@ public final class dblook {
 
 		return "\"" + name + "\"";
 
+	}
+
+
+	public static String addSingleQuotes(String name) {
+
+		if (name == null)
+			return null;
+
+		return "'" + name + "'";
 	}
 
 	/* ************************************************
