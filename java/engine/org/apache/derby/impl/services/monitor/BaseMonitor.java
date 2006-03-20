@@ -1836,7 +1836,10 @@ nextModule:
 						BaseMonitor.removeRuntimeProperties(properties), false);
 				usProperties.setServiceBooted();
 			}
-
+            
+            if (cm != previousCM)
+                cm.cleanupOnError(StandardException.closeException());
+            
 		} catch (Throwable t) {
 
 			// ensure that the severity will shutdown the service

@@ -158,9 +158,22 @@ public final class ContextService //OLD extends Hashtable
 	*/
 	private ThreadLocal threadContextList = new ThreadLocal();
 
+    /**
+     * Collection of all ContextManagers that are open
+     * in the complete Derby system. A ContextManager is
+     * added when it is created with newContextManager and
+     * removed when the session is closed.
+     * 
+     * @see #newContextManager()
+     * @see SystemContext#cleanupOnError(Throwable)
+     */
 	private HashSet allContexts;
 
-	// don't want any instances
+    /**
+     * Create a new ContextService for a Derby system.
+     * Only a single system is active at any time.
+     *
+     */
 	public ContextService() {
 
 		// find the error stream
@@ -179,10 +192,14 @@ public final class ContextService //OLD extends Hashtable
 		// For some unknown reason, the ContextManager and
 		// ContextService objects will not be garbage collected
 		// without the next two lines.
-		factory.allContexts = null;
-		factory.threadContextList = null;
-
-		ContextService.factory = null;
+        ContextService fact = ContextService.factory;
+        if (fact != null) {
+            synchronized (fact) {
+                fact.allContexts = null;
+                fact.threadContextList = null;
+                ContextService.factory = null;
+            }
+        }
 	}
 
 	public static ContextService getFactory() {
@@ -495,7 +512,7 @@ public final class ContextService //OLD extends Hashtable
 
 		synchronized (this) {
 			allContexts.add(cm);
-
+            
 			if (SanityManager.DEBUG) {
 
 				if (SanityManager.DEBUG_ON("memoryLeakTrace")) {
@@ -531,8 +548,13 @@ public final class ContextService //OLD extends Hashtable
 		}
 	}
 
-    synchronized void removeContext( ContextManager cm)
+    /**
+     * Remove a ContextManager from the list of all active
+     * contexts managers.
+     */
+    synchronized void removeContext(ContextManager cm)
     {
-        allContexts.remove( cm);
+        if (allContexts != null)
+            allContexts.remove( cm);
     }
 }
