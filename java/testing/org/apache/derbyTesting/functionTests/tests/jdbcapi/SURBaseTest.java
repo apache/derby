@@ -18,12 +18,10 @@
  * language governing permissions and limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
-import org.apache.derbyTesting.functionTests.util.DerbyJUnitTest;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import junit.framework.*;
 import java.sql.*;
-import java.util.Properties;
 
 /**
  * Base class for testing Scrollable Updatable ResultSets. 
@@ -34,7 +32,7 @@ import java.util.Properties;
  * 
  * @author Andreas Korneliussen 
  */
-abstract public class SURBaseTest extends TestCase {
+abstract public class SURBaseTest extends BaseJDBCTestCase {
     
     /** Creates a new instance of SURBaseTest */
     public SURBaseTest(String name) {
@@ -62,19 +60,11 @@ abstract public class SURBaseTest extends TestCase {
         return rcon;
     }
 
-    static Connection getConnection() 
-        throws SQLException
-    {
-        String url = TestUtil.getJdbcUrlPrefix() + "wombat;create=true";
-        return DriverManager.getConnection(url);        
-    }
-    
     /**
      * Set up the connection to the database.
      */
     public void setUp() throws  Exception {       
         println("SetUp");
-        TestUtil.loadDriver();
         con = getNewConnection();
     }
     
@@ -296,17 +286,4 @@ abstract public class SURBaseTest extends TestCase {
     final static String RESULTSET_NOT_UPDATABLE_SQL_STATE = "XJ083";
     final static String LOCK_TIMEOUT_SQL_STATE = "40XL1";
     final static String LOCK_TIMEOUT_EXPRESSION_SQL_STATE = "38000";
-    
-    static void println(String text) {
-        DerbyJUnitTest.println(text);
-    }
-    
-    /**
-     * Prints the stack trace. If run in the harness, the
-     * harness will mark the test as failed if this method
-     * has been called.
-     */
-    static void printStackTrace(Throwable t) {
-        DerbyJUnitTest.printStackTrace(t);
-    }
 }

@@ -790,7 +790,7 @@ public class TestUtil {
                 if (framework == DERBY_NET_FRAMEWORK)
                 {
                     if (( connAttrs == null) || ((connAttrs != null) && (connAttrs.indexOf("user") < 0)))
-                        url += ":" + "user=me;password=mine;retrieveMessagesFromServerOnGetMessage=true;";
+                        url += ":" + "user=APP;password=APP;retrieveMessagesFromServerOnGetMessage=true;";
                 }
                 conn = DriverManager.getConnection(url);
     	    }

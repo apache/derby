@@ -20,6 +20,8 @@
 package org.apache.derbyTesting.functionTests.util;
 
 import java.sql.*;
+import javax.sql.DataSource;
+import java.util.Properties;
 
 /**
  * Base class for JDBC JUnit tests.
@@ -73,10 +75,12 @@ public class BaseJDBCTestCase
                     CONFIG.getUserName(),
                     CONFIG.getUserPassword());
         } else {
-            throw new UnsupportedOperationException(
-                    "Creating a connection in a JSR-169 " +
-                    "environment is not yet supported. " +
-                    "Please implement :)");
+            //Use DataSource for JSR169
+            Properties prop = new Properties();
+            prop.setProperty("databaseName", CONFIG.getDatabaseName());
+            prop.setProperty("connectionAttributes", "create=true");
+            DataSource ds = TestUtil.getDataSource(prop);
+            con = ds.getConnection();
         }
         return con;
     }
@@ -133,4 +137,4 @@ public class BaseJDBCTestCase
         }
     }
 
-} // Enc class BaseJDBCTestCase
+} // End class BaseJDBCTestCase

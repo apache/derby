@@ -33,6 +33,8 @@ import java.util.*;
 
 import junit.framework.*;
 
+import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
 import org.apache.derbyTesting.functionTests.util.DerbyJUnitTest;
 
 public	class	BooleanTest	extends	DerbyJUnitTest
@@ -50,6 +52,14 @@ public	class	BooleanTest	extends	DerbyJUnitTest
 	private	static	final	Boolean	FALSE = Boolean.FALSE;
 
 	private	static	final	String	NEGATE_BOOLEAN_FUNC = "negateBooleanFunc";
+    private static boolean HAVE_BIG_DECIMAL;
+	
+    static{
+    if(BigDecimalHandler.representation != BigDecimalHandler.BIGDECIMAL_REPRESENTATION)
+        HAVE_BIG_DECIMAL = false;
+    else
+        HAVE_BIG_DECIMAL = true;
+    }
 
 	/////////////////////////////////////////////////////////////
 	//
@@ -133,7 +143,7 @@ public	class	BooleanTest	extends	DerbyJUnitTest
 	{
 		//setDebug( true );
 		
-		Connection	conn = getConnection();
+		Connection	conn = ij.startJBMS();
 
 		createSchema( conn );
 		populateTables( conn );
@@ -375,76 +385,172 @@ public	class	BooleanTest	extends	DerbyJUnitTest
 			 "( 1, true ), ( 2, false ), ( 3, null )"
 			 );
 
-		PreparedStatement	ps = prepare
+		PreparedStatement ps = null;
+		if (HAVE_BIG_DECIMAL)
+		{
+			ps = prepare
 			(
-			 conn,
-			 "select\n" +
-			 "keyCol\n" +
-			 ", cast ( booleanCol as smallint )\n" +
-			 ", cast ( booleanCol as integer )\n" +
-			 ", cast ( booleanCol as bigint )\n" +
-			 ",cast ( booleanCol as decimal )\n" +
-			 ",cast ( booleanCol as real )\n" +
-			 ",cast ( booleanCol as double )\n" +
-			 ",cast ( booleanCol as float )\n" +
-			 ",cast ( booleanCol as char(5) )\n" +
-			 ",cast ( booleanCol as varchar(5) )\n" +
-			 ",cast ( booleanCol as long varchar )\n" +
-			 ",cast ( booleanCol as clob )\n" +
-			 "from " + BOOLEAN_TABLE + " order by keyCol"
-			 );
+				conn,
+				"select\n" +
+				"keyCol\n" +
+				", cast ( booleanCol as smallint )\n" +
+				", cast ( booleanCol as integer )\n" +
+				", cast ( booleanCol as bigint )\n" +
+				",cast ( booleanCol as decimal )\n" +
+				",cast ( booleanCol as real )\n" +
+				",cast ( booleanCol as double )\n" +
+				",cast ( booleanCol as float )\n" +
+				",cast ( booleanCol as char(5) )\n" +
+				",cast ( booleanCol as varchar(5) )\n" +
+				",cast ( booleanCol as long varchar )\n" +
+				",cast ( booleanCol as clob )\n" +
+				"from " + BOOLEAN_TABLE + " order by keyCol"
+			);
+		}
+		else
+		{
+			ps = prepare
+			(
+				conn,
+				"select\n" +
+				"keyCol\n" +
+				", cast ( booleanCol as smallint )\n" +
+				", cast ( booleanCol as integer )\n" +
+				", cast ( booleanCol as bigint )\n" +
+				",cast ( booleanCol as real )\n" +
+				",cast ( booleanCol as double )\n" +
+				",cast ( booleanCol as float )\n" +
+				",cast ( booleanCol as char(5) )\n" +
+				",cast ( booleanCol as varchar(5) )\n" +
+				",cast ( booleanCol as long varchar )\n" +
+				",cast ( booleanCol as clob )\n" +
+				"from " + BOOLEAN_TABLE + " order by keyCol"
+			);
+		}
+				
 		ResultSet			rs = ps.executeQuery();
 
 		rs.next();
-		assertRow
-			(
-			 rs,
-			 new Object[]
-				{
-					new Integer( 1 ),
-					new Integer( 1 ),
-					new Integer( 1 ),
-					new Long( 1L ),
-					new BigDecimal( 1.0 ),
-					new Float( 1.0 ),
-					new Double( 1.0 ),
-					new Float( 1.0 ),
-					"true ",
-					"true",
-					"true",
-					"true",
-				}
-			 );
+		if (HAVE_BIG_DECIMAL)
+		{
+			assertRow
+		    (
+		     rs,
+		     new Object[]
+			    {
+				    new Integer( 1 ),
+				    new Integer( 1 ),
+				    new Integer( 1 ),
+				    new Long( 1L ),
+				    new BigDecimal( 1.0 ),
+				    new Float( 1.0 ),
+				    new Double( 1.0 ),
+				    new Float( 1.0 ),
+				    "true ",
+				    "true",
+				    "true",
+				    "true",
+			    }
+		     );
+		}
+		else
+		{
+		    assertRow
+			    (
+			     rs,
+			     new Object[]
+				    {
+					    new Integer( 1 ),
+					    new Integer( 1 ),
+					    new Integer( 1 ),
+					    new Long( 1L ),
+					    new Float( 1.0 ),
+					    new Double( 1.0 ),
+					    new Float( 1.0 ),
+					    "true ",
+					    "true",
+					    "true",
+					    "true",
+				    }
+			     );
+		}
 
 		rs.next();
-		assertRow
-			(
-			 rs,
-			 new Object[]
-				{
-					new Integer( 2 ),
-					new Integer( 0 ),
-					new Integer( 0 ),
-					new Long( 0L ),
-					new BigDecimal( 0.0 ),
-					new Float( 0.0 ),
-					new Double( 0.0 ),
-					new Float( 0.0 ),
-					"false",
-					"false",
-					"false",
-					"false",
-				}
-			 );
-
+		if (HAVE_BIG_DECIMAL)
+		{
+			assertRow
+				(
+			     rs,
+			     new Object[]
+				    {
+			     		new Integer( 2 ),
+						new Integer( 0 ),
+						new Integer( 0 ),
+						new Long( 0L ),
+						new BigDecimal( 0.0 ),
+						new Float( 0.0 ),
+						new Double( 0.0 ),
+						new Float( 0.0 ),
+						"false",
+						"false",
+						"false",
+						"false",
+				    }
+				);
+		}
+		else
+		{
+			assertRow
+				(
+			     rs,
+			     new Object[]
+				    {
+			     		new Integer( 2 ),
+						new Integer( 0 ),
+						new Integer( 0 ),
+						new Long( 0L ),
+						new Float( 0.0 ),
+						new Double( 0.0 ),
+						new Float( 0.0 ),
+						"false",
+						"false",
+						"false",
+						"false",
+				    }
+				);
+		}
+		
 		rs.next();
-		assertRow
+		if (HAVE_BIG_DECIMAL)
+		{
+			assertRow
+				(
+				    rs,
+					new Object[]
+					{
+					    new Integer( 3 ),
+						null,
+						null,
+						null,
+						null,
+						null,
+						null,
+						null,
+						null,
+						null,
+						null,
+						null,
+					}
+				);
+		}
+		else
+		{
+			assertRow
 			(
-			 rs,
-			 new Object[]
+			    rs,
+				new Object[]
 				{
-					new Integer( 3 ),
-					null,
+				    new Integer( 3 ),
 					null,
 					null,
 					null,
@@ -456,8 +562,9 @@ public	class	BooleanTest	extends	DerbyJUnitTest
 					null,
 					null,
 				}
-			 );
-
+			);
+		}
+	
 		close( rs );
 		close( ps );			 
 	}

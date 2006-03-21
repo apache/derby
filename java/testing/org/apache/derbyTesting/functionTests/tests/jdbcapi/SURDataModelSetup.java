@@ -18,17 +18,16 @@
  * language governing permissions and limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
-import org.apache.derbyTesting.functionTests.util.DerbyJUnitTest;
+import org.apache.derbyTesting.functionTests.util.TestConfiguration;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import java.util.Set;
-import java.util.Iterator;
 import java.util.HashSet;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,6 +39,16 @@ import java.util.Collections;
  */
 public class SURDataModelSetup extends TestSetup
 {
+	
+	 /**
+     * Configuration for the test case.
+     * The configuration is created based on system properties.
+     *
+     * @see TestConfiguration
+     */
+    public static final TestConfiguration CONFIG = 
+        TestConfiguration.DERBY_TEST_CONFIG;
+    
     /**
      * Constructor.
      * @param test test to decorate with this setup
@@ -126,7 +135,6 @@ public class SURDataModelSetup extends TestSetup
      * and populates the database model with data.
      */
     public void setUp() throws  Exception {       
-        TestUtil.loadDriver();
         println("Setting up datamodel: " + model);
         try {
             con = getNewConnection();
@@ -253,12 +261,12 @@ public class SURDataModelSetup extends TestSetup
 
     /**
      * <p>
-     * Debug code to print chatty informational messages.
+     * Println code to print chatty informational messages.
      * </p>
      */
     public static void println(String text)
     {
-        DerbyJUnitTest.println(text);
+        BaseJDBCTestCase.println(text);
     }
     
     /**
@@ -267,7 +275,7 @@ public class SURDataModelSetup extends TestSetup
      * has been called.
      */
     static void printStackTrace(Throwable t) {
-        DerbyJUnitTest.printStackTrace(t);
+        BaseJDBCTestCase.printStackTrace(t);
     }
     
     /**

@@ -20,7 +20,8 @@
 package org.apache.derbyTesting.functionTests.util;
 
 import junit.framework.TestCase;
-
+import java.io.PrintStream;
+import java.sql.SQLException;
 /**
  * Base class for JUnit tests.
  */
@@ -53,5 +54,42 @@ public class BaseTestCase
     public BaseTestCase(String name) {
         super(name);
     }
+    
+    /**
+     * Print alarm string
+     * @param text String to print
+     */
+    public static void alarm(final String text) {
+        out.println("ALARM: " + text);
+    }
+
+    /**
+     * Print debug string.
+     * @param text String to print
+     */
+    public static void println(final String text) {
+        if (CONFIG.isVerbose()) {
+            out.println("DEBUG: " + text);
+        }
+    }
+
+    /**
+     * Print debug string.
+     * @param t Throwable object to print stack trace from
+     */
+    public static void printStackTrace(Throwable t) 
+    {
+        while ( t!= null) {
+            t.printStackTrace(out);
+            
+            if (t instanceof SQLException)  {
+                t = ((SQLException) t).getNextException();
+            } else {
+                break;
+            }
+        }
+    }
+
+    private final static PrintStream out = System.out;
     
 } // End class BaseTestCase
