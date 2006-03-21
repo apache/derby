@@ -36,6 +36,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import org.apache.derby.tools.ij;
+
 /**
  * This class is used to test the implementations of the JDBC 4.0 methods
  * in the ResultSet interface
@@ -476,51 +478,26 @@ public class TestResultSetMethods {
     }
     
     public static void main(String args[]) {
-        TestConnection tc=null;
-        Connection conn_main=null;
-        PreparedStatement ps_main=null;
-        ResultSet rs_main=null;
+		try {
+			// use the ij utility to read the property file and
+			// make the initial connection.
+			ij.getPropertyArg(args);
+		
+			Connection	conn_main = ij.startJBMS();
+
+			PreparedStatement ps_main=null;
+			ResultSet rs_main=null;
         
-        try {
-            tc = new TestConnection();
-            conn_main = tc.createEmbeddedConnection();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+			ps_main = conn_main.prepareStatement("select count(*) from sys.systables");
+			rs_main = ps_main.executeQuery();
         
-        try {
-            ps_main = conn_main.prepareStatement("select count(*) from sys.systables");
-            rs_main = ps_main.executeQuery();
-        } catch(SQLException e) {
-            System.out.println(""+e);
-            e.printStackTrace();
-        }
+			TestResultSetMethods trsm = new TestResultSetMethods();
+			trsm.startTestResultSetMethods(conn_main,ps_main,rs_main);
         
-        TestResultSetMethods trsm = new TestResultSetMethods();
-        trsm.startTestResultSetMethods(conn_main,ps_main,rs_main);
-        
-        /****************************************************************************************
-         * This tests the client server part of derby
-         *****************************************************************************************/
-        
-        conn_main=null;
-        ps_main=null;
-        
-        try {
-            conn_main = tc.createClientConnection();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        
-        try {
-            ps_main = conn_main.prepareStatement("select count(*) from sys.systables");
-            rs_main = ps_main.executeQuery();
-        } catch(SQLException e) {
-            System.out.println(""+e);
-            e.printStackTrace();
-        }
-        
-        trsm.startTestResultSetMethods(conn_main,ps_main,rs_main);
+		} catch(Exception e) {
+			System.out.println(""+e);
+			e.printStackTrace();
+		}
         
     }
 }

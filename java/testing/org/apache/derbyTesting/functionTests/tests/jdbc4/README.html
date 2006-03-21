@@ -1,0 +1,49 @@
+<html>
+<title>Running the JDBC4 Tests</title>
+<body>
+<h1>Running the JDBC4 Tests</h1>
+
+<p>
+Currently, there is one suite of tests used to verify JDBC4 features:
+</p>
+
+<ul>
+<li><b>jdbc40</b> - These tests can run with either the embedded or
+network client, that is, under either the <i>embedded</i> or
+<i>DerbyNetClient</i> frameworks. In general, JDBC4 tests do not run
+the JCC client (<i>DerbyNet</i> framework) because that old client
+does not support the new JDBC4 feature set.</li>
+</ul>
+
+<p>
+Note that two of the tests in this suite
+(<i>jdbc4/TestDbMetaData.java</i> and
+<i>jdbc4/TestJDBC40Exception.java</i>) are excluded from the
+<i>DerbyNetClient</i> run. Eventually, we hope to run these tests
+under <i>DerbyNetClient</i>. At that time, we can remove these tests
+from <i>suites/DerbyNetClient.exclude</i>.
+</p>
+
+<p>
+Before running these tests, you must first build the optional jkd16
+support as described in <i>trunk/BUILDING.txt</i>.
+</p>
+
+<p>
+Verifying the JDBC4 feature set is a little tiresome right now. You must
+run the following commands in a shell window whose JAVA_HOME points at
+your jdk1.6 installation. After each suite run, check the test results.
+</p>
+
+<blockquote><pre>
+java org.apache.derbyTesting.functionTests.harness.RunSuite jdbc40
+
+# make sure the above test run succeeded
+
+java -Dframework=DerbyNetClient org.apache.derbyTesting.functionTests.harness.RunSuite jdbc40
+
+# make sure the above test run succeeded
+</pre></blockquote>
+
+</body>
+</html>

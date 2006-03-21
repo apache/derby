@@ -35,6 +35,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Statement;
 import java.util.Properties;
+import org.apache.derby.tools.ij;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
@@ -266,22 +267,42 @@ public class TestConnectionMethods {
         t_getClientInfo1();
         t_getClientInfo2();
     }
+
+	/**
+	 * <p>
+	 * Return true if we're running under the embedded client.
+	 * </p>
+	 */
+	private	static	boolean	usingEmbeddedClient()
+	{
+		return "embedded".equals( System.getProperty( "framework" ) );
+	}
+
+	
     public static void main(String args[]) {
-        TestConnection tc = new TestConnection();
-        
-        Connection connEmbedded = tc.createEmbeddedConnection();
-        TestConnectionMethods tcm = new TestConnectionMethods(connEmbedded);
-        tcm.startTestConnectionMethods_Embedded();
-        
-        
-        Connection connNetwork = tc.createClientConnection();
-        TestConnectionMethods tcm1 = new TestConnectionMethods(connNetwork);
-        tcm1.startTestConnectionMethods_Client();
-        try {
-            connEmbedded.close();
-            connNetwork.close();
-        } catch(SQLException sqle){
-            sqle.printStackTrace();
-        }
+		try {
+			// use the ij utility to read the property file and
+			// make the initial connection.
+			ij.getPropertyArg(args);
+		
+			Connection	conn_main = ij.startJBMS();
+
+			if ( usingEmbeddedClient() )
+			{
+				TestConnectionMethods tcm = new TestConnectionMethods( conn_main );
+				tcm.startTestConnectionMethods_Embedded();
+			}
+			else // DerbyNetClient
+			{
+				TestConnectionMethods tcm1 = new TestConnectionMethods( conn_main );
+				tcm1.startTestConnectionMethods_Client();
+			}
+
+			conn_main.close();
+
+		} catch(Exception e) {
+			System.out.println(""+e);
+			e.printStackTrace();
+		}
     }
 }

@@ -75,10 +75,14 @@ public class TestConnection {
             e.printStackTrace();
         }
     }
-    void startTest() {
-        Connection conn = createEmbeddedConnection();
-        closeConnection(conn);
-        Connection conn1 = createClientConnection();
-        closeConnection(conn1);
+    void startTest( Connection conn_main ) {
+		try {
+
+			closeConnection(conn_main);
+
+		} catch(Exception e) {
+			System.out.println(""+e);
+			e.printStackTrace();
+		}
     }
 }

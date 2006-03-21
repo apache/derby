@@ -27,6 +27,7 @@ import java.sql.CallableStatement;
 import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import org.apache.derby.tools.ij;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
@@ -259,44 +260,23 @@ public class TestCallableStatementMethods{
         t_getSQLXML2();
     }
     
-    public static void main(String args[]) {
-        TestConnection tc=null;
-        Connection conn_main=null;
-        CallableStatement cs_main=null;
+    public static void main(String args[])
+	{
+		try {
+			// use the ij utility to read the property file and
+			// make the initial connection.
+			ij.getPropertyArg(args);
+		
+			Connection	conn_main = ij.startJBMS();
+
+			CallableStatement cs_main = conn_main.prepareCall("select count(*) from sys.systables");
         
-        try {
-            tc = new TestConnection();
-            conn_main = tc.createEmbeddedConnection();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        
-        try {
-            cs_main = conn_main.prepareCall("select count(*) from sys.systables");
-        } catch(SQLException e) {
-            System.out.println(""+e);
-            e.printStackTrace();
-        }
-        
-        TestCallableStatementMethods tcsm = new TestCallableStatementMethods();
-        tcsm.startCallableStatementMethodTest(conn_main,cs_main);
-        
-        conn_main=null;
-        cs_main=null;
-        
-        try {
-            conn_main = tc.createClientConnection();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        
-        try {
-            cs_main = conn_main.prepareCall("select count(*) from sys.systables");
-        } catch(SQLException e) {
-            System.out.println(""+e);
-            e.printStackTrace();
-        }
-        
-        tcsm.startCallableStatementMethodTest(conn_main,cs_main);
+			TestCallableStatementMethods tcsm = new TestCallableStatementMethods();
+			tcsm.startCallableStatementMethodTest(conn_main,cs_main);
+        			
+		} catch(Exception e) {
+			System.out.println(""+e);
+			e.printStackTrace();
+		}
     }
 }

@@ -38,11 +38,13 @@ public class TestDbMetaData {
 	public static void main(String[] args) {
 		try
 		{
-            // Using TestConnection for now instead of ij because
-            // ij.startJBMS() returns null for classes built against
-            // JDK 1.6
-            runTests(new TestConnection().createEmbeddedConnection());
-            runTests(new TestConnection().createClientConnection());
+			// use the ij utility to read the property file and
+			// make the initial connection.
+			ij.getPropertyArg(args);
+		
+			Connection	conn_main = ij.startJBMS();
+
+            runTests( conn_main );
         }
         catch (SQLException e) {
             dumpSQLExceptions(e);

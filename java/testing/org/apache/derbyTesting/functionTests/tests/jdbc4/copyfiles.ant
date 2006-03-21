@@ -1,14 +1,8 @@
-TestCallableStatementMethods_app.properties
-TestPreparedStatementMethods_app.properties
+default_app.properties
 TestRowId_app.properties
 TestConnectionMethods_app.properties
-TestResultSetMethods_app.properties
-TestDbMetaData_app.properties
+TestQueryObject_app.properties
+TestPreparedStatementMethods_app.properties
 aclob.txt
 littleclob.txt
 short.txt
-TestConnectionMethods_app.properties
-TestResultSetMethods_app.properties
-TestDbMetaData_app.properties
-TestJDBC40Exception_app.properties
-TestQueryObject_app.properties

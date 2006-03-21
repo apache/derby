@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.InputStream;
 import java.io.IOException;
+import java.security.*;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.Clob;
@@ -192,7 +193,7 @@ public class TestPreparedStatementMethods {
             java.io.OutputStream os = clob.setAsciiStream(1);
             buildFilePath(filename);
             File f = new File(filepath + sep + filename);
-            InputStream is = new FileInputStream(f);
+            InputStream is = getInputStream(f);
             c = is.read(fromFile);
             while(c>0) {
                 os.write(fromFile,0,c);
@@ -204,6 +205,8 @@ public class TestPreparedStatementMethods {
             ps.executeUpdate();
         } catch(IOException ioe) {
             ioe.printStackTrace();
+        } catch(PrivilegedActionException pae) {
+            pae.printStackTrace();
         } catch(SQLException sqle) {
             sqle.printStackTrace();
         }
@@ -222,7 +225,7 @@ public class TestPreparedStatementMethods {
             java.io.OutputStream os = blob.setBinaryStream(1);
             buildFilePath(filename);
             File f = new File(filepath + sep + filename);
-            InputStream is = new FileInputStream(f);
+            InputStream is = getInputStream(f);
             c = is.read(fromFile);
             while(c>0) {
                 os.write(fromFile,0,c);
@@ -234,12 +237,32 @@ public class TestPreparedStatementMethods {
             ps.executeUpdate();
         } catch(IOException ioe) {
             ioe.printStackTrace();
+        } catch(PrivilegedActionException pae) {
+            pae.printStackTrace();
         } catch(SQLException sqle) {
             sqle.printStackTrace();
         }
         return blob;
     }
-    /*
+
+	/**
+     * May need to convert this into a privileged block for reading a file. 
+     */
+    protected static FileInputStream getInputStream(final File f)
+		throws PrivilegedActionException, FileNotFoundException
+    {
+        return (FileInputStream)AccessController.doPrivileged
+			( new PrivilegedExceptionAction<FileInputStream>(  )
+        {
+			public FileInputStream run() throws FileNotFoundException
+			{
+				return new FileInputStream(f);
+			}
+			});
+    }
+
+
+	/*
      * 1) Insert the clob in to the clob table by calling the 
      *    buildAndInsertClobValue function
      * 2) Check whether the clob value has been correctly inserted in to the 
@@ -483,16 +506,11 @@ public class TestPreparedStatementMethods {
     /*
      * Start the tests for the JDBC4.0 methods on the client side
      */
-    void startClientTestMethods() {
-        Connection conn_main = null;
+    void startClientTestMethods( Connection conn_main ) {
         PreparedStatement ps_main = null;
         stmtIsClosed = false;
         
         try {
-            Class.forName("org.apache.derby.jdbc.ClientDriver");
-            conn_main = DriverManager.getConnection("jdbc:derby:" +
-                    "//localhost:1527/mydb;" +
-                    "create=true");
             ps_main = conn_main.prepareStatement("select count(*) from " +
                     "sys.systables");
             conn = conn_main;
@@ -517,8 +535,6 @@ public class TestPreparedStatementMethods {
             t_setPoolable();
         } catch(SQLException sqle) {
             sqle.printStackTrace();
-        } catch(ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
         } finally {
             try {
                 conn_main.close();
@@ -530,21 +546,16 @@ public class TestPreparedStatementMethods {
     /*
      * Start the tests for testing the JDBC4.0 methods on the embedded side
      */
-    void startEmbeddedTestMethods() {
-        Connection conn_main = null;
+    void startEmbeddedTestMethods( Connection conn_main ) {
         PreparedStatement ps_main = null;
         stmtIsClosed = false;
         
-        try {
-            Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-            conn_main = DriverManager.getConnection("jdbc:derby:mydb1;" +
-                    "create=true");
-            
+        try {            
             Statement s = conn_main.createStatement();
             s.execute("create table clobtable3 (n int,clobcol CLOB)");
             File file = new File("extin/short.txt");
             int fileLength = (int) file.length();
-            InputStream fin = new FileInputStream(file);
+            InputStream fin = getInputStream(file);
             ps = conn_main.prepareStatement("INSERT INTO " +
                     "clobtable3 " +
                     "VALUES (?, ?)");
@@ -557,7 +568,7 @@ public class TestPreparedStatementMethods {
             s1.execute("create table blobtable3 (n int,blobcol BLOB)");
             File file1 = new File("extin/short.txt");
             int fileLength1 = (int) file1.length();
-            InputStream fin1 = new FileInputStream(file1);
+            InputStream fin1 = getInputStream(file1);
             PreparedStatement ps1 = conn_main.prepareStatement("INSERT INTO " +
                     "blobtable3 " +
                     "VALUES (?, ?)");
@@ -591,12 +602,10 @@ public class TestPreparedStatementMethods {
         }
         catch(SQLException sqle) {
             sqle.printStackTrace();
-        } catch(ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
-        } catch(FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
-        } catch(IOException ioe) {
-            ioe.printStackTrace();
+        } catch(PrivilegedActionException pae) {
+            pae.printStackTrace();
+        } catch(FileNotFoundException fne) {
+            fne.printStackTrace();
         } finally {
             try {
                 conn_main.close();
@@ -606,9 +615,41 @@ public class TestPreparedStatementMethods {
         }
     }
     
+	/**
+	 * <p>
+	 * Return true if we're running under the embedded client.
+	 * </p>
+	 */
+	private	static	boolean	usingEmbeddedClient()
+	{
+		return "embedded".equals( System.getProperty( "framework" ) );
+	}
+
     public static void main(String args[]) {
-        TestPreparedStatementMethods tpsm = new TestPreparedStatementMethods();
-        tpsm.startClientTestMethods();
-        tpsm.startEmbeddedTestMethods();
+		try {
+			// use the ij utility to read the property file and
+			// make the initial connection.
+			ij.getPropertyArg(args);
+		
+			Connection	conn_main = ij.startJBMS();
+
+			TestPreparedStatementMethods tpsm = new TestPreparedStatementMethods();
+
+			if ( usingEmbeddedClient() )
+			{
+				tpsm.startEmbeddedTestMethods( conn_main );
+			}
+			else // DerbyNetClient
+			{
+				tpsm.startClientTestMethods( conn_main );
+			}
+        			
+		} catch(Exception e) { printStackTrace( e ); }
     }
+
+	private	static	void	printStackTrace( Throwable e )
+	{
+		System.out.println(""+e);
+		e.printStackTrace();
+	}
 }

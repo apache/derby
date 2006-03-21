@@ -20,11 +20,22 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import java.sql.*;
+
+import org.apache.derby.tools.ij;
+
+
 public class StartTestConnection {
     public static void main(String args[]) {
         try {
+			// use the ij utility to read the property file and
+			// make the initial connection.
+			ij.getPropertyArg(args);
+		
+			Connection	conn_main = ij.startJBMS();
+
             TestConnection tc = new TestConnection();
-            tc.startTest();
+            tc.startTest( conn_main );
         } catch(Exception e) {
             System.out.println("Exception occurred in code StartTestConnection " + e);
             e.printStackTrace();

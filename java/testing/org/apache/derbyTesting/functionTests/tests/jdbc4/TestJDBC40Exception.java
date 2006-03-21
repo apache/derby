@@ -32,11 +32,15 @@ import java.sql.SQLTransactionRollbackException;
 import junit.framework.Test;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
+import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.tests.derbynet.testconnection;
 
 public class TestJDBC40Exception {    
     
     private static final String EXCEPTION_TABLE1 = "EXCEPTION_TABLE1";
+
+	private	static	String[]	_startupArgs;
+	
     public TestJDBC40Exception() {
     }
     
@@ -44,8 +48,14 @@ public class TestJDBC40Exception {
      * Stub methods to be removed after 623 is fixed and test is 
      * moved to use junit
      */
-    private Connection getConnection () throws SQLException {
-        return new TestConnection ().createEmbeddedConnection();
+    private Connection getConnection () throws Exception {
+		// use the ij utility to read the property file and
+		// make the initial connection.
+		ij.getPropertyArg( _startupArgs );
+		
+		Connection	conn_main = ij.startJBMS();
+		
+        return conn_main;
     }
     
     /*
@@ -153,6 +163,8 @@ public class TestJDBC40Exception {
     
     public static void main(String [] args) throws Exception {    
         TestJDBC40Exception test = new TestJDBC40Exception ();
+
+		_startupArgs = args;
         test.testException ();
     }
 }

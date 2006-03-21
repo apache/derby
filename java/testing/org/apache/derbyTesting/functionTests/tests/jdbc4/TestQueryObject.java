@@ -92,17 +92,42 @@ public class TestQueryObject {
         }
      }         
 
+	/**
+	 * <p>
+	 * Return true if we're running under the embedded client.
+	 * </p>
+	 */
+	private	static	boolean	usingEmbeddedClient()
+	{
+		return "embedded".equals( System.getProperty( "framework" ) );
+	}
+
     public static void main (String [] args) {
         //this part needs to be removed while migrating
-        //this test to junit 
-        EmbeddedDataSource40 ds = new EmbeddedDataSource40 ();
-        ds.setDatabaseName ("embedquerydb");
-        ds.setCreateDatabase ("create");
+        //this test to junit
+
+		DataSource	ds;
+
+		if ( usingEmbeddedClient() )
+		{
+			EmbeddedDataSource40 eds = new EmbeddedDataSource40 ();
+			eds = new EmbeddedDataSource40 ();
+			eds.setDatabaseName ("embedquerydb");
+			eds.setCreateDatabase ("create");
+
+			ds = eds;
+		}
+		else // DerbyNetClient
+		{
+			ClientDataSource40 clds = new ClientDataSource40 ();
+			clds = new ClientDataSource40 ();
+			clds.setDatabaseName ("netquerydb;create=true");
+        	clds.setServerName ("localhost");
+			clds.setPortNumber (1527);
+
+			ds = clds;
+		}
+		
         doTest (ds);
-        ClientDataSource40 clds = new ClientDataSource40 ();
-        clds.setDatabaseName ("netquerydb;create=true");
-        clds.setServerName ("localhost");
-        clds.setPortNumber (1527);
-        doTest (clds);
     }
 }
