@@ -98,8 +98,9 @@ public class checkDataSource
 	// DERBY-1047  wiht client xa a PreparedStatement created before the global 
 	//transaction starts gives java.sql.SQLException: 'Statement' already closed.' 
 	// when used after  the global transaction ends
-	private static boolean canUseStatementAfterXa_end = TestUtil.isEmbeddedFramework();
-	
+	//private static boolean canUseStatementAfterXa_end = TestUtil.isEmbeddedFramework();
+	 private static boolean canUseStatementAfterXa_end = true;
+	 	
 	// DERBY-1025 client  XAResource.start() does not commit an active local transaction 
 	// when auto commit is true. Embedded XAResource.start() implementation commits 
 	// the active local transaction on the Connection associated with the XAResource.
@@ -708,8 +709,11 @@ public class checkDataSource
 		} catch (Exception e) {
 				System.out.println("; wrong, unexpected exception: " + e.toString());
 		}
-		// Continuing work for DERBY-435 to get checkDataSource working with client 
-		// return here for now.
+		// skip testDSRequestAuthentication for  client because of these 
+		// two issues:
+		// DERBY-1130 : Client should not allow databaseName to be set with
+		// setConnectionAttributes
+		// DERBY-1131 : Deprecate  Derby DataSource property attributesAsPassword
 		if (TestUtil.isDerbyNetClientFramework())
 			return;
 		testDSRequestAuthentication();
