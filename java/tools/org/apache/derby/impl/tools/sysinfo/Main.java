@@ -39,6 +39,11 @@ import java.io.FileInputStream;
 import java.util.Vector;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.security.ProtectionDomain;
+import java.security.CodeSource;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 
 import org.apache.derby.iapi.services.info.PropertyNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
@@ -195,6 +200,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		  classpath = System.getProperty("java.class.path");
 	  }
 	  catch (SecurityException se) {
+          localAW.println(
+              Main.getTextMessage ("SIF01.U", se.getMessage()));
 		  classpath = null;
 	  }
 
@@ -573,8 +580,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	private static void tryMyClasspath(String cn, String library, StringBuffer successes, StringBuffer failures) {
 
 		try {
-			Class.forName(cn);
-			successes.append(found(cn, library));
+			Class c = Class.forName(cn);
+                        String loc = getFileWhichLoadedClass(c);
+                        successes.append(found(cn, library, loc));
 		}
 
 		catch (Throwable t) {
@@ -591,7 +599,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		try {
 			java.io.InputStream in = cn.getClass().getResourceAsStream(cn);
 			in.close();
-			successes.append(found(cn, library));
+                        String loc = getFileWhichLoadedClass(cn.getClass());
+			successes.append(found(cn, library, loc));
 		}
 
 		catch (Throwable t) {
@@ -601,10 +610,12 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 	}
 
-	private static String found(String cn, String library) {
+	private static String found(String cn, String library, String loc) {
 		StringBuffer temp = new StringBuffer(crLf());
 		temp.append("   " + library);
 		temp.append(crLf());
+                if (loc != null)
+                    temp.append("   ").append(loc).append(crLf());
 		temp.append(crLf());
 		return temp.toString();
 	}
@@ -885,6 +896,16 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 		ZipInfoProperties zip = new ZipInfoProperties(jccVersion);
 
+                String loc = getFileWhichLoadedClass(c);
+                // For db2jcc.jar, report the actual file from which DB2Driver
+                // was loaded, if we can determine it. For db2jcc_license_c,
+                // report the filename from the classpath, and the version 
+                // info from the DB2Driver that we loaded. This is slightly
+                // misleading, since db2jcc_license_c.jar doesn't really have
+                // a "version", but the two jars are usually linked.
+                if (loc != null && filename.indexOf("license_c") < 0)
+                    zip.setLocation(loc);
+                else
         zip.setLocation(new File(filename).getCanonicalPath().replace('/', File.separatorChar));
 		return zip;
             } catch (Exception e) { return null; }
@@ -965,5 +986,53 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		// we have a base file (sysinfoMessages.properties) so don't give us a last chance.
 		return org.apache.derby.iapi.services.i18n.MessageService.formatMessage(getBundle(), msgId, arguments, false);
 	}
+
+    /**
+     * Given a loaded class, this
+     * routine asks the class's class loader for information about where the
+     * class was loaded from. Typically, this is a file, which might be
+     * either a class file or a jar file. The routine figures that out, and
+     * returns the name of the file. If it can't figure it out, it returns null
+     */
+    private static String getFileWhichLoadedClass(final Class cls)
+    {
+         return (String)AccessController.doPrivileged( new PrivilegedAction()
+        {
+            public Object run()
+            {
+                CodeSource cs = null;
+                try {
+                    cs = cls.getProtectionDomain().getCodeSource ();
+                }
+                catch (SecurityException se) {
+                    return Main.getTextMessage("SIF01.V", cls, se.getMessage());
+                }
+ 
+                if ( cs == null )
+                    return null;        
+     
+                URL result = cs.getLocation ();
+     
+                String loc;
+
+                // If the class is found directly as a class file, loc has the
+                // filename of that classfile. If the class is found in a jar,
+                // loc has the format: 
+                //   file:[jarName]!className
+                // In that case, we fetch the jarName and return it.
+                if ("file".equals(result.getProtocol()))
+                {
+                    loc = result.getPath();
+                    if (loc.indexOf("!") > 0)
+                        loc = loc.substring(0, loc.indexOf("!"));
+                }
+                else
+                {
+                    loc = result.toString();
+                }
+                return loc;
+            }
+        });
+    }
 } // end of class Main
 

@@ -1,4 +1,6 @@
 FOUND IN CLASS PATH:
    Derby embedded engine library (derby.jar)
+   Unable to access Protection Domain or Code Source for class interface org.apache.derby.database.Database: access denied (java.lang.RuntimePermission getProtectionDomain)
    user-specified class (SimpleApp)
+   Unable to access Protection Domain or Code Source for class class SimpleApp: access denied (java.lang.RuntimePermission getProtectionDomain)
 SUCCESS: All Derby related classes found in class path.
