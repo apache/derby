@@ -3,4 +3,4 @@ jdbcapi/xaSimplePositive.sql
 jdbcapi/xaStateTran.sql
 jdbcapi/lobStreams.java
 jdbcapi/XATest.java
-derbynet/SqlExceptionTest.java
+derbynet/SqlExceptionTest.junit
