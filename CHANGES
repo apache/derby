@@ -3,3 +3,20 @@ Changes in Derby 10.2
  *) The Network Server no longer prints the message "Connection Number: N"
     to the console unless derby.drda.logConnections is set to true (DERBY-569)
     [ Bryan Pendleton ]
+
+ *) The sysinfo tool now prints additional information about the origin of
+    the classes and jars that it examines. The origin of a class might be:
+    an entry in the application classpath, an entry in a class loader location
+    list, a jar fetched due to being listed in the manifest entry of another
+    jar, a standard extension in the JRE's extensions directory, a jar
+    installed into the application server, or any of various other
+    possibilities.
+
+    Note that when sysinfo runs under a Java security manager, it may need
+    special permissions to access this additional information, including the
+    permission to read the java.class.path property, and the permission to
+    call getProtectionDomain on a class. If sysinfo is not granted these
+    permissions, it will display an error message about the security problem
+    in place of displaying the class origin information.
+    (DERBY-668) [ Bryan Pendleton ]
+
