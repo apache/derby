@@ -27,7 +27,7 @@ import java.security.PrivilegedExceptionAction;
 
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.iapi.services.info.JVMInfo;
 public class Configuration {
 
 

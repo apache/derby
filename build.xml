@@ -1106,8 +1106,7 @@
                          org/apache/derby/shared/**,
                          org/apache/derby/info/dnc.properties,
                          org/apache/derby/loc/clientmessages*.properties"
-               excludes="org/apache/derby/iapi/services/info/JVMInfo.class,
-                         org/apache/derby/shared/common/reference/**"/>
+               excludes="org/apache/derby/shared/common/reference/**"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>

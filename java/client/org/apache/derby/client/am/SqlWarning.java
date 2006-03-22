@@ -22,7 +22,7 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLWarning;
-import org.apache.derby.shared.common.info.JVMInfo;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 /**
  * This represents a warning versus a full exception.  As with
