@@ -1,4 +1,3 @@
-jdbc4/StartTestConnection.java
 jdbc4/TestConnectionMethods.java
 jdbc4/TestCallableStatementMethods.java
 jdbc4/TestPreparedStatementMethods.java
