@@ -30,6 +30,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.SQLException;
+import java.sql.BatchUpdateException;
 import java.io.ByteArrayInputStream; 
 import java.io.InputStreamReader;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
@@ -47,7 +48,7 @@ public class prepStmt
     private static String[] testObjects =  // string array for cleaning up
         {"table t1", "table tab1", "table t2", "table bigtab", "table tstab",
          "table doubletab", "table numtab", "table Numeric_Tab", "table jira614", 
-	 "table jira614_a", "table jira125", 
+	 "table jira614_a", "table jira428", "table jira125", 
          "table jira125125125125125125125125125125125125125125125125125125125125125125125125125125125125125125125"};
 
 	public static void main (String args[])
@@ -314,6 +315,7 @@ public class prepStmt
 			jira614Test_a(conn);
 			jira170Test(conn);
 			jira125Test(conn);
+			jira428Test(conn);
 			conn.close();
 			// refresh conn before cleaning up
 			conn = ij.startJBMS();
@@ -947,5 +949,58 @@ public class prepStmt
         while (rs.next());
         System.out.println("Iteration 1 successful: " + (nCols + 1) +
 			" parameter markers successfully prepared and executed.");
+    }
+    // Jira 428 involves large batch sizes for Statement.addBatch and
+    // Statement.executeBatch. Currently, there is a hard DRDA limit of
+    // 65535 statements per batch (prior to DERBY-428, the server failed
+    // at around 9000 statements). The different JDBC clients support slightly
+    // lower limits: the Network Client supports 65534
+    // statements in a single batch, while the DB2JCC driver supports
+    // 65532 statements. This test just verifies that a batch
+    // of 65532 statements works, and that a batch of 100000 statements
+    // gets a BatchUpdateException from the Network Client.
+    private static void jira428Test(Connection conn)
+        throws Exception
+    {
+        Statement stmt = conn.createStatement();
+        PreparedStatement ps ;
+        try { stmt.execute("drop table jira428"); } catch (Throwable t) { }
+        stmt.execute("create table jira428 (i integer)");
+        boolean savedAutoCommit = conn.getAutoCommit();
+        conn.setAutoCommit(false);
+        ps = conn.prepareStatement("insert into jira428 values (?)");
+        for (int i = 0; i < 65532; i++)
+        {
+            ps.setInt(1, i);
+            ps.addBatch();
+        }
+        ps.executeBatch();
+        conn.commit();
+        // We don't run this part of the test for the JCC client because
+        // the exception forces the connection closed. For DerbyNetClient, it's
+        // a clean exception that we can catch and recover from, so we test
+        // that code path:
+        if (TestUtil.isDerbyNetClientFramework())
+        {
+            ps = conn.prepareStatement("insert into jira428 values (?)");
+            for (int i = 0; i < 100000; i++)
+            {
+                ps.setInt(1, i);
+                ps.addBatch();
+            }
+            try {
+                ps.executeBatch();
+                System.out.println("JIRA428 FAILURE: expected an exception saying no more than 65534 statements in a single batch");
+            }
+            catch (BatchUpdateException bue)
+            {
+                // We don't print anything here because we use the same
+                // master files for DerbyNet and DerbyNetClient, and we only
+                // run this portion of the test for DerbyNetClient.
+                // The exception that we get says "no more than 65534 stmts".
+            }
+            conn.commit();
+        }
+        conn.setAutoCommit(savedAutoCommit);
     }
 }
