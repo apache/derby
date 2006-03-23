@@ -83,19 +83,6 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
         return statement.getResultSetHoldability();
     }
     
-    /**
-     * Checks whether this <code>ResultSet</code> object has been
-     * closed, either automatically or because <code>close()</code>
-     * has been called.
-     *
-     * @return <code>true</code> if the <code>ResultSet</code> is
-     * closed, <code>false</code> otherwise
-     * @exception SQLException if a database error occurs
-     */
-    public final boolean isClosed() throws SQLException {
-        return isClosed;
-    }
-    
     public void updateNString(int columnIndex, String nString) throws SQLException {
         throw Util.notImplemented();
     }

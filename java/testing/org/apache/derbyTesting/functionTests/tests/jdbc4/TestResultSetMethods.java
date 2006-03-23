@@ -214,6 +214,18 @@ public class TestResultSetMethods {
             assert_(count == 3, "expected three result sets");
             stmt.execute("drop procedure retrieve_result_sets");
 
+            // close statement
+            rs = stmt2.executeQuery("values(1)");
+            stmt2.close();
+            assert_(rs.isClosed(), "rs should be closed");
+
+            // close connection
+            Connection conn2 = ij.startJBMS();
+            stmt2 = conn2.createStatement();
+            rs = stmt2.executeQuery("values(1)");
+            conn2.close();
+            assert_(rs.isClosed(), "rs should be closed");
+
             stmt.close();
             stmt2.close();
             

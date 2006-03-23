@@ -4274,5 +4274,30 @@ public abstract class EmbedResultSet extends ConnectionChild
     	
     	streamUsedFlags[columnIndex - 1] = true;
     }
+
+    /**
+     * JDBC 4.0
+     *
+     * <p>
+     * Checks whether this <code>ResultSet</code> object has been
+     * closed, either automatically or because <code>close()</code>
+     * has been called.
+     *
+     * @return <code>true</code> if the <code>ResultSet</code> is
+     * closed, <code>false</code> otherwise
+     * @exception SQLException if a database error occurs
+     */
+    public final boolean isClosed() throws SQLException {
+        if (isClosed) return true;
+        try {
+            // isClosed is not updated when EmbedConnection.close() is
+            // called, so we need to check the status of the
+            // connection
+            checkExecIfClosed("");
+            return false;
+        } catch (SQLException sqle) {
+            return isClosed;
+        }
+    }
 }
 
