@@ -1240,8 +1240,17 @@ public class EmbedStatement extends ConnectionChild
 		return pvs;
 	}
 
-	//check the status of this statement, if it has already been closed,
-    //we throw an exception, need to be called by every public method
+	/**
+     * Throw an exception if this Statement has been closed explictly
+     * or it has noticed it has been closed implicitly.
+     * JDBC specifications require nearly all methods throw a SQLException
+     * if the Statement has been closed, thus most methods call this
+     * method or checkExecStatus first.
+     * 
+     * @exception SQLException Thrown if the statement is marked as closed.
+     * 
+     * @see #checkExecStatus()
+	 */
     final void checkStatus() throws SQLException {
 
 		if (!active)
@@ -1257,8 +1266,28 @@ public class EmbedStatement extends ConnectionChild
 		To avoid this heavier weight check on every method of [Prepared]Statement it is only used
 		on those methods that would end up using the database's connection to read or modify data.
 		E.g. execute*(), but not setXXX, etc.
+        <BR>
+        If this Statement's exception is actually closed an exception will
+        be thrown and the active field will be set to false,
+        completely marking the Statement as closed.
+        <BR>
+        If the Statement is not currently connected to an active
+        transaction, i.e. a suspended global transaction, then
+        this method will throw a SQLException but the Statement
+        will remain open. The Statement is open but unable to
+        process any new requests until its global transaction
+        is resumed.
+        <BR>
+        Upon return from the method, with or without a SQLException
+        the field active will correctly represent the open state of
+        the Statement.
+        
+        @exception SQLException Thrown if the statement is marked as closed
+        or the Statement's transaction is suspended.
+        
+        @see #checkStatus()
 	*/
-	protected final void checkExecStatus() throws SQLException {
+	final void checkExecStatus() throws SQLException {
 		// getConnection() checks if the Statement is closed
 		if (!getConnection().isClosed())
 			return;
