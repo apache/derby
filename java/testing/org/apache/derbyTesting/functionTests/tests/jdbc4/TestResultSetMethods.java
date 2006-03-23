@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -126,7 +127,11 @@ public class TestResultSetMethods {
      * correct behaviour.
      */
     void t_getHoldability() {
+        Boolean savedAutoCommit = null;
         try {
+            savedAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+
             // test default holdability
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("values(1)");
@@ -145,21 +150,104 @@ public class TestResultSetMethods {
                     throw sqle;
                 }
             }
-            stmt.close();
+
             // test explicitly set holdability
-            for (int h : new int[] { ResultSet.HOLD_CURSORS_OVER_COMMIT,
-                                     ResultSet.CLOSE_CURSORS_AT_COMMIT }) {
-                stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-                                            ResultSet.CONCUR_READ_ONLY, h);
-                rs = stmt.executeQuery("values(1)");
-                assert_(rs.getHoldability() == h, "holdability " + h);
+            final int[] holdabilities = {
+                ResultSet.HOLD_CURSORS_OVER_COMMIT,
+                ResultSet.CLOSE_CURSORS_AT_COMMIT,
+            };
+            for (int h : holdabilities) {
+                Statement s =
+                    conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                         ResultSet.CONCUR_READ_ONLY, h);
+                rs = s.executeQuery("values(1)");
+                assert_(rs.getHoldability() == h,
+                        "holdability " + holdabilityString(h));
                 rs.close();
-                stmt.close();
+                s.close();
             }
-            
+
+            // test holdability of result set returned from a stored
+            // procedure (DERBY-1101)
+            stmt.execute("create procedure getresultsetwithhold(in hold int) " +
+                         "parameter style java language java external name " +
+                         "'org.apache.derbyTesting.functionTests.tests." +
+                         "jdbc4.TestResultSetMethods." +
+                         "getResultSetWithHoldability' " +
+                         "dynamic result sets 1 reads sql data");
+            for (int statementHoldability : holdabilities) {
+                for (int procHoldability : holdabilities) {
+                    CallableStatement cs =
+                        conn.prepareCall("call getresultsetwithhold(?)",
+                                         ResultSet.TYPE_FORWARD_ONLY,
+                                         ResultSet.CONCUR_READ_ONLY,
+                                         statementHoldability);
+                    cs.setInt(1, procHoldability);
+                    cs.execute();
+                    rs = cs.getResultSet();
+                    int holdability = rs.getHoldability();
+                    assert_(holdability == procHoldability,
+                            "holdability of ResultSet from stored proc: " +
+                            holdabilityString(holdability));
+                    conn.commit();
+                    boolean holdable;
+                    try {
+                        rs.next();
+                        holdable = true;
+                    } catch (SQLException sqle) {
+                        String sqlstate = sqle.getSQLState();
+                        // SQL state for closed result set is XCL16,
+                        // but it is null in the client driver
+                        if (sqlstate == null || sqlstate.equals("XCL16")) {
+                            holdable = false;
+                        } else {
+                            throw sqle;
+                        }
+                    }
+                    if (holdable) {
+                        assert_(holdability ==
+                                ResultSet.HOLD_CURSORS_OVER_COMMIT,
+                                "non-holdable result set not closed on commit");
+                    } else {
+                        assert_(holdability ==
+                                ResultSet.CLOSE_CURSORS_AT_COMMIT,
+                                "holdable result set closed on commit");
+                    }
+                    rs.close();
+                    cs.close();
+                }
+            }
+            stmt.execute("drop procedure getresultsetwithhold");
+            stmt.close();
+            conn.commit();
         } catch(Exception e) {
-            System.out.println("Unexpected exception caught"+e);
-            e.printStackTrace();
+            System.out.println("Unexpected exception caught " + e);
+            e.printStackTrace(System.out);
+        } finally {
+            if (savedAutoCommit != null) {
+                try {
+                    conn.setAutoCommit(savedAutoCommit);
+                } catch (SQLException sqle) {
+                    sqle.printStackTrace(System.out);
+                }
+            }
+        }
+    }
+
+    /**
+     * Convert holdability from an integer to a readable string.
+     *
+     * @param holdability an <code>int</code> value representing a holdability
+     * @return a <code>String</code> value representing the same holdability
+     */
+    private static String holdabilityString(int holdability) {
+        switch (holdability) {
+        case ResultSet.HOLD_CURSORS_OVER_COMMIT:
+            return "HOLD_CURSORS_OVER_COMMIT";
+        case ResultSet.CLOSE_CURSORS_AT_COMMIT:
+            return "CLOSE_CURSORS_AT_COMMIT";
+        default:
+            return "UNKNOWN HOLDABILITY";
         }
     }
     
@@ -486,6 +574,26 @@ public class TestResultSetMethods {
         rs2[0] = stmt2.executeQuery("values(1)");
         Statement stmt3 = c.createStatement();
         rs3[0] = stmt3.executeQuery("values(1)");
+        c.close();
+    }
+
+    /**
+     * Method invoked by <code>t_getHoldability()</code> (as a stored
+     * procedure) to retrieve a result set with a given holdability.
+     *
+     * @param holdability requested holdability
+     * @param rs result set returned from stored procedure
+     * @exception SQLException if a database error occurs
+     */
+    public static void getResultSetWithHoldability(int holdability,
+                                                   ResultSet[] rs)
+        throws SQLException
+    {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        Statement s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                        ResultSet.CONCUR_READ_ONLY,
+                                        holdability);
+        rs[0] = s.executeQuery("values (1), (2), (3)");
         c.close();
     }
     
