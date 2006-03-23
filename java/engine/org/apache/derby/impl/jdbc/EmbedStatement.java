@@ -1267,7 +1267,7 @@ public class EmbedStatement extends ConnectionChild
 		on those methods that would end up using the database's connection to read or modify data.
 		E.g. execute*(), but not setXXX, etc.
         <BR>
-        If this Statement's exception is actually closed an exception will
+        If this Statement's Connection is closed an exception will
         be thrown and the active field will be set to false,
         completely marking the Statement as closed.
         <BR>
