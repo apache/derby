@@ -134,7 +134,7 @@ public final class SQLDouble extends NumberDataType
 	 */
 	public float	getFloat() throws StandardException
 	{
-		if (Math.abs(value) > Float.MAX_VALUE)
+		if (Float.isInfinite((float)value))
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.REAL_NAME);
 		return (float) value;
 	}
