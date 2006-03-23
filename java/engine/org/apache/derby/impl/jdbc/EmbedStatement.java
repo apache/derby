@@ -234,6 +234,23 @@ public class EmbedStatement extends ConnectionChild
 	}
 
     /**
+     * Tell whether this statment has been closed or not.
+     *
+     * @return <code>true</code> is closed, <code>false</code> otherwise.
+     * @exception SQLException if a database access error occurs.
+     */
+    public boolean isClosed() throws SQLException {
+        // If active, verify state by consulting parent connection.
+        if (active) {
+            try {
+                checkExecStatus();
+            } catch (SQLException sqle) {
+            }
+        }
+        return !active;
+    }
+
+    /**
      * In many cases, it is desirable to immediately release a
      * Statements's database and JDBC resources instead of waiting for
      * this to happen when it is automatically closed; the close

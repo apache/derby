@@ -463,6 +463,24 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
+    /**
+     * Tell whether the statement has been closed or not.
+     *
+     * @return <code>true</code> if closed, <code>false</code> otherwise.
+     * @exception SQLException if a database access error occurs (according to
+     *                         spec). Never thrown by this implementation. 
+     */
+    public boolean isClosed()
+        throws SQLException {
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceEntry(this, "isClosed", !openOnClient_);
+        }
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceExit(this, "isClosed", !openOnClient_);
+        }
+        return !openOnClient_;
+    }
+    
     // The server holds statement resources until transaction end.
     public void close() throws SQLException {
         try

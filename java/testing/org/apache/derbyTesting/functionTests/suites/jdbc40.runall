@@ -5,3 +5,4 @@ jdbc4/TestResultSetMethods.java
 jdbc4/TestQueryObject.java
 jdbc4/TestDbMetaData.java
 jdbc4/TestJDBC40Exception.java
+jdbc4/StatementTest.junit
