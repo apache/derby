@@ -1,3 +1,4 @@
+jdbcapi/HoldabilityTest.junit
 jdbcapi/bestrowidentifier.sql
 jdbcapi/characterStreams.java
 jdbcapi/checkDriver.java
