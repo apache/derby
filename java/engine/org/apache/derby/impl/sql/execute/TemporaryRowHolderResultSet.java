@@ -57,7 +57,7 @@ import java.sql.Timestamp;
  *
  * @author jamie
  */
-public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cloneable
+class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cloneable
 {
 	private ExecRow[] 				rowArray;
 	private int						numRowsOut;
@@ -181,7 +181,7 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 	 * Whip up a new Temp ResultSet that has a single
 	 * row, the current row of this result set.
 	 * 
-	 * @param tc the xact controller
+	 * @param activation the activation
 	 * @param rs the result set 
 	 * 
 	 * @return a single row result set
@@ -190,11 +190,13 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 	 */
 	public static TemporaryRowHolderResultSet getNewRSOnCurrentRow
 	(
-		TransactionController	tc,
+		Activation				activation,
 		CursorResultSet 		rs
 	) throws StandardException
 	{
-		TemporaryRowHolderImpl singleRow = new TemporaryRowHolderImpl(tc, null, rs.getResultDescription());
+		TemporaryRowHolderImpl singleRow =
+			new TemporaryRowHolderImpl(activation, null,
+									   rs.getResultDescription());
 		singleRow.insert(rs.getCurrentRow());
 		return (TemporaryRowHolderResultSet) singleRow.getResultSet();
 	}
@@ -1130,9 +1132,12 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 		return null;
 	}
 
-	public Activation getActivation() {
-		if (SanityManager.DEBUG)
-			SanityManager.THROWASSERT("getActivation() called for " + getClass());
-		return null;
+	/**
+	 * Return the <code>Activation</code> for this result set.
+	 *
+	 * @return activation
+	 */
+	public final Activation getActivation() {
+		return holder.activation;
 	}
 }

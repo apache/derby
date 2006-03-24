@@ -26,6 +26,7 @@ import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.TemporaryRowHolder;
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.ScanController;
@@ -52,7 +53,7 @@ import java.util.Properties;
  *
  * @author jamie
  */
-public class TemporaryRowHolderImpl implements TemporaryRowHolder
+class TemporaryRowHolderImpl implements TemporaryRowHolder
 {
 	public static final int DEFAULT_OVERFLOWTHRESHOLD = 5;
 
@@ -71,8 +72,9 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	private ConglomerateController	cc;
 	private Properties				properties;
 	private ScanController			scan;
-	private TransactionController	tc;
 	private	ResultDescription		resultDescription;
+	/** Activation object with local state information. */
+	Activation						activation;
 
 	private boolean     isUniqueStream;
 
@@ -98,7 +100,7 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 * Uses the default overflow to
  	 * a conglomerate threshold (5).
 	 *
-	 * @param tc the xact controller
+	 * @param activation the activation
 	 * @param properties the properties of the original table.  Used
 	 *		to help the store use optimal page size, etc.
 	 * @param resultDescription the result description.  Relevant for the getResultDescription
@@ -106,19 +108,20 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 */
 	public TemporaryRowHolderImpl
 	(
-		TransactionController	tc, 
+		Activation				activation, 
 		Properties 				properties, 
 		ResultDescription		resultDescription
 	) 
 	{
-		this(tc, properties, resultDescription, DEFAULT_OVERFLOWTHRESHOLD, false, false);
+		this(activation, properties, resultDescription,
+			 DEFAULT_OVERFLOWTHRESHOLD, false, false);
 	}
 	
 	/**
 	 * Uses the default overflow to
  	 * a conglomerate threshold (5).
 	 *
-	 * @param tc the xact controller
+	 * @param activation the activation
 	 * @param properties the properties of the original table.  Used
 	 *		to help the store use optimal page size, etc.
 	 * @param resultDescription the result description.  Relevant for the getResultDescription
@@ -127,20 +130,21 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 */
 	public TemporaryRowHolderImpl
 	(
-		TransactionController	tc, 
+		Activation				activation, 
 		Properties 				properties, 
 		ResultDescription		resultDescription,
 		boolean                 isUniqueStream
 	) 
 	{
-		this(tc, properties, resultDescription, 1, isUniqueStream, false);
+		this(activation, properties, resultDescription, 1, isUniqueStream,
+			 false);
 	}
 
 
 	/**
 	 * Create a temporary row holder with the defined overflow to conglom
 	 *
-	 * @param tc the xact controller
+	 * @param activation the activation
 	 * @param properties the properties of the original table.  Used
 	 *		to help the store use optimal page size, etc.
 	 * @param resultDescription the result description.  Relevant for the getResultDescription
@@ -151,7 +155,7 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 */
 	public TemporaryRowHolderImpl
 	(
-		TransactionController 	tc, 
+		Activation			 	activation, 
 		Properties				properties,
 		ResultDescription		resultDescription,
 		int 					overflowToConglomThreshold,
@@ -170,7 +174,7 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 			}
 		}
 
-		this.tc = tc;
+		this.activation = activation;
 		this.properties = properties;
 		this.resultDescription = resultDescription;
 		this.isUniqueStream = isUniqueStream;
@@ -250,6 +254,8 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 			
 		if (!conglomCreated)
 		{
+			TransactionController tc = activation.getTransactionController();
+
 			/*
 			** Create the conglomerate with the template row.
 			*/
@@ -320,6 +326,8 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 		
 			if(!uniqueIndexCreated)
 			{
+				TransactionController tc =
+					activation.getTransactionController();
 				int numKeys = 2;
 				uniqueIndexRow = new DataValueDescriptor[numKeys];
 				uniqueIndexRow[0] = baseRowLocation;
@@ -378,6 +386,7 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	{
 		if(!positionIndexCreated)
 		{
+			TransactionController tc = activation.getTransactionController();
 			int numKeys = 2;
 			position_sqllong = new SQLLongint();
 			positionIndexRow = new DataValueDescriptor[numKeys];
@@ -413,6 +422,7 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 	public CursorResultSet getResultSet()
 	{
 		state = STATE_DRAIN;
+		TransactionController tc = activation.getTransactionController();
 		if(isUniqueStream)
 		{
 			return new TemporaryRowHolderResultSet(tc, rowArray,
@@ -455,6 +465,7 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 		*/
 		if (conglomCreated)
 		{
+			TransactionController tc = activation.getTransactionController();
 			tc.dropConglomerate(CID);
 			conglomCreated = false;
 		}
@@ -520,6 +531,8 @@ public class TemporaryRowHolderImpl implements TemporaryRowHolder
 			positionIndex_cc.close();
 			positionIndex_cc = null;
 		}
+
+		TransactionController tc = activation.getTransactionController();
 
 		if (uniqueIndexCreated)
 		{

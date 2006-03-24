@@ -90,11 +90,13 @@ public class RowTriggerExecutor extends GenericTriggerExecutor
 	
 				tec.setBeforeResultSet(brs == null ? 
 						null : 
-						TemporaryRowHolderResultSet.getNewRSOnCurrentRow(activation.getTransactionController(), brs));
+						TemporaryRowHolderResultSet.
+									   getNewRSOnCurrentRow(activation, brs));
 					
 				tec.setAfterResultSet(ars == null ? 
 									  null : 
-									  TemporaryRowHolderResultSet.getNewRSOnCurrentRow(activation.getTransactionController(), ars));
+									  TemporaryRowHolderResultSet.
+									  getNewRSOnCurrentRow(activation, ars));
 
 				/* 	
 					This is the key to handling autoincrement values that might

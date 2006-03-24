@@ -318,7 +318,7 @@ class DeleteResultSet extends DMLWriteResultSet
 			rlColumnNumber = noTriggersOrFks ? 1: numberOfBaseColumns;
 			if(cascadeDelete)
 			{
-				rowHolder = new TemporaryRowHolderImpl(tc, properties, 
+				rowHolder = new TemporaryRowHolderImpl(activation, properties, 
 						(resultDescription != null) ?
 							resultDescription.truncateColumns(rlColumnNumber) :
 							null, false);
@@ -327,7 +327,7 @@ class DeleteResultSet extends DMLWriteResultSet
 			}else
 			{
 
-				rowHolder = new TemporaryRowHolderImpl(tc, properties, 
+				rowHolder = new TemporaryRowHolderImpl(activation, properties, 
 						(resultDescription != null) ?
 							resultDescription.truncateColumns(rlColumnNumber) :
 							null);
