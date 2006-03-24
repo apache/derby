@@ -326,8 +326,21 @@ public final class ContextService //OLD extends Hashtable
 		}
 
 		if (cm.activeCount != -1) {
-			if (--cm.activeCount == 0)
+			if (--cm.activeCount == 0) {
 				cm.activeThread = null;
+                
+                // If the ContextManager is empty
+                // then don't keep a reference to it
+                // when it is not in use. The ContextManager
+                // has been closed (most likely) and this
+                // is now unwanted. Keeping the reference
+                // would hold onto memory and increase the
+                // chance of holding onto a another reference
+                // will could cause issues for future operations.
+                if (cm.isEmpty())
+                    tcl.set(null);
+                    
+            }
 			return;
 		}
 

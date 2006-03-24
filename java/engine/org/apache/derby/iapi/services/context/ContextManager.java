@@ -203,6 +203,14 @@ public class ContextManager
 		// now remove it from its id's stack.
 		idStack.remove(theContext);
 	}
+    
+    /**
+     * Is the ContextManager empty containing no Contexts.
+     */
+    final boolean isEmpty()
+    {
+        return holder.isEmpty();
+    }
 	
 	/**
 	 * Return an unmodifiable list reference to the ArrayList backing
