@@ -61,10 +61,6 @@ public class grantRevoke
             ij.getPropertyArg(args);
             owner.setConnection( ij.startJBMS());
             dbmd = owner.getConnection().getMetaData();
-// GrantRevoke TODO: Enable standard access tests
-// checkStandardAccess( );
-//            owner.stmt.executeUpdate( "call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.sqlAuthorization',"
-//                                      + " 'true')");
 
             runGrantTests();
             // We can't test much of REVOKE unless GRANT works
@@ -87,29 +83,6 @@ public class grantRevoke
             System.out.println( "FAILED. " + errorCount + ((errorCount > 1) ? " errors" : " error"));
         System.exit( 0);
 	} // end of doIt
-
-    private void checkStandardAccess( ) throws SQLException
-    {
-        // Check that grant and revoke are not allowed in a legacy access mode.
-        System.out.println( "Try GRANT/REVOKE with legacy (non-standard) access permission.");
-        testErrors( legacyAccessErrors);
-        for( int i = 0; i < accessPropValues.length; i++)
-        {
-            owner.stmt.executeUpdate( "call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" +
-                                      " 'derby.database.defaultConnectionMode'," +
-                                      " '" + accessPropValues[i] + "')");
-            testErrors( legacyAccessErrors);
-        }
-    } // end of checkStandardAccess
-
-    private static final String[] accessPropValues = { "noAccess", "readOnlyAccess", "fullAccess"};
-    private static final String[][]legacyAccessErrors =
-    {
-        {"grant select on t1 to public", "42Z60",
-         "GRANT not allowed unless database property derby.database.defaultConnectionMode has value 'sqlStandard'."},
-        {"revoke on t1 from public", "42Z60",
-         "REVOKE not allowed unless database property derby.database.defaultConnectionMode has value 'sqlStandard'."}
-    };
 
     private void runGrantTests( ) throws SQLException
     {
@@ -828,22 +801,12 @@ public class grantRevoke
         
     private void reportFailure( String msg)
     {
-	// GrantRevoke TODO: Need to implement metadata correctly. For now, ignore errors
-	// caused by metadata.
-	if (msg.startsWith("DatabaseMetaData"))
-		return;
-
         errorCount++;
         System.out.println( msg);
     }
         
     private void reportFailure( String[] msg)
     {
-	// GrantRevoke TODO: Need to implement metadata correctly. For now, ignore errors
-	// caused by metadata.
-	if (msg[0].startsWith("DatabaseMetaData"))
-		return;
-
         errorCount++;
         for( int i = 0; i < msg.length; i++)
             System.out.println( msg[i]);
