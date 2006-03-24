@@ -1274,7 +1274,6 @@ public interface SQLState {
 
 	// Non-SQLSTATE errors 
 	String LANG_DOES_NOT_RETURN_ROWS                                   = "XCL01.S";
-	String LANG_STATEMENT_CLOSED                                       = "XCL04.S";
 	String LANG_ACTIVATION_CLOSED                                      = "XCL05.S";
 	String LANG_CURSOR_CLOSED                                          = "XCL07.S";
 	String LANG_NO_CURRENT_ROW                                         = "XCL08.S";
@@ -1387,7 +1386,7 @@ public interface SQLState {
 	String NEED_TO_REGISTER_PARAM = "07004";
     String COLUMN_NOT_FOUND = "S0022";
     //String NO_COMMIT_WHEN_AUTO = "XJ007.S";
-    //String NO_ROLLBACK_WHEN_AUTO = "XJ008.S";
+    String NO_SAVEPOINT_ROLLBACK_OR_RELEASE_WHEN_AUTO = "XJ008.S";
     String REQUIRES_CALLABLE_STATEMENT = "XJ009.S";
     String NO_SAVEPOINT_WHEN_AUTO = "XJ010.S";
     String NULL_NAME_FOR_SAVEPOINT = "XJ011.S";
@@ -1527,7 +1526,34 @@ public interface SQLState {
     String PRIMARY_TABLE_NAME_IS_NULL                               = "XN110.S";
     String FOREIGN_TABLE_NAME_IS_NULL                               = "XN111.S";
     String SECURITY_EXCEPTION_ENCOUNTERED                           = "XN112.S";
+    String CHAR_CONVERTER_NOT_FOUND                                 = "XN050.S";
+    String UNSUPPORTED_ENCODING                                     = "XN051.S";
+    String NULL_SEARCH_STRING                                       = "XN052.S";
+    String INVALID_CLOB_START_POS                                   = "XN053.S";
+    String INVALID_POS_OFFSET_OR_LEN                                = "XN054.S";
+    String INVALID_LENGTH                                           = "XN055.S";
+    String CLOB_TOO_LARGE                                           = "XN056.S";
+    String INVALID_POSITION                                         = "XN057.S";
+    String INVALID_OFFSET                                           = "XN058.S";
+    String UNSUPPORTED_TYPE                                         = "XN059.S";
+    String UNREGISTERED_COLUMN_TYPE                                 = "XN060.S";
+    String TYPE_MISMATH_WITH_REG_TYPE                               = "XN061.S";
+    String BAD_JDBC_TYPE                                            = "XN062.S";
+    String BAD_DRIVER_TYPE                                          = "XN063.S";
+    String ERROR_PRIVILEGED_ACTIOM                                  = "XN064.S";
+    String MISSING_RESOURCE_BUNDLE                                  = "XN065.S";
+    String SAVEPOINT_NOT_CREATED_BY_CONNECTION                      = "XN067.S";
+    String DRIVER_NOT_CAPABLE                                       = "XN068.S";
+    String BAD_AUTO_GEN_KEY_VALUE                                   = "XN069.S";
+    String READER_UNDER_RUN                                         = "XN070.S";
+    
     String UNABLE_TO_OPEN_FILE = "XN151.S";
+    
+    /*
+     ** Messages whose SQL states are proscribed by DRDA
+     */
+    String DRDA_NO_AUTOCOMMIT_UNDER_XA                            = "2D521.S.1";
+    String DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK            = "2D521.S.2";
     
 	/*
 	** org.apache.derby.database.UserUtility

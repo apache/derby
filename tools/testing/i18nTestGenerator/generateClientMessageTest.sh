@@ -31,28 +31,10 @@ then
 fi
 
 
-#
-# Create the top of the file
-#
 FILE=$ROOT/$TESTDIR/TestClientMessages.java
 
-echo "package org.apache.derbyTesting.functionTests.tests.i18n;" > $FILE
-echo "" >> $FILE
-echo "import org.apache.derby.client.am.MessageId;" >> $FILE
-echo "import org.apache.derby.client.am.SqlException;" >> $FILE
-echo "import org.apache.derby.shared.common.reference.SQLState;" >> $FILE
-echo "" >> $FILE
-echo "/**" >> $FILE
-echo " * This class is a GENERATED FILE that tests as many of the messages" >> $FILE
-echo " * in the client code as possible." >> $FILE
-echo " */" >> $FILE
-echo "public class TestClientMessages" >> $FILE
-echo "{" >> $FILE
-echo "  private static Exception e;" >> $FILE
-echo '  private static String feature = "testFeature";' >> $FILE
-echo "" >> $FILE
-echo "  public static void main(String[] args) {" >> $FILE
-echo "    try {" >> $FILE
+rm -f $FILE $FILE.2
+
 
 CLIENTROOT=$ROOT/java/client/org/apache/derby
 if [ ! -d $CLIENTROOT ]
@@ -75,30 +57,24 @@ MYDIR=$ROOT/tools/testing/i18nTestGenerator
 # source file.  We'll then compile this file, run it, and make
 # sure we have valid uses of message ids
 #
+touch $FILE
 for i in $FILES
 do
   echo "    // from source file $i" >> $FILE
-  sed -n -f $MYDIR/genClient1.sed $i >> $FILE 
+  sed -n -f $MYDIR/genClient1.sed $i | sed -f $MYDIR/genClient2.sed >> $FILE 
+  #sed -n -f $MYDIR/genClient1.sed $i >> $FILE
 done
 
 #
-# Use this sed script to clean things up so the source compiles 
 #
-sed -f $MYDIR/genClient2.sed $FILE > $FILE.2 
-
-if [ $? != 0 ]
-then
-  rm -f $FILE
-  rm -f $FILE.2
-  exit 1
-fi
-
+# Add the beginning lines of the class to the file
+#
+cat $MYDIR/clientPrologue.txt $FILE > $FILE.2
 mv $FILE.2 $FILE
 
-echo "    }" >> $FILE
-echo "    catch ( Throwable t ) {" >> $FILE
-echo "      t.printStackTrace();" >> $FILE
-echo "    }" >> $FILE
+#
+# Add the trailing lines of the class to the file
+#
 echo "  }" >> $FILE
 echo "}" >> $FILE
 

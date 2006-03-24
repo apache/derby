@@ -241,20 +241,20 @@ public class MessageUtil
                     return MessageFormat.format(message, arguments);
                 }
                 catch (IllegalArgumentException iae) {
-                    if ( !composeDefault )
+                    if ( !composeDefault || SanityManager.DEBUG )
                         throw iae;
                 }
                 catch (NullPointerException npe) {
                     //
                     //null arguments cause a NullPointerException. 
                     //This improves reporting.
-                    if ( !composeDefault )
+                    if ( !composeDefault  || SanityManager.DEBUG )
                         throw npe;
                 }
 
             } catch (MissingResourceException mre) {
                 // caller will try and handle the last chance
-                if (!composeDefault)
+                if (!composeDefault )
                     throw mre;
             } 
         }

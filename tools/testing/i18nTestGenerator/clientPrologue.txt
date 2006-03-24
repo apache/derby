@@ -1,0 +1,18 @@
+package org.apache.derbyTesting.functionTests.tests.i18n; 
+
+import org.apache.derby.client.am.MessageId; 
+import org.apache.derby.client.am.SqlException; 
+import org.apache.derby.shared.common.reference.SQLState; 
+
+/** 
+ * This class is a GENERATED FILE that tests as many of the messages 
+ * in the client code as possible. 
+ * 
+ * See tools/testing/i18nTestGenerator/generateClientMessageTest.sh 
+ */ 
+public class TestClientMessages { 
+  private static Exception e; 
+  private static String feature = "testFeature";
+
+  public static void main(String[] args) { 
+

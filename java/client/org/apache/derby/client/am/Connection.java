@@ -457,7 +457,8 @@ public abstract class Connection implements java.sql.Connection,
     synchronized public String nativeSQLX(String sql) throws SqlException {
         checkForClosedConnection();
         if (sql == null) {
-            throw new SqlException(agent_.logWriter_, "Null SQL string passed.");
+            throw new SqlException(agent_.logWriter_,
+                    new MessageId (SQLState.NULL_SQL_TEXT));
         }
 
         // Derby can handle the escape syntax directly so only needs escape
@@ -487,9 +488,7 @@ public abstract class Connection implements java.sql.Connection,
             if (! allowLocalCommitRollback_()) {
                 if (autoCommit) { // can't toggle to autocommit mode when between xars.start() and xars.end()
                     throw new SqlException(agent_.logWriter_,
-                            "setAutoCommit(true) invalid during global transaction",
-                            SqlState._2D521, // Spec'ed by PROTOCOL
-                            SqlCode.invalidSetAutoCommitUnderXA);
+                            new MessageId (SQLState.DRDA_NO_AUTOCOMMIT_UNDER_XA));                            
                 }
             } else {
                 if (autoCommit == autoCommit_) {
@@ -550,12 +549,9 @@ public abstract class Connection implements java.sql.Connection,
     private void checkForInvalidXAStateOnCommitOrRollback() throws SqlException {
         if (! allowLocalCommitRollback_()) {
             throw new SqlException(agent_.logWriter_,
-                    "COMMIT or ROLLBACK invalid for application execution environment",
-                    SqlState._2D521, // Spec'ed by PROTOCOL
-                    SqlCode.invalidCommitOrRollbackUnderXA);
+                new MessageId(SQLState.DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK));
         }
     }
-
     public void flowCommit() throws SqlException {
         // Per JDBC specification (see javadoc for Connection.commit()):
         //   "This method should be used only when auto-commit mode has been disabled."
@@ -644,7 +640,9 @@ public abstract class Connection implements java.sql.Connection,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "rollback");
             }
+            
             checkForInvalidXAStateOnCommitOrRollback();
+
             checkForClosedConnection();
             flowRollback();
         }
@@ -713,8 +711,7 @@ public abstract class Connection implements java.sql.Connection,
         // The following precondition matches CLI semantics, see SQLDisconnect()
         if (!autoCommit_ && inUnitOfWork_ && !allowCloseInUOW_()) {
             throw new SqlException(agent_.logWriter_,
-                    "java.sql.Connection.close() requested while a transaction is in progress on the connection." +
-                    "The transaction remains active, and the connection cannot be closed.");
+                    new MessageId (SQLState.CANNOT_CLOSE_ACTIVE_XA_CONNECTION));                   
         }
     }
 
@@ -917,8 +914,8 @@ public abstract class Connection implements java.sql.Connection,
             case java.sql.Connection.TRANSACTION_NONE:
             default:
                 throw new SqlException(agent_.logWriter_,
-                        "Transaction isolation level " + level + " is an invalid argument for java.sql.Connection.setTransactionIsolation()." +
-                        " See Javadoc specification for a list of valid arguments.", "XJ045");
+                    new MessageId (SQLState.UNIMPLEMENTED_ISOLATION_LEVEL),
+                    new Integer(level));                        
             }
             if (setTransactionIsolationStmt == null  || 
             		!(setTransactionIsolationStmt.openOnClient_ &&
@@ -1183,7 +1180,9 @@ public abstract class Connection implements java.sql.Connection,
                 agent_.logWriter_.traceEntry(this, "setTypeMap", map);
             }
             checkForClosedConnection();
-            throw new SqlException(agent_.logWriter_, "Connection.setTypeMap is not supported");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId (SQLState.NOT_IMPLEMENTED),
+                    "setTypeMap");
         }
         catch ( SqlException se )
         {
@@ -1246,7 +1245,8 @@ public abstract class Connection implements java.sql.Connection,
             checkForClosedConnection();
             if (autoCommit_) // Throw exception if auto-commit is on
             {
-                throw new SqlException(agent_.logWriter_, "Cannot set savepoint when in auto-commit mode.");
+                throw new SqlException(agent_.logWriter_, 
+                        new MessageId (SQLState.NO_SAVEPOINT_WHEN_AUTO));
             } 
             // create an un-named savepoint.
             if ((++dncGeneratedSavepointId_) < 0) {
@@ -1270,10 +1270,12 @@ public abstract class Connection implements java.sql.Connection,
             checkForClosedConnection();
             if (name == null) // Throw exception if savepoint name is null
             {
-                throw new SqlException(agent_.logWriter_, "Named savepoint needs a none-null name.");
+                throw new SqlException(agent_.logWriter_, 
+                        new MessageId (SQLState.NULL_NAME_FOR_SAVEPOINT));
             } else if (autoCommit_) // Throw exception if auto-commit is on
             {
-                throw new SqlException(agent_.logWriter_, "Cannot set savepoint when in auto-commit mode.");
+                throw new SqlException(agent_.logWriter_, 
+                        new MessageId (SQLState.NO_SAVEPOINT_WHEN_AUTO));
             }
             // create a named savepoint.
             Object s = setSavepointX(new Savepoint(agent_, name));
@@ -1327,20 +1329,22 @@ public abstract class Connection implements java.sql.Connection,
             checkForClosedConnection();
             if (savepoint == null) // Throw exception if savepoint is null
             {
-                throw new SqlException(agent_.logWriter_, "Cannot rollback to a null savepoint.");
+                throw new SqlException(agent_.logWriter_, 
+                		new MessageId (SQLState.XACT_SAVEPOINT_RELEASE_ROLLBACK_FAIL));
             } else if (autoCommit_) // Throw exception if auto-commit is on
             {
-                throw new SqlException(agent_.logWriter_, "Cannot rollback to a savepoint when in auto-commit mode.");
+                throw new SqlException(agent_.logWriter_, 
+                		new MessageId (SQLState.NO_SAVEPOINT_ROLLBACK_OR_RELEASE_WHEN_AUTO));
             } 
             // Only allow to rollback to a savepoint from the connection that create the savepoint.
             try {
                 if (this != ((Savepoint) savepoint).agent_.connection_) {
                     throw new SqlException(agent_.logWriter_,
-                            "Rollback to a savepoint not created by this connection.");
+                    		new MessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
                 }
             } catch (java.lang.ClassCastException e) { // savepoint is not an instance of am.Savepoint
                 throw new SqlException(agent_.logWriter_,
-                        "Rollback to a savepoint not created by this connection.");
+                		new MessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
             }
 
             // Construct and flow a savepoint rollback statement to server.
@@ -1385,20 +1389,23 @@ public abstract class Connection implements java.sql.Connection,
             checkForClosedConnection();
             if (savepoint == null) // Throw exception if savepoint is null
             {
-                throw new SqlException(agent_.logWriter_, "Cannot release a null savepoint.");
+                throw new SqlException(agent_.logWriter_, 
+                        new MessageId (SQLState.XACT_SAVEPOINT_RELEASE_ROLLBACK_FAIL));
             } else if (autoCommit_) // Throw exception if auto-commit is on
             {
-                throw new SqlException(agent_.logWriter_, "Cannot release a savepoint when in auto-commit mode.");
+                throw new SqlException(agent_.logWriter_, 
+                        new MessageId (SQLState.NO_SAVEPOINT_ROLLBACK_OR_RELEASE_WHEN_AUTO));
             } 
             // Only allow to release a savepoint from the connection that create the savepoint.
             try {
                 if (this != ((Savepoint) savepoint).agent_.connection_) {
-                    throw new SqlException(agent_.logWriter_,
-                            "Cannot release a savepoint that was not created by this connection.");
+                    throw new SqlException(agent_.logWriter_, new MessageId 
+                            (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
                 }
             } catch (java.lang.ClassCastException e) { // savepoint is not an instance of am.Savepoint
-                throw new SqlException(agent_.logWriter_,
-                        "Cannot release a savepoint that was not created by this connection.");
+                    throw new SqlException(agent_.logWriter_, new MessageId 
+                            (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
+
             }
 
             // Construct and flow a savepoint release statement to server.
@@ -1609,7 +1616,9 @@ public abstract class Connection implements java.sql.Connection,
                 agent_.logWriter_.traceEntry(this, "prepareStatement", sql, columnIndexes);
             }
             checkForClosedConnection();
-            throw new SqlException(agent_.logWriter_, "Driver not capable");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.NOT_IMPLEMENTED),
+                "prepareStatement(String, int[])");
         }
         catch ( SqlException se )
         {
@@ -1866,7 +1875,8 @@ public abstract class Connection implements java.sql.Connection,
     protected void checkForClosedConnection() throws SqlException {
         if (!open_) {
             agent_.checkForDeferredExceptions();
-            throw new SqlException(agent_.logWriter_, "invalid operation: connection closed");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId (SQLState.NO_CURRENT_CONNECTION));
         } else {
             agent_.checkForDeferredExceptions();
         }
@@ -1875,13 +1885,15 @@ public abstract class Connection implements java.sql.Connection,
     void checkAutoGeneratedKeysParameters(int autoGeneratedKeys, String[] columnNames) throws SqlException {
         if (autoGeneratedKeys != java.sql.Statement.NO_GENERATED_KEYS &&
                 autoGeneratedKeys != java.sql.Statement.RETURN_GENERATED_KEYS) {
-            throw new SqlException(agent_.logWriter_, "Invalid argument: " +
-                    "Statement auto-generated keys value " + autoGeneratedKeys +
-                    " is invalid.");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId(SQLState.BAD_AUTO_GEN_KEY_VALUE), 
+            		new Integer (autoGeneratedKeys));
         }
 
         if (columnNames != null) {
-            throw new SqlException(agent_.logWriter_, "Driver not capable");
+            throw new SqlException(agent_.logWriter_,
+            		new MessageId (SQLState.NOT_IMPLEMENTED),
+                    "getAutoGeneratedKeys(columnNames == null)");
         }
 
     }

@@ -117,10 +117,10 @@ public class SqlException extends Exception implements Diagnosable {
         
         this.setThrowable(cause);
     }
-
-    public SqlException(LogWriter logWriter, MessageId messageId, Throwable cause)
-    {
-        this(logWriter,messageId,null,cause);
+ 
+    public SqlException (LogWriter logwriter, 
+            MessageId msgid, Throwable cause) {
+        this (logwriter, msgid, null, cause);
     }
     
     public SqlException(LogWriter logwriter, MessageId msgid, Object[] args)
@@ -136,6 +136,12 @@ public class SqlException extends Exception implements Diagnosable {
     public SqlException(LogWriter logwriter, MessageId msgid, Object arg1)
     {
         this(logwriter, msgid, new Object[] { arg1 });
+    }
+    
+    public SqlException(LogWriter logwriter, MessageId msgid, 
+            Object arg1, Throwable cause)
+    {
+        this(logwriter, msgid, new Object[] { arg1 }, cause);
     }
     
     public SqlException(LogWriter logwriter,
@@ -226,7 +232,7 @@ public class SqlException extends Exception implements Diagnosable {
     {
         wrappedException_ = wrapme;
     }
-        
+            
     // Constructors for backward-compatibility while we're internationalizng
     // all the messages
     public SqlException(LogWriter logWriter) {
