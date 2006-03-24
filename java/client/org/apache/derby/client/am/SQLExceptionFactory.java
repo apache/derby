@@ -35,4 +35,20 @@ public class SQLExceptionFactory {
         return sqlException.getSQLException();
     }
     
+    /**
+     * creates SQLException initialized with all the params received from the 
+     * caller. This method will be overwritten to support jdbc version specific 
+     * exception class.
+     * @param message 
+     * @param sqlState SQL 
+     * @param errCode derby error code
+     * @param next next excewption for chaining
+     * @param cause root cause of the exception
+     * @return SQLException
+     */
+    public SQLException getSQLException (String message, String sqlState, 
+            int errCode) {
+        return new SQLException (message, sqlState, errCode);           
+    }    
 }
+ 

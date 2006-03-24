@@ -85,6 +85,11 @@ public class SqlException extends Exception implements Diagnosable {
     public static String CLIENT_MESSAGE_RESOURCE_NAME =
         "org.apache.derby.loc.clientmessages";
     
+    //SQLException factory initialised with default factory
+    //It will be over written by the SQLException factory of the 
+    //supported jdbc version    
+    protected static SQLExceptionFactory 
+            exceptionFactory = new SQLExceptionFactory ();
     
     /** 
      *  The message utility instance we use to find messages
@@ -290,7 +295,7 @@ public class SqlException extends Exception implements Diagnosable {
                         
         // When we have support for JDBC 4 SQLException subclasses, this is
         // where we decide which exception to create
-        SQLException sqle = new SQLException(getMessage(), getSQLState(), 
+        SQLException sqle = exceptionFactory.getSQLException(getMessage(), getSQLState(), 
             getErrorCode());
 
         // If we're in a runtime that supports chained exceptions, set the cause 
@@ -431,6 +436,14 @@ public class SqlException extends Exception implements Diagnosable {
         } else {
             return new SqlException(logWriter, getMessage(), getSQLState(), getErrorCode()); // client error
         }
+    }
+    
+    /**
+     * Sets the exceptionFactory to be used for creating SQLException
+     * @param factory SQLExceptionFactory
+     */
+    public static void setExceptionFactory (SQLExceptionFactory factory) {
+        exceptionFactory = factory;
     }
 }
 

@@ -29,6 +29,7 @@ import org.apache.derby.client.am.PreparedStatement;
 import org.apache.derby.client.am.PreparedStatement40;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.Agent;
+import org.apache.derby.client.am.SQLExceptionFactory40;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Cursor;
@@ -40,6 +41,14 @@ import java.sql.SQLException;
  * and returns the JDBC4.0 specific classes
  */
 public class ClientJDBCObjectFactoryImpl40 implements ClientJDBCObjectFactory{
+    
+    /**
+     * Sets SQLExceptionFactpry40  om SqlException to make sure jdbc40 
+     * exception and sub classes are thrown when running with jdbc4.0 support
+     */
+    public ClientJDBCObjectFactoryImpl40 () {
+        SqlException.setExceptionFactory (new SQLExceptionFactory40 ());
+    }
     /**
      * Returns an instance of org.apache.derby.client.ClientPooledConnection40 
      */
