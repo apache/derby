@@ -3152,6 +3152,13 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * soft upgrade mode. Because of this, if the database is in 
 	 * soft upgrade mode, get the queries from metadata.properties
 	 * file rather than from the system tables.
+	 *
+	 * Getting queries from metadata.properties might cause problems
+	 * if system catalogs have been changed between versions either by
+	 * addition of columns or have new catalogs. To continue
+	 * to support soft upgrade from older versions of database, find
+	 * query that most closely matches database dictionary version.
+	 *
 	 * @param queryName Name of the metadata query for which we need
 	 * a prepared statement
 	 * @return PreparedStatement
@@ -3168,7 +3175,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			try {
 				//Can't use stored prepared statements because we are in soft upgrade
 				//mode and hence need to get metadata sql from metadata.properties file 
-				String queryText = getQueryDescriptions().getProperty(queryName);
+				String queryText = getQueryFromDescription(queryName);
 				s = getEmbedConnection().prepareMetaDataStatement(queryText);
 			} catch (Throwable t) {
 				throw handleException(t);
@@ -3176,6 +3183,42 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		}
 		return s;
 	}	
+
+	/*
+	 * Given a queryName, find closest match in queryDescriptions. This method
+	 * should be called in soft-upgrade mode only, where current software version
+	 * doesn't match dictionary version. For these cases, there may be
+	 * multiple entries in queryDescriptions for given queryName. Find a
+	 * version of the query that closely matches dictionary version.
+	 *
+	 * This method is currently coded to handle two specific queries,
+	 * getColumnPrivileges and getTablePrivileges. Derby databases that are 10.1
+	 * or earlier will not have new system tables added for 10.2 for privileges.
+	 * 
+	 * It should be possible to automate finding closest match by generating
+	 * all Major_Minor versions between software version and dictionary version
+	 * and try each one from Dictionary version to current version. Since only
+	 * needed for two queries, overhead may not be worth it yet.
+	 */
+	private String getQueryFromDescription(String queryName)
+		throws StandardException
+	{
+		DataDictionary dd = getLanguageConnectionContext().getDataDictionary();
+
+		// If dictionary version is below 10.2, special case
+		// getColumnPrivileges and getTablePrivileges since new system tables
+		// for privileges wouldn't be present.
+		if (!dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_2, null))
+		{
+			if (queryName.equals("getColumnPrivileges"))
+				queryName = "getColumnPrivileges_10_1";
+
+			if (queryName.equals("getTablePrivileges"))
+				queryName = "getTablePrivileges_10_1";
+		}
+
+		return getQueryDescriptions().getProperty(queryName);
+	}
 
 	/*
 	** Given a SPS name and a query text it returns a 
