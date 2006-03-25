@@ -27,7 +27,9 @@ import java.sql.SQLInvalidAuthorizationSpecException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLTransactionRollbackException;
 import java.sql.SQLTransientConnectionException;
+import java.sql.SQLFeatureNotSupportedException;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * SQLExceptionFactory40 overwrites getSQLException method
@@ -39,6 +41,7 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
     /**
      * overwrites super class method to create JDBC4 exceptions      
      * SQLSTATE CLASS (prefix)     Exception
+     * 0A                          java.sql.SQLFeatureNotSupportedException
      * 08                          java.sql.SQLTransientConnectionException
      * 22                          java.sql.SQLDataException
      * 28                          java.sql.SQLInvalidAuthorizationSpecException
@@ -61,25 +64,27 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
             SQLException next, int severity, Throwable t, Object[] args) {
         String sqlState = StandardException.getSQLStateFromIdentifier(messageId);
         SQLException ex = new SQLException(message, sqlState, severity, t);
-        if (sqlState.startsWith("08")) {
+        if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX)) {
             //none of the sqlstate supported by derby belongs to
             //NonTransientConnectionException
             ex = new SQLTransientConnectionException(message, sqlState,
                     severity, t);
-        } else if (sqlState.startsWith("22")) {
+        } else if (sqlState.startsWith(SQLState.SQL_DATA_PREFIX)) {
             ex = new SQLDataException(message, sqlState, severity, t);
-        } else if (sqlState.startsWith("23")) {
+        } else if (sqlState.startsWith(SQLState.INTEGRITY_VIOLATION_PREFIX)) {
             ex = new SQLIntegrityConstraintViolationException(message, sqlState,
                     severity, t);
-        } else if (sqlState.startsWith("28")) {
+        } else if (sqlState.startsWith(SQLState.AUTHORIZATION_PREFIX)) {
             ex = new SQLInvalidAuthorizationSpecException(message, sqlState,
                     severity, t);
         }        
-        else if (sqlState.startsWith("40")) {
+        else if (sqlState.startsWith(SQLState.TRANSACTION_PREFIX)) {
             ex = new SQLTransactionRollbackException(message, sqlState,
                     severity, t);
-        } else if (sqlState.startsWith("42")) {
+        } else if (sqlState.startsWith(SQLState.LSE_COMPILATION_PREFIX)) {
             ex = new SQLSyntaxErrorException(message, sqlState, severity, t);
+        } else if (sqlState.startsWith(SQLState.UNSUPPORTED_PREFIX)) {
+            ex = new SQLFeatureNotSupportedException(message, sqlState, severity, t);
         }
         
         if (next != null) {

@@ -19,6 +19,8 @@
 */
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -54,24 +56,24 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
         SQLException ex = null;
         if (sqlState == null) {
             ex = new SQLException(message, sqlState, errCode); 
-        } else if (sqlState.startsWith("08")) {
+        } else if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX)) {
             //none of the sqlstate supported by derby belongs to
             //NonTransientConnectionException
             ex = new SQLTransientConnectionException(message, sqlState, errCode);
-        } else if (sqlState.startsWith("22")) {
+        } else if (sqlState.startsWith(SQLState.SQL_DATA_PREFIX)) {
             ex = new SQLDataException(message, sqlState, errCode);
-        } else if (sqlState.startsWith("23")) {
+        } else if (sqlState.startsWith(SQLState.INTEGRITY_VIOLATION_PREFIX)) {
             ex = new SQLIntegrityConstraintViolationException(message, sqlState,
                     errCode);
-        } else if (sqlState.startsWith("28")) {
+        } else if (sqlState.startsWith(SQLState.AUTHORIZATION_PREFIX)) {
             ex = new SQLInvalidAuthorizationSpecException(message, sqlState,
                     errCode);
-        } else if (sqlState.startsWith("40")) {
+        } else if (sqlState.startsWith(SQLState.TRANSACTION_PREFIX)) {
             ex = new SQLTransactionRollbackException(message, sqlState,
                     errCode);
-        } else if (sqlState.startsWith("42")) {
+        } else if (sqlState.startsWith(SQLState.LSE_COMPILATION_PREFIX)) {
             ex = new SQLSyntaxErrorException(message, sqlState, errCode);
-        } else if (sqlState.startsWith ("0A")) {
+        } else if (sqlState.startsWith (SQLState.UNSUPPORTED_PREFIX)) {
             ex = new SQLFeatureNotSupportedException(message, sqlState, 
                     errCode);
         } else {

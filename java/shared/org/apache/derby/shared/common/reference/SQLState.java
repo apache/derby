@@ -427,6 +427,8 @@ public interface SQLState {
 	/*
 	** RawStore - Transactions.Basic transaction exceptions
 	*/
+	String TRANSACTION_PREFIX="40";
+
 	String XACT_PROTOCOL_VIOLATION                              = "40XT0";
 	String XACT_COMMIT_EXCEPTION                                = "40XT1";
 	String XACT_ROLLBACK_EXCEPTION                              = "40XT2";
@@ -562,6 +564,7 @@ public interface SQLState {
 	/*
 	** Connectivity - Connection Exceptions: 08XXX
 	*/
+	String CONNECTIVITY_PREFIX="08";
 
 	String	ERROR_CLOSE = "08003";
 
@@ -664,6 +667,11 @@ public interface SQLState {
 	// 40XC0 - 40XCZ
 	String LANG_DEAD_STATEMENT                                         = "40XC0";
 
+	/*
+	** SQL Data exceptions
+	*/
+	String SQL_DATA_PREFIX="22";
+	
 	String LANG_MISSING_PARMS                                          = "07000";
 	String LANG_SCALAR_SUBQUERY_CARDINALITY_VIOLATION                  = "21000";
 	String LANG_STRING_TRUNCATION                                      = "22001";
@@ -686,6 +694,13 @@ public interface SQLState {
 	String LANG_INVALID_ESCAPE_SEQUENCE                                = "22025";
 	String LANG_INVALID_TRIM_SET                                       = "22027";
 	String LANG_ESCAPE_IS_NULL                                  	   = "22501";
+
+
+	/*
+	** Integrity violations.
+	*/
+	String INTEGRITY_VIOLATION_PREFIX="23";
+	
 	String LANG_NULL_INTO_NON_NULL                                     = "23502";
 	String LANG_DUPLICATE_KEY_CONSTRAINT                               = "23505";
 	String LANG_FK_VIOLATION                                           = "23503";
@@ -1338,6 +1353,8 @@ public interface SQLState {
 	/*
 		SQL standard 0A - feature not supported
 	*/
+	String UNSUPPORTED_PREFIX="0A";
+
     String NOT_IMPLEMENTED                                          = "0A000.S";
     String JDBC_METHOD_NOT_IMPLEMENTED                              = "0AX01.S";
 
@@ -1346,6 +1363,8 @@ public interface SQLState {
 	/*
 	** Authorization and Authentication
 	*/
+	String AUTHORIZATION_PREFIX="28";
+	
 	String AUTH_DATABASE_CONNECTION_REFUSED                            = "04501.C";
 	String AUTH_SET_CONNECTION_READ_ONLY_IN_ACTIVE_XACT                = "25501";
 	String AUTH_WRITE_WITH_READ_ONLY_CONNECTION                        = "25502";
