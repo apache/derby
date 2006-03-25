@@ -41,6 +41,7 @@ import org.apache.derby.client.am.Connection;
 import org.apache.derby.client.net.NetConfiguration;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.ClientDataSourceFactory;
+import org.apache.derby.shared.common.reference.Attribute;
 
 /**
  * Base class for client-side DataSource implementations.
@@ -188,7 +189,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static String propertyDefault_user = "APP";
 
     public static String getUser(Properties properties) {
-        String userString = properties.getProperty(propertyKey_user);
+        String userString = properties.getProperty(Attribute.USERNAME_ATTR);
         return parseString(userString, propertyDefault_user);
     }
 
@@ -251,7 +252,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      */
     public static short getSecurityMechanism(Properties properties) {
         short secmec;
-        String securityMechanismString = properties.getProperty(propertyKey_securityMechanism);
+        String securityMechanismString = properties.getProperty(Attribute.CLIENT_SECURITY_MECHANISM);
         if ( securityMechanismString != null )
         {
             // security mechanism has been set, do not override, but instead return
@@ -265,7 +266,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
             // properties. Hence, do an upgrade of security mechanism if possible
             // The logic for upgrade of security mechanism uses information about 
             // if password is available or not, so pass this information also.
-            String passwordString = properties.getProperty(propertyKey_password);
+            String passwordString = properties.getProperty(Attribute.PASSWORD_ATTR);
             secmec = getUpgradedSecurityMechanism(passwordString);
         }
         return secmec;
@@ -313,7 +314,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
 
     public static boolean getRetrieveMessageText(Properties properties) {
-        String retrieveMessageTextString = properties.getProperty(propertyKey_retrieveMessageText);
+        String retrieveMessageTextString = properties.getProperty(Attribute.CLIENT_RETIEVE_MESSAGE_TEXT);
         return parseBoolean(retrieveMessageTextString, propertyDefault_retrieveMessageText);
     }
 
@@ -323,7 +324,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static String propertyKey_traceFile = "traceFile";
 
     public static String getTraceFile(Properties properties) {
-        return properties.getProperty(propertyKey_traceFile);
+        return properties.getProperty(Attribute.CLIENT_TRACE_FILE);
     }
 
     // ---------------------------- traceDirectory -----------------------------------
@@ -334,7 +335,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static String propertyKey_traceDirectory = "traceDirectory";
 
     public static String getTraceDirectory(Properties properties) {
-        return properties.getProperty(propertyKey_traceDirectory);
+        return properties.getProperty(Attribute.CLIENT_TRACE_DIRECTORY);
     }
 
     // ---------------------------- traceFileAppend -----------------------------------
@@ -344,7 +345,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static String propertyKey_traceFileAppend = "traceFileAppend";
 
     public static boolean getTraceFileAppend(Properties properties) {
-        String traceFileAppendString = properties.getProperty(propertyKey_traceFileAppend);
+        String traceFileAppendString = properties.getProperty(Attribute.CLIENT_TRACE_APPEND);
         return parseBoolean(traceFileAppendString, propertyDefault_traceFileAppend);
     }
 
@@ -670,7 +671,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
             throw new SqlException(null, e, "Invalid attribute syntax: " + attributeString);
         }
-        checkBoolean(augmentedProperties, propertyKey_retrieveMessageText);
+        checkBoolean(augmentedProperties, Attribute.CLIENT_RETIEVE_MESSAGE_TEXT);
         return augmentedProperties;
 
     }
@@ -936,25 +937,25 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
             return;
         }
         
-        if (prop.containsKey(propertyKey_user)) {
+        if (prop.containsKey(Attribute.USERNAME_ATTR)) {
             setUser(getUser(prop));
         }
-        if (prop.containsKey(propertyKey_securityMechanism)) {
+        if (prop.containsKey(Attribute.CLIENT_SECURITY_MECHANISM)) {
             setSecurityMechanism(getSecurityMechanism(prop));
         }
-        if (prop.containsKey(propertyKey_traceFile)) {
+        if (prop.containsKey(Attribute.CLIENT_TRACE_FILE)) {
             setTraceFile(getTraceFile(prop));
         }
-        if (prop.containsKey(propertyKey_traceDirectory)) {
+        if (prop.containsKey(Attribute.CLIENT_TRACE_DIRECTORY)) {
             setTraceDirectory(getTraceDirectory(prop));
         }
-        if (prop.containsKey(propertyKey_traceFileAppend)) {
+        if (prop.containsKey(Attribute.CLIENT_TRACE_APPEND)) {
             setTraceFileAppend(getTraceFileAppend(prop));
         }
-        if (prop.containsKey(propertyKey_securityMechanism)) {
+        if (prop.containsKey(Attribute.CLIENT_SECURITY_MECHANISM)) {
             setSecurityMechanism(getSecurityMechanism(prop));
         }
-        if (prop.containsKey(propertyKey_retrieveMessageText)) {
+        if (prop.containsKey(Attribute.CLIENT_RETIEVE_MESSAGE_TEXT)) {
             setRetrieveMessageText(getRetrieveMessageText(prop));
         }
     }

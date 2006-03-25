@@ -31,6 +31,7 @@ import org.apache.derby.client.am.Version;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.client.net.ClientJDBCObjectFactoryImpl;
 import org.apache.derby.client.resources.ResourceKeys;
+import org.apache.derby.shared.common.reference.Attribute;
 
 
 public class ClientDriver implements java.sql.Driver {
@@ -164,8 +165,8 @@ public class ClientDriver implements java.sql.Driver {
 		for (Enumeration keys = augmentedProperties.keys(); keys.hasMoreElements() ;)
 		{
 			String key = (String) keys.nextElement();
-			if (key.equals(ClientDataSource.propertyKey_user) || 
-				key.equals(ClientDataSource.propertyKey_password))
+			if (key.equals(Attribute.USERNAME_ATTR) || 
+				key.equals(Attribute.PASSWORD_ATTR))
 				continue;
 			longDatabase.append(";" + key + "=" + augmentedProperties.getProperty(key));
 		}
@@ -197,12 +198,12 @@ public class ClientDriver implements java.sql.Driver {
         }
 
         driverPropertyInfo[0] =
-                new java.sql.DriverPropertyInfo(ClientDataSource.propertyKey_user,
-                        properties.getProperty(ClientDataSource.propertyKey_user, ClientDataSource.propertyDefault_user));
+                new java.sql.DriverPropertyInfo(Attribute.USERNAME_ATTR,
+                        properties.getProperty(Attribute.USERNAME_ATTR, ClientDataSource.propertyDefault_user));
 
         driverPropertyInfo[1] =
-                new java.sql.DriverPropertyInfo(ClientDataSource.propertyKey_password,
-                        properties.getProperty(ClientDataSource.propertyKey_password));
+                new java.sql.DriverPropertyInfo(Attribute.PASSWORD_ATTR,
+                        properties.getProperty(Attribute.PASSWORD_ATTR));
 
         driverPropertyInfo[0].description =
                 ResourceUtilities.getResource(ResourceKeys.propertyDescription__user);

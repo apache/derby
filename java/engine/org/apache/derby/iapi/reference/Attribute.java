@@ -39,6 +39,15 @@ package org.apache.derby.iapi.reference;
 	<P>
 	This class has no methods, all it contains are String's which by
 	are public, static and final since they are declared in an interface.
+    
+    <P>
+    At some point this class should be replaced by
+    org.apache.derby.shared.common.reference.Attribute.
+    The issue is that this class is used by ij to check attributes,
+    ij uses reflection on this class to get the list of valid attributes.
+    The expanded class in shared has the client attributes as well.
+    Ideally ij would work of an explicit list of attributes and not
+    infer the set from reflection. See DERBY-1151
 */
 
 public interface Attribute {
