@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.util.Properties;
 
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.jdbc.InternalDriver;
 
 public class EmbedConnection40 extends EmbedConnection30 {
@@ -70,10 +71,31 @@ public class EmbedConnection40 extends EmbedConnection30 {
         throw Util.notImplemented();
     }
     
+    /**
+     * Checks if the connection has not been closed and is still valid. 
+     * The validity is checked by checking that the connection is not closed.
+     *
+     * @param timeout This should be the time in seconds to wait for the 
+     * database operation used to validate the connection to complete 
+     * (according to the JDBC4 JavaDoc). This is currently not supported/used.
+     *
+     * @return true if the connection is valid, false otherwise
+     * @exception SQLException if the parameter value is illegal or if a
+     * database error has occured
+     */
     public boolean isValid(int timeout) throws SQLException {
-        throw Util.notImplemented();
+        // Validate that the timeout has a legal value
+        if (timeout < 0) {
+            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,
+                                              new Integer(timeout), "timeout",
+                                              "java.sql.Connection.isValid");
+        }
+
+        // Use the closed status for the connection to determine if the
+        // connection is valid or not
+        return !isClosed();
     }
-    
+
     public void setClientInfo(String name, String value)
     throws SQLException{
         throw Util.notImplemented();

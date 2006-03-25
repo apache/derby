@@ -29,12 +29,14 @@ import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Statement;
 import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.tools.ij;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -46,6 +48,10 @@ import org.apache.derby.shared.common.reference.SQLState;
 public class TestConnectionMethods {
     Connection conn = null;
     
+    /**
+     * Constructor for an object that is used for running test of the
+     * new connection methods defined by JDBC 4.
+     */
     public TestConnectionMethods(Connection connIn) {
         conn = connIn;
     }
@@ -173,8 +179,132 @@ public class TestConnectionMethods {
         }
         
     }
-    
-    void t_isValid() {
+
+    /**
+     * Test the Connection.isValid method in the embedded driver.
+     */
+    void t_isValid_Embed() {
+
+        /*
+         * Test illegal parameter values
+         */
+        try {
+            conn.isValid(-1);  // Negative timeout
+            System.out.println("FAIL: isValid(-1): " + 
+                               "Invalid argument execption not thrown");
+        } catch (SQLException e) {
+            if(!StandardException.getSQLStateFromIdentifier(
+                SQLState.INVALID_API_PARAMETER).equals(e.getSQLState())) {
+                System.out.println("FAIL: isValid(-1): Unexpected SQLException" +
+                                   e);
+            }
+        }
+
+        /*
+         * Test with no timeout
+         */
+        try {
+            if (!conn.isValid(0)) {
+                System.out.println("FAIL: isValid(0): returned false");
+            }
+        } catch(Exception e) {
+            System.out.println("FAIL: isValid(0): Unexpected exception: " + e);
+        }
+
+        /*
+         * Test with a valid timeout
+         */
+        try {
+            if (!conn.isValid(1)) {
+                System.out.println("FAIL: isValid(1): returned false");
+            }
+        } catch(Exception e) {
+            System.out.println("FAIL: isValid(1): Unexpected exception: " + e);
+        }
+
+        /*
+         * Test on a closed connection
+         */
+        try {
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("FAIL: close failed: Unexpected exception: " + e);
+        }
+
+        try {
+            if (conn.isValid(0)) {
+                System.out.println("FAIL: isValid(0) on closed connection: " +
+                                   "returned true");
+            }
+        } catch(Exception e) {
+            System.out.println("FAIL: isValid(0) on closed connection: " + 
+                               "Unexpected exception: " + e);
+        }
+
+        /*
+         * Open a new connection and test it
+         */
+        try {
+            conn = ij.startJBMS();
+        } catch (Exception e) {
+            System.out.println("FAIL: failed to open new connection: " +
+                               "Unexpected exception: " + e);
+        }
+
+        try {
+            if (!conn.isValid(0)) {
+                System.out.println("FAIL: isValid(0) on open connection: " + 
+                                   "returned false");
+            }
+        } catch(Exception e) {
+            System.out.println("FAIL: isValid(0) on open connection: " + 
+                               "Unexpected exception: " + e);
+        }
+
+        /*
+         * Test on stopped DB: stop Derby
+         */
+        try {
+            DriverManager.getConnection("jdbc:derby:;shutdown=true");
+        } catch(SQLException e) {
+            // Ignore any exceptions from shutdown
+        }
+
+        /*
+         * Test if the connection is still valid
+         */
+        try {
+            if (conn.isValid(0)) {
+                System.out.println("FAIL: isValid(0) on stopped database: " + 
+                                   "returned true");
+            }
+        } catch(Exception e) {
+            System.out.println("FAIL: isValid(0) on a stopped database: " + 
+                               "Unexpected exception: " + e);
+        } 
+
+        /*
+         * Start Derby by getting a new connection and check that
+         * the new connection is valid.
+         */
+        try {
+            conn = ij.startJBMS();
+        } catch (Exception e) {
+            System.out.println("FAIL: failed to re-start database: " +
+                               "Unexpected exception: " + e);
+        }
+        try {
+            if (!conn.isValid(0)) {
+                System.out.println("FAIL: isValid(0) on new connection: " + 
+                                   "returned false");
+            }
+        } catch(Exception e) {
+            System.out.println("FAIL: isValid(0) on new connection: " + 
+                               "Unexpected exception: " + e);
+        }
+    }
+
+    void t_isValid_Client() {
         boolean ret;
         try {
             ret = conn.isValid(0);
@@ -249,7 +379,7 @@ public class TestConnectionMethods {
         t_createBlob_Client();
         t_createNClob();
         t_createSQLXML();
-        t_isValid();
+        t_isValid_Client();
         t_setClientInfo1();
         t_setClientInfo2();
         t_getClientInfo1();
@@ -261,7 +391,7 @@ public class TestConnectionMethods {
         t_createBlob();
         t_createNClob();
         t_createSQLXML();
-        t_isValid();
+        t_isValid_Embed();
         t_setClientInfo1();
         t_setClientInfo2();
         t_getClientInfo1();
