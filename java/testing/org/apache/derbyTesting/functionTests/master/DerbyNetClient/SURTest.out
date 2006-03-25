@@ -1,16 +1,16 @@
-.F.F....F.F.F.F.F...E.E.E.E.E.E.E.E......java.sql.SQLException: invalid operation: connection closed
-Caused by: org.apache.derby.client.am.SqlException: invalid operation: connection closed
+.F.F....F.F.F.F.F...E.E.E.E.E.E.E.E......java.sql.SQLException: No current connection.
+Caused by: org.apache.derby.client.am.SqlException: No current connection.
 	... 17 more
 E.E.F.E.E.E.E.F.F....F.F.F.
-F.F...E.E.E.E.E.E.E.E......java.sql.SQLException: invalid operation: connection closed
-Caused by: org.apache.derby.client.am.SqlException: invalid operation: connection closed
+F.F...E.E.E.E.E.E.E.E......java.sql.SQLException: No current connection.
+Caused by: org.apache.derby.client.am.SqlException: No current connection.
 	... 17 more
 E.E.F.E.E.E.E.F.F....F.F.F.F.F...E.E.E.E.E.
-E.E.E......java.sql.SQLException: invalid operation: connection closed
-Caused by: org.apache.derby.client.am.SqlException: invalid operation: connection closed
+E.E.E......java.sql.SQLException: No current connection.
+Caused by: org.apache.derby.client.am.SqlException: No current connection.
 	... 17 more
-E.E.F.E.E.E.E.F.F....F.F.F.F.F...E.E.E.E.E.E.E.E......java.sql.SQLException: invalid operation: connection closed
-Caused by: org.apache.derby.client.am.SqlException: invalid operation: connection closed
+E.E.F.E.E.E.E.F.F....F.F.F.F.F...E.E.E.E.E.E.E.E......java.sql.SQLException: No current connection.
+Caused by: org.apache.derby.client.am.SqlException: No current connection.
 	... 17 more
 E.
 E.F.E.E.E.E
