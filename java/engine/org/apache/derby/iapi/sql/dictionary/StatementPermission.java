@@ -20,7 +20,7 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.error.StandardException;
 
 /**
@@ -30,15 +30,13 @@ import org.apache.derby.iapi.error.StandardException;
 public abstract class StatementPermission
 {
 	/**
-	 * @param tc the TransactionController
-	 * @param dd A DataDictionary
-	 * @param authorizationId A user
+	 * @param lcc				LanguageConnectionContext
+	 * @param authorizationId	AuthorizationId
 	 * @param forGrant
 	 *
 	 * @exception StandardException if the permission has not been granted
 	 */
-	public abstract void check( TransactionController tc,
-								DataDictionary dd,
+	public abstract void check( LanguageConnectionContext lcc,
 								String authorizationId,
 								boolean forGrant) throws StandardException;
 }

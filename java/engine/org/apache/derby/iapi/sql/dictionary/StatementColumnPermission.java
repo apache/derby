@@ -25,7 +25,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 /**
  * This class describes a column permission used (required) by a statement.
@@ -81,19 +81,15 @@ public class StatementColumnPermission extends StatementTablePermission
 	}
 	
 	/**
-	 * @param tc the TransactionController
-	 * @param dd A DataDictionary
-	 * @param authorizationId A user
-	 * @param forGrant
-	 *
-	 * @exception StandardException if the permission has not been granted
+	 * @see StatementPermission#check
 	 */
-	public void check(TransactionController tc,
-					   DataDictionary dd,
+	public void check( LanguageConnectionContext lcc,
 					   String authorizationId,
 					   boolean forGrant)
 		throws StandardException
 	{
+		DataDictionary dd = lcc.getDataDictionary();
+
 		if( hasPermissionOnTable(dd, authorizationId, forGrant))
 			return;
 		FormatableBitSet permittedColumns = null;

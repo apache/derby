@@ -23,6 +23,7 @@ package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -41,18 +42,15 @@ public class StatementRoutinePermission extends StatementPermission
 	}
 									 
 	/**
-	 * @param tc the TransactionController
-	 * @param dd A DataDictionary
-	 * @param authorizationId A user
-	 * @param forGrant
-	 *
-	 * @exception StandardException if the permission has not been granted
+	 * @see StatementPermission#check
 	 */
-	public void check( TransactionController tc,
-					   DataDictionary dd,
+	public void check( LanguageConnectionContext lcc,
 					   String authorizationId,
 					   boolean forGrant) throws StandardException
 	{
+		DataDictionary dd = lcc.getDataDictionary();
+		TransactionController tc = lcc.getTransactionExecute();
+		
 		RoutinePermsDescriptor perms = dd.getRoutinePermissions( routineUUID, authorizationId);
 		if( perms == null || ! perms.getHasExecutePermission())
 			perms = dd.getRoutinePermissions(routineUUID, Authorizer.PUBLIC_AUTHORIZATION_ID);

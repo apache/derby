@@ -151,11 +151,10 @@ implements Authorizer
             if( requiredPermissionsList != null && ! requiredPermissionsList.isEmpty() && 
 				!authorizationId.equals(dd.getAuthorizationDBA()))
             {
-                TransactionController tc = activation.getTransactionController();
                 for( Iterator iter = requiredPermissionsList.iterator();
                      iter.hasNext();)
                 {
-                    ((StatementPermission) iter.next()).check( tc, dd, authorizationId, false);
+                    ((StatementPermission) iter.next()).check( lcc, authorizationId, false);
                 }                    
             }
 		}

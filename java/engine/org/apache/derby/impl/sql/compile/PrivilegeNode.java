@@ -117,10 +117,15 @@ public class PrivilegeNode extends QueryTreeNode
             if( td == null)
                 throw StandardException.newException( SQLState.LANG_TABLE_NOT_FOUND, tableName);
 
-			// Don't allow authorization on SESSION schema tables. Causes confusion if
-			// a temporary table is created later with same name.
-			if (isSessionSchema(sd.getSchemaName()))
-				throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
+            // Don't allow authorization on SESSION schema tables. Causes confusion if
+            // a temporary table is created later with same name.
+            if (isSessionSchema(sd.getSchemaName()))
+                throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
+
+            // GrantRevoke TODO: Need to enable for views later. Disable for now.
+            // Disable grant on VTIs and Synonyms
+            if (td.getTableType() != TableDescriptor.BASE_TABLE_TYPE)
+                throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, tableName.getFullTableName());
 
             specificPrivileges.bind( td);
             dependencyProvider = td;

@@ -24,6 +24,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
@@ -44,18 +45,15 @@ public class StatementSchemaPermission extends StatementPermission
 	}
 
 	/**
-	 * @param tc		the TransactionController
-	 * @param dd 		A DataDictionary
-	 * @param authid	authorizationId
-	 * @param forGrant
-	 *
-	 * @exception StandardException if schema authorization not granted
+	 * @see StatementPermission#check
 	 */
-	public void check(TransactionController tc,
-					   DataDictionary dd,
+	public void check( LanguageConnectionContext lcc,
 					   String authid,
 					   boolean forGrant) throws StandardException
 	{
+		DataDictionary dd =	lcc.getDataDictionary();
+		TransactionController tc = lcc.getTransactionExecute();
+	
 		if (privType == Authorizer.MODIFY_SCHEMA_PRIV)
 		{
 			SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, false);

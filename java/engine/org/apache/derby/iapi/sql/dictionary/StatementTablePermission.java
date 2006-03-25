@@ -23,8 +23,8 @@ package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
  * This class describes a table permission used (required) by a statement.
@@ -36,8 +36,8 @@ public class StatementTablePermission extends StatementPermission
 	protected int privType; // One of Authorizer.SELECT_PRIV, UPDATE_PRIV, etc.
 
 	/**
-	 * Constructor for StatementTablePermission. Creates an instance of table permission requested
-	 * for the given access.
+	 * Constructor for StatementTablePermission. Creates an instance of
+	 * table permission requested for the given access.
 	 * 
 	 * @param tableUUID	UUID of the table
 	 * @param privType	Access privilege requested
@@ -102,19 +102,15 @@ public class StatementTablePermission extends StatementPermission
 	}
 	
 	/**
-	 * @param tc the TransactionController
-	 * @param dd A DataDictionary
-	 * @param authorizationId A user
-	 * @param forGrant
-	 *
-	 * @exception StandardException if the permission has not been granted
+	 * @see StatementPermission#check
 	 */
-	public void check( TransactionController tc,
-					   DataDictionary dd,
+	public void check( LanguageConnectionContext lcc,
 					   String authorizationId,
 					   boolean forGrant)
 		throws StandardException
 	{
+		DataDictionary dd = lcc.getDataDictionary();
+	
 		if( ! hasPermissionOnTable( dd, authorizationId, forGrant))
 		{
 			TableDescriptor td = getTableDescriptor( dd);
