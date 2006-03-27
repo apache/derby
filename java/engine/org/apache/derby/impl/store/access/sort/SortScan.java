@@ -157,6 +157,23 @@ public abstract class SortScan extends Scan
 	}
 
     /**
+    Fetch the row at the current position of the Scan and does not apply the
+    qualifiers.
+    
+    This method will always throw an exception.
+    (SQLState.SORT_IMPROPER_SCAN_METHOD)
+    
+    @see ScanController#fetchWithoutQualify
+    **/
+    public final void fetchWithoutQualify(DataValueDescriptor[] result)
+		throws StandardException
+	{
+        throw StandardException.newException(
+                SQLState.SORT_IMPROPER_SCAN_METHOD);
+
+    }
+    
+    /**
     Close the scan.	@see ScanController#close
     **/
     public void close()

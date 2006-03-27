@@ -4,9 +4,9 @@ WARNING 01J03: Scroll sensitive and scroll insensitive updatable ResultSets are 
 requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
 Make sure that we got CONCUR_READ_ONLY? true
-ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? true
 othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
-deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? true
 JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
 SQL State : XJ083
 Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 

@@ -575,6 +575,7 @@ class UpdateResultSet extends DMLWriteResultSet
 				}
 
 				rowChanger.updateRow(row,newBaseRow,baseRowLocation);
+				source.updateRow(newBaseRow);
 
 				//beetle 3865, update cursor use index.
 				if (notifyCursor)
@@ -901,6 +902,7 @@ class UpdateResultSet extends DMLWriteResultSet
 					rowChanger.updateRow(deferredBaseRow,
 										newBaseRow,
 										baseRowLocation);
+					source.updateRow(newBaseRow);
 				}
 			} finally
 			{

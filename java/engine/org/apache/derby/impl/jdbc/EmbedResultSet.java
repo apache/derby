@@ -28,14 +28,11 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 
 import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.Row;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.impl.sql.execute.ScrollInsensitiveResultSet;
 
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.CursorActivation;
@@ -2090,7 +2087,17 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public boolean rowUpdated() throws SQLException {
 		checkIfClosed("rowUpdated");
-		return false;
+        boolean rvalue = false;
+
+		try {
+			if (isForUpdate() && 
+					getType() == java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE) {
+				rvalue = ((ScrollInsensitiveResultSet)theResults).isUpdated();
+			}
+		} catch (Throwable t) {
+				handleException(t);
+		}
+		return rvalue;
 	}
 
 	/**
@@ -2125,8 +2132,18 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @see EmbedDatabaseMetaData#deletesAreDetected
 	 */
 	public boolean rowDeleted() throws SQLException {
-		checkIfClosed("rowDeleted");
-		return false;
+		checkIfClosed("rowUpdated");
+        boolean rvalue = false;
+
+		try {
+			if (isForUpdate() && 
+					getType() == java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE) {
+				rvalue = ((ScrollInsensitiveResultSet)theResults).isDeleted();
+			}
+		} catch (Throwable t) {
+			handleException(t);
+		}
+		return rvalue;
 	}
 
 	//do following few checks before accepting updateXXX resultset api
@@ -3446,11 +3463,17 @@ public abstract class EmbedResultSet extends ConnectionChild
             }
             // Don't set any timeout when updating rows (use 0)
             org.apache.derby.iapi.sql.ResultSet rs = ps.execute(act, false, true, true, 0L); //execute the update where current of sql
+            SQLWarning w = act.getWarnings();
+            if (w != null) {
+                addWarning(w);
+            }
             rs.close();
             rs.finish();
             //For forward only resultsets, after a update, the ResultSet will be positioned right before the next row.
-            rowData = null;
-            currentRow = null;
+            if (getType() == TYPE_FORWARD_ONLY) {
+                rowData = null;
+                currentRow = null;
+            }
             lcc.popStatementContext(statementContext, null);
         } catch (StandardException t) {
             throw closeOnTransactionError(t);
@@ -3492,11 +3515,20 @@ public abstract class EmbedResultSet extends ConnectionChild
                 // Context used for preparing, don't set any timeout (use 0)
                 StatementContext statementContext = lcc.pushStatementContext(isAtomic, false, deleteWhereCurrentOfSQL.toString(), null, false, 0L);
                 org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(deleteWhereCurrentOfSQL.toString());
+                // Get activation, so that we can get the warning from it
+                Activation act = ps.getActivation(lcc, false);
                 // Don't set any timeout when deleting rows (use 0)
-                org.apache.derby.iapi.sql.ResultSet rs = ps.execute(lcc, true, 0L); //execute delete where current of sql
+                //execute delete where current of sql
+                org.apache.derby.iapi.sql.ResultSet rs = 
+                        ps.execute(act, false, true, true, 0L);
+                SQLWarning w = act.getWarnings();
+                if (w != null) {
+                    addWarning(w);
+                }
                 rs.close();
                 rs.finish();
-                //For forward only resultsets, after a delete, the ResultSet will be positioned right before the next row.
+                //After a delete, the ResultSet will be positioned right before 
+                //the next row.
                 rowData = null;
                 currentRow = null;
                 lcc.popStatementContext(statementContext, null);
@@ -4299,5 +4331,18 @@ public abstract class EmbedResultSet extends ConnectionChild
             return isClosed;
         }
     }
+     
+     /**
+      * Adds a warning to the end of the warning chain.
+      *
+      * @param w The warning to add to the warning chain.
+      */
+     private void addWarning(SQLWarning w) {
+         if (topWarning == null) {
+             topWarning = w;
+         } else {
+             topWarning.setNextWarning(w);
+         }
+     }
 }
 

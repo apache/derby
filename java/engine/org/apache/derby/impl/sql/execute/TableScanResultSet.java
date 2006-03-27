@@ -138,6 +138,21 @@ public class TableScanResultSet extends NoPutResultSetImpl
 	private ExecRow sparseRow;				//sparse row in heap column order
 	private FormatableBitSet sparseRowMap;			//which columns to read
 
+	// For Scrollable insensitive updatable result sets, only qualify a row the 
+	// first time it's been read, since an update can change a row so that it 
+	// no longer qualifies
+	private boolean qualify;
+
+	// currentRowIsValid is set to the result of positioning at a rowLocation.
+	// It will be true if the positioning was successful and false if the row 
+	// was deleted under our feet. Whenenver currentRowIsValid is false it means 
+	// that the row has been deleted.
+	private boolean currentRowIsValid;
+	
+	// Indicates whether the scan has been positioned back to a previously read
+	// row, or it is accessing a row for the first time.
+	private boolean scanRepositioned;
+
     //
     // class interface
     //
@@ -316,6 +331,11 @@ public class TableScanResultSet extends NoPutResultSetImpl
 		/* Only call row allocators once */
 		candidate = (ExecRow) resultRowAllocator.invoke(activation);
 		constructorTime += getElapsedMillis(beginTime);
+		
+		/* Always qualify the first time a row is being read */
+		qualify = true;
+		currentRowIsValid = false;
+		scanRepositioned = false;
     }
 
 	//
@@ -604,7 +624,7 @@ public class TableScanResultSet extends NoPutResultSetImpl
 	{
         checkCancellationFlag();
             
-		if (currentRow == null)
+		if (currentRow == null || scanRepositioned)
 		{
 			currentRow =
 				getCompactRow(candidate, accessedCols, (FormatableBitSet) null, isKeyed);
@@ -740,6 +760,9 @@ public class TableScanResultSet extends NoPutResultSetImpl
 	    }
 
 		setCurrentRow(result);
+		currentRowIsValid = true;
+		scanRepositioned = false;
+		qualify = true;
 
 		nextTime += getElapsedMillis(beginTime);
 	    return result;
@@ -851,8 +874,8 @@ public class TableScanResultSet extends NoPutResultSetImpl
 
 	/**
 	 * This result set has its row location from
-	 * the last fetch done. If the cursor is closed,
-	 * a null is returned.
+	 * the last fetch done. If the cursor is closed, 
+	 * or the row has been deleted a null is returned.
 	 *
 	 * @see CursorResultSet
 	 *
@@ -886,11 +909,15 @@ public class TableScanResultSet extends NoPutResultSetImpl
 		}
 		else
 		{
-			// we reuse the same rowlocation object across several calls.
-			if (rlTemplate == null)
-				rlTemplate = scanController.newRowLocationTemplate();
-			rl = rlTemplate;
-			scanController.fetchLocation(rl);
+			if (currentRowIsValid) {
+				// we reuse the same rowlocation object across several calls.
+				if (rlTemplate == null)
+					rlTemplate = scanController.newRowLocationTemplate();
+				rl = rlTemplate;
+				scanController.fetchLocation(rl);
+			} else {
+				rl = null;
+			}
 		}
 
 		return rl;
@@ -898,7 +925,9 @@ public class TableScanResultSet extends NoPutResultSetImpl
 
 	/**
 	 * This result set has its row from the last fetch done. 
-	 * If the cursor is closed, a null is returned.
+	 * If the cursor is closed, the row has been deleted, or
+	 * no longer qualifies (for forward only result sets) a 
+	 * null is returned.
 	 *
 	 * @see CursorResultSet
 	 *
@@ -927,9 +956,10 @@ public class TableScanResultSet extends NoPutResultSetImpl
 		try
 		{
 			if ((currentRow == null)                        ||
+			(!currentRowIsValid)                            ||
 			(!scanControllerOpened)                         ||
-			(scanController.isCurrentPositionDeleted())     ||
-			(!scanController.doesCurrentPositionQualify()))
+			(qualify && scanController.isCurrentPositionDeleted())     ||
+			(qualify && (!scanController.doesCurrentPositionQualify())))
 			{
 				return null;
 			}
@@ -950,7 +980,7 @@ public class TableScanResultSet extends NoPutResultSetImpl
 
         try
         {
-            scanController.fetch(result.getRowArray());
+            scanController.fetchWithoutQualify(result.getRowArray());
         }
         catch (StandardException se)
         {
@@ -969,6 +999,24 @@ public class TableScanResultSet extends NoPutResultSetImpl
 
 		setCurrentRow(result);
 	    return currentRow;
+	}
+
+	/**
+	 * @see NoPutResultSet#positionScanAtRowLocation
+	 * 
+	 * Also sets qualify to false so that later calls to getCurrentRow
+	 * will not attempt to re-qualify the current row. 
+	 */
+	public void positionScanAtRowLocation(RowLocation rl) 
+		throws StandardException 
+	{
+		// Check if the scanController is a B-tree scan controller. Do not
+		// attempt to re-position a b-tree controller.
+		if (!isKeyed) {
+			currentRowIsValid = scanController.positionAtRowLocation(rl);
+		}
+		qualify = false;
+		scanRepositioned = true;
 	}
 
 	/**

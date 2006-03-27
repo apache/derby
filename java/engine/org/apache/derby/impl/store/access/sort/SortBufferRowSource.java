@@ -29,6 +29,7 @@ import org.apache.derby.iapi.store.access.SortObserver;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.store.access.conglomerate.ScanControllerRowSource;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
+import org.apache.derby.iapi.store.access.ScanController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -169,6 +170,27 @@ public class SortBufferRowSource extends Scan
                 SQLState.SORT_IMPROPER_SCAN_METHOD);
 	}
 
+    /**
+     * Fetch the row at the current position of the Scan and does not apply the
+     * qualifiers.
+     *
+     * This method will always throw an exception. 
+     * (SQLState.SORT_IMPROPER_SCAN_METHOD)
+     *
+     * @see ScanController#fetchWithoutQualify
+     **/
+    public void fetchWithoutQualify(DataValueDescriptor[] result) 
+        throws StandardException
+    {
+        throw StandardException.newException(
+                SQLState.SORT_IMPROPER_SCAN_METHOD);
+    }
+
+    /**
+     * Fetch the row at the current position of the Scan.
+     *
+     * @see ScanController#fetch
+     **/
     public void fetch(DataValueDescriptor[] result) throws StandardException
 	{
         throw StandardException.newException(

@@ -642,6 +642,8 @@ public class updatableResultSet {
 				System.out.println("Got expected exception " + e.getMessage());
 			}
 
+			reloadData();
+
 			System.out.println("Positive Test1a - request updatable resultset for forward only type resultset");
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 			JDBCDisplayUtil.ShowWarnings(System.out, conn);

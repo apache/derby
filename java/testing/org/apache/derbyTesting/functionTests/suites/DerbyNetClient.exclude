@@ -25,3 +25,4 @@ jdbcapi/dataSourceReference.java
 largedata/LobLimits.java
 jdbc4/TestDbMetaData.java
 jdbc4/TestJDBC40Exception.java
+jdbcapi/SURTest.junit

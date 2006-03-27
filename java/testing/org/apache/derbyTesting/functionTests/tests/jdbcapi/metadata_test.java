@@ -670,6 +670,31 @@ public abstract class metadata_test {
 			System.out.println("othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
 			System.out.println("othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
 
+ 			System.out.println("Test the metadata calls related to visibility of *own* changes for different resultset types");
+ 			System.out.println("ownUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? " + met.ownUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+ 			System.out.println("ownDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? " + met.ownDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+ 			System.out.println("ownInsertsAreVisible(ResultSet.TYPE_FORWARD_ONLY)? " + met.ownInsertsAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+ 			System.out.println("Scroll insensitive ResultSet see updates and deletes, but not inserts");
+ 			System.out.println("ownUpdatesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + met.ownUpdatesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+ 			System.out.println("ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + met.ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+ 			System.out.println("ownInsertsAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + met.ownInsertsAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+ 			System.out.println("Derby does not yet implement scroll sensitive resultsets and hence following metadata calls return false");
+ 			System.out.println("ownUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.ownUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+ 			System.out.println("ownDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.ownDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+ 			System.out.println("ownInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+ 
+ 			System.out.println("Test the metadata calls related to detectability of visible changes for different resultset types");
+ 			System.out.println("Expect true for updates and deletes of TYPE_SCROLL_INSENSITIVE, all others should be false");
+ 			System.out.println("updatesAreDetected(ResultSet.TYPE_FORWARD_ONLY)? " + met.updatesAreDetected(ResultSet.TYPE_FORWARD_ONLY));
+ 			System.out.println("deletesAreDetected(ResultSet.TYPE_FORWARD_ONLY)? " + met.deletesAreDetected(ResultSet.TYPE_FORWARD_ONLY));
+ 			System.out.println("insertsAreDetected(ResultSet.TYPE_FORWARD_ONLY)? " + met.insertsAreDetected(ResultSet.TYPE_FORWARD_ONLY));
+ 			System.out.println("updatesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + met.updatesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
+ 			System.out.println("deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + met.deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
+ 			System.out.println("insertsAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + met.insertsAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
+ 			System.out.println("updatesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.updatesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
+ 			System.out.println("deletesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.deletesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
+ 			System.out.println("insertsAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE)? " + met.insertsAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
+            
 			if (!TestUtil.isJCCFramework()) { // gives false on all.. bug
 				int[] types = {ResultSet.TYPE_FORWARD_ONLY, 
 							   ResultSet.TYPE_SCROLL_INSENSITIVE,

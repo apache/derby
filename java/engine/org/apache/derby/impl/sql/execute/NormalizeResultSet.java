@@ -371,4 +371,19 @@ public class NormalizeResultSet extends NoPutResultSetImpl
 
 		return normalizedRow;
 	}
+
+	/**
+	 * @see NoPutResultSet#updateRow
+	 */
+	public void updateRow (ExecRow row) throws StandardException {
+		source.updateRow(row);
+	}
+
+	/**
+	 * @see NoPutResultSet#markRowAsDeleted
+	 */
+	public void markRowAsDeleted() throws StandardException {
+		source.markRowAsDeleted();
+	}
+
 }

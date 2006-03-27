@@ -1102,6 +1102,18 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	public void rowLocation(RowLocation rl) throws StandardException
 	{ }
 
+	/**
+	 * @see NoPutResultSet#positionScanAtRowLocation
+	 *
+	 * This method is result sets used for scroll insensitive updatable 
+	 * result sets for other result set it is a no-op.
+	 */
+	public void positionScanAtRowLocation(RowLocation rl) 
+		throws StandardException 
+	{
+		// Only used for Scrollable insensitive result sets otherwise no-op
+	}
+
 	// Class implementation
 
 	/**
@@ -1130,6 +1142,30 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	}
 	public java.sql.SQLWarning getWarnings() {
 		return null;
+	}
+
+	/**
+	 * @see NoPutResultSet#updateRow
+	 *
+	 * This method is result sets used for scroll insensitive updatable 
+	 * result sets for other result set it is a no-op.
+	 */
+	public void updateRow(ExecRow row) throws StandardException {
+		// Only ResultSets of type Scroll Insensitive implement
+		// detectability, so for other result sets this method
+		// is a no-op
+	}
+ 
+	/**
+	 * @see NoPutResultSet#markRowAsDeleted
+	 *
+	 * This method is result sets used for scroll insensitive updatable 
+	 * result sets for other result set it is a no-op.
+	 */
+	public void markRowAsDeleted() throws StandardException {
+		// Only ResultSets of type Scroll Insensitive implement
+		// detectability, so for other result sets this method
+		// is a no-op
 	}
 
 	/**

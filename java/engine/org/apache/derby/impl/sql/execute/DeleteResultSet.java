@@ -430,6 +430,7 @@ class DeleteResultSet extends DMLWriteResultSet
 				}
 
 				rc.deleteRow(row,baseRowLocation);
+				source.markRowAsDeleted();
 			}
 
             rowCount++;
@@ -548,6 +549,7 @@ class DeleteResultSet extends DMLWriteResultSet
 				}
 	
 				rc.deleteRow(deferredBaseRow, baseRowLocation);
+				source.markRowAsDeleted();
 			}
 		} finally
 		{

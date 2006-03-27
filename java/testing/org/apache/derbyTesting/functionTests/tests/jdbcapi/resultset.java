@@ -224,9 +224,8 @@ public class resultset {
 				System.out.println("getColumnTypeName("+i+"): "+met.getColumnTypeName(i));
 				System.out.println("isReadOnly("+i+"): "+met.isReadOnly(i));
 				boolean writable = met.isWritable(i);
-				// JCC Supports updatable resultsets so isWritable is true
-				if ((isDerbyNet && writable == true) ||
-					(!isDerbyNet && writable == false))
+				// JCC & Embedded driver support updatable resultsets so isWritable is true
+				if (writable == true)
 					System.out.println("isWritable("+i+"): Expected isWritable value");
 				System.out.println("isDefinitelyWritable("+i+"): "+met.isDefinitelyWritable(i));
 			}

@@ -1422,9 +1422,39 @@ public abstract class GenericScanController
     }
 
     /**
-	@see ScanController#fetch
+    Fetch the row at the current position of the Scan without applying the 
+    qualifiers.
+	
+    @see ScanController#fetchWithoutQualify
+	**/
+	public void fetchWithoutQualify(DataValueDescriptor[] row)
+		throws StandardException
+	{
+		fetch(row, false);
+	}
+	
+	/**
+    Fetch the row at the current position of the Scan.
+
+    @see ScanController#fetch
 	**/
 	public void fetch(DataValueDescriptor[] row)
+		throws StandardException
+	{
+		fetch(row, true);
+	}
+
+	/**
+    Fetch the row at the current position of the Scan.
+
+    @param row The row into which the value of the current 
+     position in the scan is to be stored.
+
+    @param qualify Indicates whether the qualifiers should be applied.
+
+    @exception StandardException Standard exception policy.
+	**/
+	private void fetch(DataValueDescriptor[] row, boolean qualify)
 		throws StandardException
 	{
         if (scan_state != SCAN_INPROGRESS)
@@ -1445,7 +1475,7 @@ public abstract class GenericScanController
                 scan_position.current_rh, 
                 scan_position.current_slot, 
                 row, 
-                init_fetchDesc, 
+                qualify ? init_fetchDesc : null, 
                 false);
 
         scan_position.unlatch();

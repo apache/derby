@@ -609,7 +609,8 @@ public class scrollCursors2 {
 			System.out.println("cursor type = " + rs.getType() +
 							   ", not " + ResultSet.TYPE_SCROLL_INSENSITIVE);
 		}
-		if (rs.getConcurrency() != ResultSet.CONCUR_READ_ONLY)
+		if ((rs.getConcurrency() != ResultSet.CONCUR_READ_ONLY) && 
+				isDerbyNetClient)
 		{
 			System.out.println("concurrency = " + rs.getConcurrency() +
 							   ", not " + ResultSet.CONCUR_READ_ONLY);
@@ -1200,7 +1201,8 @@ public class scrollCursors2 {
 		}
 		if (warningCount != 1)
 		{
-			System.out.println("warningCount expected to be 1, not " + warningCount);
+			System.out.println("warningCount expected to be 1, not " + 
+					warningCount);
 			passed = false;
 		}
 		conn.clearWarnings();
@@ -1220,9 +1222,15 @@ public class scrollCursors2 {
 			warning = warning.getNextWarning();
 			warningCount++;
 		}
-		if (warningCount != 2)
+		if (warningCount != 2 && isDerbyNetClient)
 		{
 			System.out.println("warningCount expected to be 2, not " + warningCount);
+			passed = false;
+		}
+		// Embedded implements SCROLL_INSENSITIVE and UPDATABLE
+		if (warningCount != 1 && !isDerbyNetClient)
+		{
+			System.out.println("warningCount expected to be 1, not " + warningCount);
 			passed = false;
 		}
 		conn.clearWarnings();
@@ -1244,7 +1252,8 @@ public class scrollCursors2 {
 		}
 		if (warningCount != 0)
 		{
-			System.out.println("warningCount expected to be 0, not " + warningCount);
+			System.out.println("warningCount expected to be 0, not " + 
+					warningCount);
 			passed = false;
 		}
 		conn.clearWarnings();
@@ -1264,9 +1273,15 @@ public class scrollCursors2 {
 			warning = warning.getNextWarning();
 			warningCount++;
 		}
-		if (warningCount != 1)
+		if (warningCount != 1 && isDerbyNetClient)
 		{
 			System.out.println("warningCount expected to be 1, not " + warningCount);
+			passed = false;
+		}
+		// Embedded implements SCROLL_INSENSITIVE and UPDATABLE
+		if (warningCount != 0 && !isDerbyNetClient)
+		{
+			System.out.println("warningCount expected to be 0, not " + warningCount);
 			passed = false;
 		}
 		conn.clearWarnings();

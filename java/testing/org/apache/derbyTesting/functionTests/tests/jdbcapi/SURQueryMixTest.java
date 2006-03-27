@@ -235,12 +235,10 @@ public class SURQueryMixTest extends SURBaseTest
                 con.createStatement().executeUpdate
                         ("DELETE FROM T1 WHERE CURRENT OF \"" + cursorName + 
                          "\"");
-                
-                rs.relative(0); // If this call is not here, the old values are
-                                // returned in rs.getXXX calls
             } else {
                 rs.deleteRow();
             }
+            rs.relative(0);
             println("Deleted row " + key);
             // Update the rows table
             rows.put(key, getRowString(rs));

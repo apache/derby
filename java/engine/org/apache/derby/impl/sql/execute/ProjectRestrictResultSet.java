@@ -519,6 +519,30 @@ public class ProjectRestrictResultSet extends NoPutResultSetImpl
 	}
 
 	/**
+	 * Do the projection against the sourceRow. If the source of the result set
+	 * is of type ProjectRestrictResultSet, the projection by that result set
+	 * will also be performed.
+	 *
+	 * @param sourceRow row to be projected
+	 *
+	 * @return The result of the projection
+	 *
+	 * @exception StandardException thrown on failure.
+	 */
+	public ExecRow doBaseRowProjection(ExecRow sourceRow)
+		throws StandardException
+	{
+		ExecRow result = null;
+		if (source instanceof ProjectRestrictResultSet) {
+			ProjectRestrictResultSet prs = (ProjectRestrictResultSet) source;
+			result = prs.doBaseRowProjection(sourceRow);
+		} else {
+			result = sourceRow.getClone();
+		}
+		return doProjection(result);
+	}
+	
+	/**
 	 * Is this ResultSet or it's source result set for update
 	 * 
 	 * @return Whether or not the result set is for update.
@@ -526,6 +550,20 @@ public class ProjectRestrictResultSet extends NoPutResultSetImpl
 	public boolean isForUpdate()
 	{
 		return source.isForUpdate();
+	}
+
+	/**
+	 * @see NoPutResultSet#updateRow
+	 */
+	public void updateRow (ExecRow row) throws StandardException {
+		source.updateRow(row);
+	}
+
+	/**
+	 * @see NoPutResultSet#markRowAsDeleted
+	 */
+	public void markRowAsDeleted() throws StandardException {
+		source.markRowAsDeleted();
 	}
 
 }

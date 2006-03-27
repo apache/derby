@@ -1505,12 +1505,15 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
 
     /**
-    Fetch the row at the current position of the Scan.
-	@see ScanController#fetch
-
-	@exception  StandardException  Standard exception policy.
-    **/
-	public void fetch(DataValueDescriptor[] row)
+     * Fetch the row at the current position of the Scan.
+     * 
+     * @param row The row into which the value of the current 
+     * position in the scan is to be stored.
+     * @param qualify indicates whether the qualifiers should be applied.
+     * 
+     * @exception  StandardException  Standard exception policy.
+     */
+	private void fetch(DataValueDescriptor[] row, boolean qualify)
 		throws StandardException
 	{
         if (scan_state != SCAN_INPROGRESS)
@@ -1551,7 +1554,8 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             scan_position.current_rh = 
                 scan_position.current_leaf.page.fetchFromSlot(
                 (RecordHandle) null, 
-                scan_position.current_slot, row, init_fetchDesc,
+                scan_position.current_slot, row, 
+                qualify ? init_fetchDesc : null,
                 true);
 
             // The possibility is that the row at the current position
@@ -1582,6 +1586,31 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 		return;
 	}
 
+    /**
+    Fetch the row at the current position of the Scan.
+	@see ScanController#fetch
+
+	@exception  StandardException  Standard exception policy.
+    **/
+	public void fetch(DataValueDescriptor[] row)
+        throws StandardException
+    {
+        fetch(row, true);
+    }
+
+    /**
+     * Fetch the row at the current position of the Scan without applying the 
+     * qualifiers.
+     * @see ScanController#fetchWithoutQualify
+     * 
+     * @exception  StandardException  Standard exception policy.
+     */
+	public void fetchWithoutQualify(DataValueDescriptor[] row)
+		throws StandardException
+    {
+        fetch(row, false);
+    }
+    
     /**
      * Return ScanInfo object which describes performance of scan.
      * <p>

@@ -349,6 +349,7 @@ extends BasicNoPutResultSetImpl
 	public final void setCurrentRow(ExecRow row)
 	{
 		activation.setCurrentRow(row, resultSetNumber);
+		currentRow = row;
 	}
 
 	/**
@@ -536,4 +537,44 @@ extends BasicNoPutResultSetImpl
 
 		return output;
 	}
+
+	/**
+	 * @see NoPutResultSet#updateRow
+	 *
+	 * This method is result sets used for scroll insensitive updatable 
+	 * result sets for other result set it is a no-op.
+	 */
+	public void updateRow(ExecRow row) throws StandardException {
+		// Only ResultSets of type Scroll Insensitive implement
+		// detectability, so for other result sets this method
+		// is a no-op
+	}
+
+	/**
+	 * @see NoPutResultSet#markRowAsDeleted
+	 *
+	 * This method is result sets used for scroll insensitive updatable 
+	 * result sets for other result set it is a no-op.
+	 */
+	public void markRowAsDeleted() throws StandardException {
+		// Only ResultSets of type Scroll Insensitive implement
+		// detectability, so for other result sets this method
+		// is a no-op
+	}
+
+	/**
+	 * @see NoPutResultSet#positionScanAtRowLocation
+	 *
+	 * This method is result sets used for scroll insensitive updatable 
+	 * result sets for other result set it is a no-op.
+	 */
+	public void positionScanAtRowLocation(RowLocation rl) 
+		throws StandardException 
+	{
+		// Only ResultSets of type Scroll Insensitive implement
+		// detectability, so for other result sets this method
+		// is a no-op
+	}
+
+
 }

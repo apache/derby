@@ -205,6 +205,19 @@ public interface ScanController extends GenericScanController
 		throws StandardException;
 
     /**
+     The same as fetch, except that the qualifiers passed to the openScan()
+     will not be applied. destRow will contain the current row even if it
+     has been changed and no longer qualifies.
+
+     @param destRow The row into which the value of the current 
+     position in the scan is to be stored.
+
+     @exception StandardException Standard exception policy.
+     */
+    void fetchWithoutQualify(DataValueDescriptor[] destRow)
+		throws StandardException;
+
+    /**
     Fetch the (partial) row at the next position of the Scan.
 
     If there is a valid next position in the scan then
@@ -318,4 +331,5 @@ public interface ScanController extends GenericScanController
 
     boolean replace(DataValueDescriptor[] row, FormatableBitSet validColumns)
 		throws StandardException;
+
 }

@@ -2630,60 +2630,102 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @see Connection
      */
 	public boolean supportsResultSetConcurrency(int type, int concurrency) {
-		//FORWARD_ONLY + CONCUR_UPDATABLE combination is supported (at this point, delete and update functionality only)
-		if ((type == JDBC20Translation.TYPE_FORWARD_ONLY) &&
-				(concurrency == JDBC20Translation.CONCUR_UPDATABLE))
-			return true;
-
-		//requesting CONCUR_UPDATABLE on any resultset type other than TYPE_FORWARD_ONLY will return false
-		if ((type == JDBC20Translation.TYPE_SCROLL_SENSITIVE) ||
-				(concurrency == JDBC20Translation.CONCUR_UPDATABLE))
-			return false;
-		return true;
+ 		if (type == JDBC20Translation.TYPE_SCROLL_SENSITIVE) {
+ 			// (TYPE_SCROLL_SENSITIVE, *)
+  			return false;
+ 		} else {
+ 			// (FORWARD_ONLY, CONCUR_UPDATABLE)
+ 			// (FORWARD_ONLY, CONCUR_READ_ONLY)
+ 			// (TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE)
+ 			// (TYPE_SCROLL_INSENSITIVE, READ_ONLY)
+ 			return true;
+ 		}
 	}
 
     /**
      * JDBC 2.0
      *
-     * Determine whether a result set's own changes visible.
+     * Determine whether a result set's updates are visible.
      *
      * @param type result set type, i.e. ResultSet.TYPE_XXX
-     * @return true if changes are visible for the result set type
+     * @return true if updates are visible for the result set type
      */
     public boolean ownUpdatesAreVisible(int type)   {
-		  return false;
+ 		if (type == JDBC20Translation.TYPE_SCROLL_INSENSITIVE) {
+ 			return true;
+ 		} else {
+ 			return false;
+ 		}
 	}
-    public boolean ownDeletesAreVisible(int type)  {
-		  return false;
-	}
-    public boolean ownInsertsAreVisible(int type)   {
-		  return false;
-	}
-
+ 
     /**
      * JDBC 2.0
      *
-     * Determine whether changes made by others are visible.
+     * Determine whether a result set's deletes are visible.
      *
      * @param type result set type, i.e. ResultSet.TYPE_XXX
-     * @return true if changes are visible for the result set type
+     * @return true if deletes are visible for the result set type
      */
-    //Since Derby materializes a forward only ResultSet incrementally, it is possible to see changes
-    //made by others and hence following 3 metadata calls will return true for forward only ResultSets.
-    //Scroll insensitive ResultSet by their definition do not see changes made by others.
-    //Derby does not yet implement scroll sensitive resultsets.
+    public boolean ownDeletesAreVisible(int type)   {
+ 		if (type == JDBC20Translation.TYPE_SCROLL_INSENSITIVE) {
+ 			return true;
+ 		} else {
+ 			return false;
+ 		}
+	}
+ 
+     /**
+      * JDBC 2.0
+      *
+      * Determine whether a result set's inserts are visible.
+      *
+      * @param type result set type, i.e. ResultSet.TYPE_XXX
+      * @return true if inserts are visible for the result set type
+      */
+     public boolean ownInsertsAreVisible(int type)  {
+ 		return false;
+  	}
+
+      // Since Derby materializes a forward only ResultSet incrementally, it is 
+      // possible to see changes made by others and hence following 3 metadata 
+      // calls will return true for forward only ResultSets.
+
+      /**
+       * JDBC 2.0
+       *
+       * Determine whether updates made by others are visible.
+       *
+       * @param type result set type, i.e. ResultSet.TYPE_XXX
+       * @return true if updates are visible for the result set type
+       */
     public boolean othersUpdatesAreVisible(int type) {
 		if (type == JDBC20Translation.TYPE_FORWARD_ONLY)
 			return true;
 		return false;
 	}
 
+    /**
+     * JDBC 2.0
+     *
+     * Determine whether deletes made by others are visible.
+     *
+     * @param type result set type, i.e. ResultSet.TYPE_XXX
+     * @return true if deletes are visible for the result set type
+     */
     public boolean othersDeletesAreVisible(int type)  {
 		if (type == JDBC20Translation.TYPE_FORWARD_ONLY)
 			return true;
 		return false;
 	}
 
+    /**
+     * JDBC 2.0
+     *
+     * Determine whether inserts made by others are visible.
+     *
+     * @param type result set type, i.e. ResultSet.TYPE_XXX
+     * @return true if inserts are visible for the result set type
+     */
     public boolean othersInsertsAreVisible(int type)  {
 		if (type == JDBC20Translation.TYPE_FORWARD_ONLY)
 			return true;
@@ -2697,12 +2739,17 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * calling ResultSet.rowUpdated().
      *
      * @param type result set type, i.e. ResultSet.TYPE_XXX
-     * @return true if changes are detected by the resultset type
+     * @return true if updates are detected by the resultset type
      */
-    //updatable resultsets are supported for forward only resultset types only. And for forward only
-    //resultsets, we move to before the next row after a update and that is why updatesAreDetected returns false
     public boolean updatesAreDetected(int type) {
-		  return false;
+		if (type == JDBC20Translation.TYPE_SCROLL_INSENSITIVE) {
+			return true;
+		} else {
+			// For forward only resultsets, we move to before the next
+			// row after a update and that is why updatesAreDetected
+			// returns false.
+			return false;
+		}
 	}
 
     /**
@@ -2713,12 +2760,17 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * returns false, then deleted rows are removed from the result set.
      *
      * @param type result set type, i.e. ResultSet.TYPE_XXX
-     * @return true if changes are detected by the resultset type
+     * @return true if deletes are detected by the resultset type
      */
-    //updatable resultsets are supported for forward only resultset types only. And for forward only
-    //resultsets, we move to before the next row after a delete and that is why deletesAreDetected returns false
     public boolean deletesAreDetected(int type) {
-		  return false;
+		if (type == JDBC20Translation.TYPE_SCROLL_INSENSITIVE) {
+			return true;
+		} else {
+			// For forward only resultsets, we move to before the next
+			// row after a delete and that is why deletesAreDetected
+			// returns false
+			return false;
+		}
 	}
 
     /**
@@ -2728,7 +2780,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * by calling ResultSet.rowInserted().
      *
      * @param type result set type, i.e. ResultSet.TYPE_XXX
-     * @return true if changes are detected by the resultset type
+     * @return true if inserts are detected by the resultset type
      */
     public boolean insertsAreDetected(int type) {
 		  return false;

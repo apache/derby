@@ -179,10 +179,33 @@ Derby does not yet implement scroll sensitive resultsets and hence following met
 othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
 othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
 othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
+Test the metadata calls related to visibility of *own* changes for different resultset types
+ownUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? false
+ownDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? false
+ownInsertsAreVisible(ResultSet.TYPE_FORWARD_ONLY)? false
+Scroll insensitive ResultSet see updates and deletes, but not inserts
+ownUpdatesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? true
+ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? true
+ownInsertsAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+Derby does not yet implement scroll sensitive resultsets and hence following metadata calls return false
+ownUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
+ownDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
+ownInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE)? false
+Test the metadata calls related to detectability of visible changes for different resultset types
+Expect true for updates and deletes of TYPE_SCROLL_INSENSITIVE, all others should be false
+updatesAreDetected(ResultSet.TYPE_FORWARD_ONLY)? false
+deletesAreDetected(ResultSet.TYPE_FORWARD_ONLY)? false
+insertsAreDetected(ResultSet.TYPE_FORWARD_ONLY)? false
+updatesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? true
+deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? true
+insertsAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+updatesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE)? false
+deletesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE)? false
+insertsAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE)? false
 SupportsResultSetConcurrency: TYPE_FORWARD_ONLY,CONCUR_READ_ONLY: true
 SupportsResultSetConcurrency: TYPE_FORWARD_ONLY,CONCUR_UPDATABLE: true
 SupportsResultSetConcurrency: TYPE_SCROLL_INSENSITIVE,CONCUR_READ_ONLY: true
-SupportsResultSetConcurrency: TYPE_SCROLL_INSENSITIVE,CONCUR_UPDATABLE: false
+SupportsResultSetConcurrency: TYPE_SCROLL_INSENSITIVE,CONCUR_UPDATABLE: true
 SupportsResultSetConcurrency: TYPE_SCROLL_SENSITIVE,CONCUR_READ_ONLY: false
 SupportsResultSetConcurrency: TYPE_SCROLL_SENSITIVE,CONCUR_UPDATABLE: false
 getConnection(): same connection

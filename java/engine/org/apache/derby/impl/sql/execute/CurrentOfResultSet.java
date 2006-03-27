@@ -122,9 +122,18 @@ public class CurrentOfResultSet extends NoPutResultSetImpl
 				// get the row from the base table, which is the real result
 				// row for the CurrentOfResultSet
 				currentRow = target.getCurrentRow();
-				if (SanityManager.DEBUG)
-					SanityManager.ASSERT(currentRow != null,
-									"No target row when there is a cursor row");
+
+				// if the source result set is a ScrollInsensitiveResultSet, and
+				// the current row has been deleted (while the cursor was 
+				// opened), the cursor result set (scroll insensitive) will 
+				// return the cached row, while the target result set will 
+				// return null (row has been deleted under owr feet).
+				if (rowLocation == null  || 
+						(cursorRow != null && currentRow == null)) {
+					activation.addWarning(StandardException.
+							newWarning(SQLState.CURSOR_OPERATION_CONFLICT));
+					return null;
+				}
 
 				/* beetle 3865: updateable cursor using index.  If underlying is a covering
 				 * index, target is a TableScanRS (instead of a IndexRow2BaseRowRS) for the
@@ -331,4 +340,18 @@ public class CurrentOfResultSet extends NoPutResultSetImpl
 		}
 	}
 
+	/**
+	 * @see NoPutResultSet#updateRow
+	 */
+	public void updateRow (ExecRow row) throws StandardException {
+		((NoPutResultSet)cursor).updateRow(row);
+	}
+	
+	/**
+	 * @see NoPutResultSet#markRowAsDeleted
+	 */
+	public void markRowAsDeleted() throws StandardException {
+		((NoPutResultSet)cursor).markRowAsDeleted();
+	}
+	
 }

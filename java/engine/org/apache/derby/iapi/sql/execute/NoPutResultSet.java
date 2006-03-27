@@ -170,4 +170,42 @@ public interface NoPutResultSet extends ResultSet, RowLocationRetRowSource
 	 */
 	public boolean isForUpdate();
 
-}
+	/* 
+	 * New methods for supporting detectability of own changes for
+	 * for updates and deletes when using ResultSets of type 
+	 * TYPE_SCROLL_INSENSITIVE and concurrency CONCUR_UPDATABLE.
+	 */
+	
+	/**
+	 * Updates the resultSet's current row with it's new values after
+	 * an update has been issued either using positioned update or
+	 * JDBC's udpateRow method.
+	 *
+	 * @param row new values for the currentRow
+	 *
+	 * @exception StandardException thrown on failure.
+	 */
+	public void updateRow(ExecRow row) throws StandardException;
+	
+	/**
+	 * Marks the resultSet's currentRow as deleted after a delete has been 
+	 * issued by either by using positioned delete or JDBC's deleteRow
+	 * method.
+	 *
+	 * @exception StandardException thrown on failure.
+	 */
+	public void markRowAsDeleted() throws StandardException;
+
+	/**
+	 * Positions the cursor in the specified rowLocation. Used for
+	 * scrollable insensitive result sets in order to position the
+	 * cursor back to a row that has already be visited.
+	 * 
+	 * @param rLoc row location of the current cursor row
+	 *
+	 * @exception StandardException thrown on failure to
+	 *	get location from storage engine
+	 *
+	 */
+	void positionScanAtRowLocation(RowLocation rLoc) 
+		throws StandardException;}

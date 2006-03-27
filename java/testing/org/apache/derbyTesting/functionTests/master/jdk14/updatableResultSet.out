@@ -1,29 +1,25 @@
 Start testing delete and update using JDBC2.0 updateable resultset apis
 Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset
-WARNING 01J03: Scroll sensitive and scroll insensitive updatable ResultSets are not currently implemented.
 requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
-Make sure that we got CONCUR_READ_ONLY? true
-ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+Make sure that we got CONCUR_READ_ONLY? false
+ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? true
 othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
-deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
+deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? true
 JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
-SQL State : XJ083
-Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
-SQL State : XJ083
-Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
+FAIL!!! deleteRow should have failed because Derby does not yet support scroll insensitive updatable resultsets
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
 WARNING 01J02: Scroll sensitive cursors are not currently implemented.
-WARNING 01J03: Scroll sensitive and scroll insensitive updatable ResultSets are not currently implemented.
 requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
 Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
-Make sure that we got CONCUR_READ_ONLY? true
+Make sure that we got CONCUR_READ_ONLY? false
 JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
-SQL State : XJ083
-Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
-SQL State : XJ083
-Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
+FAIL!!! deleteRow should have failed because Derby does not yet support scroll sensitive updatable resultsets
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Negative Test3 - request a read only resultset and attempt deleteRow and updateRow on it
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a deleteRow on a read only resultset.
@@ -155,7 +151,7 @@ column 1 on this deleted row is 234
 column 2 on this deleted row is aa                  
 doing positioned delete again w/o first positioning the ResultSet on the next row will fail
 SQL State : XCL08
-Got expected exception Cursor 'SQLCUR4' is not on a row.
+Got expected exception Cursor 'SQLCUR6' is not on a row.
 Position the ResultSet with next()
 Should be able to do positioned delete on the current row now
 Positive Test1d - updatable resultset to do positioned update
@@ -306,7 +302,7 @@ Table t1 after updateRow has following rows
 	{3,cc                  }
 Positive Test9c - try to updateXXX on a readonly column. Should get error
 SQL State : 42X31
-Got expected exception Column 'C2' is not in the FOR UPDATE list of cursor 'SQLCUR17'.
+Got expected exception Column 'C2' is not in the FOR UPDATE list of cursor 'SQLCUR19'.
 attempt to get an updatable resultset using correlation name for an readonly column. It should work
 The sql is SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1
 Table t1 after updateRow has following rows
@@ -317,7 +313,7 @@ Table t1 after updateRow has following rows
 	{3,cc                  }
 Positive Test9d - try to updateXXX on a readonly column with correlation name. Should get error
 SQL State : 42X31
-Got expected exception Column 'COL2' is not in the FOR UPDATE list of cursor 'SQLCUR19'.
+Got expected exception Column 'COL2' is not in the FOR UPDATE list of cursor 'SQLCUR21'.
 Table t1 has following rows
 	 C1,C2
 	 -- --
@@ -328,7 +324,7 @@ Positive Test10 - 2 updatable resultsets going against the same table, will they
 delete using first resultset
 attempt to send deleteRow on the same row through a different resultset should throw an exception
 SQL State : XCL08
-Got expected exception Cursor 'SQLCUR21' is not on a row.
+Got expected exception Cursor 'SQLCUR23' is not on a row.
 Move to next row in the 2nd resultset and then delete using the second resultset
 Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
 Notice the Fetch Size in run time statistics output.
@@ -3069,7 +3065,7 @@ Positive Test32 - call updateXXX methods on column that is not in for update col
 	{2,bb                  }
 	{3,cc                  }
 SQL State : 42X31
-Got expected exception Column 'C2' is not in the FOR UPDATE list of cursor 'SQLCUR39'.
+Got expected exception Column 'C2' is not in the FOR UPDATE list of cursor 'SQLCUR41'.
 updateRow passed
   Make sure the contents of table are unchanged
 	 C1,C2

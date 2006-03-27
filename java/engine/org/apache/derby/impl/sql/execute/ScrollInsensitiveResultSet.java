@@ -46,12 +46,46 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+
+import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLInteger;
 
 /**
+ *
  * Provide insensitive scrolling functionality for the underlying
- * result set.  We build a hash table of rows as the user scrolls
- * forward, with the position as the key.
+ * result set.  We build a disk backed hash table of rows as the 
+ * user scrolls forward, with the position as the key.
+ *
+ * For read-only result sets the hash table will containg the
+ * following columns:
+ *<pre>
+ *  +-------------------------------+
+ *  | KEY                           |
+ *  +-------------------------------+
+ *  | Row                           |
+ *  +-------------------------------+
+ *</pre>
+ * where key is the position of the row in the result set and row is the data.
+ *
+ * And for updatable result sets it will contain:
+ * <pre>
+ *  +-------------------------------+
+ *  | KEY                           | [0]
+ *  +-------------------------------+
+ *  | RowLocation                   | [POS_ROWLOCATION]
+ *  +-------------------------------+
+ *  | Deleted                       | [POS_ROWDELETED]
+ *  +-------------------------------+
+ *  | Updated                       | [POS_ROWUPDATED]
+ *  +-------------------------------+
+ *  | Row                           | [extraColumns ... n]
+ *  +-------------------------------+
+ *</pre>
+ * where key is the position of the row in the result set, rowLocation is
+ * the row location of that row in the Heap, Deleted indicates whether the
+ * row has been deleted, Updated indicates whether the row has been updated,
+ * and row is the data.
+ *
  */
 
 public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
@@ -88,6 +122,39 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 
     private boolean keepAfterCommit;
 
+	/* The hash table will contain a different number of extra columns depending
+	 * on whether the result set is updatable or not.
+	 * extraColumns will contain the number of extra columns on the hash table,
+	 * 1 for read-only result sets and LAST_EXTRA_COLUMN + 1 for updatable 
+	 * result sets.
+	 */
+	private int extraColumns;
+	
+	/* positionInHashTable is used for getting a row from the hash table. Prior
+	 * to getting the row, positionInHashTable will be set to the desired KEY.
+	 */
+	private SQLInteger positionInHashTable;
+
+	/* Reference to the target result set. Target is used for updatable result
+	 * sets in order to keep the target result set on the same row as the
+	 * ScrollInsensitiveResultSet.  
+	 */
+	private CursorResultSet target;
+
+	/* If the last row was fetched from the HashTable, updatable result sets
+	 * need to be positioned in the last fetched row before resuming the 
+	 * fetch from core.
+	 */
+	private boolean needsRepositioning;
+
+	/* Position of the different fields in the hash table row for updatable
+	 * result sets 
+	 */
+	private static final int POS_ROWLOCATION = 1;
+	private static final int POS_ROWDELETED = 2;
+	private static final int POS_ROWUPDATED = 3;
+	private static final int LAST_EXTRA_COLUMN = 3;
+
 	/**
 	 * Constructor for a ScrollInsensitiveResultSet
 	 *
@@ -121,6 +188,16 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 
         closeCleanup = c;
 		constructorTime += getElapsedMillis(beginTime);
+
+		positionInHashTable = new SQLInteger();
+		needsRepositioning = false;
+		if (isForUpdate()) {
+			target = ((CursorActivation)activation).getTargetResultSet();
+			extraColumns = LAST_EXTRA_COLUMN + 1;
+		} else {
+			target = null;
+			extraColumns = 1;
+		}
 	}
 
 
@@ -727,6 +804,11 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			return null;
 		}
 
+
+		if (needsRepositioning) {
+			positionInLastFetchedRow();
+			needsRepositioning = false;
+		}
 		sourceRow = source.getNextRowCore();
 
 		if (sourceRow != null)
@@ -745,7 +827,13 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 
 			positionInSource++;
 			currentPosition = positionInSource;
-			addRowToHashTable(sourceRow);
+
+			RowLocation rowLoc = null;
+			if (source.isForUpdate()) {
+				rowLoc = ((CursorResultSet)source).getRowLocation();
+			}
+
+			addRowToHashTable(sourceRow, currentPosition, rowLoc, false);
 
 		}
 		// Remember whether or not we're past the end of the table
@@ -865,9 +953,13 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	/* RESOLVE - this should return activation.getCurrentRow(resultSetNumber),
 	 * once there is such a method.  (currentRow is redundant)
 	 */
-	public ExecRow getCurrentRow() 
+	public ExecRow getCurrentRow() throws StandardException
 	{
-		return currentRow;
+		if (isForUpdate() && isDeleted()) {
+			return null;
+		} else {
+			return currentRow;
+		}
 	}
 
 	//
@@ -875,17 +967,33 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	//
 
 	/**
-	 * Add a row to the backing hash table,
-	 * keyed on positionInSource.
+	 * Add a row to the backing hash table, keyed on position.
+	 * When a row gets updated when using scrollable insensitive updatable
+	 * result sets, the old entry for the row will be deleted from the hash 
+	 * table and this method will be called to add the new values for the row
+	 * to the hash table, with the parameter rowUpdated = true so as to mark 
+	 * the row as updated. The latter is done in order to implement 
+	 * detectability of own changes for result sets of this type.
 	 *
 	 * @param sourceRow	The row to add.
+	 * @param position The key
+	 * @param rowLoc The rowLocation of the row to add.
+	 * @param rowUpdated Indicates whether the row has been updated.
+	 *
 	 */
-	private void addRowToHashTable(ExecRow sourceRow)
+	private void addRowToHashTable(ExecRow sourceRow, int position,
+			RowLocation rowLoc, boolean rowUpdated)
 		throws StandardException
 	{
-		DataValueDescriptor[] hashRowArray = new DataValueDescriptor[sourceRowWidth + 1];
+		DataValueDescriptor[] hashRowArray = new 
+				DataValueDescriptor[sourceRowWidth + extraColumns];
 		// 1st element is the key
-		hashRowArray[0] = new SQLInteger(positionInSource);
+		hashRowArray[0] = new SQLInteger(position);
+		if (isForUpdate()) {
+			hashRowArray[POS_ROWLOCATION] = rowLoc.getClone();
+			hashRowArray[POS_ROWDELETED] = new SQLBoolean(false);
+			hashRowArray[POS_ROWUPDATED] = new SQLBoolean(rowUpdated);
+		}
 
 		/* Copy rest of elements from sourceRow.
 		 * NOTE: We need to clone the source row
@@ -894,7 +1002,8 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		 */
 		DataValueDescriptor[] sourceRowArray = sourceRow.getRowArrayClone();
 
-		System.arraycopy(sourceRowArray, 0, hashRowArray, 1, sourceRowArray.length);
+		System.arraycopy(sourceRowArray, 0, hashRowArray, extraColumns, 
+				sourceRowArray.length);
 
 		ht.put(false, hashRowArray);
 
@@ -916,7 +1025,9 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	{
 
 		// Get the row from the hash table
-		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) ht.get(new SQLInteger(position));
+		positionInHashTable.setValue(position);
+		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
+				ht.get(positionInHashTable);
 
 
 		if (SanityManager.DEBUG)
@@ -925,8 +1036,10 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 				"hashRowArray expected to be non-null");
 		}
 		// Copy out the Object[] without the position.
-		DataValueDescriptor[] resultRowArray = new DataValueDescriptor[hashRowArray.length - 1];
-		System.arraycopy(hashRowArray, 1, resultRowArray, 0, resultRowArray.length);
+		DataValueDescriptor[] resultRowArray = new 
+				DataValueDescriptor[hashRowArray.length - extraColumns];
+		System.arraycopy(hashRowArray, extraColumns, resultRowArray, 0, 
+				resultRowArray.length);
 
 		resultRow.setRowArray(resultRowArray);
 
@@ -941,7 +1054,107 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			afterLast = false;
 		}
 
-		currentRow = resultRow;
+		if (isForUpdate()) {
+			RowLocation rowLoc = (RowLocation) hashRowArray[POS_ROWLOCATION];
+			// Keep source and target with the same currentRow
+			((NoPutResultSet)target).setCurrentRow(resultRow);
+			((NoPutResultSet)target).positionScanAtRowLocation(rowLoc);
+			needsRepositioning = true;
+		}
+		
+		setCurrentRow(resultRow);
+
 		return resultRow;
 	}
+
+	/**
+	 * Positions the cursor in the last fetched row. This is done before
+	 * navigating to a row that has not previously been fetched, so that
+	 * getNextRowCore() will re-start from where it stopped.
+	 */
+	private void positionInLastFetchedRow() throws StandardException {
+		if (positionInSource > 0) {
+			positionInHashTable.setValue(positionInSource);
+			DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
+					ht.get(positionInHashTable);
+			RowLocation rowLoc = (RowLocation) hashRowArray[POS_ROWLOCATION];
+			((NoPutResultSet)target).positionScanAtRowLocation(rowLoc);
+			currentPosition = positionInSource;
+		}
+	}
+
+	/**
+	 * @see NoPutResultSet#updateRow
+	 *
+	 * Sets the updated column of the hash table to true and updates the row
+	 * in the hash table with the new values for the row.
+	 */
+	public void updateRow(ExecRow row) throws StandardException {
+		ExecRow newRow = row.getClone();
+		if (source instanceof ProjectRestrictResultSet) {
+			newRow = ((ProjectRestrictResultSet)source).
+					doBaseRowProjection(newRow);
+		}
+		positionInHashTable.setValue(currentPosition);
+		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
+				ht.get(positionInHashTable);
+		RowLocation rowLoc = (RowLocation) hashRowArray[POS_ROWLOCATION];
+		ht.remove(new SQLInteger(currentPosition));
+		addRowToHashTable(newRow, currentPosition, rowLoc, true);
+	}
+
+	/**
+	 * @see NoPutResultSet#markRowAsDeleted
+	 *
+	 * Sets the deleted column of the hash table to true in the current row.
+	 */
+	public void markRowAsDeleted() throws StandardException  {
+		positionInHashTable.setValue(currentPosition);
+		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
+				ht.get(positionInHashTable);
+		RowLocation rowLoc = (RowLocation) hashRowArray[POS_ROWLOCATION];
+		ht.remove(new SQLInteger(currentPosition));
+		((SQLBoolean)hashRowArray[POS_ROWDELETED]).setValue(true);
+		// Set all columns to NULL, the row is now a placeholder
+		for (int i=extraColumns; i<hashRowArray.length; i++) {
+			hashRowArray[i].setToNull();
+		}
+
+		ht.put(false, hashRowArray);
+	}
+
+	/**
+	 * Returns TRUE if the row was been deleted within the transaction,
+	 * otherwise returns FALSE
+	 *
+	 * @return True if the row has been deleted, otherwise false
+	 *
+	 * @exception StandardException on error
+	 */
+	public boolean isDeleted() throws StandardException  {
+		positionInHashTable.setValue(currentPosition);
+		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
+				ht.get(positionInHashTable);
+		return hashRowArray[POS_ROWDELETED].getBoolean();
+	}
+
+	/**
+	 * Returns TRUE if the row was been updated within the transaction,
+	 * otherwise returns FALSE
+	 *
+	 * @return True if the row has been deleted, otherwise false
+	 *
+	 * @exception StandardException on error
+	 */
+	public boolean isUpdated() throws StandardException {
+		positionInHashTable.setValue(currentPosition);
+		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
+				ht.get(positionInHashTable);
+		return hashRowArray[POS_ROWUPDATED].getBoolean();			
+	}
+
+	public boolean isForUpdate() {
+		return source.isForUpdate();
+	}
+
 }
