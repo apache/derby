@@ -67,19 +67,6 @@ public class TestPreparedStatementMethods {
             filepath = userDir + sep + ".." + sep + filepath;
         }
     }
-    void t_setRowId() {
-        try {
-            ps.setRowId(0,null);
-            System.out.println("UnImplemented Exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-        } catch(Exception e) {
-            System.out.println("Unexpected exception thrown in method"+e);
-            e.printStackTrace();
-        }
-    }
     void t_setNString() {
         try {
             ps.setNString(0,null);
@@ -515,7 +502,6 @@ public class TestPreparedStatementMethods {
                     "sys.systables");
             conn = conn_main;
             ps = ps_main;
-            t_setRowId();
             t_setNString();
             t_setNCharacterStream();
             t_setNClob1();
@@ -583,7 +569,6 @@ public class TestPreparedStatementMethods {
                     "sys.systables");
             conn = conn_main;
             ps = ps_main;
-            t_setRowId();
             t_setNString();
             t_setNCharacterStream();
             t_setNClob1();

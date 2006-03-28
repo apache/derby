@@ -26,7 +26,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.RowIdLifetime;
 
 import org.apache.derby.tools.ij;
 
@@ -87,12 +86,6 @@ public class TestDbMetaData {
             System.out.println
                 ("FAIL: providesQueryObjectGenerator() should " +
                  "return false");
-        }
-
-        RowIdLifetime lifetime = met.getRowIdLifetime();
-        if (lifetime != RowIdLifetime.ROWID_UNSUPPORTED) {
-            System.out.println("FAIL: getRowIdLifetime() should return " +
-                               "ROWID_UNSUPPORTED, but got " + lifetime);
         }
 
         try {

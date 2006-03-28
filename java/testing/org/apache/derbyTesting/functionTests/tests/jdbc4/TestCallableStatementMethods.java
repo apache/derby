@@ -39,51 +39,6 @@ public class TestCallableStatementMethods{
     Connection conn=null;
     CallableStatement cs=null;
     
-    void t_getRowId1() {
-        try {
-            cs.getRowId(0);
-            System.out.println("Not Implemented Exception not thrown");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-            
-        } catch(Exception e) {
-            System.out.println("Exception"+e);
-            e.printStackTrace();
-        }
-    }
-    
-    void t_getRowId2() {
-        try {
-            cs.getRowId(null);
-            System.out.println("Not Implemented Exception not thrown");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-        } catch(Exception e) {
-            System.out.println("Exception"+e);
-            e.printStackTrace();
-        }
-    }
-    
-    void t_setRowId() {
-        try {
-            cs.setRowId(null,null);
-            System.out.println("Not Implemented Exception not thrown");
-        } catch(SQLException e) {
-            
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-            
-        } catch(Exception e) {
-            System.out.println("Exception"+e);
-            e.printStackTrace();
-        }
-    }
-    
     void t_setNString() {
         try {
             cs.setNString(null,null);
@@ -244,9 +199,6 @@ public class TestCallableStatementMethods{
     void startCallableStatementMethodTest(Connection conn_in,CallableStatement cs_in) {
         conn = conn_in;
         cs = cs_in;
-        t_getRowId1();
-        t_getRowId2();
-        t_setRowId();
         t_setNString();
         t_setNCharacterStream();
         t_setNClob1();

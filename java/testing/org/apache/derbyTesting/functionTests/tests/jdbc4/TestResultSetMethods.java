@@ -63,65 +63,6 @@ public class TestResultSetMethods {
         }
     }
     
-    void t_getRowId1() {
-        try {
-            rs.getRowId(0);
-            System.out.println("unImplemented Exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-            
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught"+e);
-            e.printStackTrace();
-        }
-    }
-    void t_getRowId2(){
-        try {
-            rs.getRowId(null);
-            System.out.println("unImplemented Exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-            
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught"+e);
-            e.printStackTrace();
-        }
-    }
-    
-    void t_updateRowId1() {
-        try {
-            rs.updateRowId(0,null);
-            System.out.println("unImplemented Exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-            
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught"+e);
-            e.printStackTrace();
-        }
-    }
-    
-    void t_updateRowId2(){
-        try {
-            rs.updateRowId(null,null);
-            System.out.println("unImplemented Exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-            
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught"+e);
-            e.printStackTrace();
-        }
-    }
-    
     /**
      * Tests that <code>ResultSet.getHoldability()</code> has the
      * correct behaviour.
@@ -525,12 +466,6 @@ public class TestResultSetMethods {
         conn = conn_in;
         ps = ps_in;
         rs = rs_in;
-        
-        t_getRowId1();
-        t_getRowId2();
-        
-        t_updateRowId1();
-        t_updateRowId2();
         
         t_getHoldability();
         t_isClosed();
