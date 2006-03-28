@@ -692,4 +692,5 @@ Checked class declared as: java.sql.Statement
 Checked class declared as: javax.sql.DataSource
 Checked class declared as: javax.sql.PooledConnection
 Checked class declared as: javax.sql.XAConnection
+Checked class declared as: javax.transaction.xa.XAResource
 Completed checkDataSource

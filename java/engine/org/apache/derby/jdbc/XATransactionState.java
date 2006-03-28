@@ -46,8 +46,9 @@ final class XATransactionState extends ContextImpl {
 	final static int TC_COMPLETED				= 3; // rollback/commit called
 
 	final EmbedConnection	conn;
-	final EmbedXAConnection creatingResource;
-	private EmbedXAConnection  associatedResource;	// owning XAResource
+	final EmbedXAResource creatingResource;
+        // owning XAResource
+	private EmbedXAResource  associatedResource;	
 	final XAXactId			xid;	
 	/**
 		When an XAResource suspends a transaction (end(TMSUSPEND)) it must be resumed
@@ -72,7 +73,8 @@ final class XATransactionState extends ContextImpl {
 	*/
 	boolean isPrepared;
 
-	XATransactionState(ContextManager cm, EmbedConnection conn, EmbedXAConnection resource, XAXactId xid) {
+	XATransactionState(ContextManager cm, EmbedConnection conn, 
+                EmbedXAResource resource, XAXactId xid) {
 
 		super(cm, "XATransactionState");
 		this.conn = conn;
@@ -112,7 +114,7 @@ final class XATransactionState extends ContextImpl {
 		}
 	}
 
-	void start(EmbedXAConnection resource, int flags) throws XAException {
+	void start(EmbedXAResource resource, int flags) throws XAException {
 
 		synchronized (this) {
 			if (associationState == XATransactionState.TRO_FAIL)
@@ -163,7 +165,8 @@ final class XATransactionState extends ContextImpl {
 		}
 	}
 
-	boolean end(EmbedXAConnection resource, int flags, boolean endingCurrentXid) throws XAException {
+	boolean end(EmbedXAResource resource, int flags, 
+                boolean endingCurrentXid) throws XAException {
 
 		boolean rollbackOnly = false;
 		synchronized (this) {
