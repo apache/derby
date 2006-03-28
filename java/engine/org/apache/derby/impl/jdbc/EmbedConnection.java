@@ -123,10 +123,13 @@ public class EmbedConnection implements EngineConnection
 	private boolean	active;
 	boolean	autoCommit = true;
 	boolean	needCommit;
-	//following is a new feature in JDBC3.0 where you can specify the holdability
-	//of a resultset at the end of the transaction. This gets set by the
-	//new method setHoldability(int) in JDBC3.0
-	int	connectionHoldAbility = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+	/*
+     following is a new feature in JDBC3.0 where you can specify the holdability
+     of a resultset at the end of the transaction. This gets set by the
+	 new method setHoldability(int) in JDBC3.0
+     * 
+	 */
+	private int	connectionHoldAbility = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
 
 
 	//////////////////////////////////////////////////////////
