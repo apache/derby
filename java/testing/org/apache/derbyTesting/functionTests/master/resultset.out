@@ -1993,6 +1993,7 @@ Testing nullif(?,TIMESTAMP) with setTimestamp
 	{null}
 Testing nullif(?,BLOB(1k))
 ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+DERBY-1136 fetched: 3.4028235E38
 Single RS auto-commit test: PASS.
 SingleRSCloseCursorsAtCommit: PASS.
 Checked class declared as: java.sql.ResultSet

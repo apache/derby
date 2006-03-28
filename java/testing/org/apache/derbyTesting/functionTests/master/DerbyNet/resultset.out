@@ -1973,4 +1973,5 @@ Testing nullif(?,TIMESTAMP) with setTimestamp
 Testing nullif(?,BLOB(1k))
 Testing nullif(?,BLOB(1k)) with setBinaryStream
 ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+DERBY-1136 fetched: 3.4028235E38
 Test resultset finished

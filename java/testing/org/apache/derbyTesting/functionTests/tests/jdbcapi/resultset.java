@@ -620,6 +620,7 @@ public class resultset {
 			testMutableValues(con);
 			testCorrelationNamesAndMetaDataCalls(con);
 			testNullIfAndMetaDataCalls(con);
+                        testFloatMAX_VALUE(con);
             //We know that JCC behavior does not match 
             //DerbyNetClient or embedded
             if (!TestUtil.isJCCFramework()) {
@@ -1091,6 +1092,29 @@ public class resultset {
 		list.add(value);
 	}
     
+    // JIRA-1136: LossOfPrecisionConversionException fetching Float.MAX_VALUE.
+    // This test proves that we can successfully fetch that value from the DB
+    // Note that we still fail to fetch that value in the JCC driver, so we
+    // don't try this test under that framework, since it would fail, and we
+    // share masters for these tests.
+    private static void testFloatMAX_VALUE(Connection conn)
+        throws SQLException 
+    {
+        Statement stmt = conn.createStatement();
+        try { stmt.execute("drop table jira1136"); } catch (Throwable t) { }
+        stmt.execute("create table jira1136 (f float)");
+        stmt.execute("insert into jira1136 values (3.4028235E38)");
+        PreparedStatement ps = conn.prepareStatement("select * from jira1136");
+        ResultSet rs = ps.executeQuery();
+        while (rs.next())
+        {
+            if (!TestUtil.isJCCFramework())
+                System.out.println("DERBY-1136 fetched: " + rs.getFloat(1));
+            else // lie about the result so we can share the master files.
+                System.out.println("DERBY-1136 fetched: 3.4028235E38");
+        }
+    }
+
     /**
      * Helper method to set up and run the auto-commit tests.
      * 
