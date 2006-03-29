@@ -201,6 +201,33 @@ public class BaseJDBCTestCase
     }
 
     /**
+     * Assert that SQLState is as expected.
+     * The expected SQLState is truncated to five characters if required.
+     *
+     * @param message message to print on failure.
+     * @param expected the expected SQLState.
+     * @param exception the exception to check the SQLState of.
+     *
+     * @throws IllegalArgumentException if exception is <code>null</code>.
+     */
+    public static void assertSQLState(String message, 
+                                      String expected, 
+                                      SQLException exception) {
+        // Make sure exception is not null. We want to separate between a
+        // null-exception object, and a null-SQLState.
+        if (exception == null) {
+            throw new IllegalArgumentException("Exception cannot be null " +
+                                               "when asserting SQLState");
+        }
+        // Make sure the expected SQLState is 5 characters long, if not null.
+        // If it is too short, we let it be.
+        if (expected != null && expected.length() > 5) {
+            expected = expected.substring(0, 5);
+        }
+        assertEquals(message, expected, exception.getSQLState());
+    }
+    
+    /**
      * Load the specified JDBC driver
      *
      * @param driverClass name of the JDBC driver class.
