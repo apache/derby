@@ -158,6 +158,15 @@ public class TestConfiguration {
     }
 
     /**
+     * Return the host name for the network server.
+     *
+     * @return host name.
+     */
+    public String getHostName() {
+        return hostName;
+    }
+
+    /**
      * Get port number for network server.
      * 
      * @return port number.

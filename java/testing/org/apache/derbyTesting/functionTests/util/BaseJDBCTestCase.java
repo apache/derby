@@ -22,6 +22,8 @@ package org.apache.derbyTesting.functionTests.util;
 import java.sql.*;
 import javax.sql.DataSource;
 import java.util.Properties;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.XADataSource;
 
 /**
  * Base class for JDBC JUnit tests.
@@ -76,13 +78,96 @@ public class BaseJDBCTestCase
                     CONFIG.getUserPassword());
         } else {
             //Use DataSource for JSR169
-            Properties prop = new Properties();
-            prop.setProperty("databaseName", CONFIG.getDatabaseName());
-            prop.setProperty("connectionAttributes", "create=true");
-            DataSource ds = TestUtil.getDataSource(prop);
-            con = ds.getConnection();
+            con = getDataSource().getConnection();
         }
         return con;
+    }
+
+    /**
+     * Generate properties which can be set on a
+     * <code>DataSource</code> in order to connect to the default
+     * database.
+     *
+     * @return a <code>Properties</code> object containing server
+     * name, port number, database name and other attributes needed to
+     * connect to the default database
+     */
+    private static Properties getDefaultDataSourceProperties() {
+        Properties attrs = new Properties();
+        if (!usingEmbedded()) {
+            attrs.setProperty("serverName", CONFIG.getHostName());
+            attrs.setProperty("portNumber", Integer.toString(CONFIG.getPort()));
+        }
+        attrs.setProperty("databaseName", CONFIG.getDatabaseName());
+        attrs.setProperty("connectionAttributes", "create=true");
+        return attrs;
+    }
+
+    /**
+     * Return a <code>DataSource</code> for the appropriate framework.
+     *
+     * @param attrs properties for the data source
+     * @return a <code>DataSource</code> object
+     * @see TestUtil#getDataSource(Properties)
+     */
+    public static DataSource getDataSource(Properties attrs) {
+        return TestUtil.getDataSource(attrs);
+    }
+
+    /**
+     * Return a <code>DataSource</code> which can establish a
+     * connection to the default database.
+     *
+     * @return a <code>DataSource</code> object
+     */
+    public static DataSource getDataSource() {
+        return getDataSource(getDefaultDataSourceProperties());
+    }
+
+    /**
+     * Return a <code>ConnectionPoolDataSource</code> for the
+     * appropriate framework.
+     *
+     * @param attrs properties for the data source
+     * @return a <code>ConnectionPoolDataSource</code> object
+     * @see TestUtil#getConnectionPoolDataSource(Properties)
+     */
+    public static ConnectionPoolDataSource
+        getConnectionPoolDataSource(Properties attrs)
+    {
+        return TestUtil.getConnectionPoolDataSource(attrs);
+    }
+
+    /**
+     * Return a <code>ConnectionPoolDataSource</code> which can
+     * establish a connection to the default database.
+     *
+     * @return a <code>ConnectionPoolDataSource</code> object
+     */
+    public static ConnectionPoolDataSource getConnectionPoolDataSource() {
+        return getConnectionPoolDataSource(getDefaultDataSourceProperties());
+    }
+
+    /**
+     * Return an <code>XADataSource</code> for the appropriate
+     * framework.
+     *
+     * @param attrs properties for the data source
+     * @return an <code>XADataSource</code> object
+     * @see TestUtil#getXADataSource(Properties)
+     */
+    public static XADataSource getXADataSource(Properties attrs) {
+        return TestUtil.getXADataSource(attrs);
+    }
+
+    /**
+     * Return an <code>XADataSource</code> which can establish a
+     * connection to the default database.
+     *
+     * @return an <code>XADataSource</code> object
+     */
+    public static XADataSource getXADataSource() {
+        return getXADataSource(getDefaultDataSourceProperties());
     }
 
    /**

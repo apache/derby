@@ -37,6 +37,7 @@ import java.security.PrivilegedActionException;
 import javax.sql.DataSource;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 
 
@@ -306,6 +307,16 @@ public class TestUtil {
 		if(HAVE_DRIVER_CLASS)
 		{
 			classname = getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource";
+			// The JDBC 4.0 implementation of the DataSource interface
+			// is suffixed with "40". Use it if it is available and
+			// the JVM version is at least 1.6.
+			if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
+				String classname40 = classname + "40";
+				try {
+					Class.forName(classname40);
+					classname = classname40;
+				} catch (ClassNotFoundException e) {}
+			}
 			return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
 		}
 		else
