@@ -43,8 +43,9 @@ public class BrokeredConnection30 extends BrokeredConnection
                                  int resultSetHoldability)
 								 throws SQLException {
 		try {
-			control.checkHoldCursors(resultSetHoldability);
-			return control.wrapStatement(getRealConnection().createStatement(resultSetType, resultSetConcurrency, resultSetHoldability));
+            resultSetHoldability = statementHoldabilityCheck(resultSetHoldability);
+			return control.wrapStatement(getRealConnection().createStatement(resultSetType,
+                    resultSetConcurrency, resultSetHoldability));
 		}
 		catch (SQLException se)
 		{
@@ -58,9 +59,10 @@ public class BrokeredConnection30 extends BrokeredConnection
                                      int resultSetHoldability)
 									 throws SQLException {
 		try {
-			control.checkHoldCursors(resultSetHoldability);
+            resultSetHoldability = statementHoldabilityCheck(resultSetHoldability);
 			return control.wrapStatement(
-				getRealConnection().prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability), sql);
+				getRealConnection().prepareCall(sql, resultSetType,
+                        resultSetConcurrency, resultSetHoldability), sql);
 		}
 		catch (SQLException se)
 		{
@@ -129,7 +131,7 @@ public class BrokeredConnection30 extends BrokeredConnection
 		throws SQLException
 	{
 		try {
-			control.checkHoldCursors(holdability);
+			holdability = control.checkHoldCursors(holdability, false);
 			getRealConnection().setHoldability(holdability);
 			stateHoldability = holdability;
 		}

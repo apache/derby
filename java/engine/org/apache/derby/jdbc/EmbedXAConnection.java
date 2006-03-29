@@ -74,16 +74,25 @@ final class EmbedXAConnection extends EmbedPooledConnection
 		super.checkAutoCommit(autoCommit);
 	}
 	/**
-		Are held cursors allowed.
+		Are held cursors allowed. If the connection is attached to
+        a global transaction then downgrade the result set holdabilty
+        to CLOSE_CURSORS_AT_COMMIT if downgrade is true, otherwise
+        throw an exception.
+        If the connection is in a local transaction then the
+        passed in holdabilty is returned.
 	*/
-	public void checkHoldCursors(int holdability) throws SQLException {
-
+	public int  checkHoldCursors(int holdability, boolean downgrade)
+        throws SQLException
+    {
 		if (holdability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {		
-			if (xaRes.getCurrentXid () != null)
-				throw Util.generateCsSQLException(SQLState.CANNOT_HOLD_CURSOR_XA);
+			if (xaRes.getCurrentXid () != null) {
+                if (downgrade)
+                    return JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
+                throw Util.generateCsSQLException(SQLState.CANNOT_HOLD_CURSOR_XA);
+            }
 		}
 
-		super.checkHoldCursors(holdability);
+		return super.checkHoldCursors(holdability, downgrade);
 	}
 
 	/**

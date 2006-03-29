@@ -64,8 +64,11 @@ public interface BrokeredConnectionControl
 
 	/**
 		Can cursors be held across commits.
+        @param downgrade true to downgrade the holdability,
+        false to throw an exception.
 	*/
-	public void checkHoldCursors(int holdability) throws SQLException;
+	public int checkHoldCursors(int holdability, boolean downgrade)
+        throws SQLException;
 
 	/**
 		Returns true if isolation level has been set using JDBC/SQL.
