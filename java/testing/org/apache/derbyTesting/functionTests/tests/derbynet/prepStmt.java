@@ -955,9 +955,10 @@ public class prepStmt
     // 65535 statements per batch (prior to DERBY-428, the server failed
     // at around 9000 statements). The different JDBC clients support slightly
     // lower limits: the Network Client supports 65534
-    // statements in a single batch, while the DB2JCC driver supports
-    // 65532 statements. This test just verifies that a batch
-    // of 65532 statements works, and that a batch of 100000 statements
+    // statements in a single batch, the DB2JCC driver v2.4 supports
+    // 65532 statements, the DB2JCC driver v2.6 supports 32765 statements. 
+    // This test just verifies that a batch of 32765 statements works, 
+    // and that a batch of 100000 statements
     // gets a BatchUpdateException from the Network Client.
     private static void jira428Test(Connection conn)
         throws Exception
@@ -969,7 +970,7 @@ public class prepStmt
         boolean savedAutoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);
         ps = conn.prepareStatement("insert into jira428 values (?)");
-        for (int i = 0; i < 65532; i++)
+        for (int i = 0; i < 32765; i++)
         {
             ps.setInt(1, i);
             ps.addBatch();
