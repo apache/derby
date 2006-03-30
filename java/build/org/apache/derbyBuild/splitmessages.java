@@ -52,7 +52,7 @@ public class splitmessages {
         // Add message ids that don't start with XJ here
         clientMessageIds.add(SQLState.NO_CURRENT_CONNECTION);
         clientMessageIds.add(SQLState.NOT_IMPLEMENTED);
-        clientMessageIds.add(SQLState.CANNOT_CLOSE_ACTIVE_XA_CONNECTION);
+        clientMessageIds.add(SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION);
         clientMessageIds.add(SQLState.XACT_SAVEPOINT_RELEASE_ROLLBACK_FAIL);
     }
 

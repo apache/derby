@@ -712,6 +712,8 @@ public interface SQLState {
 	String LANG_NOT_AN_XML_DOCUMENT                                    = "2200L";
 
 	String LANG_INVALID_TRANSACTION_STATE                              = "25000";
+    String CANNOT_CLOSE_ACTIVE_CONNECTION                              = "25001";
+
 
 	String LANG_UNEXPECTED_USER_EXCEPTION                              = "38000";
 	String EXTERNAL_ROUTINE_NO_SQL									   = "38001";

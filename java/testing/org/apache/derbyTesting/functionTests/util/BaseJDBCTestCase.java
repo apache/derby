@@ -219,12 +219,18 @@ public class BaseJDBCTestCase
             throw new IllegalArgumentException("Exception cannot be null " +
                                                "when asserting SQLState");
         }
-        // Make sure the expected SQLState is 5 characters long, if not null.
-        // If it is too short, we let it be.
-        if (expected != null && expected.length() > 5) {
-            expected = expected.substring(0, 5);
-        }
-        assertEquals(message, expected, exception.getSQLState());
+        
+        String state = exception.getSQLState();
+        
+        if ( state != null )
+            assertTrue("The exception's SQL state must be five characters long",
+                exception.getSQLState().length() == 5);
+        
+        if ( expected != null )
+            assertTrue("The expected SQL state must be five characters long",
+                expected.length() == 5);
+        
+        assertEquals(message, expected, state);
     }
     
     /**

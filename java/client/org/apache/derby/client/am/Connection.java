@@ -711,7 +711,7 @@ public abstract class Connection implements java.sql.Connection,
         // The following precondition matches CLI semantics, see SQLDisconnect()
         if (!autoCommit_ && inUnitOfWork_ && !allowCloseInUOW_()) {
             throw new SqlException(agent_.logWriter_,
-                    new MessageId (SQLState.CANNOT_CLOSE_ACTIVE_XA_CONNECTION));                   
+                    new MessageId (SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION));                   
         }
     }
 

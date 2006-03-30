@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 import junit.framework.*;
 
@@ -169,18 +170,22 @@ public class StatementTest
             con.close();
             fail("Invalid transaction state exception was not thrown");
         } catch (SQLException sqle) {
-            if (usingEmbedded()) {
-                assertEquals("Unexpected exception thrown: " + sqle.getMessage(),
-                        SQLState.LANG_INVALID_TRANSACTION_STATE,
-                        sqle.getSQLState());
-            } else {
-                // TODO: Compare with SQLState when implemented on the client side.
-                assertEquals("Unexpected exception thrown: " + sqle.getMessage(),
-                        "java.sql.Connection.close() requested while a " +
-                        "transaction is in progress on the connection.The " +
-                        "transaction remains active, and the connection " +
-                        "cannot be closed.",
-                        sqle.getMessage());
+            // The SQL State is incorrect in the embedded client, see
+            // JIRA id DERBY-1168
+            String expectedState;
+            if ( this.usingDerbyNetClient() )
+                expectedState = SQLStateConstants.INVALID_TRANSACTION_STATE_ACTIVE_SQL_TRANSACTION;
+            else
+                expectedState = SQLStateConstants.INVALID_TRANSACTION_STATE_NO_SUBCLASS;
+            
+            if ( ! expectedState.equals(sqle.getSQLState()) )
+            {
+                System.err.println("ERROR: Unexpected SQL State encountered; "
+                    + "got " + sqle.getSQLState() + ", expected " 
+                    + expectedState +
+                    ". Unexpected exception message is " + sqle.getMessage());
+                
+                throw sqle;
             }
         }
         assertFalse("Statement should still be open, because " +
