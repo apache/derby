@@ -20,6 +20,8 @@
 
 package org.apache.derby.impl.tools.sysinfo;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Locale;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -364,11 +366,23 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
       String localeResource =
          "/org/apache/derby/info/locale_" + stringLocales[i] + ".properties";
-
-      try {
-
-        InputStream is = p.getClass().getResourceAsStream (localeResource);
-
+      
+      final Properties finalp = p;
+      final String finalLocaleResource = localeResource;
+     
+      try {     
+        	InputStream is = (InputStream) AccessController.doPrivileged
+            (new PrivilegedAction() {
+                  public Object run() {
+  		            InputStream locis =
+  		            	finalp.getClass().getResourceAsStream (finalLocaleResource);
+  					return locis;
+                  }
+              }
+           );      
+      	
+      	
+      	
         if (is == null) {
 //           localAW.println("resource is null: " + localeResource);
         }
@@ -751,9 +765,18 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
         for (int i = 0; i < infoNames.length; i++)
         {
-			String resource = "/".concat(infoNames[i]);
+            final String resource = "/".concat(infoNames[i]);
 
-            InputStream is = new Main().getClass().getResourceAsStream(resource);
+            InputStream is = (InputStream) AccessController.doPrivileged
+            (new PrivilegedAction() {
+                public Object run() {
+			        InputStream locis =
+                        new Main().getClass().getResourceAsStream(resource);
+                            return locis;
+                    }
+                }
+            );         
+
 			if (is == null)
 				continue;
 
