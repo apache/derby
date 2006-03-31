@@ -1464,16 +1464,10 @@ ERROR 42818: Comparisons between 'CHAR' and 'LONG VARCHAR FOR BIT DATA' are not 
 SELECT NULLIF(CHARCOL,CLOBCOL) from AllDataTypesTable
 ERROR 42818: Comparisons between 'CHAR' and 'CLOB' are not supported. : 
 SELECT NULLIF(CHARCOL,DATECOL) from AllDataTypesTable
-	 COL1(datatype : CHAR, precision : 60, scale : 0)
-	 ------------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(CHARCOL,TIMECOL) from AllDataTypesTable
-	 COL1(datatype : CHAR, precision : 60, scale : 0)
-	 ------------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(CHARCOL,TIMESTAMPCOL) from AllDataTypesTable
-	 COL1(datatype : CHAR, precision : 60, scale : 0)
-	 ------------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(CHARCOL,BLOBCOL) from AllDataTypesTable
 ERROR 42818: Comparisons between 'CHAR' and 'BLOB' are not supported. : 
@@ -1514,16 +1508,10 @@ ERROR 42818: Comparisons between 'VARCHAR' and 'LONG VARCHAR FOR BIT DATA' are n
 SELECT NULLIF(VARCHARCOL,CLOBCOL) from AllDataTypesTable
 ERROR 42818: Comparisons between 'VARCHAR' and 'CLOB' are not supported. : 
 SELECT NULLIF(VARCHARCOL,DATECOL) from AllDataTypesTable
-	 COL1(datatype : VARCHAR, precision : 60, scale : 0)
-	 ---------------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(VARCHARCOL,TIMECOL) from AllDataTypesTable
-	 COL1(datatype : VARCHAR, precision : 60, scale : 0)
-	 ---------------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(VARCHARCOL,TIMESTAMPCOL) from AllDataTypesTable
-	 COL1(datatype : VARCHAR, precision : 60, scale : 0)
-	 ---------------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(VARCHARCOL,BLOBCOL) from AllDataTypesTable
 ERROR 42818: Comparisons between 'VARCHAR' and 'BLOB' are not supported. : 
@@ -1730,12 +1718,8 @@ ERROR 42818: Comparisons between 'DATE' and 'REAL' are not supported. :
 SELECT NULLIF(DATECOL,DOUBLECOL) from AllDataTypesTable
 ERROR 42818: Comparisons between 'DATE' and 'DOUBLE' are not supported. : 
 SELECT NULLIF(DATECOL,CHARCOL) from AllDataTypesTable
-	 COL1(datatype : DATE, precision : 10, scale : 0)
-	 ------------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(DATECOL,VARCHARCOL) from AllDataTypesTable
-	 COL1(datatype : DATE, precision : 10, scale : 0)
-	 ------------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(DATECOL,LONGVARCHARCOL) from AllDataTypesTable
 ERROR 42818: Comparisons between 'DATE' and 'LONG VARCHAR' are not supported. : 
@@ -1773,12 +1757,8 @@ ERROR 42818: Comparisons between 'TIME' and 'REAL' are not supported. :
 SELECT NULLIF(TIMECOL,DOUBLECOL) from AllDataTypesTable
 ERROR 42818: Comparisons between 'TIME' and 'DOUBLE' are not supported. : 
 SELECT NULLIF(TIMECOL,CHARCOL) from AllDataTypesTable
-	 COL1(datatype : TIME, precision : 8, scale : 0)
-	 -----------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(TIMECOL,VARCHARCOL) from AllDataTypesTable
-	 COL1(datatype : TIME, precision : 8, scale : 0)
-	 -----------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(TIMECOL,LONGVARCHARCOL) from AllDataTypesTable
 ERROR 42818: Comparisons between 'TIME' and 'LONG VARCHAR' are not supported. : 
@@ -1816,12 +1796,8 @@ ERROR 42818: Comparisons between 'TIMESTAMP' and 'REAL' are not supported. :
 SELECT NULLIF(TIMESTAMPCOL,DOUBLECOL) from AllDataTypesTable
 ERROR 42818: Comparisons between 'TIMESTAMP' and 'DOUBLE' are not supported. : 
 SELECT NULLIF(TIMESTAMPCOL,CHARCOL) from AllDataTypesTable
-	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
-	 -----------------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(TIMESTAMPCOL,VARCHARCOL) from AllDataTypesTable
-	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
-	 -----------------------------------------------------
 Data Conversion SQLException
 SELECT NULLIF(TIMESTAMPCOL,LONGVARCHARCOL) from AllDataTypesTable
 ERROR 42818: Comparisons between 'TIMESTAMP' and 'LONG VARCHAR' are not supported. : 

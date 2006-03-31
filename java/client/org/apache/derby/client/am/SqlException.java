@@ -27,6 +27,7 @@ import org.apache.derby.client.resources.ResourceKeys;
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.error.ExceptionUtil;
+import org.apache.derby.shared.common.reference.SQLState;
 
 
 // The signature of the stored procedure SQLCAMessage I have come out so far is as follows:
@@ -147,6 +148,12 @@ public class SqlException extends Exception implements Diagnosable {
             Object arg1, Throwable cause)
     {
         this(logwriter, msgid, new Object[] { arg1 }, cause);
+    }
+    
+    public SqlException(LogWriter logwriter, MessageId msgid,
+        Object arg1, Object arg2, Throwable cause)
+    {
+        this(logwriter, msgid, new Object[] { arg1, arg2 }, cause);
     }
     
     public SqlException(LogWriter logwriter,
@@ -427,6 +434,16 @@ public class SqlException extends Exception implements Diagnosable {
         ExceptionFormatter.printTrace(this, printWriter, header);
     }
     
+    /**
+     * Helper method to construct an exception which basically says that
+     * we encountered an underlying Java exception
+     */
+    public static SqlException javaException(LogWriter logWriter, Throwable e) {
+        return new SqlException(logWriter, 
+            new MessageId (SQLState.JAVA_EXCEPTION), 
+            new Object[] {e.getClass().getName(), e.getMessage()}, e);
+    }
+    
     // Return a single SQLException without the "next" pointing to another SQLException.
     // Because the "next" is a private field in java.sql.SQLException,
     // we have to create a new SqlException in order to break the chain with "next" as null.
@@ -476,10 +493,11 @@ class NumberFormatConversionException extends SqlException {
 // for common ResultSet data conversion exceptions.
 
 class ColumnTypeConversionException extends SqlException {
-    ColumnTypeConversionException(LogWriter logWriter) {
+    ColumnTypeConversionException(LogWriter logWriter, String sourceType,
+        String targetType) {
         super(logWriter,
-                "Invalid data conversion:" +
-                " Wrong result column type for requested conversion.");
+            new MessageId(SQLState.LANG_DATA_TYPE_GET_MISMATCH),
+            sourceType, targetType);
     }
 }
 

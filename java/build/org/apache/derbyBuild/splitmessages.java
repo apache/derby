@@ -54,6 +54,13 @@ public class splitmessages {
         clientMessageIds.add(SQLState.NOT_IMPLEMENTED);
         clientMessageIds.add(SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION);
         clientMessageIds.add(SQLState.XACT_SAVEPOINT_RELEASE_ROLLBACK_FAIL);
+        clientMessageIds.add(SQLState.UNSUPPORTED_ENCODING);
+        clientMessageIds.add(SQLState.LANG_FORMAT_EXCEPTION);
+        clientMessageIds.add(SQLState.LANG_DATA_TYPE_GET_MISMATCH);
+        clientMessageIds.add(SQLState.LANG_DATA_TYPE_SET_MISMATCH);
+        clientMessageIds.add(SQLState.LANG_DATE_SYNTAX_EXCEPTION);
+        clientMessageIds.add(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE);
+        clientMessageIds.add(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE);
     }
 
 	public static void main(String[] args) throws Exception {

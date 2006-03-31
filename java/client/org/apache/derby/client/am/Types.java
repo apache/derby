@@ -79,6 +79,32 @@ public class Types {
     // hide the default constructor
     private Types() {
    }
+    
+    static public String getTypeString(int type)
+    {
+        switch (type )
+        {
+            case BIGINT:        return "BIGINT";
+            case BINARY:        return "BINARY";
+            case BLOB:          return "BLOB";
+            case BOOLEAN:       return "BOOLEAN";
+            case CHAR:          return "CHAR";
+            case CLOB:          return "CLOB";
+            case DATE:          return "DATE";
+            case DECIMAL:       return "DECIMAL";
+            case DOUBLE:        return "DOUBLE";
+            case INTEGER:       return "INTEGER";
+            case LONGVARBINARY: return "LONGVARBINARY";
+            case LONGVARCHAR:   return "LONGVARCHAR";
+            case REAL:          return "REAL";
+            case SMALLINT:      return "SMALLINT";
+            case TIME:          return "TIME";
+            case TIMESTAMP:     return "TIMESTAMP";
+            case VARBINARY:     return "VARBINARY";
+            case VARCHAR:       return "VARCHAR";
+            default:            return "<UNKNOWN>";
+        }
+    }
 
     static public int mapDERBYTypeToDriverType(boolean isDescribed, int sqlType, long length, int ccsid) {
         switch (Utils.getNonNullableSqlType(sqlType)) { // mask the isNullable bit

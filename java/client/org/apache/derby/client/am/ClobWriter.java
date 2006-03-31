@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 
 public class ClobWriter extends java.io.Writer {
     private Clob clob_;
@@ -33,7 +35,9 @@ public class ClobWriter extends java.io.Writer {
         offset_ = offset;
 
         if (offset_ - 1 > clob_.sqlLength_) {
-            throw new SqlException(clob_.agent_.logWriter_, "Invalid position: " + offset);
+            throw new SqlException(clob_.agent_.logWriter_, 
+                new MessageId(SQLState.BLOB_BAD_POSITION),
+                new Long(offset));
         }
     }
 

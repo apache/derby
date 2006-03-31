@@ -12,187 +12,187 @@ insert into bit_table ( typecol ) values cast ( X'0074007200750065'  AS char (8 
 === Columntype int
 select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, col_0 as col_0_5, col_0 as col_0_6, col_0 as col_0_7, col_0 as col_0_8, col_0 as col_0_9, col_0 as col_0_10, col_0 as col_0_11, col_0 as col_0_12, col_0 as col_0_13, col_0 as col_0_14, col_0 as col_0_15, col_0 as col_0_16, col_0 as col_0_17, col_0 as col_0_18, col_0 as col_0_19, col_0 as col_0_20, col_0 as col_0_21 from bit_table
 	0 getObject            ->'100'    	: java.lang.Integer
-	0 getArray             ->		EXCEPTION (not yet implemented)
-	0 getAsciiStream       ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
+	0 getAsciiStream       ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.InputStream'.)
 	0 getBigDecimal        ->'100'    	: java.math.BigDecimal
-	0 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.InputStream'.)
+	0 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Blob'.)
 	0 getBoolean           ->'true'    	: java.lang.Boolean
 	0 getByte              ->'100'    	: java.lang.Byte
-	0 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getCharacterStream   ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'byte[]'.)
+	0 getCharacterStream   ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.Reader'.)
+	0 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Clob'.)
+	0 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Date'.)
 	0 getDouble            ->'100.0'    	: java.lang.Double
 	0 getFloat             ->'100.0'    	: java.lang.Float
 	0 getInt               ->'100'    	: java.lang.Integer
 	0 getLong              ->'100'    	: java.lang.Long
-	0 getRef               ->		EXCEPTION (not yet implemented)
+	0 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	0 getShort             ->'100'    	: java.lang.Short
 	0 getString            ->'100'    	: java.lang.String
-	0 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Time'.)
+	0 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Timestamp'.)
 === Columntype char(10)
 select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, col_1 as col_1_5, col_1 as col_1_6, col_1 as col_1_7, col_1 as col_1_8, col_1 as col_1_9, col_1 as col_1_10, col_1 as col_1_11, col_1 as col_1_12, col_1 as col_1_13, col_1 as col_1_14, col_1 as col_1_15, col_1 as col_1_16, col_1 as col_1_17, col_1 as col_1_18, col_1 as col_1_19, col_1 as col_1_20, col_1 as col_1_21 from bit_table
 	1 getObject            ->'101       '    	: java.lang.String
-	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	1 getAsciiStream       ->Object'   	: java.io.InputStream
 	1 getBigDecimal        ->'101'    	: java.math.BigDecimal
-	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	1 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->'101'    	: java.lang.Byte
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
-	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
+	1 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	1 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	1 getDouble            ->'101.0'    	: java.lang.Double
 	1 getFloat             ->'101.0'    	: java.lang.Float
 	1 getInt               ->'101'    	: java.lang.Integer
 	1 getLong              ->'101'    	: java.lang.Long
-	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	1 getShort             ->'101'    	: java.lang.Short
 	1 getString            ->'101       '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
+	1 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	1 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from bit_table
 	2 getObject            ->'102'    	: java.lang.String
-	2 getArray             ->		EXCEPTION (not yet implemented)
+	2 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	2 getAsciiStream       ->Object'   	: java.io.InputStream
 	2 getBigDecimal        ->'102'    	: java.math.BigDecimal
-	2 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	2 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	2 getBoolean           ->'true'    	: java.lang.Boolean
 	2 getByte              ->'102'    	: java.lang.Byte
-	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
-	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
+	2 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	2 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
 	2 getLong              ->'102'    	: java.lang.Long
-	2 getRef               ->		EXCEPTION (not yet implemented)
+	2 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
-	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
-	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
+	2 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	2 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from bit_table
 	3 getObject            ->'103'    	: java.lang.String
-	3 getArray             ->		EXCEPTION (not yet implemented)
+	3 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	3 getAsciiStream       ->Object'   	: java.io.InputStream
 	3 getBigDecimal        ->'103'    	: java.math.BigDecimal
-	3 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.io.InputStream'.)
+	3 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.sql.Blob'.)
 	3 getBoolean           ->'true'    	: java.lang.Boolean
 	3 getByte              ->'103'    	: java.lang.Byte
-	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'byte[]'.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
-	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
+	3 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.sql.Clob'.)
+	3 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
 	3 getLong              ->'103'    	: java.lang.Long
-	3 getRef               ->		EXCEPTION (not yet implemented)
+	3 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
-	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
-	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
+	3 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	3 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from bit_table
 	4 getObject            ->Object'   	: byte[]
-	4 getArray             ->		EXCEPTION (not yet implemented)
+	4 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	4 getAsciiStream       ->Object'   	: java.io.InputStream
-	4 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.math.BigDecimal'.)
 	4 getBinaryStream      ->Object'   	: java.io.InputStream
-	4 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Blob'.)
+	4 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'boolean'.)
+	4 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'byte'.)
 	4 getBytes             ->Object'   	: byte[]
 	4 getCharacterStream   ->Object'   	: java.io.Reader
-	4 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getRef               ->		EXCEPTION (not yet implemented)
-	4 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Clob'.)
+	4 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Date'.)
+	4 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'double'.)
+	4 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'float'.)
+	4 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'int'.)
+	4 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'long'.)
+	4 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	4 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'short'.)
 	4 getString            ->'00310030003420202020'    	: java.lang.String
-	4 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Time'.)
+	4 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Timestamp'.)
 === Columntype long varchar for bit data
 select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, col_5 as col_5_5, col_5 as col_5_6, col_5 as col_5_7, col_5 as col_5_8, col_5 as col_5_9, col_5 as col_5_10, col_5 as col_5_11, col_5 as col_5_12, col_5 as col_5_13, col_5 as col_5_14, col_5 as col_5_15, col_5 as col_5_16, col_5 as col_5_17, col_5 as col_5_18, col_5 as col_5_19, col_5 as col_5_20, col_5 as col_5_21 from bit_table
 	5 getObject            ->Object'   	: byte[]
-	5 getArray             ->		EXCEPTION (not yet implemented)
+	5 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	5 getAsciiStream       ->Object'   	: java.io.InputStream
-	5 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.math.BigDecimal'.)
 	5 getBinaryStream      ->Object'   	: java.io.InputStream
-	5 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Blob'.)
+	5 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'boolean'.)
+	5 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'byte'.)
 	5 getBytes             ->Object'   	: byte[]
 	5 getCharacterStream   ->Object'   	: java.io.Reader
-	5 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getRef               ->		EXCEPTION (not yet implemented)
-	5 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Clob'.)
+	5 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Date'.)
+	5 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'double'.)
+	5 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'float'.)
+	5 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'int'.)
+	5 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'long'.)
+	5 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	5 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'short'.)
 	5 getString            ->'003100300035'    	: java.lang.String
-	5 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Time'.)
+	5 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Timestamp'.)
 === Columntype blob(80)
 select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, col_6 as col_6_5, col_6 as col_6_6, col_6 as col_6_7, col_6 as col_6_8, col_6 as col_6_9, col_6 as col_6_10, col_6 as col_6_11, col_6 as col_6_12, col_6 as col_6_13, col_6 as col_6_14, col_6 as col_6_15, col_6 as col_6_16, col_6 as col_6_17, col_6 as col_6_18, col_6 as col_6_19, col_6 as col_6_20, col_6 as col_6_21 from bit_table
 	6 getObject            ->Object'   	: java.sql.Blob
-	6 getArray             ->		EXCEPTION (not yet implemented)
+	6 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	6 getAsciiStream       ->Object'   	: java.io.InputStream
-	6 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.math.BigDecimal'.)
 	6 getBinaryStream      ->Object'   	: java.io.InputStream
 	6 getBlob              ->Object'   	: java.sql.Blob
-	6 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'boolean'.)
+	6 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'byte'.)
 	6 getBytes             ->Object'   	: byte[]
 	6 getCharacterStream   ->Object'   	: java.io.Reader
-	6 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getRef               ->		EXCEPTION (not yet implemented)
-	6 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Clob'.)
+	6 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Date'.)
+	6 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'double'.)
+	6 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'float'.)
+	6 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'int'.)
+	6 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'long'.)
+	6 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	6 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'short'.)
 	6 getString            ->'003100300036'    	: java.lang.String
-	6 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Time'.)
+	6 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Timestamp'.)
 === Columntype char (8 ) for bit data
 select typecol as typecol_1, typecol as typecol_2, typecol as typecol_3, typecol as typecol_4, typecol as typecol_5, typecol as typecol_6, typecol as typecol_7, typecol as typecol_8, typecol as typecol_9, typecol as typecol_10, typecol as typecol_11, typecol as typecol_12, typecol as typecol_13, typecol as typecol_14, typecol as typecol_15, typecol as typecol_16, typecol as typecol_17, typecol as typecol_18, typecol as typecol_19, typecol as typecol_20, typecol as typecol_21 from bit_table
 	7 getObject            ->Object'   	: byte[]
-	7 getArray             ->		EXCEPTION (not yet implemented)
+	7 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	7 getAsciiStream       ->Object'   	: java.io.InputStream
-	7 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.math.BigDecimal'.)
 	7 getBinaryStream      ->Object'   	: java.io.InputStream
-	7 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Blob'.)
+	7 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'boolean'.)
+	7 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'byte'.)
 	7 getBytes             ->Object'   	: byte[]
 	7 getCharacterStream   ->Object'   	: java.io.Reader
-	7 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getRef               ->		EXCEPTION (not yet implemented)
-	7 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Clob'.)
+	7 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Date'.)
+	7 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'double'.)
+	7 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'float'.)
+	7 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'int'.)
+	7 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'long'.)
+	7 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	7 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'short'.)
 	7 getString            ->'0031003000372020'    	: java.lang.String
-	7 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Time'.)
+	7 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Timestamp'.)
 -----< METADATA TESTS
 select col_0 from bit_table
 	---- 1
@@ -574,187 +574,187 @@ insert into bit_table ( typecol ) values cast ( X'0074007200750065'  AS char (8 
 === Columntype int
 select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, col_0 as col_0_5, col_0 as col_0_6, col_0 as col_0_7, col_0 as col_0_8, col_0 as col_0_9, col_0 as col_0_10, col_0 as col_0_11, col_0 as col_0_12, col_0 as col_0_13, col_0 as col_0_14, col_0 as col_0_15, col_0 as col_0_16, col_0 as col_0_17, col_0 as col_0_18, col_0 as col_0_19, col_0 as col_0_20, col_0 as col_0_21 from bit_table
 	0 getObject            ->'100'    	: java.lang.Integer
-	0 getArray             ->		EXCEPTION (not yet implemented)
-	0 getAsciiStream       ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
+	0 getAsciiStream       ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.InputStream'.)
 	0 getBigDecimal        ->'100'    	: java.math.BigDecimal
-	0 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.InputStream'.)
+	0 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Blob'.)
 	0 getBoolean           ->'true'    	: java.lang.Boolean
 	0 getByte              ->'100'    	: java.lang.Byte
-	0 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getCharacterStream   ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'byte[]'.)
+	0 getCharacterStream   ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.Reader'.)
+	0 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Clob'.)
+	0 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Date'.)
 	0 getDouble            ->'100.0'    	: java.lang.Double
 	0 getFloat             ->'100.0'    	: java.lang.Float
 	0 getInt               ->'100'    	: java.lang.Integer
 	0 getLong              ->'100'    	: java.lang.Long
-	0 getRef               ->		EXCEPTION (not yet implemented)
+	0 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	0 getShort             ->'100'    	: java.lang.Short
 	0 getString            ->'100'    	: java.lang.String
-	0 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Time'.)
+	0 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Timestamp'.)
 === Columntype char(10)
 select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, col_1 as col_1_5, col_1 as col_1_6, col_1 as col_1_7, col_1 as col_1_8, col_1 as col_1_9, col_1 as col_1_10, col_1 as col_1_11, col_1 as col_1_12, col_1 as col_1_13, col_1 as col_1_14, col_1 as col_1_15, col_1 as col_1_16, col_1 as col_1_17, col_1 as col_1_18, col_1 as col_1_19, col_1 as col_1_20, col_1 as col_1_21 from bit_table
 	1 getObject            ->'101       '    	: java.lang.String
-	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	1 getAsciiStream       ->Object'   	: java.io.InputStream
 	1 getBigDecimal        ->'101'    	: java.math.BigDecimal
-	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	1 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->'101'    	: java.lang.Byte
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
-	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
+	1 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	1 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	1 getDouble            ->'101.0'    	: java.lang.Double
 	1 getFloat             ->'101.0'    	: java.lang.Float
 	1 getInt               ->'101'    	: java.lang.Integer
 	1 getLong              ->'101'    	: java.lang.Long
-	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	1 getShort             ->'101'    	: java.lang.Short
 	1 getString            ->'101       '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
+	1 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	1 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from bit_table
 	2 getObject            ->'102'    	: java.lang.String
-	2 getArray             ->		EXCEPTION (not yet implemented)
+	2 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	2 getAsciiStream       ->Object'   	: java.io.InputStream
 	2 getBigDecimal        ->'102'    	: java.math.BigDecimal
-	2 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	2 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	2 getBoolean           ->'true'    	: java.lang.Boolean
 	2 getByte              ->'102'    	: java.lang.Byte
-	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
-	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
+	2 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	2 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
 	2 getLong              ->'102'    	: java.lang.Long
-	2 getRef               ->		EXCEPTION (not yet implemented)
+	2 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
-	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
-	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
+	2 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	2 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from bit_table
 	3 getObject            ->'103'    	: java.lang.String
-	3 getArray             ->		EXCEPTION (not yet implemented)
+	3 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	3 getAsciiStream       ->Object'   	: java.io.InputStream
 	3 getBigDecimal        ->'103'    	: java.math.BigDecimal
-	3 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.io.InputStream'.)
+	3 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.sql.Blob'.)
 	3 getBoolean           ->'true'    	: java.lang.Boolean
 	3 getByte              ->'103'    	: java.lang.Byte
-	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'byte[]'.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
-	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
+	3 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.sql.Clob'.)
+	3 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
 	3 getLong              ->'103'    	: java.lang.Long
-	3 getRef               ->		EXCEPTION (not yet implemented)
+	3 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
-	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
-	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
+	3 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	3 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from bit_table
 	4 getObject            ->Object'   	: byte[]
-	4 getArray             ->		EXCEPTION (not yet implemented)
+	4 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	4 getAsciiStream       ->Object'   	: java.io.InputStream
-	4 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.math.BigDecimal'.)
 	4 getBinaryStream      ->Object'   	: java.io.InputStream
-	4 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Blob'.)
+	4 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'boolean'.)
+	4 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'byte'.)
 	4 getBytes             ->Object'   	: byte[]
 	4 getCharacterStream   ->Object'   	: java.io.Reader
-	4 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getRef               ->		EXCEPTION (not yet implemented)
-	4 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Clob'.)
+	4 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Date'.)
+	4 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'double'.)
+	4 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'float'.)
+	4 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'int'.)
+	4 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'long'.)
+	4 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	4 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'short'.)
 	4 getString            ->'00310030003420202020'    	: java.lang.String
-	4 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Time'.)
+	4 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Timestamp'.)
 === Columntype long varchar for bit data
 select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, col_5 as col_5_5, col_5 as col_5_6, col_5 as col_5_7, col_5 as col_5_8, col_5 as col_5_9, col_5 as col_5_10, col_5 as col_5_11, col_5 as col_5_12, col_5 as col_5_13, col_5 as col_5_14, col_5 as col_5_15, col_5 as col_5_16, col_5 as col_5_17, col_5 as col_5_18, col_5 as col_5_19, col_5 as col_5_20, col_5 as col_5_21 from bit_table
 	5 getObject            ->Object'   	: byte[]
-	5 getArray             ->		EXCEPTION (not yet implemented)
+	5 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	5 getAsciiStream       ->Object'   	: java.io.InputStream
-	5 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.math.BigDecimal'.)
 	5 getBinaryStream      ->Object'   	: java.io.InputStream
-	5 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Blob'.)
+	5 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'boolean'.)
+	5 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'byte'.)
 	5 getBytes             ->Object'   	: byte[]
 	5 getCharacterStream   ->Object'   	: java.io.Reader
-	5 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getRef               ->		EXCEPTION (not yet implemented)
-	5 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Clob'.)
+	5 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Date'.)
+	5 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'double'.)
+	5 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'float'.)
+	5 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'int'.)
+	5 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'long'.)
+	5 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	5 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'short'.)
 	5 getString            ->'003100300035'    	: java.lang.String
-	5 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Time'.)
+	5 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Timestamp'.)
 === Columntype blob(80)
 select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, col_6 as col_6_5, col_6 as col_6_6, col_6 as col_6_7, col_6 as col_6_8, col_6 as col_6_9, col_6 as col_6_10, col_6 as col_6_11, col_6 as col_6_12, col_6 as col_6_13, col_6 as col_6_14, col_6 as col_6_15, col_6 as col_6_16, col_6 as col_6_17, col_6 as col_6_18, col_6 as col_6_19, col_6 as col_6_20, col_6 as col_6_21 from bit_table
 	6 getObject            ->Object'   	: java.sql.Blob
-	6 getArray             ->		EXCEPTION (not yet implemented)
+	6 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	6 getAsciiStream       ->Object'   	: java.io.InputStream
-	6 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.math.BigDecimal'.)
 	6 getBinaryStream      ->Object'   	: java.io.InputStream
 	6 getBlob              ->Object'   	: java.sql.Blob
-	6 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'boolean'.)
+	6 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'byte'.)
 	6 getBytes             ->Object'   	: byte[]
 	6 getCharacterStream   ->Object'   	: java.io.Reader
-	6 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getRef               ->		EXCEPTION (not yet implemented)
-	6 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Clob'.)
+	6 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Date'.)
+	6 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'double'.)
+	6 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'float'.)
+	6 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'int'.)
+	6 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'long'.)
+	6 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	6 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'short'.)
 	6 getString            ->'003100300036'    	: java.lang.String
-	6 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Time'.)
+	6 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Timestamp'.)
 === Columntype char (8 ) for bit data
 select typecol as typecol_1, typecol as typecol_2, typecol as typecol_3, typecol as typecol_4, typecol as typecol_5, typecol as typecol_6, typecol as typecol_7, typecol as typecol_8, typecol as typecol_9, typecol as typecol_10, typecol as typecol_11, typecol as typecol_12, typecol as typecol_13, typecol as typecol_14, typecol as typecol_15, typecol as typecol_16, typecol as typecol_17, typecol as typecol_18, typecol as typecol_19, typecol as typecol_20, typecol as typecol_21 from bit_table
 	7 getObject            ->Object'   	: byte[]
-	7 getArray             ->		EXCEPTION (not yet implemented)
+	7 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	7 getAsciiStream       ->Object'   	: java.io.InputStream
-	7 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.math.BigDecimal'.)
 	7 getBinaryStream      ->Object'   	: java.io.InputStream
-	7 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Blob'.)
+	7 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'boolean'.)
+	7 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'byte'.)
 	7 getBytes             ->Object'   	: byte[]
 	7 getCharacterStream   ->Object'   	: java.io.Reader
-	7 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getRef               ->		EXCEPTION (not yet implemented)
-	7 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Clob'.)
+	7 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Date'.)
+	7 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'double'.)
+	7 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'float'.)
+	7 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'int'.)
+	7 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'long'.)
+	7 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	7 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'short'.)
 	7 getString            ->'0031003000372020'    	: java.lang.String
-	7 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Time'.)
+	7 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Timestamp'.)
 -----< METADATA TESTS
 select col_0 from bit_table
 	---- 1
@@ -1136,187 +1136,187 @@ insert into blob_table ( typecol ) values cast ( X'0074007200750065'  AS blob (2
 === Columntype int
 select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, col_0 as col_0_5, col_0 as col_0_6, col_0 as col_0_7, col_0 as col_0_8, col_0 as col_0_9, col_0 as col_0_10, col_0 as col_0_11, col_0 as col_0_12, col_0 as col_0_13, col_0 as col_0_14, col_0 as col_0_15, col_0 as col_0_16, col_0 as col_0_17, col_0 as col_0_18, col_0 as col_0_19, col_0 as col_0_20, col_0 as col_0_21 from blob_table
 	0 getObject            ->'100'    	: java.lang.Integer
-	0 getArray             ->		EXCEPTION (not yet implemented)
-	0 getAsciiStream       ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
+	0 getAsciiStream       ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.InputStream'.)
 	0 getBigDecimal        ->'100'    	: java.math.BigDecimal
-	0 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.InputStream'.)
+	0 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Blob'.)
 	0 getBoolean           ->'true'    	: java.lang.Boolean
 	0 getByte              ->'100'    	: java.lang.Byte
-	0 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getCharacterStream   ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'byte[]'.)
+	0 getCharacterStream   ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.Reader'.)
+	0 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Clob'.)
+	0 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Date'.)
 	0 getDouble            ->'100.0'    	: java.lang.Double
 	0 getFloat             ->'100.0'    	: java.lang.Float
 	0 getInt               ->'100'    	: java.lang.Integer
 	0 getLong              ->'100'    	: java.lang.Long
-	0 getRef               ->		EXCEPTION (not yet implemented)
+	0 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	0 getShort             ->'100'    	: java.lang.Short
 	0 getString            ->'100'    	: java.lang.String
-	0 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Time'.)
+	0 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Timestamp'.)
 === Columntype char(10)
 select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, col_1 as col_1_5, col_1 as col_1_6, col_1 as col_1_7, col_1 as col_1_8, col_1 as col_1_9, col_1 as col_1_10, col_1 as col_1_11, col_1 as col_1_12, col_1 as col_1_13, col_1 as col_1_14, col_1 as col_1_15, col_1 as col_1_16, col_1 as col_1_17, col_1 as col_1_18, col_1 as col_1_19, col_1 as col_1_20, col_1 as col_1_21 from blob_table
 	1 getObject            ->'101       '    	: java.lang.String
-	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	1 getAsciiStream       ->Object'   	: java.io.InputStream
 	1 getBigDecimal        ->'101'    	: java.math.BigDecimal
-	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	1 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->'101'    	: java.lang.Byte
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
-	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
+	1 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	1 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	1 getDouble            ->'101.0'    	: java.lang.Double
 	1 getFloat             ->'101.0'    	: java.lang.Float
 	1 getInt               ->'101'    	: java.lang.Integer
 	1 getLong              ->'101'    	: java.lang.Long
-	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	1 getShort             ->'101'    	: java.lang.Short
 	1 getString            ->'101       '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
+	1 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	1 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from blob_table
 	2 getObject            ->'102'    	: java.lang.String
-	2 getArray             ->		EXCEPTION (not yet implemented)
+	2 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	2 getAsciiStream       ->Object'   	: java.io.InputStream
 	2 getBigDecimal        ->'102'    	: java.math.BigDecimal
-	2 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	2 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	2 getBoolean           ->'true'    	: java.lang.Boolean
 	2 getByte              ->'102'    	: java.lang.Byte
-	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
-	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
+	2 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	2 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
 	2 getLong              ->'102'    	: java.lang.Long
-	2 getRef               ->		EXCEPTION (not yet implemented)
+	2 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
-	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
-	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
+	2 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	2 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from blob_table
 	3 getObject            ->'103'    	: java.lang.String
-	3 getArray             ->		EXCEPTION (not yet implemented)
+	3 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	3 getAsciiStream       ->Object'   	: java.io.InputStream
 	3 getBigDecimal        ->'103'    	: java.math.BigDecimal
-	3 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.io.InputStream'.)
+	3 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.sql.Blob'.)
 	3 getBoolean           ->'true'    	: java.lang.Boolean
 	3 getByte              ->'103'    	: java.lang.Byte
-	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'byte[]'.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
-	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
+	3 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.sql.Clob'.)
+	3 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
 	3 getLong              ->'103'    	: java.lang.Long
-	3 getRef               ->		EXCEPTION (not yet implemented)
+	3 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
-	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
-	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
+	3 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	3 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from blob_table
 	4 getObject            ->Object'   	: byte[]
-	4 getArray             ->		EXCEPTION (not yet implemented)
+	4 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	4 getAsciiStream       ->Object'   	: java.io.InputStream
-	4 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.math.BigDecimal'.)
 	4 getBinaryStream      ->Object'   	: java.io.InputStream
-	4 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Blob'.)
+	4 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'boolean'.)
+	4 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'byte'.)
 	4 getBytes             ->Object'   	: byte[]
 	4 getCharacterStream   ->Object'   	: java.io.Reader
-	4 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getRef               ->		EXCEPTION (not yet implemented)
-	4 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Clob'.)
+	4 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Date'.)
+	4 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'double'.)
+	4 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'float'.)
+	4 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'int'.)
+	4 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'long'.)
+	4 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	4 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'short'.)
 	4 getString            ->'00310030003420202020'    	: java.lang.String
-	4 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Time'.)
+	4 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Timestamp'.)
 === Columntype long varchar for bit data
 select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, col_5 as col_5_5, col_5 as col_5_6, col_5 as col_5_7, col_5 as col_5_8, col_5 as col_5_9, col_5 as col_5_10, col_5 as col_5_11, col_5 as col_5_12, col_5 as col_5_13, col_5 as col_5_14, col_5 as col_5_15, col_5 as col_5_16, col_5 as col_5_17, col_5 as col_5_18, col_5 as col_5_19, col_5 as col_5_20, col_5 as col_5_21 from blob_table
 	5 getObject            ->Object'   	: byte[]
-	5 getArray             ->		EXCEPTION (not yet implemented)
+	5 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	5 getAsciiStream       ->Object'   	: java.io.InputStream
-	5 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.math.BigDecimal'.)
 	5 getBinaryStream      ->Object'   	: java.io.InputStream
-	5 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Blob'.)
+	5 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'boolean'.)
+	5 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'byte'.)
 	5 getBytes             ->Object'   	: byte[]
 	5 getCharacterStream   ->Object'   	: java.io.Reader
-	5 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getRef               ->		EXCEPTION (not yet implemented)
-	5 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Clob'.)
+	5 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Date'.)
+	5 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'double'.)
+	5 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'float'.)
+	5 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'int'.)
+	5 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'long'.)
+	5 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	5 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'short'.)
 	5 getString            ->'003100300035'    	: java.lang.String
-	5 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Time'.)
+	5 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Timestamp'.)
 === Columntype blob(80)
 select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, col_6 as col_6_5, col_6 as col_6_6, col_6 as col_6_7, col_6 as col_6_8, col_6 as col_6_9, col_6 as col_6_10, col_6 as col_6_11, col_6 as col_6_12, col_6 as col_6_13, col_6 as col_6_14, col_6 as col_6_15, col_6 as col_6_16, col_6 as col_6_17, col_6 as col_6_18, col_6 as col_6_19, col_6 as col_6_20, col_6 as col_6_21 from blob_table
 	6 getObject            ->Object'   	: java.sql.Blob
-	6 getArray             ->		EXCEPTION (not yet implemented)
+	6 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	6 getAsciiStream       ->Object'   	: java.io.InputStream
-	6 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.math.BigDecimal'.)
 	6 getBinaryStream      ->Object'   	: java.io.InputStream
 	6 getBlob              ->Object'   	: java.sql.Blob
-	6 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'boolean'.)
+	6 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'byte'.)
 	6 getBytes             ->Object'   	: byte[]
 	6 getCharacterStream   ->Object'   	: java.io.Reader
-	6 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getRef               ->		EXCEPTION (not yet implemented)
-	6 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Clob'.)
+	6 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Date'.)
+	6 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'double'.)
+	6 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'float'.)
+	6 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'int'.)
+	6 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'long'.)
+	6 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	6 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'short'.)
 	6 getString            ->'003100300036'    	: java.lang.String
-	6 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Time'.)
+	6 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Timestamp'.)
 === Columntype blob (2 M)
 select typecol as typecol_1, typecol as typecol_2, typecol as typecol_3, typecol as typecol_4, typecol as typecol_5, typecol as typecol_6, typecol as typecol_7, typecol as typecol_8, typecol as typecol_9, typecol as typecol_10, typecol as typecol_11, typecol as typecol_12, typecol as typecol_13, typecol as typecol_14, typecol as typecol_15, typecol as typecol_16, typecol as typecol_17, typecol as typecol_18, typecol as typecol_19, typecol as typecol_20, typecol as typecol_21 from blob_table
 	7 getObject            ->Object'   	: java.sql.Blob
-	7 getArray             ->		EXCEPTION (not yet implemented)
+	7 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	7 getAsciiStream       ->Object'   	: java.io.InputStream
-	7 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.math.BigDecimal'.)
 	7 getBinaryStream      ->Object'   	: java.io.InputStream
 	7 getBlob              ->Object'   	: java.sql.Blob
-	7 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'boolean'.)
+	7 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'byte'.)
 	7 getBytes             ->Object'   	: byte[]
 	7 getCharacterStream   ->Object'   	: java.io.Reader
-	7 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getRef               ->		EXCEPTION (not yet implemented)
-	7 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Clob'.)
+	7 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Date'.)
+	7 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'double'.)
+	7 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'float'.)
+	7 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'int'.)
+	7 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'long'.)
+	7 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	7 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'short'.)
 	7 getString            ->'003100300037'    	: java.lang.String
-	7 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Time'.)
+	7 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Timestamp'.)
 -----< METADATA TESTS
 select col_0 from blob_table
 	---- 1
@@ -1677,187 +1677,187 @@ insert into blob_table ( typecol ) values cast ( X'0074007200750065'  AS blob (2
 === Columntype int
 select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, col_0 as col_0_5, col_0 as col_0_6, col_0 as col_0_7, col_0 as col_0_8, col_0 as col_0_9, col_0 as col_0_10, col_0 as col_0_11, col_0 as col_0_12, col_0 as col_0_13, col_0 as col_0_14, col_0 as col_0_15, col_0 as col_0_16, col_0 as col_0_17, col_0 as col_0_18, col_0 as col_0_19, col_0 as col_0_20, col_0 as col_0_21 from blob_table
 	0 getObject            ->'100'    	: java.lang.Integer
-	0 getArray             ->		EXCEPTION (not yet implemented)
-	0 getAsciiStream       ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
+	0 getAsciiStream       ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.InputStream'.)
 	0 getBigDecimal        ->'100'    	: java.math.BigDecimal
-	0 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.InputStream'.)
+	0 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Blob'.)
 	0 getBoolean           ->'true'    	: java.lang.Boolean
 	0 getByte              ->'100'    	: java.lang.Byte
-	0 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getCharacterStream   ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'byte[]'.)
+	0 getCharacterStream   ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.Reader'.)
+	0 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Clob'.)
+	0 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Date'.)
 	0 getDouble            ->'100.0'    	: java.lang.Double
 	0 getFloat             ->'100.0'    	: java.lang.Float
 	0 getInt               ->'100'    	: java.lang.Integer
 	0 getLong              ->'100'    	: java.lang.Long
-	0 getRef               ->		EXCEPTION (not yet implemented)
+	0 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	0 getShort             ->'100'    	: java.lang.Short
 	0 getString            ->'100'    	: java.lang.String
-	0 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Time'.)
+	0 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Timestamp'.)
 === Columntype char(10)
 select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, col_1 as col_1_5, col_1 as col_1_6, col_1 as col_1_7, col_1 as col_1_8, col_1 as col_1_9, col_1 as col_1_10, col_1 as col_1_11, col_1 as col_1_12, col_1 as col_1_13, col_1 as col_1_14, col_1 as col_1_15, col_1 as col_1_16, col_1 as col_1_17, col_1 as col_1_18, col_1 as col_1_19, col_1 as col_1_20, col_1 as col_1_21 from blob_table
 	1 getObject            ->'101       '    	: java.lang.String
-	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	1 getAsciiStream       ->Object'   	: java.io.InputStream
 	1 getBigDecimal        ->'101'    	: java.math.BigDecimal
-	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	1 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->'101'    	: java.lang.Byte
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
-	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
+	1 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	1 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	1 getDouble            ->'101.0'    	: java.lang.Double
 	1 getFloat             ->'101.0'    	: java.lang.Float
 	1 getInt               ->'101'    	: java.lang.Integer
 	1 getLong              ->'101'    	: java.lang.Long
-	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	1 getShort             ->'101'    	: java.lang.Short
 	1 getString            ->'101       '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
+	1 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	1 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from blob_table
 	2 getObject            ->'102'    	: java.lang.String
-	2 getArray             ->		EXCEPTION (not yet implemented)
+	2 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	2 getAsciiStream       ->Object'   	: java.io.InputStream
 	2 getBigDecimal        ->'102'    	: java.math.BigDecimal
-	2 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	2 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	2 getBoolean           ->'true'    	: java.lang.Boolean
 	2 getByte              ->'102'    	: java.lang.Byte
-	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
-	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
+	2 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	2 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
 	2 getLong              ->'102'    	: java.lang.Long
-	2 getRef               ->		EXCEPTION (not yet implemented)
+	2 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
-	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
-	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
+	2 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	2 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from blob_table
 	3 getObject            ->'103'    	: java.lang.String
-	3 getArray             ->		EXCEPTION (not yet implemented)
+	3 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	3 getAsciiStream       ->Object'   	: java.io.InputStream
 	3 getBigDecimal        ->'103'    	: java.math.BigDecimal
-	3 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.io.InputStream'.)
+	3 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.sql.Blob'.)
 	3 getBoolean           ->'true'    	: java.lang.Boolean
 	3 getByte              ->'103'    	: java.lang.Byte
-	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'byte[]'.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
-	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
+	3 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.sql.Clob'.)
+	3 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
 	3 getLong              ->'103'    	: java.lang.Long
-	3 getRef               ->		EXCEPTION (not yet implemented)
+	3 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
-	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
-	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
+	3 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	3 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from blob_table
 	4 getObject            ->Object'   	: byte[]
-	4 getArray             ->		EXCEPTION (not yet implemented)
+	4 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	4 getAsciiStream       ->Object'   	: java.io.InputStream
-	4 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.math.BigDecimal'.)
 	4 getBinaryStream      ->Object'   	: java.io.InputStream
-	4 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Blob'.)
+	4 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'boolean'.)
+	4 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'byte'.)
 	4 getBytes             ->Object'   	: byte[]
 	4 getCharacterStream   ->Object'   	: java.io.Reader
-	4 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getRef               ->		EXCEPTION (not yet implemented)
-	4 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Clob'.)
+	4 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Date'.)
+	4 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'double'.)
+	4 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'float'.)
+	4 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'int'.)
+	4 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'long'.)
+	4 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	4 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'short'.)
 	4 getString            ->'00310030003420202020'    	: java.lang.String
-	4 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Time'.)
+	4 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Timestamp'.)
 === Columntype long varchar for bit data
 select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, col_5 as col_5_5, col_5 as col_5_6, col_5 as col_5_7, col_5 as col_5_8, col_5 as col_5_9, col_5 as col_5_10, col_5 as col_5_11, col_5 as col_5_12, col_5 as col_5_13, col_5 as col_5_14, col_5 as col_5_15, col_5 as col_5_16, col_5 as col_5_17, col_5 as col_5_18, col_5 as col_5_19, col_5 as col_5_20, col_5 as col_5_21 from blob_table
 	5 getObject            ->Object'   	: byte[]
-	5 getArray             ->		EXCEPTION (not yet implemented)
+	5 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	5 getAsciiStream       ->Object'   	: java.io.InputStream
-	5 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.math.BigDecimal'.)
 	5 getBinaryStream      ->Object'   	: java.io.InputStream
-	5 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Blob'.)
+	5 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'boolean'.)
+	5 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'byte'.)
 	5 getBytes             ->Object'   	: byte[]
 	5 getCharacterStream   ->Object'   	: java.io.Reader
-	5 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getRef               ->		EXCEPTION (not yet implemented)
-	5 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Clob'.)
+	5 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Date'.)
+	5 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'double'.)
+	5 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'float'.)
+	5 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'int'.)
+	5 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'long'.)
+	5 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	5 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'short'.)
 	5 getString            ->'003100300035'    	: java.lang.String
-	5 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Time'.)
+	5 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Timestamp'.)
 === Columntype blob(80)
 select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, col_6 as col_6_5, col_6 as col_6_6, col_6 as col_6_7, col_6 as col_6_8, col_6 as col_6_9, col_6 as col_6_10, col_6 as col_6_11, col_6 as col_6_12, col_6 as col_6_13, col_6 as col_6_14, col_6 as col_6_15, col_6 as col_6_16, col_6 as col_6_17, col_6 as col_6_18, col_6 as col_6_19, col_6 as col_6_20, col_6 as col_6_21 from blob_table
 	6 getObject            ->Object'   	: java.sql.Blob
-	6 getArray             ->		EXCEPTION (not yet implemented)
+	6 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	6 getAsciiStream       ->Object'   	: java.io.InputStream
-	6 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.math.BigDecimal'.)
 	6 getBinaryStream      ->Object'   	: java.io.InputStream
 	6 getBlob              ->Object'   	: java.sql.Blob
-	6 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'boolean'.)
+	6 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'byte'.)
 	6 getBytes             ->Object'   	: byte[]
 	6 getCharacterStream   ->Object'   	: java.io.Reader
-	6 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getRef               ->		EXCEPTION (not yet implemented)
-	6 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Clob'.)
+	6 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Date'.)
+	6 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'double'.)
+	6 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'float'.)
+	6 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'int'.)
+	6 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'long'.)
+	6 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	6 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'short'.)
 	6 getString            ->'003100300036'    	: java.lang.String
-	6 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Time'.)
+	6 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Timestamp'.)
 === Columntype blob (2 K)
 select typecol as typecol_1, typecol as typecol_2, typecol as typecol_3, typecol as typecol_4, typecol as typecol_5, typecol as typecol_6, typecol as typecol_7, typecol as typecol_8, typecol as typecol_9, typecol as typecol_10, typecol as typecol_11, typecol as typecol_12, typecol as typecol_13, typecol as typecol_14, typecol as typecol_15, typecol as typecol_16, typecol as typecol_17, typecol as typecol_18, typecol as typecol_19, typecol as typecol_20, typecol as typecol_21 from blob_table
 	7 getObject            ->Object'   	: java.sql.Blob
-	7 getArray             ->		EXCEPTION (not yet implemented)
+	7 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	7 getAsciiStream       ->Object'   	: java.io.InputStream
-	7 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.math.BigDecimal'.)
 	7 getBinaryStream      ->Object'   	: java.io.InputStream
 	7 getBlob              ->Object'   	: java.sql.Blob
-	7 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'boolean'.)
+	7 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'byte'.)
 	7 getBytes             ->Object'   	: byte[]
 	7 getCharacterStream   ->Object'   	: java.io.Reader
-	7 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getRef               ->		EXCEPTION (not yet implemented)
-	7 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Clob'.)
+	7 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Date'.)
+	7 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'double'.)
+	7 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'float'.)
+	7 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'int'.)
+	7 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'long'.)
+	7 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	7 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'short'.)
 	7 getString            ->'003100300037'    	: java.lang.String
-	7 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Time'.)
+	7 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Timestamp'.)
 -----< METADATA TESTS
 select col_0 from blob_table
 	---- 1
@@ -2218,187 +2218,187 @@ insert into blob_table ( typecol ) values cast ( X'0074007200750065'  AS blob (6
 === Columntype int
 select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, col_0 as col_0_5, col_0 as col_0_6, col_0 as col_0_7, col_0 as col_0_8, col_0 as col_0_9, col_0 as col_0_10, col_0 as col_0_11, col_0 as col_0_12, col_0 as col_0_13, col_0 as col_0_14, col_0 as col_0_15, col_0 as col_0_16, col_0 as col_0_17, col_0 as col_0_18, col_0 as col_0_19, col_0 as col_0_20, col_0 as col_0_21 from blob_table
 	0 getObject            ->'100'    	: java.lang.Integer
-	0 getArray             ->		EXCEPTION (not yet implemented)
-	0 getAsciiStream       ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
+	0 getAsciiStream       ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.InputStream'.)
 	0 getBigDecimal        ->'100'    	: java.math.BigDecimal
-	0 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.InputStream'.)
+	0 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Blob'.)
 	0 getBoolean           ->'true'    	: java.lang.Boolean
 	0 getByte              ->'100'    	: java.lang.Byte
-	0 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getCharacterStream   ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'byte[]'.)
+	0 getCharacterStream   ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.io.Reader'.)
+	0 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Clob'.)
+	0 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Date'.)
 	0 getDouble            ->'100.0'    	: java.lang.Double
 	0 getFloat             ->'100.0'    	: java.lang.Float
 	0 getInt               ->'100'    	: java.lang.Integer
 	0 getLong              ->'100'    	: java.lang.Long
-	0 getRef               ->		EXCEPTION (not yet implemented)
+	0 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	0 getShort             ->'100'    	: java.lang.Short
 	0 getString            ->'100'    	: java.lang.String
-	0 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	0 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	0 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Time'.)
+	0 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Timestamp'.)
 === Columntype char(10)
 select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, col_1 as col_1_5, col_1 as col_1_6, col_1 as col_1_7, col_1 as col_1_8, col_1 as col_1_9, col_1 as col_1_10, col_1 as col_1_11, col_1 as col_1_12, col_1 as col_1_13, col_1 as col_1_14, col_1 as col_1_15, col_1 as col_1_16, col_1 as col_1_17, col_1 as col_1_18, col_1 as col_1_19, col_1 as col_1_20, col_1 as col_1_21 from blob_table
 	1 getObject            ->'101       '    	: java.lang.String
-	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	1 getAsciiStream       ->Object'   	: java.io.InputStream
 	1 getBigDecimal        ->'101'    	: java.math.BigDecimal
-	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	1 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->'101'    	: java.lang.Byte
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
-	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
+	1 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	1 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	1 getDouble            ->'101.0'    	: java.lang.Double
 	1 getFloat             ->'101.0'    	: java.lang.Float
 	1 getInt               ->'101'    	: java.lang.Integer
 	1 getLong              ->'101'    	: java.lang.Long
-	1 getRef               ->		EXCEPTION (not yet implemented)
+	1 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	1 getShort             ->'101'    	: java.lang.Short
 	1 getString            ->'101       '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Time.)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Timestamp.)
+	1 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	1 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from blob_table
 	2 getObject            ->'102'    	: java.lang.String
-	2 getArray             ->		EXCEPTION (not yet implemented)
+	2 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	2 getAsciiStream       ->Object'   	: java.io.InputStream
 	2 getBigDecimal        ->'102'    	: java.math.BigDecimal
-	2 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	2 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	2 getBoolean           ->'true'    	: java.lang.Boolean
 	2 getByte              ->'102'    	: java.lang.Byte
-	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	2 getCharacterStream   ->Object'   	: java.io.Reader
-	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	2 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Date.)
+	2 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	2 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	2 getDouble            ->'102.0'    	: java.lang.Double
 	2 getFloat             ->'102.0'    	: java.lang.Float
 	2 getInt               ->'102'    	: java.lang.Integer
 	2 getLong              ->'102'    	: java.lang.Long
-	2 getRef               ->		EXCEPTION (not yet implemented)
+	2 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	2 getShort             ->'102'    	: java.lang.Short
 	2 getString            ->'102'    	: java.lang.String
-	2 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Time.)
-	2 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 102 is invalid for requested conversion to java.sql.Timestamp.)
+	2 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	2 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from blob_table
 	3 getObject            ->'103'    	: java.lang.String
-	3 getArray             ->		EXCEPTION (not yet implemented)
+	3 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	3 getAsciiStream       ->Object'   	: java.io.InputStream
 	3 getBigDecimal        ->'103'    	: java.math.BigDecimal
-	3 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.io.InputStream'.)
+	3 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.sql.Blob'.)
 	3 getBoolean           ->'true'    	: java.lang.Boolean
 	3 getByte              ->'103'    	: java.lang.Byte
-	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'byte[]'.)
 	3 getCharacterStream   ->Object'   	: java.io.Reader
-	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	3 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Date.)
+	3 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -1' from a data value of type 'java.sql.Clob'.)
+	3 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 	3 getDouble            ->'103.0'    	: java.lang.Double
 	3 getFloat             ->'103.0'    	: java.lang.Float
 	3 getInt               ->'103'    	: java.lang.Integer
 	3 getLong              ->'103'    	: java.lang.Long
-	3 getRef               ->		EXCEPTION (not yet implemented)
+	3 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
 	3 getShort             ->'103'    	: java.lang.Short
 	3 getString            ->'103'    	: java.lang.String
-	3 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Time.)
-	3 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance 103 is invalid for requested conversion to java.sql.Timestamp.)
+	3 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	3 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from blob_table
 	4 getObject            ->Object'   	: byte[]
-	4 getArray             ->		EXCEPTION (not yet implemented)
+	4 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	4 getAsciiStream       ->Object'   	: java.io.InputStream
-	4 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.math.BigDecimal'.)
 	4 getBinaryStream      ->Object'   	: java.io.InputStream
-	4 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Blob'.)
+	4 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'boolean'.)
+	4 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'byte'.)
 	4 getBytes             ->Object'   	: byte[]
 	4 getCharacterStream   ->Object'   	: java.io.Reader
-	4 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getRef               ->		EXCEPTION (not yet implemented)
-	4 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Clob'.)
+	4 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Date'.)
+	4 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'double'.)
+	4 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'float'.)
+	4 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'int'.)
+	4 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'long'.)
+	4 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	4 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'short'.)
 	4 getString            ->'00310030003420202020'    	: java.lang.String
-	4 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	4 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	4 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Time'.)
+	4 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -3' from a data value of type 'java.sql.Timestamp'.)
 === Columntype long varchar for bit data
 select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, col_5 as col_5_5, col_5 as col_5_6, col_5 as col_5_7, col_5 as col_5_8, col_5 as col_5_9, col_5 as col_5_10, col_5 as col_5_11, col_5 as col_5_12, col_5 as col_5_13, col_5 as col_5_14, col_5 as col_5_15, col_5 as col_5_16, col_5 as col_5_17, col_5 as col_5_18, col_5 as col_5_19, col_5 as col_5_20, col_5 as col_5_21 from blob_table
 	5 getObject            ->Object'   	: byte[]
-	5 getArray             ->		EXCEPTION (not yet implemented)
+	5 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	5 getAsciiStream       ->Object'   	: java.io.InputStream
-	5 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.math.BigDecimal'.)
 	5 getBinaryStream      ->Object'   	: java.io.InputStream
-	5 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Blob'.)
+	5 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'boolean'.)
+	5 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'byte'.)
 	5 getBytes             ->Object'   	: byte[]
 	5 getCharacterStream   ->Object'   	: java.io.Reader
-	5 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getRef               ->		EXCEPTION (not yet implemented)
-	5 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Clob'.)
+	5 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Date'.)
+	5 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'double'.)
+	5 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'float'.)
+	5 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'int'.)
+	5 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'long'.)
+	5 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	5 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'short'.)
 	5 getString            ->'003100300035'    	: java.lang.String
-	5 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	5 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	5 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Time'.)
+	5 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types -4' from a data value of type 'java.sql.Timestamp'.)
 === Columntype blob(80)
 select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, col_6 as col_6_5, col_6 as col_6_6, col_6 as col_6_7, col_6 as col_6_8, col_6 as col_6_9, col_6 as col_6_10, col_6 as col_6_11, col_6 as col_6_12, col_6 as col_6_13, col_6 as col_6_14, col_6 as col_6_15, col_6 as col_6_16, col_6 as col_6_17, col_6 as col_6_18, col_6 as col_6_19, col_6 as col_6_20, col_6 as col_6_21 from blob_table
 	6 getObject            ->Object'   	: java.sql.Blob
-	6 getArray             ->		EXCEPTION (not yet implemented)
+	6 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	6 getAsciiStream       ->Object'   	: java.io.InputStream
-	6 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.math.BigDecimal'.)
 	6 getBinaryStream      ->Object'   	: java.io.InputStream
 	6 getBlob              ->Object'   	: java.sql.Blob
-	6 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'boolean'.)
+	6 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'byte'.)
 	6 getBytes             ->Object'   	: byte[]
 	6 getCharacterStream   ->Object'   	: java.io.Reader
-	6 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getRef               ->		EXCEPTION (not yet implemented)
-	6 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Clob'.)
+	6 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Date'.)
+	6 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'double'.)
+	6 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'float'.)
+	6 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'int'.)
+	6 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'long'.)
+	6 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	6 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'short'.)
 	6 getString            ->'003100300036'    	: java.lang.String
-	6 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	6 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	6 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Time'.)
+	6 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Timestamp'.)
 === Columntype blob (64  )
 select typecol as typecol_1, typecol as typecol_2, typecol as typecol_3, typecol as typecol_4, typecol as typecol_5, typecol as typecol_6, typecol as typecol_7, typecol as typecol_8, typecol as typecol_9, typecol as typecol_10, typecol as typecol_11, typecol as typecol_12, typecol as typecol_13, typecol as typecol_14, typecol as typecol_15, typecol as typecol_16, typecol as typecol_17, typecol as typecol_18, typecol as typecol_19, typecol as typecol_20, typecol as typecol_21 from blob_table
 	7 getObject            ->Object'   	: java.sql.Blob
-	7 getArray             ->		EXCEPTION (not yet implemented)
+	7 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	7 getAsciiStream       ->Object'   	: java.io.InputStream
-	7 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBigDecimal        ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.math.BigDecimal'.)
 	7 getBinaryStream      ->Object'   	: java.io.InputStream
 	7 getBlob              ->Object'   	: java.sql.Blob
-	7 getBoolean           ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getByte              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getBoolean           ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'boolean'.)
+	7 getByte              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'byte'.)
 	7 getBytes             ->Object'   	: byte[]
 	7 getCharacterStream   ->Object'   	: java.io.Reader
-	7 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getDate              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getDouble            ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getFloat             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getInt               ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getLong              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getRef               ->		EXCEPTION (not yet implemented)
-	7 getShort             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Clob'.)
+	7 getDate              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Date'.)
+	7 getDouble            ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'double'.)
+	7 getFloat             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'float'.)
+	7 getInt               ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'int'.)
+	7 getLong              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'long'.)
+	7 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	7 getShort             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'short'.)
 	7 getString            ->'003100300037'    	: java.lang.String
-	7 getTime              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	7 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	7 getTime              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Time'.)
+	7 getTimeStamp         ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 2004' from a data value of type 'java.sql.Timestamp'.)
 -----< METADATA TESTS
 select col_0 from blob_table
 	---- 1
@@ -2784,26 +2784,26 @@ select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, c
 === Columntype char(10)
 select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, col_1 as col_1_5, col_1 as col_1_6, col_1 as col_1_7, col_1 as col_1_8, col_1 as col_1_9, col_1 as col_1_10, col_1 as col_1_11, col_1 as col_1_12, col_1 as col_1_13, col_1 as col_1_14, col_1 as col_1_15, col_1 as col_1_16, col_1 as col_1_17, col_1 as col_1_18, col_1 as col_1_19, col_1 as col_1_20, col_1 as col_1_21 from clob_table
 	1 getObject            ->'true      '    	: java.lang.String
-	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	1 getAsciiStream       ->Object'   	: java.io.InputStream
-	1 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.math.BigDecimal.)
-	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBigDecimal        ->		EXCEPTION (Invalid character string format for type java.math.BigDecimal.)
+	1 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	1 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
-	1 getByte              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to byte.)
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getByte              ->		EXCEPTION (Invalid character string format for type byte.)
+	1 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
-	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Date.)
-	1 getDouble            ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to double.)
-	1 getFloat             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to float.)
-	1 getInt               ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to int.)
-	1 getLong              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to long.)
-	1 getRef               ->		EXCEPTION (not yet implemented)
-	1 getShort             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to short.)
+	1 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	1 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	1 getDouble            ->		EXCEPTION (Invalid character string format for type double.)
+	1 getFloat             ->		EXCEPTION (Invalid character string format for type float.)
+	1 getInt               ->		EXCEPTION (Invalid character string format for type int.)
+	1 getLong              ->		EXCEPTION (Invalid character string format for type long.)
+	1 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	1 getShort             ->		EXCEPTION (Invalid character string format for type short.)
 	1 getString            ->'true      '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Time.)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Timestamp.)
+	1 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	1 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from clob_table
 	2 getObject            ->		EXCEPTION (null)
@@ -3337,26 +3337,26 @@ select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, c
 === Columntype char(10)
 select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, col_1 as col_1_5, col_1 as col_1_6, col_1 as col_1_7, col_1 as col_1_8, col_1 as col_1_9, col_1 as col_1_10, col_1 as col_1_11, col_1 as col_1_12, col_1 as col_1_13, col_1 as col_1_14, col_1 as col_1_15, col_1 as col_1_16, col_1 as col_1_17, col_1 as col_1_18, col_1 as col_1_19, col_1 as col_1_20, col_1 as col_1_21 from clob_table
 	1 getObject            ->'true      '    	: java.lang.String
-	1 getArray             ->		EXCEPTION (not yet implemented)
+	1 getArray             ->		EXCEPTION (Feature not implemented: getArray(int).)
 	1 getAsciiStream       ->Object'   	: java.io.InputStream
-	1 getBigDecimal        ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.math.BigDecimal.)
-	1 getBinaryStream      ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBigDecimal        ->		EXCEPTION (Invalid character string format for type java.math.BigDecimal.)
+	1 getBinaryStream      ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.io.InputStream'.)
+	1 getBlob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Blob'.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
-	1 getByte              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to byte.)
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getByte              ->		EXCEPTION (Invalid character string format for type byte.)
+	1 getBytes             ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'byte[]'.)
 	1 getCharacterStream   ->Object'   	: java.io.Reader
-	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
-	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Date.)
-	1 getDouble            ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to double.)
-	1 getFloat             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to float.)
-	1 getInt               ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to int.)
-	1 getLong              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to long.)
-	1 getRef               ->		EXCEPTION (not yet implemented)
-	1 getShort             ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to short.)
+	1 getClob              ->		EXCEPTION (An attempt was made to get a data value of type 'java.sql.Types 12' from a data value of type 'java.sql.Clob'.)
+	1 getDate              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	1 getDouble            ->		EXCEPTION (Invalid character string format for type double.)
+	1 getFloat             ->		EXCEPTION (Invalid character string format for type float.)
+	1 getInt               ->		EXCEPTION (Invalid character string format for type int.)
+	1 getLong              ->		EXCEPTION (Invalid character string format for type long.)
+	1 getRef               ->		EXCEPTION (Feature not implemented: getRef(int).)
+	1 getShort             ->		EXCEPTION (Invalid character string format for type short.)
 	1 getString            ->'true      '    	: java.lang.String
-	1 getTime              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Time.)
-	1 getTimeStamp         ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Timestamp.)
+	1 getTime              ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
+	1 getTimeStamp         ->		EXCEPTION (The syntax of the string representation of a datetime value is incorrect.)
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from clob_table
 	2 getObject            ->		EXCEPTION (null)

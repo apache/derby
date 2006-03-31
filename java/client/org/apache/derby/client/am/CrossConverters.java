@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 // All currently supported derby types are mapped to one of the following jdbc types:
 // java.sql.Types.SMALLINT;
 // java.sql.Types.INTEGER;
@@ -124,7 +126,9 @@ final class CrossConverters {
             return String.valueOf(source);
 
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "byte", Types.getTypeString(targetType));
         }
     }
 
@@ -160,7 +164,9 @@ final class CrossConverters {
             return String.valueOf(source);
 
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                    "int", Types.getTypeString(targetType));
         }
     }
 
@@ -185,7 +191,8 @@ final class CrossConverters {
         case Types.LONGVARCHAR:
             return getBooleanFromString((String) source);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                Types.getTypeString(sourceType), "boolean");
         }
     }
 
@@ -210,7 +217,8 @@ final class CrossConverters {
         case Types.LONGVARCHAR:
             return getByteFromString((String) source);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                Types.getTypeString(sourceType), "byte");
         }
     }
 
@@ -250,7 +258,9 @@ final class CrossConverters {
             return String.valueOf(source);
 
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "long", Types.getTypeString(targetType));
         }
     }
 
@@ -323,7 +333,9 @@ final class CrossConverters {
             return String.valueOf(source);
 
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "float", Types.getTypeString(targetType));
         }
     }
 
@@ -384,7 +396,9 @@ final class CrossConverters {
             return String.valueOf(source);
 
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "double", Types.getTypeString(targetType));
         }
     }
 
@@ -436,7 +450,9 @@ final class CrossConverters {
             return String.valueOf(source);
 
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.Math.BigDecimal", Types.getTypeString(targetType));
         }
     }
 
@@ -457,7 +473,9 @@ final class CrossConverters {
             return String.valueOf(source);
 
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.sql.Date", Types.getTypeString(targetType));
         }
     }
 
@@ -475,7 +493,9 @@ final class CrossConverters {
             return String.valueOf(source);
 
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.sql.Time", Types.getTypeString(targetType));
         }
     }
 
@@ -499,7 +519,9 @@ final class CrossConverters {
             return String.valueOf(source);
 
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.sql.Timestamp", Types.getTypeString(targetType));
         }
     }
 
@@ -552,15 +574,16 @@ final class CrossConverters {
             case Types.LONGVARBINARY:
             case Types.BLOB:
             default:
-                throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "String", Types.getTypeString(targetDriverType));
             }
         } catch (java.lang.NumberFormatException e) {
-            throw new SqlException(agent_.logWriter_,
-                    e,
-                    "Invalid data conversion:"
-                    + " Parameter instance "
-                    + source
-                    + " is invalid for requested conversion.");
+            throw new SqlException(agent_.logWriter_, 
+                    new MessageId 
+                    (SQLState.LANG_FORMAT_EXCEPTION), 
+                    Types.getTypeString(targetDriverType),
+                    e);                    
         }
     }
 
@@ -600,7 +623,9 @@ final class CrossConverters {
         case Types.BLOB:
             return new Blob(source, agent_, 0);
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "byte[]", Types.getTypeString(targetType));
         }
     }
 
@@ -621,7 +646,9 @@ final class CrossConverters {
         case Types.LONGVARBINARY:
         case Types.BLOB:
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.io.Reader", Types.getTypeString(targetType));
         }
     }
 
@@ -637,11 +664,12 @@ final class CrossConverters {
                 read = r.read();
             }
             if (length != totalRead) {
-                throw new SqlException(agent_.logWriter_, "The Reader object does not contain length characters");
+                throw new SqlException(agent_.logWriter_, 
+                		new MessageId (SQLState.READER_UNDER_RUN));
             }
             return sw.toString();
         } catch (java.io.IOException e) {
-            throw new SqlException(agent_.logWriter_, e.getMessage());
+            throw SqlException.javaException(agent_.logWriter_, e);
         }
     }
 
@@ -661,7 +689,9 @@ final class CrossConverters {
         case Types.LONGVARBINARY:
         case Types.BLOB:
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.io.InputStream", Types.getTypeString(targetType));
         }
     }
 
@@ -680,16 +710,19 @@ final class CrossConverters {
                     read = is.read();
                 }
             } catch (java.io.IOException e) {
-                throw new SqlException(agent_.logWriter_, e.getMessage());
+                throw new SqlException(agent_.logWriter_, e, null);
             }
 
             if (length != totalRead) {
-                throw new SqlException(agent_.logWriter_, "The InputStream object does not contain length bytes");
+                throw new SqlException(agent_.logWriter_, 
+                		new MessageId (SQLState.READER_UNDER_RUN));
             }
 
             return new String(baos.toByteArray(), encoding);
         } catch (java.io.UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e.getMessage());
+            throw new SqlException(agent_.logWriter_,
+                new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    "java.io.InputStream", "String", e);
         }
     }
 
@@ -705,10 +738,12 @@ final class CrossConverters {
             try {
                 return source.getBytes(1L, (int) source.length());
             } catch (java.sql.SQLException e) {
-                throw new SqlException(agent_.logWriter_, e.getMessage());
+                throw new SqlException(e);                        
             }
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.sql.Blob", Types.getTypeString(targetType));
         }
     }
 
@@ -723,7 +758,9 @@ final class CrossConverters {
         case Types.BLOB:
             return new Blob(agent_, source, length);
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.io.InputStream", Types.getTypeString(targetType));
         }
     }
 
@@ -741,10 +778,11 @@ final class CrossConverters {
             }
 
             if (length != totalRead) {
-                throw new SqlException(agent_.logWriter_, "The InputStream object does not contain length bytes");
+                throw new SqlException(agent_.logWriter_,
+                		new MessageId (SQLState.READER_UNDER_RUN));
             }
         } catch (java.io.IOException e) {
-            throw new SqlException(agent_.logWriter_, e.getMessage());
+            throw new SqlException(agent_.logWriter_, e, null);
         }
         return baos.toByteArray();
     }
@@ -760,7 +798,9 @@ final class CrossConverters {
         case Types.LONGVARCHAR:
             return source.toString();
         default:
-            throw new SqlException(agent_.logWriter_, "Illegal Conversion");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.sql.Clob", Types.getTypeString(targetType));
         }
     }
 
@@ -802,9 +842,9 @@ final class CrossConverters {
         } else if (source instanceof Byte) {
             return setObject(targetType, ((Byte) source).byteValue());
         } else {
-            throw new SqlException(agent_.logWriter_, "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion.");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                source.getClass().getName(), Types.getTypeString(targetType));
         }
     }
 
@@ -911,9 +951,9 @@ final class CrossConverters {
         try {
             return parseByte(source);
         } catch (java.lang.NumberFormatException e) {
-            throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion to " + "byte.");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId 
+            		(SQLState.LANG_FORMAT_EXCEPTION), "byte", e);
         }
     }
 
@@ -971,9 +1011,10 @@ final class CrossConverters {
         try {
             return parseShort(source);
         } catch (java.lang.NumberFormatException e) {
-            throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion to " + "short.");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId 
+            		(SQLState.LANG_FORMAT_EXCEPTION), 
+            		"short", e);
         }
     }
 
@@ -1022,9 +1063,9 @@ final class CrossConverters {
         try {
             return parseInt(source);
         } catch (java.lang.NumberFormatException e) {
-            throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion to " + "int.");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId (SQLState.LANG_FORMAT_EXCEPTION),
+            		"int", e);
         }
     }
 
@@ -1064,9 +1105,9 @@ final class CrossConverters {
         try {
             return parseLong(source);
         } catch (java.lang.NumberFormatException e) {
-            throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion to " + "long.");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId (SQLState.LANG_FORMAT_EXCEPTION),
+        			"long", e);
         }
     }
 
@@ -1097,9 +1138,9 @@ final class CrossConverters {
         try {
             return Float.parseFloat(source.trim());
         } catch (java.lang.NumberFormatException e) {
-            throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion to " + "float.");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId (SQLState.LANG_FORMAT_EXCEPTION),
+                    "float", e);
         }
     }
 
@@ -1121,9 +1162,9 @@ final class CrossConverters {
         try {
             return Double.parseDouble(source.trim());
         } catch (java.lang.NumberFormatException e) {
-            throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion to " + "double.");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId (SQLState.LANG_FORMAT_EXCEPTION),
+                    "double", e);
         }
     }
 
@@ -1139,9 +1180,9 @@ final class CrossConverters {
             // which doesn't like spaces, so we have to call trim() to get rid of the spaces from CHAR columns.
             return new java.math.BigDecimal(source.trim());
         } catch (java.lang.NumberFormatException e) {
-            throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion to " + "java.math.BigDecimal.");
+            throw new SqlException(agent_.logWriter_,
+            		new MessageId (SQLState.LANG_FORMAT_EXCEPTION),
+                    "java.math.BigDecimal", e);
         }
     }
 
@@ -1173,9 +1214,8 @@ final class CrossConverters {
         try {
             return date_valueOf(source);
         } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
-            throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion to " + "java.sql.Date.");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 
@@ -1193,9 +1233,8 @@ final class CrossConverters {
         try {
             return time_valueOf(source);
         } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
-            throw new SqlException(agent_.logWriter_, e, "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion to " + "java.sql.Time.");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 
@@ -1209,10 +1248,8 @@ final class CrossConverters {
         try {
             return timestamp_valueOf(source);
         } catch (java.lang.IllegalArgumentException e) {  // subsumes NumberFormatException
-            throw new SqlException(agent_.logWriter_, e,
-                    "Invalid data conversion:" +
-                    " Parameter instance " + source +
-                    " is invalid for requested conversion to " + "java.sql.Timestamp.");
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 

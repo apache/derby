@@ -27,7 +27,9 @@ import java.security.PrivilegedExceptionAction;
 
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.info.JVMInfo;
+
 public class Configuration {
 
 
@@ -171,25 +173,23 @@ public class Configuration {
         try {
             dncResources__ = (java.util.ResourceBundle) java.security.AccessController.doPrivileged(new org.apache.derby.client.am.GetResourceBundleAction(classNameForResources));
         } catch (java.security.PrivilegedActionException e) {
-            throw new SqlException(null,
-                    "[derby] " +
-                    "PrivilegedActionException:" +
-                    e.getException());
+            throw new SqlException(null, 
+                    new MessageId (SQLState.ERROR_PRIVILEGED_ACTION),
+                    e.getException());                    
         } catch (java.util.MissingResourceException e) {
             // A null log writer is passed, because jdbc 1 sql exceptions are automatically traced
             throw new SqlException(null,
-                    "[derby] " +
-                    "Missing resource bundle:" +
-                    " a resource bundle could not be found" +
-                    " in the " + packageNameForDNC + " package for " + Configuration.dncDriverName);
+                    new MessageId (SQLState.MISSING_RESOURCE_BUNDLE),
+                    packageNameForDNC, Configuration.dncDriverName);
         }
     }
 
     public static void checkForExceptionsFromLoadConfiguration(LogWriter dncLogWriter) throws SqlException {
         if (dncResources__ == null) {
-            throw new SqlException(dncLogWriter,
-                    "Missing resource bundle: a resource bundle could not be found" +
-                    " in the " + Configuration.packageNameForDNC + " package for " + Configuration.dncDriverName);
+             throw new SqlException(null,
+                    new MessageId (SQLState.MISSING_RESOURCE_BUNDLE),
+                    Configuration.packageNameForDNC, 
+                     Configuration.dncDriverName);            
         }
     }
 
@@ -200,15 +200,11 @@ public class Configuration {
         try {
             dncProductVersionHolder__ = buildProductVersionHolder();
         } catch (java.security.PrivilegedActionException e) {
-            throw new SqlException(null,
-                    "[derby] " +
-                    "PrivilegedActionException:" +
-                    e.getException());
+            throw new SqlException(null, 
+                    new MessageId (SQLState.ERROR_PRIVILEGED_ACTION),
+                    e.getException());                    
         } catch (java.io.IOException ioe) {
-            throw new SqlException(null,
-                    "[derby] " +
-                    "IOException:" +
-                    ioe);
+            throw new SqlException(null, ioe, null);
         }
     }
 

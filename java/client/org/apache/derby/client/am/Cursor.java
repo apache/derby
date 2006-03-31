@@ -20,6 +20,7 @@
 
 package org.apache.derby.client.am;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
 import java.io.UnsupportedEncodingException;
@@ -360,7 +361,9 @@ public abstract class Cursor {
                     getColumnPrecision(column - 1),
                     getColumnScale(column - 1));
         } catch (java.io.UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e, "Encoding is unsupported for conversion to BigDecimal");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.UNSUPPORTED_ENCODING),  
+                "DECIMAL", "java.math.BigDecimal", e);
         }
     }
 
@@ -373,9 +376,13 @@ public abstract class Cursor {
                     getColumnPrecision(column - 1),
                     getColumnScale(column - 1));
         } catch (java.lang.IllegalArgumentException e) {
-            throw new SqlException(agent_.logWriter_, e, "Decimal value is out of range for conversion to double");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+                "double", e);
         } catch (java.io.UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e, "Encoding is unsupported for conversion to BigDecimal");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                "DECIMAL", "double", e);
         }
     }
 
@@ -387,9 +394,13 @@ public abstract class Cursor {
                     getColumnPrecision(column - 1),
                     getColumnScale(column - 1));
         } catch (java.lang.IllegalArgumentException e) {
-            throw new SqlException(agent_.logWriter_, e, "Decimal value is out of range for conversion to long");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+                "long", e);
         } catch (java.io.UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e, "Encoding is unsupported for conversion to BigDecimal");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                "DECIMAL", "long", e);
         }
     }
 
@@ -413,7 +424,7 @@ public abstract class Cursor {
             // byte ccsids.
             if (charsetName_[column - 1] == null) {
                 throw new SqlException(agent_.logWriter_,
-                        "Required character converter not available for data type.");
+                    new MessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
             }
 
             tempString = new String(dataBuffer_,
@@ -423,7 +434,9 @@ public abstract class Cursor {
             return (maxFieldSize_ == 0) ? tempString :
                     tempString.substring(0, java.lang.Math.min(maxFieldSize_, tempString.length()));
         } catch (java.io.UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e, "unsupported encoding for result set column " + column);
+            throw new SqlException(agent_.logWriter_, 
+            		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+            		"VARCHAR", "String", e);
         }
     }
 
@@ -442,7 +455,7 @@ public abstract class Cursor {
             // byte ccsids.
             if (charsetName_[column - 1] == null) {
                 throw new SqlException(agent_.logWriter_,
-                        "Required character converter not available for data type.");
+                    new MessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
             }
 
             tempString = new String(dataBuffer_,
@@ -452,7 +465,9 @@ public abstract class Cursor {
             return (maxFieldSize_ == 0) ? tempString :
                     tempString.substring(0, java.lang.Math.min(maxFieldSize_, tempString.length()));
         } catch (java.io.UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e, "unsupported encoding for result set column " + column);
+            throw new SqlException(agent_.logWriter_,
+                new MessageId (SQLState.UNSUPPORTED_ENCODING),
+                "CHAR", "String", e);
         }
     }
 
@@ -464,8 +479,9 @@ public abstract class Cursor {
                 recyclableDate_, 
                 charsetName_[column - 1]);
         }catch (UnsupportedEncodingException e) {
-             throw new SqlException(agent_.logWriter_, e, 
-                    "Encoding is unsupported for conversion to DATE");
+             throw new SqlException(agent_.logWriter_, 
+                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 "DATE", "java.sql.Date", e);
         }
 
         
@@ -479,8 +495,9 @@ public abstract class Cursor {
                     recyclableTime_,
                     charsetName_[column - 1]);
         } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e, 
-                    "Encoding is unsupported for conversion to TIME");
+             throw new SqlException(agent_.logWriter_, 
+                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 "TIME", "java.sql.Time", e);
         }
     }
 
@@ -494,8 +511,9 @@ public abstract class Cursor {
                 recyclableTimestamp_, 
                 charsetName_[column - 1]);
     } catch (java.io.UnsupportedEncodingException e) {
-        throw new SqlException(agent_.logWriter_, e, 
-                "Encoding is unsupported for conversion to TIMESTAMP");
+             throw new SqlException(agent_.logWriter_, 
+                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 "TIMESTAMP", "java.sql.Timestamp", e);
     }
     }
 
@@ -507,8 +525,9 @@ public abstract class Cursor {
                     recyclableTimestamp_, 
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
-              throw new SqlException(agent_.logWriter_, e, 
-                      "Encoding is unsupported for conversion to TIMESTAMP");            
+             throw new SqlException(agent_.logWriter_, 
+                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 "DATE", "java.sql.Timestamp", e);
         }
     }
 
@@ -520,8 +539,9 @@ public abstract class Cursor {
                     recyclableTimestamp_,
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e, 
-                    "Encoding is unsupported for conversion to TIMESTAMP");
+             throw new SqlException(agent_.logWriter_, 
+                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 "TIME", "java.sql.Timestamp", e);
         }
     }
 
@@ -533,8 +553,9 @@ public abstract class Cursor {
                     recyclableDate_,
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
-             throw new SqlException(agent_.logWriter_, e, 
-                     "Encoding is unsupported for conversion to DATE");
+             throw new SqlException(agent_.logWriter_, 
+                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 "TIMESTAMP", "java.sql.Date", e);
         }
     }
 
@@ -546,8 +567,9 @@ public abstract class Cursor {
                     recyclableTime_,
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
-             throw new SqlException(agent_.logWriter_, e, 
-                     "Encoding is unsupported for conversion to TIME");
+             throw new SqlException(agent_.logWriter_, 
+                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 "TIMESTAMP", "java.sql.Time", e);
         }
     }
 
@@ -624,7 +646,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getBooleanFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "boolean");
         }
     }
 
@@ -652,7 +675,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getByteFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "byte");
         }
     }
 
@@ -679,7 +703,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getShortFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "short");
         }
     }
 
@@ -706,7 +731,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getIntFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "int");
         }
     }
 
@@ -733,7 +759,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getLongFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "long");
         }
     }
 
@@ -760,7 +787,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getFloatFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "float");
         }
     }
 
@@ -789,7 +817,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getDoubleFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "double");
         }
     }
 
@@ -819,7 +848,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getBigDecimalFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "java.math.BigDecimal");
         }
     }
 
@@ -835,7 +865,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getDateFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Date");
         }
     }
 
@@ -851,7 +882,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getTimeFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Time");
         }
     }
 
@@ -869,7 +901,8 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getTimestampFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Timestamp");
         }
     }
 
@@ -923,7 +956,8 @@ public abstract class Cursor {
                 Clob c = getClobColumn_(column, agent_);
                 return c.getSubString(1, (int) c.length());
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_);
+                throw new ColumnTypeConversionException(agent_.logWriter_,
+                    "java.sql.Types " + jdbcTypes_[column -1], "String");
             }
         } catch ( SQLException se ) {
             throw new SqlException(se);
@@ -942,7 +976,8 @@ public abstract class Cursor {
                 Blob b = (Blob) getBlobColumn_(column, agent_);
                 return b.getBytes(1, (int) b.length());
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_);
+                throw new ColumnTypeConversionException(agent_.logWriter_,
+                    "java.sql.Types " + jdbcTypes_[column -1], "byte[]");
             }
         } catch ( SQLException se ) {
             throw new SqlException(se);
@@ -961,7 +996,8 @@ public abstract class Cursor {
                 Blob b = (Blob) getBlobColumn_(column, agent_);
                 return b.getBinaryStream();
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_);
+                throw new ColumnTypeConversionException(agent_.logWriter_,
+                    "java.sql.Types " + jdbcTypes_[column -1], "java.io.InputStream");
             }
         } catch ( SQLException se ) {
             throw new SqlException(se);
@@ -978,14 +1014,18 @@ public abstract class Cursor {
                 try {
                     return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("US-ASCII"));
                 } catch (java.io.UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, e.getMessage());
+                    throw new SqlException(agent_.logWriter_, 
+                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		"CHAR", "java.io.InputStream", e);
                 }
             case java.sql.Types.VARCHAR:
             case java.sql.Types.LONGVARCHAR:
                 try {
                     return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("US-ASCII"));
                 } catch (java.io.UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, e.getMessage());
+                    throw new SqlException(agent_.logWriter_, 
+                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		"VARCHAR/LONGVARCHAR", "java.io.InputStream", e);
                 }
             case java.sql.Types.BINARY:
                 return new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
@@ -996,7 +1036,8 @@ public abstract class Cursor {
                 Blob b = (Blob) getBlobColumn_(column, agent_);
                 return b.getBinaryStream();
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_);
+                throw new ColumnTypeConversionException(agent_.logWriter_,
+                    "java.sql.Types " + jdbcTypes_[column -1], "java.io.InputStream");
             }
         }
         catch ( SQLException se ) {
@@ -1014,7 +1055,9 @@ public abstract class Cursor {
                     try {
                         return new java.io.ByteArrayInputStream(s.getBytes("UTF-8"));
                     } catch (java.io.UnsupportedEncodingException e) {
-                        throw new SqlException(agent_.logWriter_, e.getMessage());
+                        throw new SqlException(agent_.logWriter_, 
+                        		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                        		"CLOB", "UnicodeStream", e);
                     }
                 }
             case java.sql.Types.CHAR:
@@ -1022,7 +1065,9 @@ public abstract class Cursor {
                     try {
                         return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("UTF-8"));
                     } catch (java.io.UnsupportedEncodingException e) {
-                        throw new SqlException(agent_.logWriter_, e.getMessage());
+                        throw new SqlException(agent_.logWriter_, 
+                        		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                        		"CHAR", "UnicodeStream", e);
                     }
                 }
             case java.sql.Types.VARCHAR:
@@ -1030,7 +1075,9 @@ public abstract class Cursor {
                 try {
                     return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("UTF-8"));
                 } catch (java.io.UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, e.getMessage());
+                    throw new SqlException(agent_.logWriter_, 
+                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		"VARCHAR/LONGVARCHAR", "UnicodeStream", e);
                 }
             case java.sql.Types.BINARY:
                 return new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
@@ -1041,7 +1088,8 @@ public abstract class Cursor {
                 Blob b = (Blob) getBlobColumn_(column, agent_);
                 return b.getBinaryStream();
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_);
+                throw new ColumnTypeConversionException(agent_.logWriter_,
+                    "java.sql.Types " + jdbcTypes_[column -1], "UnicodeStream");
             }
         } catch ( SQLException se ) {
             throw new SqlException(se);
@@ -1063,24 +1111,31 @@ public abstract class Cursor {
                 try {
                     return new java.io.InputStreamReader(new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column)), "UTF-16BE");
                 } catch (java.io.UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, "UnsupportedEncodingException: " + e.getMessage());
+                    throw new SqlException(agent_.logWriter_, 
+                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		"BINARY", "java.io.Reader", e);
                 }
             case java.sql.Types.VARBINARY:
             case java.sql.Types.LONGVARBINARY:
                 try {
                     return new java.io.InputStreamReader(new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column)), "UTF-16BE");
                 } catch (java.io.UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, "UnsupportedEncodingException: " + e.getMessage());
+                    throw new SqlException(agent_.logWriter_, 
+                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		"VARBINARY/LONGVARBINARY", "java.io.Reader", e);
                 }
             case java.sql.Types.BLOB:
                 try {
                     Blob b = (Blob) getBlobColumn_(column, agent_);
                     return new java.io.InputStreamReader(b.getBinaryStream(), "UTF-16BE");
                 } catch (java.io.UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, "UnsupportedEncodingException: " + e.getMessage());
+                    throw new SqlException(agent_.logWriter_, 
+                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		"BLOB", "java.io.Reader", e);
                 }
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_);
+                throw new ColumnTypeConversionException(agent_.logWriter_,
+                    "java.sql.Types " + jdbcTypes_[column -1], "java.io.Reader");
             }
         } catch ( SQLException se ) {
             throw new SqlException(se);
@@ -1092,7 +1147,8 @@ public abstract class Cursor {
         case Types.BLOB:
             return getBlobColumn_(column, agent_);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Blob");
         }
     }
 
@@ -1101,16 +1157,20 @@ public abstract class Cursor {
         case Types.CLOB:
             return getClobColumn_(column, agent_);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Clob");
         }
     }
 
     public final java.sql.Array getArray(int column) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "not yet implemented");
+        throw new SqlException(agent_.logWriter_, 
+            new MessageId (SQLState.NOT_IMPLEMENTED),
+            "getArray(int)");
     }
 
     public final java.sql.Ref getRef(int column) throws SqlException {
-        throw new SqlException(agent_.logWriter_, "not yet implemented");
+        throw new SqlException(agent_.logWriter_, 
+            new MessageId (SQLState.NOT_IMPLEMENTED), "getRef(int)");
     }
 
     public final Object getObject(int column) throws SqlException {
@@ -1150,7 +1210,8 @@ public abstract class Cursor {
         case java.sql.Types.CLOB:
             return getClobColumn_(column, agent_);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_);
+            throw new ColumnTypeConversionException(agent_.logWriter_,
+                "java.sql.Types " + jdbcTypes_[column -1], "Object");
         }
     }
 

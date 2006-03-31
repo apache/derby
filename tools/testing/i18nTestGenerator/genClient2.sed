@@ -2,7 +2,7 @@
 # a try block and create a SqlException to complete the expression
 /^[[:space:]]*new MessageId/i\
     try { \
-       e = new SqlException(null,
+       testException = new SqlException(null,
 
 # For those expressions that start with "new SqlException", pre-append
 # a try block
@@ -16,13 +16,13 @@
       // We can get this on an assertion failure \
       t.printStackTrace(); \
     } \
-    if ( e.getMessage().startsWith("UNKNOWN") )  {\
-      e.printStackTrace(); \
+    if ( testException.getMessage().startsWith("UNKNOWN") )  {\
+      testException.printStackTrace(); \
       System.err.println("FAILURE: message id was not found"); \
     }
 
 #
-# Add substitution for various string parameters where you replace
+# Add substitution for various message parameters where you replace
 # the variable with a string containing the variable.  This prevents
 # compile errors saying "symbol not found"
 #
@@ -32,6 +32,14 @@ s/Configuration.packageNameForDNC/"Configuration.packageNameForDNC"/g
 s/Configuration.dncDriverName/"Configuration.dncDriverName"/g
 s/[^\.]packageNameForDNC/"packageNameForDNC"/g
 s/source,/"source",/g
+s/Types.getTypeString([^)]*)/"targetType"/g
+s/encoding/"encoding"/g
+s/source.getClass().getName()/"source"/g
+s/e.getException()/new Exception("foo")/g
+s/[[:space:]]e);/testException);/
+s/e.getClass().getName()/"exceptionClassName"/g
+s/[[:space:]]sourceType/"sourceType"/g
+s/[[:space:]]targetType/ "targetType"/g
 
 #
 # Subsitute Long and Integer params with 0 as a default
@@ -43,7 +51,7 @@ s/new Integer[[:space:]]*([^)]*/new Integer(0/g
 s/new SqlException[[:space:]]*(.*,/new SqlException(null,/g
 
 # Don't throw, just assign
-s/throw new/e = new/g
+s/throw new/testException = new/g
 
 # There are some odd situations where there is one too many parens
 s/)))/))/g

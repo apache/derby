@@ -11,7 +11,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * See tools/testing/i18nTestGenerator/generateClientMessageTest.sh 
  */ 
 public class TestClientMessages { 
-  private static Exception e; 
+  private static Exception testException; 
   private static String feature = "testFeature";
 
   public static void main(String[] args) { 

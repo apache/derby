@@ -417,7 +417,7 @@ insert into testInteger values('158')
 select a from testInteger
 getClob(1)
 52: SQLException
-EXPECTED SQL Exception: Invalid data conversion: Wrong result column type for requested conversion.
+EXPECTED SQL Exception: An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Clob'.
 START: clobTest53
 clobTest53 finished
 START: clobTest54
@@ -706,7 +706,7 @@ blobTest4 finished
 START: blobTest51
 blobTest51 finished
 START: blobTest52
-EXPECTED SQLSTATE(null): Invalid data conversion: Wrong result column type for requested conversion.
+EXPECTED SQLSTATE(22005): An attempt was made to get a data value of type 'java.sql.Types 4' from a data value of type 'java.sql.Blob'.
 START: blobTest53
 blobTest53 finished
 START: blobTest54

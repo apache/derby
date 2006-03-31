@@ -680,6 +680,8 @@ public interface SQLState {
 
 	String LANG_DB2_GETXXX_BAD_COLUMN_TYPE                             = "22005"; // same 22005 error
 	String LANG_DATA_TYPE_GET_MISMATCH                                 = "22005"; // same 22005 error
+    String UNSUPPORTED_ENCODING                                        = "22005.S.1";
+    String CHARACTER_CONVERTER_NOT_AVAILABLE                           = "22005.S.2";
 
 	String LANG_DATE_RANGE_EXCEPTION                                   = "22007.S.180";
 	String LANG_DATE_SYNTAX_EXCEPTION                                  = "22007.S.181";
@@ -1548,8 +1550,6 @@ public interface SQLState {
     String PRIMARY_TABLE_NAME_IS_NULL                               = "XN110.S";
     String FOREIGN_TABLE_NAME_IS_NULL                               = "XN111.S";
     String SECURITY_EXCEPTION_ENCOUNTERED                           = "XN112.S";
-    String CHAR_CONVERTER_NOT_FOUND                                 = "XN050.S";
-    String UNSUPPORTED_ENCODING                                     = "XN051.S";
     String NULL_SEARCH_STRING                                       = "XN052.S";
     String INVALID_CLOB_START_POS                                   = "XN053.S";
     String INVALID_POS_OFFSET_OR_LEN                                = "XN054.S";
@@ -1562,7 +1562,7 @@ public interface SQLState {
     String TYPE_MISMATH_WITH_REG_TYPE                               = "XN061.S";
     String BAD_JDBC_TYPE                                            = "XN062.S";
     String BAD_DRIVER_TYPE                                          = "XN063.S";
-    String ERROR_PRIVILEGED_ACTIOM                                  = "XN064.S";
+    String ERROR_PRIVILEGED_ACTION                                  = "XN064.S";
     String MISSING_RESOURCE_BUNDLE                                  = "XN065.S";
     String SAVEPOINT_NOT_CREATED_BY_CONNECTION                      = "XN067.S";
     String DRIVER_NOT_CAPABLE                                       = "XN068.S";
