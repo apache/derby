@@ -98,8 +98,7 @@ public class checkDataSource
 	// DERBY-1047  wiht client xa a PreparedStatement created before the global 
 	//transaction starts gives java.sql.SQLException: 'Statement' already closed.' 
 	// when used after  the global transaction ends
-	//private static boolean canUseStatementAfterXa_end = TestUtil.isEmbeddedFramework();
-	 private static boolean canUseStatementAfterXa_end = true;
+	private static boolean canUseStatementAfterXa_end = TestUtil.isEmbeddedFramework();
 	 	
 	// DERBY-1025 client  XAResource.start() does not commit an active local transaction 
 	// when auto commit is true. Embedded XAResource.start() implementation commits 
