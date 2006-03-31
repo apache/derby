@@ -2,7 +2,7 @@
  
    Derby - Class org.apache.derby.client.am.CallableStatement40
  
-   Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 2005, 2006 The Apache Software Foundation or its licensors, as applicable.
  
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package org.apache.derby.client.am;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
@@ -37,7 +39,37 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
         super(agent, connection, sql, type, concurrency, holdability);        
     }
     
+    public Reader getCharacterStream(int parameterIndex)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("getCharacterStream(int)");
+    }
     
+    public Reader getCharacterStream(String parameterName)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("getCharacterStream(String)");
+    }
+
+    public Reader getNCharacterStream(int parameterIndex)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("getNCharacterStream(int)");
+    }
+    
+    public Reader getNCharacterStream(String parameterName)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "getNCharacterStream(String)");
+    }
+
+    public String getNString(int parameterIndex)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("getNString(int)");
+    }
+
+    public String getNString(String parameterIndex)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("getNString(String)");
+    }
+
     public RowId getRowId(int parameterIndex) throws SQLException {
         throw SQLExceptionFactory.notImplemented ("getRowId (int)");
     }
@@ -50,6 +82,15 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
         throw SQLExceptionFactory.notImplemented ("setRowId (String, RowId)");
     }
     
+    public void setBlob(String parameterName, Blob x)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setBlob(String, Blob)");
+    }
+    
+    public void setClob(String parameterName, Clob x)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setClob(String, Clob)");
+    }
     
     public void setNString(String parameterName, String value)
     throws SQLException {

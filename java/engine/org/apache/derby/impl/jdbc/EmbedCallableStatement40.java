@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.jdbc.EmbedCallableStatement40
 
-   Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 2005, 2006 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package org.apache.derby.impl.jdbc;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
@@ -38,7 +40,46 @@ public class EmbedCallableStatement40 extends EmbedCallableStatement30 {
         super(conn, sql, resultSetType, resultSetConcurrency, resultSetHoldability);     
     }
     
+    public Reader getCharacterStream(int parameterIndex)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public Reader getCharacterStream(String parameterName)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public Reader getNCharacterStream(int parameterIndex)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
     
+    public Reader getNCharacterStream(String parameterName)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+    
+    public String getNString(int parameterIndex)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+    
+    public String getNString(String parameterName)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void setBlob(String parameterName, Blob x)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+    
+    public void setClob(String parameterName, Clob x)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public RowId getRowId(int parameterIndex) throws SQLException {
         throw Util.notImplemented();
     }

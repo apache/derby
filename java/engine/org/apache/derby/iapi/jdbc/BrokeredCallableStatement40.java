@@ -2,7 +2,7 @@
  
    Derby - Class org.apache.derby.iapi.jdbc.BrokeredCallableStatement40
  
-   Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 2005, 2006 The Apache Software Foundation or its licensors, as applicable.
  
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package org.apache.derby.iapi.jdbc;
 
 import java.io.Reader;
 import java.io.InputStream;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
@@ -33,6 +35,36 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
         super(control,jdbcLevel,sql);
     }
     
+    public Reader getCharacterStream(int parameterIndex)
+        throws SQLException {
+        return getCallableStatement().getCharacterStream(parameterIndex);
+    }
+    
+    public Reader getCharacterStream(String parameterName)
+        throws SQLException {
+        return getCallableStatement().getCharacterStream(parameterName);
+    }
+    
+    public Reader getNCharacterStream(int parameterIndex)
+        throws SQLException {
+        return getCallableStatement().getNCharacterStream(parameterIndex);
+    }
+    
+    public Reader getNCharacterStream(String parameterName)
+        throws SQLException {
+        return getCallableStatement().getNCharacterStream(parameterName);
+    }
+
+    public String getNString(int parameterIndex)
+        throws SQLException {
+        return getCallableStatement().getNString(parameterIndex);
+    }
+
+    public String getNString(String parameterName)
+        throws SQLException {
+        return getCallableStatement().getNString(parameterName);
+    }
+
     public RowId getRowId(int parameterIndex) throws SQLException{
         return getCallableStatement().getRowId(parameterIndex);
     }
@@ -45,7 +77,16 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
         getCallableStatement().setRowId(parameterName,x);
     }
     
-    
+    public void setBlob(String parameterName, Blob x)
+        throws SQLException {
+        getCallableStatement().setBlob(parameterName, x);
+    }
+
+    public void setClob(String parameterName, Clob x)
+        throws SQLException {
+        getCallableStatement().setClob(parameterName, x);
+    }
+
     public void setNString(String parameterName, String value)
     throws SQLException{
         getCallableStatement().setNString(parameterName,value);
