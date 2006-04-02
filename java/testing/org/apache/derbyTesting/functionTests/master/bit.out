@@ -807,4 +807,32 @@ C1        |C2        |C3
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 ij> values cast(X'00680069' as char(30)), cast(X'00680069' as varchar(30)), cast(X'00680069' as long varchar);
 ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
+ij> -- DERBY-1085
+create table npetest1 (col1 varchar(36) for bit data not null, constraint pknpe1 primary key (col1));
+0 rows inserted/updated/deleted
+ij> create table npetest2 (col2 varchar(36) for bit data, constraint fknpe1 foreign key (col2) references npetest1(col1) on delete cascade);
+0 rows inserted/updated/deleted
+ij> insert into npetest1 (col1) values (X'0000000001');
+1 row inserted/updated/deleted
+ij> insert into npetest1 (col1) values (X'0000000002');
+1 row inserted/updated/deleted
+ij> insert into npetest1 (col1) values (X'0000000003');
+1 row inserted/updated/deleted
+ij> insert into npetest2 (col2) values (X'0000000001');
+1 row inserted/updated/deleted
+ij> insert into npetest2 (col2) values (NULL);
+1 row inserted/updated/deleted
+ij> insert into npetest2 (col2) values (X'0000000002');
+1 row inserted/updated/deleted
+ij> select col1 from npetest1 where col1 not in (select col2 from npetest2);
+COL1                                                                    
+------------------------------------------------------------------------
+ij> select col1 from npetest1 where col1 not in (select col2 from npetest2 where col2 is not null);
+COL1                                                                    
+------------------------------------------------------------------------
+0000000003                                                              
+ij> drop table npetest2;
+0 rows inserted/updated/deleted
+ij> drop table npetest1;
+0 rows inserted/updated/deleted
 ij> 

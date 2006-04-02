@@ -229,8 +229,7 @@ public abstract class SQLBinary
 				return streamLength;
 		}
 
-		return getBytes().length;
-
+		return (getBytes() == null) ? 0 : getBytes().length;
 	}
 
 	/*

@@ -413,3 +413,19 @@ create table t5612 (c1 char(10), c2 varchar(10), c3 long  varchar);
 insert into t5612 values (X'00680069', X'00680069', X'00680069');
 select * from t5612;
 values cast(X'00680069' as char(30)), cast(X'00680069' as varchar(30)), cast(X'00680069' as long varchar);
+
+-- DERBY-1085
+
+create table npetest1 (col1 varchar(36) for bit data not null, constraint pknpe1 primary key (col1));
+create table npetest2 (col2 varchar(36) for bit data, constraint fknpe1 foreign key (col2) references npetest1(col1) on delete cascade);
+insert into npetest1 (col1) values (X'0000000001');
+insert into npetest1 (col1) values (X'0000000002');
+insert into npetest1 (col1) values (X'0000000003');
+insert into npetest2 (col2) values (X'0000000001');
+insert into npetest2 (col2) values (NULL);
+insert into npetest2 (col2) values (X'0000000002');
+select col1 from npetest1 where col1 not in (select col2 from npetest2);
+select col1 from npetest1 where col1 not in (select col2 from npetest2 where col2 is not null);
+
+drop table npetest2;
+drop table npetest1;
