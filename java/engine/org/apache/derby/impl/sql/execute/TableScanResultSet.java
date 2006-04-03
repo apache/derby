@@ -914,7 +914,17 @@ public class TableScanResultSet extends NoPutResultSetImpl
 				if (rlTemplate == null)
 					rlTemplate = scanController.newRowLocationTemplate();
 				rl = rlTemplate;
-				scanController.fetchLocation(rl);
+				try {
+					scanController.fetchLocation(rl);
+				} catch (StandardException se) {
+					if (se.getMessageId().equals(SQLState.AM_SCAN_NOT_POSITIONED)) {
+						
+						//Have a easier to understand error message than what 
+						//we get from store 
+						throw StandardException.
+							newException(SQLState.NO_CURRENT_ROW);
+					}
+				}
 			} else {
 				rl = null;
 			}

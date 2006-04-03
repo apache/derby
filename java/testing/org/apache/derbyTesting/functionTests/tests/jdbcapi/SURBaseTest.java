@@ -286,4 +286,6 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
     final static String RESULTSET_NOT_UPDATABLE_SQL_STATE = "XJ083";
     final static String LOCK_TIMEOUT_SQL_STATE = "40XL1";
     final static String LOCK_TIMEOUT_EXPRESSION_SQL_STATE = "38000";
+    final static String INVALID_CURSOR_STATE_NO_CURRENT_ROW = "24000";
+    final static String CURSOR_OPERATION_CONFLICT = "01001";
 }

@@ -317,6 +317,60 @@ public class HoldabilityTest extends SURBaseTest {
     }
 
     /**
+     * Test that updateRow() after a commit requires a renavigation 
+     * on a held forward only ResulTset.
+     */
+    public void testUpdateRowAfterCommitOnHeldForwardOnlyResultSet() 
+        throws SQLException
+    {
+        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                                          ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(selectStatement);
+        
+        if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
+            println("Test disabled");
+            return;
+        }
+        rs.next();
+        con.commit();
+        try {
+            rs.updateInt(2, -100);
+            rs.updateRow();
+            assertTrue("Expected updateRow() to throw exception", false);
+        } catch (SQLException e) {
+            assertEquals("Unexpected SQLState",
+                         INVALID_CURSOR_STATE_NO_CURRENT_ROW, e.getSQLState());
+        }
+    }
+
+    /**
+     * Test that updateRow() after a commit requires a renavigation 
+     * on a held scrollinsensitve ResulTset.
+     */
+    public void testUpdateRowAfterCommitOnHeldScrollInsensitiveResultSet() 
+        throws SQLException
+    {
+        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+                                          ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(selectStatement);
+        
+        if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
+            println("Test disabled");
+            return;
+        }
+        rs.next();
+        con.commit();
+        try {
+            rs.updateInt(2, -100);
+            rs.updateRow();
+            assertTrue("Expected updateRow() to throw exception", false);
+        } catch (SQLException e) {
+            assertEquals("Unexpected SQLState",
+                         INVALID_CURSOR_STATE_NO_CURRENT_ROW, e.getSQLState());
+        }
+    }
+
+    /**
      * Test that running a compress on a holdable scrollable updatable 
      * resultset will not invalidate the ResultSet from doing updates,
      * if the scan is initialized
@@ -494,7 +548,8 @@ public class HoldabilityTest extends SURBaseTest {
         rs.updateRow();
         SQLWarning warn = rs.getWarnings();
         assertNotNull("Expected warning when updating deleted tuple", warn);
-        assertEquals("Unexpected SQL State on warning", "01001", 
+        assertEquals("Unexpected SQL State on warning", 
+                     CURSOR_OPERATION_CONFLICT, 
                      warn.getSQLState());        
         rs.clearWarnings();
         
@@ -504,7 +559,8 @@ public class HoldabilityTest extends SURBaseTest {
         updateTuple(rs); 
         warn = rs.getWarnings();
         assertNotNull("Expected warning when updating deleted tuple", warn);
-        assertEquals("Unexpected SQL State on warning", "01001", 
+        assertEquals("Unexpected SQL State on warning", 
+                     CURSOR_OPERATION_CONFLICT, 
                      warn.getSQLState());
         con.commit();
         
