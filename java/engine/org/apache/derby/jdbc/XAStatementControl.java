@@ -41,7 +41,7 @@ final class XAStatementControl implements BrokeredStatementControl {
 
 	/**
 	*/
-	private final EmbedXAConnection	xaConnection;
+	private final EmbedPooledConnection	xaConnection;
 	private final BrokeredConnection	applicationConnection;
 	BrokeredStatement		applicationStatement;
 	private EmbedConnection	realConnection;
@@ -49,23 +49,28 @@ final class XAStatementControl implements BrokeredStatementControl {
 	private PreparedStatement	realPreparedStatement;
 	private CallableStatement	realCallableStatement;
 
-	private XAStatementControl(EmbedXAConnection xaConnection) {
+	private XAStatementControl(EmbedPooledConnection xaConnection) {
 		this.xaConnection = xaConnection;
 		this.realConnection = xaConnection.realConnection;
 		this.applicationConnection = xaConnection.currentConnectionHandle;
 	}
 
-	XAStatementControl(EmbedXAConnection xaConnection, Statement realStatement) throws SQLException {
+	XAStatementControl(EmbedPooledConnection xaConnection, 
+                                Statement realStatement) throws SQLException {
 		this(xaConnection);
 		this.realStatement = realStatement;
 		this.applicationStatement = applicationConnection.newBrokeredStatement(this);
 	}
-	XAStatementControl(EmbedXAConnection xaConnection, PreparedStatement realPreparedStatement, String sql, Object generatedKeys) throws SQLException {
+	XAStatementControl(EmbedPooledConnection xaConnection, 
+                PreparedStatement realPreparedStatement, 
+                String sql, Object generatedKeys) throws SQLException {            
 		this(xaConnection);
 		this.realPreparedStatement = realPreparedStatement;
 		this.applicationStatement = applicationConnection.newBrokeredStatement(this, sql, generatedKeys);
 	}
-	XAStatementControl(EmbedXAConnection xaConnection, CallableStatement realCallableStatement, String sql) throws SQLException {
+	XAStatementControl(EmbedPooledConnection xaConnection, 
+                CallableStatement realCallableStatement, 
+                String sql) throws SQLException {
 		this(xaConnection);
 		this.realCallableStatement = realCallableStatement;
 		this.applicationStatement = applicationConnection.newBrokeredStatement(this, sql);
