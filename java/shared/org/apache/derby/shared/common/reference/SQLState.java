@@ -1558,10 +1558,6 @@ public interface SQLState {
     String INVALID_POSITION                                         = "XN057.S";
     String INVALID_OFFSET                                           = "XN058.S";
     String UNSUPPORTED_TYPE                                         = "XN059.S";
-    String UNREGISTERED_COLUMN_TYPE                                 = "XN060.S";
-    String TYPE_MISMATH_WITH_REG_TYPE                               = "XN061.S";
-    String BAD_JDBC_TYPE                                            = "XN062.S";
-    String BAD_DRIVER_TYPE                                          = "XN063.S";
     String ERROR_PRIVILEGED_ACTION                                  = "XN064.S";
     String MISSING_RESOURCE_BUNDLE                                  = "XN065.S";
     String SAVEPOINT_NOT_CREATED_BY_CONNECTION                      = "XN067.S";

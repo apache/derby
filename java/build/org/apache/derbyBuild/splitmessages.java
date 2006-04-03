@@ -61,6 +61,9 @@ public class splitmessages {
         clientMessageIds.add(SQLState.LANG_DATE_SYNTAX_EXCEPTION);
         clientMessageIds.add(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE);
         clientMessageIds.add(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE);
+        clientMessageIds.add(SQLState.LANG_STATEMENT_CLOSED_NO_REASON);
+        clientMessageIds.add(SQLState.LANG_INVALID_COLUMN_POSITION);
+        clientMessageIds.add(SQLState.INVALID_COLUMN_NAME);
     }
 
 	public static void main(String[] args) throws Exception {

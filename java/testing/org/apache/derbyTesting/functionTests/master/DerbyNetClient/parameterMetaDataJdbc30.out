@@ -155,11 +155,11 @@ parameter getParameterTypeName INTEGER
 parameter getParameterClassName java.lang.Integer
 parameter getParameterMode PARAMETER_MODE_IN
 PASS -- expected exception
-SQLSTATE(null): SQL Exception: Invalid argument: column index -1 is out of range.
+SQLSTATE(XCL14): SQL Exception: The column position '-1' is out of range.  The number of columns for this ResultSet is '1'.
 PASS -- expected exception
-SQLSTATE(null): SQL Exception: Invalid argument: column index 0 is out of range.
+SQLSTATE(XCL14): SQL Exception: The column position '0' is out of range.  The number of columns for this ResultSet is '1'.
 PASS -- expected exception
-SQLSTATE(null): SQL Exception: Invalid argument: column index 2 is out of range.
+SQLSTATE(XCL14): SQL Exception: The column position '2' is out of range.  The number of columns for this ResultSet is '1'.
 test: no parameter for the statement and then do getParameterMetaData()
 parameters count for prepared statement is 0
 test: the scale returned should be the one set by registerOutParameter

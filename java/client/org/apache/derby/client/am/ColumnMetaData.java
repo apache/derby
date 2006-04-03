@@ -24,6 +24,7 @@ import java.sql.SQLException;
 
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.shared.common.reference.SQLState;
 
 // Under JDBC 2, we must new up our parameter meta data as column meta data instances
 // Once we move to JDK 1.4 pre-req, create a ResultSetMetaData class and make this class abstract
@@ -106,7 +107,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
     void checkForClosedStatement() throws SqlException {
         // agent_.checkForDeferredExceptions();
         if (statementClosed_) {
-            throw new SqlException(logWriter_, "Statement closed");
+            throw new SqlException(logWriter_, 
+            		new MessageId (SQLState.LANG_STATEMENT_CLOSED_NO_REASON));
         }
     }
 
@@ -308,7 +310,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             case Types.BLOB:
                 return (int) (2 * sqlLength_[column - 1]); // eg. "FF" represents just one byte
             default:
-                throw new SqlException(logWriter_, "not supported");
+                throw new SqlException(logWriter_, 
+                		new MessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -426,7 +429,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             case Types.TIMESTAMP:
                 return 26;
             default:
-                throw new SqlException(logWriter_, "Unregistered column type");
+                throw new SqlException(logWriter_, 
+                		new MessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -589,7 +593,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             case DRDAConstants.DB2_SQLTYPE_NNUMERIC:
                 return "NUMERIC";
             default:
-                throw new SqlException(logWriter_, "Not supported");
+                throw new SqlException(logWriter_, 
+                		new MessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -700,7 +705,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             case java.sql.Types.REF:
                 return "java.sql.Ref";
             default:
-                throw new SqlException(logWriter_, "Not supported");
+                throw new SqlException(logWriter_, 
+                		new MessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -714,8 +720,9 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
 
     void checkForValidColumnIndex(int column) throws SqlException {
         if (column < 1 || column > columns_) {
-            throw new SqlException(logWriter_, "Invalid argument: column index " +
-                    column + " is out of range.");
+            throw new SqlException(logWriter_, 
+            		new MessageId (SQLState.LANG_INVALID_COLUMN_POSITION),
+            		new Integer (column), new Integer(columns_));
         }
     }
 
@@ -734,11 +741,13 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         return sqlxParmmode_[parameterIndex - 1] >= java.sql.ParameterMetaData.parameterModeInOut;
     }
 
+    /** This method does not appear to be in use -- davidvc@apache.org
     // Only called when column meta data is not described. Called by setXXX methods.
     public void guessInputParameterMetaData(int parameterIndex,
                                             int jdbcType) throws SqlException {
         guessInputParameterMetaData(parameterIndex, jdbcType, 0);
     }
+     */
 
     private void setParmModeForInputParameter(int parameterIndex) {
         if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeOut) {
@@ -748,24 +757,6 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         }
     }
 
-    // Only called when column meta data is not described. Called by setXXX methods.
-    // Scale is only applied for Decimal or Numeric JDBC type.
-    public void guessInputParameterMetaData(int parameterIndex,
-                                            int jdbcType,
-                                            int scale) throws SqlException {
-        setParmModeForInputParameter(parameterIndex);
-        int driverType = getInternalTypeForGuessedOrRegisteredJdbcType(jdbcType);
-        // if output parameter has been registered already
-        if (isParameterModeGuessedAsOutput(parameterIndex)) {
-            if (!isCompatibleDriverTypes(types_[parameterIndex - 1], driverType)) {
-                throw new SqlException(logWriter_, "The jdbcType " + jdbcType + " does not match between the setter method and " +
-                        "the registerOutParameter method.");
-            } else {
-                return; // don't bother guessing if the parameter was already registered
-            }
-        }
-        guessParameterMetaDataBasedOnSupportedDriverType(parameterIndex, jdbcType == java.sql.Types.BIGINT, driverType, scale);
-    }
 
     private void setParmModeForOutputParameter(int parameterIndex) {
         if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeIn) {
@@ -773,23 +764,6 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         } else if (sqlxParmmode_[parameterIndex - 1] == java.sql.ParameterMetaData.parameterModeUnknown) {
             sqlxParmmode_[parameterIndex - 1] = java.sql.ParameterMetaData.parameterModeOut;
         }
-    }
-
-    // Only called when column meta data is not described, called by registerOutParameter methods.
-    public void guessOutputParameterMetaData(int parameterIndex,
-                                             int jdbcType,
-                                             int scale) throws SqlException {
-        setParmModeForOutputParameter(parameterIndex);
-        int driverType = getInternalTypeForGuessedOrRegisteredJdbcType(jdbcType);
-        if (isParameterModeGuessedAsAnInput(parameterIndex)) { // if input parameter has been set already
-            // Verify that "set" and "registered" types are compatible.
-            if (!isCompatibleDriverTypes(driverType, types_[parameterIndex - 1])) {
-                throw new SqlException(logWriter_, "The jdbcType does not match between the setter method and " +
-                        "the registerOutParameter method.");
-            }
-            // the registered type will take precedence over any previously guessed input "set" type
-        }
-        guessParameterMetaDataBasedOnSupportedDriverType(parameterIndex, jdbcType == java.sql.Types.BIGINT, driverType, scale);
     }
 
     private boolean isCompatibleDriverTypes(int registeredType, int guessedInputType) {
@@ -850,152 +824,13 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             return Types.CLOB;
         case java.sql.Types.NULL:
         case java.sql.Types.OTHER:
-            throw new SqlException(logWriter_, "Jdbc type " + guessedOrRegisteredJdbcType + " not yet supported.");
+            throw new SqlException(logWriter_, 
+            		new MessageId (SQLState.UNSUPPORTED_TYPE));
         default:
-            throw new SqlException(logWriter_, "Unrecognized jdbc type " + guessedOrRegisteredJdbcType);
+            throw new SqlException(logWriter_, 
+            		new MessageId (SQLState.UNSUPPORTED_TYPE));
         }
     }
-
-    private void guessParameterMetaDataBasedOnSupportedDriverType(int parameterIndex,
-                                                                  boolean isBigInt,
-                                                                  int driverType,
-                                                                  int scale) throws SqlException {
-        switch (driverType) {
-        case Types.SMALLINT:
-            guessParameterMetaData(parameterIndex, driverType, 2, 0, 0);
-            break;
-        case Types.INTEGER:
-            guessParameterMetaData(parameterIndex, driverType, 4, 0, 0);
-            break;
-        case Types.BIGINT:
-            guessParameterMetaData(parameterIndex, driverType, 8, 0, 0);
-            break;
-        case Types.REAL:
-            guessParameterMetaData(parameterIndex, driverType, 4, 0, 0);
-            break;
-        case Types.DOUBLE:
-            guessParameterMetaData(parameterIndex, driverType, 8, 0, 0);
-            break;
-        case Types.DECIMAL:
-            if (isBigInt) {
-                guessParameterMetaData(parameterIndex, driverType, 0, 19, 0);
-            } else {
-                guessParameterMetaData(parameterIndex, driverType, 0, 31, scale);
-            }
-            break;
-        case Types.DATE:
-            guessParameterMetaData(parameterIndex, driverType, 10, 0, 0);
-            break;
-        case Types.TIME:
-            guessParameterMetaData(parameterIndex, driverType, 8, 0, 0);
-            break;
-        case Types.TIMESTAMP:
-            guessParameterMetaData(parameterIndex, driverType, 26, 0, 0);
-            break;
-        case Types.CHAR:
-        case Types.VARCHAR:
-            guessParameterMetaData(parameterIndex, driverType, 32672, 0, 0);
-            break;
-        case Types.LONGVARCHAR:
-            guessParameterMetaData(parameterIndex, driverType, 32700, 0, 0);
-            break;
-        case Types.BINARY:
-        case Types.VARBINARY:
-            guessParameterMetaData(parameterIndex, driverType, 4000, 0, 0);
-            break;
-        case Types.LONGVARBINARY:
-            guessParameterMetaData(parameterIndex, driverType, 32700, 0, 0);
-            break;
-        case Types.BLOB:
-            // 32768 will cause 8004 for a null placeholder length (could hard code in NET layer)
-            guessParameterMetaData(parameterIndex, driverType, 32768, 0, 0);
-            break;
-        case Types.CLOB:
-            // 32768 will cause 8004 for a null placeholder length (could hard code in NET layer)
-            guessParameterMetaData(parameterIndex, driverType, 32768, 0, 0);
-            break;
-        default:
-            throw new SqlException(logWriter_, "Unrecognized driver type " + driverType);
-        }
-    }
-
-    // Only called when column meta data is not described
-    private void guessParameterMetaData(int parameterIndex,
-                                        int type,
-                                        int length,
-                                        int precision,
-                                        int scale) {
-        // Always guess that the column is nullable
-        nullable_[parameterIndex - 1] = true;
-        types_[parameterIndex - 1] = type;
-        sqlLength_[parameterIndex - 1] = length;
-        sqlPrecision_[parameterIndex - 1] = precision;
-        sqlScale_[parameterIndex - 1] = scale;
-        sqlType_[parameterIndex - 1] = mapDriverToSqlType(type, true);
-    }
-
-    int mapDriverToSqlType(int type, boolean nullable) {
-        int sqlType = 0;
-        switch (type) {
-        case JDBC30Translation.BOOLEAN:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NBOOLEAN;
-            break;
-        case java.sql.Types.SMALLINT:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NSMALL;
-            break;
-        case java.sql.Types.INTEGER:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NINTEGER;
-            break;
-        case java.sql.Types.BIGINT:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NBIGINT;
-            break;
-        case java.sql.Types.REAL:
-        case java.sql.Types.DOUBLE:
-        case java.sql.Types.FLOAT:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NFLOAT;
-            break;
-        case java.sql.Types.DATE:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NDATE;
-            break;
-        case java.sql.Types.TIME:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NTIME;
-            break;
-        case java.sql.Types.TIMESTAMP:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NTIMESTAMP;
-            break;
-        case java.sql.Types.CHAR:
-        case java.sql.Types.VARCHAR:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NVARCHAR;
-            break;
-        case java.sql.Types.LONGVARCHAR:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NLONG;
-            break;
-        case java.sql.Types.BINARY:
-        case java.sql.Types.VARBINARY:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NVARCHAR;
-            break;
-        case java.sql.Types.LONGVARBINARY:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NLONG;
-            break;
-        case java.sql.Types.NUMERIC:
-        case java.sql.Types.DECIMAL:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NDECIMAL;
-            break;
-        case java.sql.Types.BLOB:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NBLOB;
-            break;
-        case java.sql.Types.CLOB:
-            sqlType = DRDAConstants.DB2_SQLTYPE_NCLOB;
-            break;
-        default:
-            break; // bug check
-        }
-        if (!nullable) {
-            sqlType--;
-        }
-        return sqlType;
-    }
-
 
     public void setLogWriter(LogWriter logWriter) {
         logWriter_ = logWriter;
@@ -1065,7 +900,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return col + 1;
             }
         }
-        throw new SqlException(logWriter_, "Invalid argument: unknown column name " + columnName);
+        throw new SqlException(logWriter_, 
+        		new MessageId (SQLState.INVALID_COLUMN_NAME), columnName);
     }
 
     // assign ordinal position as the column name if null.

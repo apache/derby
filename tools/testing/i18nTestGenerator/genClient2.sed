@@ -40,6 +40,7 @@ s/[[:space:]]e);/testException);/
 s/e.getClass().getName()/"exceptionClassName"/g
 s/[[:space:]]sourceType/"sourceType"/g
 s/[[:space:]]targetType/ "targetType"/g
+s/[[:space:]]columnName/ "columnName"/g
 
 #
 # Subsitute Long and Integer params with 0 as a default
