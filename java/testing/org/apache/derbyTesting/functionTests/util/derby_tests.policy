@@ -24,6 +24,7 @@
 //
 grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.util.PropertyPermission "derby.*", "read";
+  permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
   
   // for unit tests
   permission java.util.PropertyPermission "derbyTesting.unittest.*", "read";
@@ -64,6 +65,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
 // Permissions for the network server (derbynet.jar)
 //
 grant codeBase "${derbyTesting.codejar}derbynet.jar" {
+  permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
   
   // accept is needed for the server accepting connections
   // connect is needed for ping command (which is in the server jar)
@@ -106,6 +108,9 @@ grant codeBase "${derbyTesting.codejar}derbytools.jar" {
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
   
+  // BUG DERBY-622 derbynet/sysinfo.java
+  permission java.io.FilePermission "${derbyTesting.codedir}${/}*", "read";
+
   // Read all files under ${user.dir}
   permission java.io.FilePermission "${user.dir}${/}-", "read";
   

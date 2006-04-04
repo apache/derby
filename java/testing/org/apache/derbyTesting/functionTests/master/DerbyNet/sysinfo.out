@@ -12,7 +12,6 @@ derby.drda.startNetworkServer=false
 derby.drda.host=xxxFILTERED_HOSTNAMExxx
 derby.drda.traceAll=false
 ----- Derby Information --------
-Unable to analyze class path: access denied (java.util.PropertyPermission java.class.path read)
 -----
 ----- Locale Information -----------------
 Current Locale :  [English/United States [en_US]]
@@ -40,7 +39,6 @@ derby.drda.startNetworkServer=false
 derby.drda.host=xxxFILTERED_HOSTNAMExxx
 derby.drda.traceAll=false
 ----- Derby Information --------
-Unable to analyze class path: access denied (java.util.PropertyPermission java.class.path read)
 -----
 ----- Locale Information -----------------
 Current Locale :  [English/United States [en_US]]
@@ -69,7 +67,6 @@ derby.drda.startNetworkServer=false
 derby.drda.host=xxxFILTERED_HOSTNAMExxx
 derby.drda.traceAll=false
 ----- Derby Information --------
-Unable to analyze class path: access denied (java.util.PropertyPermission java.class.path read)
 -----
 ----- Locale Information -----------------
 Current Locale :  [English/United States [en_US]]
