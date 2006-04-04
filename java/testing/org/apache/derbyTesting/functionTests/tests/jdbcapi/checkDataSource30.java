@@ -30,6 +30,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
@@ -60,9 +62,11 @@ public class checkDataSource30 extends checkDataSource
 			tester.runTest(args);
 		tester.checkXAHoldability();
 		
+		testDerby1144();
 		// Print a report on System.out of the issues
 		// found with the security checks.
 		SecurityCheck.report();
+		
 		
 		System.out.println("Completed checkDataSource30");
 
@@ -433,4 +437,283 @@ public class checkDataSource30 extends checkDataSource
     {
         return "checkDataSource30.checkNesConn30";
     }
+    
+    
+    /**
+     * Tests for DERBY-1144
+     * 
+     * This test tests that holdability, autocomit, and transactionIsolation are
+     * reset  on getConnection for PooledConnections obtaind from connectionPoolDataSources 
+     * 
+     * DERBY-1134 has been filed for more comprehensive testing of client connection state. 
+     * 
+     * @throws SQLException
+     */
+    public static void testDerby1144() throws SQLException
+    {
+    	Connection conn = null;
+    	PooledConnection pc1 = null;
+		Properties p = new Properties();
+		
+		p.put("databaseName","sample");
+		p.put("connectionAttributes","create=true");
+		p.put("user","APP");
+		p.put("password","pw");
+		
+        // Test holdability   
+        ConnectionPoolDataSource ds = TestUtil.getConnectionPoolDataSource(p);
+        pc1 = ds.getPooledConnection();
+        testPooledConnHoldability("PooledConnection", pc1);
+        pc1.close();
+        
+        // Test autocommit
+        pc1 = ds.getPooledConnection();
+        testPooledConnAutoCommit("PooledConnection", pc1);
+        pc1.close();
+        
+        // Test pooled connection isolation
+		ds = TestUtil.getConnectionPoolDataSource(p);
+		pc1 = ds.getPooledConnection();
+		testPooledConnIso("PooledConnection" , pc1);   
+        pc1.close();
+       
+        // Test xa connection isolation
+		XADataSource xds = TestUtil.getXADataSource(p);
+    	XAConnection xpc1 = xds.getXAConnection();        
+        testPooledConnIso("XAConnection", xpc1);                 
+        xpc1.close();
+      }
+  
+    
+	/**
+	 * Make sure autocommit gets reset on PooledConnection.getConnection()
+	 * @param desc		description of connection
+	 * @param pc1		pooled connection to test
+	 * @throws SQLException
+	 */
+	private static void testPooledConnAutoCommit(String desc, PooledConnection pc1) throws SQLException {
+		System.out.println("\n** Test autoCommit state for: " + desc + "**");
+		Connection conn  = pc1.getConnection();
+		conn.setAutoCommit(true);
+		// reset the connection and see if the autocommit 
+		conn = pc1.getConnection();
+		boolean autocommit  = conn.getAutoCommit();
+		if (autocommit != true)
+		{
+			new Exception("FAIL: autoCommit not reset on getConnection").printStackTrace(System.out);			
+		}
+		else 
+		{
+			System.out.println("PASS: autoCommit reset on getConnection");
+		}
+		conn.close();
+	}
+
+
+	/**
+	 * Test Holdability gets reset on PooledConnection.getConnection()
+	 * @param desc
+	 * @param pc1
+	 * @throws SQLException
+	 */
+	private static void testPooledConnHoldability(String desc, PooledConnection pc1) 
+	throws SQLException { 
+		System.out.println("\n**Test holdability state for: " + desc + " **");
+		Connection conn  = pc1.getConnection();
+		conn.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		// reset the connection and see if the holdability gets reset
+		// to HOLD_CURSORS_OVER_COMMIT
+		conn = pc1.getConnection();
+		checkConnHoldability(conn, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		conn.close();
+	}
+	
+
+
+	/**
+	 * Verify connection holdablity is expected holdability
+	 * @param conn
+	 * @param expectedHoldability 
+	 * 	 * @throws SQLException
+	 */
+	private static void checkConnHoldability(Connection conn, 
+				int expectedHoldability) throws SQLException {
+		int holdability = conn.getHoldability();
+		if (holdability != expectedHoldability)
+		{
+			new Exception("FAIL: Holdability:" + translateHoldability(holdability) +
+					" does not match expected holdability:" +
+						translateHoldability(expectedHoldability)).printStackTrace(System.out);			
+		}
+		else 
+		{
+			System.out.println("PASS: Holdability matches expected holdability:" +
+					translateHoldability(expectedHoldability));
+		}
+	}
+
+
+	/**
+	 * Test that isolation is reset on PooledConnection.getConnection()
+	 * @param pooledConnType   Descripiton of the type of pooled connection
+	 * @param pc
+	 * @throws SQLException
+	 */
+	private static void testPooledConnIso(String pooledConnType, PooledConnection pc)
+	 throws SQLException {
+			 Connection conn = pc.getConnection();
+             
+			 setupDerby1144Table(conn);
+			 System.out.println("*** Test isolation level reset on " + pooledConnType+ ".getConnection()***");;			 
+			 System.out.println("\nsetTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED");
+			 conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			 checkIsoLocks(conn,Connection.TRANSACTION_READ_UNCOMMITTED);
+			 
+			 conn.close();
+			 System.out.println("\nGet a new connection with " + pooledConnType+ ".getConnection()");
+			 System.out.println("Isolation level should be reset to READ_COMMITTED");
+			 Connection newconn = pc.getConnection();
+			 checkIsoLocks(newconn,Connection.TRANSACTION_READ_COMMITTED);
+			 
+      
+	}
+
+
+	/**
+	 * Make a simple table for DERBY-1144 tests
+	 * @param conn
+	 * @throws SQLException
+	 */
+	private static void  setupDerby1144Table(Connection conn) throws SQLException
+	{
+		Statement stmt = conn.createStatement();
+		try {
+			stmt.executeUpdate("DROP TABLE TAB1");
+		}
+		catch (SQLException e)
+		{
+			// ignore drop error
+		}
+		stmt.executeUpdate("CREATE TABLE TAB1(COL1 INT NOT NULL)");
+		stmt.executeUpdate("INSERT INTO TAB1 VALUES(1)");
+		stmt.executeUpdate("INSERT INTO TAB1 VALUES(2)");
+
+        System.out.println("done creating  table");
+             conn.commit ();
+    }
+
+
+	
+	
+	/* 
+	 * Checks locks for designated isolation level on the connection.
+	 * Currently only supports TRANSACTION_READ_COMMITTED and 
+	 * TRANSACTION_READ_UNCOMMITTED
+	 * @param conn   Connection to test
+	 * @param isoLevel expected isolation level
+	 *
+	 */
+	private static void checkIsoLocks(Connection conn, int expectedIsoLevel)
+	{
+		try {
+			int conniso = conn.getTransactionIsolation();
+			if (conniso !=  expectedIsoLevel)
+			{
+				new  Exception("FAIL: Connection isolation level " + 
+						translateIso(conniso) + 
+						" does not match expected level " +
+						translateIso(expectedIsoLevel));
+			}			
+
+			boolean selectTimedOut  = selectTimesoutDuringUpdate(conn);
+			switch (conniso) {
+				case Connection.TRANSACTION_READ_UNCOMMITTED:
+					if (selectTimedOut)
+						new Exception("FAIL: Unexpected lock timeout for READ_UNCOMMITTED").printStackTrace(System.out);
+					else
+						System.out.println("PASS: No lock timeout occurs for READ_UNCOMMITTED");
+					case Connection.TRANSACTION_READ_COMMITTED:
+					if (selectTimedOut)	
+						System.out.println("PASS: Expected lock timeout for READ_COMMITTED");
+					else
+						new Exception("FAIL: Did not get lock timeout for READ_COMMITTED");
+					default:
+						new Exception("No test support for isolation level" + 
+									translateIso(conniso));
+			}
+		} catch (SQLException se) {
+			se.printStackTrace();	
+		}
+	}
+	
+	/**
+	 * Determine if a select on this connection during update will timeout.
+	 * Used to establish isolation level.  If the connection isolation level
+	 * is <code> Connection.TRANSACTION_READ_UNCOMMITTED </code> it will not
+	 * timeout.  Otherwise it should.  
+	 * 
+	 * @param conn   Connection to test.
+	 * @return  true if the select got a lock timeout, false otherwise.
+	 */
+	private static boolean selectTimesoutDuringUpdate(Connection conn) 	{
+	 Connection updateConn = null;
+	
+		try {
+		
+		conn.setAutoCommit(false);
+		// create another connection and do an update but don't commit
+		updateConn = TestUtil.getConnection("sample","create=true");
+		updateConn.setAutoCommit(false);
+		
+		
+		// First update the rows on the update connection
+		Statement upStmt = updateConn.createStatement();
+		upStmt.executeUpdate("update tab1 set col1 = 3");
+
+		// now see if we can select them
+
+		Statement stmt = conn.createStatement();
+		ResultSet rs = stmt.executeQuery("Select * from tab1");
+		while (rs.next()){};
+		rs.close();
+
+		}
+		catch (SQLException e)
+		{
+			if (e.getSQLState().equals("40XL1"))
+			{
+				// If we got a lock timeout this is not read uncommitted
+				return true;
+			}	
+
+		}
+		finally {
+
+			try {
+				conn.rollback();
+				updateConn.rollback();
+			}catch (SQLException  se) {
+				se.printStackTrace();
+			}
+		}
+		return false;
+		
+	}
+	
+	/**
+	 * Translate holdability int readable format.
+	 * 
+	 * @param holdability   holdability to translate.
+	 * @return  "HOLD_CURSORS_OVER_COMMIT" or "CLOSE_CURSORS_AT_COMMIT"
+	 */
+	public static String translateHoldability(int holdability)
+	{
+		switch (holdability)
+		{
+			case ResultSet.HOLD_CURSORS_OVER_COMMIT : return  "HOLD_CURSORS_OVER_COMMIT";
+			case ResultSet.CLOSE_CURSORS_AT_COMMIT : return  "CLOSE_CURSORS_AT_COMMIT";
+		}
+		return "UNKNOWN_HOLDABILTY";
+	}    
+
 }

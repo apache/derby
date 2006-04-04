@@ -38,4 +38,22 @@ Expected SQLException Invalid operation: result set closed
 Expected SQLException Invalid operation: result set closed
 Set connection to hold 
 CONNECTION(held) HOLDABILITY true
+**Test holdability state for: PooledConnection **
+PASS: Holdability matches expected holdability:HOLD_CURSORS_OVER_COMMIT
+** Test autoCommit state for: PooledConnection**
+PASS: autoCommit reset on getConnection
+done creating  table
+*** Test isolation level reset on PooledConnection.getConnection()***
+setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED
+PASS: No lock timeout occurs for READ_UNCOMMITTED
+Get a new connection with PooledConnection.getConnection()
+Isolation level should be reset to READ_COMMITTED
+PASS: Expected lock timeout for READ_COMMITTED
+done creating  table
+*** Test isolation level reset on XAConnection.getConnection()***
+setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED
+PASS: No lock timeout occurs for READ_UNCOMMITTED
+Get a new connection with XAConnection.getConnection()
+Isolation level should be reset to READ_COMMITTED
+PASS: Expected lock timeout for READ_COMMITTED
 Completed checkDataSource30
