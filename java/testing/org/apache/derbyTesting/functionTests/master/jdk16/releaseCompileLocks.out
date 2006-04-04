@@ -28,8 +28,8 @@ select
 from sys.systables where tablename = 'SYSCONGLOMERATES';
 1          
 -----------
-Caught exception java.sql.SQLException: The external routine is not allowed to execute SQL statements.
-java.sql.SQLException: The external routine is not allowed to execute SQL statements.
+Caught exception SQL Exception: The external routine is not allowed to execute SQL statements.
+SQL Exception: The external routine is not allowed to execute SQL statements.
 Caused by: ERROR 38001: The external routine is not allowed to execute SQL statements.
 	... 29 more
 1          
@@ -48,8 +48,8 @@ ij> select
 from sys.systables where tablename = 'SYSCONGLOMERATES';
 1          
 -----------
-Caught exception java.sql.SQLException: The external routine is not allowed to execute SQL statements.
-java.sql.SQLException: The external routine is not allowed to execute SQL statements.
+Caught exception SQL Exception: The external routine is not allowed to execute SQL statements.
+SQL Exception: The external routine is not allowed to execute SQL statements.
 Caused by: ERROR 38001: The external routine is not allowed to execute SQL statements.
 	... 30 more
 1          

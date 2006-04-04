@@ -159,7 +159,7 @@ public class testij
         original.close();
         Sed hostSed = new Sed();
         InputStream sedIs = new ByteArrayInputStream(("substitute=localhost;" + hostName).getBytes("UTF-8"));
-        hostSed.exec(tmpFile, orgFile, sedIs, false, false);		
+        hostSed.exec(tmpFile, orgFile, sedIs, false, false, false);		
     }
 
 	public static void main (String args[]) throws Exception

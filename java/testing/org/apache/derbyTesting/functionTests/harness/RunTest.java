@@ -240,7 +240,9 @@ public class RunTest
             System.setProperties(sp);
         }
         
-        getProperties(sp);
+        JavaVersionHolder	jvh = getProperties(sp);
+		boolean				isJDBC4 = jvh.atLeast( 1, 6 );
+
         // Setup the directories for the test and test output
         setDirectories(scriptName,sp);
 
@@ -337,7 +339,7 @@ public class RunTest
                     {
                         Sed sed = new Sed();
                         sed.exec(tmpOutFile,finalOutFile, isSed, 
-                                        NetServer.isClientConnection(framework), isI18N);
+                                        NetServer.isClientConnection(framework), isI18N, isJDBC4);
 		    }
 		    catch (ClassFormatError cfe)
 		    {
@@ -829,7 +831,7 @@ public class RunTest
             (new BufferedWriter(new FileWriter(diffFile.getPath()), 4096), true);
     }
 
-    private static void getProperties(Properties sp)
+    private static JavaVersionHolder getProperties(Properties sp)
         throws Exception
     {
         // Get any properties specified on the command line
@@ -1150,7 +1152,8 @@ public class RunTest
 		String uscdb = sp.getProperty("useCommonDB");
 		if (uscdb != null && uscdb.equals("true"))
 			useCommonDB = true;
-		
+
+		return jvh;
     }
 
     private static String createPropString()

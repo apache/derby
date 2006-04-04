@@ -221,12 +221,11 @@ public abstract class Util  {
 
 	public static SQLException notImplemented() {
 
-		return newEmbedSQLException(SQLState.NOT_IMPLEMENTED,
-			new Object[] {MessageService.getTextMessage(MessageId.CONN_NO_DETAILS)},
-                StandardException.getSeverityFromIdentifier(SQLState.NOT_IMPLEMENTED));
+		return notImplemented( MessageService.getTextMessage(MessageId.CONN_NO_DETAILS) );
 	}
 
 	public static SQLException notImplemented(String feature) {
+
 		return newEmbedSQLException(SQLState.NOT_IMPLEMENTED,
 			new Object[] {feature},
                 StandardException.getSeverityFromIdentifier(SQLState.NOT_IMPLEMENTED));

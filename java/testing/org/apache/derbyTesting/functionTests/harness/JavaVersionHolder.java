@@ -121,4 +121,20 @@ public class JavaVersionHolder
     {
         return minor;
     }
+
+	/**
+	 * <p>
+	 * Return true if we are at least at the passed in version.
+	 * </p>
+	 */
+	public	boolean	atLeast( int baseMajor, int baseMinor )
+	{
+		if ( major < baseMajor ) { return false; }
+		if ( major > baseMajor ) { return true; }
+
+		// same major number
+
+		return ( minor >= baseMinor );
+	}
+
 }

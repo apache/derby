@@ -39,6 +39,7 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class Sed
 {
+	private	static	final	String	SQL_EXCEPTION_FILTERED_SUBSTITUTION = "SQL Exception:";
 
     public Sed()
     {
@@ -51,11 +52,12 @@ public class Sed
         }
         File src = new File(args[0]);
         File tgt = new File(args[1]);
-        new Sed().exec(src,tgt,null, false, false);
+        new Sed().exec(src,tgt,null, false, false,false);
     }
 
     // The arguments should be the names of the input and output files
-    public void exec(File srcFile, File dstFile, InputStream isSed, boolean isJCC, boolean isI18N)
+    public void exec
+		(File srcFile, File dstFile, InputStream isSed, boolean isJCC, boolean isI18N, boolean isJDBC4)
         throws IOException
     {
     	String hostName = TestUtil.getHostName();
@@ -171,6 +173,26 @@ public class Sed
         // Filter out localhost, or hostName
         searchStrings.addElement(hostName);
 
+		if ( isJDBC4 )
+		{
+			// Filters for the sql exception class names which appear in
+			// exception messages. These are different in JDBC3 and JDBC4.
+			searchStrings.addElement("java.sql.SQLDataException:");
+			searchStrings.addElement("java.sql.SQLDataSetSyncException:");
+			searchStrings.addElement("java.sql.SQLException:");
+			searchStrings.addElement("java.sql.SQLFeatureNotSupportedException:");
+			searchStrings.addElement("java.sql.SQLIntegrityConstraintViolationException:");
+			searchStrings.addElement("java.sql.SQLInvalidAuthorizationSpecException:");
+			searchStrings.addElement("java.sql.SQLNonTransientConnectionException:");
+			searchStrings.addElement("java.sql.SQLNonTransientException:");
+			searchStrings.addElement("java.sql.SQLRuntimeException:");
+			searchStrings.addElement("java.sql.SQLSyntaxErrorException:");
+			searchStrings.addElement("java.sql.SQLTimeoutException:");
+			searchStrings.addElement("java.sql.SQLTransactionRollbackException:");
+			searchStrings.addElement("java.sql.SQLTransientConnectionException:");
+			searchStrings.addElement("java.sql.SQLTransientException:");
+		}
+		
         Vector subStrings = new Vector();
         subStrings.addElement("Transaction:(XXX)|");
         subStrings.addElement("Read ... bytes");
@@ -209,7 +231,26 @@ public class Sed
         subStrings.addElement("xxxFILTERED-SAX-EXCEPTIONxxx'.");
         // Filter out localhost, or hostName
         subStrings.addElement("xxxFILTERED_HOSTNAMExxx");
-        doWork(srcFile, dstFile, null, deleteLines, searchStrings, subStrings, isSed, isI18N);
+
+		if ( isJDBC4 )
+		{
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+		}
+
+		doWork(srcFile, dstFile, null, deleteLines, searchStrings, subStrings, isSed, isI18N);
         
     } // end exec
 

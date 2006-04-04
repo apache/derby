@@ -2,12 +2,12 @@ Test savepointJdbc30 starting
 Test savepointJdbc30 starting for regular connections
 Tests common to DRDA and embedded Cloudscape
 Test1 - no unnamed savepoints allowed if autocommit is true
-Expected Exception is Cannot set savepoint when in auto-commit mode.
+Expected Exception is Cannot issue savepoint when autoCommit is on.
 Test1a - no named savepoints allowed if autocommit is true
-Expected Exception is Cannot set savepoint when in auto-commit mode.
+Expected Exception is Cannot issue savepoint when autoCommit is on.
 Test2 - Release and reuse a savepoint name
 Test3 - null name not allowed for named savepoints
-Expected Exception is Named savepoint needs a none-null name.
+Expected Exception is Cannot pass null for savepoint name.
 Test4 - Verify names/ids of named/unnamed savepoints
 Expected Exception is This is an un-named savepoint.
 Expected Exception is This is a named savepoint.
@@ -20,11 +20,11 @@ Expected Exception is SAVEPOINT, s1 does not  exist or is not active in the curr
 Test6b - create a savepoint, release it, create another with same name and rollback the first one
 Expected Exception is SAVEPOINT, s1 does not  exist or is not active in the current transaction. : 
 Test6c - Try to use a savepoint from another connection for release
-Expected Exception is Cannot release a savepoint that was not created by this connection.
+Expected Exception is Cannot rollback or release a savepoint that was not created by this connection.
 Test7a - swap savepoints across connections with release
-Expected Exception is Cannot release a savepoint that was not created by this connection.
+Expected Exception is Cannot rollback or release a savepoint that was not created by this connection.
 Test7b - swap savepoints across connections with rollback
-Expected Exception is Rollback to a savepoint not created by this connection.
+Expected Exception is Cannot rollback or release a savepoint that was not created by this connection.
 Test 9 test savepoint name
 Test 10 test savepoint name case sensitivity
 Test 11 rolling back a savepoint multiple times - should work
@@ -69,7 +69,7 @@ Expected Exception is The name 'MyName123456789012345678901234567890123456789012
 Test 25 Should not be able to create a SQL savepoint starting with name SYS through jdbc
 Expected Exception is An object cannot be created with the schema name 'SYS'. : 
 Test 26a rollback of null savepoint
-Expected Exception is Cannot rollback to a null savepoint.
+Expected Exception is A RELEASE or ROLLBACK TO SAVEPOINT was specified, but the savepoint does not exist.
 Test 26b release  of null savepoint
-Expected Exception is Cannot release a null savepoint.
+Expected Exception is A RELEASE or ROLLBACK TO SAVEPOINT was specified, but the savepoint does not exist.
 Next try non-DRDA tests
