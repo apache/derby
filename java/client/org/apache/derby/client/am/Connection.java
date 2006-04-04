@@ -1469,11 +1469,19 @@ public abstract class Connection implements java.sql.Connection,
         // In an XA global transaction do not allow the
         // holdability to be set to hold cursors across
         // commits, as the engine does not support it.
+        // Downgrade the holdability to CLOSE_CURSORS_AT_COMMIT
+        // and attach a warning. This is specified in
+        // JDBC 4.0 (proposed final draft) section 16.1.3.1
+        // Similar code is not needed for PreparedStatement
+        // as the holdability gets pushed all the way to the
+        // engine and handled there.
         if (this.isXAConnection_ && this.xaState_ == XA_T1_ASSOCIATED)
         {
-            if (resultSetHoldability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT)
-                throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.CANNOT_HOLD_CURSOR_XA));
+            if (resultSetHoldability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {
+                resultSetHoldability = JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
+                accumulateWarning(new SqlWarning(agent_.logWriter_, 
+                        new MessageId(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE)));
+            }
         }
         Statement s = newStatement_(resultSetType, resultSetConcurrency, resultSetHoldability);
         s.cursorAttributesToSendOnPrepare_ = s.cacheCursorAttributesToSendOnPrepare();

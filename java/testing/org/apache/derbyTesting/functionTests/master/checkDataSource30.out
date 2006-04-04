@@ -860,9 +860,9 @@ Set connection to hold
 CONNECTION(held) HOLDABILITY true
 CONNECTION(xa) HOLDABILITY false
 Expected SQLException(setHoldability) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
-Expected SQLException (Statement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
-Expected SQLException (PreparedStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
-Expected SQLException (CallableStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+HOLDABLE Statement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
+HOLDABLE PreparedStatement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
+HOLDABLE CallableStatement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
 STATEMENT HOLDABILITY true
 Expected SQLException (local Statement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 Expected SQLException (local Statement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.

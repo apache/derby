@@ -64,6 +64,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.LANG_STATEMENT_CLOSED_NO_REASON);
         clientMessageIds.add(SQLState.LANG_INVALID_COLUMN_POSITION);
         clientMessageIds.add(SQLState.INVALID_COLUMN_NAME);
+        clientMessageIds.add(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
     }
 
 	public static void main(String[] args) throws Exception {

@@ -22,6 +22,7 @@ package org.apache.derby.iapi.jdbc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
@@ -82,5 +83,13 @@ public interface EngineConnection extends Connection {
      * Can be removed once JDK 1.3 is no longer supported.
      */
     public int getHoldability() throws SQLException;
+    
+    /**
+     * Add a SQLWarning to this Connection object.
+     * @param newWarning Warning to be added, will be chained to any
+     * existing warnings.
+     */
+    public void addWarning(SQLWarning newWarning)
+        throws SQLException;
 
 }

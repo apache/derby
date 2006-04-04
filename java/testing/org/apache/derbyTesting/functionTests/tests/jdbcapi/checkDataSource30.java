@@ -331,27 +331,34 @@ public class checkDataSource30 extends checkDataSource
 				System.out.println("Expected SQLException(setHoldability) " + sqle.getMessage());
 			}
 			
-			try {
-				Statement shxa = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
-				System.out.println("FAIL opened statement with hold cursor attribute in global transaction");
-			} catch (SQLException sqle) {
-				System.out.println("Expected SQLException (Statement hold) " + sqle.getMessage());
-			}
-			try {
-				Statement shxa = conn.prepareStatement("select id from hold_30",
+            // JDBC 4.0 (proposed final draft) section 16.1.3.1 allows Statements to
+            // be created with a different holdability if the driver cannot support it.
+            // In this case the driver does not support holdability in a global transaction
+            // so a valid statement is returned with close cursors on commit,
+			
+		    Statement shxa = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+            System.out.println("HOLDABLE Statement in global xact " +
+                    (s.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT) +
+                    " connection warning " + conn.getWarnings().getMessage());
+            shxa.close();
+            
+		
+           shxa = conn.prepareStatement("select id from hold_30",
 					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
-				System.out.println("FAIL opened statement with hold cursor attribute in global transaction");
-			} catch (SQLException sqle) {
-				System.out.println("Expected SQLException (PreparedStatement hold) " + sqle.getMessage());
-			}
-			try {
-				Statement shxa = conn.prepareCall("CALL XXX.TTT()",
+           System.out.println("HOLDABLE PreparedStatement in global xact " +
+                   (s.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT) +
+                   " connection warning " + conn.getWarnings().getMessage());
+           shxa.close();
+           
+           shxa = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()",
 					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
-				System.out.println("FAIL opened statement with hold cursor attribute in global transaction");
-			} catch (SQLException sqle) {
-				System.out.println("Expected SQLException (CallableStatement hold) " + sqle.getMessage());
-			}
-
+           System.out.println("HOLDABLE CallableStatement in global xact " +
+                   (s.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT) +
+                   " connection warning " + conn.getWarnings().getMessage());
+           shxa.close();
+           
+           
 			// check we cannot use a holdable statement set up in local mode.
 			System.out.println("STATEMENT HOLDABILITY " + (sh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
 			try {
