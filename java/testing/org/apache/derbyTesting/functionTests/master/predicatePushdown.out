@@ -7502,12 +7502,13 @@ ij> -- Multiple, non-flattenable subqueries, but NO UNIONs.  Shouldn't push
 select x1.j, x2.b from
   (select distinct i,j from t1) x1,
   (select distinct a,b from t3) x2
-where x1.i = x2.a;
+where x1.i = x2.a
+order by x1.j, x2.b;
 J          |B          
 -----------------------
-6          |3          
-4          |2          
 2          |1          
+4          |2          
+6          |3          
 8          |4          
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
@@ -7521,6 +7522,7 @@ select x1.j, x2.b from
   (select distinct i,j from t1) x1,
   (select distinct a,b from t3) x2
 where x1.i = x2.a
+order by x1.j, x2.b
 Parse Time: 0
 Bind Time: 0
 Optimize Time: 0
@@ -7532,75 +7534,49 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (5):
+Sort ResultSet:
 Number of opens = 1
-Rows seen = 4
-Rows filtered = 0
-restriction = false
-projection = true
+Rows input = 4
+Rows returned = 4
+Eliminate duplicates = false
+In sorted order = false
+Sort information: 
+	Number of rows input=4
+	Number of rows output=4
 	constructor time (milliseconds) = 0
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-	restriction time (milliseconds) = 0
-	projection time (milliseconds) = 0
 Source result set:
-	Nested Loop Join ResultSet:
+	Project-Restrict ResultSet (5):
 	Number of opens = 1
-	Rows seen from the left = 5
-	Rows seen from the right = 4
+	Rows seen = 4
 	Rows filtered = 0
-	Rows returned = 4
+	restriction = false
+	projection = true
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	Left result set:
-		Distinct Scan ResultSet for T1 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
+		Nested Loop Join ResultSet:
 		Number of opens = 1
-		Hash table size = 5
-		Distinct columns are column numbers (0,1)
-		Rows seen = 5
+		Rows seen from the left = 5
+		Rows seen from the right = 4
 		Rows filtered = 0
+		Rows returned = 4
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-			next time in milliseconds/row = 0
-		scan information: 
-			Bit set of columns fetched=All
-			Number of columns fetched=2
-			Number of pages visited=1
-			Number of rows qualified=5
-			Number of rows visited=5
-			Scan type=heap
-			start position:
-	None
-			stop position:
-	None
-			scan qualifiers:
-None
-			next qualifiers:
-None
-	Right result set:
-		Project-Restrict ResultSet (4):
-		Number of opens = 5
-		Rows seen = 495
-		Rows filtered = 491
-		restriction = true
-		projection = true
-			constructor time (milliseconds) = 0
-			open time (milliseconds) = 0
-			next time (milliseconds) = 0
-			close time (milliseconds) = 0
-			restriction time (milliseconds) = 0
-			projection time (milliseconds) = 0
-		Source result set:
-			Distinct Scan ResultSet for T3 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
-			Number of opens = 5
-			Hash table size = 99
+		Left result set:
+			Distinct Scan ResultSet for T1 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+			Number of opens = 1
+			Hash table size = 5
 			Distinct columns are column numbers (0,1)
-			Rows seen = 495
+			Rows seen = 5
 			Rows filtered = 0
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
@@ -7611,8 +7587,8 @@ None
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of pages visited=1
-				Number of rows qualified=99
-				Number of rows visited=99
+				Number of rows qualified=5
+				Number of rows visited=5
 				Scan type=heap
 				start position:
 	None
@@ -7622,20 +7598,61 @@ None
 None
 				next qualifiers:
 None
+		Right result set:
+			Project-Restrict ResultSet (4):
+			Number of opens = 5
+			Rows seen = 495
+			Rows filtered = 491
+			restriction = true
+			projection = true
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Distinct Scan ResultSet for T3 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+				Number of opens = 5
+				Hash table size = 99
+				Distinct columns are column numbers (0,1)
+				Rows seen = 495
+				Rows filtered = 0
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=99
+					Number of rows visited=99
+					Scan type=heap
+					start position:
+	None
+					stop position:
+	None
+					scan qualifiers:
+None
+					next qualifiers:
+None
 ij> select x1.j, x2.b from
   (select distinct i,j from t1) x1,
   (select distinct a,b from t3) x2,
   (select distinct i,j from t2) x3,
   (select distinct a,b from t4) x4
-where x1.i = x2.a and x3.i = x4.a;
+where x1.i = x2.a and x3.i = x4.a
+order by x1.j, x2.b;
 J          |B          
 -----------------------
-6          |3          
-6          |3          
-4          |2          
-4          |2          
 2          |1          
 2          |1          
+4          |2          
+4          |2          
+6          |3          
+6          |3          
 8          |4          
 8          |4          
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -7650,6 +7667,7 @@ Statement Text:
   (select distinct i,j from t2) x3,
   (select distinct a,b from t4) x4
 where x1.i = x2.a and x3.i = x4.a
+order by x1.j, x2.b
 Parse Time: 0
 Bind Time: 0
 Optimize Time: 0
@@ -7661,36 +7679,39 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (10):
+Sort ResultSet:
 Number of opens = 1
-Rows seen = 8
-Rows filtered = 0
-restriction = false
-projection = true
+Rows input = 8
+Rows returned = 8
+Eliminate duplicates = false
+In sorted order = false
+Sort information: 
+	Number of rows input=8
+	Number of rows output=8
 	constructor time (milliseconds) = 0
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-	restriction time (milliseconds) = 0
-	projection time (milliseconds) = 0
 Source result set:
-	Nested Loop Join ResultSet:
+	Project-Restrict ResultSet (10):
 	Number of opens = 1
-	Rows seen from the left = 10
-	Rows seen from the right = 8
+	Rows seen = 8
 	Rows filtered = 0
-	Rows returned = 8
+	restriction = false
+	projection = true
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	Left result set:
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
+	Source result set:
 		Nested Loop Join ResultSet:
 		Number of opens = 1
-		Rows seen from the left = 25
-		Rows seen from the right = 10
+		Rows seen from the left = 10
+		Rows seen from the right = 8
 		Rows filtered = 0
-		Rows returned = 10
+		Rows returned = 8
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
@@ -7698,73 +7719,124 @@ Source result set:
 		Left result set:
 			Nested Loop Join ResultSet:
 			Number of opens = 1
-			Rows seen from the left = 5
-			Rows seen from the right = 25
+			Rows seen from the left = 25
+			Rows seen from the right = 10
 			Rows filtered = 0
-			Rows returned = 25
+			Rows returned = 10
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 			Left result set:
-				Distinct Scan ResultSet for T1 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+				Nested Loop Join ResultSet:
 				Number of opens = 1
-				Hash table size = 5
-				Distinct columns are column numbers (0,1)
-				Rows seen = 5
+				Rows seen from the left = 5
+				Rows seen from the right = 25
 				Rows filtered = 0
+				Rows returned = 25
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of pages visited=1
-					Number of rows qualified=5
-					Number of rows visited=5
-					Scan type=heap
-					start position:
+				Left result set:
+					Distinct Scan ResultSet for T1 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+					Number of opens = 1
+					Hash table size = 5
+					Distinct columns are column numbers (0,1)
+					Rows seen = 5
+					Rows filtered = 0
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=5
+						Number of rows visited=5
+						Scan type=heap
+						start position:
 	None
-					stop position:
+						stop position:
 	None
-					scan qualifiers:
+						scan qualifiers:
 None
-					next qualifiers:
+						next qualifiers:
+None
+				Right result set:
+					Distinct Scan ResultSet for T2 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+					Number of opens = 5
+					Hash table size = 5
+					Distinct columns are column numbers (0,1)
+					Rows seen = 25
+					Rows filtered = 0
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=5
+						Number of rows visited=5
+						Scan type=heap
+						start position:
+	None
+						stop position:
+	None
+						scan qualifiers:
+None
+						next qualifiers:
 None
 			Right result set:
-				Distinct Scan ResultSet for T2 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
-				Number of opens = 5
-				Hash table size = 5
-				Distinct columns are column numbers (0,1)
-				Rows seen = 25
-				Rows filtered = 0
+				Project-Restrict ResultSet (7):
+				Number of opens = 25
+				Rows seen = 2300
+				Rows filtered = 2290
+				restriction = true
+				projection = true
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of pages visited=1
-					Number of rows qualified=5
-					Number of rows visited=5
-					Scan type=heap
-					start position:
+					restriction time (milliseconds) = 0
+					projection time (milliseconds) = 0
+				Source result set:
+					Distinct Scan ResultSet for T4 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+					Number of opens = 25
+					Hash table size = 92
+					Distinct columns are column numbers (0,1)
+					Rows seen = 2300
+					Rows filtered = 0
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=92
+						Number of rows visited=92
+						Scan type=heap
+						start position:
 	None
-					stop position:
+						stop position:
 	None
-					scan qualifiers:
+						scan qualifiers:
 None
-					next qualifiers:
+						next qualifiers:
 None
 		Right result set:
-			Project-Restrict ResultSet (7):
-			Number of opens = 25
-			Rows seen = 2300
-			Rows filtered = 2290
+			Project-Restrict ResultSet (9):
+			Number of opens = 10
+			Rows seen = 990
+			Rows filtered = 982
 			restriction = true
 			projection = true
 				constructor time (milliseconds) = 0
@@ -7774,11 +7846,11 @@ None
 				restriction time (milliseconds) = 0
 				projection time (milliseconds) = 0
 			Source result set:
-				Distinct Scan ResultSet for T4 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
-				Number of opens = 25
-				Hash table size = 92
+				Distinct Scan ResultSet for T3 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+				Number of opens = 10
+				Hash table size = 99
 				Distinct columns are column numbers (0,1)
-				Rows seen = 2300
+				Rows seen = 990
 				Rows filtered = 0
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
@@ -7789,8 +7861,8 @@ None
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of pages visited=1
-					Number of rows qualified=92
-					Number of rows visited=92
+					Number of rows qualified=99
+					Number of rows visited=99
 					Scan type=heap
 					start position:
 	None
@@ -7799,46 +7871,6 @@ None
 					scan qualifiers:
 None
 					next qualifiers:
-None
-	Right result set:
-		Project-Restrict ResultSet (9):
-		Number of opens = 10
-		Rows seen = 990
-		Rows filtered = 982
-		restriction = true
-		projection = true
-			constructor time (milliseconds) = 0
-			open time (milliseconds) = 0
-			next time (milliseconds) = 0
-			close time (milliseconds) = 0
-			restriction time (milliseconds) = 0
-			projection time (milliseconds) = 0
-		Source result set:
-			Distinct Scan ResultSet for T3 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
-			Number of opens = 10
-			Hash table size = 99
-			Distinct columns are column numbers (0,1)
-			Rows seen = 990
-			Rows filtered = 0
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				next time in milliseconds/row = 0
-			scan information: 
-				Bit set of columns fetched=All
-				Number of columns fetched=2
-				Number of pages visited=1
-				Number of rows qualified=99
-				Number of rows visited=99
-				Scan type=heap
-				start position:
-	None
-				stop position:
-	None
-				scan qualifiers:
-None
-				next qualifiers:
 None
 ij> -- Multiple subqueries that are UNIONs.  Outer-most predicate
 -- X0.b = X2.j can be pushed to union X0 but NOT to subquery X2.

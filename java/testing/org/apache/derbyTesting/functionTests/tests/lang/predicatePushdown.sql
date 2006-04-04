@@ -360,7 +360,8 @@ values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 select x1.j, x2.b from
   (select distinct i,j from t1) x1,
   (select distinct a,b from t3) x2
-where x1.i = x2.a;
+where x1.i = x2.a
+order by x1.j, x2.b;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 select x1.j, x2.b from
@@ -368,7 +369,8 @@ select x1.j, x2.b from
   (select distinct a,b from t3) x2,
   (select distinct i,j from t2) x3,
   (select distinct a,b from t4) x4
-where x1.i = x2.a and x3.i = x4.a;
+where x1.i = x2.a and x3.i = x4.a
+order by x1.j, x2.b;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 -- Multiple subqueries that are UNIONs.  Outer-most predicate
