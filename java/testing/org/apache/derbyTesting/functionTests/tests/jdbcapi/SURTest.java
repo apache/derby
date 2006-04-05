@@ -849,16 +849,12 @@ public class SURTest extends SURBaseTest {
     }
     
     /**
-     * Get a new cursor name. WORKAROUND FOR DERBY-787, since
-     * the cursors have side-effects..!
-     * To reproduce DERBY-787, just return the same cursor name.
+     * Get a cursor name. We use the same cursor name for all cursors.
      */
     private final String getNextCursorName() {
-        return "MYCURSOR" + cursorIndex++;
+        return "MYCURSOR";
     }
     
-    private static int cursorIndex = 0;
-
     
     /**
      * The suite contains all testcases in this class running on different 

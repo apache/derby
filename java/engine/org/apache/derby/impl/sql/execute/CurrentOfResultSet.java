@@ -311,27 +311,17 @@ public class CurrentOfResultSet extends NoPutResultSetImpl
 
 			if (cursorActivation != null)
 			{
-				// check we are compiled against the correct cursor
-				PreparedStatement cps = cursorActivation.getPreparedStatement();
-
-				if (psName.equals(cps.getObjectName())) {
-					cursor = cursorActivation.getCursorResultSet();
-					target = cursorActivation.getTargetResultSet();
-					/* beetle 3865: updateable cursor using index. 2 way communication between
-					 * update activation and cursor activation. Cursor passes index scan to
-					 * update and update passes heap conglom controller to cursor.
-					 */
-					activation.setForUpdateIndexScan(cursorActivation.getForUpdateIndexScan());
-					if (cursorActivation.getHeapConglomerateController() != null)
-						cursorActivation.getHeapConglomerateController().close();
-					cursorActivation.setHeapConglomerateController(activation.getHeapConglomerateController());
-				} else {
-
-					// our prepared statement is now invalid since there
-					// exists another cursor with the same name but a different
-					// statement.
-					activation.getPreparedStatement().makeInvalid(DependencyManager.CHANGED_CURSOR, lcc);
-				}
+				
+				cursor = cursorActivation.getCursorResultSet();
+				target = cursorActivation.getTargetResultSet();
+				/* beetle 3865: updateable cursor using index. 2 way communication between
+				 * update activation and cursor activation. Cursor passes index scan to
+				 * update and update passes heap conglom controller to cursor.
+				 */
+				activation.setForUpdateIndexScan(cursorActivation.getForUpdateIndexScan());
+				if (cursorActivation.getHeapConglomerateController() != null)
+					cursorActivation.getHeapConglomerateController().close();
+				cursorActivation.setHeapConglomerateController(activation.getHeapConglomerateController());				
 			}
 		}
 
