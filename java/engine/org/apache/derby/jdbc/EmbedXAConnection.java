@@ -86,9 +86,10 @@ final class EmbedXAConnection extends EmbedPooledConnection
     {
 		if (holdability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {		
 			if (xaRes.getCurrentXid () != null) {
-                if (downgrade)
-                    return JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
-                throw Util.generateCsSQLException(SQLState.CANNOT_HOLD_CURSOR_XA);
+                if (!downgrade)
+                    throw Util.generateCsSQLException(SQLState.CANNOT_HOLD_CURSOR_XA);
+                
+                holdability = JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
             }
 		}
 

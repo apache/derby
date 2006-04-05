@@ -203,6 +203,6 @@ final class XAStatementControl implements BrokeredStatementControl {
 		Can cursors be held across commits.
 	*/
 	public int checkHoldCursors(int holdability) throws SQLException {
-		return xaConnection.checkHoldCursors(holdability, false);
+		return xaConnection.checkHoldCursors(holdability, true);
  	}
 }

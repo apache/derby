@@ -21,10 +21,13 @@
 package org.apache.derby.iapi.jdbc;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.impl.jdbc.Util;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -98,13 +101,13 @@ public class BrokeredStatement implements EngineStatement
 
     public final boolean execute(String sql) throws SQLException
 	{
-		controlCheck().checkHoldCursors(resultSetHoldability);
+        checkHoldability();
 		return getStatement().execute(sql);
     } 
 
     public final ResultSet executeQuery(String sql) throws SQLException
 	{
-		controlCheck().checkHoldCursors(resultSetHoldability);
+        checkHoldability();
 		return wrapResultSet(getStatement().executeQuery(sql));
     }
 
@@ -461,10 +464,21 @@ public class BrokeredStatement implements EngineStatement
         return wrapResultSet(getStatement().getGeneratedKeys());
     }
 
+    /**
+     * Return the holdability of ResultSets created by this Statement.
+     * If this Statement is active in a global transaction the
+     * CLOSE_CURSORS_ON_COMMIT will be returned regardless of
+     * the holdability it was created with. In a local transaction
+     * the original create holdabilty will be returned.
+     */
 	public final int getResultSetHoldability()
         throws SQLException
 	{
-		return ((EngineStatement) getStatement()).getResultSetHoldability();
+        int holdability =
+            ((EngineStatement) getStatement()).getResultSetHoldability();
+        
+        // Holdability might be downgraded.
+        return controlCheck().checkHoldCursors(holdability);
 	}
 
 	/*
@@ -478,7 +492,8 @@ public class BrokeredStatement implements EngineStatement
 		if (jdbcLevel == 2)
 			newStatement = conn.createStatement(resultSetType, resultSetConcurrency);
 		else
-			newStatement = conn.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
+			newStatement = conn.createStatement(resultSetType, resultSetConcurrency,
+                    resultSetHoldability);
 
 		setStatementState(oldStatement, newStatement);
 
@@ -526,4 +541,11 @@ public class BrokeredStatement implements EngineStatement
 		getStatement().getConnection();
 		return control;
 	}
+    
+    final void checkHoldability() throws SQLException {
+        int holdability = controlCheck().checkHoldCursors(resultSetHoldability);
+        if (holdability != resultSetHoldability)
+            throw Util.generateCsSQLException(SQLState.CANNOT_HOLD_CURSOR_XA);
+
+    }
 }
