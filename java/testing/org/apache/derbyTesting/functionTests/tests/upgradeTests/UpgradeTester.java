@@ -126,16 +126,15 @@ public class UpgradeTester {
 	// Indicate if alpha/beta releases should support upgrade
 	private boolean allowPreReleaseUpgrade;
 	
-	// Currently, only derby.jar is specified. We can specify more jars, 
-	// as required.
-	private String[] jarFiles = new String [] {"derby.jar"};
+	// We can specify more jars, as required.
+	private String[] jarFiles = new String [] { "derby.jar", 
+												"derbynet.jar",
+												"derbyclient.jar",
+												"derbytools.jar"};
 	
 	// Test jar
 	private String testJar = "derbyTesting.jar";
 	
-	// Protocol used for classloader url
-	private final String urlProtocol = "file:";
-		
 	/**
 	 * Constructor
 	 * 
@@ -186,11 +185,11 @@ public class UpgradeTester {
 		URL[] url = new URL[jarFiles.length + 1];
 		
 		for(int i=0; i < jarFiles.length; i++) {
-			url[i] = new URL(urlProtocol + jarLoc + File.separator + jarFiles[i]);
+			url[i] = new File(jarLoc + File.separator + jarFiles[i]).toURL();
 		}
 		
 		// Add derbyTesting.jar. Added from newer release
-		url[jarFiles.length] = new URL(urlProtocol + newJarLoc + File.separator + testJar);
+		url[jarFiles.length] = new File(newJarLoc + File.separator + testJar).toURL();
 		
 		// Specify null for parent class loader to avoid mixing up 
 		// jars specified in the system classpath
@@ -323,7 +322,7 @@ public class UpgradeTester {
 		}
 		
 		try {
-			conn = getConnectionUsingReflection(classLoader, prop);
+			conn = getConnectionUsingDataSource(classLoader, prop);
 		} catch (SQLException sqle) {
 			if(phase != PH_POST_HARD_UPGRADE)
 				throw sqle;
@@ -352,7 +351,7 @@ public class UpgradeTester {
 	 * @return
 	 * @throws Exception
 	 */
-	private Connection getConnectionUsingReflection(URLClassLoader classLoader, Properties prop) throws Exception{
+	private Connection getConnectionUsingDataSource(URLClassLoader classLoader, Properties prop) throws Exception{
 		Connection conn = null;
 		
 		Class testUtilClass = Class.forName("org.apache.derbyTesting.functionTests.util.TestUtil", 
@@ -641,7 +640,7 @@ public class UpgradeTester {
 		prop.setProperty("connectionAttributes", "shutdown=true");
 		
 		try { 
-			getConnectionUsingReflection(classLoader, prop);
+			getConnectionUsingDataSource(classLoader, prop);
 		} catch (SQLException sqle) {
 			if(sqle.getSQLState().equals("08006")) {
 				System.out.println("Expected exception during shutdown: " 

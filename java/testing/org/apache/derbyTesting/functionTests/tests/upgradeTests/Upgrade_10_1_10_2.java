@@ -22,6 +22,8 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 import java.net.MalformedURLException;
 import java.sql.SQLException;
 
+import org.apache.derbyTesting.functionTests.harness.jvm;
+
 /**
  * Test upgrade from 10.1 to 10.2 
  */
@@ -29,16 +31,9 @@ public class Upgrade_10_1_10_2 {
 
 	public static void main(String[] args) {
 		
-		// This test will use jar locations provided in command-line input till 
-		// the 10.1 jars are available in the repository (DERBY-1049)
-		if(args.length != 2) {
-			System.out.println("USAGE: java UpgradeTester_10_1_10_2 <location of old jars> <location of new jars>");
-			System.out.println("e.g: java UpgradeTester C:\\derby\\10.1\\lib C:\\derby\\trunk\\lib");
-			return;
-		}
-		
-		String oldJarLoc = args[0];
-		String newJarLoc = args[1];
+		String oldJarLoc = System.getProperty("derbyTesting.oldJarLocation");
+		boolean[] isJar = new boolean[1];
+		String newJarLoc = jvm.findCodeBase(isJar);
 		
 		int oldMajorVersion = 10;
 		int oldMinorVersion = 1;

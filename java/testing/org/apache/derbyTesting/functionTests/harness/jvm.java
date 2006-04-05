@@ -297,7 +297,7 @@ public abstract class jvm {
 		return wshome;
 	}
 
-	protected static String findCodeBase(boolean[] isJar)
+	public static String findCodeBase(boolean[] isJar)
 	{
 		String classpath = System.getProperty("java.class.path");
 		char sep = '/';
