@@ -48,6 +48,7 @@ import org.apache.derby.iapi.services.io.NewByteArrayInputStream;
 import org.apache.derby.iapi.services.io.LimitReader;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.JDBC20Translation;
+import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.StringUtil;
 
@@ -1556,6 +1557,26 @@ public abstract class EmbedResultSet extends ConnectionChild
 		return rMetaData;
 	  }
 	}
+    
+    /**
+     * JDBC 4.0
+     * 
+     * <p>
+     * Retrieves the holdability for this <code>ResultSet</code>
+     * object.
+     * 
+     * @return either <code>ResultSet.HOLD_CURSORS_OVER_COMMIT</code>
+     *         or <code>ResultSet.CLOSE_CURSORS_AT_COMMIT</code>
+     * @exception SQLException
+     *                if a database error occurs
+     */
+    public final int getHoldability() throws SQLException {
+        checkIfClosed("getHoldability");
+        if (theResults.getActivation().getResultSetHoldability()) {
+            return JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+        }
+        return JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
+    }
 
     /**
      * <p>Get the value of a column in the current row as a Java object.

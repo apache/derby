@@ -60,29 +60,6 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
         throw Util.notImplemented();
     }
     
-    /**
-     * Retrieves the holdability for this <code>ResultSet</code>
-     * object.
-     *
-     * @return either <code>ResultSet.HOLD_CURSORS_OVER_COMMIT</code>
-     * or <code>ResultSet.CLOSE_CURSORS_AT_COMMIT</code>
-     * @exception SQLException if a database error occurs
-     */
-    public final int getHoldability() throws SQLException {
-        checkIfClosed("getHoldability");
-        Statement statement = getStatement();
-        if (statement == null) {
-            // If statement is null, the result set is an internal
-            // result set created by getNewRowSet() or getOldRowSet()
-            // in InternalTriggerExecutionContext. These result sets
-            // are not exposed to the JDBC applications. Returning
-            // CLOSE_CURSORS_AT_COMMIT since the result set will be
-            // closed when the trigger has finished.
-            return CLOSE_CURSORS_AT_COMMIT;
-        }
-        return statement.getResultSetHoldability();
-    }
-    
     public void updateNString(int columnIndex, String nString) throws SQLException {
         throw Util.notImplemented();
     }
