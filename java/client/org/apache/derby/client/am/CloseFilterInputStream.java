@@ -24,13 +24,15 @@ import java.io.InputStream;
 import java.io.FilterInputStream;
 
 import java.io.IOException;
+import org.apache.derby.shared.common.i18n.MessageUtil;
 
 class CloseFilterInputStream extends FilterInputStream {
 	
-	private static final String ALREADY_CLOSED_ERR_MEASSAGE = "This object is already closed.";
+	private static final String ALREADY_CLOSED_ERR_MESSAGE = 
+        MessageUtil.getCompleteMessage("J104",
+            SqlException.CLIENT_MESSAGE_RESOURCE_NAME, (Object[]) null);
 	
 	private boolean closed;
-	
 	
 	public CloseFilterInputStream(InputStream is){
 		
@@ -44,7 +46,7 @@ class CloseFilterInputStream extends FilterInputStream {
 		throws IOException {
 
 		if(closed){
-			throw new IOException(ALREADY_CLOSED_ERR_MEASSAGE);
+			throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
 		}
 		
 		return super.read();
@@ -56,7 +58,7 @@ class CloseFilterInputStream extends FilterInputStream {
 		throws IOException {
 		
 		if(closed){
-			throw new IOException(ALREADY_CLOSED_ERR_MEASSAGE);
+			throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
 		}
 
 		return super.read(b);
@@ -70,7 +72,7 @@ class CloseFilterInputStream extends FilterInputStream {
 		throws IOException{
 		
 		if(closed){
-			throw new IOException(ALREADY_CLOSED_ERR_MEASSAGE);
+			throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
 		}
 
 		return super.read(b, off, len);
@@ -82,7 +84,7 @@ class CloseFilterInputStream extends FilterInputStream {
 		throws IOException{
 
 		if(closed){
-			throw new IOException(ALREADY_CLOSED_ERR_MEASSAGE);
+			throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
 		}
 		
 		return super.skip(n);
@@ -94,7 +96,7 @@ class CloseFilterInputStream extends FilterInputStream {
 		throws IOException{
 		
 		if(closed){
-			throw new IOException(ALREADY_CLOSED_ERR_MEASSAGE);
+			throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
 		}
 
 		return super.available();

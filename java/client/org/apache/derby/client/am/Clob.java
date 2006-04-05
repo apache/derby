@@ -21,6 +21,7 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLException;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class Clob extends Lob implements java.sql.Clob {
     //---------------------navigational members-----------------------------------
@@ -68,7 +69,7 @@ public class Clob extends Lob implements java.sql.Clob {
             // byte ccsids.
             if (charsetName == null) {
                 throw new SqlException(agent.logWriter_,
-                        "Required character converter not available for data type.");
+                    new MessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
             }
 
             string_ = new String(unconvertedBytes,
@@ -79,7 +80,10 @@ public class Clob extends Lob implements java.sql.Clob {
             lengthObtained_ = true;
             dataType_ |= STRING;
         } catch (java.io.UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e.getMessage());
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                "byte[]", charsetName + " String", e);
+                
         }
     }
 
@@ -105,7 +109,9 @@ public class Clob extends Lob implements java.sql.Clob {
                 characterStream_ =
                         new java.io.InputStreamReader(inputStream, "UnicodeBigUnmarked");
             } catch (java.io.UnsupportedEncodingException e) {
-                throw new SqlException(agent_.logWriter_, e.getMessage());
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.UNSUPPORTED_ENCODING), 
+                    "UnicodeBigUnmarked", "InputStreamReader", e);
             }
             dataType_ |= CHARACTER_STREAM;
             sqlLength_ = length / 2;
@@ -173,8 +179,16 @@ public class Clob extends Lob implements java.sql.Clob {
 
                 // We can also do a check for pos > length()
                 // Defer it till FP7 so that proper testing can be performed on this
-                if ((pos <= 0) || (length < 0)) {
-                    throw new SqlException(agent_.logWriter_, "Invalid position " + pos + " or length " + length);
+                if ( pos <= 0 ) {
+                    throw new SqlException(agent_.logWriter_,
+                        new MessageId(SQLState.BLOB_BAD_POSITION),
+                        new Long(pos));
+                }
+                
+                if ( length < 0 ) {
+                    throw new SqlException(agent_.logWriter_,
+                        new MessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
+                        new Integer(length));
                 }
 
                 retVal = getSubStringX(pos, length);
@@ -279,7 +293,8 @@ public class Clob extends Lob implements java.sql.Clob {
                             start);
                 }
                 if (searchstr == null) {
-                    throw new SqlException(agent_.logWriter_, "Search string cannot be null.");
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
                 }
 
                 long pos = positionX(searchstr, start);
@@ -300,7 +315,9 @@ public class Clob extends Lob implements java.sql.Clob {
 
 
         if (start <= 0) {
-            throw new SqlException(agent_.logWriter_, "Clob.position(): start must be >= 1.");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.INVALID_API_PARAMETER),
+                new Long(start), "start", "Clob.position()");
         }
 
         int index = string_.indexOf(searchstr, (int) start - 1);
@@ -321,7 +338,8 @@ public class Clob extends Lob implements java.sql.Clob {
                             start);
                 }
                 if (searchstr == null) {
-                    throw new SqlException(agent_.logWriter_, "Search string cannot be null.");
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
                 }
                 long pos = positionX(searchstr, start);
                 if (agent_.loggingEnabled()) {
@@ -340,7 +358,9 @@ public class Clob extends Lob implements java.sql.Clob {
         checkForClosedConnection();
 
         if (start <= 0) {
-            throw new SqlException(agent_.logWriter_, "Clob.position(): start must be >= 1.");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.INVALID_API_PARAMETER),
+                new Long(start), "start", "Clob.position()");
         }
 
         // if the searchstr is longer than the source, no match
@@ -352,7 +372,7 @@ public class Clob extends Lob implements java.sql.Clob {
 
             index = string_.indexOf(searchstr.getSubString(1L, (int) searchstr.length()), (int) start - 1);
         } catch (java.sql.SQLException e) {
-            throw new SqlException(agent_.logWriter_, e.getMessage());
+            throw new SqlException(e);
         }
         if (index != -1) {
             index++; // api index starts at 1
@@ -403,14 +423,28 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     public int setStringX(long pos, String str, int offset, int len) throws SqlException {
-        if ((int) pos <= 0 || pos - 1 > sqlLength_) {
-            throw new SqlException(agent_.logWriter_, "Invalid position " + pos
-                    + " , offset " + offset + " or length " + len);
+        if ((int) pos <= 0 ) {
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.BLOB_BAD_POSITION), 
+                new Long(pos));
         }
-        if ((offset < 0) || offset > str.length() || len < 0) {
-            throw new SqlException(agent_.logWriter_, "Invalid position " + pos
-                    + " , offset " + offset + " or length " + len);
+        if ( pos - 1 > sqlLength_) {
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.BLOB_POSITION_TOO_LARGE),
+                new Long(pos));
         }
+        if ((offset < 0) || offset > str.length() ) { 
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.BLOB_INVALID_OFFSET),
+                new Integer(offset));
+        }
+        
+        if ( len < 0 ) {
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
+                new Integer(len));
+        }
+        
         if (len == 0) {
             return 0;
         }
@@ -475,9 +509,18 @@ public class Clob extends Lob implements java.sql.Clob {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, " truncate", (int) len);
                 }
-                if (len < 0 || len > this.length()) {
-                    throw new SqlException(agent_.logWriter_, "Invalid length " + len);
+                if (len < 0 ) {
+                    throw new SqlException(agent_.logWriter_,
+                        new MessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
+                        new Long(len));
                 }
+                
+                if ( len > this.length()) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.BLOB_LENGTH_TOO_LONG),
+                        new Long(len));
+                }
+                
                 if (len == this.length()) {
                     return;
                 }
@@ -536,7 +579,9 @@ public class Clob extends Lob implements java.sql.Clob {
             utf8String_ = string_.getBytes("UTF-8");
             return utf8String_.length;
         } catch (java.io.UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e.getMessage());
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                "String", "UTF8 byte[]", e);
         }
     }
 
@@ -548,11 +593,13 @@ public class Clob extends Lob implements java.sql.Clob {
         try {
             length = clob.length();
         } catch (java.sql.SQLException e) {
-            throw new SqlException(agent_.logWriter_, e.getMessage());
+            throw new SqlException(e);
         }
 
-        if (length > java.lang.Integer.MAX_VALUE) {
-            throw new SqlException(agent_.logWriter_, "searchstr Clob object is too large");
+        if (length > Integer.MAX_VALUE) {
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
+                new Long(length), new Integer(Integer.MAX_VALUE));
         }
 
         try {
@@ -570,7 +617,9 @@ public class Clob extends Lob implements java.sql.Clob {
                     new java.io.InputStreamReader(asciiStream_, "US-ASCII");
             dataType_ = CHARACTER_STREAM;
         } catch (java.io.UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, e.getMessage());
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.UNSUPPORTED_ENCODING), 
+                "US-ASCII", "CharacterStream", e);
         }
     }
 

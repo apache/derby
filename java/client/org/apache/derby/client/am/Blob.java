@@ -167,7 +167,7 @@ public class Blob extends Lob implements java.sql.Blob {
                 }
                 if (pattern == null) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.BLOB_NULL_PATTERN));
+                        new MessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
                 }
                 long pos = positionX(pattern, start);
                 if (agent_.loggingEnabled()) {
@@ -197,7 +197,7 @@ public class Blob extends Lob implements java.sql.Blob {
                 }
                 if (pattern == null) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.BLOB_NULL_PATTERN));
+                        new MessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
                 }
                 long pos = positionX(pattern, start);
                 if (agent_.loggingEnabled()) {
@@ -297,7 +297,7 @@ public class Blob extends Lob implements java.sql.Blob {
         if ((offset < 0) || offset > bytes.length )
         {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.INVALID_BLOB_OFFSET), 
+                new MessageId(SQLState.BLOB_INVALID_OFFSET), 
                 new Integer(offset));
         }
         if ( len < 0 ) {

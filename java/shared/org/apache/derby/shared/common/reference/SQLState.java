@@ -1420,7 +1420,7 @@ public interface SQLState {
     String NO_SAVEPOINT_IN_TRIGGER = "XJ017.S";
     String NULL_COLUMN_NAME = "XJ018.S";
     String TYPE_MISMATCH = "XJ020.S";
-    String INVALID_JDBCTYPE = "XJ021.S";
+    String UNSUPPORTED_TYPE = "XJ021.S";
     String SET_STREAM_FAILURE = "XJ022.S";
     String SET_STREAM_INEXACT_LENGTH_DATA = "XJ023.S";
     String STREAM_EOF = "XJ085.S";
@@ -1458,14 +1458,16 @@ public interface SQLState {
     // Blob/Clob
     String BLOB_BAD_POSITION = "XJ070.S";
     String BLOB_NONPOSITIVE_LENGTH = "XJ071.S";
-    String BLOB_NULL_PATTERN = "XJ072.S";
+    String BLOB_NULL_PATTERN_OR_SEARCH_STR = "XJ072.S";
     String BLOB_ACCESSED_AFTER_COMMIT = "XJ073.S";
     String BLOB_POSITION_TOO_LARGE = "XJ076.S";
     String BLOB_UNABLE_TO_READ_PATTERN = "XJ077.S";
+    String BLOB_INVALID_OFFSET = "XJ078.S";
+    String BLOB_LENGTH_TOO_LONG = "XJ079.S";
+
     String LOB_AS_METHOD_ARGUMENT_OR_RECEIVER = "XJ082.U";
     // the following exception is internal and is never seen by the user
     // (no message in message.properties)
-    String BLOB_SETPOSITION_FAILED = "XJ079.S";
 
     //updatable resultset related
     String UPDATABLE_RESULTSET_API_DISALLOWED = "XJ083.U";
@@ -1536,12 +1538,18 @@ public interface SQLState {
      * to keep track of the numbers to ensure we don't duplicate the 
      * SQL State
      */
-    String INVALID_BLOB_OFFSET                                      = "XN003.S";
     String WASNULL_INVALID                                          = "XN004.S";
     String INVALID_PARAM_USE_GETINT                                 = "XN005.S";
     String CALENDAR_IS_NULL                                         = "XN006.S";
     String PARAM_NOT_OUT_OR_INOUT                                   = "XN009.S";
     String RETURN_PARAM_MUST_BE_INT                                 = "XN010.S";
+    String BLOB_TOO_LARGE_FOR_CLIENT                                = "XN011.S";
+    String OBJECT_ALREADY_CLOSED                                    = "XN012.S";
+    String ERROR_PRIVILEGED_ACTION                                  = "XN064.S";
+    String MISSING_RESOURCE_BUNDLE                                  = "XN065.S";
+    String SAVEPOINT_NOT_CREATED_BY_CONNECTION                      = "XN067.S";
+    String BAD_AUTO_GEN_KEY_VALUE                                   = "XN069.S";
+    String READER_UNDER_RUN                                         = "XN070.S";
     String TABLE_NAME_CANNOT_BE_NULL                                = "XN100.S";
     String SHARED_KEY_LENGTH_ERROR                                  = "XN104.S";
     String DES_KEY_HAS_WRONG_LENGTH                                 = "XN105.S";
@@ -1551,20 +1559,6 @@ public interface SQLState {
     String PRIMARY_TABLE_NAME_IS_NULL                               = "XN110.S";
     String FOREIGN_TABLE_NAME_IS_NULL                               = "XN111.S";
     String SECURITY_EXCEPTION_ENCOUNTERED                           = "XN112.S";
-    String NULL_SEARCH_STRING                                       = "XN052.S";
-    String INVALID_CLOB_START_POS                                   = "XN053.S";
-    String INVALID_POS_OFFSET_OR_LEN                                = "XN054.S";
-    String INVALID_LENGTH                                           = "XN055.S";
-    String CLOB_TOO_LARGE                                           = "XN056.S";
-    String INVALID_POSITION                                         = "XN057.S";
-    String INVALID_OFFSET                                           = "XN058.S";
-    String UNSUPPORTED_TYPE                                         = "XN059.S";
-    String ERROR_PRIVILEGED_ACTION                                  = "XN064.S";
-    String MISSING_RESOURCE_BUNDLE                                  = "XN065.S";
-    String SAVEPOINT_NOT_CREATED_BY_CONNECTION                      = "XN067.S";
-    String DRIVER_NOT_CAPABLE                                       = "XN068.S";
-    String BAD_AUTO_GEN_KEY_VALUE                                   = "XN069.S";
-    String READER_UNDER_RUN                                         = "XN070.S";
     
     String UNABLE_TO_OPEN_FILE = "XN151.S";
     

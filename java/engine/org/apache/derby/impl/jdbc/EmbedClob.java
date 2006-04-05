@@ -351,7 +351,7 @@ final class EmbedClob extends ConnectionChild implements Clob
                 throw StandardException.newException(
                     SQLState.BLOB_BAD_POSITION, new Long(start));
             if (searchStr == null)
-                throw StandardException.newException(SQLState.BLOB_NULL_PATTERN);
+                throw StandardException.newException(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
             if (searchStr == "")
                 return start; // match DB2's SQL LOCATE function
 
@@ -590,7 +590,7 @@ compareArrays:
                 throw StandardException.newException(
                     SQLState.BLOB_BAD_POSITION, new Long(start));
             if (searchClob == null)
-                throw StandardException.newException(SQLState.BLOB_NULL_PATTERN);
+                throw StandardException.newException(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
 
             synchronized (getConnectionSynchronization())
             {

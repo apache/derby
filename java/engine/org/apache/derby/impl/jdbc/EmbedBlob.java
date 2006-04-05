@@ -170,7 +170,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
                 int size = biStream.read(
                     buf,0,(int) Math.min((newPos-pos), (long) BLOB_BUF_SIZE));
                 if (size <= 0)   // ran out of stream
-                    throw StandardException.newException(SQLState.BLOB_SETPOSITION_FAILED);
+                    throw StandardException.newException(SQLState.BLOB_LENGTH_TOO_LONG);
                 pos += size;
             }
         }
@@ -322,7 +322,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
         }
         catch (StandardException e)
         {  // if this is a setPosition exception then we ran out of Blob
-            if (e.getMessageId().equals(SQLState.BLOB_SETPOSITION_FAILED))
+            if (e.getMessageId().equals(SQLState.BLOB_LENGTH_TOO_LONG))
                 e = StandardException.newException(
                     SQLState.BLOB_POSITION_TOO_LARGE, new Long(startPos));
             throw handleMyExceptions(e);
@@ -408,7 +408,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
                 throw StandardException.newException(
                     SQLState.BLOB_BAD_POSITION, new Long(start));
             if (pattern == null)
-                throw StandardException.newException(SQLState.BLOB_NULL_PATTERN);
+                throw StandardException.newException(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
             if (pattern.length == 0)
                 return start; // match DB2's SQL LOCATE function
 
@@ -441,7 +441,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
         }
         catch (StandardException e)
         {  // if this is a setPosition exception then not found
-            if (e.getMessageId().equals(SQLState.BLOB_SETPOSITION_FAILED))
+            if (e.getMessageId().equals(SQLState.BLOB_LENGTH_TOO_LONG))
                 return -1;
             else
                 throw handleMyExceptions(e);
@@ -503,7 +503,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
                 throw StandardException.newException(
                     SQLState.BLOB_BAD_POSITION, new Long(start));
             if (pattern == null)
-                throw StandardException.newException(SQLState.BLOB_NULL_PATTERN);
+                throw StandardException.newException(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
             synchronized (getConnectionSynchronization())
             {
                 pushStack = !getEmbedConnection().isClosed();
@@ -544,7 +544,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
         }
         catch (StandardException e)
         {  // if this is a setPosition exception then not found
-            if (e.getMessageId().equals(SQLState.BLOB_SETPOSITION_FAILED))
+            if (e.getMessageId().equals(SQLState.BLOB_LENGTH_TOO_LONG))
                 return -1;
             else
                 throw handleMyExceptions(e);
