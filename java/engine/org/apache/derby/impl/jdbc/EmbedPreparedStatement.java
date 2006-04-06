@@ -737,7 +737,7 @@ public abstract class EmbedPreparedStatement
   	  }
     }
 
-	protected boolean executeBatchElement(Object batchElement) throws SQLException, StandardException {
+	boolean executeBatchElement(Object batchElement) throws SQLException, StandardException {
 		
 		ParameterValueSet temp = (ParameterValueSet) batchElement;
 
@@ -1314,7 +1314,7 @@ public abstract class EmbedPreparedStatement
 		}
 	}
 
-	protected boolean executeStatement(Activation a,
+	boolean executeStatement(Activation a,
                      boolean executeQuery, boolean executeUpdate)
                      throws SQLException {
 
@@ -1324,7 +1324,7 @@ public abstract class EmbedPreparedStatement
 		return super.executeStatement(a, executeQuery, executeUpdate);
 	}
 
-	protected final SQLException dataTypeConversion(int column, String sourceType)
+	final SQLException dataTypeConversion(int column, String sourceType)
 		throws SQLException {
 		SQLException se = newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH, getEmbedParameterSetMetaData().getParameterTypeName(column),
 			sourceType);
