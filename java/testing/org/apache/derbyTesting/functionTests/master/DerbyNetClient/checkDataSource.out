@@ -2,24 +2,24 @@ Running connection checks on DriverManager
   isolation level 2
   auto commit     true
   read only       false
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 method calls on a closed connection
 DriverManager  <closedconn>.close() no error
-DriverManager  <closedconn>.createStatement() null - invalid operation: connection closed
+DriverManager  <closedconn>.createStatement() 08003 - No current connection.
 DriverManager  <closedstmt>.execute() null - Invalid operation: statement closed
 Running connection checks on DataSource
   isolation level 2
   auto commit     true
   read only       false
   has warnings    false
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 method calls on a closed connection
 DataSource <closedconn>.close() no error
-DataSource <closedconn>.createStatement() null - invalid operation: connection closed
+DataSource <closedconn>.createStatement() 08003 - No current connection.
 DataSource <closedstmt>.execute() null - Invalid operation: statement closed
 Running connection checks on ConnectionPoolDataSource
   isolation level 2
@@ -29,9 +29,9 @@ Running connection checks on ConnectionPoolDataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(1):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
@@ -45,9 +45,9 @@ Running connection checks on ConnectionPoolDataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(1):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
@@ -70,9 +70,9 @@ Running connection checks on XADataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(3):connectionClosed
 method calls on a closed connection
 XADataSource <closedconn>.close() no error
@@ -85,29 +85,29 @@ IDENTITY_VAL_LOCAL=1
 IDENTITY_VAL_LOCAL=2
 IDENTITY_VAL_LOCAL=3
 End testPoolReset XADataSource
-ERROR XJ015: Derby system shutdown.
+ERROR XJ015: DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ015, SQLERRMC: Derby system shutdown.
 Running connection checks on DriverManager 
   isolation level 2
   auto commit     true
   read only       false
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 method calls on a closed connection
 DriverManager  <closedconn>.close() no error
-DriverManager  <closedconn>.createStatement() null - invalid operation: connection closed
+DriverManager  <closedconn>.createStatement() 08003 - No current connection.
 DriverManager  <closedstmt>.execute() null - Invalid operation: statement closed
 Running connection checks on DataSource
   isolation level 2
   auto commit     true
   read only       false
   has warnings    false
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 method calls on a closed connection
 DataSource <closedconn>.close() no error
-DataSource <closedconn>.createStatement() null - invalid operation: connection closed
+DataSource <closedconn>.createStatement() 08003 - No current connection.
 DataSource <closedstmt>.execute() null - Invalid operation: statement closed
 Running connection checks on ConnectionPoolDataSource
   isolation level 2
@@ -117,9 +117,9 @@ Running connection checks on ConnectionPoolDataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(2):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
@@ -133,9 +133,9 @@ Running connection checks on ConnectionPoolDataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(2):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
@@ -149,9 +149,9 @@ Running connection checks on XADataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(4):connectionClosed
 method calls on a closed connection
 XADataSource <closedconn>.close() no error
@@ -165,9 +165,9 @@ Running connection checks on XADataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(4):connectionClosed
 method calls on a closed connection
 XADataSource <closedconn>.close() no error
@@ -181,9 +181,9 @@ Running connection checks on Global XADataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(5):connectionClosed
 method calls on a closed connection
 Global XADataSource <closedconn>.close() no error
@@ -196,9 +196,9 @@ Running connection checks on Global XADataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(5):connectionClosed
 method calls on a closed connection
 Global XADataSource <closedconn>.close() no error
@@ -212,9 +212,9 @@ Running connection checks on Switch to local XADataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to local XADataSource <closedconn>.close() no error
@@ -228,9 +228,9 @@ Running connection checks on Switch to local XADataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to local XADataSource <closedconn>.close() no error
@@ -244,9 +244,9 @@ Running connection checks on Switch to global XADataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to global XADataSource <closedconn>.close() no error
@@ -260,9 +260,9 @@ Running connection checks on Switch to global XADataSource
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for Statement.getConnection()
 FAIL incorrect connection object returned for DatabaseMetaData.getConnection()
-setTypeMap(EMPTY_MAP) - FAIL null - Connection.setTypeMap is not supported
-setTypeMap(null) - ok null - Connection.setTypeMap is not supported
-setTypeMap(map) - ok null - Connection.setTypeMap is not supported
+setTypeMap(EMPTY_MAP) - FAIL 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(null) - ok 0A000 - Feature not implemented: setTypeMap.
+setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to global XADataSource <closedconn>.close() no error
@@ -288,32 +288,20 @@ reset local
   isolation level READ_COMMITTED
   auto commit     true
   read only       false
-re-join X1
-  isolation level READ_COMMITTED
-  auto commit     false
-  read only       false
 back to local (same as reset)
   isolation level READ_COMMITTED
   auto commit     true
   read only       false
 EVENT(6):connectionClosed
 new handle - local 
-  isolation level READ_UNCOMMITTED
+  isolation level READ_COMMITTED
   auto commit     true
   read only       false
 EVENT(6):connectionClosed
-re-join with new handle X1
-  isolation level READ_UNCOMMITTED
-  auto commit     false
-  read only       false
 EVENT(6):connectionClosed
 pre-X1 commit - local
   isolation level REPEATABLE_READ
   auto commit     true
-  read only       false
-pre-X1 commit - X1
-  isolation level REPEATABLE_READ
-  auto commit     false
   read only       false
 post-X1 end - local
   isolation level REPEATABLE_READ
@@ -325,6 +313,10 @@ post-X1 commit - local
   read only       false
 EVENT(6):connectionClosed
 Some more isolation testing using SQL and JDBC api
+initial local
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
 Issue setTransactionIsolation in local transaction
 setTransactionIsolation in local
   isolation level READ_UNCOMMITTED
@@ -361,12 +353,12 @@ sru1-local-1: mismatched Statement connection
 sru1-local-1: ru(SN1) contents {1} {2} {3}
 Expecting exception because global transaction sru1-global-2 is trying to use a statement with holdability true
 sru1-global-2: mismatched Statement connection
-sru1-global-2: java.sql.SQLException: Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+sru1-global-2: ru(SQL_CURLH000C) contents {1} {2} {3}
 sru2-global-3: mismatched Statement connection
 sru2-global-3: ru(OAK2) contents {1} {2} {3}
 Expecting exception because global transaction sru1-global-4 is trying to use a statement with holdability true
 sru1-global-4: mismatched Statement connection
-sru1-global-4: java.sql.SQLException: Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+sru1-global-4: ru(SQL_CURLH000C) contents {1} {2} {3}
 Statement State @ GLOBAL 
   getResultSetType() SCROLL_INSENSITIVE
   getResultSetConcurrency() READ_ONLY
@@ -391,9 +383,9 @@ Statement State @ CS GLOBAL
 PASS: got exception because holdability is true on prepared statement and that is not allowed in global transactions
 Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 sru1-local-5: mismatched Statement connection
-sru1-local-5: ru(SQL_CURLH000C4) contents {1} {2} {3}
+sru1-local-5: ru(SQL_CURLH000C) contents {1} {2} {3}
 sru2-local-6: mismatched Statement connection
-sru2-local-6: ru(SQL_CURLN000C8) contents {1} {2} {3}
+sru2-local-6: ru(SQL_CURLN000C) contents {1} {2} {3}
 sru3-local-7: mismatched Statement connection
 sru3-local-7: ru(SF3) contents {1} {2} {3}
 Statement State @ LOCAL 
@@ -418,15 +410,15 @@ Statement State @ CS LOCAL
   getMaxFieldSize() 137
   getMaxRows() 85
 LOCK TABLE
-  xid row 0 lock count 4
+  xid row 0 lock count 12
   xid row 1 lock count 12
 END LOCK TABLE
 sru1-local-8: mismatched Statement connection
-sru1-local-8: ru(SQL_CURLH000C9) contents {1} {2} {3}
+sru1-local-8: ru(SQL_CURLH000C) contents {1} {2} {3}
 sru2-local-9: mismatched Statement connection
-sru2-local-9: ru(SQL_CURLN000C1) contents {1} {2} {3}
+sru2-local-9: ru(SQL_CURLN000C) contents {1} {2} {3}
 sru3-local-10: mismatched Statement connection
-sru3-local-10: ru(SQL_CURLH000C4) contents {1} {2} {3}
+sru3-local-10: ru(SQL_CURLH000C) contents {1} {2} {3}
 Statement State @ LOCAL 2 
   getResultSetType() SCROLL_INSENSITIVE
   getResultSetConcurrency() READ_ONLY
@@ -449,12 +441,12 @@ Statement State @ CS LOCAL 2
   getMaxFieldSize() 137
   getMaxRows() 85
 LOCK TABLE
-  xid row 0 lock count 4
+  xid row 0 lock count 12
   xid row 1 lock count 12
 END LOCK TABLE
 sruBatch update counts : 1  1  2  1 :
 sruBatch: mismatched Statement connection
-sruBatch: ru(SQL_CURLH000C10) contents {1} {2} {3} {4} {5} {6} {7} {8}
+sruBatch: ru(SQL_CURLH000C) contents {1} {2} {3} {4} {5} {6} {7} {8}
 XAConnection.getConnection : getConnection() is not valid on a closed PooledConnection.
 XAResource.start : XAException - XAER_RMFAIL : Connection is Closed.
 XAResource.end : XAException - XAER_RMFAIL : Connection is Closed.

@@ -8,6 +8,7 @@ bestrowidentifier.sql
 bestrowidentifier_app.properties
 checkDataSource30_app.properties
 checkDataSource30_derby.properties
+checkDataSource_derby.properties
 checkDriver_app.properties
 checkDriver_derby.properties
 dataSourceReference_app.properties

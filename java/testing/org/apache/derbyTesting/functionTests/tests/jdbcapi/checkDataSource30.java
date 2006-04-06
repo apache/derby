@@ -55,11 +55,7 @@ public class checkDataSource30 extends checkDataSource
 	public static void main(String[] args) throws Exception {
 
 		checkDataSource30 tester = new checkDataSource30();
-		// portions of this test do not run yet with client and so
-		// are enabled only for embedded with 
-		//  if (TestUtil.isEmbeddedFramework())blocks
-		if (TestUtil.isEmbeddedFramework())
-			tester.runTest(args);
+		tester.runTest(args);
 		tester.checkXAHoldability();
 		
 		testDerby1144();

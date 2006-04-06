@@ -88,12 +88,6 @@ public class checkDataSource
 	// Tests for setting isolation level this way only run in embedded for now.
 	private boolean canSetIsolationWithStatement = TestUtil.isEmbeddedFramework();
 	  
-	// DERBY-1044 [xa] client XAConnection.getConnection() does not have the 
-	// correct default isolation level if set by an earlier connection 
-	// obtained from the same XAConnection
-	// Only print out initial isolation for embedded in this case
-	private boolean isolationResetOnSecondGetConnection = 
-			TestUtil.isEmbeddedFramework();
 	
 	// DERBY-1047  wiht client xa a PreparedStatement created before the global 
 	//transaction starts gives java.sql.SQLException: 'Statement' already closed.' 
@@ -107,6 +101,12 @@ public class checkDataSource
 	// run only for embedded for now.
 	private static boolean autocommitCommitsOnXa_Start =TestUtil.isEmbeddedFramework();
 	
+	//	 DERBY-1148 - Client Connection state does not
+	// get set properly when joining a global transaction.
+	private static boolean isolationSetProperlyOnJoin = TestUtil.isEmbeddedFramework();
+	
+	// DERBY-1183 getCursorName not correct after first statement execution
+	private static boolean hasGetCursorNameBug = TestUtil.isDerbyNetClientFramework();
 	/**
      * A hashtable of opened connections.  This is used when checking to
      * make sure connection strings are unique; we need to make sure all
@@ -408,7 +408,9 @@ public class checkDataSource
 		// and isolation level from the transaction,
 		// holdability remains that of this handle.
 		xar.start(xid, XAResource.TMJOIN);
-		printState("re-join X1", cs1);
+		// DERBY-1148
+		if (isolationSetProperlyOnJoin)
+			printState("re-join X1", cs1);
 		xar.end(xid, XAResource.TMSUCCESS);
 
 		// should be the same as the reset local
@@ -418,14 +420,16 @@ public class checkDataSource
 		cs1.setReadOnly(true);
 		setHoldability(cs1, true);
 		cs1.close();
-
+		
 		cs1 = xac.getConnection();
 		printState("new handle - local ", cs1);
 		cs1.close();
-
+		
 		xar.start(xid, XAResource.TMJOIN);
 		cs1 = xac.getConnection();
-		printState("re-join with new handle X1", cs1);
+		// DERBY-1148
+		if (isolationSetProperlyOnJoin)
+			printState("re-join with new handle X1", cs1);
 		cs1.close();
 		xar.end(xid, XAResource.TMSUCCESS);
 
@@ -436,7 +440,9 @@ public class checkDataSource
 		cs1.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 		printState("pre-X1 commit - local", cs1);
 		xar.start(xid, XAResource.TMJOIN);
-		printState("pre-X1 commit - X1", cs1);
+		// DERBY-1148
+		if (isolationSetProperlyOnJoin)
+			printState("pre-X1 commit - X1", cs1);
 		xar.end(xid, XAResource.TMSUCCESS);
 		printState("post-X1 end - local", cs1);
 		xar.commit(xid, true);
@@ -447,8 +453,7 @@ public class checkDataSource
 		System.out.println("Some more isolation testing using SQL and JDBC api");
 		cs1 = xac.getConnection();
 		s = cs1.createStatement();
-		if (isolationResetOnSecondGetConnection)
-			printState("initial local", cs1);
+		printState("initial local", cs1);
 
     System.out.println("Issue setTransactionIsolation in local transaction");
 		cs1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
@@ -915,7 +920,15 @@ public class checkDataSource
 	}
 
 	private static void resultSetQuery(String tag, ResultSet rs) throws SQLException {
-		System.out.print(tag + ": ru(" + rs.getCursorName() + ") contents");
+		String cursorName = rs.getCursorName();
+		//	DERBY-1183 client cursor name is not correct.
+		// need to truncate the cursor number of the generated name as it might
+		// not be consistent.
+		if (hasGetCursorNameBug && cursorName.startsWith("SQL_CUR"))
+		{
+			cursorName = cursorName.substring(0,13);
+		}
+		System.out.print(tag + ": ru(" + cursorName + ") contents");
 		SecurityCheck.inspect(rs, "java.sql.ResultSet");
 		while (rs.next()) {
 			System.out.print(" {" + rs.getInt(1) + "}");
@@ -1708,7 +1721,7 @@ public class checkDataSource
 	{
 		System.out.print("\ntesting jira 95 for DataSource");
 		EmbeddedDataSource ds = new EmbeddedDataSource();
-		ds.setDatabaseName(dbName);
+		ds.setDatabaseName( dbName);
 		Connection conn1 = ds.getConnection();
 		conn1.close();
 	}
