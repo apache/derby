@@ -355,47 +355,22 @@ public class checkDataSource30 extends checkDataSource
            shxa.close();
            
            
-			// check we cannot use a holdable statement set up in local mode.
+			// check we can use a holdable statement set up in local mode.
+            // holdability is downgraded, tested in XATest.java
 			System.out.println("STATEMENT HOLDABILITY " + (sh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
-			try {
-				sh.executeQuery("select id from hold_30");
-				System.out.println("FAIL used held statement in global transaction");
-			} catch (SQLException sqle) {
-				System.out.println("Expected SQLException (local Statement hold) " + sqle.getMessage());
-			}
-			try {
-				sh.execute("select id from hold_30");
-				System.out.println("FAIL used held statement in global transaction");
-			} catch (SQLException sqle) {
-				System.out.println("Expected SQLException (local Statement hold) " + sqle.getMessage());
-			}
-			System.out.println("PREPARED STATEMENT HOLDABILITY " + (psh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
-			try {
-				psh.executeQuery();
-				System.out.println("FAIL used held prepared statement in global transaction");
-			} catch (SQLException sqle) {
-				System.out.println("Expected SQLException (local PreparedStatement hold) " + sqle.getMessage());
-			}
-			try {
-				psh.execute();
-				System.out.println("FAIL used held prepared statement in global transaction");
-			} catch (SQLException sqle) {
-				System.out.println("Expected SQLException (local PreparedStatement hold) " + sqle.getMessage());
-			}
+			sh.executeQuery("select id from hold_30").close();
+			sh.execute("select id from hold_30");
+            sh.getResultSet().close();
+
+            System.out.println("PREPARED STATEMENT HOLDABILITY " + (psh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
+			psh.executeQuery().close();
+			psh.execute();
+            psh.getResultSet().close();
 
 			System.out.println("CALLABLE STATEMENT HOLDABILITY " + (csh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
-			try {
-				csh.executeQuery();
-				System.out.println("FAIL used held callable statement in global transaction");
-			} catch (SQLException sqle) {
-				System.out.println("Expected SQLException (local CallableStatement hold) " + sqle.getMessage());
-			}
-			try {
-				csh.execute();
-				System.out.println("FAIL used held callable statement in global transaction");
-			} catch (SQLException sqle) {
-				System.out.println("Expected SQLException (local CallableStatement hold) " + sqle.getMessage());
-			}
+			csh.executeQuery().close();
+			csh.execute();
+            csh.getResultSet().close();
 
 			// but an update works
 			sh.executeUpdate("insert into hold_30 values(10, 'init10')");
