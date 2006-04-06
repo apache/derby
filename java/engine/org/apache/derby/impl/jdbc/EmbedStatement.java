@@ -70,9 +70,9 @@ public class EmbedStatement extends ConnectionChild
 	protected String cursorName;
 
 	protected final boolean forMetaData;
-	public final int resultSetType;
-	protected final int resultSetConcurrency;
-	protected final int resultSetHoldability;
+	final int resultSetType;
+	private final int resultSetConcurrency;
+	private final int resultSetHoldability;
 	protected final LanguageConnectionContext lcc;
 
 	private SQLWarning warnings;
@@ -767,7 +767,7 @@ public class EmbedStatement extends ConnectionChild
      * ResultSet.CLOSE_CURSORS_AT_COMMIT
      * @exception SQLException Feature not implemented for now.
      */
-    public int getResultSetHoldability() throws SQLException {
+    public final int getResultSetHoldability() throws SQLException {
 		checkStatus();
 		return resultSetHoldability;
 	}
@@ -1083,7 +1083,7 @@ public class EmbedStatement extends ConnectionChild
 				// gets it for us, it won't recompile unless it is invalid.
 				PreparedStatement ps = a.getPreparedStatement();
 				ps.rePrepare(lcc);
-				getWarnings(ps.getCompileTimeWarnings());
+				addWarning(ps.getCompileTimeWarnings());
 
 
 				/*
@@ -1099,6 +1099,7 @@ public class EmbedStatement extends ConnectionChild
 				{
 					a.setCursorName(cursorName);
 				}
+
 				a.setResultSetHoldability(resultSetHoldability != JDBC30Translation.CLOSE_CURSORS_AT_COMMIT);
 
 				//reset the activation to clear warnings
@@ -1106,7 +1107,7 @@ public class EmbedStatement extends ConnectionChild
 				a.reset();
 				a.setMaxRows(maxRows);
 				ResultSet resultsToWrap = ps.execute(a, executeQuery, executeUpdate, false);
-				getWarnings(a.getWarnings());
+				addWarning(a.getWarnings());
 
 
 				if (resultsToWrap.returnsRows()) {
@@ -1177,7 +1178,14 @@ public class EmbedStatement extends ConnectionChild
 		}
 	}
 
-	protected void getWarnings(SQLWarning sw)
+    /**
+     * Add a SQLWarning to this Statement object.
+     * If the Statement already has a SQLWarning then it
+     * is added to the end of the chain.
+     * 
+     * @see #getWarnings()
+     */
+	final void addWarning(SQLWarning sw)
 	{
 		if (sw != null) {
 			if (warnings == null)
@@ -1366,7 +1374,7 @@ public class EmbedStatement extends ConnectionChild
 			dynamicResults = sorted;
 
 			if (actualCount > maxDynamicResultSets) {
-				getWarnings(StandardException.newWarning(SQLState.LANG_TOO_MANY_DYNAMIC_RESULTS_RETURNED));
+				addWarning(StandardException.newWarning(SQLState.LANG_TOO_MANY_DYNAMIC_RESULTS_RETURNED));
 
 				for (int i = maxDynamicResultSets; i < actualCount; i++) {
 					sorted[i].close();

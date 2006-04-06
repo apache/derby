@@ -115,8 +115,9 @@ public abstract class EmbedPreparedStatement
 			SQLText = sql;
 
 			try {
+
 			    preparedStatement = lcc.prepareInternalStatement(sql);
-				getWarnings(preparedStatement.getCompileTimeWarnings());
+                addWarning(preparedStatement.getCompileTimeWarnings());
 
 			    activation = preparedStatement.getActivation(lcc, resultSetType == JDBC20Translation.TYPE_SCROLL_INSENSITIVE);
 

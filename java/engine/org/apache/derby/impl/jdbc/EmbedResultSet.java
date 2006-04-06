@@ -104,7 +104,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	private Object	currentStream;
 
 	// immutable state
-	protected ResultSet theResults;
+	private ResultSet theResults;
 	private boolean forMetaData;
 	private ResultSetMetaData rMetaData;
 	private SQLWarning topWarning;
@@ -159,9 +159,9 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     private Statement applicationStmt;
     
-	protected final boolean isAtomic;
+	private final boolean isAtomic;
 
-	protected final int concurrencyOfThisResultSet;
+	private final int concurrencyOfThisResultSet;
 
 	//copyOfDatabaseRow will keep the original contents of the columns of the current row which got updated.
 	//These will be used if user decides to cancel the changes made to the row using cancelRowUpdates.
@@ -3802,7 +3802,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		be closed (e.g. when executing a server side Java procedure). See bug 4397
 
 	*/
-	public static final SQLException noStateChangeException(Throwable thrownException) {
+	static final SQLException noStateChangeException(Throwable thrownException) {
 
 		// Any exception on a setXXX/getXXX method does not close
 		// the ResultSet or the Statement. So we only need
