@@ -566,8 +566,6 @@ public interface SQLState {
 	*/
 	String CONNECTIVITY_PREFIX="08";
 
-	String	ERROR_CLOSE = "08003";
-
 
     /*
 	** Language
@@ -654,14 +652,6 @@ public interface SQLState {
 	String LANG_DYNAMIC_RESULTS_RETURNED							   = "0100C";
 	String LANG_TOO_MANY_DYNAMIC_RESULTS_RETURNED					   = "0100E";
     
-    // Warnings from the network client
-    String INVALID_RESULTSET_TYPE                                      = "01X00";
-    String INVALID_RESULTSET_CONCURRENCY                               = "01X01";
-    String SCROLL_SENSITIVE_NOT_SUPPORTED                              = "01X02";
-    String INSENSITIVE_UPDATABLE_NOT_SUPPORTED                         = "01X03";
-    String UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER                   = "01X04";
-    String NUMBER_OF_ROWS_TOO_LARGE_FOR_INT                            = "01X05";
-
 
 	// TRANSACTION severity language errors. These are in the range:
 	// 40XC0 - 40XCZ
@@ -1360,7 +1350,7 @@ public interface SQLState {
 	String UNSUPPORTED_PREFIX="0A";
 
     String NOT_IMPLEMENTED                                          = "0A000.S";
-    String JDBC_METHOD_NOT_IMPLEMENTED                              = "0AX01.S";
+    String JDBC_METHOD_NOT_IMPLEMENTED                              = "0A000.S.1";
 
 	
 
@@ -1473,6 +1463,28 @@ public interface SQLState {
     String UPDATABLE_RESULTSET_API_DISALLOWED = "XJ083.U";
     String COLUMN_NOT_FROM_BASE_TABLE = "XJ084.U";
     String NOT_POSITIONED_ON_INSERT_ROW = "XJ086.S";
+    String WASNULL_INVALID = "XJ088.S";
+    String INVALID_PARAM_USE_GETINT  = "XJ089.S";
+    String CALENDAR_IS_NULL = "XJ090.S";
+    String PARAM_NOT_OUT_OR_INOUT = "XJ091.S";
+    String RETURN_PARAM_MUST_BE_INT  = "XJ092.S";
+    String BLOB_TOO_LARGE_FOR_CLIENT  = "XJ093.S";
+    String OBJECT_ALREADY_CLOSED = "XJ094.S";
+    String ERROR_PRIVILEGED_ACTION = "XJ095.S";
+    String MISSING_RESOURCE_BUNDLE = "XJ096.S";
+    String SAVEPOINT_NOT_CREATED_BY_CONNECTION = "XJ097.S";
+    String BAD_AUTO_GEN_KEY_VALUE = "XJ098.S";
+    String READER_UNDER_RUN = "XJ099.S";
+    String TABLE_NAME_CANNOT_BE_NULL = "XJ100.S";
+    String SHARED_KEY_LENGTH_ERROR = "XJ104.S";
+    String DES_KEY_HAS_WRONG_LENGTH = "XJ105.S";
+    String CRYPTO_NO_SUCH_PADDING = "XJ106.S";
+    String CRYPTO_BAD_PADDING = "XJ107.S";
+    String CRYPTO_ILLEGAL_BLOCK_SIZE = "XJ108.S";
+    String PRIMARY_TABLE_NAME_IS_NULL = "XJ110.S";
+    String FOREIGN_TABLE_NAME_IS_NULL = "XJ111.S";
+    String SECURITY_EXCEPTION_ENCOUNTERED = "XJ112.S";    
+    String UNABLE_TO_OPEN_FILE = "XJ113.S";
 
     //following are session severity.
     String DATABASE_NOT_FOUND = "XJ004.C";
@@ -1520,6 +1532,13 @@ public interface SQLState {
 	String UPGRADE_SPSRECOMPILEFAILED = "01J05";
     String QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET = "01J06";
     String HOLDABLE_RESULT_SET_NOT_AVAILABLE = "01J07";
+    String INVALID_RESULTSET_TYPE = "01J08";
+    String INVALID_RESULTSET_CONCURRENCY = "01J09";
+    String SCROLL_SENSITIVE_NOT_SUPPORTED = "01J10";
+    String INSENSITIVE_UPDATABLE_NOT_SUPPORTED = "01J11";
+    String UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER  = "01J12";
+    String NUMBER_OF_ROWS_TOO_LARGE_FOR_INT = "01J13";
+
     String CURSOR_OPERATION_CONFLICT = "01001";
 
 
@@ -1528,39 +1547,6 @@ public interface SQLState {
     String JAVA_EXCEPTION = "XJ001.U";
     String UNSERIALIZABLE_CONNECTION = "XJ038.U";
     String NO_UPGRADE = "XJ050.U";
-
-    /**
-     * Client-specific JDBC messages
-     * We use the class XN to distinguish these from engine-specific or 
-     * shared message ids
-     *
-     * I don't try to organize by severity because it's just too hard
-     * to keep track of the numbers to ensure we don't duplicate the 
-     * SQL State
-     */
-    String WASNULL_INVALID                                          = "XN004.S";
-    String INVALID_PARAM_USE_GETINT                                 = "XN005.S";
-    String CALENDAR_IS_NULL                                         = "XN006.S";
-    String PARAM_NOT_OUT_OR_INOUT                                   = "XN009.S";
-    String RETURN_PARAM_MUST_BE_INT                                 = "XN010.S";
-    String BLOB_TOO_LARGE_FOR_CLIENT                                = "XN011.S";
-    String OBJECT_ALREADY_CLOSED                                    = "XN012.S";
-    String ERROR_PRIVILEGED_ACTION                                  = "XN064.S";
-    String MISSING_RESOURCE_BUNDLE                                  = "XN065.S";
-    String SAVEPOINT_NOT_CREATED_BY_CONNECTION                      = "XN067.S";
-    String BAD_AUTO_GEN_KEY_VALUE                                   = "XN069.S";
-    String READER_UNDER_RUN                                         = "XN070.S";
-    String TABLE_NAME_CANNOT_BE_NULL                                = "XN100.S";
-    String SHARED_KEY_LENGTH_ERROR                                  = "XN104.S";
-    String DES_KEY_HAS_WRONG_LENGTH                                 = "XN105.S";
-    String CRYPTO_NO_SUCH_PADDING                                   = "XN106.S";
-    String CRYPTO_BAD_PADDING                                       = "XN107.S";
-    String CRYPTO_ILLEGAL_BLOCK_SIZE                                = "XN108.S";
-    String PRIMARY_TABLE_NAME_IS_NULL                               = "XN110.S";
-    String FOREIGN_TABLE_NAME_IS_NULL                               = "XN111.S";
-    String SECURITY_EXCEPTION_ENCOUNTERED                           = "XN112.S";
-    
-    String UNABLE_TO_OPEN_FILE = "XN151.S";
     
     /*
      ** Messages whose SQL states are proscribed by DRDA

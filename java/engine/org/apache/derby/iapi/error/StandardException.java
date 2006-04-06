@@ -288,13 +288,6 @@ public class StandardException extends Exception
 		return se;
 	}
 
-	public	static	StandardException	errorClose( Throwable t )
-	{
-		StandardException	se = newException( SQLState.ERROR_CLOSE, t );
-		se.report = REPORT_NEVER;
-		return se;
-	}
-
 	/* 0 arguments */
 
 	public static StandardException newException(String messageID) {

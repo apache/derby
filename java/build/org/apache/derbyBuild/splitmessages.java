@@ -45,7 +45,10 @@ public class splitmessages {
     private static TreeSet clientMessageIds = new TreeSet();
     
     /**
-     * Initialize the set of shared message ids
+     * Initialize the set of message ids that the network client will use.  
+     * <p>
+     * Note that all message ids that start with "XJ" are automatically added, 
+     * these are just for message ids that have a different prefix.
      */
     static void initClientMessageIds()
     {
@@ -66,6 +69,18 @@ public class splitmessages {
         clientMessageIds.add(SQLState.INVALID_COLUMN_NAME);
         clientMessageIds.add("J104");
         clientMessageIds.add(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
+        clientMessageIds.add(SQLState.JDBC_METHOD_NOT_IMPLEMENTED);
+        clientMessageIds.add(SQLState.DRDA_NO_AUTOCOMMIT_UNDER_XA);
+        clientMessageIds.add(SQLState.DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK);
+        clientMessageIds.add(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
+        clientMessageIds.add(SQLState.INVALID_RESULTSET_TYPE);
+        clientMessageIds.add(SQLState.INVALID_RESULTSET_CONCURRENCY);
+        clientMessageIds.add(SQLState.SCROLL_SENSITIVE_NOT_SUPPORTED);
+        clientMessageIds.add(SQLState.INSENSITIVE_UPDATABLE_NOT_SUPPORTED);
+        clientMessageIds.add(SQLState.UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER );
+        clientMessageIds.add(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT);
+        clientMessageIds.add(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION);
+        clientMessageIds.add(SQLState.LOB_METHOD_ON_CLOSED_CONNECTION);
     }
 
 	public static void main(String[] args) throws Exception {
@@ -101,22 +116,7 @@ public class splitmessages {
         
         Properties clientProps = new Properties();
 
-        // Open the client properties file for the given locale
-        // from the client locales directory, and then intialize
-        // clientProps with what we find in there
         String clientPropsFileName = "clientmessages" + locale + ".properties";
-        try
-        {
-            InputStream clientInStream = new FileInputStream(
-                    new File(clientDir, clientPropsFileName));
-            clientProps.load(clientInStream);
-            clientInStream.close();
-        }
-        catch ( FileNotFoundException fnfe )
-        {
-            // That's fine, it just means there are no client-specfic messages
-            // for this locale yet
-        }
 
 		for (Enumeration e = p.keys(); e.hasMoreElements(); ) {
 			String key = (String) e.nextElement();
