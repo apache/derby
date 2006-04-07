@@ -1100,8 +1100,10 @@ public class EmbedStatement extends ConnectionChild
 				{
 					a.setCursorName(cursorName);
 				}
-
-				a.setResultSetHoldability(resultSetHoldability != JDBC30Translation.CLOSE_CURSORS_AT_COMMIT);
+                
+                boolean executeHoldable = getExecuteHoldable();
+ 
+				a.setResultSetHoldability(executeHoldable);
 
 				//reset the activation to clear warnings
 				//and clear existing result sets in case this has been cached
@@ -1439,6 +1441,17 @@ public class EmbedStatement extends ConnectionChild
         // then next then close a commit would not be forced on the close.
 		commitIfAutoCommit();
 	}
-
+    
+    /**
+     * Get the execute time holdability for the Statement.
+     * When in a global transaction holdabilty defaults to false.
+     */
+    private boolean getExecuteHoldable()
+    {
+        if (resultSetHoldability  == JDBC30Translation.CLOSE_CURSORS_AT_COMMIT)
+            return false;
+        
+        return true;
+    }
 }
 

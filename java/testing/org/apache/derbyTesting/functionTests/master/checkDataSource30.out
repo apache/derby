@@ -515,7 +515,7 @@ Statement State @ GLOBAL
   getFetchSize() 444
   getMaxFieldSize() 713
   getMaxRows() 19
-  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  getResultSetHoldability() CLOSE_CURSORS_AT_COMMIT 
 Statement State @ PS GLOBAL 
   getResultSetType() SCROLL_INSENSITIVE
   getResultSetConcurrency() READ_ONLY
@@ -523,7 +523,7 @@ Statement State @ PS GLOBAL
   getFetchSize() 888
   getMaxFieldSize() 317
   getMaxRows() 91
-  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  getResultSetHoldability() CLOSE_CURSORS_AT_COMMIT 
   Parameter Count 1
     1 type 4
 Statement State @ CS GLOBAL 
@@ -533,7 +533,7 @@ Statement State @ CS GLOBAL
   getFetchSize() 999
   getMaxFieldSize() 137
   getMaxRows() 85
-  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
+  getResultSetHoldability() CLOSE_CURSORS_AT_COMMIT 
   Parameter Count 2
     1 type 12
     2 type 12
@@ -814,7 +814,7 @@ H@2 id 2
 H@3 id 3
 CONNECTION(xa) HOLDABILITY false
 STATEMENT(this one was created with holdability false, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
-STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY true
+STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
 STATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
 PREPAREDSTATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
 CALLABLESTATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
@@ -826,7 +826,7 @@ resume XA transaction and keep using rs
 Check holdability of various jdbc objects after resuming XA transaction
 CONNECTION(xa) HOLDABILITY false
 STATEMENT(this one was created with holdability false, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
-STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY true
+STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
 STATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
 PREPAREDSTATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
 CALLABLESTATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
@@ -843,13 +843,13 @@ Expected SQLException(setHoldability) Cannot set holdability ResultSet.HOLD_CURS
 HOLDABLE Statement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
 HOLDABLE PreparedStatement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
 HOLDABLE CallableStatement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
-STATEMENT HOLDABILITY true
+STATEMENT HOLDABILITY false
 Expected SQLException (local Statement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 Expected SQLException (local Statement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
-PREPARED STATEMENT HOLDABILITY true
+PREPARED STATEMENT HOLDABILITY false
 Expected SQLException (local PreparedStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 Expected SQLException (local PreparedStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
-CALLABLE STATEMENT HOLDABILITY true
+CALLABLE STATEMENT HOLDABILITY false
 Expected SQLException (local CallableStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 Expected SQLException (local CallableStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 CONNECTION(held) HOLDABILITY true
