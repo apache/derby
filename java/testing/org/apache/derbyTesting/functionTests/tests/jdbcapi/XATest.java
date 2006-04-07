@@ -915,12 +915,10 @@ public class XATest {
             xar.start(xid, XAResource.TMNOFLAGS);
             
             // Statements not returning ResultSet's should be ok
-            if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
             sdh.executeUpdate("DELETE FROM APP.FOO where A < -99");
             shh.executeUpdate("DELETE FROM APP.FOO where A < -99");
             sch.executeUpdate("DELETE FROM APP.FOO where A < -99");
-            }
-            
+           
             ArrayList openRS = new ArrayList();
             
             // Statements obtained while default was hold.
@@ -938,18 +936,14 @@ public class XATest {
             openRS.add(psch.executeQuery());
             
             // Statements not returning ResultSet's should be ok
-            if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
             psdh_d.executeUpdate();
             pshh_d.executeUpdate();
             psch_d.executeUpdate();
-            }
-
+ 
             // Statements not returning ResultSet's should be ok
-            if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
             sdc.executeUpdate("DELETE FROM APP.FOO where A < -99");
             shc.executeUpdate("DELETE FROM APP.FOO where A < -99");
             scc.executeUpdate("DELETE FROM APP.FOO where A < -99");
-            }             
  
             // Statements obtained while default was close.
             // all should return close on commit ResultSets
@@ -963,11 +957,9 @@ public class XATest {
             openRS.add(pscc.executeQuery());
             
             // Statements not returning ResultSet's should be ok
-            if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
             psdc_d.executeUpdate();
             pshc_d.executeUpdate();
             pscc_d.executeUpdate();
-            }
             
             // All the ResultSets should be open. Run a simple
             // test, clearWarnings throws an error if the ResultSet
