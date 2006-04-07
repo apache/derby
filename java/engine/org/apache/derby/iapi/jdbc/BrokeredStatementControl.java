@@ -29,8 +29,11 @@ public interface BrokeredStatementControl
 {
 	/**
 		Can cursors be held across commits.
+        Returns the holdability that should be
+        used which may be different from the passed
+        in holdabilty.
 	*/
-	public void checkHoldCursors(int holdability) throws SQLException;
+	public int checkHoldCursors(int holdability) throws SQLException;
 
 	/**
 		Return the real JDBC statement for the brokered statement

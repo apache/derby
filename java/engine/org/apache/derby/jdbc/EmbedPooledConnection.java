@@ -379,7 +379,10 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	/**
 		Are held cursors allowed.
 	*/
-	public void checkHoldCursors(int holdability) throws SQLException {
+	public int checkHoldCursors(int holdability, boolean downgrade)
+        throws SQLException
+    {
+        return holdability;
 	}
 
 	/**

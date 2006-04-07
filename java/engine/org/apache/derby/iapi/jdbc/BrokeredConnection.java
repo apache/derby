@@ -28,6 +28,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
+import org.apache.derby.client.am.SqlState;
 import org.apache.derby.impl.jdbc.Util;
 
 import java.io.ObjectOutput;
@@ -36,6 +37,7 @@ import java.io.ObjectInput;
 import java.lang.reflect.*;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -538,9 +540,11 @@ public class BrokeredConnection implements EngineConnection
             int resultSetType, int resultSetConcurrency,
             int resultSetHoldability) throws SQLException {
     	try {
-    		control.checkHoldCursors(resultSetHoldability);
+            resultSetHoldability = statementHoldabilityCheck(resultSetHoldability);
+    		
     		return control.wrapStatement(
-    			getRealConnection().prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability), sql, null);
+    			getRealConnection().prepareStatement(sql, resultSetType,
+                        resultSetConcurrency, resultSetHoldability), sql, null);
     	}
     	catch (SQLException se)
     	{
@@ -562,5 +566,29 @@ public class BrokeredConnection implements EngineConnection
     		notifyException(se);
     		throw se;
     	}
+    }
+    
+    /*
+    ** Methods private to the class.
+    */
+    
+    /**
+     * Check the result set holdability when creating a statement
+     * object. Section 16.1.3.1 of JDBC 4.0 (proposed final draft)
+     * says the driver may change the holdabilty and add a SQLWarning
+     * to the Connection object.
+     * 
+     * This work-in-progress implementation throws an exception
+     * to match the old behaviour just as part of incremental development.
+     */
+    final int statementHoldabilityCheck(int resultSetHoldability)
+        throws SQLException
+    {
+        int holdability = control.checkHoldCursors(resultSetHoldability, true);
+        if (holdability != resultSetHoldability)
+            throw Util.generateCsSQLException(SQLState.CANNOT_HOLD_CURSOR_XA);
+        
+        return holdability;
+        
     }
 }
