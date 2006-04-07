@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.Properties;
 
@@ -545,15 +546,15 @@ public class XATest {
             conn.setAutoCommit(false);
 
             // s was created in local mode so it has holdibilty
-            // set, 
-            try {
-                s.executeQuery("select * from APP.foo where A >= 2000");
-                System.out.println("FAIL: query with holdable statement");
-            } catch (SQLException sqle) {
-                TestUtil.dumpSQLExceptions(sqle, true);
+            // set, will execute but ResultSet will have close on commit
+
+            if (TestUtil.isDerbyNetClientFramework()) { // DERBY-1158
+            s.executeQuery("select * from APP.foo where A >= 2000").close();
+            System.out.println("OK: query with holdable statement");
             }
             s.close();
-
+            
+            
             s = conn.createStatement();
             boolean holdable = s.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT;
             System.out.println("Statement created in global has holdabilty: "
@@ -890,18 +891,11 @@ public class XATest {
             xar.start(xid, XAResource.TMNOFLAGS);
             
             // Statements obtained while default was hold.
-            // Only sch should work as held cursors not supported in XA
-            try {
-                sdh.executeQuery("SELECT * FROM APP.FOO").close();
-                System.out.println("FAIL - held Statement in global");
-            } catch (SQLException e) {
-                TestUtil.dumpSQLExceptions(e, true);
-            }
-            try {
-                shh.executeQuery("SELECT * FROM APP.FOO").close();
-                System.out.println("FAIL - held Statement in global");
-            } catch (SQLException e) {
-                TestUtil.dumpSQLExceptions(e, true);
+            // All should work, holability will be downgraded
+            // to close on commit for those Statements with hold set.
+            if (TestUtil.isDerbyNetClientFramework()) { // DERBY-1158
+            sdh.executeQuery("SELECT * FROM APP.FOO").close();
+            shh.executeQuery("SELECT * FROM APP.FOO").close();
             }
             sch.executeQuery("SELECT * FROM APP.FOO").close();
             
@@ -909,13 +903,13 @@ public class XATest {
             // Only sch should work as held cursors not supported in XA
             try {
                 psdh.executeQuery().close();
-                System.out.println("FAIL - held Statement in global");
+                System.out.println("FAIL - held Statement in global psdf");
             } catch (SQLException e) {
                 TestUtil.dumpSQLExceptions(e, true);
             }
             try {
                 pshh.executeQuery().close();
-                System.out.println("FAIL - held Statement in global");
+                System.out.println("FAIL - held Statement in global pshh");
             } catch (SQLException e) {
                 TestUtil.dumpSQLExceptions(e, true);
             }
@@ -924,11 +918,8 @@ public class XATest {
             // Statements obtained while default was close.
             // Only sch should work as held cursors not supported in XA
             sdc.executeQuery("SELECT * FROM APP.FOO").close();
-            try {
-                shc.executeQuery("SELECT * FROM APP.FOO").close();
-                System.out.println("FAIL - held Statement in global");
-            } catch (SQLException e) {
-                TestUtil.dumpSQLExceptions(e, true);
+            if (TestUtil.isDerbyNetClientFramework()) { // DERBY-1158
+            shc.executeQuery("SELECT * FROM APP.FOO").close();
             }
             scc.executeQuery("SELECT * FROM APP.FOO").close();
             
@@ -943,7 +934,6 @@ public class XATest {
             pscc.executeQuery().close();
                    
             // Test we cannot switch the connection to holdable
-            // or create a statement with holdable.
             try {
                 conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
                 System.out.println("FAIL - set holdability in global xact.");
@@ -952,25 +942,25 @@ public class XATest {
                 TestUtil.dumpSQLExceptions(sqle, true);
             }
             
-            try {
-                    conn.createStatement(
+            // JDBC 4.0 (proposed final draft) section allows
+            // drivers to change the holdability when creating
+            // a Statement object and attach a warning to the Connection.
+            Statement sglobalhold = conn.createStatement(
                     ResultSet.TYPE_FORWARD_ONLY,
                     ResultSet.CONCUR_READ_ONLY,
                     ResultSet.HOLD_CURSORS_OVER_COMMIT);
-                    System.out.println("FAIL - Statement holdability in global xact.");
-            } catch (SQLException sqle) {
-                TestUtil.dumpSQLExceptions(sqle, true);
-            }
-            try {
-                conn.prepareStatement(
+            showHoldStatus("Global createStatement(hold)", sglobalhold);
+            sglobalhold.close();
+
+            PreparedStatement psglobalhold = conn.prepareStatement(
                 "SELECT * FROM APP.FOO",
                 ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_READ_ONLY,
                 ResultSet.HOLD_CURSORS_OVER_COMMIT);
-                System.out.println("FAIL - PreparedStatement holdability in global xact.");
-        } catch (SQLException sqle) {
-            TestUtil.dumpSQLExceptions(sqle, true);
-        }
+            showHoldStatus("Global prepareStatement(hold)", psglobalhold);
+            psglobalhold.close();
+
+        
             xar.end(xid, XAResource.TMSUCCESS);
             if (xar.prepare(xid) != XAResource.XA_RDONLY)
                 System.out.println("FAIL prepare didn't indicate r/o");
@@ -1052,6 +1042,13 @@ public class XATest {
     {
         System.out.println(tag + "Statement holdable " +
                 holdStatus(s.getResultSetHoldability()));
+        SQLWarning w = s.getConnection().getWarnings();
+        while (w != null)
+        {
+            System.out.println(w.getSQLState() + " :" + w.toString());
+            w = w.getNextWarning();
+        }
+        
     }
     /**
      * Show the held status of the Connection.

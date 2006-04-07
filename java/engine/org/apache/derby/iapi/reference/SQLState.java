@@ -1439,6 +1439,7 @@ public interface SQLState {
 	String LANG_TYPE_NOT_SERIALIZABLE = "01J04";
 	String UPGRADE_SPSRECOMPILEFAILED = "01J05";
     String QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET = "01J06";
+    String HOLDABLE_RESULT_SET_NOT_AVAILABLE = "01J07";
 
 
     //following are database severity

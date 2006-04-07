@@ -28,7 +28,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
-import org.apache.derby.client.am.SqlState;
+import org.apache.derby.impl.jdbc.EmbedSQLWarning;
 import org.apache.derby.impl.jdbc.Util;
 
 import java.io.ObjectOutput;
@@ -496,6 +496,15 @@ public class BrokeredConnection implements EngineConnection
 	{
 		return getRealConnection().getPrepareIsolation();
 	}
+    
+    /**
+     * Add a SQLWarning to this Connection object.
+     * @throws SQLException 
+     */
+    public final void addWarning(SQLWarning w) throws SQLException
+    {
+        getRealConnection().addWarning(w);
+    }
             
     /**
      * Get the string representation for the underlying physical
@@ -585,8 +594,12 @@ public class BrokeredConnection implements EngineConnection
         throws SQLException
     {
         int holdability = control.checkHoldCursors(resultSetHoldability, true);
-        if (holdability != resultSetHoldability)
-            throw Util.generateCsSQLException(SQLState.CANNOT_HOLD_CURSOR_XA);
+        if (holdability != resultSetHoldability) {
+            SQLWarning w =
+                 EmbedSQLWarning.newEmbedSQLWarning(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
+            
+            addWarning(w);
+        }
         
         return holdability;
         
