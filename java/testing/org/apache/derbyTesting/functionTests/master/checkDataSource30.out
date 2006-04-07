@@ -468,8 +468,6 @@ local
   auto commit     true
   read only       false
 TESTING RE_USE OF STATEMENT OBJECTS
-THE STATEMENT OBJECTS CAN NOT BE REUSED ACROSS LOCAL/GLOBAL CONNECTIONS BECAUSE, LOCAL CONNECTION CREATES THEM
-WITH HOLDABILITY TRUE WHEREAS GLOBAL CONNECTION CAN ONLY WORK WITH STATEMENTS WITH HOLDABILITY FALSE
 LOCK TABLE
 END LOCK TABLE
 Statement State @ Create 
@@ -503,11 +501,11 @@ Statement State @ CS Create
     2 type 12
 Params-local-1: ru(params) contents {3}
 sru1-local-1: ru(SN1) contents {1} {2} {3}
-Expecting exception because global transaction sru1-global-2 is trying to use a statement with holdability true
-sru1-global-2: SQL Exception: Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Expecting downgrade because global transaction sru1-global-2 is using a statement with holdability true
+sru1-global-2: ru(SN1) contents {1} {2} {3}
 sru2-global-3: ru(OAK2) contents {1} {2} {3}
-Expecting exception because global transaction sru1-global-4 is trying to use a statement with holdability true
-sru1-global-4: SQL Exception: Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Expecting downgrade because global transaction sru1-global-4 is using a statement with holdability true
+sru1-global-4: ru(SN1) contents {1} {2} {3}
 Statement State @ GLOBAL 
   getResultSetType() SCROLL_INSENSITIVE
   getResultSetConcurrency() READ_ONLY
@@ -537,8 +535,7 @@ Statement State @ CS GLOBAL
   Parameter Count 2
     1 type 12
     2 type 12
-PASS: got exception because holdability is true on prepared statement and that is not allowed in global transactions
-Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Params-global-1: ru(params) contents {3}
 sru1-local-5: ru(SN1) contents {1} {2} {3}
 sru2-local-6: ru(OAK2) contents {1} {2} {3}
 sru3-local-7: ru(SF3) contents {1} {2} {3}
@@ -573,7 +570,7 @@ Statement State @ CS LOCAL
     2 type 12
 Params-local-2: ru(params) contents {3}
 LOCK TABLE
-  xid row 0 lock count 4
+  xid row 0 lock count 14
   xid row 1 lock count 14
 END LOCK TABLE
 sru1-local-8: ru(SN1) contents {1} {2} {3}
@@ -609,7 +606,7 @@ Statement State @ CS LOCAL 2
     1 type 12
     2 type 12
 LOCK TABLE
-  xid row 0 lock count 4
+  xid row 0 lock count 14
   xid row 1 lock count 12
 END LOCK TABLE
 sruBatch update counts : 1  1  2  1 :
@@ -844,14 +841,8 @@ HOLDABLE Statement in global xact false connection warning ResultSetHoldability 
 HOLDABLE PreparedStatement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
 HOLDABLE CallableStatement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
 STATEMENT HOLDABILITY false
-Expected SQLException (local Statement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
-Expected SQLException (local Statement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 PREPARED STATEMENT HOLDABILITY false
-Expected SQLException (local PreparedStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
-Expected SQLException (local PreparedStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 CALLABLE STATEMENT HOLDABILITY false
-Expected SQLException (local CallableStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
-Expected SQLException (local CallableStatement hold) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 CONNECTION(held) HOLDABILITY true
 PASS XA HOLDABILITY TEST
 Completed checkDataSource30

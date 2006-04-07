@@ -101,14 +101,12 @@ public class BrokeredStatement implements EngineStatement
 
     public final boolean execute(String sql) throws SQLException
 	{
-        checkHoldability();
 		return getStatement().execute(sql);
     } 
 
     public final ResultSet executeQuery(String sql) throws SQLException
 	{
-        checkHoldability();
-		return wrapResultSet(getStatement().executeQuery(sql));
+ 		return wrapResultSet(getStatement().executeQuery(sql));
     }
 
     public final int executeUpdate(String sql) throws SQLException
@@ -541,11 +539,4 @@ public class BrokeredStatement implements EngineStatement
 		getStatement().getConnection();
 		return control;
 	}
-    
-    final void checkHoldability() throws SQLException {
-        int holdability = controlCheck().checkHoldCursors(resultSetHoldability);
-        if (holdability != resultSetHoldability)
-            throw Util.generateCsSQLException(SQLState.CANNOT_HOLD_CURSOR_XA);
-
-    }
 }

@@ -392,8 +392,6 @@ public class checkDataSource
 
 		// now check re-use of *Statement objects across local/global connections.
 		System.out.println("TESTING RE_USE OF STATEMENT OBJECTS");
-		System.out.println("THE STATEMENT OBJECTS CAN NOT BE REUSED ACROSS LOCAL/GLOBAL CONNECTIONS BECAUSE, LOCAL CONNECTION CREATES THEM");
-		System.out.println("WITH HOLDABILITY TRUE WHEREAS GLOBAL CONNECTION CAN ONLY WORK WITH STATEMENTS WITH HOLDABILITY FALSE");
 		cs1 = xac.getConnection();
 
     
@@ -420,24 +418,18 @@ public class checkDataSource
 		cs1.commit(); // need to commit to switch to an global connection;
 		xid = new cdsXid(1, (byte) 103, (byte) 119);
 		xar.start(xid, XAResource.TMNOFLAGS); // simple case - underlying connection is re-used for global.
-		System.out.println("Expecting exception because global transaction sru1-global-2 is trying to use a statement with holdability true");
+		System.out.println("Expecting downgrade because global transaction sru1-global-2 is using a statement with holdability true");
 		queryOnStatement("sru1-global-2", cs1, sru1);
 		sruBatch.addBatch("insert into ru values 5");
 		Statement sru2 = cs1.createStatement();
 		sru2.setCursorName("OAK2");
 		queryOnStatement("sru2-global-3", cs1, sru2);
-		System.out.println("Expecting exception because global transaction sru1-global-4 is trying to use a statement with holdability true");
+		System.out.println("Expecting downgrade because global transaction sru1-global-4 is using a statement with holdability true");
 		queryOnStatement("sru1-global-4", cs1, sru1);
 		showStatementState("GLOBAL ", sruState);
 		showStatementState("PS GLOBAL ", psruState);
 		showStatementState("CS GLOBAL ", csruState);
-		try {
-			resultSetQuery("Params-global-1", psParams.executeQuery());
-			System.out.println("FAIL: should have gotten exception because holdability is true on prepared statement and that is not allowed in global transactions");
-		} catch (SQLException ex) {
-			System.out.println("PASS: got exception because holdability is true on prepared statement and that is not allowed in global transactions");
-			System.out.println(ex.getMessage());
-		}
+		resultSetQuery("Params-global-1", psParams.executeQuery());
 
 		xar.end(xid, XAResource.TMSUCCESS);
 		// now a new underlying connection is created

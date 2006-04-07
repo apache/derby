@@ -169,14 +169,36 @@ Non-held ResultSet correctly closed after commit
 BGBC 0
 BGAC 1
 START GLOBAL TRANSACTION
-EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
-EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
-EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+Global transaction open ResultSets 12
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
 Global createStatement(hold)Statement holdable CLOSE_CURSORS_AT_COMMIT 2
 01J07 :SQL Warning: ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
 Global prepareStatement(hold)Statement holdable CLOSE_CURSORS_AT_COMMIT 2
 01J07 :SQL Warning: ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
-01J07 :SQL Warning: ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
+Global xact Statement sdh Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement shh Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement sch Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement psdh Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement pshh Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement psch Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement sdc Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement shc Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement scc Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement psdh_d Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement pshh_d Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement psch_d Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+After global transaction closed ResultSets 12
+Global xact Statement sdh Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+Global xact Statement shh Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+Global xact Statement sch Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement psdh Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+Global xact Statement pshh Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+Global xact Statement psch Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement sdc Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement shc Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+Global xact Statement scc Statement holdable CLOSE_CURSORS_AT_COMMIT 2
+Global xact Statement psdh_d Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+Global xact Statement pshh_d Statement holdable HOLD_CURSORS_OVER_COMMIT 1
+Global xact Statement psch_d Statement holdable CLOSE_CURSORS_AT_COMMIT 2
 derby966 complete
 XATest complete

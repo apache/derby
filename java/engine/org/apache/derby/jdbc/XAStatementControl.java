@@ -25,6 +25,7 @@ import org.apache.derby.iapi.jdbc.BrokeredStatementControl;
 import org.apache.derby.iapi.jdbc.BrokeredStatement;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.jdbc.BrokeredCallableStatement;
+import org.apache.derby.iapi.jdbc.EngineStatement;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.jdbc.EmbedStatement;
@@ -59,16 +60,23 @@ final class XAStatementControl implements BrokeredStatementControl {
 		this(xaConnection);
 		this.realStatement = realStatement;
 		this.applicationStatement = applicationConnection.newBrokeredStatement(this);
+        
+        ((EmbedStatement) realStatement).setApplicationStatement(
+                applicationStatement);
 	}
 	XAStatementControl(EmbedXAConnection xaConnection, PreparedStatement realPreparedStatement, String sql, Object generatedKeys) throws SQLException {
 		this(xaConnection);
 		this.realPreparedStatement = realPreparedStatement;
 		this.applicationStatement = applicationConnection.newBrokeredStatement(this, sql, generatedKeys);
+        ((EmbedStatement) realPreparedStatement).setApplicationStatement(
+                applicationStatement);
 	}
 	XAStatementControl(EmbedXAConnection xaConnection, CallableStatement realCallableStatement, String sql) throws SQLException {
 		this(xaConnection);
 		this.realCallableStatement = realCallableStatement;
 		this.applicationStatement = applicationConnection.newBrokeredStatement(this, sql);
+        ((EmbedStatement) realCallableStatement).setApplicationStatement(
+                applicationStatement);
 	}
 
 	public Statement getRealStatement() throws SQLException {
@@ -91,7 +99,7 @@ final class XAStatementControl implements BrokeredStatementControl {
 			// create new Statement
 			Statement newStatement = applicationStatement.createDuplicateStatement(xaConnection.realConnection, realStatement);
 			((EmbedStatement) realStatement).transferBatch((EmbedStatement) newStatement);
-
+ 
 			try {
 				realStatement.close();
 			} catch (SQLException sqle) {
@@ -99,6 +107,8 @@ final class XAStatementControl implements BrokeredStatementControl {
 
 			realStatement = newStatement;
 			realConnection = xaConnection.realConnection;
+            ((EmbedStatement) realStatement).setApplicationStatement(
+                    applicationStatement);
 		}
 		else {
 			// application connection is different, therefore the outer application
@@ -138,6 +148,8 @@ final class XAStatementControl implements BrokeredStatementControl {
 
 			realPreparedStatement = newPreparedStatement;
 			realConnection = xaConnection.realConnection;
+            ((EmbedStatement) realPreparedStatement).setApplicationStatement(
+                        applicationStatement);
 		}
 		else {
 			// application connection is different, therefore the outer application
@@ -174,6 +186,8 @@ final class XAStatementControl implements BrokeredStatementControl {
 
 			realCallableStatement = newCallableStatement;
 			realConnection = xaConnection.realConnection;
+            ((EmbedStatement) realCallableStatement).setApplicationStatement(
+                    applicationStatement);
 		}
 		else {
 			// application connection is different, therefore the outer application

@@ -62,6 +62,14 @@ public class EmbedStatement extends ConnectionChild
     implements EngineStatement {
 
 	private final java.sql.Connection applicationConnection;
+    
+    /**
+     * Statement reference the application is using to execute
+     * this Statement. Normally set to this, but if this was
+     * created by a Connection from an XAConnection then this
+     * will be a reference to the BrokeredStatement.
+     */
+    private EngineStatement applicationStatement;
 
 	int updateCount = -1;
 	java.sql.ResultSet results;
@@ -110,6 +118,9 @@ public class EmbedStatement extends ConnectionChild
 
 		lcc = getEmbedConnection().getLanguageConnection();
 		applicationConnection = getEmbedConnection().getApplicationConnection();
+
+        applicationStatement = this;
+
 	}
 
 	//
@@ -1331,7 +1342,13 @@ public class EmbedStatement extends ConnectionChild
 			batchStatements = null;
 		}
 	}
-
+    
+    /**
+     * Set the application statement for this Statement.
+    */
+    public final void setApplicationStatement(EngineStatement s) {
+        this.applicationStatement = s;
+    }
 
 	private EmbedResultSet[] dynamicResults;
 	private int currentDynamicResultSet;
@@ -1445,13 +1462,19 @@ public class EmbedStatement extends ConnectionChild
     /**
      * Get the execute time holdability for the Statement.
      * When in a global transaction holdabilty defaults to false.
+     * @throws SQLException Error from getResultSetHoldability.
      */
-    private boolean getExecuteHoldable()
+    private boolean getExecuteHoldable() throws SQLException
     {
         if (resultSetHoldability  == JDBC30Translation.CLOSE_CURSORS_AT_COMMIT)
             return false;
         
-        return true;
+        // Simple non-XA case
+        if (applicationStatement == this)
+            return true;
+        
+        return applicationStatement.getResultSetHoldability() ==
+            JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
     }
 }
 

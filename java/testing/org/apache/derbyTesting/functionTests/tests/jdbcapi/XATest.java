@@ -26,6 +26,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Properties;
 
 import javax.sql.XAConnection;
@@ -912,15 +914,6 @@ public class XATest {
             // start a global xact and test those statements.
             xar.start(xid, XAResource.TMNOFLAGS);
             
-            // Statements obtained while default was hold.
-            // All should work, holability will be downgraded
-            // to close on commit for those Statements with hold set.
-            if (TestUtil.isDerbyNetClientFramework()) { // DERBY-1158
-            sdh.executeQuery("SELECT * FROM APP.FOO").close();
-            shh.executeQuery("SELECT * FROM APP.FOO").close();
-            }
-            sch.executeQuery("SELECT * FROM APP.FOO").close();
-                        
             // Statements not returning ResultSet's should be ok
             if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
             sdh.executeUpdate("DELETE FROM APP.FOO where A < -99");
@@ -928,22 +921,21 @@ public class XATest {
             sch.executeUpdate("DELETE FROM APP.FOO where A < -99");
             }
             
+            ArrayList openRS = new ArrayList();
+            
+            // Statements obtained while default was hold.
+            // All should work, holability will be downgraded
+            // to close on commit for those Statements with hold set.
+            openRS.add(sdh.executeQuery("SELECT * FROM APP.FOO"));
+            openRS.add(shh.executeQuery("SELECT * FROM APP.FOO"));
+            openRS.add(sch.executeQuery("SELECT * FROM APP.FOO"));
+
             
             // PreparedStatements obtained while default was hold.
-            // Only sch should work as held cursors not supported in XA
-            try {
-                psdh.executeQuery().close();
-                System.out.println("FAIL - held Statement in global psdf");
-            } catch (SQLException e) {
-                TestUtil.dumpSQLExceptions(e, true);
-            }
-            try {
-                pshh.executeQuery().close();
-                System.out.println("FAIL - held Statement in global pshh");
-            } catch (SQLException e) {
-                TestUtil.dumpSQLExceptions(e, true);
-            }
-            psch.executeQuery().close();
+            // Holdability should be downgraded.
+            openRS.add(psdh.executeQuery());
+            openRS.add(pshh.executeQuery());
+            openRS.add(psch.executeQuery());
             
             // Statements not returning ResultSet's should be ok
             if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
@@ -951,31 +943,24 @@ public class XATest {
             pshh_d.executeUpdate();
             psch_d.executeUpdate();
             }
-             
-            // Statements obtained while default was close.
-            // Only sch should work as held cursors not supported in XA
-            sdc.executeQuery("SELECT * FROM APP.FOO").close();
-            if (TestUtil.isDerbyNetClientFramework()) { // DERBY-1158
-            shc.executeQuery("SELECT * FROM APP.FOO").close();
-            }
-            scc.executeQuery("SELECT * FROM APP.FOO").close();
-            
+
             // Statements not returning ResultSet's should be ok
             if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
             sdc.executeUpdate("DELETE FROM APP.FOO where A < -99");
             shc.executeUpdate("DELETE FROM APP.FOO where A < -99");
             scc.executeUpdate("DELETE FROM APP.FOO where A < -99");
-            }
+            }             
+ 
+            // Statements obtained while default was close.
+            // all should return close on commit ResultSets
+            openRS.add(sdc.executeQuery("SELECT * FROM APP.FOO"));
+            openRS.add(shc.executeQuery("SELECT * FROM APP.FOO"));
+            openRS.add(scc.executeQuery("SELECT * FROM APP.FOO"));
             
             // PreparedStatements obtained while default was close.
-           psdc.executeQuery().close();
-           try {
-                pshc.executeQuery().close();
-                System.out.println("FAIL - held Statement in global");
-            } catch (SQLException e) {
-                TestUtil.dumpSQLExceptions(e, true);
-            }
-            pscc.executeQuery().close();
+            openRS.add(psdc.executeQuery());
+            openRS.add(pshc.executeQuery());
+            openRS.add(pscc.executeQuery());
             
             // Statements not returning ResultSet's should be ok
             if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
@@ -983,6 +968,19 @@ public class XATest {
             pshc_d.executeUpdate();
             pscc_d.executeUpdate();
             }
+            
+            // All the ResultSets should be open. Run a simple
+            // test, clearWarnings throws an error if the ResultSet
+            // is closed. Also would be nice here to use the new
+            // JDBC 4.0 method getHoldabilty to ensure the
+            // holdability is reported correctly.
+            int orsCount = 0;
+            for (Iterator i = openRS.iterator(); i.hasNext();) {
+                ResultSet ors = (ResultSet) i.next();
+                ors.clearWarnings();
+                orsCount++;
+            }
+            System.out.println("Global transaction open ResultSets " + orsCount);
 
                    
             // Test we cannot switch the connection to holdable
@@ -1011,11 +1009,63 @@ public class XATest {
                 ResultSet.HOLD_CURSORS_OVER_COMMIT);
             showHoldStatus("Global prepareStatement(hold)", psglobalhold);
             psglobalhold.close();
-
+            
+            if (!TestUtil.isDerbyNetClientFramework()) { //DERBY-1158 in progress
+            // Show the holdability for all the Statements while
+            // in the global transaction, all should be close on commit.
+            showHoldStatus("Global xact Statement sdh ", sdh);
+            showHoldStatus("Global xact Statement shh ", shh);
+            showHoldStatus("Global xact Statement sch ", sch);
+            
+            showHoldStatus("Global xact Statement psdh ", psdh);
+            showHoldStatus("Global xact Statement pshh ", pshh);
+            showHoldStatus("Global xact Statement psch ", psch);
+            
+            showHoldStatus("Global xact Statement sdc ", sdc);
+            showHoldStatus("Global xact Statement shc ", shc);
+            showHoldStatus("Global xact Statement scc ", scc);
+ 
+            showHoldStatus("Global xact Statement psdh_d ", psdh_d);
+            showHoldStatus("Global xact Statement pshh_d ", pshh_d);
+            showHoldStatus("Global xact Statement psch_d ", psch_d);
+            }
+ 
         
             xar.end(xid, XAResource.TMSUCCESS);
             if (xar.prepare(xid) != XAResource.XA_RDONLY)
                 System.out.println("FAIL prepare didn't indicate r/o");
+            
+            // All the ResultSets should be closed. Run a simple
+            // test, clearWarnings throws an error if the ResultSet
+            // is closed.
+            int crsCount = 0;
+            for (Iterator i = openRS.iterator(); i.hasNext();) {
+                ResultSet crs = (ResultSet) i.next();
+                try {
+                    crs.clearWarnings();
+                } catch (SQLException sqle) {
+                }
+                crsCount++;
+            }
+            System.out.println("After global transaction closed ResultSets " + crsCount);
+
+            
+            // Check the statements revert to holdable as required.
+            showHoldStatus("Global xact Statement sdh ", sdh);
+            showHoldStatus("Global xact Statement shh ", shh);
+            showHoldStatus("Global xact Statement sch ", sch);
+            
+            showHoldStatus("Global xact Statement psdh ", psdh);
+            showHoldStatus("Global xact Statement pshh ", pshh);
+            showHoldStatus("Global xact Statement psch ", psch);
+ 
+            showHoldStatus("Global xact Statement sdc ", sdc);
+            showHoldStatus("Global xact Statement shc ", shc);
+            showHoldStatus("Global xact Statement scc ", scc);
+            
+            showHoldStatus("Global xact Statement psdh_d ", psdh_d);
+            showHoldStatus("Global xact Statement pshh_d ", pshh_d);
+            showHoldStatus("Global xact Statement psch_d ", psch_d);
             
             conn.close();
             
@@ -1100,6 +1150,7 @@ public class XATest {
             System.out.println(w.getSQLState() + " :" + w.toString());
             w = w.getNextWarning();
         }
+        s.getConnection().clearWarnings();
         
     }
     /**
