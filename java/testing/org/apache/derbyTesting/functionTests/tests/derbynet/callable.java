@@ -109,6 +109,30 @@ public class callable
 			cs.close();
 			// stmt.execute("DROP FUNCTION method4");
 
+			// DERBY-1184: User-defined output parameter not supported:
+			if (!TestUtil.isJCCFramework())
+			{
+				cs = conn.prepareCall("? = call method4()");
+				try
+				{
+					cs.registerOutParameter (1, java.sql.Types.INTEGER,
+							"user-def");
+					System.out.println("DERBY-1184 FAIL: Expected exception");
+				}
+				catch (SQLException expectedException)
+				{
+					if (! "0AX01".equals(expectedException.getSQLState()))
+					{
+						System.out.println("DERBY-1184: Caught UNexpected: " +
+							expectedException.getMessage());
+						System.out.println("DERBY-1184: SQLState: " +
+							expectedException.getSQLState() + ", errorCode: " +
+							expectedException.getErrorCode());
+					}
+				}
+				cs.close();
+			}
+
 			// different parameter types, also method overload
 			stmt.execute("CREATE PROCEDURE method4P(" +
 					"IN P1 SMALLINT, IN P2 INT, IN P3 BIGINT, IN P4 REAL, " +

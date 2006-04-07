@@ -264,19 +264,10 @@ public class CallableStatement extends PreparedStatement
     }
 
     public void registerOutParameter(int parameterIndex, int jdbcType, String typeName) throws SQLException {
-        try
-        {
-            synchronized (connection_) {
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterIndex, jdbcType, typeName);
-                }
-                super.checkForClosedStatement();
-            }
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterIndex, jdbcType, typeName);
         }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
+        throw jdbcMethodNotImplemented();
     }
 
     public boolean wasNull() throws SQLException {
