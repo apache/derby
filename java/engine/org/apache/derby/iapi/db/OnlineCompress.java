@@ -400,6 +400,15 @@ public class OnlineCompress
                     }
                 }
             }
+
+            // TODO - It would be better if commits happened more frequently
+            // in the nested transaction, but to do that there has to be more
+            // logic to catch a ddl that might jump in the middle of the 
+            // above loop and invalidate the various table control structures
+            // which are needed to properly update the indexes.  For example
+            // the above loop would corrupt an index added midway through
+            // the loop if not properly handled.  See DERBY-1188.  
+            nested_tc.commit();
 			
 		}
 		catch (StandardException se)

@@ -72,3 +72,9 @@ Executing test: end deleteAllRows,50 row test.
 Executing test: begin checkPurgePhase50 row test, create = false.
 Executing test: end checkPurgePhase50 row test.
 Ending test: test3
+Beginning test: test5
+Executing test: begin test5: 2000 row test.
+Executing test: end test5: 2000 row test.
+Executing test: begin test5: 10000 row test.
+Executing test: end test5: 10000 row test.
+Ending test: test5

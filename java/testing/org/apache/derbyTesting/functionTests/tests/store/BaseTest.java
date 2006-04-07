@@ -409,8 +409,12 @@ public abstract class BaseTest
     protected static final int SPACE_INFO_IS_INDEX          = 0;
     protected static final int SPACE_INFO_NUM_ALLOC         = 1;
     protected static final int SPACE_INFO_NUM_FREE          = 2;
-    protected static final int SPACE_INFO_PAGE_SIZE         = 3;
-    protected static final int SPACE_INFO_ESTIMSPACESAVING  = 4;
+    protected static final int SPACE_INFO_NUM_UNFILLED      = 3;
+    protected static final int SPACE_INFO_PAGE_SIZE         = 4;
+    protected static final int SPACE_INFO_ESTIMSPACESAVING  = 5;
+
+    protected static final int SPACE_INFO_NUMCOLS           = 6;
+
     protected int[] getSpaceInfo(
     Connection  conn,
     String      schemaName,
@@ -419,7 +423,7 @@ public abstract class BaseTest
 		throws SQLException
     {
         String stmt_str = 
-            "select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving from new org.apache.derby.diag.SpaceTable('" +
+            "select conglomeratename, isindex, numallocatedpages, numfreepages, numunfilledpages, pagesize, estimspacesaving from new org.apache.derby.diag.SpaceTable('" +
             tableName + "') t where isindex = 0";
         PreparedStatement space_stmt = conn.prepareStatement(stmt_str);
         ResultSet rs = space_stmt.executeQuery();
@@ -434,9 +438,9 @@ public abstract class BaseTest
             }
         }
 
-        int[] ret_info = new int[5];
+        int[] ret_info = new int[SPACE_INFO_NUMCOLS];
         String conglomerate_name        = rs.getString(1);
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < SPACE_INFO_NUMCOLS; i++)
         {
             ret_info[i] = rs.getInt(i + 2);
         }
@@ -455,10 +459,16 @@ public abstract class BaseTest
         {
             System.out.println(
                 "Space information for " + schemaName + "." + tableName + ":");
-            System.out.println("isindex = " + ret_info[SPACE_INFO_IS_INDEX]);
-            System.out.println("num_alloc = " + ret_info[SPACE_INFO_NUM_ALLOC]);
-            System.out.println("num_free = " + ret_info[SPACE_INFO_NUM_FREE]);
-            System.out.println("page_size = " + ret_info[SPACE_INFO_PAGE_SIZE]);
+            System.out.println(
+                "isindex = " + ret_info[SPACE_INFO_IS_INDEX]);
+            System.out.println(
+                "num_alloc = " + ret_info[SPACE_INFO_NUM_ALLOC]);
+            System.out.println(
+                "num_free = " + ret_info[SPACE_INFO_NUM_FREE]);
+            System.out.println(
+                "num_unfilled = " + ret_info[SPACE_INFO_NUM_UNFILLED]);
+            System.out.println(
+                "page_size = " + ret_info[SPACE_INFO_PAGE_SIZE]);
             System.out.println(
                 "estimspacesaving = " + ret_info[SPACE_INFO_ESTIMSPACESAVING]);
         }
@@ -471,4 +481,15 @@ public abstract class BaseTest
         return(ret_info);
     }
 
+    /**
+     * Given output from getSpaceInfo(), return total pages in file.
+     * <p>
+     * simply the sum of allocated and free pages.
+     *
+     **/
+    protected int total_pages(int[] space_info)
+    {
+        return(space_info[SPACE_INFO_NUM_FREE] + 
+               space_info[SPACE_INFO_NUM_ALLOC]);
+    }
 }
