@@ -32,6 +32,7 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.EngineStatement;
 
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -58,7 +59,7 @@ import java.sql.ResultSet;
  * @author ames
  */
 public class EmbedStatement extends ConnectionChild
-    implements java.sql.Statement {
+    implements EngineStatement {
 
 	private final java.sql.Connection applicationConnection;
 

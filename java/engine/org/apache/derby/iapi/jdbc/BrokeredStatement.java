@@ -36,7 +36,7 @@ import java.lang.reflect.*;
 /**
 	A Statement implementation that forwards all of its requests to an underlying Statement.
  */
-public class BrokeredStatement implements Statement
+public class BrokeredStatement implements EngineStatement
 {
 
 	/**
@@ -441,7 +441,7 @@ public class BrokeredStatement implements Statement
      */
 	public final boolean getMoreResults(int current) throws SQLException
     {
-        return getStatement().getMoreResults( current);
+        return ((EngineStatement) getStatement()).getMoreResults( current);
 	}
 
     /**
@@ -464,19 +464,7 @@ public class BrokeredStatement implements Statement
 	public final int getResultSetHoldability()
         throws SQLException
 	{
-		int defaultHoldability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
-		if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14) { //No need to use reflection for jdks 1.4 and higher
-			defaultHoldability = getStatement().getResultSetHoldability();
-		} else {
-			try {
-				Method sh = getStatement().getClass().getMethod("getResultSetHoldability", null);
-				defaultHoldability = ((Integer)sh.invoke(getStatement(), null)).intValue();
-			} catch( Exception e)
-			{
-				throw PublicAPI.wrapStandardException( StandardException.plainWrapException( e));
-			}
-		}
-		return defaultHoldability;
+		return ((EngineStatement) getStatement()).getResultSetHoldability();
 	}
 
 	/*

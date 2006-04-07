@@ -38,6 +38,7 @@ import java.util.Vector;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.jdbc.EngineConnection;
+import org.apache.derby.iapi.jdbc.EngineStatement;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.util.StringUtil;
@@ -245,65 +246,47 @@ class DRDAStatement
 
 	/**
 	 *
-	 *  get resultSetHoldability with reflection. 
-	 *  We need to use reflection so we can use hold cursors with 1.3.1. 
-	 *  And also since our statement might be a BrokeredStatement.
+	 *  get resultSetHoldability.
 	 * 
 	 * @return the resultSet holdability for the prepared statement
 	 *
 	 */
 	protected int getResultSetHoldability() throws SQLException
 	{
-		Statement rsstmt = null;
+		Statement rsstmt;
 		ResultSet rs = getResultSet();
-		int holdValue = -1;
 
 		if (rs  != null)
 			rsstmt = rs.getStatement();
 		else
 			rsstmt = getPreparedStatement();
-				
-		Class[] getResultSetHoldabilityParam  = {};
-		try {
-			Method sh =
-				rsstmt.getClass().getMethod("getResultSetHoldability", getResultSetHoldabilityParam);
-			holdValue =  ((Integer) sh.invoke(rsstmt,null)).intValue();
-		}
-		catch (Exception e) {
-			handleReflectionException(e);
-		}
+        
+        int holdValue = 
+            ((EngineStatement) rsstmt).getResultSetHoldability();
+
 		return holdValue;
 	}
 	
 	/**
 	 *
-	 *  get resultSetHoldability with reflection. 
-	 *  We need to use reflection so we can use hold cursors with 1.3.1. 
-	 *  And also since our statement might be a BrokeredStatement.
+	 *  get resultSetHoldability.
 	 * 
 	 * @param rs ResultSet 
 	 * @return the resultSet holdability for the prepared statement
 	 *
 	 */
-	protected int getResultSetHoldability(ResultSet rs) throws SQLException
+	int getResultSetHoldability(ResultSet rs) throws SQLException
 	{
-		Statement rsstmt = null;
-		int holdValue = -1;
+		Statement rsstmt;
 
 		if (rs  != null)
 			rsstmt = rs.getStatement();
 		else
 			rsstmt = getPreparedStatement();
-				
-		Class[] getResultSetHoldabilityParam  = {};
-		try {
-			Method sh =
-				rsstmt.getClass().getMethod("getResultSetHoldability", getResultSetHoldabilityParam);
-			holdValue =  ((Integer) sh.invoke(rsstmt,null)).intValue();
-		}
-		catch (Exception e) {
-			handleReflectionException(e);
-		}
+        
+        int holdValue = 
+            ((EngineStatement) rsstmt).getResultSetHoldability();
+
 		return holdValue;
 	}	
 
@@ -1554,22 +1537,10 @@ class DRDAStatement
 	 * @see java.sql.Statement#getMoreResults
 	 *
 	 */
-	protected boolean getMoreResults(int current) throws SQLException
-	{
-		boolean retVal = false;
-		Class[] intPARAM = {Integer.TYPE};
-		Object[] args = {new Integer(current)};
-		try {
-			Method sh = getPreparedStatement().getClass().getMethod("getMoreResults",intPARAM);
-			Boolean retObj = (Boolean) sh.invoke(getPreparedStatement(),args);
-			retVal = retObj.booleanValue();
-		}
-		catch (Exception e)
-		{
-			
-			handleReflectionException(e);
-		}
-		return retVal;
+	private boolean getMoreResults(int current) throws SQLException
+	{       
+        return
+            ((EngineStatement) getPreparedStatement()).getMoreResults(current);
 	}
 
 	/**
