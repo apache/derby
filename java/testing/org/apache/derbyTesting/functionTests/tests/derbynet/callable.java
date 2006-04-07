@@ -121,7 +121,7 @@ public class callable
 				}
 				catch (SQLException expectedException)
 				{
-					if (! "0AX01".equals(expectedException.getSQLState()))
+					if (! "0A000".equals(expectedException.getSQLState()))
 					{
 						System.out.println("DERBY-1184: Caught UNexpected: " +
 							expectedException.getMessage());
