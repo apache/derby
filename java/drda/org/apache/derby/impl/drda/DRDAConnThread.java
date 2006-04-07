@@ -1195,7 +1195,7 @@ class DRDAConnThread extends Thread {
 		// Everything worked so log connection to the database.
 		if (getLogConnections())
 	 		println2Log(database.dbName, session.drdaID,
-				"Cloudscape Network Server connected to database " +
+				"Apache Derby Network Server connected to database " +
 						database.dbName);
 		return 0;
 	}
