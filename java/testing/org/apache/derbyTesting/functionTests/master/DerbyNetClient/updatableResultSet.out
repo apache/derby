@@ -2074,9 +2074,7 @@ Next datatype to test is SMALLINT
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is INTEGER
   updateObject with column position & Short object as parameters
   updateObject with column name & Short object as parameters
@@ -2113,9 +2111,7 @@ Next datatype to test is INTEGER
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is BIGINT
   updateObject with column position & Short object as parameters
   updateObject with column name & Short object as parameters
@@ -2152,9 +2148,7 @@ Next datatype to test is BIGINT
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is DECIMAL(10,5)
   updateObject with column position & Short object as parameters
   updateObject with column name & Short object as parameters
@@ -2191,9 +2185,7 @@ Next datatype to test is DECIMAL(10,5)
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is REAL
   updateObject with column position & Short object as parameters
   updateObject with column name & Short object as parameters
@@ -2228,9 +2220,7 @@ Next datatype to test is REAL
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is DOUBLE
   updateObject with column position & Short object as parameters
   updateObject with column name & Short object as parameters
@@ -2265,9 +2255,7 @@ Next datatype to test is DOUBLE
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is CHAR(60)
   updateObject with column position & Short object as parameters
   updateObject with column name & Short object as parameters
@@ -2296,9 +2284,7 @@ Next datatype to test is CHAR(60)
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is VARCHAR(60)
   updateObject with column position & Short object as parameters
   updateObject with column name & Short object as parameters
@@ -2327,9 +2313,7 @@ Next datatype to test is VARCHAR(60)
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is LONG VARCHAR
   updateObject with column position & Short object as parameters
   updateObject with column name & Short object as parameters
@@ -2358,9 +2342,7 @@ Next datatype to test is LONG VARCHAR
   updateObject with column position & Boolean object as parameters
   updateObject with column name & Boolean object as parameters
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is CHAR(2) FOR BIT DATA
   updateObject with column position & Short object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BINARY'.
@@ -2409,9 +2391,7 @@ Next datatype to test is CHAR(2) FOR BIT DATA
   updateObject with column name & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BINARY'.
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is VARCHAR(2) FOR BIT DATA
   updateObject with column position & Short object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'VARBINARY'.
@@ -2460,9 +2440,7 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
   updateObject with column name & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'VARBINARY'.
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is LONG VARCHAR FOR BIT DATA
   updateObject with column position & Short object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'LONGVARBINARY'.
@@ -2511,9 +2489,7 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
   updateObject with column name & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'LONGVARBINARY'.
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is CLOB(1k)
   updateObject with column position & Short object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'CLOB'.
@@ -2562,9 +2538,7 @@ Next datatype to test is CLOB(1k)
   updateObject with column name & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'CLOB'.
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is DATE
   updateObject with column position & Short object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'DATE'.
@@ -2611,9 +2585,7 @@ Next datatype to test is DATE
   updateObject with column name & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'DATE'.
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is TIME
   updateObject with column position & Short object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIME'.
@@ -2660,9 +2632,7 @@ Next datatype to test is TIME
   updateObject with column name & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIME'.
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is TIMESTAMP
   updateObject with column position & Short object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIMESTAMP'.
@@ -2709,9 +2679,7 @@ Next datatype to test is TIMESTAMP
   updateObject with column name & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIMESTAMP'.
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Next datatype to test is BLOB(1k)
   updateObject with column position & Short object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BLOB'.
@@ -2760,9 +2728,7 @@ Next datatype to test is BLOB(1k)
   updateObject with column name & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BLOB'.
   updateObject with column position & null as parameters
-   Got expected exception:null
   updateObject with column name & null as parameters
-   Got expected exception:null
 Positive Test23 - Test cancelRowUpdates after updateXXX methods on all the supported sql datatypes
   updateShort and then cancelRowUpdates
   updateInt and then cancelRowUpdates

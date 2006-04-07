@@ -1413,7 +1413,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
     // indicates column has been updated, then column is updated to null.
     private boolean wasNullSensitiveUpdate(int column) {
         return
-                resultSetType_ == java.sql.ResultSet.TYPE_SCROLL_SENSITIVE &&
                 updatedColumns_ != null &&
                 updatedColumns_[column - 1] == null &&
                 columnUpdated_[column - 1];

@@ -1956,14 +1956,9 @@ public class updatableResultSet {
 									rs.updateObject(sqlType, null);
 								else //test by passing column name
 									rs.updateObject(ColumnNames[sqlType-1], null);
-								} catch (Throwable e) {
-								if (TestUtil.isNetFramework()) {
-									System.out.println("   Got expected exception:" + e.getMessage());
-									continue;
-								} else {
+								} catch (Throwable e) {							
 									System.out.println("   Got UNexpected exception:" + e.getMessage());
 									return;
-								}
 								}
 							} else if (updateXXXName == 20 || updateXXXName == 21) //since Derby does not support Array, Ref datatype, this is a no-op
 									continue;

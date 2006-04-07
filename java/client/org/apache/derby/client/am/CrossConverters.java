@@ -807,7 +807,9 @@ final class CrossConverters {
     // The Java compiler uses static binding, so we can't rely on the strongly
     // typed setObject() methods above for each of the Java Object instance types.
     final Object setObject(int targetType, Object source) throws SqlException {
-        if (source instanceof Boolean) {
+        if (source == null) {
+            return null;
+        } else if (source instanceof Boolean) {
             return setObject(targetType, ((Boolean) source).booleanValue());
         } else if (source instanceof Integer) {
             return setObject(targetType, ((Integer) source).intValue());
