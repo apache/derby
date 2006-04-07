@@ -803,6 +803,7 @@ public class XATest {
             showHoldStatus("Local(held) default ", sdh);
             checkHeldRS(conn, sdh, sdh.executeQuery("select * from app.foo"));
             PreparedStatement psdh = conn.prepareStatement("SELECT * FROM APP.FOO");
+            PreparedStatement psdh_d = conn.prepareStatement("DELETE FROM APP.FOO WHERE A < -99");
             showHoldStatus("Local(held) default Prepared", psdh);
             checkHeldRS(conn, psdh, psdh.executeQuery());
             
@@ -814,6 +815,11 @@ public class XATest {
             checkHeldRS(conn, shh, shh.executeQuery("select * from app.foo"));
             PreparedStatement pshh =
                 conn.prepareStatement("SELECT * FROM APP.FOO",
+                        ResultSet.TYPE_FORWARD_ONLY,
+                        ResultSet.CONCUR_READ_ONLY,
+                        ResultSet.HOLD_CURSORS_OVER_COMMIT);
+            PreparedStatement pshh_d =
+                conn.prepareStatement("DELETE FROM APP.FOO WHERE A < -99",
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY,
                         ResultSet.HOLD_CURSORS_OVER_COMMIT);
@@ -830,7 +836,12 @@ public class XATest {
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY,
                         ResultSet.CLOSE_CURSORS_AT_COMMIT);
-            showHoldStatus("Local(held) close Prepared", psch);
+            PreparedStatement psch_d =
+                conn.prepareStatement("DELETE FROM APP.FOO WHERE A < -99",
+                        ResultSet.TYPE_FORWARD_ONLY,
+                        ResultSet.CONCUR_READ_ONLY,
+                        ResultSet.CLOSE_CURSORS_AT_COMMIT);
+             showHoldStatus("Local(held) close Prepared", psch);
             checkHeldRS(conn, psch, psch.executeQuery());
          
             // set the connection's holdabilty to false
@@ -840,6 +851,7 @@ public class XATest {
             showHoldStatus("Local(close) default ", sdc);
             checkHeldRS(conn, sdc, sdc.executeQuery("select * from app.foo"));
             PreparedStatement psdc = conn.prepareStatement("SELECT * FROM APP.FOO");
+            PreparedStatement psdc_d = conn.prepareStatement("DELETE FROM APP.FOO WHERE A < -99");
             showHoldStatus("Local(close) default Prepared", psdc);
             checkHeldRS(conn, psdc, psdc.executeQuery());
  
@@ -850,6 +862,11 @@ public class XATest {
             checkHeldRS(conn, shc, shc.executeQuery("select * from app.foo"));
             PreparedStatement pshc =
                 conn.prepareStatement("SELECT * FROM APP.FOO",
+                        ResultSet.TYPE_FORWARD_ONLY,
+                        ResultSet.CONCUR_READ_ONLY,
+                        ResultSet.HOLD_CURSORS_OVER_COMMIT);
+            PreparedStatement pshc_d =
+                conn.prepareStatement("DELETE FROM APP.FOO WHERE A < -99",
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY,
                         ResultSet.HOLD_CURSORS_OVER_COMMIT);
@@ -866,7 +883,12 @@ public class XATest {
                         ResultSet.TYPE_FORWARD_ONLY,
                         ResultSet.CONCUR_READ_ONLY,
                         ResultSet.CLOSE_CURSORS_AT_COMMIT);
-            showHoldStatus("Local(close) close Prepared", pscc);
+            PreparedStatement pscc_d =
+                conn.prepareStatement("DELETE FROM APP.FOO WHERE A < -99",
+                        ResultSet.TYPE_FORWARD_ONLY,
+                        ResultSet.CONCUR_READ_ONLY,
+                        ResultSet.CLOSE_CURSORS_AT_COMMIT);
+             showHoldStatus("Local(close) close Prepared", pscc);
             checkHeldRS(conn, pscc, pscc.executeQuery());
             
             // Revert back to holdable
@@ -898,6 +920,14 @@ public class XATest {
             shh.executeQuery("SELECT * FROM APP.FOO").close();
             }
             sch.executeQuery("SELECT * FROM APP.FOO").close();
+                        
+            // Statements not returning ResultSet's should be ok
+            if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
+            sdh.executeUpdate("DELETE FROM APP.FOO where A < -99");
+            shh.executeUpdate("DELETE FROM APP.FOO where A < -99");
+            sch.executeUpdate("DELETE FROM APP.FOO where A < -99");
+            }
+            
             
             // PreparedStatements obtained while default was hold.
             // Only sch should work as held cursors not supported in XA
@@ -914,6 +944,13 @@ public class XATest {
                 TestUtil.dumpSQLExceptions(e, true);
             }
             psch.executeQuery().close();
+            
+            // Statements not returning ResultSet's should be ok
+            if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
+            psdh_d.executeUpdate();
+            pshh_d.executeUpdate();
+            psch_d.executeUpdate();
+            }
              
             // Statements obtained while default was close.
             // Only sch should work as held cursors not supported in XA
@@ -922,6 +959,13 @@ public class XATest {
             shc.executeQuery("SELECT * FROM APP.FOO").close();
             }
             scc.executeQuery("SELECT * FROM APP.FOO").close();
+            
+            // Statements not returning ResultSet's should be ok
+            if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
+            sdc.executeUpdate("DELETE FROM APP.FOO where A < -99");
+            shc.executeUpdate("DELETE FROM APP.FOO where A < -99");
+            scc.executeUpdate("DELETE FROM APP.FOO where A < -99");
+            }
             
             // PreparedStatements obtained while default was close.
            psdc.executeQuery().close();
@@ -932,6 +976,14 @@ public class XATest {
                 TestUtil.dumpSQLExceptions(e, true);
             }
             pscc.executeQuery().close();
+            
+            // Statements not returning ResultSet's should be ok
+            if (!TestUtil.isDerbyNetClientFramework()) { // DERBY-1159
+            psdc_d.executeUpdate();
+            pshc_d.executeUpdate();
+            pscc_d.executeUpdate();
+            }
+
                    
             // Test we cannot switch the connection to holdable
             try {
