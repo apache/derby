@@ -43,3 +43,6 @@ jdbcapi/SURQueryMixTest.junit
 jdbcapi/SURTest.junit
 jdbcapi/ConcurrencyTest.junit
 jdbcapi/HoldabilityTest.junit
+# Excluding checkDataSource and checkDataSource30 because JCC has no XA
+jdbcapi/checkDataSource30.java
+jdbcapi/checkDataSource.java
