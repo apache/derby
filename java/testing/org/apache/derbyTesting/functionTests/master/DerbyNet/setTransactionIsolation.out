@@ -465,15 +465,15 @@ A lock could not be obtained within the time requested
 con.setTransactionIsolation(TRANSACTION_REAPEATABLE_READ:4)
 con.getTransactionIsolation() =TRANSACTION_REAPEATABLE_READ:4
 select * from t1
-'Statement' already closed.
+A lock could not be obtained within the time requested
 con.setTransactionIsolation(TRANSACTION_READ_COMMITTED:2)
 con.getTransactionIsolation() =TRANSACTION_READ_COMMITTED:2
 select * from t1
-'Statement' already closed.
+A lock could not be obtained within the time requested
 con.setTransactionIsolation(TRANSACTION_SERIALIZABLE:8)
 con.getTransactionIsolation() =TRANSACTION_SERIALIZABLE:8
 select * from t1
-'Statement' already closed.
+A lock could not be obtained within the time requested
 ***testLevelsAndPrintStatistics sql:insert into t1copy (select * from t1) makenewStatements:false
 con.prepareStatement(insert into t1copy (select * from t1))
 con.setTransactionIsolation(TRANSACTION_READ_UNCOMMITTED:1)

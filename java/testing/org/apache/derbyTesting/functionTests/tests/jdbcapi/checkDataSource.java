@@ -88,11 +88,6 @@ public class checkDataSource
 	// Tests for setting isolation level this way only run in embedded for now.
 	private boolean canSetIsolationWithStatement = TestUtil.isEmbeddedFramework();
 	  
-	
-	// DERBY-1047  wiht client xa a PreparedStatement created before the global 
-	//transaction starts gives java.sql.SQLException: 'Statement' already closed.' 
-	// when used after  the global transaction ends
-	private static boolean canUseStatementAfterXa_end = TestUtil.isEmbeddedFramework();
 	 	
 	// DERBY-1025 client  XAResource.start() does not commit an active local transaction 
 	// when auto commit is true. Embedded XAResource.start() implementation commits 
@@ -467,7 +462,7 @@ public class checkDataSource
 		cs1 = xac.getConnection();
 
     
-		// ensure read locsk stay around until end-of transaction
+		// ensure read locks stay around until end-of transaction
 		cs1.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 		cs1.setAutoCommit(false);
 
@@ -516,10 +511,7 @@ public class checkDataSource
 		showStatementState("LOCAL ", sruState);
 		showStatementState("PS LOCAL ", psruState);
 		showStatementState("CS LOCAL ", csruState);
-		if (canUseStatementAfterXa_end)
-		{
-			resultSetQuery("Params-local-2", psParams.executeQuery());
-		}
+		resultSetQuery("Params-local-2", psParams.executeQuery());
 		checkLocks(cs1);
 		cs1.commit();
 

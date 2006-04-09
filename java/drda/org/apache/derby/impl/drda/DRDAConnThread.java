@@ -747,14 +747,10 @@ class DRDAConnThread extends Thread {
 					catch (SQLException e)
 					{
 						writer.clearDSSesBackToMark(writerMark);
-						try {
-							// Try to cleanup if we hit an error.
-							if (ps != null)
-								ps.close();
+						// The fix for DERBY-1196 removed code 
+						// here to close the prepared statement 
+						// if OPNQRY failed.
 							writeOPNQFLRM(e);
-						}
-						catch (SQLException pse) {}
-						errorInChain(e);
 					}
 					break;
 				case CodePoint.RDBCMM:
