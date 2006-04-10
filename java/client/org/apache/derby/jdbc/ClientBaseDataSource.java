@@ -22,6 +22,7 @@ package org.apache.derby.jdbc;
 
 import java.io.Serializable;
 import java.io.PrintWriter;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
@@ -29,6 +30,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
+import javax.naming.RefAddr;
 import javax.naming.Referenceable;
 import javax.naming.Reference;
 import javax.naming.NamingException;
@@ -101,9 +104,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      *
      * @serial
      */
-    private int loginTimeout = propertyDefault_loginTimeout;
-    public final static String propertyKey_loginTimeout = "loginTimeout";
-    public static final int propertyDefault_loginTimeout = 0;
+    private int loginTimeout;
 
     public synchronized void setLoginTimeout(int seconds) {
         this.loginTimeout = seconds;
@@ -138,16 +139,14 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     //
     //
     private String databaseName;
-    public final static String propertyKey_databaseName = "databaseName";
-
+    
     // databaseName is not permitted in a properties object
 
 
     // ---------------------------- description ------------------------------
     // A description of this data source.
     private String description;
-    public final static String propertyKey_description = "description";
-
+    
     // ---------------------------- dataSourceName -----------------------------------
     //
     // A data source name;
@@ -155,21 +154,18 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // or ConnectionPoolDataSource when pooling of connections is done.
     //
     private String dataSourceName;
-    public final static String propertyKey_dataSourceName = "dataSourceName";
-
+    
     // ---------------------------- portNumber -----------------------------------
     //
     private int portNumber = propertyDefault_portNumber;
     public final static int propertyDefault_portNumber = 1527;
-    public final static String propertyKey_portNumber = "portNumber";
-
+    
     // ---------------------------- serverName -----------------------------------
     //
     // Derby-410 fix.
     private String serverName = propertyDefault_serverName;
     public final static String propertyDefault_serverName = "localhost";
-    public final static String propertyKey_serverName = "serverName";
-
+   
     // serverName is not permitted in a properties object
 
     // ---------------------------- user -----------------------------------
@@ -185,7 +181,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // to a file in clear-text, care must taken by the user to prevent security breaches.
     // Derby-406 fix
     private String user = propertyDefault_user;
-    public final static String propertyKey_user = "user";
     public final static String propertyDefault_user = "APP";
 
     public static String getUser(Properties properties) {
@@ -238,8 +233,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     //  public final static short propertyDefault_securityMechanism = (short)
     //  org.apache.derby.client.net.NetConfiguration.SECMEC_USRIDONL;
     public final static short propertyDefault_securityMechanism = (short) NetConfiguration.SECMEC_USRIDONL;
-    public final static String propertyKey_securityMechanism = "securityMechanism";
-
 
     
     // We use the NET layer constants to avoid a mapping for the NET driver.
@@ -310,8 +303,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     //
     private boolean retrieveMessageText = propertyDefault_retrieveMessageText;
     public final static boolean propertyDefault_retrieveMessageText = true;
-    public final static String propertyKey_retrieveMessageText = "retrieveMessageText";
-
 
     public static boolean getRetrieveMessageText(Properties properties) {
         String retrieveMessageTextString = properties.getProperty(Attribute.CLIENT_RETIEVE_MESSAGE_TEXT);
@@ -321,8 +312,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // ---------------------------- traceFile -----------------------------------
     //
     private String traceFile;
-    public final static String propertyKey_traceFile = "traceFile";
-
+    
     public static String getTraceFile(Properties properties) {
         return properties.getProperty(Attribute.CLIENT_TRACE_FILE);
     }
@@ -332,8 +322,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     private transient int traceFileSuffixIndex_ = 0;
     //
     private String traceDirectory;
-    public final static String propertyKey_traceDirectory = "traceDirectory";
-
+    
     public static String getTraceDirectory(Properties properties) {
         return properties.getProperty(Attribute.CLIENT_TRACE_DIRECTORY);
     }
@@ -342,8 +331,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     //
     private boolean traceFileAppend = propertyDefault_traceFileAppend;
     public final static boolean propertyDefault_traceFileAppend = false;
-    public final static String propertyKey_traceFileAppend = "traceFileAppend";
-
+    
     public static boolean getTraceFileAppend(Properties properties) {
         String traceFileAppendString = properties.getProperty(Attribute.CLIENT_TRACE_APPEND);
         return parseBoolean(traceFileAppendString, propertyDefault_traceFileAppend);
@@ -354,7 +342,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // The password property is defined in subclasses, but the method
     // getPassword (java.util.Properties properties) is in this class to eliminate
     // dependencies on j2ee for connections that go thru the driver manager.
-    public final static String propertyKey_password = "password";
 
     public static String getPassword(Properties properties) {
         return properties.getProperty("password");
@@ -456,63 +443,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     }
 
     // ----------------------supplemental methods---------------------------------
-    /**
-     * Not an external.  Do not document in pubs. Returns all non-transient properties of a ClientBaseDataSource.
-     */
-    public Properties getProperties() throws SqlException {
-        Properties properties = new Properties();
 
-        Class clz = getClass();
-        Field[] fields = clz.getFields();
-        for (int i = 0; i < fields.length; i++) {
-            String name = fields[i].getName();
-            if (name.startsWith("propertyKey_")) {
-                if (Modifier.isTransient(fields[i].getModifiers())) {
-                    continue; // if it is transient, then skip this propertyKey.
-                }
-                try {
-                    String propertyKey = fields[i].get(this).toString();
-                    // search for property field.
-                    Field propertyField;
-                    clz = getClass(); // start from current class.
-                    while (true) {
-                        try {
-                            propertyField = clz.getDeclaredField(name.substring(12));
-                            break; // found the property field, so break the while loop.
-                        } catch (NoSuchFieldException nsfe) {
-                            // property field is not found at current level of class, so continue to super class.
-                            clz = clz.getSuperclass();
-                            if (clz == Object.class) {
-                                throw new SqlException(new LogWriter(logWriter, traceLevel), "bug check: corresponding property field does not exist");
-                            }
-                            continue;
-                        }
-                    }
-
-                    if (!Modifier.isTransient(propertyField.getModifiers())) {
-                        // if the property is not transient:
-                        // get the property.
-                        propertyField.setAccessible(true);
-                        Object propertyObj = propertyField.get(this);
-                        String property = String.valueOf(propertyObj); // don't use toString becuase it may be null.
-                        if ("password".equals(propertyKey)) {
-                            StringBuffer sb = new StringBuffer(property);
-                            for (int j = 0; j < property.length(); j++) {
-                                sb.setCharAt(j, '*');
-                            }
-                            property = sb.toString();
-                        }
-                        // add into prperties.
-                        properties.setProperty(propertyKey, property);
-                    }
-                } catch (IllegalAccessException e) {
-                    throw new SqlException(new LogWriter(this.logWriter, this.traceLevel), "bug check: property cannot be accessed");
-                }
-            }
-        }
-
-        return properties;
-    }
 
     //---------------------- helper methods --------------------------------------
 
@@ -835,7 +766,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     }
 
     protected String connectionAttributes = null;
-    public final static String propertyKey_connectionAttributes = "connectionAttributes";
 
     /**
      * Set this property to pass in more Derby specific connection URL attributes.
@@ -879,12 +809,11 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static int TRACE_ALL = 0xFFFFFFFF;
 
     public final static int propertyDefault_traceLevel = TRACE_ALL;
-    public final static String propertyKey_traceLevel = "traceLevel";
-
+    
     protected int traceLevel = propertyDefault_traceLevel;
 
     public static int getTraceLevel(Properties properties) {
-        String traceLevelString = properties.getProperty(propertyKey_traceLevel);
+        String traceLevelString = properties.getProperty(Attribute.CLIENT_TRACE_LEVEL);
         return parseInt(traceLevelString, propertyDefault_traceLevel);
     }
 

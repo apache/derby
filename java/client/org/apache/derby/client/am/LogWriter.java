@@ -21,8 +21,15 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.Properties;
+
+import javax.naming.NamingException;
+import javax.naming.RefAddr;
+import javax.naming.Reference;
 
 import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class LogWriter {
@@ -1046,7 +1053,7 @@ public class LogWriter {
             traceConnectsResetEntry(dataSource.getServerName(),
                     dataSource.getPortNumber(),
                     dataSource.getDatabaseName(),
-                    dataSource.getProperties());
+                    getProperties(dataSource));
         } catch ( SqlException se ) {
             dncprintln("Encountered an SQL exception while trying to trace connection reset entry");
         }
@@ -1060,7 +1067,7 @@ public class LogWriter {
             traceConnectsEntry(dataSource.getServerName(),
                     dataSource.getPortNumber(),
                     dataSource.getDatabaseName(),
-                    dataSource.getProperties());
+                    getProperties(dataSource));
         } catch ( SqlException se ) {
             dncprintln("Encountered an SQL exception while trying to trace connection entry");
         }
@@ -1213,6 +1220,38 @@ public class LogWriter {
                 new Object[] { fileName, e.getMessage() },
                 e);
         }
+    }
+    
+    /**
+     * Obtain a set of Properties for the ClientDataSource
+     */
+    private Properties getProperties(ClientDataSource cds)
+    throws SqlException {
+        
+        Properties properties = new Properties();
+        
+        try {
+            Reference ref = cds.getReference();
+            
+            for (Enumeration e = ref.getAll(); e.hasMoreElements();) {
+
+                RefAddr attribute = (RefAddr) e.nextElement();
+
+                String propertyKey = attribute.getType();
+                String value = (String) attribute.getContent();
+                
+                // Don't display the password or even its length
+                if (Attribute.PASSWORD_ATTR.equals(propertyKey)) {
+                    value = "********";
+                }
+                
+                properties.setProperty(propertyKey, value);
+            }
+        } catch (NamingException e) {
+            throw new SqlException(this, e.toString());
+        }
+        
+        return properties;
     }
 
 }

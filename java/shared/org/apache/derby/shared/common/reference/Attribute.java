@@ -201,6 +201,12 @@ public interface Attribute {
     String CLIENT_TRACE_APPEND = "traceFileAppend";
     
     /**
+     * traceLevel.
+     * Client driver attribute.
+     */
+    String CLIENT_TRACE_LEVEL = "traceLevel";
+    
+    /**
      * retrieveMessageText.
      * Client driver attribute.
      */    
