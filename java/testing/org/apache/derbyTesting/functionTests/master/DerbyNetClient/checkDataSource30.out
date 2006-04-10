@@ -493,9 +493,10 @@ Statement State @ CS LOCAL
   Parameter Count 2
     1 type 12
     2 type 12
+Params-local-2: ru(SQL_CURLH000C) contents {3}
 LOCK TABLE
   xid row 0 lock count 14
-  xid row 1 lock count 12
+  xid row 1 lock count 14
 END LOCK TABLE
 sru1-local-8: mismatched Statement connection
 sru1-local-8: ru(SQL_CURLH000C) contents {1} {2} {3}
