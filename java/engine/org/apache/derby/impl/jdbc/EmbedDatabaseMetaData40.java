@@ -26,6 +26,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import org.apache.derby.impl.jdbc.Util;
+import org.apache.derby.iapi.reference.SQLState;
 
 
 public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
@@ -101,6 +102,42 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
                                 throws SQLException
     {
         return getSimpleQuery("getFunctionParameters");
+    }
+    
+    /**
+     * Returns false unless <code>interfaces</code> is implemented 
+     * 
+     * @param  interfaces             a Class defining an interface.
+     * @return true                   if this implements the interface or 
+     *                                directly or indirectly wraps an object 
+     *                                that does.
+     * @throws java.sql.SQLException  if an error occurs while determining 
+     *                                whether this is a wrapper for an object 
+     *                                with the given interface.
+     */
+    public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        return interfaces.isInstance(this);
+    }
+    
+    /**
+     * Returns <code>this</code> if this class implements the interface
+     *
+     * @param  interfaces a Class defining an interface
+     * @return an object that implements the interface
+     * @throws java.sql.SQLExption if no object if found that implements the 
+     * interface
+     */
+    public <T> T unwrap(java.lang.Class<T> interfaces) 
+                            throws SQLException{
+        //Derby does not implement non-standard methods on 
+        //JDBC objects
+        //hence return this if this class implements the interface 
+        //or throw an SQLException
+        try {
+            return interfaces.cast(this);
+        } catch (ClassCastException cce) {
+            throw newSQLException(SQLState.UNABLE_TO_UNWRAP,interfaces);
+        }
     }
 
 }

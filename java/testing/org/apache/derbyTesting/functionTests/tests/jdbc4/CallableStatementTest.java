@@ -23,8 +23,11 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 import java.sql.*;
+import java.lang.reflect.Method;
+import java.util.Vector;
 
 /**
  * Tests of the <code>java.sql.CallableStatement</code> JDBC40 API.
@@ -261,6 +264,76 @@ public class CallableStatementTest
                  "should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
             // We are fine, do nothing.
+        }
+    }
+    
+    /**
+     *
+     * Tests the wrapper methods isWrapperFor and unwrap. Test
+     * for the case when isWrapperFor returns true and we call unwrap
+     * The test is right now being run in the embedded case only
+     *
+     */
+    public void testisWrapperReturnsTrue() throws SQLException {
+        //wrapper support is currently provided 
+        //only for embedded side so return if 
+        //running in DerbyNetClient framework
+        if(usingDerbyNetClient())
+            return;
+        
+        Class<CallableStatement> wrap_class = CallableStatement.class;
+        
+        //The if should return true enabling us  to call the unwrap method
+        //without throwing  an exception
+        if(cStmt.isWrapperFor(wrap_class)) {
+            try {
+                CallableStatement stmt1 =
+                        (CallableStatement)cStmt.unwrap(wrap_class);
+            }
+            catch(SQLException sqle) {
+                fail("Unwrap wrongly throws a SQLException");
+            }
+        } else {
+            fail("isWrapperFor wrongly returns false");
+        }
+    }
+    
+    /**
+     *
+     * Tests the wrapper methods isWrapperFor and unwrap. Test
+     * for the case when isWrapperFor returns false and we call unwrap
+     * The test is right now being run in the embedded case only
+     *
+     */
+    public void testisWrapperReturnsFalse() throws SQLException {
+        //wrapper support is currently provided 
+        //only for embedded side so return if 
+        //running in DerbyNetClient framework
+         if(usingDerbyNetClient())
+            return;
+         
+        //test for the case when isWrapper returns false
+        //using some class that will return false when
+        //passed to isWrapperFor
+        Class<ResultSet> wrap_class = ResultSet.class;
+        
+        //returning false is the correct behaviour in this case
+        //Generate a message if it returns true
+        if(cStmt.isWrapperFor(wrap_class)) {
+            fail("isWrapperFor wrongly returns true");
+        } else {
+            try {
+                ResultSet rs1 = (ResultSet)
+                cStmt.unwrap(wrap_class);
+                fail("unwrap does not throw the expected " +
+                        "exception");
+            } catch (SQLException sqle) {
+                //calling unwrap in this case throws an SQLException
+                //check that this SQLException has the correct SQLState
+                if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
+                    throw sqle;
+                }
+            }
         }
     }
 

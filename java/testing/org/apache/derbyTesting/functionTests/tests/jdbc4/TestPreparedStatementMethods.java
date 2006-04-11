@@ -40,6 +40,8 @@ import java.sql.Statement;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.tools.ij;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 /**
  * This class is used to test the implementations of the JDBC 4.0 methods 
  * in the PreparedStatement interface 
@@ -490,6 +492,58 @@ public class TestPreparedStatementMethods {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Tests the wrapper methods isWrapperFor and unwrap. There are two cases
+     * to be tested
+     * Case 1: isWrapperFor returns true and we call unwrap
+     * Case 2: isWrapperFor returns false and we call unwrap
+     */
+    void t_wrapper() {
+        Class<PreparedStatement> wrap_class = PreparedStatement.class;
+        
+        //The if method succeeds enabling us to call the unwrap method without 
+        //throwing an exception
+        try {
+            if(ps.isWrapperFor(wrap_class)) {
+                PreparedStatement stmt1 = 
+                        (PreparedStatement)ps.unwrap(wrap_class);
+            }
+            else {
+                System.out.println("isWrapperFor wrongly returns false");
+            }
+        }
+        catch(SQLException sqle) {
+            sqle.printStackTrace();
+        }
+        
+        //Begin test for case2
+        //test for the case when isWrapper returns false
+        //using some class that will return false when 
+        //passed to isWrapperFor
+        Class<ResultSet> wrap_class1 = ResultSet.class;
+        
+        try {
+            //returning false is the correct behaviour in this case
+            //Generate a message if it returns true
+            if(ps.isWrapperFor(wrap_class1)) {
+                System.out.println("isWrapperFor wrongly returns true");
+            }
+            else {
+                ResultSet rs1 = (ResultSet)
+                                           ps.unwrap(wrap_class1);
+                System.out.println("unwrap does not throw the expected " +
+                                   "exception");
+            }
+        }
+        catch (SQLException sqle) {
+            //calling unwrap in this case throws an SQLException 
+            //ensure that this SQLException has the correct SQLState
+            if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
+                sqle.printStackTrace();
+            }
+        }
+    }
     /*
      * Start the tests for the JDBC4.0 methods on the client side
      */
@@ -576,6 +630,7 @@ public class TestPreparedStatementMethods {
             t_setSQLXML();
             t_isPoolable();
             t_setPoolable();
+            t_wrapper();
             // Close the prepared statement and verify the poolable hint
             // cannot be set or retrieved
             ps.close();

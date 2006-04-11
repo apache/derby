@@ -49,6 +49,7 @@
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredCallableStatement30.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredCallableStatement40.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredStatement.java"/>
+          <exclude name="${derby.dir}/${cur.dir}/BrokeredStatement40.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/JDBCBoot.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/ResourceAdapter.java"/>
     </javac>
@@ -134,6 +135,7 @@
               <pathelement path="${java16compile.classpath}"/>
           </classpath>
           <include name="${derby.dir}/${cur.dir}/BrokeredConnection40.java"/>
+          <include name="${derby.dir}/${cur.dir}/BrokeredStatement40.java"/>
           <include name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement40.java"/>
           <include name="${derby.dir}/${cur.dir}/BrokeredCallableStatement40.java"/>
       </javac>

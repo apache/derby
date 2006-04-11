@@ -7,3 +7,6 @@ jdbc4/TestJDBC40Exception.java
 jdbc4/CallableStatementTest.junit
 jdbc4/RowIdNotImplementedTest.junit
 jdbc4/StatementTest.junit
+jdbc4/DataSourceTest.junit
+jdbc4/ResultSetMetaDataTest.junit
+jdbc4/EmbeddedBrokeredConnectionWrapperTest.junit

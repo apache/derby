@@ -39,6 +39,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.iapi.jdbc.AuthenticationService;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
 import org.apache.derby.impl.jdbc.*;
 
@@ -514,6 +515,17 @@ public abstract class InternalDriver implements ModuleControl {
 	 */
 	public abstract EmbedResultSet
 		newEmbedResultSet(EmbedConnection conn, ResultSet results, boolean forMetaData, EmbedStatement statement, boolean isAtomic) throws SQLException;
+        
+        /**
+         * Returns a new java.sql.ResultSetMetaData for this implementation
+         *
+         * @param columnInfo a ResultColumnDescriptor that stores information 
+         *        about the columns in a ResultSet
+         */
+        public EmbedResultSetMetaData newEmbedResultSetMetaData
+                           (ResultColumnDescriptor[] columnInfo) {
+            return new EmbedResultSetMetaData(columnInfo);
+        }
 }
 
 

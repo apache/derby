@@ -1393,7 +1393,7 @@ public abstract class EmbedPreparedStatement
 	//
 	protected EmbedResultSetMetaData newEmbedResultSetMetaData(ResultDescription resultDesc) {
 
-		return new EmbedResultSetMetaData(resultDesc.getColumnInfo());
+		return factory.newEmbedResultSetMetaData(resultDesc.getColumnInfo());
 	}
 
 	public String toString() {

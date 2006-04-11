@@ -37,13 +37,15 @@ import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.jdbc.EmbedResultSet40;
 import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData40;
 import org.apache.derby.impl.jdbc.SQLExceptionFactory40;
+import org.apache.derby.impl.jdbc.EmbedStatement40;
+import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 import org.apache.derby.impl.jdbc.Util;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.util.Properties;
-
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
 
 public class Driver40 extends Driver30 {
@@ -62,6 +64,27 @@ public class Driver40 extends Driver30 {
         return new EmbedConnection40(this, url, info);
     }
     
+    /**
+     * returns a new EmbedStatement
+     * @param  conn                 the EmbedConnection class associated with  
+     *                              this statement object
+     * @param  forMetadata          boolean
+     * @param  resultSetType        int
+     * @param  resultSetConcurrency int
+     * @param  resultSetHoldability int
+     * @return Statement            a new java.sql.Statement implementation
+     * 
+     */
+    public java.sql.Statement newEmbedStatement(
+				EmbedConnection conn,
+				boolean forMetaData,
+				int resultSetType,
+				int resultSetConcurrency,
+				int resultSetHoldability)
+	{
+		return new EmbedStatement40(conn, forMetaData, resultSetType, resultSetConcurrency,
+		resultSetHoldability);
+	}
     
     public PreparedStatement
         newEmbedPreparedStatement(
@@ -129,4 +152,16 @@ public class Driver40 extends Driver30 {
         throws SQLException {
 		return new EmbedDatabaseMetaData40(conn,dbname);
     }
+    
+        /**
+         * Returns a new java.sql.ResultSetMetaData for this implementation
+         *
+         * @param  columnInfo a ResultColumnDescriptor that stores information 
+         *                    about the columns in a ResultSet
+         * @return ResultSetMetaData
+         */
+        public EmbedResultSetMetaData40 newEmbedResultSetMetaData
+                             (ResultColumnDescriptor[] columnInfo) {
+            return new EmbedResultSetMetaData40(columnInfo);
+        }
 }

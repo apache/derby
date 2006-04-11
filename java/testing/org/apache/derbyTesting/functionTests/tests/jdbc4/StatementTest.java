@@ -233,6 +233,76 @@ public class StatementTest
     }
     
     /**
+     *
+     * Tests the wrapper methods isWrapperFor and unwrap. Test
+     * for the case when isWrapperFor returns true and we call unwrap
+     * The test is right now being run in the embedded case only
+     *
+     */
+    public void testisWrapperReturnsTrue() throws SQLException {
+        //wrapper support is currently provided 
+        //only for embedded side so return if 
+        //running in DerbyNetClient framework
+        if(usingDerbyNetClient())
+            return;
+        
+        Class<Statement> wrap_class = Statement.class;
+        
+        //The if should return true enabling us  to call the unwrap method
+        //without throwing  an exception
+        if(stmt.isWrapperFor(wrap_class)) {
+            try {
+                Statement stmt1 =
+                        (Statement)stmt.unwrap(wrap_class);
+            }
+            catch(SQLException sqle) {
+                fail("Unwrap wrongly throws a SQLException");
+            }
+        } else {
+            fail("isWrapperFor wrongly returns false");
+        }
+    }
+    
+    /**
+     *
+     * Tests the wrapper methods isWrapperFor and unwrap. Test
+     * for the case when isWrapperFor returns false and we call unwrap
+     * The test is right now being run in the embedded case only.
+     *
+     */
+    public void testisWrapperReturnsFalse() throws SQLException {
+        //wrapper support is currently provided 
+        //only for embedded side so return if 
+        //running in DerbyNetClient framework
+         if(usingDerbyNetClient())
+            return;
+         
+        //test for the case when isWrapper returns false
+        //using some class that will return false when
+        //passed to isWrapperFor
+        Class<ResultSet> wrap_class = ResultSet.class;
+        
+        //returning false is the correct behaviour in this case
+        //Generate a message if it returns true
+        if(stmt.isWrapperFor(wrap_class)) {
+            fail("isWrapperFor wrongly returns true");
+        } else {
+            try {
+                ResultSet rs1 = (ResultSet)
+                stmt.unwrap(wrap_class);
+                fail("unwrap does not throw the expected " +
+                        "exception");
+            } catch (SQLException sqle) {
+                //calling unwrap in this case throws an SQLException
+                //check that this SQLException has the correct SQLState
+                if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
+                    throw sqle;
+                }
+            }
+        }
+    }
+    
+    /**
      * Create test suite for StatementTest.
      */
     public static Test suite() {

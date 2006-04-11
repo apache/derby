@@ -1464,6 +1464,8 @@ public interface SQLState {
     String UPDATABLE_RESULTSET_API_DISALLOWED = "XJ083.U";
     String COLUMN_NOT_FROM_BASE_TABLE = "XJ084.U";
     String NOT_POSITIONED_ON_INSERT_ROW = "XJ086.S";
+    
+    
     String WASNULL_INVALID = "XJ088.S";
     String INVALID_PARAM_USE_GETINT  = "XJ089.S";
     String CALENDAR_IS_NULL = "XJ090.S";
@@ -1486,6 +1488,8 @@ public interface SQLState {
     String FOREIGN_TABLE_NAME_IS_NULL = "XJ111.S";
     String SECURITY_EXCEPTION_ENCOUNTERED = "XJ112.S";    
     String UNABLE_TO_OPEN_FILE = "XJ113.S";
+    //wrapper related
+    String UNABLE_TO_UNWRAP = "XJ120.S";
 
     //following are session severity.
     String DATABASE_NOT_FOUND = "XJ004.C";

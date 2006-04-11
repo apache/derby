@@ -22,12 +22,14 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 /**
  * Test of database metadata for new methods in JDBC 40.
@@ -178,10 +180,22 @@ public class TestDbMetaData {
             System.out.println("getSchemas():");
             dumpSQLExceptions(e);
         }
-
+        
+        if(usingEmbeddedClient())
+            t_wrapper(met);
+        
         s.close();
     }
 
+    /**
+     * <p>
+     * Return true if we're running under the embedded client.
+     * </p>
+     */
+    private	static	boolean	usingEmbeddedClient() {
+        return "embedded".equals( System.getProperty( "framework" ) );
+    }
+    
     /**
      * Test supportsStoredFunctionsUsingCallSyntax() by checking
      * whether calling a stored procedure using the escape syntax
@@ -327,4 +341,64 @@ public class TestDbMetaData {
 			throw new Exception("Unexpected SQL Exception: " + e.getMessage(), e);
 		}
 	}
+        
+        
+    /**
+     * Tests the wrapper methods isWrapperFor and unwrap. There are two cases
+     * to be tested
+     * Case 1: isWrapperFor returns true and we call unwrap
+     * Case 2: isWrapperFor returns false and we call unwrap
+     *
+     * @param dmd The DatabaseMetaData object on which the wrapper methods are 
+     *           called
+     */
+        
+    static void t_wrapper(DatabaseMetaData dmd) {
+        //test for the case when isWrapper returns true
+        //Begin test for Case 1
+        Class<DatabaseMetaData> wrap_class = DatabaseMetaData.class;
+        
+        //The if succeeds and we call the unwrap method on the conn object        
+        try {
+            if(dmd.isWrapperFor(wrap_class)) {
+                DatabaseMetaData dmd1 = 
+                        (DatabaseMetaData)dmd.unwrap(wrap_class);
+            }
+            else {
+                System.out.println("isWrapperFor wrongly returns false");
+            }
+        }
+        catch(SQLException sqle) {
+            dumpSQLExceptions(sqle);
+        }
+        
+        //Begin the test for Case 2
+        //test for the case when isWrapper returns false
+        //using some class that will return false when 
+        //passed to isWrapperFor
+        
+        Class<PreparedStatement> wrap_class1 = PreparedStatement.class;
+        
+        try {
+            //returning false is the correct behaviour in this case
+            //Generate a message if it returns true
+            if(dmd.isWrapperFor(wrap_class1)) {
+                System.out.println("isWrapperFor wrongly returns true");
+            }
+            else {
+                PreparedStatement ps1 = (PreparedStatement)
+                                           dmd.unwrap(wrap_class1);
+                System.out.println("unwrap does not throw the expected " +
+                                   "exception");
+            }
+        }
+        catch (SQLException sqle) {
+            //calling unwrap in this case throws an 
+            //SQLException ensure that the SQLException 
+            //has the correct SQLState
+            if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
+                sqle.printStackTrace();
+            }
+        }
+    }
 }

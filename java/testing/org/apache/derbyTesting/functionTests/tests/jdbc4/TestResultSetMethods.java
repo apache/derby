@@ -32,12 +32,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.derby.shared.common.reference.SQLState;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 /**
  * This class is used to test the implementations of the JDBC 4.0 methods
@@ -462,6 +461,60 @@ public class TestResultSetMethods {
         }
     }
     
+    /**
+     * Tests the wrapper methods isWrapperFor and unwrap. There are two cases
+     * to be tested
+     * Case 1: isWrapperFor returns true and we call unwrap
+     * Case 2: isWrapperFor returns false and we call unwrap
+     *
+     * @param rs The ResultSet object on which the wrapper 
+     *           methods are tested
+     */
+    void t_wrapper(ResultSet rs) {
+        Class<ResultSet> wrap_class = ResultSet.class;
+        
+        //The if succeeds and we call the unwrap method on the conn object        
+        try {
+            if(rs.isWrapperFor(wrap_class)) {
+                ResultSet rs1 = 
+                        (ResultSet)rs.unwrap(wrap_class);
+            }
+            else {
+                System.out.println("isWrapperFor wrongly returns false");
+            }
+        }
+        catch(SQLException sqle) {
+            sqle.printStackTrace();
+        }
+        
+        //Being Test for Case2
+        //test for the case when isWrapper returns false
+        //using some class that will return false when 
+        //passed to isWrapperFor
+        Class<PreparedStatement> wrap_class1 = PreparedStatement.class;
+        
+        try {
+            //returning false is the correct behaviour in this case
+            //Generate a message if it returns true
+            if(rs.isWrapperFor(wrap_class1)) {
+                System.out.println("isWrapperFor wrongly returns true");
+            }
+            else {
+                PreparedStatement ps1 = (PreparedStatement)
+                                           rs.unwrap(wrap_class1);
+                System.out.println("unwrap does not throw the expected " +
+                                   "exception");
+            }
+        }
+        catch (SQLException sqle) {
+            //Calling unwrap in this case throws an 
+            //SQLException ensure that this SQLException 
+            //has the correct SQLState
+            if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
+                sqle.printStackTrace();
+            }
+        }
+    }
     void startTestResultSetMethods(Connection conn_in,PreparedStatement ps_in,ResultSet rs_in) {
         conn = conn_in;
         ps = ps_in;
@@ -532,6 +585,18 @@ public class TestResultSetMethods {
         c.close();
     }
     
+    /**
+     * <p>
+     * Return true if we're running under the embedded client.
+     * </p>
+     * @return a boolean value signifying whether we are running under the 
+     *         embedded framework
+     */
+    private static boolean usingEmbeddedClient()
+    {
+            return "embedded".equals(System.getProperty("framework" ) );
+    }
+    
     public static void main(String args[]) {
 		try {
 			// use the ij utility to read the property file and
@@ -547,12 +612,15 @@ public class TestResultSetMethods {
 			rs_main = ps_main.executeQuery();
         
 			TestResultSetMethods trsm = new TestResultSetMethods();
+                        
 			trsm.startTestResultSetMethods(conn_main,ps_main,rs_main);
-        
+                        if(usingEmbeddedClient())
+                            trsm.t_wrapper(rs_main);
 		} catch(Exception e) {
 			System.out.println(""+e);
 			e.printStackTrace();
 		}
+        
         
     }
 }

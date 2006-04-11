@@ -192,7 +192,7 @@ public abstract class EmbedResultSet extends ConnectionChild
      * as a stream for a row. Created on-demand by a getXXXStream call.
      */
     private boolean[] streamUsedFlags;
-
+    
 	/**
 	 * This class provides the glue between the Cloudscape
 	 * resultset and the JDBC resultset, mapping calls-to-calls.
@@ -214,6 +214,7 @@ public abstract class EmbedResultSet extends ConnectionChild
             : (long)stmt.getQueryTimeout() * 1000L;
 
 		this.isAtomic = isAtomic;
+                
 
 		//If the Statement object has CONCUR_READ_ONLY set on it then the concurrency on the ResultSet object will be CONCUR_READ_ONLY also.
 		//But, if the Statement object has CONCUR_UPDATABLE set on it, then the concurrency on the ResultSet object can be
@@ -4022,7 +4023,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	// that want to stay within their subimplementation.
 	//
 	protected EmbedResultSetMetaData newEmbedResultSetMetaData(ResultDescription resultDesc) {
-		return new EmbedResultSetMetaData(resultDesc.getColumnInfo());
+		return factory.newEmbedResultSetMetaData(resultDesc.getColumnInfo());
 	}
 
 	/**
