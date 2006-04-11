@@ -44,6 +44,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
+import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
@@ -195,6 +196,22 @@ public class SQLBlob extends SQLBinary
 
 		// This may cause problems for streaming blobs, by materializing the whole blob.
 		ps.setBytes(position, getBytes());
+    }
+    
+    /**
+     * Set the value from an non-null object.
+     */
+    final void setObject(Object theValue)
+        throws StandardException
+    {
+        Blob vb = (Blob) theValue;
+        try {
+            stream = vb.getBinaryStream();
+        } catch (SQLException e) {
+            throw dataTypeConversion("DAN-438-tmp");
+       }
+        streamLength = -1; // unknown
+        dataValue = null;
     }
 }
 

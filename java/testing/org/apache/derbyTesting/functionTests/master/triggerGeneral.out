@@ -897,4 +897,38 @@ ij(CONNECTION1)> create table myschema.mytable (i int);
 ij(CONNECTION1)> create trigger mytrigger after update on myschema.mytable for each row mode db2sql select * from sys.systables;
 0 rows inserted/updated/deleted
 ij(CONNECTION1)> rollback;
-ij(CONNECTION1)> 
+ij(CONNECTION1)> disconnect;
+ij> -- DERBY-438 - Working triggers with BLOB columns
+set connection CONNECTION0;
+ij> autocommit on;
+ij> create table t438 (id int,  cost decimal(6,2), bl blob);
+0 rows inserted/updated/deleted
+ij> create table t438_t (id int, bl blob, l int, nc decimal(6,2), oc decimal(6,2));
+0 rows inserted/updated/deleted
+ij> create trigger tr_438 after update on t438
+referencing new as n old as o
+for each row mode db2sql
+insert into t438_t(id, bl, l, nc, oc) values (n.id, n.bl, length(n.bl), n.cost, o.cost);
+0 rows inserted/updated/deleted
+ij> -- initially just some small BLOB values.
+insert into t438 values (1, 34.53, cast (X'124594322143423214ab35f2e34c' as blob));
+1 row inserted/updated/deleted
+ij> insert into t438 values (0, 95.32, null);
+1 row inserted/updated/deleted
+ij> insert into t438 values (2, 22.21, cast (X'aa' as blob));
+1 row inserted/updated/deleted
+ij> select id, cost, length(bl) from t438 order by 1;
+ID         |COST     |3          
+---------------------------------
+0          |95.32    |NULL       
+1          |34.53    |14         
+2          |22.21    |1          
+ij> update t438 set cost = cost + 1.23;
+3 rows inserted/updated/deleted
+ij> select id, length(bl), l, nc, oc from t438_t order by 1,5,4;
+ID         |2          |L          |NC       |OC       
+-------------------------------------------------------
+0          |NULL       |NULL       |96.55    |95.32    
+1          |14         |14         |35.76    |34.53    
+2          |1          |1          |23.44    |22.21    
+ij> 

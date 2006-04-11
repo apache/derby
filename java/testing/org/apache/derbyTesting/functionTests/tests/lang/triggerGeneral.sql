@@ -501,4 +501,24 @@ autocommit off;
 create table myschema.mytable (i int);
 create trigger mytrigger after update on myschema.mytable for each row mode db2sql select * from sys.systables;
 rollback;
+disconnect;
+
+-- DERBY-438 - Working triggers with BLOB columns
+set connection CONNECTION0;
+autocommit on;
+create table t438 (id int,  cost decimal(6,2), bl blob);
+create table t438_t (id int, bl blob, l int, nc decimal(6,2), oc decimal(6,2));
+create trigger tr_438 after update on t438
+referencing new as n old as o
+for each row mode db2sql
+insert into t438_t(id, bl, l, nc, oc) values (n.id, n.bl, length(n.bl), n.cost, o.cost);
+
+-- initially just some small BLOB values.
+insert into t438 values (1, 34.53, cast (X'124594322143423214ab35f2e34c' as blob));
+insert into t438 values (0, 95.32, null);
+insert into t438 values (2, 22.21, cast (X'aa' as blob));
+select id, cost, length(bl) from t438 order by 1;
+
+update t438 set cost = cost + 1.23;
+select id, length(bl), l, nc, oc from t438_t order by 1,5,4;
 
