@@ -1351,6 +1351,7 @@ public interface SQLState {
 
     String NOT_IMPLEMENTED                                          = "0A000.S";
     String JDBC_METHOD_NOT_IMPLEMENTED                              = "0A000.S.1";
+    String JDBC_METHOD_NOT_SUPPORTED_BY_SERVER                      = "0A000.S.2";
 
 	
 

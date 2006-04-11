@@ -63,6 +63,11 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     public ProductLevel productLevel_;
 
+    /** The JDBC major version supported by the server. */
+    private final int serverJdbcMajorVersion;
+    /** The JDBC minor version supported by the server. */
+    private final int serverJdbcMinorVersion;
+
     private ResultSet lastGetColumnPrivilegesResultSet_ = null;
     private ResultSet lastGetColumnsResultSet_ = null;
     private ResultSet lastGetForeignKeysResultSet_ = null;
@@ -90,6 +95,13 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         computeFeatureSet_();
         if (connection.isXAConnection()) {
             connection.xaHostVersion_ = productLevel_.versionLevel_;
+        }
+        if (productLevel_.lessThan(10, 2, 0)) {
+            serverJdbcMajorVersion = 3;
+            serverJdbcMinorVersion = 0;
+        } else {
+            serverJdbcMajorVersion = 4;
+            serverJdbcMinorVersion = 0;
         }
     }
 
@@ -2395,6 +2407,30 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
         } else {
             agent_.checkForDeferredExceptions();
+        }
+    }
+
+    /**
+     * Checks whether the server supports a JDBC version. If the
+     * server does not support the JDBC version, an exception is
+     * thrown.
+     *
+     * @param method name of the method for which support is needed on
+     * the server (used in exception message)
+     * @param major minimum JDBC major version
+     * @param minor minimum JDBC minor version if major version matches
+     * @exception SqlException if the server does not support the
+     * specified JDBC version
+     */
+    protected void checkServerJdbcVersionX(String method, int major, int minor)
+        throws SqlException
+    {
+        if (serverJdbcMajorVersion < major ||
+            (serverJdbcMajorVersion == major &&
+             serverJdbcMinorVersion < minor)) {
+            MessageId mid =
+                new MessageId(SQLState.JDBC_METHOD_NOT_SUPPORTED_BY_SERVER);
+            throw new SqlException(agent_.logWriter_, mid, method);
         }
     }
 }

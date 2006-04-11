@@ -70,6 +70,7 @@ public class splitmessages {
         clientMessageIds.add("J104");
         clientMessageIds.add(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
         clientMessageIds.add(SQLState.JDBC_METHOD_NOT_IMPLEMENTED);
+        clientMessageIds.add(SQLState.JDBC_METHOD_NOT_SUPPORTED_BY_SERVER);
         clientMessageIds.add(SQLState.DRDA_NO_AUTOCOMMIT_UNDER_XA);
         clientMessageIds.add(SQLState.DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK);
         clientMessageIds.add(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
