@@ -70,6 +70,7 @@
         <pathelement path="${java13compile.classpath};${jcc};${jta1_2}"/>
       </classpath>
     </javac>
+    <ant target="compile" dir="toursdb"/>
   </target>
 
   <target name="checktoursdb">

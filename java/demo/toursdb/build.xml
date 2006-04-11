@@ -21,7 +21,6 @@
   <target name="toursdb" depends="compile,buildschema,loadtables,jarup,copyfiles"/>
 
   <target name="compile">
-    <echo message="Begin building toursdb"/>
     <javac
       bootclasspath="${empty}"
       debug="${debug}"
@@ -40,6 +39,7 @@
   </target>
 
   <target name="buildschema">
+    <echo message="Begin building toursdb"/>
     <java classname="org.apache.derby.tools.ij"
           output="toursdb.out"
           failonerror="true"
