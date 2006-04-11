@@ -63,7 +63,14 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
     public SQLException getSQLException(String message, String messageId,
             SQLException next, int severity, Throwable t, Object[] args) {
         String sqlState = StandardException.getSQLStateFromIdentifier(messageId);
-        SQLException ex = new SQLException(message, sqlState, severity, t);
+
+		//
+		// Create dummy exception which ferries arguments needed to serialize
+		// SQLExceptions across the DRDA network layer.
+		//
+		t = wrapArgsForTransportAcrossDRDA( message, messageId, next, severity, t, args );
+
+		SQLException ex = new SQLException(message, sqlState, severity, t);
         if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX)) {
             //none of the sqlstate supported by derby belongs to
             //NonTransientConnectionException
@@ -95,4 +102,38 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
         }
         return ex;
     }        
+
+	/**
+	 * Unpack the exception, looking for an EmbedSQLException which carries
+	 * the Derby messageID and args which we will serialize across DRDA so
+	 * that the client can reconstitute a SQLException with appropriate text.
+	 * If we are running JDBC4, then the
+	 * passed-in exception will hopefully wrap an informative EmbedSQLException.
+	 * See wrapArgsForTransportAcrossDRDA() below.
+	 */
+	public	SQLException	getArgumentFerry(SQLException se)
+	{
+		Throwable	cause = se.getCause();
+
+		if ( (cause == null) || !(cause instanceof EmbedSQLException ))	{ return se; }
+		else	{ return (SQLException) cause; }
+	}
+
+	/**
+	 * <p>
+	 * The following method helps handle DERBY-1178. The problem is that we may
+	 * need to serialize our final SQLException across the DRDA network layer.
+	 * That serialization involves some clever encoding of the Derby messageID and
+	 * arguments. Unfortunately, once we create one of the
+	 * JDBC4-specific subclasses of SQLException, we lose the messageID and
+	 * args. This method creates a dummy EmbedSQLException which preserves that
+	 * information. We return the dummy exception.
+	 * </p>
+	 */
+	private	SQLException	wrapArgsForTransportAcrossDRDA
+	( String message, String messageId, SQLException next, int severity, Throwable t, Object[] args )
+	{
+		return super.getSQLException( message, messageId, next, severity, t, args );
+	}
+	
 }

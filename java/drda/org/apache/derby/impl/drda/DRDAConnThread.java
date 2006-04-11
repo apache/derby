@@ -5324,6 +5324,10 @@ class DRDAConnThread extends Thread {
 	{
 		boolean severe = (se.getErrorCode() >=  ExceptionSeverity.SESSION_SEVERITY);	
 		String sqlerrmc = null;
+
+		// get exception which carries Derby messageID and args, per DERBY-1178
+		se = Util.getExceptionFactory().getArgumentFerry( se );
+		
 		if (se instanceof EmbedSQLException  && ! severe)
 			sqlerrmc = buildTokenizedSqlerrmc((EmbedSQLException) se);
 		else {
@@ -5341,7 +5345,6 @@ class DRDAConnThread extends Thread {
 			return sqlerrmc;
 		}
 
-	
 	/**
 	 * Build preformatted SQLException text 
 	 * for severe exceptions or SQLExceptions that are not EmbedSQLExceptions.

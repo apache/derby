@@ -1,95 +1,95 @@
 testNegative
 create procedure asdf() language java external name 'asdfasdf' parameter style java
-EXPECTED SQL Exception: (42Y04) Cannot create a procedure or function with EXTERNAL NAME 'asdfasdf' because it is not a list separated by periods. The expected format is <full java path>.<method name>. : 
+EXPECTED SQL Exception: (42Y04) Cannot create a procedure or function with EXTERNAL NAME 'asdfasdf' because it is not a list separated by periods. The expected format is <full java path>.<method name>.
 create procedure asdf() language java external name 'asdfasdf.' parameter style java
-EXPECTED SQL Exception: (42Y04) Cannot create a procedure or function with EXTERNAL NAME 'asdfasdf.' because it is not a list separated by periods. The expected format is <full java path>.<method name>. : 
+EXPECTED SQL Exception: (42Y04) Cannot create a procedure or function with EXTERNAL NAME 'asdfasdf.' because it is not a list separated by periods. The expected format is <full java path>.<method name>.
 create procedure a23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789() language java external name 'asdf.asdf' parameter style java
-EXPECTED SQL Exception: (42622) The name 'A23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' is too long. The maximum length is '128'. : 
+EXPECTED SQL Exception: (42622) The name 'A23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789' is too long. The maximum length is '128'.
 create procedure asdf language java external name java.lang.Thread.currentThread parameter style java
-EXPECTED SQL Exception: (42X01) Syntax error: Encountered "language" at line 1, column 23. : 
+EXPECTED SQL Exception: (42X01) Syntax error: Encountered "language" at line 1, column 23.
 CREATE PROCEDURE ASSEMBLY_PARTS (IN ASSEMBLY_NUM INTEGER, OUT NUM_PARTS INTEGER, OUT COST DOUBLE) EXTERNAL NAME 'parts!assembly' DYNAMIC RESULT SETS 1 LANGUAGE C PARAMETER STYLE GENERAL
-EXPECTED SQL Exception: (42X01) Syntax error: Encountered "C" at line 1, column 161. : 
+EXPECTED SQL Exception: (42X01) Syntax error: Encountered "C" at line 1, column 161.
 create procedure sys.proc1() language java external name 'java.lang.System.gc' parameter style java
-EXPECTED SQL Exception: (42X62) 'CREATE PROCEDURE' is not allowed in the 'SYS' schema. : 
+EXPECTED SQL Exception: (42X62) 'CREATE PROCEDURE' is not allowed in the 'SYS' schema.
 create procedure noclass() language java external name 'asdf.asdf' parameter style java language java
-EXPECTED SQL Exception: (42613) Multiple or conflicting keywords involving the 'LANGUAGE' clause are present. : 
+EXPECTED SQL Exception: (42613) Multiple or conflicting keywords involving the 'LANGUAGE' clause are present.
 create procedure noclass() parameter style java language java external name 'asdf.asdf' parameter style java
-EXPECTED SQL Exception: (42613) Multiple or conflicting keywords involving the 'PARAMETER STYLE' clause are present. : 
+EXPECTED SQL Exception: (42613) Multiple or conflicting keywords involving the 'PARAMETER STYLE' clause are present.
 create procedure noclass() external name 'asdf.xxxx' language java external name 'asdf.asdf' parameter style java
-EXPECTED SQL Exception: (42613) Multiple or conflicting keywords involving the 'EXTERNAL NAME' clause are present. : 
+EXPECTED SQL Exception: (42613) Multiple or conflicting keywords involving the 'EXTERNAL NAME' clause are present.
 create procedure noclass() parameter style java language java external name 'asdf.asdf' parameter style derby_rs_collection
-EXPECTED SQL Exception: (42X01) Syntax error: Encountered "derby_rs_collection" at line 1, column 105. : 
+EXPECTED SQL Exception: (42X01) Syntax error: Encountered "derby_rs_collection" at line 1, column 105.
 create procedure missing01()
-EXPECTED SQL Exception: (42X01) Syntax error: Encountered "<EOF>" at line 1, column 28. : 
+EXPECTED SQL Exception: (42X01) Syntax error: Encountered "<EOF>" at line 1, column 28.
 create procedure missing02() language java
-EXPECTED SQL Exception: (42X01) Syntax error: EXTERNAL NAME. : 
+EXPECTED SQL Exception: (42X01) Syntax error: EXTERNAL NAME.
 create procedure missing03() language java parameter style java
-EXPECTED SQL Exception: (42X01) Syntax error: EXTERNAL NAME. : 
+EXPECTED SQL Exception: (42X01) Syntax error: EXTERNAL NAME.
 create procedure missing04() language java external name 'foo.bar'
-EXPECTED SQL Exception: (42X01) Syntax error: PARAMETER STYLE. : 
+EXPECTED SQL Exception: (42X01) Syntax error: PARAMETER STYLE.
 create procedure missing05() parameter style java
-EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE. : 
+EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE.
 create procedure missing06() parameter style java external name 'foo.bar'
-EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE. : 
+EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE.
 create procedure missing07() external name 'goo.bar'
-EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE. : 
+EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE.
 create procedure missing08() dynamic result sets 1
-EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE. : 
+EXPECTED SQL Exception: (42X01) Syntax error: LANGUAGE.
 create procedure nullinput2() returns null on null input language java parameter style java external name 'foo.bar'
-EXPECTED SQL Exception: (42X01) Syntax error: RETURNS NULL ON NULL INPUT. : 
+EXPECTED SQL Exception: (42X01) Syntax error: RETURNS NULL ON NULL INPUT.
 create procedure NO_BLOB(IN P1 BLOB(3k)) language java parameter style java external name 'no.blob'
-EXPECTED SQL Exception: (42962) Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions.  : 
+EXPECTED SQL Exception: (42962) Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions. 
 create procedure NO_CLOB(IN P1 CLOB(3k)) language java parameter style java external name 'no.clob'
-EXPECTED SQL Exception: (42962) Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions.  : 
+EXPECTED SQL Exception: (42962) Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions. 
 create procedure NO_LVC(IN P1 LONG VARCHAR) language java parameter style java external name 'no.lvc'
-EXPECTED SQL Exception: (42962) Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions.  : 
+EXPECTED SQL Exception: (42962) Long column type column or parameter 'P1' not permitted in declared global temporary tables or procedure definitions. 
 create procedure DUP_P1(IN FRED INT, OUT RON CHAR(10), IN FRED INT) language java parameter style java external name 'no.dup1'
-EXPECTED SQL Exception: (42734) Name 'FRED' specified in context 'DUP_P1' is not unique. : 
+EXPECTED SQL Exception: (42734) Name 'FRED' specified in context 'DUP_P1' is not unique.
 create procedure D2.DUP_P2(IN "FreD" INT, OUT RON CHAR(10), IN "FreD" INT) language java parameter style java external name 'no.dup2'
-EXPECTED SQL Exception: (42734) Name 'FreD' specified in context 'D2.DUP_P2' is not unique. : 
+EXPECTED SQL Exception: (42734) Name 'FreD' specified in context 'D2.DUP_P2' is not unique.
 create procedure D3.DUP_P3(IN "FRED" INT, OUT RON CHAR(10), IN fred INT) language java parameter style java external name 'no.dup3'
-EXPECTED SQL Exception: (42734) Name 'FRED' specified in context 'D3.DUP_P3' is not unique. : 
+EXPECTED SQL Exception: (42734) Name 'FRED' specified in context 'D3.DUP_P3' is not unique.
 CALL APP.NSP(?, ?)
-EXPECTED SQL Exception: (42Y03) 'APP.NSP' is not recognized as a function or procedure. : 
+EXPECTED SQL Exception: (42Y03) 'APP.NSP' is not recognized as a function or procedure.
 call syscs_util.syscs_set_database_property("foo", "bar")
-EXPECTED SQL Exception: (42X15) Column name 'foo' appears in a statement without a FROM list. : 
+EXPECTED SQL Exception: (42X15) Column name 'foo' appears in a statement without a FROM list.
 signature mismatched types
 CALL APP.SIGNATURE_BUG_DERBY_258_A(4)
-EXPECTED SQL Exception: (22005) An attempt was made to get a data value of type 'java.lang.String' from a data value of type 'INTEGER'. : 
+EXPECTED SQL Exception: (22005) An attempt was made to get a data value of type 'java.lang.String' from a data value of type 'INTEGER'.
 signature too many parameters
 VALUES APP.SIGNATURE_BUG_DERBY_258_B(4)
-EXPECTED SQL Exception: (46J02) Java method signature contains incorrect number (2) of parameters, expected 1. : 
+EXPECTED SQL Exception: (46J02) Java method signature contains incorrect number (2) of parameters, expected 1.
 signature too few parameters
 CALL APP.SIGNATURE_BUG_DERBY_258_C(4)
-EXPECTED SQL Exception: (46J02) Java method signature contains incorrect number (0) of parameters, expected 1. : 
+EXPECTED SQL Exception: (46J02) Java method signature contains incorrect number (0) of parameters, expected 1.
 signature invalid format
 CALL APP.SIGNATURE_BUG_DERBY_258_F(4)
-EXPECTED SQL Exception: (46J01) Java method signature has invalid format. : 
+EXPECTED SQL Exception: (46J01) Java method signature has invalid format.
 signature invalid format
 CALL APP.SIGNATURE_BUG_DERBY_258_G(4)
-EXPECTED SQL Exception: (46J01) Java method signature has invalid format. : 
+EXPECTED SQL Exception: (46J01) Java method signature has invalid format.
 signature invalid format
 CALL APP.SIGNATURE_BUG_DERBY_258_H(4)
-EXPECTED SQL Exception: (46J01) Java method signature has invalid format. : 
+EXPECTED SQL Exception: (46J01) Java method signature has invalid format.
 signature invalid format
 CALL APP.SIGNATURE_BUG_DERBY_258_I(4)
-EXPECTED SQL Exception: (46J01) Java method signature has invalid format. : 
+EXPECTED SQL Exception: (46J01) Java method signature has invalid format.
 testDelayedClassChecking
 call noclass()
-EXPECTED SQL Exception: (42X51) The class 'asdf' does not exist or is inaccessible. This can happen if the class is not public.::SQLSTATE: XJ001Java exception: 'asdf: java.lang.ClassNotFoundException'. : 
+EXPECTED SQL Exception: (42X51) The class 'asdf' does not exist or is inaccessible. This can happen if the class is not public.
 call nomethod()
-EXPECTED SQL Exception: (42X50) No method was found that matched the method call java.lang.Integer.asdf(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible. : 
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call java.lang.Integer.asdf(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 call notstatic()
-EXPECTED SQL Exception: (42X50) No method was found that matched the method call java.lang.Integer.equals(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible. : 
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call java.lang.Integer.equals(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 call notvoid()
-EXPECTED SQL Exception: (42X50) No method was found that matched the method call void java.lang.Runtime.getRuntime(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible. : 
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call void java.lang.Runtime.getRuntime(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 testDuplicates
 create procedure PROCDUP() language java external name 'failAPP.fail0' parameter style java
-EXPECTED SQL Exception: (X0Y68) PROCEDURE 'PROCDUP' already exists. : 
+EXPECTED SQL Exception: (X0Y68) PROCEDURE 'PROCDUP' already exists.
 create procedure s1.PROCDUP() language java external name 'fails1.fail0' parameter style java
-EXPECTED SQL Exception: (X0Y68) PROCEDURE 'PROCDUP' already exists. : 
+EXPECTED SQL Exception: (X0Y68) PROCEDURE 'PROCDUP' already exists.
 create procedure s2.PROCDUP() language java external name 'fails2.fail0' parameter style java
-EXPECTED SQL Exception: (X0Y68) PROCEDURE 'PROCDUP' already exists. : 
+EXPECTED SQL Exception: (X0Y68) PROCEDURE 'PROCDUP' already exists.
 DEFINED PROCEDURES FOR PROCDUP
   APP.PROCDUP AS okAPP.ok0() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
   S1.PROCDUP AS oks1.ok0() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
@@ -100,19 +100,19 @@ DATABASE METATDATA PROCEDURES FOR PROCDUP
   S2.PROCDUP AS oks2.ok0 type procedureNoResult
 -----
 create procedure S1.NOTYET() SPECIFIC fred language java external name 'failAPP.fail0' parameter style java
-EXPECTED SQL Exception: (0A000) Feature not implemented: SPECIFIC identifier. : 
+EXPECTED SQL Exception: (0A000) Feature not implemented: SPECIFIC identifier.
 ambigiousMethods
 call AMBIGIOUS01(?, ?)
-EXPECTED SQL Exception: (42X73) Method resolution for signature org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious1(int, java.lang.String, [Ljava.sql.ResultSet;) was ambiguous. (No single maximally specific method.) : 
+EXPECTED SQL Exception: (42X73) Method resolution for signature org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious1(int, java.lang.String, [Ljava.sql.ResultSet;) was ambiguous. (No single maximally specific method.)
 call AMBIGIOUS02(?, ?)
-EXPECTED SQL Exception: (42X50) No method was found that matched the method call org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious2(int, int, java.sql.ResultSet[]), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible. : 
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call org.apache.derbyTesting.functionTests.util.ProcedureTest.ambigious2(int, int, java.sql.ResultSet[]), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 No ResultSet or update count returned
 No ResultSet or update count returned
 zeroArgProcedures
 No ResultSet or update count returned
 No ResultSet or update count returned
 No ResultSet or update count returned
-EXPECTED SQL Exception: 'ZA' is not recognized as a function or procedure. : 
+EXPECTED SQL Exception: 'ZA' is not recognized as a function or procedure.
 No ResultSet or update count returned
 No ResultSet or update count returned
 DEFINED PROCEDURES FOR ZA
@@ -135,10 +135,10 @@ DATABASE METATDATA PROCEDURES FOR IR%
     procedureColumnIn P2 CHAR
 -----
 CALL IR()
-EXPECTED SQL Exception: (42Y03) 'IR' is not recognized as a function or procedure. : 
+EXPECTED SQL Exception: (42Y03) 'IR' is not recognized as a function or procedure.
 No ResultSet or update count returned
 No ResultSet or update count returned
-EXPECTED SQL Exception: The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression.::SQLSTATE: 23505The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'. : 
+EXPECTED SQL Exception: The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression.
 No ResultSet or update count returned
 No ResultSet or update count returned
 No ResultSet or update count returned
@@ -154,14 +154,14 @@ I |B
 5 |ir2            
 6 |'012345678     
 CALL IR2(2, 'no way')
-EXPECTED SQL Exception: (38000) The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression.::SQLSTATE: 23505The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'. : 
+EXPECTED SQL Exception: (38000) The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression.
 CALL IR2(?, 'no way')
 EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
 CALL IR2(2, ?)
 EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
 dynamicResultSets - parameter style JAVA
 create procedure DRS(p1 int) parameter style JAVA READS SQL DATA dynamic result sets -1 language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows'
-EXPECTED SQL Exception: (42X01) Syntax error: Encountered "-" at line 1, column 86. : 
+EXPECTED SQL Exception: (42X01) Syntax error: Encountered "-" at line 1, column 86.
 DEFINED PROCEDURES FOR DRS
   APP.DRS AS org.apache.derbyTesting.functionTests.util.ProcedureTest.selectRows(IN P1 INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA DYNAMIC RESULT SETS 1
 DATABASE METATDATA PROCEDURES FOR DRS
@@ -169,9 +169,9 @@ DATABASE METATDATA PROCEDURES FOR DRS
     procedureColumnIn P1 INTEGER
 -----
 CALL DRS()
-EXPECTED SQL Exception: (42Y03) 'DRS' is not recognized as a function or procedure. : 
+EXPECTED SQL Exception: (42Y03) 'DRS' is not recognized as a function or procedure.
 CALL DRS(?,?)
-EXPECTED SQL Exception: (42Y03) 'DRS' is not recognized as a function or procedure. : 
+EXPECTED SQL Exception: (42Y03) 'DRS' is not recognized as a function or procedure.
 I |B              
 -----
 3 |int            
@@ -205,9 +205,9 @@ I |B
 6 |'012345678     
 7 |int            
 CALL IRDRS(?)
-EXPECTED SQL Exception: (42X50) No method was found that matched the method call org.apache.derbyTesting.functionTests.util.ProcedureTest.missingDynamicParameter(int, java.sql.ResultSet[]), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible. : 
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call org.apache.derbyTesting.functionTests.util.ProcedureTest.missingDynamicParameter(int, java.sql.ResultSet[]), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 CALL rsi(?)
-EXPECTED SQL Exception: (42X50) No method was found that matched the method call org.apache.derbyTesting.functionTests.util.ProcedureTest.badDynamicParameter(int, java.sql.ResultSet[]), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible. : 
+EXPECTED SQL Exception: (42X50) No method was found that matched the method call org.apache.derbyTesting.functionTests.util.ProcedureTest.badDynamicParameter(int, java.sql.ResultSet[]), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
 no dynamic result sets
 No ResultSet or update count returned
 Testing too many result sets
@@ -283,8 +283,8 @@ DATABASE METATDATA PROCEDURES FOR PTSMALLINT%
     procedureColumnInOut P_INOUT SMALLINT
     procedureColumnOut P_OUT SMALLINT
 -----
-EXPECTED SQL Exception: (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'. : 
-EXPECTED SQL Exception: (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'. : 
+EXPECTED SQL Exception: (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'.
+EXPECTED SQL Exception: (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'.
 p_inout 9 p_out 6
 p_inout 9 null?false p_out 6 null?false
 p_inout 9 null?false p_out 6 null?false
@@ -331,7 +331,7 @@ No ResultSet or update count returned
 OP4 11.3 >28.30< null ? false
 No ResultSet or update count returned
 OP4 39.345 >56.34< null ? false
-EXPECTED SQL Exception: The resulting value is outside the range for the data type DECIMAL/NUMERIC(4,2). : 
+EXPECTED SQL Exception: The resulting value is outside the range for the data type DECIMAL/NUMERIC(4,2).
 No ResultSet or update count returned
 OP4 49.345 >66.34< null ? false
 EXPECTED SQL Exception: Invalid argument: parameter index 2 is not an OUT or INOUT parameter.
@@ -351,7 +351,7 @@ No ResultSet or update count returned
 OP4INOUT 14+23.5 >37.50< null ? false
 No ResultSet or update count returned
 OP4INOUT 9+23.505 >32.50< null ? false
-EXPECTED SQL Exception: The resulting value is outside the range for the data type DECIMAL/NUMERIC(4,2). : 
+EXPECTED SQL Exception: The resulting value is outside the range for the data type DECIMAL/NUMERIC(4,2).
 EXPECTED SQL Exception: BigDecimal conversion exception [converters] Overflow occurred during numeric data type conversion of "102.33".. See attached Throwable.
 EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
 SQL Control
@@ -895,11 +895,11 @@ DATABASE METATDATA PROCEDURES FOR TY_%
     procedureColumnIn P1 VARCHAR
     procedureColumnOut P2 VARCHAR
 -----
-CALL LITT.TY_SMALLINT (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'. : 
-CALL LITT.TY_INTEGER (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'int'. : 
-CALL LITT.TY_BIGINT (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'long'. : 
-CALL LITT.TY_REAL (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'float'. : 
-CALL LITT.TY_DOUBLE (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'. : 
+CALL LITT.TY_SMALLINT (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'short'.
+CALL LITT.TY_INTEGER (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'int'.
+CALL LITT.TY_BIGINT (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'long'.
+CALL LITT.TY_REAL (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'float'.
+CALL LITT.TY_DOUBLE (null, ?) (39004) A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
 CALL LITT.TY_DECIMAL (null, ?)=>NULL<
 CALL LITT.TY_CHAR (null, ?)=>NULL<
 CALL LITT.TY_VARCHAR (null, ?)=>NULL<
@@ -909,30 +909,30 @@ CALL LITT.TY_BIGINT (12, ?)=>12<
 CALL LITT.TY_REAL (12, ?)=>12.0<
 CALL LITT.TY_DOUBLE (12, ?)=>12.0<
 CALL LITT.TY_DECIMAL (12, ?)=>12.00<
-CALL LITT.TY_CHAR (12, ?) (42821) Columns of type 'CHAR' cannot hold values of type 'INTEGER'.  : 
-CALL LITT.TY_VARCHAR (12, ?) (42821) Columns of type 'VARCHAR' cannot hold values of type 'INTEGER'.  : 
+CALL LITT.TY_CHAR (12, ?) (42821) Columns of type 'CHAR' cannot hold values of type 'INTEGER'. 
+CALL LITT.TY_VARCHAR (12, ?) (42821) Columns of type 'VARCHAR' cannot hold values of type 'INTEGER'. 
 CALL LITT.TY_SMALLINT (23.43e1, ?)=>234<
 CALL LITT.TY_INTEGER (23.43e1, ?)=>234<
 CALL LITT.TY_BIGINT (23.43e1, ?)=>234<
 CALL LITT.TY_REAL (23.43e1, ?)=>234.3<
 CALL LITT.TY_DOUBLE (23.43e1, ?)=>234.3<
 CALL LITT.TY_DECIMAL (23.43e1, ?)=>234.30<
-CALL LITT.TY_CHAR (23.43e1, ?) (42821) Columns of type 'CHAR' cannot hold values of type 'DOUBLE'.  : 
-CALL LITT.TY_VARCHAR (23.43e1, ?) (42821) Columns of type 'VARCHAR' cannot hold values of type 'DOUBLE'.  : 
+CALL LITT.TY_CHAR (23.43e1, ?) (42821) Columns of type 'CHAR' cannot hold values of type 'DOUBLE'. 
+CALL LITT.TY_VARCHAR (23.43e1, ?) (42821) Columns of type 'VARCHAR' cannot hold values of type 'DOUBLE'. 
 CALL LITT.TY_SMALLINT (176.3, ?)=>176<
 CALL LITT.TY_INTEGER (176.3, ?)=>176<
 CALL LITT.TY_BIGINT (176.3, ?)=>176<
 CALL LITT.TY_REAL (176.3, ?)=>176.3<
 CALL LITT.TY_DOUBLE (176.3, ?)=>176.3<
 CALL LITT.TY_DECIMAL (176.3, ?)=>176.30<
-CALL LITT.TY_CHAR (176.3, ?) (42821) Columns of type 'CHAR' cannot hold values of type 'DECIMAL'.  : 
-CALL LITT.TY_VARCHAR (176.3, ?) (42821) Columns of type 'VARCHAR' cannot hold values of type 'DECIMAL'.  : 
-CALL LITT.TY_SMALLINT ('12.34', ?) (42821) Columns of type 'SMALLINT' cannot hold values of type 'CHAR'.  : 
-CALL LITT.TY_INTEGER ('12.34', ?) (42821) Columns of type 'INTEGER' cannot hold values of type 'CHAR'.  : 
-CALL LITT.TY_BIGINT ('12.34', ?) (42821) Columns of type 'BIGINT' cannot hold values of type 'CHAR'.  : 
-CALL LITT.TY_REAL ('12.34', ?) (42821) Columns of type 'REAL' cannot hold values of type 'CHAR'.  : 
-CALL LITT.TY_DOUBLE ('12.34', ?) (42821) Columns of type 'DOUBLE' cannot hold values of type 'CHAR'.  : 
-CALL LITT.TY_DECIMAL ('12.34', ?) (42821) Columns of type 'DECIMAL' cannot hold values of type 'CHAR'.  : 
+CALL LITT.TY_CHAR (176.3, ?) (42821) Columns of type 'CHAR' cannot hold values of type 'DECIMAL'. 
+CALL LITT.TY_VARCHAR (176.3, ?) (42821) Columns of type 'VARCHAR' cannot hold values of type 'DECIMAL'. 
+CALL LITT.TY_SMALLINT ('12.34', ?) (42821) Columns of type 'SMALLINT' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_INTEGER ('12.34', ?) (42821) Columns of type 'INTEGER' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_BIGINT ('12.34', ?) (42821) Columns of type 'BIGINT' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_REAL ('12.34', ?) (42821) Columns of type 'REAL' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_DOUBLE ('12.34', ?) (42821) Columns of type 'DOUBLE' cannot hold values of type 'CHAR'. 
+CALL LITT.TY_DECIMAL ('12.34', ?) (42821) Columns of type 'DECIMAL' cannot hold values of type 'CHAR'. 
 CALL LITT.TY_CHAR ('12.34', ?)=>12.34     <
 CALL LITT.TY_VARCHAR ('12.34', ?)=>12.34<
 MultipleRSAutoCommit: PASS. 

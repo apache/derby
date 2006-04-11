@@ -44,4 +44,18 @@ public class SQLExceptionFactory {
         return new EmbedSQLException(message, messageId, next, severity,
                 t, args);
     }
+
+	/**
+	 * Unpack a SQL exception, looking for an EmbedSQLException which carries
+	 * the Derby messageID and args which we will serialize across DRDA so
+	 * that the client can reconstitute a SQLException with appropriate text.
+	 * If we are running JDBC3 or JDBC2, then we hope that the passed-in
+	 * exception is already an EmbedSQLException, which carries all the
+	 * information we need.
+	 */
+	public	SQLException	getArgumentFerry(SQLException se)
+	{
+		return se;
+	}
+
 }

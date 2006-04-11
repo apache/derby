@@ -61,14 +61,14 @@ Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when th
 Make sure that we got CONCUR_UPDATABLE? true
 Now attempt a deleteRow without first doing next on the resultset.
 SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row. : 
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Now attempt a updateRow without first doing next on the resultset.
 updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX
 SQL State : null
 Got expected exception Invalid operation to update at current cursor position
 ResultSet is positioned after the last row. attempt to deleteRow at this point should fail!
 SQL State : XCL07
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is closed. Verify that autocommit is OFF. : 
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is closed. Verify that autocommit is OFF.
 ResultSet is positioned after the last row. attempt to updateRow at this point should fail!
 SQL State : null
 Got expected exception Invalid operation to update at current cursor position
@@ -80,31 +80,31 @@ SQL State : null
 Got expected exception Invalid operation: result set closed
 Negative Test9 - try updatable resultset on system table
 SQL State : 42Y90
-Got expected exception FOR UPDATE is not permitted in this type of statement.   : 
+Got expected exception FOR UPDATE is not permitted in this type of statement.  
 Negative Test10 - try updatable resultset on a view
 SQL State : 42Y90
-Got expected exception FOR UPDATE is not permitted in this type of statement.   : 
+Got expected exception FOR UPDATE is not permitted in this type of statement.  
 Negative Test11 - attempt to open updatable resultset when there is join in the select query should fail
 SQL State : 42Y90
-Got expected exception FOR UPDATE is not permitted in this type of statement.   : 
+Got expected exception FOR UPDATE is not permitted in this type of statement.  
 Negative Test12 - With autocommit on, attempt to drop a table when there is an open updatable resultset on it
 Opened an updatable resultset. Now trying to drop that table through another Statement
 SQL State : X0X95
-Got expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object. : 
+Got expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
 Since autocommit is on, the drop table exception resulted in a runtime rollback causing updatable resultset object to close
 SQL State : 24000
-Got expected exception Invalid cursor state - no current row. : 
+Got expected exception Invalid cursor state - no current row.
 SQL State : 24000
-Got expected exception Invalid cursor state - no current row. : 
+Got expected exception Invalid cursor state - no current row.
 Negative Test13 - foreign key constraint failure will cause deleteRow to fail
 SQL State : 23503
-Got expected exception DELETE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back. : 
+Got expected exception DELETE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
 Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close
 Jira entry Derby-160 : for Network Server because next should have failed
 FAIL!!! next should have failed because foreign key constraint failure resulted in a runtime rollback
 Negative Test14 - foreign key constraint failure will cause updateRow to fail
 SQL State : 23503
-Got expected exception UPDATE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back. : 
+Got expected exception UPDATE on table 'TABLEWITHPRIMARYKEY' caused a violation of foreign key constraint 'FK' for key (1,1).  The statement has been rolled back.
 Since autocommit is on, the constraint exception resulted in a runtime rollback causing updatable resultset object to close
 Jira entry Derby-160 : for Network Server because next should have failed
 FAIL!!! next should have failed because foreign key constraint failure resulted in a runtime rollback
@@ -127,7 +127,7 @@ SQL State : null
 Got expected exception Invalid operation to read at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
 SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row. : 
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
 Positive Test1b - request updatable resultset for forward only type resultset
@@ -153,7 +153,7 @@ column 1 on this deleted row is 234
 column 2 on this deleted row is aa                  
 doing positioned delete again w/o first positioning the ResultSet on the next row will fail
 SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row. : 
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Position the ResultSet with next()
 Should be able to do positioned delete on the current row now
 Positive Test1d - updatable resultset to do positioned update
@@ -177,7 +177,7 @@ total number of rows in T1
 	{3}
 column 1 on this row is 1
 SQL State : 42X01
-Got expected exception Syntax error: Encountered "WHERE" at line 1, column 14. : 
+Got expected exception Syntax error: Encountered "WHERE" at line 1, column 14.
 total number of rows in T1 after one deleteRow is 
 	 1
 	 -
@@ -192,7 +192,7 @@ SQL State : null
 Got expected exception Invalid operation to read at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
 SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row. : 
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
 Positive Test3b - use prepared statement with concur updatable status to test updateXXX
@@ -223,7 +223,7 @@ SQL State : null
 Got expected exception Invalid operation to read at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
 SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row. : 
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
 Positive Test5 - donot have to select primary key to get an updatable resultset
@@ -296,7 +296,7 @@ Table t1 has following rows
 attempt to get an updatable resultset using correlation name for an updatable column
 The sql is SELECT c1 as col1, c2 as col2 FROM t1 abcde FOR UPDATE of c1
 SQL State : 42X42
-Got expected exception Correlation name not allowed for column 'C1' because it is part of the FOR UPDATE list. : 
+Got expected exception Correlation name not allowed for column 'C1' because it is part of the FOR UPDATE list.
 attempt to get an updatable resultset using correlation name for an readonly column. It should work
 The sql is SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1
 Table t1 after updateRow has following rows
@@ -329,7 +329,7 @@ Positive Test10 - 2 updatable resultsets going against the same table, will they
 delete using first resultset
 attempt to send deleteRow on the same row through a different resultset should throw an exception
 SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row. : 
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Move to next row in the 2nd resultset and then delete using the second resultset
 Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
 Notice the Fetch Size in run time statistics output.
@@ -397,7 +397,7 @@ Positive Test13a - Another test case for delete trigger
 column 1 on this row is 1
 this delete row will fire the delete trigger which will delete all the rows from the table and from the resultset
 SQL State : XCL07
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is closed. Verify that autocommit is OFF. : 
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is closed. Verify that autocommit is OFF.
 Verify that delete trigger got fired by verifying the row count to be 0 in table1WithTriggers
 	 1
 	 -
@@ -431,7 +431,7 @@ Positive Test14a - make sure self referential delete cascade works when deleteRo
 column 1 on this row is e1
 this delete row will cause the delete cascade constraint to delete all the rows from the table and from the resultset
 SQL State : XCL07
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is closed. Verify that autocommit is OFF. : 
+Got expected exception Cursor '<xxx-cursor-name-xxx>' is closed. Verify that autocommit is OFF.
 Verify that delete trigger got fired by verifying the row count to be 0 in selfReferencingT1
 	 1
 	 -
@@ -446,11 +446,11 @@ Positive Test14b - make sure self referential update restrict works when updateR
 column 1 on this row is e1
 update row should fail because cascade constraint is update restrict
 SQL State : 23503
-Got expected exception UPDATE on table 'SELFREFERENCINGT2' caused a violation of foreign key constraint 'MANAGES2' for key (e1).  The statement has been rolled back. : 
+Got expected exception UPDATE on table 'SELFREFERENCINGT2' caused a violation of foreign key constraint 'MANAGES2' for key (e1).  The statement has been rolled back.
 Positive Test15 - With autocommit off, attempt to drop a table when there is an open updatable resultset on it
 Opened an updatable resultset. Now trying to drop that table through another Statement
 SQL State : X0X95
-Got expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object. : 
+Got expected exception Operation 'DROP TABLE' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object.
 Since autocommit is off, the drop table exception will NOT result in a runtime rollback and hence updatable resultset object is still open
 Positive Test16a - Do deleteRow within a transaction and then rollback the transaction
 Verify that before delete trigger got fired, row count is 0 in deleteTriggerInsertIntoThisTable
@@ -2601,9 +2601,9 @@ Next datatype to test is CHAR(2) FOR BIT DATA
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BINARY'.
   updateObject with column position & Blob object as parameters
-    Got expected exception : A truncation error was encountered trying to shrink CHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2. : 
+    Got expected exception : A truncation error was encountered trying to shrink CHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2.
   updateObject with column name & Blob object as parameters
-    Got expected exception : A truncation error was encountered trying to shrink CHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2. : 
+    Got expected exception : A truncation error was encountered trying to shrink CHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2.
   updateObject with column position & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BINARY'.
   updateObject with column name & Boolean object as parameters
@@ -2658,9 +2658,9 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
   updateObject with column name & TimeStamp object as parameters
     Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'VARBINARY'.
   updateObject with column position & Blob object as parameters
-    Got expected exception : A truncation error was encountered trying to shrink VARCHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2. : 
+    Got expected exception : A truncation error was encountered trying to shrink VARCHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2.
   updateObject with column name & Blob object as parameters
-    Got expected exception : A truncation error was encountered trying to shrink VARCHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2. : 
+    Got expected exception : A truncation error was encountered trying to shrink VARCHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 2.
   updateObject with column position & Boolean object as parameters
     Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'VARBINARY'.
   updateObject with column name & Boolean object as parameters
@@ -3179,7 +3179,7 @@ Positive test 37.b - moveToinsertRow from insertRow
 Positive test 37.c - check that getXXX gets undefined values when updateXXX has not been called yet on insertRow
 Negative Test 38 - insertRow: do not set a value to all not nullable columns
 SQL State: 23502
-Got expected exception: Column 'C41'  cannot accept a NULL value. : 
+Got expected exception: Column 'C41'  cannot accept a NULL value.
 Negative Test 39 - run updateRow and deleterow when positioned at insertRow
 Negative Test 39.a - run updateRow on insertRow
 SQL State: null

@@ -257,8 +257,13 @@ public abstract class Util  {
         exceptionFactory = factory;
     }
 
+    /**
+     * Get the exception factory specific to the version of JDBC which
+	 * we are running.
+     */
+	public	static	SQLExceptionFactory	getExceptionFactory() { return exceptionFactory; }
 
-  public static String typeName(int jdbcType) {
+	public static String typeName(int jdbcType) {
 		switch (jdbcType) {
 			case Types.BIT 		:  return TypeId.BIT_NAME;
 			case JDBC30Translation.SQL_TYPES_BOOLEAN  : return TypeId.BOOLEAN_NAME;

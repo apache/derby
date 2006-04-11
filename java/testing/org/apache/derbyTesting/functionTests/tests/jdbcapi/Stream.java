@@ -34,7 +34,7 @@ import org.apache.derby.tools.ij;
 
 
 public class Stream {
-    
+
     public static void main(String[] args){
 	
 	Connection conn = null;
@@ -389,11 +389,8 @@ public class Stream {
 		
 		System.out.println("Expected exception did not happen.");
 		
-	    }catch(SQLException e){
-		System.out.println("Expected exception may happen.");
-		e.printStackTrace(System.out);
-		
-	    }finally{
+	    }catch(SQLException e){ acknowledgeException( e ); }
+		finally{
 		if( st != null )
 		    st.close();
 		
@@ -407,6 +404,21 @@ public class Stream {
 	}
     }
 
+	private	static	void	acknowledgeException( Throwable e )
+	{
+		String	message = e.getMessage();
+
+		// Get rid of network and jdk-specific canons by stripping off
+		// introductory exception class name
+		if ( message.startsWith( "java.sql." ) )
+		{
+			int		boilerplateEndIndex = message.indexOf( ": " );
+			message = message.substring( boilerplateEndIndex + 2, message.length() );
+		}
+		
+		System.out.println("Expected exception may happen.");
+		System.out.println( e.getMessage() );
+	}
 
     static class ClobTester {
 	
@@ -447,11 +459,8 @@ public class Stream {
 		
 		System.out.println("Expected exception did not happen.");
 		
-	    }catch(SQLException e){
-		System.out.println("Expected exception may happen.");
-		e.printStackTrace(System.out);
-
-	    }finally{
+	    }catch(SQLException e){ acknowledgeException( e ); }
+		finally{
 		if(st != null)
 		    st.close();
 		

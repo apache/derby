@@ -421,7 +421,7 @@ EXPECTED SQL Exception: An attempt was made to get a data value of type 'java.sq
 START: clobTest53
 clobTest53 finished
 START: clobTest54
-EXPECTED SQLSTATE(22018): Invalid character string format for type INTEGER. : 
+EXPECTED SQLSTATE(22018): Invalid character string format for type INTEGER.
 end clobTest54
 START: clobTest6
  negative tests for clob.getSubstring won't run  for network server  until 5243 is fixed
@@ -710,7 +710,7 @@ EXPECTED SQLSTATE(22005): An attempt was made to get a data value of type 'java.
 START: blobTest53
 blobTest53 finished
 START: blobTest54
-EXPECTED SQLSTATE(XCL12): An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'. : 
+EXPECTED SQLSTATE(XCL12): An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'.
 START: blobTest6
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
 EXPECTED SQLSTATE(XJ071): Zero or negative length argument '-76' passed in a BLOB or CLOB method.
@@ -763,9 +763,9 @@ Expect to get an IOException, container has been closed
 clobTestSelfDestructive2 finished
 START: clobNegativeTest_Derby265
 -----
-EXPECTED SQLSTATE(XCL30): An IOException was thrown when reading a 'java.sql.String' from an InputStream.::SQLSTATE: XJ001Java exception: 'ERROR 40XD0: Container has been closed: java.io.IOException'. : 
+EXPECTED SQLSTATE(XCL30): An IOException was thrown when reading a 'java.sql.String' from an InputStream.
 START: blobTestNegativeTest_Derby265
 -----
-EXPECTED SQLSTATE(XCL30): An IOException was thrown when reading a 'BLOB' from an InputStream.::SQLSTATE: XJ001Java exception: 'ERROR 40XD0: Container has been closed: java.io.IOException'. : 
+EXPECTED SQLSTATE(XCL30): An IOException was thrown when reading a 'BLOB' from an InputStream.
 FINISHED TEST blobclob :-)
 Test blobclob finished

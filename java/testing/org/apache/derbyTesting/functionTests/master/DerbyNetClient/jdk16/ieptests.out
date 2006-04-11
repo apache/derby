@@ -291,7 +291,7 @@ ij> insert into t1 values(4) ;
 ij> --file not found error should rollback 
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extinout/nofile.del' , 
                                  null, null, null, 0) ;
-ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.::SQLSTATE: 38000The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.::SQLSTATE: XJ001Java exception: ': java.lang.reflect.InvocationTargetException'.::SQLSTATE: XIE04Data file not found: extinout/nofile.del : 
+ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ij> commit;
 ij> select * from t1 ;
 A          
@@ -307,7 +307,7 @@ ij> insert into t1 values(4) ;
 ij> --table not found error should issue a implicit rollback 
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'NOTABLE' , 'extinout/t1.del' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: Table 'NOTABLE' does not exist.   : 
+ERROR XIE0M: Table 'NOTABLE' does not exist.  
 ij> commit ;
 ij> select * from t1 ;
 A          
@@ -350,7 +350,7 @@ ij> insert into t1 values(4) ;
 ij> --file not found error should rollback 
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extinout/nofile.del' , 
                                  null, null, null, 1) ;
-ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.::SQLSTATE: 38000The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.::SQLSTATE: XJ001Java exception: ': java.lang.reflect.InvocationTargetException'.::SQLSTATE: XIE04Data file not found: extinout/nofile.del : 
+ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ij> commit;
 ij> select * from t1 ;
 A          
@@ -364,7 +364,7 @@ ij> insert into t1 values(4) ;
 ij> --table not found error should issue a implicit rollback 
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'NOTABLE' , 'extinout/t1.del' , 
                                  null, null, null, 1) ;
-ERROR XIE0M: Table 'NOTABLE' does not exist.   : 
+ERROR XIE0M: Table 'NOTABLE' does not exist.  
 ij> commit ;
 ij> ---check IMPORT_DATA calls commit/rollback
 select * from t1 ;
@@ -401,7 +401,7 @@ ij> insert into t1 values(4) ;
 ij> --file not found error should rollback 
 call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'T1', 'A' , '1'  , 'extinout/nofile.del' , 
                                  null, null, null, 0) ;
-ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.::SQLSTATE: 38000The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.::SQLSTATE: XJ001Java exception: ': java.lang.reflect.InvocationTargetException'.::SQLSTATE: XIE04Data file not found: extinout/nofile.del : 
+ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ij> commit;
 ij> select * from t1 ;
 A          
@@ -417,7 +417,7 @@ ij> insert into t1 values(4) ;
 ij> --table not found error should issue a implicit rollback 
 call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'NOTABLE' , 'A' , '1', 'extinout/t1.del' , 
                                  null, null, null, 1) ;
-ERROR XIE0M: Table 'NOTABLE' does not exist.   : 
+ERROR XIE0M: Table 'NOTABLE' does not exist.  
 ij> commit ;
 ij> select * from t1 ;
 A          
@@ -453,7 +453,7 @@ ij> insert into t1 values(6) ;
 ij> --following import will back , but should not have any impact on inserts
 call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'T1', 'A' , '1'  , 'extinout/nofile.del' , 
                                  null, null, null, 0) ;
-ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.::SQLSTATE: 38000The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.::SQLSTATE: XJ001Java exception: ': java.lang.reflect.InvocationTargetException'.::SQLSTATE: XIE04Data file not found: extinout/nofile.del : 
+ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ij> select * from t1 ;
 A          
 -----
@@ -563,7 +563,7 @@ ij> delete from alltypes;
 3 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALLTYPES' , 'extinout/alltypes.del' , 
                                  null, null, null, 1) ;
-ERROR 38000: The exception 'SQL Exception: Bulk insert replace is not permitted on 'APP.ALLTYPES' because it has an enabled trigger (TRIG_IMPORT).' was thrown while evaluating an expression.::SQLSTATE: 42Z08Bulk insert replace is not permitted on 'APP.ALLTYPES' because it has an enabled trigger (TRIG_IMPORT). : 
+ERROR 38000: The exception 'SQL Exception: Bulk insert replace is not permitted on 'APP.ALLTYPES' because it has an enabled trigger (TRIG_IMPORT).' was thrown while evaluating an expression.
 ij> select count(*) from alltypes;
 1          
 -----
@@ -606,7 +606,7 @@ ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE(null , 'TABLE2' , 'extinout/import.del', 
 Statement executed.
 ij> --following import should fail becuase of inserting into identity column.
 CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'TABLE1', 'extinout/import.del',null, null, null,1);
-ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'C2'.' was thrown while evaluating an expression.::SQLSTATE: 42Z23Attempt to modify an identity column 'C2'.  : 
+ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'C2'.' was thrown while evaluating an expression.
 ij> --following import should be succesful
 CALL SYSCS_UTIL.SYSCS_IMPORT_DATA(NULL, 'TABLE1', 'C1,C3,C4' , '1,3,4', 'extinout/import.del',null, null, null,1);
 Statement executed.
@@ -623,7 +623,7 @@ call SYSCS_UTIL.SYSCS_EXPORT_TABLE(null , 'TABLE2' , 'extinout/import.del' ,
                                  null, null, null) ;
 Statement executed.
 ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'TABLE1', 'extinout/import.del',null, null, null,1);
-ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'C2'.' was thrown while evaluating an expression.::SQLSTATE: 42Z23Attempt to modify an identity column 'C2'.  : 
+ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'C2'.' was thrown while evaluating an expression.
 ij> select * from table1;
 C1 |C2 |C3 |C4  
 -----
@@ -645,7 +645,7 @@ ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from parent where a < 3' , 'ext
 Statement executed.
 ij> --replace should fail because of dependent table
 CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'PARENT', 'extinout/parent.del',null, null, null,1);
-ERROR 38000: The exception 'SQL Exception: INSERT on table 'PARENT' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back.' was thrown while evaluating an expression.::SQLSTATE: 23503INSERT on table 'PARENT' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back. : 
+ERROR 38000: The exception 'SQL Exception: INSERT on table 'PARENT' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back.' was thrown while evaluating an expression.
 ij> select * from parent;
 A          
 -----
@@ -726,7 +726,7 @@ ij> create table dest_always(i int generated always as identity);
 ij> create table dest_by_default(i int generated by default as identity);
 0 rows inserted/updated/deleted
 ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('APP','DEST_ALWAYS','extinout/autoinc.dat',null,null,null,0);
-ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'I'.' was thrown while evaluating an expression.::SQLSTATE: 42Z23Attempt to modify an identity column 'I'.  : 
+ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'I'.' was thrown while evaluating an expression.
 ij> select * from dest_always;
 I          
 -----
@@ -747,7 +747,7 @@ ij> create table dest_always(i int generated always as identity);
 ij> create table dest_by_default(i int generated by default as identity);
 0 rows inserted/updated/deleted
 ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('APP','DEST_ALWAYS','extinout/autoinc.dat',null,null,null,1);
-ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'I'.' was thrown while evaluating an expression.::SQLSTATE: 42Z23Attempt to modify an identity column 'I'.  : 
+ERROR 38000: The exception 'SQL Exception: Attempt to modify an identity column 'I'.' was thrown while evaluating an expression.
 ij> select * from dest_always;
 I          
 -----
@@ -777,13 +777,13 @@ ij> insert into "Group"."Order" values(5, 6, 'mouse') ;
 1 row inserted/updated/deleted
 ij> --following export should fail because schema name is not matching the way it is defined using delimited quotes.
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('GROUP', 'Order' , 'extinout/order.dat', null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Schema 'GROUP' does not exist' was thrown while evaluating an expression.::SQLSTATE: 42Y07Schema 'GROUP' does not exist : 
+ERROR 38000: The exception 'SQL Exception: Schema 'GROUP' does not exist' was thrown while evaluating an expression.
 ij> --following export should fail because table name is not matching the way it is defined in the quotes.
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('Group', 'ORDER' , 'extinout/order.dat', null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Table 'Group.ORDER' does not exist.' was thrown while evaluating an expression.::SQLSTATE: 42X05Table 'Group.ORDER' does not exist. : 
+ERROR 38000: The exception 'SQL Exception: Table 'Group.ORDER' does not exist.' was thrown while evaluating an expression.
 ij> --following export should fail because of unquoted table name that is a reserved word.
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from "Group".Order' , 'extinout/order.dat' ,    null , null , null ) ;
-ERROR 38000: The exception 'SQL Exception: Syntax error: Encountered "Order" at line 1, column 23.' was thrown while evaluating an expression.::SQLSTATE: 42X01Syntax error: Encountered "Order" at line 1, column 23. : 
+ERROR 38000: The exception 'SQL Exception: Syntax error: Encountered "Order" at line 1, column 23.' was thrown while evaluating an expression.
 ij> --following exports should pass.
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('Group', 'Order' , 'extinout/order.dat', null, null, null) ;
 Statement executed.
@@ -794,19 +794,19 @@ ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select "select" , "delete" , itemName fr
 Statement executed.
 ij> --following import should fail because schema name is not matching the way it is defined using delimited quotes.
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('GROUP', 'Order' , 'extinout/order.dat', null, null, null, 0) ;
-ERROR XIE0M: Table 'GROUP.Order' does not exist.   : 
+ERROR XIE0M: Table 'GROUP.Order' does not exist.  
 ij> --following import should fail because table name is not matching the way it is defined in the quotes.
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('Group', 'ORDER' , 'extinout/order.dat', null, null, null, 0) ;
-ERROR XIE0M: Table 'Group.ORDER' does not exist.   : 
+ERROR XIE0M: Table 'Group.ORDER' does not exist.  
 ij> --following import should fail because table name is not matching the way it is defined in the quotes.
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('Group', 'ORDER' , null , null ,   'extinout/order.dat'   , null , null , null, 1) ;
-ERROR XIE0M: Table 'Group.ORDER' does not exist.   : 
+ERROR XIE0M: Table 'Group.ORDER' does not exist.  
 ij> --following import should fail because column name is not matching the way it is defined in the quotes.
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('Group', 'Order' , 'DELETE, ITEMNAME' , '2, 3' ,   'extinout/order.dat'   , null , null , null, 1) ;
-ERROR XIE08: There is no column named: DELETE.   : 
+ERROR XIE08: There is no column named: DELETE.  
 ij> --following import should fail because undelimited column name is not in upper case.
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('Group', 'Order' , 'delete, itemName' , '2, 3' ,   'extinout/order.dat'   , null , null , null, 1) ;
-ERROR XIE08: There is no column named: itemName.   : 
+ERROR XIE08: There is no column named: itemName.  
 ij> --following imports should pass
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('Group', 'Order' , 'extinout/order.dat', null, null, null, 0) ;
 Statement executed.
@@ -860,25 +860,25 @@ ij> insert into inventory.orderTable values(104, 8, 'buffolo wings') ;
 1 row inserted/updated/deleted
 ij> --following export should fail because schema name is not in upper case.
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('inventory', 'ORDERTABLE' , 'extinout/order.dat', null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Schema 'inventory' does not exist' was thrown while evaluating an expression.::SQLSTATE: 42Y07Schema 'inventory' does not exist : 
+ERROR 38000: The exception 'SQL Exception: Schema 'inventory' does not exist' was thrown while evaluating an expression.
 ij> --following export should fail because table name is not in upper case.
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('INVENTORY', 'ordertable' , 'extinout/order.dat', null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Table 'INVENTORY.ordertable' does not exist.' was thrown while evaluating an expression.::SQLSTATE: 42X05Table 'INVENTORY.ordertable' does not exist. : 
+ERROR 38000: The exception 'SQL Exception: Table 'INVENTORY.ordertable' does not exist.' was thrown while evaluating an expression.
 ij> --following export should pass.
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('INVENTORY', 'ORDERTABLE' , 'extinout/order.dat', null, null, null) ;
 Statement executed.
 ij> --following import should fail because schema name is not in upper case
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('inventory', 'ORDERTABLE' , 'extinout/order.dat', null, null, null, 0) ;
-ERROR XIE0M: Table 'inventory.ORDERTABLE' does not exist.   : 
+ERROR XIE0M: Table 'inventory.ORDERTABLE' does not exist.  
 ij> --following import should fail because table name is not in upper case.
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('INVENTORY', 'ordertable' , 'extinout/order.dat', null, null, null, 0) ;
-ERROR XIE0M: Table 'INVENTORY.ordertable' does not exist.   : 
+ERROR XIE0M: Table 'INVENTORY.ordertable' does not exist.  
 ij> --following import should fail because table name is not in upper case .
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('INVENTORY', 'ordertable' , null , null ,   'extinout/order.dat'   , null , null , null, 1) ;
-ERROR XIE0M: Table 'INVENTORY.ordertable' does not exist.   : 
+ERROR XIE0M: Table 'INVENTORY.ordertable' does not exist.  
 ij> --following import should fail because column name is not in upper case.
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('INVENTORY', 'ORDERTABLE' , 'amount, ITEMNAME' , '2, 3' ,   'extinout/order.dat'   , null , null , null, 1) ;
-ERROR XIE08: There is no column named: amount.   : 
+ERROR XIE08: There is no column named: amount.  
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('INVENTORY', 'ORDERTABLE' , null , null ,   'extinout/order.dat'   , null , null , null, 1) ;
 Statement executed.
 ij> select * from inventory.orderTable;
