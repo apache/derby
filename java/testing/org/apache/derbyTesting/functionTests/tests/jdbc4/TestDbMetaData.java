@@ -127,32 +127,20 @@ public class TestDbMetaData {
             ame.printStackTrace(System.out);
         }
 
-        try {
-			// Any function in any schema in any catalog
-			dumpRS(met.getFunctions(null, null, null));
-			// Any function in any schema in "Dummy
-			// Catalog". Same as above since the catalog
-			// argument is ignored (is always null)
-			dumpRS(met.getFunctions("Dummy Catalog", null, null));
-			// Any function in a schema starting with "SYS"
-			dumpRS(met.getFunctions(null, "SYS%", null));
-			// All functions containing "GET" in any schema 
-			// (and any catalog)
-			dumpRS(met.getFunctions(null, null, "%GET%"));
-			// Any function that belongs to NO schema and 
-			// NO catalog (none)
-			checkEmptyRS(met.getFunctions("", "", null));
-            
-        } catch (SQLException e) {
-            // TODO: remove try/catch once method is implemented!
-            System.out.println("getFunctions():");
-            dumpSQLExceptions(e);
-        } catch (AbstractMethodError ame) {
-            // TODO: No implementation on client yet, so catch
-            // AbstractMethodError for now. Remove when implemented.
-            System.out.println("getClientInfoProperties():");
-            ame.printStackTrace(System.out);
-        }
+        // Any function in any schema in any catalog
+        dumpRS(met.getFunctions(null, null, null));
+        // Any function in any schema in "Dummy
+        // Catalog". Same as above since the catalog
+        // argument is ignored (is always null)
+        dumpRS(met.getFunctions("Dummy Catalog", null, null));
+        // Any function in a schema starting with "SYS"
+        dumpRS(met.getFunctions(null, "SYS%", null));
+        // All functions containing "GET" in any schema 
+        // (and any catalog)
+        dumpRS(met.getFunctions(null, null, "%GET%"));
+        // Any function that belongs to NO schema and 
+        // NO catalog (none)
+        checkEmptyRS(met.getFunctions("", "", null));
 
         try {
             // 

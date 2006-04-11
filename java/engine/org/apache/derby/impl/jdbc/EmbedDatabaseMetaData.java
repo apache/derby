@@ -1417,10 +1417,40 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		return doGetProcs(catalog, schemaPattern,
 			procedureNamePattern, "odbc_getProcedures");
 	}
+    
+    /**
+     * Implements DatabaseMetaData.getFunctions() for an embedded
+     * database. Queries the database to get information about
+     * functions (procedures returning values). Executes the
+     * 'getFunctions' query from metadata.properties to obtain the
+     * ResultSet to return.<p> Compatibility: This is a new method in
+     * the API which is only available with with Derby versions > 10.1 and
+     * JDK versions >= 1.6 <p>Upgrade: Since this is a new query it
+     * does not have an SPS, and will be available as soon as any
+     * database, new or old, is booted with the new version of Derby,
+     * (in <b>soft and hard</b> upgrade).
+     * @param catalog limit the search to functions in this catalog 
+     * (not used)
+     * @param schemaPattern limit the search to functions in schemas 
+     * matching this pattern
+     * @param functionNamePattern limit the search to functions 
+     * matching this pattern
+     * @return a ResultSet with metadata information
+     * @throws SQLException if any of the underlying jdbc methods fail
+     */
+    public ResultSet getFunctions(java.lang.String catalog,
+                                  java.lang.String schemaPattern,
+                                  java.lang.String functionNamePattern)
+        throws SQLException
+    {
+        return doGetProcs(catalog, schemaPattern,
+                   functionNamePattern, "getFunctions");
+    }
 
 	/**
-	 * Does the actual work for the getProcedures metadata calls.
-	 * See getProcedures() method above for parameter descriptions.
+	 * Does the actual work for the getProcedures and getFunctions
+	 * metadata calls.  See getProcedures() method above for parameter
+	 * descriptions.
 	 * @param queryName Name of the query to execute; is used
 	 *	to determine whether the result set should conform to
 	 *	JDBC or ODBC specifications.

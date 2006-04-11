@@ -349,6 +349,25 @@ public abstract class metadata_test {
 				"'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b'" +
 				" parameter style java"); 
 
+						// Create functions so we can test
+						// getFunctions()
+						s.execute("CREATE FUNCTION DUMMY1 ( X SMALLINT ) "+
+								  "RETURNS SMALLINT PARAMETER STYLE JAVA "+
+								  "NO SQL LANGUAGE JAVA EXTERNAL "+
+								  "NAME 'java.some.func'");
+						s.execute("CREATE FUNCTION DUMMY2 ( X INTEGER, Y "+
+								  "SMALLINT ) RETURNS INTEGER PARAMETER STYLE"+
+								  " JAVA NO SQL LANGUAGE JAVA "+
+								  "EXTERNAL NAME 'java.some.func'");
+						s.execute("CREATE FUNCTION DUMMY3 ( X VARCHAR(16), "+
+								  "Y INTEGER ) RETURNS VARCHAR(16) PARAMETER"+
+								  " STYLE JAVA NO SQL LANGUAGE"+
+								  " JAVA EXTERNAL NAME 'java.some.func'");
+						s.execute("CREATE FUNCTION DUMMY4 ( X VARCHAR(128), "+
+								  "Y INTEGER ) RETURNS INTEGER PARAMETER "+
+								  "STYLE JAVA NO SQL LANGUAGE "+
+								  "JAVA EXTERNAL NAME 'java.some.func'");
+						
 			met = con.getMetaData();
 
 			System.out.println("JDBC Driver '" + met.getDriverName() +
@@ -398,6 +417,52 @@ public abstract class metadata_test {
 			dumpRS(GET_PROCEDURES, getMetaDataRS(met, GET_PROCEDURES,
 				new String [] {null, "%", "GETPCTEST%"},
 				null, null, null));
+
+			// Using reflection to check if we have getFunctions in the
+			// the current version of Derby
+			try {
+				Class s = "".getClass();
+				Class [] a = new Class [] { s, s, s };
+				
+				// Make sure the method is actually implemented
+				java.lang.reflect.Method gf = 
+					met.getClass().getMethod("getFunctions", a);
+				if (!java.lang.reflect.Modifier.isAbstract(gf.getModifiers())){
+					// Any function in any schema in any catalog
+					System.out.println("getFunctions(null,null,null):");
+					dumpRS(0, (ResultSet)gf.
+						   invoke(met, new String [] {null, null, null}));
+
+					// Any function in any schema in "Dummy
+					// Catalog". Same as above since the catalog
+					// argument is ignored (is always null)
+					System.out.println("getFunctions(\"Dummy Catalog\",null,"+
+									   "null):");
+					dumpRS(0, (ResultSet)gf.
+						   invoke(met, new String [] {"Dummy Catalog", 
+													  null, null}));
+
+					// Any function in a schema starting with "SYS"
+					System.out.println("getFunctions(null,\"%SYS%\",null):");
+					dumpRS(0, (ResultSet)gf.
+						   invoke(met, new String [] {null, "SYS%", null}));
+
+					// All functions containing "GET" in any schema
+					// (and any catalog)
+					System.out.println("getFunctions(null,null,\"%GET%\"):");
+					dumpRS(0, (ResultSet)gf.
+						   invoke(met, new String [] {null, null, "%GET%"}));
+
+					// Any function that belongs to NO schema and
+					// NO catalog (none)
+					System.out.println("getFunctions(\"\",\"\",null):");
+					dumpRS(0, (ResultSet)gf.
+						   invoke(met, new String [] {"", "", null}));
+
+				}
+			} 
+			catch (NoSuchMethodException e) {}
+			catch (Exception e) { e.printStackTrace(); }
 
 			System.out.println("getUDTs() with user-named types null :");
  			dumpRS(met.getUDTs(null, null, null, null));
@@ -1352,7 +1417,8 @@ public abstract class metadata_test {
 			"procedure getpctest1", "procedure getpctest2",
 			"procedure getpctest3a", "procedure getpctest3b",
 			"procedure getpctest4a", "procedure getpctest4b", "procedure getpctest4bx",
-			"procedure isreadO" };
+			"procedure isreadO", "FUNCTION DUMMY1", "FUNCTION DUMMY2", 
+			"FUNCTION DUMMY3", "FUNCTION DUMMY4" };
 		TestUtil.cleanUpTest(stmt, testObjects);
 	}
 	

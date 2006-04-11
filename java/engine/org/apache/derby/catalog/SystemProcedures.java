@@ -202,6 +202,27 @@ public class SystemProcedures  {
 	}
 
 	/**
+	 *  Map SQLFunctions to EmbedDatabaseMetaData.getFunctions
+	 *
+	 *  @param catalogName SYSIBM.SQLFunctions CatalogName varchar(128),
+	 *  @param schemaName  SYSIBM.SQLFunctions SchemaName  varchar(128),
+	 *  @param funcName    SYSIBM.SQLFunctions ProcName    varchar(128),
+	 *  @param options     SYSIBM.SQLFunctions Options     varchar(4000)) 
+	 *                     (not used)
+	 *  @param rs          output parameter, the resultset object containing 
+	 *                     the result of getFunctions
+	 */
+	public static void SQLFUNCTIONS(String catalogName, 
+									String schemaName, 
+									String funcName,
+									String options, 
+									ResultSet[] rs) throws SQLException
+	{
+		rs[0] = ((EmbedDatabaseMetaData)getDMD()).
+			getFunctions(catalogName, schemaName, funcName);
+	}
+
+	/**
 	 *  Map SQLTables to EmbedDatabaseMetaData.getSchemas, getCatalogs, getTableTypes and getTables
 	 *
 	 *                     containing the result of the DatabaseMetaData calls

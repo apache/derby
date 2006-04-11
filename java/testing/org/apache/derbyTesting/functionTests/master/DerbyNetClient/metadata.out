@@ -44,6 +44,35 @@ PROCEDURE_CAT[VARCHAR],PROCEDURE_SCHEM[VARCHAR],PROCEDURE_NAME[VARCHAR],RESERVED
 ,APP,GETPCTEST4A,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4a,1
 ,APP,GETPCTEST4B,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b,1
 ,APP,GETPCTEST4BX,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b,1
+getFunctions(null,null,null):
+FUNCTION_CAT[VARCHAR],FUNCTION_SCHEM[VARCHAR],FUNCTION_NAME[VARCHAR],REMARKS[VARCHAR],SPECIFIC_NAME[VARCHAR]
+null,APP,DUMMY1,java.some.func,xxxxGENERATED-IDxxxx
+null,APP,DUMMY2,java.some.func,xxxxGENERATED-IDxxxx
+null,APP,DUMMY3,java.some.func,xxxxGENERATED-IDxxxx
+null,APP,DUMMY4,java.some.func,xxxxGENERATED-IDxxxx
+null,SYSCS_UTIL,SYSCS_CHECK_TABLE,org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE,xxxxGENERATED-IDxxxx
+null,SYSCS_UTIL,SYSCS_GET_DATABASE_PROPERTY,org.apache.derby.catalog.SystemProcedures.SYSCS_GET_DATABASE_PROPERTY,xxxxGENERATED-IDxxxx
+null,SYSCS_UTIL,SYSCS_GET_RUNTIMESTATISTICS,org.apache.derby.catalog.SystemProcedures.SYSCS_GET_RUNTIMESTATISTICS,xxxxGENERATED-IDxxxx
+getFunctions("Dummy Catalog",null,null):
+FUNCTION_CAT[VARCHAR],FUNCTION_SCHEM[VARCHAR],FUNCTION_NAME[VARCHAR],REMARKS[VARCHAR],SPECIFIC_NAME[VARCHAR]
+null,APP,DUMMY1,java.some.func,xxxxGENERATED-IDxxxx
+null,APP,DUMMY2,java.some.func,xxxxGENERATED-IDxxxx
+null,APP,DUMMY3,java.some.func,xxxxGENERATED-IDxxxx
+null,APP,DUMMY4,java.some.func,xxxxGENERATED-IDxxxx
+null,SYSCS_UTIL,SYSCS_CHECK_TABLE,org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE,xxxxGENERATED-IDxxxx
+null,SYSCS_UTIL,SYSCS_GET_DATABASE_PROPERTY,org.apache.derby.catalog.SystemProcedures.SYSCS_GET_DATABASE_PROPERTY,xxxxGENERATED-IDxxxx
+null,SYSCS_UTIL,SYSCS_GET_RUNTIMESTATISTICS,org.apache.derby.catalog.SystemProcedures.SYSCS_GET_RUNTIMESTATISTICS,xxxxGENERATED-IDxxxx
+getFunctions(null,"%SYS%",null):
+FUNCTION_CAT[VARCHAR],FUNCTION_SCHEM[VARCHAR],FUNCTION_NAME[VARCHAR],REMARKS[VARCHAR],SPECIFIC_NAME[VARCHAR]
+null,SYSCS_UTIL,SYSCS_CHECK_TABLE,org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE,xxxxGENERATED-IDxxxx
+null,SYSCS_UTIL,SYSCS_GET_DATABASE_PROPERTY,org.apache.derby.catalog.SystemProcedures.SYSCS_GET_DATABASE_PROPERTY,xxxxGENERATED-IDxxxx
+null,SYSCS_UTIL,SYSCS_GET_RUNTIMESTATISTICS,org.apache.derby.catalog.SystemProcedures.SYSCS_GET_RUNTIMESTATISTICS,xxxxGENERATED-IDxxxx
+getFunctions(null,null,"%GET%"):
+FUNCTION_CAT[VARCHAR],FUNCTION_SCHEM[VARCHAR],FUNCTION_NAME[VARCHAR],REMARKS[VARCHAR],SPECIFIC_NAME[VARCHAR]
+null,SYSCS_UTIL,SYSCS_GET_DATABASE_PROPERTY,org.apache.derby.catalog.SystemProcedures.SYSCS_GET_DATABASE_PROPERTY,xxxxGENERATED-IDxxxx
+null,SYSCS_UTIL,SYSCS_GET_RUNTIMESTATISTICS,org.apache.derby.catalog.SystemProcedures.SYSCS_GET_RUNTIMESTATISTICS,xxxxGENERATED-IDxxxx
+getFunctions("","",null):
+FUNCTION_CAT[VARCHAR],FUNCTION_SCHEM[VARCHAR],FUNCTION_NAME[VARCHAR],REMARKS[VARCHAR],SPECIFIC_NAME[VARCHAR]
 getUDTs() with user-named types null :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR]
 getUDTs() with user-named types in ('JAVA_OBJECT') :

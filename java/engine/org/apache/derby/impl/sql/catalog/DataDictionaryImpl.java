@@ -9673,6 +9673,35 @@ public final class	DataDictionaryImpl
                 tc);
         }
 
+        // SYSIBM.SQLFUNCTIONS(VARCHAR(128), VARCHAR(128), VARCHAR(128), 
+	// VARCHAR(4000))
+        {
+
+            // procedure argument names
+            String[] arg_names = {
+				"CATALOGNAME",
+				"SCHEMANAME",
+				"FUNCNAME",
+				"OPTIONS"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
+				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
+				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
+				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+
+            createSystemProcedureOrFunction(
+                "SQLFUNCTIONS",
+                getSysIBMSchemaDescriptor().getUUID(),
+                arg_names,
+                arg_types,
+				0,
+				1,
+                RoutineAliasInfo.READS_SQL_DATA,
+                (TypeDescriptor) null,
+                tc);
+        }
     }
 
 

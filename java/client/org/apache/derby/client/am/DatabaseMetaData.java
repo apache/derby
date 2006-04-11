@@ -1119,6 +1119,84 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     }
 
 
+    /** 
+     * Get the function names available in the database.  Calls stored
+     * procedure <code>SYSIBM.SQLFunctions(CatalogName
+     * varchar(128), SchemaName varchar(128), FuncName varchar(128),
+     * Options varchar(4000))</code> on the server. This procedure
+     * will in turn call
+     * <code>EmbedDatabaseMetaData.getFunctions(String,String,String)</code><p>
+     * Compatibility: Only available if both server and client version
+     * > 10.1, and JDK version >= 1.6. Older clients will not have
+     * this method available. Newer clients will be able to call this
+     * method when connected to an older server, but this will be
+     * trigger an exception in
+     * <code>checkServerJdbcVersionX()</code>. <p>Upgrade:
+     * <code>SYSIBM.SQLFunctions</code> is added in
+     * <code>DataDictionaryImpl.create_10_2_system_procedures
+     * (TransactionController,UUID)</code> so it will become available
+     * in newly created databases and after <b>hard</b> upgrade.
+     *
+     * @param catalog limit search to this catalog
+     * @param schemaPattern limit search to schemas matching this pattern
+     * @param functionNamePattern limit search to functions matching this 
+     * pattern
+     * @return a <code>ResultSet</code> listing the fucntions
+     * @exception SqlException if a database error occurs
+     * @see #getFunctionsX(String, String, String)
+     * @see org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,UUID)
+     * @see org.apache.derby.impl.jdbc.EmbedDatabaseMetaData#getFunctions(String,String,String)
+     */
+
+    public java.sql.ResultSet getFunctions(String catalog,
+                                           String schemaPattern,
+                                           String functionNamePattern) 
+        throws SQLException {
+        try {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getFunctions", 
+                                                 catalog, schemaPattern, 
+                                                 functionNamePattern);
+                }
+                return getFunctionsX(catalog, schemaPattern, 
+                                     functionNamePattern);
+            }
+        }
+        catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+
+    /** 
+     * Untraced version of <code>getFunctions(String, String, String)</code>.
+     * @param catalog limit search to this catalog
+     * @param schemaPattern limit search to schemas matching this pattern
+     * @param functionNamePattern limit search to functions matching this 
+     * pattern
+     * @return a <code>ResultSet</code> listing the fucntions
+     * @excption SqlException if a database error occurs
+     * @see #getFunctions(String, String, String)
+     */
+    private ResultSet getFunctionsX(String catalog,
+                                    String schemaPattern,
+                                    String functionNamePattern) 
+        throws SqlException {
+        checkForClosedConnectionX();
+        checkServerJdbcVersionX("getFunctions(String,String,String)", 4, 0); 
+
+        PreparedStatement cs = 
+            prepareMetaDataQuery("SYSIBM.SQLFUNCTIONS(?,?,?,?)");
+
+        cs.setStringX(1, catalog);
+        cs.setStringX(2, schemaPattern);
+        cs.setStringX(3, functionNamePattern);
+        cs.setStringX(4, getOptions());
+        lastGetProceduresResultSet_ = executeCatalogQuery(cs);
+        return lastGetProceduresResultSet_;
+    }
+
+
     // call stored procedure SQLTables
     // SYSIBM.SQLTables(
     //              CatalogName varchar(128),
