@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.jdbc.RawToBinaryFormatStream
+   Derby - Class org.apache.derby.iapi.types.RawToBinaryFormatStream
 
    Copyright 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -18,10 +18,9 @@
 
  */
 
-package org.apache.derby.impl.jdbc;
+package org.apache.derby.iapi.types;
 
 import java.io.InputStream;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.EOFException;
 
@@ -31,12 +30,12 @@ import org.apache.derby.iapi.reference.SQLState;
 
 /**
 	Stream that takes a raw input stream and converts it
-	to the format of the binary types by prepending the
+	to the on-disk format of the binary types by prepending the
 	length of the value. In this case 0 is always written.
     Note: This stream cannot be re-used. Once end of file is
     reached, the next read call will throw an EOFException
 */
-class RawToBinaryFormatStream extends LimitInputStream {
+public class RawToBinaryFormatStream extends LimitInputStream {
 
 	private int dummyBytes = 4;
     
@@ -48,7 +47,7 @@ class RawToBinaryFormatStream extends LimitInputStream {
 		@param	in Application's raw binary stream passed into JDBC layer
 		@param	length - length of the stream, if known, otherwise -1.
 	*/
-	RawToBinaryFormatStream(InputStream in, int length) {
+	public RawToBinaryFormatStream(InputStream in, int length) {
 		super(in);
 		if (length >= 0) {
 			setLimit(length);
