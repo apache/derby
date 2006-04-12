@@ -249,7 +249,7 @@ public class DB_GrantRevoke {
 	 * 
 	 * @param rs		ResultSet with info for this GRANT statement
 	 * @param fullName	Full qualified name of the table
-	 * @param rs		authorization name for this GRANT
+	 * @param authName	Authorization name for this GRANT
 	 * @param rsCols	ResultSet for mapping column numbers to names
 	 ****/
 
