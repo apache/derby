@@ -377,6 +377,60 @@ public class OptimizerImpl implements Optimizer
 			}
 		}
 
+		if (timeExceeded && bestCost.isUninitialized())
+		{
+			/* We can get here if this OptimizerImpl is for a subquery
+			 * that timed out for a previous permutation of the outer
+			 * query, but then the outer query itself did _not_ timeout.
+			 * In that case we'll end up back here for another round of
+			 * optimization, but our timeExceeded flag will be true.
+			 * We don't want to reset all of the timeout state here
+			 * because that could lead to redundant work (see comments
+			 * in prepForNextRound()), but we also don't want to return
+			 * without having a plan, because then we'd return an unfairly
+			 * high "bestCost" value--i.e. Double.MAX_VALUE.  Note that
+			 * we can't just revert back to whatever bestCost we had
+			 * prior to this because that cost is for some previous
+			 * permutation of the outer query--not the current permutation--
+			 * and thus would be incorrect.  So instead we have to delay
+			 * the timeout until we find a complete (and valid) join order,
+			 * so that we can return a valid cost estimate.  Once we have
+			 * a valid cost we'll then go through the timeout logic
+			 * and stop optimizing.
+			 * 
+			 * All of that said, instead of just trying the first possible
+			 * join order, we jump to the join order that gave us the best
+			 * cost in previous rounds.  We know that such a join order exists
+			 * because that's how our timeout value was set to begin with--so
+			 * if there was no best join order, we never would have timed out
+			 * and thus we wouldn't be here.
+			 */
+			if (permuteState != JUMPING)
+			{
+				// By setting firstLookOrder to our target join order
+				// and then setting our permuteState to JUMPING, we'll
+				// jump to the target join order and get the cost.  That
+				// cost will then be saved as bestCost, allowing us to
+				// proceed with normal timeout logic.
+				for (int i = 0; i < numOptimizables; i++)
+					firstLookOrder[i] = bestJoinOrder[i];
+				permuteState = JUMPING;
+
+				// If we were in the middle of a join order when this
+				// happened, then reset the join order before jumping.
+				if (joinPosition > 0)
+					rewindJoinOrder();
+			}
+
+			// Reset the timeExceeded flag so that we'll keep going
+			// until we find a complete join order.  NOTE: we intentionally
+			// do _not_ reset the timeOptimizationStarted value because we
+			// we want to go through this timeout logic for every
+			// permutation, to make sure we timeout as soon as we have
+			// our first complete join order.
+			timeExceeded = false;
+		}
+
 		/*
 		** Pick the next table in the join order, if there is an unused position
 		** in the join order, and the current plan is less expensive than
