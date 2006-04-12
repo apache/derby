@@ -1636,18 +1636,20 @@ public abstract class ResultSetNode extends QueryTreeNode
 	}
 
 	/**
-	 * Get the optimizer for this result set; assumption is that
-	 * this.optimizer has already been created by the getOptimizer()
-	 * method above.
+	 * Get the optimizer for this result set.
+	 * 
+	 * @return If this.optimizer has has already been created by the
+	 *  getOptimizer() method above, then return it; otherwise,
+	 *  return null.
 	 */
-	protected OptimizerImpl getOptimizerImpl() {
-
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(optimizer != null,
-				"Tried to retrieve optimizer for a result set, but no such " +
-				"optimizer existed.");
-		}
-
+	protected OptimizerImpl getOptimizerImpl()
+	{
+		// Note that the optimizer might be null because it's possible that
+		// we'll get here before any calls to getOptimizer() were made, which
+		// can happen if we're trying to save a "best path" but we haven't
+		// actually found one yet.  In that case we just return the "null"
+		// value; the caller must check for it and behave appropriately.
+		// Ex. see TableOperatorNode.addOrLoadBestPlanMapping().
 		return (OptimizerImpl)optimizer;
 	}
 

@@ -135,14 +135,14 @@ public class BaseTableNumbersVisitor implements Visitor
 
 				if (rcExpr instanceof ColumnReference)
 				// we found our column reference; recurse using that.
-					return rcExpr.accept(this);
-
+					rcExpr.accept(this);
+				else {
 				// Else we must have found the table number someplace
 				// other than within a ColumnReference (ex. we may
 				// have pulled it from a VirtualColumnNode's source
 				// table); so just set the number.
-				tableMap.set(baseTableNumber);
-
+					tableMap.set(baseTableNumber);
+				}
 			}
 			else if (node instanceof ColumnReference) {
 			// we couldn't find any other table numbers beneath the

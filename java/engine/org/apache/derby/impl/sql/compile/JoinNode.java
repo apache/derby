@@ -176,6 +176,18 @@ public class JoinNode extends TableOperatorNode
 	{
 		optimizer.trace(Optimizer.CALLING_ON_JOIN_NODE, 0, 0, 0.0, null);
 
+		// It's possible that a call to optimize the left/right will cause
+		// a new "truly the best" plan to be stored in the underlying base
+		// tables.  If that happens and then we decide to skip that plan
+		// (which we might do if the call to "considerCost()" below decides
+		// the current path is infeasible or not the best) we need to be
+		// able to revert back to the "truly the best" plans that we had
+		// saved before we got here.  So with this next call we save the
+		// current plans using "this" node as the key.  If needed, we'll
+		// then make the call to revert the plans in OptimizerImpl's
+		// getNextDecoratedPermutation() method.
+		addOrLoadBestPlanMapping(true, this);
+
 		/*
 		** RESOLVE: Most types of Optimizables only implement estimateCost(),
 		** and leave it up to optimizeIt() in FromTable to figure out the

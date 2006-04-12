@@ -171,18 +171,25 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * child, in order to ensure that we have a full plan mapped.
 	 */
 	public void addOrLoadBestPlanMapping(boolean doAdd,
-		Optimizer optimizer) throws StandardException
+		Object planKey) throws StandardException
 	{
-		super.addOrLoadBestPlanMapping(doAdd, optimizer);
+		super.addOrLoadBestPlanMapping(doAdd, planKey);
+
+		// Now walk the child.  Note that if the child is not an
+		// Optimizable and the call to child.getOptimizerImpl()
+		// returns null, then that means we haven't tried to optimize
+		// the child yet.  So in that case there's nothing to
+		// add/load.
+
 		if (childResult instanceof Optimizable)
 		{
 			((Optimizable)childResult).
-				addOrLoadBestPlanMapping(doAdd, optimizer);
+				addOrLoadBestPlanMapping(doAdd, planKey);
 		}
-		else
+		else if (childResult.getOptimizerImpl() != null)
 		{
 			childResult.getOptimizerImpl().
-				addOrLoadBestPlanMappings(doAdd, optimizer);
+				addOrLoadBestPlanMappings(doAdd, planKey);
 		}
 	}
 

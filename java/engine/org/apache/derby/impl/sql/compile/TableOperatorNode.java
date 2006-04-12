@@ -164,29 +164,36 @@ public abstract class TableOperatorNode extends FromTable
 	 * full plan mapped.
 	 */
 	public void addOrLoadBestPlanMapping(boolean doAdd,
-		Optimizer optimizer) throws StandardException
+		Object planKey) throws StandardException
 	{
-		super.addOrLoadBestPlanMapping(doAdd, optimizer);
+		super.addOrLoadBestPlanMapping(doAdd, planKey);
+
+		// Now walk the children.  Note that if either child is not
+		// an Optimizable and the call to child.getOptimizerImpl()
+		// returns null, then that means we haven't tried to optimize
+		// the child yet.  So in that case there's nothing to
+		// add/load.
+
 		if (leftResultSet instanceof Optimizable)
 		{
 			((Optimizable)leftResultSet).
-				addOrLoadBestPlanMapping(doAdd, optimizer);
+				addOrLoadBestPlanMapping(doAdd, planKey);
 		}
-		else
+		else if (leftResultSet.getOptimizerImpl() != null)
 		{
 			leftResultSet.getOptimizerImpl().
-				addOrLoadBestPlanMappings(doAdd, optimizer);
+				addOrLoadBestPlanMappings(doAdd, planKey);
 		}
 
 		if (rightResultSet instanceof Optimizable)
 		{
 			((Optimizable)rightResultSet).
-				addOrLoadBestPlanMapping(doAdd, optimizer);
+				addOrLoadBestPlanMapping(doAdd, planKey);
 		}
-		else
+		else if (rightResultSet.getOptimizerImpl() != null)
 		{
 			rightResultSet.getOptimizerImpl().
-				addOrLoadBestPlanMappings(doAdd, optimizer);
+				addOrLoadBestPlanMappings(doAdd, planKey);
 		}
 	}
 

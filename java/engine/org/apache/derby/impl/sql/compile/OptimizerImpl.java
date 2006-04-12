@@ -1138,6 +1138,38 @@ public class OptimizerImpl implements Optimizer
 										(OptimizablePredicateList) null,
 										currentRowOrdering);
 
+		// If the previous path that we considered for curOpt was _not_ the best
+		// path for this round, then we need to revert back to whatever the
+		// best plan for curOpt was this round.  Note that the cost estimate
+		// for bestAccessPath could be null here if the last path that we
+		// checked was the only one possible for this round.
+		if ((curOpt.getBestAccessPath().getCostEstimate() != null) &&
+			(curOpt.getCurrentAccessPath().getCostEstimate() != null))
+		{
+			// Note: we can't just check to see if bestCost is cheaper
+			// than currentCost because it's possible that currentCost
+			// is actually cheaper--but it may have been 'rejected' because
+			// it would have required too much memory.  So we just check
+			// to see if bestCost and currentCost are different.  If so
+			// then we know that the most recent access path (represented
+			// by "current" access path) was not the best.
+			if (curOpt.getBestAccessPath().getCostEstimate().compare(
+				curOpt.getCurrentAccessPath().getCostEstimate()) != 0)
+			{
+				curOpt.addOrLoadBestPlanMapping(false, curOpt);
+			}
+			else if (curOpt.getBestAccessPath().getCostEstimate().rowCount() <
+				curOpt.getCurrentAccessPath().getCostEstimate().rowCount())
+			{
+				// If currentCost and bestCost have the same cost estimate
+				// but currentCost has been rejected because of memory, we
+				// still need to revert the plans.  In this case the row
+				// count for currentCost will be greater than the row count
+				// for bestCost, so that's what we just checked.
+				curOpt.addOrLoadBestPlanMapping(false, curOpt);
+			}
+		}
+
 		/*
 		** When all the access paths have been looked at, we know what the
 		** cheapest one is, so remember it.  Only do this if a cost estimate
@@ -1810,15 +1842,21 @@ public class OptimizerImpl implements Optimizer
 			return;
 		}
 
+		// Before considering the cost, make sure we set the optimizable's
+		// "current" cost to be the one that we received.  Doing this allows
+		// us to compare "current" with "best" later on to find out if
+		// the "current" plan is also the "best" one this round--if it's
+		// not then we'll have to revert back to whatever the best plan is.
+		// That check is performed in getNextDecoratedPermutation() of
+		// this class.
+		optimizable.getCurrentAccessPath().setCostEstimate(estimatedCost);
+
 		/*
 		** Skip this access path if it takes too much memory.
 		**
 		** NOTE: The default assumption here is that the number of rows in
 		** a single scan is the total number of rows divided by the number
 		** of outer rows.  The optimizable may over-ride this assumption.
-		**
-		** NOTE: This is probably not necessary here, because we should
-		** get here only for nested loop joins, which don't use memory.
 		*/
         if( ! optimizable.memoryUsageOK( estimatedCost.rowCount() / outerCost.rowCount(),
                                          maxMemoryPerTable))
@@ -2152,11 +2190,14 @@ public class OptimizerImpl implements Optimizer
 	 * necessary.
 	 *
 	 * @param doAdd True if we're adding a mapping, false if we're loading.
-	 * @param outerOptimizer OptimizerImpl corresponding to an outer
-	 *  query; we will use this as the key for the mapping.
+	 * @param planKey Object to use as the map key when adding/looking up
+	 *  a plan.  If this is an instance of OptimizerImpl then it corresponds
+	 *  to an outer query; otherwise it's some Optimizable above this
+	 *  OptimizerImpl that could potentially reject plans chosen by this
+	 *  OptimizerImpl.
 	 */
 	protected void addOrLoadBestPlanMappings(boolean doAdd,
-		Optimizer outerOptimizer) throws StandardException
+		Object planKey) throws StandardException
 	{
 		// First we save this OptimizerImpl's best join order.  If there's
 		// only one optimizable in the list, then there's only one possible
@@ -2171,7 +2212,7 @@ public class OptimizerImpl implements Optimizer
 				if (savedJoinOrders == null)
 					savedJoinOrders = new HashMap();
 				else
-					joinOrder = (int[])savedJoinOrders.get(outerOptimizer);
+					joinOrder = (int[])savedJoinOrders.get(planKey);
 
 				// If we don't already have a join order array for the optimizer,
 				// create a new one.
@@ -2182,7 +2223,7 @@ public class OptimizerImpl implements Optimizer
 				for (int i = 0; i < bestJoinOrder.length; i++)
 					joinOrder[i] = bestJoinOrder[i];
 
-				savedJoinOrders.put(outerOptimizer, joinOrder);
+				savedJoinOrders.put(planKey, joinOrder);
 			}
 			else
 			{
@@ -2192,16 +2233,17 @@ public class OptimizerImpl implements Optimizer
 				// If we don't have any join orders saved, then there's nothing to
 				// load.  This can happen if the optimizer tried some join order
 				// for which there was no valid plan.
-				if (savedJoinOrders == null)
-					return;
-
-				joinOrder = (int[])savedJoinOrders.get(outerOptimizer);
-				if (joinOrder == null)
-					return;
-
-				// Load the join order we found into our bestJoinOrder array.
-				for (int i = 0; i < joinOrder.length; i++)
-					bestJoinOrder[i] = joinOrder[i];
+				if (savedJoinOrders != null)
+				{
+					joinOrder = (int[])savedJoinOrders.get(planKey);
+					if (joinOrder != null)
+					{
+						// Load the join order we found into our
+						// bestJoinOrder array.
+						for (int i = 0; i < joinOrder.length; i++)
+							bestJoinOrder[i] = joinOrder[i];
+					}
+				}
 			}
 		}
 
@@ -2211,7 +2253,7 @@ public class OptimizerImpl implements Optimizer
 		for (int i = optimizableList.size() - 1; i >= 0; i--)
 		{
 			optimizableList.getOptimizable(i).
-				addOrLoadBestPlanMapping(doAdd, outerOptimizer);
+				addOrLoadBestPlanMapping(doAdd, planKey);
 		}
 	}
 

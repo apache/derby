@@ -6,18 +6,7 @@ ij> -- Test predicate pushdown into expressions in a FROM list.  As of
 -- plans and we don't want the plans to differ from one machine
 -- to another (which can happen if some machines are faster than
 -- others when noTimeout is false).
--- Create the tables/views for DERBY-805 testing.  For DERBY-805
--- we can tell if a predicate has been "pushed" by looking at
--- the query plan information for the tables in question: if the
--- table has an index on a column that is used as part of the
--- pushed predicate, then the optimizer will (for these tests)
--- do an Index scan instead of a Table scan.  If the table does
--- not have such an index then the predicate will show up as a
--- "qualifier" for a Table scan.  In all of these tests T3 and T4
--- have appropriate indexes, so if we push a predicate to either
--- of those tables we should see index scans.  Neither T1 nor T2
--- has indexes, so if we push a predicate to either of those tables
--- we should see a qualifier in the table scan information.
+-- Create the basic tables/views for DERBY-805 testing.
 CREATE TABLE "APP"."T1" ("I" INTEGER, "J" INTEGER);
 0 rows inserted/updated/deleted
 ij> insert into t1 values (1, 2), (2, 4), (3, 6), (4, 8), (5, 10);
@@ -28,15 +17,1299 @@ ij> insert into t2 values (1, 2), (2, -4), (3, 6), (4, -8), (5, 10);
 5 rows inserted/updated/deleted
 ij> CREATE TABLE "APP"."T3" ("A" INTEGER, "B" INTEGER);
 0 rows inserted/updated/deleted
-ij> CREATE INDEX "APP"."T3_IX1" ON "APP"."T3" ("A");
-0 rows inserted/updated/deleted
-ij> CREATE INDEX "APP"."T3_IX2" ON "APP"."T3" ("B");
-0 rows inserted/updated/deleted
 ij> insert into T3 values (1,1), (2,2), (3,3), (4,4), (6, 24),
   (7, 28), (8, 32), (9, 36), (10, 40);
 9 rows inserted/updated/deleted
 ij> insert into t3 (a) values 11, 12, 13, 14, 15, 16, 17, 18, 19, 20;
 10 rows inserted/updated/deleted
+ij> update t3 set b = 2 * a where a > 10;
+10 rows inserted/updated/deleted
+ij> CREATE TABLE "APP"."T4" ("A" INTEGER, "B" INTEGER);
+0 rows inserted/updated/deleted
+ij> insert into t4 values (3, 12), (4, 16);
+2 rows inserted/updated/deleted
+ij> insert into t4 (a) values 11, 12, 13, 14, 15, 16, 17, 18, 19, 20;
+10 rows inserted/updated/deleted
+ij> update t4 set b = 2 * a where a > 10;
+10 rows inserted/updated/deleted
+ij> create view V1 as select i, j from T1 union select i,j from T2;
+0 rows inserted/updated/deleted
+ij> create view V2 as select a,b from T3 union select a,b from T4;
+0 rows inserted/updated/deleted
+ij> -- Now that we have the basic tables and views for the tests, run
+-- some quick queries to make sure that the optimizer will still 
+-- consider NOT pushing the predicates and will instead do a hash
+-- join.  The optimizer should choose do this so long as doing so is
+-- the best choice, which usually means that we don't have indexes
+-- on the tables or else we have relatively small tables.  Start
+-- by checking the case of small (~20 row) tables.  We should
+-- see hash joins and table scans in ALL of these cases.
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 20000;
+ij> -- Basic cases.
+select * from V1, V2 where V1.j = V2.b;
+I          |J          |A          |B          
+-----------------------------------------------
+1          |2          |2          |2          
+2          |4          |4          |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- Basic cases.
+select * from V1, V2 where V1.j = V2.b
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Hash Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 7
+Rows seen from the right = 2
+Rows filtered = 0
+Rows returned = 2
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Sort ResultSet:
+	Number of opens = 1
+	Rows input = 10
+	Rows returned = 7
+	Eliminate duplicates = true
+	In sorted order = false
+	Sort information: 
+		Number of rows input=10
+		Number of rows output=7
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Union ResultSet:
+		Number of opens = 1
+		Rows seen from the left = 5
+		Rows seen from the right = 5
+		Rows returned = 10
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Left result set:
+			Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 5
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+		Right result set:
+			Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 5
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+Right result set:
+	Hash Table ResultSet (10):
+	Number of opens = 7
+	Hash table size = 16
+	Hash key is column number 1
+	Rows seen = 21
+	Rows filtered = 0
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+		next qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Source result set:
+		Sort ResultSet:
+		Number of opens = 1
+		Rows input = 31
+		Rows returned = 21
+		Eliminate duplicates = true
+		In sorted order = false
+		Sort information: 
+			Number of rows input=31
+			Number of rows output=21
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Source result set:
+			Union ResultSet:
+			Number of opens = 1
+			Rows seen from the left = 19
+			Rows seen from the right = 12
+			Rows returned = 31
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 19
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=19
+					Number of rows visited=19
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+			Right result set:
+				Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 12
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=12
+					Number of rows visited=12
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+ij> select * from V2, V1 where V1.j = V2.b;
+A          |B          |I          |J          
+-----------------------------------------------
+2          |2          |1          |2          
+4          |4          |2          |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from V2, V1 where V1.j = V2.b
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Project-Restrict ResultSet (11):
+Number of opens = 1
+Rows seen = 2
+Rows filtered = 0
+restriction = false
+projection = true
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Hash Join ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 7
+	Rows seen from the right = 2
+	Rows filtered = 0
+	Rows returned = 2
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Sort ResultSet:
+		Number of opens = 1
+		Rows input = 10
+		Rows returned = 7
+		Eliminate duplicates = true
+		In sorted order = false
+		Sort information: 
+			Number of rows input=10
+			Number of rows output=7
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Source result set:
+			Union ResultSet:
+			Number of opens = 1
+			Rows seen from the left = 5
+			Rows seen from the right = 5
+			Rows returned = 10
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 5
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=5
+					Number of rows visited=5
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+			Right result set:
+				Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 5
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=5
+					Number of rows visited=5
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+	Right result set:
+		Hash Table ResultSet (10):
+		Number of opens = 7
+		Hash table size = 16
+		Hash key is column number 1
+		Rows seen = 21
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+			next qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+		Source result set:
+			Sort ResultSet:
+			Number of opens = 1
+			Rows input = 31
+			Rows returned = 21
+			Eliminate duplicates = true
+			In sorted order = false
+			Sort information: 
+				Number of rows input=31
+				Number of rows output=21
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Source result set:
+				Union ResultSet:
+				Number of opens = 1
+				Rows seen from the left = 19
+				Rows seen from the right = 12
+				Rows returned = 31
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				Left result set:
+					Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 19
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=19
+						Number of rows visited=19
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+				Right result set:
+					Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 12
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=12
+						Number of rows visited=12
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+ij> -- Nested unions.
+select * from
+  (select * from t1 union
+    select * from t2 union
+      select * from t1 union
+        select * from t2
+  ) x1,
+  (select * from t3 union
+    select * from t4 union
+      select * from t4
+  ) x2
+where x1.i = x2.a;
+I          |J          |A          |B          
+-----------------------------------------------
+1          |2          |1          |1          
+2          |-4         |2          |2          
+2          |4          |2          |2          
+3          |6          |3          |3          
+3          |6          |3          |12         
+4          |-8         |4          |4          
+4          |-8         |4          |16         
+4          |8          |4          |4          
+4          |8          |4          |16         
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- Nested unions.
+select * from
+  (select * from t1 union
+    select * from t2 union
+      select * from t1 union
+        select * from t2
+  ) x1,
+  (select * from t3 union
+    select * from t4 union
+      select * from t4
+  ) x2
+where x1.i = x2.a
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Hash Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 7
+Rows seen from the right = 9
+Rows filtered = 0
+Rows returned = 9
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Sort ResultSet:
+	Number of opens = 1
+	Rows input = 20
+	Rows returned = 7
+	Eliminate duplicates = true
+	In sorted order = false
+	Sort information: 
+		Number of rows input=20
+		Number of rows output=7
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Union ResultSet:
+		Number of opens = 1
+		Rows seen from the left = 15
+		Rows seen from the right = 5
+		Rows returned = 20
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Left result set:
+			Union ResultSet:
+			Number of opens = 1
+			Rows seen from the left = 10
+			Rows seen from the right = 5
+			Rows returned = 15
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Union ResultSet:
+				Number of opens = 1
+				Rows seen from the left = 5
+				Rows seen from the right = 5
+				Rows returned = 10
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				Left result set:
+					Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 5
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=5
+						Number of rows visited=5
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+				Right result set:
+					Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 5
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=5
+						Number of rows visited=5
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+			Right result set:
+				Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 5
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=5
+					Number of rows visited=5
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+		Right result set:
+			Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 5
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+Right result set:
+	Hash Table ResultSet (16):
+	Number of opens = 7
+	Hash table size = 19
+	Hash key is column number 0
+	Rows seen = 21
+	Rows filtered = 0
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+		next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Source result set:
+		Sort ResultSet:
+		Number of opens = 1
+		Rows input = 43
+		Rows returned = 21
+		Eliminate duplicates = true
+		In sorted order = false
+		Sort information: 
+			Number of rows input=43
+			Number of rows output=21
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Source result set:
+			Union ResultSet:
+			Number of opens = 1
+			Rows seen from the left = 31
+			Rows seen from the right = 12
+			Rows returned = 43
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Union ResultSet:
+				Number of opens = 1
+				Rows seen from the left = 19
+				Rows seen from the right = 12
+				Rows returned = 31
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				Left result set:
+					Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 19
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=19
+						Number of rows visited=19
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+				Right result set:
+					Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 12
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=12
+						Number of rows visited=12
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+			Right result set:
+				Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 12
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=12
+					Number of rows visited=12
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+ij> -- UNION ALLs.
+select * from
+  (select * from t1 union all select * from t2) x1,
+  (select * from t3 union select * from t4) x2
+where x1.i = x2.a;
+I          |J          |A          |B          
+-----------------------------------------------
+1          |2          |1          |1          
+2          |4          |2          |2          
+3          |6          |3          |3          
+3          |6          |3          |12         
+4          |8          |4          |4          
+4          |8          |4          |16         
+1          |2          |1          |1          
+2          |-4         |2          |2          
+3          |6          |3          |3          
+3          |6          |3          |12         
+4          |-8         |4          |4          
+4          |-8         |4          |16         
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- UNION ALLs.
+select * from
+  (select * from t1 union all select * from t2) x1,
+  (select * from t3 union select * from t4) x2
+where x1.i = x2.a
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Hash Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 10
+Rows seen from the right = 12
+Rows filtered = 0
+Rows returned = 12
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Union ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 5
+	Rows seen from the right = 5
+	Rows returned = 10
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=5
+			Number of rows visited=5
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+	Right result set:
+		Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=5
+			Number of rows visited=5
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+Right result set:
+	Hash Table ResultSet (9):
+	Number of opens = 10
+	Hash table size = 19
+	Hash key is column number 0
+	Rows seen = 21
+	Rows filtered = 0
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+		next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Source result set:
+		Sort ResultSet:
+		Number of opens = 1
+		Rows input = 31
+		Rows returned = 21
+		Eliminate duplicates = true
+		In sorted order = false
+		Sort information: 
+			Number of rows input=31
+			Number of rows output=21
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Source result set:
+			Union ResultSet:
+			Number of opens = 1
+			Rows seen from the left = 19
+			Rows seen from the right = 12
+			Rows returned = 31
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 19
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=19
+					Number of rows visited=19
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+			Right result set:
+				Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 12
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=12
+					Number of rows visited=12
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+ij> select * from
+  (select * from t1 union select * from t2) x1,
+  (select * from t3 union all select * from t4) x2
+where x1.i = x2.a;
+I          |J          |A          |B          
+-----------------------------------------------
+1          |2          |1          |1          
+2          |-4         |2          |2          
+2          |4          |2          |2          
+3          |6          |3          |3          
+3          |6          |3          |12         
+4          |-8         |4          |4          
+4          |-8         |4          |16         
+4          |8          |4          |4          
+4          |8          |4          |16         
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from
+  (select * from t1 union select * from t2) x1,
+  (select * from t3 union all select * from t4) x2
+where x1.i = x2.a
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Hash Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 7
+Rows seen from the right = 9
+Rows filtered = 0
+Rows returned = 9
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Sort ResultSet:
+	Number of opens = 1
+	Rows input = 10
+	Rows returned = 7
+	Eliminate duplicates = true
+	In sorted order = false
+	Sort information: 
+		Number of rows input=10
+		Number of rows output=7
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Union ResultSet:
+		Number of opens = 1
+		Rows seen from the left = 5
+		Rows seen from the right = 5
+		Rows returned = 10
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Left result set:
+			Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 5
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+		Right result set:
+			Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 5
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+Right result set:
+	Hash Table ResultSet (9):
+	Number of opens = 7
+	Hash table size = 19
+	Hash key is column number 0
+	Rows seen = 31
+	Rows filtered = 0
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+		next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Source result set:
+		Union ResultSet:
+		Number of opens = 1
+		Rows seen from the left = 19
+		Rows seen from the right = 12
+		Rows returned = 31
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Left result set:
+			Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 19
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=19
+				Number of rows visited=19
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+		Right result set:
+			Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 12
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=12
+				Number of rows visited=12
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+ij> select * from
+  (select * from t1 union all select * from t2) x1,
+  (select * from t3 union all select * from t4) x2
+where x1.i = x2.a;
+I          |J          |A          |B          
+-----------------------------------------------
+1          |2          |1          |1          
+2          |4          |2          |2          
+3          |6          |3          |3          
+3          |6          |3          |12         
+4          |8          |4          |4          
+4          |8          |4          |16         
+1          |2          |1          |1          
+2          |-4         |2          |2          
+3          |6          |3          |3          
+3          |6          |3          |12         
+4          |-8         |4          |4          
+4          |-8         |4          |16         
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	select * from
+  (select * from t1 union all select * from t2) x1,
+  (select * from t3 union all select * from t4) x2
+where x1.i = x2.a
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Hash Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 10
+Rows seen from the right = 12
+Rows filtered = 0
+Rows returned = 12
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Union ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 5
+	Rows seen from the right = 5
+	Rows returned = 10
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=5
+			Number of rows visited=5
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+	Right result set:
+		Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		Fetch Size = 1
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of pages visited=1
+			Number of rows qualified=5
+			Number of rows visited=5
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+Right result set:
+	Hash Table ResultSet (8):
+	Number of opens = 10
+	Hash table size = 19
+	Hash key is column number 0
+	Rows seen = 31
+	Rows filtered = 0
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+		next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Source result set:
+		Union ResultSet:
+		Number of opens = 1
+		Rows seen from the left = 19
+		Rows seen from the right = 12
+		Rows returned = 31
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Left result set:
+			Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 19
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=19
+				Number of rows visited=19
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+		Right result set:
+			Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 12
+			Rows filtered = 0
+			Fetch Size = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of pages visited=1
+				Number of rows qualified=12
+				Number of rows visited=12
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+ij> -- Now bump up the size of tables T3 and T4 to the point where
+-- use of indexes will cause optimizer to choose nested loop join
+-- (and push predicates) instead of hash join.  The following
+-- insertions put roughly 50,000 rows into T3 and into T4.
+-- These numbers are somewhat arbitrary, but please note that
+-- reducing the number of rows in these two tables could cause the
+-- optimizer to choose to skip pushing and instead use a hash join
+-- for some of the test queries.  That's not 'wrong' per se, but
+-- it's not what we want to test here...
+autocommit off;
 ij> insert into t3 (a) values 21, 22, 23, 24, 25, 26, 27, 28, 29, 30;
 10 rows inserted/updated/deleted
 ij> insert into t3 (a) values 31, 32, 33, 34, 35, 36, 37, 38, 39, 40;
@@ -53,37 +1326,64 @@ ij> insert into t3 (a) values 81, 82, 83, 84, 85, 86, 87, 88, 89, 90;
 10 rows inserted/updated/deleted
 ij> insert into t3 (a) values 91, 92, 93, 94, 95, 96, 97, 98, 99, 100;
 10 rows inserted/updated/deleted
-ij> update t3 set b = 2 * a where a > 10;
-90 rows inserted/updated/deleted
-ij> CREATE TABLE "APP"."T4" ("A" INTEGER, "B" INTEGER);
+ij> update t3 set b = 2 * a where a > 20;
+80 rows inserted/updated/deleted
+ij> insert into t4 (a, b) (select a,b from t3 where a > 20);
+80 rows inserted/updated/deleted
+ij> insert into t4 (a, b) (select a,b from t3 where a > 20);
+80 rows inserted/updated/deleted
+ij> insert into t3 (a, b) (select a,b from t4 where a > 20);
+160 rows inserted/updated/deleted
+ij> insert into t4 (a, b) (select a,b from t3 where a > 20);
+240 rows inserted/updated/deleted
+ij> insert into t3 (a, b) (select a,b from t4 where a > 20);
+400 rows inserted/updated/deleted
+ij> insert into t4 (a, b) (select a,b from t3 where a > 20);
+640 rows inserted/updated/deleted
+ij> insert into t3 (a, b) (select a,b from t4 where a > 20);
+1040 rows inserted/updated/deleted
+ij> insert into t4 (a, b) (select a,b from t3 where a > 20);
+1680 rows inserted/updated/deleted
+ij> insert into t3 (a, b) (select a,b from t4 where a > 20);
+2720 rows inserted/updated/deleted
+ij> insert into t4 (a, b) (select a,b from t3 where a > 20);
+4400 rows inserted/updated/deleted
+ij> insert into t3 (a, b) (select a,b from t4 where a > 20);
+7120 rows inserted/updated/deleted
+ij> insert into t4 (a, b) (select a,b from t3 where a > 20);
+11520 rows inserted/updated/deleted
+ij> insert into t3 (a, b) (select a,b from t4 where a > 20);
+18640 rows inserted/updated/deleted
+ij> insert into t4 (a, b) (select a,b from t3 where a > 20);
+30160 rows inserted/updated/deleted
+ij> insert into t3 (a, b) (select a,b from t4 where a > 60);
+24400 rows inserted/updated/deleted
+ij> commit;
+ij> autocommit on;
+ij> -- See exactly how many rows we inserted, for sanity.
+select count(*) from t3;
+1          
+-----------
+54579      
+ij> select count(*) from t4;
+1          
+-----------
+48812      
+ij> -- At this point we create the indexes.  Note that we intentionally
+-- create the indexes AFTER loading the data, in order ensure that the
+-- index statistics are correct.  We need the stats to be correct in
+-- order for the optimizer to choose the correct plan (i.e. to push the
+-- join predicates where possible).
+CREATE INDEX "APP"."T3_IX1" ON "APP"."T3" ("A");
+0 rows inserted/updated/deleted
+ij> CREATE INDEX "APP"."T3_IX2" ON "APP"."T3" ("B");
 0 rows inserted/updated/deleted
 ij> CREATE INDEX "APP"."T4_IX1" ON "APP"."T4" ("A");
 0 rows inserted/updated/deleted
 ij> CREATE INDEX "APP"."T4_IX2" ON "APP"."T4" ("B");
 0 rows inserted/updated/deleted
-ij> insert into t4 values (3, 12), (4, 16);
-2 rows inserted/updated/deleted
-ij> insert into t4 (a) values 11, 12, 13, 14, 15, 16, 17, 18, 19, 20;
-10 rows inserted/updated/deleted
-ij> insert into t4 (a) values 21, 22, 23, 24, 25, 26, 27, 28, 29, 30;
-10 rows inserted/updated/deleted
-ij> insert into t4 (a) values 31, 32, 33, 34, 35, 36, 37, 38, 39, 40;
-10 rows inserted/updated/deleted
-ij> insert into t4 (a) values 41, 42, 43, 44, 45, 46, 47, 48, 49, 50;
-10 rows inserted/updated/deleted
-ij> insert into t4 (a) values 51, 52, 53, 54, 55, 56, 57, 58, 59, 60;
-10 rows inserted/updated/deleted
-ij> insert into t4 (a) values 61, 62, 63, 64, 65, 66, 67, 68, 69, 70;
-10 rows inserted/updated/deleted
-ij> insert into t4 (a) values 71, 72, 73, 74, 75, 76, 77, 78, 79, 80;
-10 rows inserted/updated/deleted
-ij> insert into t4 (a) values 81, 82, 83, 84, 85, 86, 87, 88, 89, 90;
-10 rows inserted/updated/deleted
-ij> insert into t4 (a) values 91, 92, 93, 94, 95, 96, 97, 98, 99, 100;
-10 rows inserted/updated/deleted
-ij> update t4 set b = 2 * a where a > 10;
-90 rows inserted/updated/deleted
-ij> CREATE TABLE "APP"."T5" ("I" INTEGER, "J" INTEGER);
+ij> -- Create the rest of objects used in this test.
+CREATE TABLE "APP"."T5" ("I" INTEGER, "J" INTEGER);
 0 rows inserted/updated/deleted
 ij> insert into t5 values (5, 10);
 1 row inserted/updated/deleted
@@ -101,18 +1401,24 @@ ij> ALTER TABLE "APP"."YY1" ADD CONSTRAINT "PK_YY1" PRIMARY KEY ("II");
 0 rows inserted/updated/deleted
 ij> ALTER TABLE "APP"."XX1" ADD CONSTRAINT "PK_XX1" PRIMARY KEY ("II");
 0 rows inserted/updated/deleted
-ij> create view V1 as select i, j from T1 union select i,j from T2;
-0 rows inserted/updated/deleted
-ij> create view V2 as select a,b from T3 union select a,b from T4;
-0 rows inserted/updated/deleted
 ij> create view xxunion as select all ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1;
 0 rows inserted/updated/deleted
 ij> create view yyunion as select all ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
-0 rows inserted/updated/deleted
-ij> maximumdisplaywidth 20000;
-ij> -- Predicate push-down should occur for next two queries.  Thus we
+ij> -- And finally, run more extensive tests using the larger tables
+-- that have indexes.  In these tests the optimizer should consider
+-- pushing predicates where possible.  We can tell if a predicate
+-- has been "pushed" by looking at the query plan information for
+-- the tables in question: if the table has an index on a column that
+-- is used as part of the pushed predicate, then the optimizer will
+-- (for these tests) do an Index scan instead of a Table scan.  If
+-- the table does not have such an index then the predicate will show
+-- up as a "qualifier" for a Table scan.  In all of these tests T3 and
+-- T4 have appropriate indexes, so if we push a predicate to either
+-- of those tables we should see index scans.  Neither T1 nor T2
+-- has indexes, so if we push a predicate to either of those tables
+-- we should see a qualifier in the table scan information.
+-- Predicate push-down should occur for next two queries.  Thus we
 -- we should see Index scans for T3 and T4--and this should be the
 -- case regardless of the order of the FROM list.
 select * from V1, V2 where V1.j = V2.b;
@@ -126,7 +1432,20 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 Statement Name: 
 	null
 Statement Text: 
-	-- Predicate push-down should occur for next two queries.  Thus we
+	-- And finally, run more extensive tests using the larger tables
+-- that have indexes.  In these tests the optimizer should consider
+-- pushing predicates where possible.  We can tell if a predicate
+-- has been "pushed" by looking at the query plan information for
+-- the tables in question: if the table has an index on a column that
+-- is used as part of the pushed predicate, then the optimizer will
+-- (for these tests) do an Index scan instead of a Table scan.  If
+-- the table does not have such an index then the predicate will show
+-- up as a "qualifier" for a Table scan.  In all of these tests T3 and
+-- T4 have appropriate indexes, so if we push a predicate to either
+-- of those tables we should see index scans.  Neither T1 nor T2
+-- has indexes, so if we push a predicate to either of those tables
+-- we should see a qualifier in the table scan information.
+-- Predicate push-down should occur for next two queries.  Thus we
 -- we should see Index scans for T3 and T4--and this should be the
 -- case regardless of the order of the FROM list.
 select * from V1, V2 where V1.j = V2.b
@@ -279,11 +1598,11 @@ Right result set:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -327,11 +1646,11 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -514,11 +1833,11 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=1
+							Number of pages visited=3
 							Number of rows qualified=0
 							Number of rows visited=1
 							Scan type=btree
-							Tree height=1
+							Tree height=3
 							start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -562,11 +1881,11 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=1
+							Number of pages visited=3
 							Number of rows qualified=0
 							Number of rows visited=1
 							Scan type=btree
-							Tree height=1
+							Tree height=3
 							start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -577,8 +1896,8 @@ None
 None
 ij> -- Changes for DERBY-805 don't affect non-join predicates (ex. "IN" or one-
 -- sided predicates), but make sure things still behave--i.e. these queries
--- should still compile and execute without error, and there should be a
--- qualifier on T1 for the scalar predicate.
+-- should still compile and execute without error.  We don't expect to see
+-- any predicates pushed to T3 nor T4.
 select count(*) from V1, V2 where V1.i in (2,4);
 1          
 -----------
@@ -591,8 +1910,8 @@ Statement Name:
 Statement Text: 
 	-- Changes for DERBY-805 don't affect non-join predicates (ex. "IN" or one-
 -- sided predicates), but make sure things still behave--i.e. these queries
--- should still compile and execute without error, and there should be a
--- qualifier on T1 for the scalar predicate.
+-- should still compile and execute without error.  We don't expect to see
+-- any predicates pushed to T3 nor T4.
 select count(*) from V1, V2 where V1.i in (2,4)
 Parse Time: 0
 Bind Time: 0
@@ -778,12 +2097,12 @@ Negate comparison result: false
 			Right result set:
 				Sort ResultSet:
 				Number of opens = 4
-				Rows input = 764
+				Rows input = 413564
 				Rows returned = 404
 				Eliminate duplicates = true
 				In sorted order = false
 				Sort information: 
-					Number of rows input=191
+					Number of rows input=103391
 					Number of rows output=101
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
@@ -792,9 +2111,9 @@ Negate comparison result: false
 				Source result set:
 					Union ResultSet:
 					Number of opens = 4
-					Rows seen from the left = 396
-					Rows seen from the right = 368
-					Rows returned = 764
+					Rows seen from the left = 218316
+					Rows seen from the right = 195248
+					Rows returned = 413564
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -802,7 +2121,7 @@ Negate comparison result: false
 					Left result set:
 						Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
 						Number of opens = 4
-						Rows seen = 396
+						Rows seen = 218316
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -813,9 +2132,9 @@ Negate comparison result: false
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
-							Number of rows qualified=99
-							Number of rows visited=99
+							Number of pages visited=434
+							Number of rows qualified=54579
+							Number of rows visited=54579
 							Scan type=heap
 							start position: 
 null							stop position: 
@@ -824,7 +2143,7 @@ None
 					Right result set:
 						Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
 						Number of opens = 4
-						Rows seen = 368
+						Rows seen = 195248
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -835,9 +2154,9 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
-							Number of rows qualified=92
-							Number of rows visited=92
+							Number of pages visited=388
+							Number of rows qualified=48812
+							Number of rows visited=48812
 							Scan type=heap
 							start position: 
 null							stop position: 
@@ -1002,12 +2321,12 @@ Negate comparison result: true
 			Right result set:
 				Sort ResultSet:
 				Number of opens = 5
-				Rows input = 955
+				Rows input = 516955
 				Rows returned = 505
 				Eliminate duplicates = true
 				In sorted order = false
 				Sort information: 
-					Number of rows input=191
+					Number of rows input=103391
 					Number of rows output=101
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
@@ -1016,9 +2335,9 @@ Negate comparison result: true
 				Source result set:
 					Union ResultSet:
 					Number of opens = 5
-					Rows seen from the left = 495
-					Rows seen from the right = 460
-					Rows returned = 955
+					Rows seen from the left = 272895
+					Rows seen from the right = 244060
+					Rows returned = 516955
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -1026,7 +2345,7 @@ Negate comparison result: true
 					Left result set:
 						Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
 						Number of opens = 5
-						Rows seen = 495
+						Rows seen = 272895
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -1037,9 +2356,9 @@ Negate comparison result: true
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
-							Number of rows qualified=99
-							Number of rows visited=99
+							Number of pages visited=434
+							Number of rows qualified=54579
+							Number of rows visited=54579
 							Scan type=heap
 							start position: 
 null							stop position: 
@@ -1048,7 +2367,7 @@ None
 					Right result set:
 						Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
 						Number of opens = 5
-						Rows seen = 460
+						Rows seen = 244060
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -1059,9 +2378,9 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
-							Number of rows qualified=92
-							Number of rows visited=92
+							Number of pages visited=388
+							Number of rows qualified=48812
+							Number of rows visited=48812
 							Scan type=heap
 							start position: 
 null							stop position: 
@@ -1177,15 +2496,15 @@ Left result set:
 null						stop position: 
 null						qualifiers:
 Column[0][0] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 0
 Operator: <=
 Ordered nulls: false
 Unknown return value: false
 Negate comparison result: false
+Column[0][1] Id: 0
+Operator: <
+Ordered nulls: false
+Unknown return value: true
+Negate comparison result: true
 			Right result set:
 				Project-Restrict ResultSet (7):
 				Number of opens = 1
@@ -1221,15 +2540,15 @@ Negate comparison result: false
 null						stop position: 
 null						qualifiers:
 Column[0][0] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 0
 Operator: <=
 Ordered nulls: false
 Unknown return value: false
 Negate comparison result: false
+Column[0][1] Id: 0
+Operator: <
+Ordered nulls: false
+Unknown return value: true
+Negate comparison result: true
 Right result set:
 	Sort ResultSet:
 	Number of opens = 4
@@ -1290,11 +2609,11 @@ Right result set:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -1338,11 +2657,11 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -1529,11 +2848,11 @@ Right result set:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -1578,11 +2897,11 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -1592,8 +2911,8 @@ None
 						qualifiers:
 None
 ij> -- In this case optimizer will consider pushing predicate to X1 but will
--- choose not to because it's cheaper to do a hash join between X1 and T3.
--- So should see regular table scans on T1 and T2 with hash scan on T3.
+-- choose not to because it's cheaper to push the predicate to T3.
+-- So should see regular table scans on T1 and T2.
 select * from
   (select * from t1 union select * from t2) x1,
   t3
@@ -1613,8 +2932,8 @@ Statement Name:
 	null
 Statement Text: 
 	-- In this case optimizer will consider pushing predicate to X1 but will
--- choose not to because it's cheaper to do a hash join between X1 and T3.
--- So should see regular table scans on T1 and T2 with hash scan on T3.
+-- choose not to because it's cheaper to push the predicate to T3.
+-- So should see regular table scans on T1 and T2.
 select * from
   (select * from t1 union select * from t2) x1,
   t3
@@ -1630,7 +2949,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Hash Join ResultSet:
+Nested Loop Join ResultSet:
 Number of opens = 1
 Rows seen from the left = 7
 Rows seen from the right = 6
@@ -1709,34 +3028,41 @@ null				stop position:
 null				qualifiers:
 None
 Right result set:
-	Hash Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking: 
+	Index Row to Base Row ResultSet for T3:
 	Number of opens = 7
-	Hash table size = 99
-	Hash key is column number 0
 	Rows seen = 6
-	Rows filtered = 0
+	Columns accessed from heap = {0, 1}
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-		next time in milliseconds/row = 0
-	scan information: 
-		Bit set of columns fetched=All
-		Number of columns fetched=2
-		Number of pages visited=1
-		Number of rows qualified=99
-		Number of rows visited=99
-		Scan type=heap
-		start position: 
-null		stop position: 
-null		scan qualifiers:
+		Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 7
+		Rows seen = 6
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=2
+			Number of deleted rows visited=0
+			Number of pages visited=21
+			Number of rows qualified=6
+			Number of rows visited=13
+			Scan type=btree
+			Tree height=3
+			start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+			qualifiers:
 None
-		next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
 ij> -- UNION ALL should behave just like normal UNION.  I.e. predicates should
 -- still be pushed to T3 and T4.
 select * from
@@ -1904,11 +3230,11 @@ Right result set:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -1953,11 +3279,11 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -2115,11 +3441,11 @@ Right result set:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
-					Number of pages visited=1
+					Number of pages visited=3
 					Number of rows qualified=0
 					Number of rows visited=1
 					Scan type=btree
-					Tree height=1
+					Tree height=3
 					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -2164,11 +3490,11 @@ None
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
-					Number of pages visited=1
+					Number of pages visited=3
 					Number of rows qualified=0
 					Number of rows visited=1
 					Scan type=btree
-					Tree height=1
+					Tree height=3
 					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -2385,8 +3711,7 @@ null				stop position:
 null				qualifiers:
 None
 ij> -- Pushing predicates should still work even if user specifies explicit
--- column names.  In 1st and 2nd queries we push to X2 (T3 and T4); in 3rd
--- query we push to X1 (T1 and T3).
+-- column names.  In these two queries we push to X2 (T3 and T4).
 select * from
   (select * from t1 union select * from t2) x1 (c, d),
   (select * from t3 union select * from t4) x2 (e, f)
@@ -2409,8 +3734,7 @@ Statement Name:
 	null
 Statement Text: 
 	-- Pushing predicates should still work even if user specifies explicit
--- column names.  In 1st and 2nd queries we push to X2 (T3 and T4); in 3rd
--- query we push to X1 (T1 and T3).
+-- column names.  In these two queries we push to X2 (T3 and T4).
 select * from
   (select * from t1 union select * from t2) x1 (c, d),
   (select * from t3 union select * from t4) x2 (e, f)
@@ -2564,11 +3888,11 @@ Right result set:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -2613,11 +3937,11 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -2800,11 +4124,11 @@ Right result set:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -2849,11 +4173,11 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -2862,7 +4186,10 @@ None
 	Ordered null semantics on the following columns: 
 						qualifiers:
 None
-ij> select count(*) from
+ij> -- In this query the optimizer will consider pushing, but will find
+-- that it's cheaper to do a hash join and thus will _not_ push.  So
+-- we see hash join with table scan on T3.
+select count(*) from
   (select * from t1 union select * from t3) x1 (c, d),
   (select * from t2 union select * from t4) x2 (e, f)
 where x1.c = x2.e;
@@ -2875,7 +4202,10 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 Statement Name: 
 	null
 Statement Text: 
-	select count(*) from
+	-- In this query the optimizer will consider pushing, but will find
+-- that it's cheaper to do a hash join and thus will _not_ push.  So
+-- we see hash join with table scan on T3.
+select count(*) from
   (select * from t1 union select * from t3) x1 (c, d),
   (select * from t2 union select * from t4) x2 (e, f)
 where x1.c = x2.e
@@ -2890,7 +4220,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (15):
+Project-Restrict ResultSet (13):
 Number of opens = 1
 Rows seen = 1
 Rows filtered = 0
@@ -2912,7 +4242,7 @@ Source result set:
 		close time (milliseconds) = 0
 	Index Key Optimization = false
 	Source result set:
-		Project-Restrict ResultSet (14):
+		Project-Restrict ResultSet (12):
 		Number of opens = 1
 		Rows seen = 103
 		Rows filtered = 0
@@ -2925,7 +4255,7 @@ Source result set:
 			restriction time (milliseconds) = 0
 			projection time (milliseconds) = 0
 		Source result set:
-			Nested Loop Join ResultSet:
+			Hash Join ResultSet:
 			Number of opens = 1
 			Rows seen from the left = 97
 			Rows seen from the right = 103
@@ -2938,12 +4268,12 @@ Source result set:
 			Left result set:
 				Sort ResultSet:
 				Number of opens = 1
-				Rows input = 97
+				Rows input = 48817
 				Rows returned = 97
 				Eliminate duplicates = true
 				In sorted order = false
 				Sort information: 
-					Number of rows input=97
+					Number of rows input=48817
 					Number of rows output=97
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
@@ -2953,8 +4283,8 @@ Source result set:
 					Union ResultSet:
 					Number of opens = 1
 					Rows seen from the left = 5
-					Rows seen from the right = 92
-					Rows returned = 97
+					Rows seen from the right = 48812
+					Rows returned = 48817
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -2984,7 +4314,7 @@ None
 					Right result set:
 						Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
 						Number of opens = 1
-						Rows seen = 92
+						Rows seen = 48812
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -2995,55 +4325,60 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
-							Number of rows qualified=92
-							Number of rows visited=92
+							Number of pages visited=388
+							Number of rows qualified=48812
+							Number of rows visited=48812
 							Scan type=heap
 							start position: 
 null							stop position: 
 null							qualifiers:
 None
 			Right result set:
-				Sort ResultSet:
+				Hash Table ResultSet (11):
 				Number of opens = 97
-				Rows input = 103
-				Rows returned = 103
-				Eliminate duplicates = true
-				In sorted order = false
-				Sort information: 
-					Number of rows input=1
-					Number of rows output=1
+				Hash table size = 100
+				Hash key is column number 0
+				Rows seen = 104
+				Rows filtered = 0
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+					next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 				Source result set:
-					Union ResultSet:
-					Number of opens = 97
-					Rows seen from the left = 7
-					Rows seen from the right = 96
-					Rows returned = 103
+					Sort ResultSet:
+					Number of opens = 1
+					Rows input = 54584
+					Rows returned = 104
+					Eliminate duplicates = true
+					In sorted order = false
+					Sort information: 
+						Number of rows input=54584
+						Number of rows output=104
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-					Left result set:
-						Project-Restrict ResultSet (10):
-						Number of opens = 97
-						Rows seen = 7
-						Rows filtered = 0
-						restriction = false
-						projection = false
+					Source result set:
+						Union ResultSet:
+						Number of opens = 1
+						Rows seen from the left = 5
+						Rows seen from the right = 54579
+						Rows returned = 54584
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
-							restriction time (milliseconds) = 0
-							projection time (milliseconds) = 0
-						Source result set:
+						Left result set:
 							Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
-							Number of opens = 97
-							Rows seen = 7
+							Number of opens = 1
+							Rows seen = 5
 							Rows filtered = 0
 							Fetch Size = 1
 								constructor time (milliseconds) = 0
@@ -3055,65 +4390,34 @@ None
 								Bit set of columns fetched=All
 								Number of columns fetched=2
 								Number of pages visited=1
-								Number of rows qualified=0
+								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
 								start position: 
 null								stop position: 
 null								qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-					Right result set:
-						Project-Restrict ResultSet (13):
-						Number of opens = 97
-						Rows seen = 96
-						Rows filtered = 0
-						restriction = false
-						projection = false
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-							restriction time (milliseconds) = 0
-							projection time (milliseconds) = 0
-						Source result set:
-							Index Row to Base Row ResultSet for T3:
-							Number of opens = 97
-							Rows seen = 96
-							Columns accessed from heap = {1}
+None
+						Right result set:
+							Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+							Number of opens = 1
+							Rows seen = 54579
+							Rows filtered = 0
+							Fetch Size = 1
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-								Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-								Number of opens = 97
-								Rows seen = 96
-								Rows filtered = 0
-								Fetch Size = 1
-									constructor time (milliseconds) = 0
-									open time (milliseconds) = 0
-									next time (milliseconds) = 0
-									close time (milliseconds) = 0
-									next time in milliseconds/row = 0
-								scan information: 
-									Bit set of columns fetched=All
-									Number of columns fetched=2
-									Number of deleted rows visited=0
-									Number of pages visited=1
-									Number of rows qualified=1
-									Number of rows visited=1
-									Scan type=btree
-									Tree height=1
-									start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-									stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-									qualifiers:
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of pages visited=434
+								Number of rows qualified=54579
+								Number of rows visited=54579
+								Scan type=heap
+								start position: 
+null								stop position: 
+null								qualifiers:
 None
 ij> -- If we have nested unions, the predicate should get pushed all the way down
 -- to the base table(s) for every level of nesting.  Should see index scans for
@@ -3383,11 +4687,11 @@ Right result set:
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=1
+							Number of pages visited=3
 							Number of rows qualified=0
 							Number of rows visited=1
 							Scan type=btree
-							Tree height=1
+							Tree height=3
 							start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -3432,11 +4736,11 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=1
+							Number of pages visited=3
 							Number of rows qualified=0
 							Number of rows visited=1
 							Scan type=btree
-							Tree height=1
+							Tree height=3
 							start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -3481,11 +4785,11 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -3788,12 +5092,12 @@ Source result set:
 			Source result set:
 				Sort ResultSet:
 				Number of opens = 1
-				Rows input = 201
+				Rows input = 103401
 				Rows returned = 108
 				Eliminate duplicates = true
 				In sorted order = false
 				Sort information: 
-					Number of rows input=201
+					Number of rows input=103401
 					Number of rows output=108
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
@@ -3802,9 +5106,9 @@ Source result set:
 				Source result set:
 					Union ResultSet:
 					Number of opens = 1
-					Rows seen from the left = 109
-					Rows seen from the right = 92
-					Rows returned = 201
+					Rows seen from the left = 54589
+					Rows seen from the right = 48812
+					Rows returned = 103401
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -3813,8 +5117,8 @@ Source result set:
 						Union ResultSet:
 						Number of opens = 1
 						Rows seen from the left = 10
-						Rows seen from the right = 99
-						Rows returned = 109
+						Rows seen from the right = 54579
+						Rows returned = 54589
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
@@ -3876,7 +5180,7 @@ None
 						Right result set:
 							Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
 							Number of opens = 1
-							Rows seen = 99
+							Rows seen = 54579
 							Rows filtered = 0
 							Fetch Size = 1
 								constructor time (milliseconds) = 0
@@ -3887,9 +5191,9 @@ None
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
-								Number of rows qualified=99
-								Number of rows visited=99
+								Number of pages visited=434
+								Number of rows qualified=54579
+								Number of rows visited=54579
 								Scan type=heap
 								start position: 
 null								stop position: 
@@ -3898,7 +5202,7 @@ None
 					Right result set:
 						Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
 						Number of opens = 1
-						Rows seen = 92
+						Rows seen = 48812
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -3909,9 +5213,9 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
-							Number of rows qualified=92
-							Number of rows visited=92
+							Number of pages visited=388
+							Number of rows qualified=48812
+							Number of rows visited=48812
 							Scan type=heap
 							start position: 
 null							stop position: 
@@ -4088,11 +5392,11 @@ Right result set:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -4136,11 +5440,11 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -4411,11 +5715,11 @@ Right result set:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -4460,11 +5764,11 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=3
 						Number of rows qualified=0
 						Number of rows visited=1
 						Scan type=btree
-						Tree height=1
+						Tree height=3
 						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -4672,7 +5976,7 @@ Operator: =
 Ordered nulls: false
 Unknown return value: false
 Negate comparison result: false
-ij> -- Can't push predicates into VALUES clause.  We'll try to push it to X0, but
+ij> -- Can't push predicates into VALUES clause.  We'll try to push it to X1, but
 -- it will only make it to T4; it won't make it to T3 because the "other side"
 -- of the union with T3 is a VALUES clause.  So we'll see an index scan on T4
 -- and table scan on T3--but the predicate should still be applied to T3 at a
@@ -4715,7 +6019,7 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 Statement Name: 
 	null
 Statement Text: 
-	-- Can't push predicates into VALUES clause.  We'll try to push it to X0, but
+	-- Can't push predicates into VALUES clause.  We'll try to push it to X1, but
 -- it will only make it to T4; it won't make it to T3 because the "other side"
 -- of the union with T3 is a VALUES clause.  So we'll see an index scan on T4
 -- and table scan on T3--but the predicate should still be applied to T3 at a
@@ -4908,12 +6212,12 @@ Right result set:
 	Source result set:
 		Sort ResultSet:
 		Number of opens = 11
-		Rows input = 1127
+		Rows input = 600407
 		Rows returned = 1127
 		Eliminate duplicates = true
 		In sorted order = false
 		Sort information: 
-			Number of rows input=102
+			Number of rows input=54582
 			Number of rows output=102
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
@@ -4922,9 +6226,9 @@ Right result set:
 		Source result set:
 			Union ResultSet:
 			Number of opens = 11
-			Rows seen from the left = 1122
+			Rows seen from the left = 600402
 			Rows seen from the right = 5
-			Rows returned = 1127
+			Rows returned = 600407
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
@@ -4932,9 +6236,9 @@ Right result set:
 			Left result set:
 				Union ResultSet:
 				Number of opens = 11
-				Rows seen from the left = 1089
+				Rows seen from the left = 600369
 				Rows seen from the right = 33
-				Rows returned = 1122
+				Rows returned = 600402
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
@@ -4942,7 +6246,7 @@ Right result set:
 				Left result set:
 					Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 11
-					Rows seen = 1089
+					Rows seen = 600369
 					Rows filtered = 0
 					Fetch Size = 1
 						constructor time (milliseconds) = 0
@@ -4953,9 +6257,9 @@ Right result set:
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
-						Number of rows qualified=99
-						Number of rows visited=99
+						Number of pages visited=434
+						Number of rows qualified=54579
+						Number of rows visited=54579
 						Scan type=heap
 						start position: 
 null						stop position: 
@@ -5041,11 +6345,11 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=1
+							Number of pages visited=3
 							Number of rows qualified=0
 							Number of rows visited=1
 							Scan type=btree
-							Tree height=1
+							Tree height=3
 							start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -5541,11 +6845,11 @@ None
 										Bit set of columns fetched=All
 										Number of columns fetched=2
 										Number of deleted rows visited=0
-										Number of pages visited=1
+										Number of pages visited=3
 										Number of rows qualified=0
 										Number of rows visited=1
 										Scan type=btree
-										Tree height=1
+										Tree height=3
 										start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -5590,11 +6894,11 @@ None
 										Bit set of columns fetched=All
 										Number of columns fetched=2
 										Number of deleted rows visited=0
-										Number of pages visited=1
+										Number of pages visited=3
 										Number of rows qualified=0
 										Number of rows visited=1
 										Scan type=btree
-										Tree height=1
+										Tree height=3
 										start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -5606,12 +6910,12 @@ None
 			Right result set:
 				Sort ResultSet:
 				Number of opens = 9
-				Rows input = 1719
+				Rows input = 930519
 				Rows returned = 909
 				Eliminate duplicates = true
 				In sorted order = false
 				Sort information: 
-					Number of rows input=191
+					Number of rows input=103391
 					Number of rows output=101
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
@@ -5620,9 +6924,9 @@ None
 				Source result set:
 					Union ResultSet:
 					Number of opens = 9
-					Rows seen from the left = 891
-					Rows seen from the right = 828
-					Rows returned = 1719
+					Rows seen from the left = 491211
+					Rows seen from the right = 439308
+					Rows returned = 930519
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -5630,7 +6934,7 @@ None
 					Left result set:
 						Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
 						Number of opens = 9
-						Rows seen = 891
+						Rows seen = 491211
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -5641,9 +6945,9 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
-							Number of rows qualified=99
-							Number of rows visited=99
+							Number of pages visited=434
+							Number of rows qualified=54579
+							Number of rows visited=54579
 							Scan type=heap
 							start position: 
 null							stop position: 
@@ -5652,7 +6956,7 @@ None
 					Right result set:
 						Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
 						Number of opens = 9
-						Rows seen = 828
+						Rows seen = 439308
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -5663,9 +6967,9 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
-							Number of rows qualified=92
-							Number of rows visited=92
+							Number of pages visited=388
+							Number of rows qualified=48812
+							Number of rows visited=48812
 							Scan type=heap
 							start position: 
 null							stop position: 
@@ -5889,11 +7193,11 @@ None
 										Bit set of columns fetched=All
 										Number of columns fetched=2
 										Number of deleted rows visited=0
-										Number of pages visited=1
+										Number of pages visited=3
 										Number of rows qualified=0
 										Number of rows visited=1
 										Scan type=btree
-										Tree height=1
+										Tree height=3
 										start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -5938,11 +7242,11 @@ None
 										Bit set of columns fetched=All
 										Number of columns fetched=2
 										Number of deleted rows visited=0
-										Number of pages visited=1
+										Number of pages visited=3
 										Number of rows qualified=0
 										Number of rows visited=1
 										Scan type=btree
-										Tree height=1
+										Tree height=3
 										start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -6011,11 +7315,11 @@ None
 									Bit set of columns fetched=All
 									Number of columns fetched=2
 									Number of deleted rows visited=0
-									Number of pages visited=1
+									Number of pages visited=3
 									Number of rows qualified=0
 									Number of rows visited=1
 									Scan type=btree
-									Tree height=1
+									Tree height=3
 									start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -6060,11 +7364,11 @@ None
 									Bit set of columns fetched=All
 									Number of columns fetched=2
 									Number of deleted rows visited=0
-									Number of pages visited=1
+									Number of pages visited=3
 									Number of rows qualified=1
 									Number of rows visited=2
 									Scan type=btree
-									Tree height=1
+									Tree height=3
 									start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -6085,7 +7389,8 @@ I          |J          |A          |B
 3          |6          |6          |24         
 5          |10         |10         |40         
 ij> -- Inner predicate should be handled as normal, outer predicate should
--- still be pushed to V2 (T3 and T4).
+-- either get pushed to V2 (T3 and T4) or else used for a hash join
+-- between x1 and v2.
 select * from
   (select i, b j from t1, t4 where i = j union select * from t2) x1,
   v2
@@ -6102,7 +7407,8 @@ Statement Name:
 	null
 Statement Text: 
 	-- Inner predicate should be handled as normal, outer predicate should
--- still be pushed to V2 (T3 and T4).
+-- either get pushed to V2 (T3 and T4) or else used for a hash join
+-- between x1 and v2.
 select * from
   (select i, b j from t1, t4 where i = j union select * from t2) x1,
   v2
@@ -6118,71 +7424,146 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Nested Loop Join ResultSet:
+Project-Restrict ResultSet (15):
 Number of opens = 1
-Rows seen from the left = 5
-Rows seen from the right = 3
+Rows seen = 3
 Rows filtered = 0
-Rows returned = 3
+restriction = false
+projection = true
 	constructor time (milliseconds) = 0
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-Left result set:
-	Sort ResultSet:
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Hash Join ResultSet:
 	Number of opens = 1
-	Rows input = 5
-	Rows returned = 5
-	Eliminate duplicates = true
-	In sorted order = false
-	Sort information: 
-		Number of rows input=5
-		Number of rows output=5
+	Rows seen from the left = 101
+	Rows seen from the right = 3
+	Rows filtered = 0
+	Rows returned = 3
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	Source result set:
-		Union ResultSet:
+	Left result set:
+		Sort ResultSet:
 		Number of opens = 1
-		Rows seen from the left = 0
-		Rows seen from the right = 5
-		Rows returned = 5
+		Rows input = 103391
+		Rows returned = 101
+		Eliminate duplicates = true
+		In sorted order = false
+		Sort information: 
+			Number of rows input=103391
+			Number of rows output=101
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		Left result set:
-			Project-Restrict ResultSet (8):
+		Source result set:
+			Union ResultSet:
 			Number of opens = 1
-			Rows seen = 0
-			Rows filtered = 0
-			restriction = false
-			projection = true
+			Rows seen from the left = 54579
+			Rows seen from the right = 48812
+			Rows returned = 103391
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
+			Left result set:
+				Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 54579
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=434
+					Number of rows qualified=54579
+					Number of rows visited=54579
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+			Right result set:
+				Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 48812
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=388
+					Number of rows qualified=48812
+					Number of rows visited=48812
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+	Right result set:
+		Hash Table ResultSet (14):
+		Number of opens = 101
+		Hash table size = 5
+		Hash key is column number 1
+		Rows seen = 5
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+			next qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+		Source result set:
+			Sort ResultSet:
+			Number of opens = 1
+			Rows input = 5
+			Rows returned = 5
+			Eliminate duplicates = true
+			In sorted order = false
+			Sort information: 
+				Number of rows input=5
+				Number of rows output=5
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
 			Source result set:
-				Nested Loop Join ResultSet:
+				Union ResultSet:
 				Number of opens = 1
 				Rows seen from the left = 0
-				Rows seen from the right = 0
-				Rows filtered = 0
-				Rows returned = 0
+				Rows seen from the right = 5
+				Rows returned = 5
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				Left result set:
-					Project-Restrict ResultSet (6):
+					Project-Restrict ResultSet (12):
 					Number of opens = 1
-					Rows seen = 5
-					Rows filtered = 5
-					restriction = true
-					projection = false
+					Rows seen = 0
+					Rows filtered = 0
+					restriction = false
+					projection = true
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -6190,113 +7571,72 @@ Left result set:
 						restriction time (milliseconds) = 0
 						projection time (milliseconds) = 0
 					Source result set:
-						Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+						Nested Loop Join ResultSet:
 						Number of opens = 1
-						Rows seen = 5
+						Rows seen from the left = 0
+						Rows seen from the right = 0
 						Rows filtered = 0
-						Fetch Size = 1
+						Rows returned = 0
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
-							next time in milliseconds/row = 0
-						scan information: 
-							Bit set of columns fetched=All
-							Number of columns fetched=2
-							Number of pages visited=1
-							Number of rows qualified=5
-							Number of rows visited=5
-							Scan type=heap
-							start position: 
-null							stop position: 
-null							qualifiers:
+						Left result set:
+							Project-Restrict ResultSet (10):
+							Number of opens = 1
+							Rows seen = 5
+							Rows filtered = 5
+							restriction = true
+							projection = false
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								restriction time (milliseconds) = 0
+								projection time (milliseconds) = 0
+							Source result set:
+								Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+								Number of opens = 1
+								Rows seen = 5
+								Rows filtered = 0
+								Fetch Size = 1
+									constructor time (milliseconds) = 0
+									open time (milliseconds) = 0
+									next time (milliseconds) = 0
+									close time (milliseconds) = 0
+									next time in milliseconds/row = 0
+								scan information: 
+									Bit set of columns fetched=All
+									Number of columns fetched=2
+									Number of pages visited=1
+									Number of rows qualified=5
+									Number of rows visited=5
+									Scan type=heap
+									start position: 
+null									stop position: 
+null									qualifiers:
+None
+						Right result set:
+							Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
+							Number of opens = 0
+							Rows seen = 0
+							Rows filtered = 0
+							Fetch Size = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+							scan information: 
+								start position: 
+	None
+								stop position: 
+	None
+								qualifiers:
 None
 				Right result set:
-					Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 0
-					Rows seen = 0
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-					scan information: 
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
-		Right result set:
-			Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
-			Number of opens = 1
-			Rows seen = 5
-			Rows filtered = 0
-			Fetch Size = 1
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				next time in milliseconds/row = 0
-			scan information: 
-				Bit set of columns fetched=All
-				Number of columns fetched=2
-				Number of pages visited=1
-				Number of rows qualified=5
-				Number of rows visited=5
-				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
-Right result set:
-	Sort ResultSet:
-	Number of opens = 5
-	Rows input = 3
-	Rows returned = 3
-	Eliminate duplicates = true
-	In sorted order = false
-	Sort information: 
-		Number of rows input=1
-		Number of rows output=1
-		constructor time (milliseconds) = 0
-		open time (milliseconds) = 0
-		next time (milliseconds) = 0
-		close time (milliseconds) = 0
-	Source result set:
-		Union ResultSet:
-		Number of opens = 5
-		Rows seen from the left = 3
-		Rows seen from the right = 0
-		Rows returned = 3
-			constructor time (milliseconds) = 0
-			open time (milliseconds) = 0
-			next time (milliseconds) = 0
-			close time (milliseconds) = 0
-		Left result set:
-			Project-Restrict ResultSet (14):
-			Number of opens = 5
-			Rows seen = 3
-			Rows filtered = 0
-			restriction = false
-			projection = false
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T3:
-				Number of opens = 5
-				Rows seen = 3
-				Columns accessed from heap = {1}
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 5
-					Rows seen = 3
+					Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 5
 					Rows filtered = 0
 					Fetch Size = 1
 						constructor time (milliseconds) = 0
@@ -6307,70 +7647,18 @@ Right result set:
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of deleted rows visited=0
 						Number of pages visited=1
-						Number of rows qualified=1
-						Number of rows visited=2
-						Scan type=btree
-						Tree height=1
+						Number of rows qualified=5
+						Number of rows visited=5
+						Scan type=heap
 						start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-						stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-						qualifiers:
+null						stop position: 
+null						qualifiers:
 None
-		Right result set:
-			Project-Restrict ResultSet (17):
-			Number of opens = 5
-			Rows seen = 0
-			Rows filtered = 0
-			restriction = false
-			projection = false
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T4:
-				Number of opens = 5
-				Rows seen = 0
-				Columns accessed from heap = {1}
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 5
-					Rows seen = 0
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=1
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=1
-						start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-						stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-						qualifiers:
-None
-ij> -- Outer predicate should still be pushed to V2 (T3 and T4); inner predicate
--- should be used for hash join between T1 and T3.
+ij> -- Outer predicate should either get pushed to V2 (T3 and T4) or
+-- else used for a hash join; similarly, inner predicate should
+-- either get pushed to T3 or else used for hash join between T1
+-- and T3.
 select * from
   (select i, j from t1, t3 where i = a union select * from t2) x1,
   v2
@@ -6383,8 +7671,8 @@ I          |J          |A          |B
 3          |6          |3          |3          
 3          |6          |3          |12         
 4          |-8         |4          |4          
-4          |-8         |4          |16         
 4          |8          |4          |4          
+4          |-8         |4          |16         
 4          |8          |4          |16         
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
@@ -6392,8 +7680,10 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 Statement Name: 
 	null
 Statement Text: 
-	-- Outer predicate should still be pushed to V2 (T3 and T4); inner predicate
--- should be used for hash join between T1 and T3.
+	-- Outer predicate should either get pushed to V2 (T3 and T4) or
+-- else used for a hash join; similarly, inner predicate should
+-- either get pushed to T3 or else used for hash join between T1
+-- and T3.
 select * from
   (select i, j from t1, t3 where i = a union select * from t2) x1,
   v2
@@ -6409,93 +7699,224 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Nested Loop Join ResultSet:
+Project-Restrict ResultSet (14):
 Number of opens = 1
-Rows seen from the left = 7
-Rows seen from the right = 9
+Rows seen = 9
 Rows filtered = 0
-Rows returned = 9
+restriction = false
+projection = true
 	constructor time (milliseconds) = 0
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-Left result set:
-	Sort ResultSet:
+	restriction time (milliseconds) = 0
+	projection time (milliseconds) = 0
+Source result set:
+	Hash Join ResultSet:
 	Number of opens = 1
-	Rows input = 9
-	Rows returned = 7
-	Eliminate duplicates = true
-	In sorted order = false
-	Sort information: 
-		Number of rows input=9
-		Number of rows output=7
+	Rows seen from the left = 101
+	Rows seen from the right = 9
+	Rows filtered = 0
+	Rows returned = 9
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	Source result set:
-		Union ResultSet:
+	Left result set:
+		Sort ResultSet:
 		Number of opens = 1
-		Rows seen from the left = 4
-		Rows seen from the right = 5
-		Rows returned = 9
+		Rows input = 103391
+		Rows returned = 101
+		Eliminate duplicates = true
+		In sorted order = false
+		Sort information: 
+			Number of rows input=103391
+			Number of rows output=101
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		Left result set:
-			Project-Restrict ResultSet (7):
+		Source result set:
+			Union ResultSet:
 			Number of opens = 1
-			Rows seen = 4
-			Rows filtered = 0
-			restriction = false
-			projection = true
+			Rows seen from the left = 54579
+			Rows seen from the right = 48812
+			Rows returned = 103391
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Hash Join ResultSet:
+			Left result set:
+				Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 1
-				Rows seen from the left = 99
-				Rows seen from the right = 4
+				Rows seen = 54579
 				Rows filtered = 0
-				Rows returned = 4
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=434
+					Number of rows qualified=54579
+					Number of rows visited=54579
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+			Right result set:
+				Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 48812
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=388
+					Number of rows qualified=48812
+					Number of rows visited=48812
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+	Right result set:
+		Hash Table ResultSet (13):
+		Number of opens = 101
+		Hash table size = 5
+		Hash key is column number 0
+		Rows seen = 7
+		Rows filtered = 0
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+			next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+		Source result set:
+			Sort ResultSet:
+			Number of opens = 1
+			Rows input = 9
+			Rows returned = 7
+			Eliminate duplicates = true
+			In sorted order = false
+			Sort information: 
+				Number of rows input=9
+				Number of rows output=7
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Source result set:
+				Union ResultSet:
+				Number of opens = 1
+				Rows seen from the left = 4
+				Rows seen from the right = 5
+				Rows returned = 9
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				Left result set:
-					Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+					Project-Restrict ResultSet (11):
 					Number of opens = 1
-					Rows seen = 99
+					Rows seen = 4
 					Rows filtered = 0
-					Fetch Size = 1
+					restriction = false
+					projection = true
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched={0}
-						Number of columns fetched=1
-						Number of pages visited=1
-						Number of rows qualified=99
-						Number of rows visited=99
-						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
+						restriction time (milliseconds) = 0
+						projection time (milliseconds) = 0
+					Source result set:
+						Hash Join ResultSet:
+						Number of opens = 1
+						Rows seen from the left = 5
+						Rows seen from the right = 4
+						Rows filtered = 0
+						Rows returned = 4
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+						Left result set:
+							Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+							Number of opens = 1
+							Rows seen = 5
+							Rows filtered = 0
+							Fetch Size = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of pages visited=1
+								Number of rows qualified=5
+								Number of rows visited=5
+								Scan type=heap
+								start position: 
+null								stop position: 
+null								qualifiers:
 None
+						Right result set:
+							Hash Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using instantaneous share row locking: 
+							Number of opens = 5
+							Hash table size = 99
+							Hash key is column number 0
+							Rows seen = 4
+							Rows filtered = 0
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched={0}
+								Number of columns fetched=1
+								Number of deleted rows visited=0
+								Number of pages visited=298
+								Number of rows qualified=54579
+								Number of rows visited=54579
+								Scan type=btree
+								Tree height=3
+								start position: 
+	None
+								stop position: 
+	None
+								scan qualifiers:
+None
+								next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 				Right result set:
-					Hash Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking: 
-					Number of opens = 99
-					Hash table size = 5
-					Hash key is column number 0
-					Rows seen = 4
+					Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 5
 					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -6510,161 +7931,10 @@ None
 						Scan type=heap
 						start position: 
 null						stop position: 
-null						scan qualifiers:
+null						qualifiers:
 None
-						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-		Right result set:
-			Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
-			Number of opens = 1
-			Rows seen = 5
-			Rows filtered = 0
-			Fetch Size = 1
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				next time in milliseconds/row = 0
-			scan information: 
-				Bit set of columns fetched=All
-				Number of columns fetched=2
-				Number of pages visited=1
-				Number of rows qualified=5
-				Number of rows visited=5
-				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
-Right result set:
-	Sort ResultSet:
-	Number of opens = 7
-	Rows input = 9
-	Rows returned = 9
-	Eliminate duplicates = true
-	In sorted order = false
-	Sort information: 
-		Number of rows input=0
-		Number of rows output=0
-		constructor time (milliseconds) = 0
-		open time (milliseconds) = 0
-		next time (milliseconds) = 0
-		close time (milliseconds) = 0
-	Source result set:
-		Union ResultSet:
-		Number of opens = 7
-		Rows seen from the left = 6
-		Rows seen from the right = 3
-		Rows returned = 9
-			constructor time (milliseconds) = 0
-			open time (milliseconds) = 0
-			next time (milliseconds) = 0
-			close time (milliseconds) = 0
-		Left result set:
-			Project-Restrict ResultSet (13):
-			Number of opens = 7
-			Rows seen = 6
-			Rows filtered = 0
-			restriction = false
-			projection = false
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T3:
-				Number of opens = 7
-				Rows seen = 6
-				Columns accessed from heap = {1}
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 6
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=1
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=1
-						start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-						stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-						qualifiers:
-None
-		Right result set:
-			Project-Restrict ResultSet (16):
-			Number of opens = 7
-			Rows seen = 3
-			Rows filtered = 0
-			restriction = false
-			projection = false
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T4:
-				Number of opens = 7
-				Rows seen = 3
-				Columns accessed from heap = {1}
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 3
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=1
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=1
-						start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-						stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-						qualifiers:
-None
-ij> -- Inner predicates treated as restrictions, outer predicate should
--- get pushed to X2 (T2 and T1).  So scans for last instances of T1
--- and T2 should have qualifiers that came from the predicate.
+ij> -- Inner predicates treated as restrictions, outer predicate either
+-- pushed to X2 (T2 and T1) or used for hash join between X2 and X1.
 select * from
   (select i, b j from t1, t4 where i = j union select * from t2) x1,
   (select i, b j from t2, t3 where i = j union select * from t1) x2
@@ -6678,9 +7948,8 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 Statement Name: 
 	null
 Statement Text: 
-	-- Inner predicates treated as restrictions, outer predicate should
--- get pushed to X2 (T2 and T1).  So scans for last instances of T1
--- and T2 should have qualifiers that came from the predicate.
+	-- Inner predicates treated as restrictions, outer predicate either
+-- pushed to X2 (T2 and T1) or used for hash join between X2 and X1.
 select * from
   (select i, b j from t1, t4 where i = j union select * from t2) x1,
   (select i, b j from t2, t3 where i = j union select * from t1) x2
@@ -6696,7 +7965,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Nested Loop Join ResultSet:
+Hash Join ResultSet:
 Number of opens = 1
 Rows seen from the left = 5
 Rows seen from the right = 1
@@ -6790,7 +8059,7 @@ null							stop position:
 null							qualifiers:
 None
 				Right result set:
-					Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+					Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 0
 					Rows seen = 0
 					Rows filtered = 0
@@ -6801,8 +8070,10 @@ None
 						close time (milliseconds) = 0
 					scan information: 
 						start position: 
-null						stop position: 
-null						qualifiers:
+	None
+						stop position: 
+	None
+						qualifiers:
 None
 		Right result set:
 			Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
@@ -6827,124 +8098,127 @@ null				stop position:
 null				qualifiers:
 None
 Right result set:
-	Sort ResultSet:
+	Hash Table ResultSet (18):
 	Number of opens = 5
-	Rows input = 1
-	Rows returned = 1
-	Eliminate duplicates = true
-	In sorted order = false
-	Sort information: 
-		Number of rows input=0
-		Number of rows output=0
+	Hash table size = 5
+	Hash key is column number 0
+	Rows seen = 5
+	Rows filtered = 0
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+		next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 	Source result set:
-		Union ResultSet:
-		Number of opens = 5
-		Rows seen from the left = 0
-		Rows seen from the right = 1
-		Rows returned = 1
+		Sort ResultSet:
+		Number of opens = 1
+		Rows input = 5
+		Rows returned = 5
+		Eliminate duplicates = true
+		In sorted order = false
+		Sort information: 
+			Number of rows input=5
+			Number of rows output=5
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		Left result set:
-			Project-Restrict ResultSet (16):
-			Number of opens = 5
-			Rows seen = 0
-			Rows filtered = 0
-			restriction = false
-			projection = true
+		Source result set:
+			Union ResultSet:
+			Number of opens = 1
+			Rows seen from the left = 0
+			Rows seen from the right = 5
+			Rows returned = 5
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Nested Loop Join ResultSet:
-				Number of opens = 5
-				Rows seen from the left = 0
-				Rows seen from the right = 0
+			Left result set:
+				Project-Restrict ResultSet (16):
+				Number of opens = 1
+				Rows seen = 0
 				Rows filtered = 0
-				Rows returned = 0
+				restriction = false
+				projection = true
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				Left result set:
-					Project-Restrict ResultSet (14):
-					Number of opens = 5
-					Rows seen = 1
-					Rows filtered = 1
-					restriction = true
-					projection = false
+					restriction time (milliseconds) = 0
+					projection time (milliseconds) = 0
+				Source result set:
+					Nested Loop Join ResultSet:
+					Number of opens = 1
+					Rows seen from the left = 0
+					Rows seen from the right = 0
+					Rows filtered = 0
+					Rows returned = 0
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						restriction time (milliseconds) = 0
-						projection time (milliseconds) = 0
-					Source result set:
-						Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
-						Number of opens = 5
-						Rows seen = 1
+					Left result set:
+						Project-Restrict ResultSet (14):
+						Number of opens = 1
+						Rows seen = 5
+						Rows filtered = 5
+						restriction = true
+						projection = false
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+							restriction time (milliseconds) = 0
+							projection time (milliseconds) = 0
+						Source result set:
+							Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+							Number of opens = 1
+							Rows seen = 5
+							Rows filtered = 0
+							Fetch Size = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of pages visited=1
+								Number of rows qualified=5
+								Number of rows visited=5
+								Scan type=heap
+								start position: 
+null								stop position: 
+null								qualifiers:
+None
+					Right result set:
+						Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
+						Number of opens = 0
+						Rows seen = 0
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
-							next time in milliseconds/row = 0
 						scan information: 
-							Bit set of columns fetched=All
-							Number of columns fetched=2
-							Number of pages visited=1
-							Number of rows qualified=0
-							Number of rows visited=5
-							Scan type=heap
 							start position: 
-null							stop position: 
-null							qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-				Right result set:
-					Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 0
-					Rows seen = 0
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-					scan information: 
-						start position: 
-null						stop position: 
-null						qualifiers:
+	None
+							stop position: 
+	None
+							qualifiers:
 None
-		Right result set:
-			Project-Restrict ResultSet (18):
-			Number of opens = 5
-			Rows seen = 1
-			Rows filtered = 0
-			restriction = false
-			projection = false
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
+			Right result set:
 				Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
-				Number of opens = 5
-				Rows seen = 1
+				Number of opens = 1
+				Rows seen = 5
 				Rows filtered = 0
 				Fetch Size = 1
 					constructor time (milliseconds) = 0
@@ -6956,17 +8230,13 @@ None
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of pages visited=1
-					Number of rows qualified=0
+					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
 					start position: 
 null					stop position: 
 null					qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+None
 ij> -- Following queries deal with nested subqueries, which deserve extra
 -- testing because "best paths" for outer queries might not agree with
 -- "best paths" for inner queries, so we need to make sure the correct
@@ -7197,11 +8467,11 @@ None
 										Bit set of columns fetched=All
 										Number of columns fetched=2
 										Number of deleted rows visited=0
-										Number of pages visited=1
+										Number of pages visited=3
 										Number of rows qualified=0
 										Number of rows visited=1
 										Scan type=btree
-										Tree height=1
+										Tree height=3
 										start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -7245,11 +8515,11 @@ None
 										Bit set of columns fetched=All
 										Number of columns fetched=2
 										Number of deleted rows visited=0
-										Number of pages visited=1
+										Number of pages visited=3
 										Number of rows qualified=0
 										Number of rows visited=1
 										Scan type=btree
-										Tree height=1
+										Tree height=3
 										start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
@@ -7258,9 +8528,8 @@ None
 	Ordered null semantics on the following columns: 
 										qualifiers:
 None
-ij> -- Multiple subqueries but NO UNIONs.  All predicates are used for hash joins
--- at their current level (no pushing).  So should see hash scan on T1, T6,
--- and T2.
+ij> -- Multiple subqueries but NO UNIONs.  All predicates are used for joins
+-- at their current level (no pushing).
 select t2.i,p from
   (select distinct i,p from
     (select distinct i,a from t1, t3 where t1.j = t3.b) X1,
@@ -7276,9 +8545,8 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 Statement Name: 
 	null
 Statement Text: 
-	-- Multiple subqueries but NO UNIONs.  All predicates are used for hash joins
--- at their current level (no pushing).  So should see hash scan on T1, T6,
--- and T2.
+	-- Multiple subqueries but NO UNIONs.  All predicates are used for joins
+-- at their current level (no pushing).
 select t2.i,p from
   (select distinct i,p from
     (select distinct i,a from t1, t3 where t1.j = t3.b) X1,
@@ -7297,7 +8565,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (12):
+Project-Restrict ResultSet (13):
 Number of opens = 1
 Rows seen = 0
 Rows filtered = 0
@@ -7335,7 +8603,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Source result set:
-			Project-Restrict ResultSet (10):
+			Project-Restrict ResultSet (11):
 			Number of opens = 1
 			Rows seen = 0
 			Rows filtered = 0
@@ -7373,7 +8641,7 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 					Source result set:
-						Project-Restrict ResultSet (8):
+						Project-Restrict ResultSet (9):
 						Number of opens = 1
 						Rows seen = 2
 						Rows filtered = 0
@@ -7386,9 +8654,9 @@ Source result set:
 							restriction time (milliseconds) = 0
 							projection time (milliseconds) = 0
 						Source result set:
-							Hash Join ResultSet:
+							Nested Loop Join ResultSet:
 							Number of opens = 1
-							Rows seen from the left = 99
+							Rows seen from the left = 5
 							Rows seen from the right = 2
 							Rows filtered = 0
 							Rows returned = 2
@@ -7397,34 +8665,11 @@ Source result set:
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
 							Left result set:
-								Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+								Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
 								Number of opens = 1
-								Rows seen = 99
+								Rows seen = 5
 								Rows filtered = 0
 								Fetch Size = 1
-									constructor time (milliseconds) = 0
-									open time (milliseconds) = 0
-									next time (milliseconds) = 0
-									close time (milliseconds) = 0
-									next time in milliseconds/row = 0
-								scan information: 
-									Bit set of columns fetched=All
-									Number of columns fetched=2
-									Number of pages visited=1
-									Number of rows qualified=99
-									Number of rows visited=99
-									Scan type=heap
-									start position: 
-null									stop position: 
-null									qualifiers:
-None
-							Right result set:
-								Hash Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking: 
-								Number of opens = 99
-								Hash table size = 5
-								Hash key is column number 1
-								Rows seen = 2
-								Rows filtered = 0
 									constructor time (milliseconds) = 0
 									open time (milliseconds) = 0
 									next time (milliseconds) = 0
@@ -7439,14 +8684,44 @@ None
 									Scan type=heap
 									start position: 
 null									stop position: 
-null									scan qualifiers:
+null									qualifiers:
 None
-									next qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+							Right result set:
+								Index Row to Base Row ResultSet for T3:
+								Number of opens = 5
+								Rows seen = 2
+								Columns accessed from heap = {0}
+									constructor time (milliseconds) = 0
+									open time (milliseconds) = 0
+									next time (milliseconds) = 0
+									close time (milliseconds) = 0
+									Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
+									Number of opens = 5
+									Rows seen = 2
+									Rows filtered = 0
+									Fetch Size = 1
+										constructor time (milliseconds) = 0
+										open time (milliseconds) = 0
+										next time (milliseconds) = 0
+										close time (milliseconds) = 0
+										next time in milliseconds/row = 0
+									scan information: 
+										Bit set of columns fetched=All
+										Number of columns fetched=2
+										Number of deleted rows visited=0
+										Number of pages visited=15
+										Number of rows qualified=2
+										Number of rows visited=7
+										Scan type=btree
+										Tree height=3
+										start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+										stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+										qualifiers:
+None
 				Right result set:
 					Hash Scan ResultSet for T6 at read committed isolation level using instantaneous share row locking: 
 					Number of opens = 2
@@ -7626,9 +8901,9 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
-					Number of rows qualified=99
-					Number of rows visited=99
+					Number of pages visited=434
+					Number of rows qualified=54579
+					Number of rows visited=54579
 					Scan type=heap
 					start position:
 	None
@@ -7708,7 +8983,7 @@ Source result set:
 	Source result set:
 		Nested Loop Join ResultSet:
 		Number of opens = 1
-		Rows seen from the left = 10
+		Rows seen from the left = 20
 		Rows seen from the right = 8
 		Rows filtered = 0
 		Rows returned = 8
@@ -7720,9 +8995,9 @@ Source result set:
 			Nested Loop Join ResultSet:
 			Number of opens = 1
 			Rows seen from the left = 25
-			Rows seen from the right = 10
+			Rows seen from the right = 20
 			Rows filtered = 0
-			Rows returned = 10
+			Rows returned = 20
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
@@ -7739,7 +9014,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				Left result set:
-					Distinct Scan ResultSet for T1 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+					Distinct Scan ResultSet for T2 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
 					Number of opens = 1
 					Hash table size = 5
 					Distinct columns are column numbers (0,1)
@@ -7766,7 +9041,7 @@ None
 						next qualifiers:
 None
 				Right result set:
-					Distinct Scan ResultSet for T2 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+					Distinct Scan ResultSet for T1 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
 					Number of opens = 5
 					Hash table size = 5
 					Distinct columns are column numbers (0,1)
@@ -7795,8 +9070,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (7):
 				Number of opens = 25
-				Rows seen = 2300
-				Rows filtered = 2290
+				Rows seen = 2475
+				Rows filtered = 2455
 				restriction = true
 				projection = true
 					constructor time (milliseconds) = 0
@@ -7806,11 +9081,11 @@ None
 					restriction time (milliseconds) = 0
 					projection time (milliseconds) = 0
 				Source result set:
-					Distinct Scan ResultSet for T4 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+					Distinct Scan ResultSet for T3 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
 					Number of opens = 25
-					Hash table size = 92
+					Hash table size = 99
 					Distinct columns are column numbers (0,1)
-					Rows seen = 2300
+					Rows seen = 2475
 					Rows filtered = 0
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
@@ -7820,9 +9095,9 @@ None
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
-						Number of rows qualified=92
-						Number of rows visited=92
+						Number of pages visited=434
+						Number of rows qualified=54579
+						Number of rows visited=54579
 						Scan type=heap
 						start position:
 	None
@@ -7834,9 +9109,9 @@ None
 None
 		Right result set:
 			Project-Restrict ResultSet (9):
-			Number of opens = 10
-			Rows seen = 990
-			Rows filtered = 982
+			Number of opens = 20
+			Rows seen = 1840
+			Rows filtered = 1832
 			restriction = true
 			projection = true
 				constructor time (milliseconds) = 0
@@ -7846,11 +9121,11 @@ None
 				restriction time (milliseconds) = 0
 				projection time (milliseconds) = 0
 			Source result set:
-				Distinct Scan ResultSet for T3 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
-				Number of opens = 10
-				Hash table size = 99
+				Distinct Scan ResultSet for T4 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+				Number of opens = 20
+				Hash table size = 92
 				Distinct columns are column numbers (0,1)
-				Rows seen = 990
+				Rows seen = 1840
 				Rows filtered = 0
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
@@ -7860,9 +9135,9 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
-					Number of rows qualified=99
-					Number of rows visited=99
+					Number of pages visited=388
+					Number of rows qualified=48812
+					Number of rows visited=48812
 					Scan type=heap
 					start position:
 	None
@@ -7875,9 +9150,9 @@ None
 ij> -- Multiple subqueries that are UNIONs.  Outer-most predicate
 -- X0.b = X2.j can be pushed to union X0 but NOT to subquery X2.
 -- Inner predicate T6.p = X1.i is eligible for being pushed into
--- union X1, but optimizer won't choose to do so (because it's
--- cheaper to do a hash between X1 and T6).  So should see
--- predicate pushed to T3 and T4, but not to T1 nor T2.
+-- union X1.  In this case outer predicate is pushed to X0
+-- (so we'll see index scans on T3 and T4) but inner predicate
+-- is used for a hash join between X1 and T6.
 select X0.a, X2.i from
    (select a,b from t4 union select a,b from t3) X0,
    (select i,j from
@@ -7897,9 +9172,9 @@ Statement Text:
 	-- Multiple subqueries that are UNIONs.  Outer-most predicate
 -- X0.b = X2.j can be pushed to union X0 but NOT to subquery X2.
 -- Inner predicate T6.p = X1.i is eligible for being pushed into
--- union X1, but optimizer won't choose to do so (because it's
--- cheaper to do a hash between X1 and T6).  So should see
--- predicate pushed to T3 and T4, but not to T1 nor T2.
+-- union X1.  In this case outer predicate is pushed to X0
+-- (so we'll see index scans on T3 and T4) but inner predicate
+-- is used for a hash join between X1 and T6.
 select X0.a, X2.i from
    (select a,b from t4 union select a,b from t3) X0,
    (select i,j from

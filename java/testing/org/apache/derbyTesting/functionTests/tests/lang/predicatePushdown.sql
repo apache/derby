@@ -7,18 +7,7 @@
 -- to another (which can happen if some machines are faster than
 -- others when noTimeout is false).
 
--- Create the tables/views for DERBY-805 testing.  For DERBY-805
--- we can tell if a predicate has been "pushed" by looking at
--- the query plan information for the tables in question: if the
--- table has an index on a column that is used as part of the
--- pushed predicate, then the optimizer will (for these tests)
--- do an Index scan instead of a Table scan.  If the table does
--- not have such an index then the predicate will show up as a
--- "qualifier" for a Table scan.  In all of these tests T3 and T4
--- have appropriate indexes, so if we push a predicate to either
--- of those tables we should see index scans.  Neither T1 nor T2
--- has indexes, so if we push a predicate to either of those tables
--- we should see a qualifier in the table scan information.
+-- Create the basic tables/views for DERBY-805 testing.
 
 CREATE TABLE "APP"."T1" ("I" INTEGER, "J" INTEGER);
 insert into t1 values (1, 2), (2, 4), (3, 6), (4, 8), (5, 10);
@@ -27,12 +16,82 @@ CREATE TABLE "APP"."T2" ("I" INTEGER, "J" INTEGER);
 insert into t2 values (1, 2), (2, -4), (3, 6), (4, -8), (5, 10);
 
 CREATE TABLE "APP"."T3" ("A" INTEGER, "B" INTEGER);
-CREATE INDEX "APP"."T3_IX1" ON "APP"."T3" ("A");
-CREATE INDEX "APP"."T3_IX2" ON "APP"."T3" ("B");
 insert into T3 values (1,1), (2,2), (3,3), (4,4), (6, 24),
   (7, 28), (8, 32), (9, 36), (10, 40); 
 
 insert into t3 (a) values 11, 12, 13, 14, 15, 16, 17, 18, 19, 20;
+update t3 set b = 2 * a where a > 10;
+
+CREATE TABLE "APP"."T4" ("A" INTEGER, "B" INTEGER);
+insert into t4 values (3, 12), (4, 16);
+
+insert into t4 (a) values 11, 12, 13, 14, 15, 16, 17, 18, 19, 20;
+update t4 set b = 2 * a where a > 10;
+
+create view V1 as select i, j from T1 union select i,j from T2;
+create view V2 as select a,b from T3 union select a,b from T4;
+
+-- Now that we have the basic tables and views for the tests, run
+-- some quick queries to make sure that the optimizer will still 
+-- consider NOT pushing the predicates and will instead do a hash
+-- join.  The optimizer should choose do this so long as doing so is
+-- the best choice, which usually means that we don't have indexes
+-- on the tables or else we have relatively small tables.  Start
+-- by checking the case of small (~20 row) tables.  We should
+-- see hash joins and table scans in ALL of these cases.
+
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+maximumdisplaywidth 20000;
+
+-- Basic cases.
+select * from V1, V2 where V1.j = V2.b;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+select * from V2, V1 where V1.j = V2.b;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+ 
+-- Nested unions.
+select * from
+  (select * from t1 union
+    select * from t2 union
+      select * from t1 union
+        select * from t2
+  ) x1,
+  (select * from t3 union
+    select * from t4 union
+      select * from t4
+  ) x2
+where x1.i = x2.a;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+ 
+-- UNION ALLs.
+select * from
+  (select * from t1 union all select * from t2) x1,
+  (select * from t3 union select * from t4) x2
+where x1.i = x2.a;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+select * from
+  (select * from t1 union select * from t2) x1,
+  (select * from t3 union all select * from t4) x2
+where x1.i = x2.a;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+select * from
+  (select * from t1 union all select * from t2) x1,
+  (select * from t3 union all select * from t4) x2
+where x1.i = x2.a;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+-- Now bump up the size of tables T3 and T4 to the point where
+-- use of indexes will cause optimizer to choose nested loop join
+-- (and push predicates) instead of hash join.  The following
+-- insertions put roughly 50,000 rows into T3 and into T4.
+-- These numbers are somewhat arbitrary, but please note that
+-- reducing the number of rows in these two tables could cause the
+-- optimizer to choose to skip pushing and instead use a hash join
+-- for some of the test queries.  That's not 'wrong' per se, but
+-- it's not what we want to test here...
+
+autocommit off;
+
 insert into t3 (a) values 21, 22, 23, 24, 25, 26, 27, 28, 29, 30;
 insert into t3 (a) values 31, 32, 33, 34, 35, 36, 37, 38, 39, 40;
 insert into t3 (a) values 41, 42, 43, 44, 45, 46, 47, 48, 49, 50;
@@ -41,23 +100,44 @@ insert into t3 (a) values 61, 62, 63, 64, 65, 66, 67, 68, 69, 70;
 insert into t3 (a) values 71, 72, 73, 74, 75, 76, 77, 78, 79, 80;
 insert into t3 (a) values 81, 82, 83, 84, 85, 86, 87, 88, 89, 90;
 insert into t3 (a) values 91, 92, 93, 94, 95, 96, 97, 98, 99, 100;
-update t3 set b = 2 * a where a > 10;
 
-CREATE TABLE "APP"."T4" ("A" INTEGER, "B" INTEGER);
+update t3 set b = 2 * a where a > 20;
+insert into t4 (a, b) (select a,b from t3 where a > 20);
+
+insert into t4 (a, b) (select a,b from t3 where a > 20);
+insert into t3 (a, b) (select a,b from t4 where a > 20);
+insert into t4 (a, b) (select a,b from t3 where a > 20);
+insert into t3 (a, b) (select a,b from t4 where a > 20);
+insert into t4 (a, b) (select a,b from t3 where a > 20);
+insert into t3 (a, b) (select a,b from t4 where a > 20);
+insert into t4 (a, b) (select a,b from t3 where a > 20);
+insert into t3 (a, b) (select a,b from t4 where a > 20);
+insert into t4 (a, b) (select a,b from t3 where a > 20);
+insert into t3 (a, b) (select a,b from t4 where a > 20);
+insert into t4 (a, b) (select a,b from t3 where a > 20);
+insert into t3 (a, b) (select a,b from t4 where a > 20);
+insert into t4 (a, b) (select a,b from t3 where a > 20);
+insert into t3 (a, b) (select a,b from t4 where a > 60);
+
+commit;
+autocommit on;
+
+-- See exactly how many rows we inserted, for sanity.
+select count(*) from t3;
+select count(*) from t4;
+
+-- At this point we create the indexes.  Note that we intentionally
+-- create the indexes AFTER loading the data, in order ensure that the
+-- index statistics are correct.  We need the stats to be correct in
+-- order for the optimizer to choose the correct plan (i.e. to push the
+-- join predicates where possible).
+
+CREATE INDEX "APP"."T3_IX1" ON "APP"."T3" ("A");
+CREATE INDEX "APP"."T3_IX2" ON "APP"."T3" ("B");
 CREATE INDEX "APP"."T4_IX1" ON "APP"."T4" ("A");
 CREATE INDEX "APP"."T4_IX2" ON "APP"."T4" ("B");
-insert into t4 values (3, 12), (4, 16);
 
-insert into t4 (a) values 11, 12, 13, 14, 15, 16, 17, 18, 19, 20;
-insert into t4 (a) values 21, 22, 23, 24, 25, 26, 27, 28, 29, 30;
-insert into t4 (a) values 31, 32, 33, 34, 35, 36, 37, 38, 39, 40;
-insert into t4 (a) values 41, 42, 43, 44, 45, 46, 47, 48, 49, 50;
-insert into t4 (a) values 51, 52, 53, 54, 55, 56, 57, 58, 59, 60;
-insert into t4 (a) values 61, 62, 63, 64, 65, 66, 67, 68, 69, 70;
-insert into t4 (a) values 71, 72, 73, 74, 75, 76, 77, 78, 79, 80;
-insert into t4 (a) values 81, 82, 83, 84, 85, 86, 87, 88, 89, 90;
-insert into t4 (a) values 91, 92, 93, 94, 95, 96, 97, 98, 99, 100;
-update t4 set b = 2 * a where a > 10;
+-- Create the rest of objects used in this test.
 
 CREATE TABLE "APP"."T5" ("I" INTEGER, "J" INTEGER);
 insert into t5 values (5, 10);
@@ -73,15 +153,23 @@ CREATE TABLE "APP"."YY1" ("II" INTEGER NOT NULL, "JJ" CHAR(10),
 ALTER TABLE "APP"."YY1" ADD CONSTRAINT "PK_YY1" PRIMARY KEY ("II");
 ALTER TABLE "APP"."XX1" ADD CONSTRAINT "PK_XX1" PRIMARY KEY ("II");
 
-create view V1 as select i, j from T1 union select i,j from T2;
-create view V2 as select a,b from T3 union select a,b from T4;
-
 create view xxunion as select all ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1;
 
 create view yyunion as select all ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1;
 
-call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
-maximumdisplaywidth 20000;
+-- And finally, run more extensive tests using the larger tables
+-- that have indexes.  In these tests the optimizer should consider
+-- pushing predicates where possible.  We can tell if a predicate
+-- has been "pushed" by looking at the query plan information for
+-- the tables in question: if the table has an index on a column that
+-- is used as part of the pushed predicate, then the optimizer will
+-- (for these tests) do an Index scan instead of a Table scan.  If
+-- the table does not have such an index then the predicate will show
+-- up as a "qualifier" for a Table scan.  In all of these tests T3 and
+-- T4 have appropriate indexes, so if we push a predicate to either
+-- of those tables we should see index scans.  Neither T1 nor T2
+-- has indexes, so if we push a predicate to either of those tables
+-- we should see a qualifier in the table scan information.
 
 -- Predicate push-down should occur for next two queries.  Thus we
 -- we should see Index scans for T3 and T4--and this should be the
@@ -93,8 +181,8 @@ values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 -- Changes for DERBY-805 don't affect non-join predicates (ex. "IN" or one-
 -- sided predicates), but make sure things still behave--i.e. these queries
--- should still compile and execute without error, and there should be a
--- qualifier on T1 for the scalar predicate.
+-- should still compile and execute without error.  We don't expect to see
+-- any predicates pushed to T3 nor T4.
 select count(*) from V1, V2 where V1.i in (2,4);
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 select count(*) from V1, V2 where V1.j > 0;
@@ -115,8 +203,8 @@ where x1.i = x2.a;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 -- In this case optimizer will consider pushing predicate to X1 but will
--- choose not to because it's cheaper to do a hash join between X1 and T3.
--- So should see regular table scans on T1 and T2 with hash scan on T3.
+-- choose not to because it's cheaper to push the predicate to T3.
+-- So should see regular table scans on T1 and T2.
 select * from
   (select * from t1 union select * from t2) x1,
   t3
@@ -142,8 +230,7 @@ select * from v1, v2 where V1.i = V1.j;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 -- Pushing predicates should still work even if user specifies explicit
--- column names.  In 1st and 2nd queries we push to X2 (T3 and T4); in 3rd
--- query we push to X1 (T1 and T3).
+-- column names.  In these two queries we push to X2 (T3 and T4).
 select * from
   (select * from t1 union select * from t2) x1 (c, d),
   (select * from t3 union select * from t4) x2 (e, f)
@@ -154,6 +241,10 @@ select * from
   (select * from t3 union select * from t4) x2 (i, j)
 where x1.a = x2.i;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+-- In this query the optimizer will consider pushing, but will find
+-- that it's cheaper to do a hash join and thus will _not_ push.  So
+-- we see hash join with table scan on T3.
 select count(*) from
   (select * from t1 union select * from t3) x1 (c, d),
   (select * from t2 union select * from t4) x2 (e, f)
@@ -226,7 +317,7 @@ select * from
 where X1.a = t2.i;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
--- Can't push predicates into VALUES clause.  We'll try to push it to X0, but
+-- Can't push predicates into VALUES clause.  We'll try to push it to X1, but
 -- it will only make it to T4; it won't make it to T3 because the "other side"
 -- of the union with T3 is a VALUES clause.  So we'll see an index scan on T4
 -- and table scan on T3--but the predicate should still be applied to T3 at a
@@ -304,24 +395,26 @@ select * from
 where x1.j = t3.a;
 
 -- Inner predicate should be handled as normal, outer predicate should
--- still be pushed to V2 (T3 and T4).
+-- either get pushed to V2 (T3 and T4) or else used for a hash join
+-- between x1 and v2.
 select * from
   (select i, b j from t1, t4 where i = j union select * from t2) x1,
   v2
 where x1.j = v2.a;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
--- Outer predicate should still be pushed to V2 (T3 and T4); inner predicate
--- should be used for hash join between T1 and T3.
+-- Outer predicate should either get pushed to V2 (T3 and T4) or
+-- else used for a hash join; similarly, inner predicate should
+-- either get pushed to T3 or else used for hash join between T1
+-- and T3.
 select * from
   (select i, j from t1, t3 where i = a union select * from t2) x1,
   v2
 where x1.i = v2.a;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
--- Inner predicates treated as restrictions, outer predicate should
--- get pushed to X2 (T2 and T1).  So scans for last instances of T1
--- and T2 should have qualifiers that came from the predicate.
+-- Inner predicates treated as restrictions, outer predicate either
+-- pushed to X2 (T2 and T1) or used for hash join between X2 and X1.
 select * from
   (select i, b j from t1, t4 where i = j union select * from t2) x1,
   (select i, b j from t2, t3 where i = j union select * from t1) x2
@@ -343,9 +436,8 @@ select count(*) from
     ) X3;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
--- Multiple subqueries but NO UNIONs.  All predicates are used for hash joins
--- at their current level (no pushing).  So should see hash scan on T1, T6,
--- and T2.
+-- Multiple subqueries but NO UNIONs.  All predicates are used for joins
+-- at their current level (no pushing).
 select t2.i,p from
   (select distinct i,p from
     (select distinct i,a from t1, t3 where t1.j = t3.b) X1,
@@ -376,9 +468,9 @@ values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 -- Multiple subqueries that are UNIONs.  Outer-most predicate
 -- X0.b = X2.j can be pushed to union X0 but NOT to subquery X2.
 -- Inner predicate T6.p = X1.i is eligible for being pushed into
--- union X1, but optimizer won't choose to do so (because it's
--- cheaper to do a hash between X1 and T6).  So should see
--- predicate pushed to T3 and T4, but not to T1 nor T2.
+-- union X1.  In this case outer predicate is pushed to X0
+-- (so we'll see index scans on T3 and T4) but inner predicate
+-- is used for a hash join between X1 and T6.
 select X0.a, X2.i from
    (select a,b from t4 union select a,b from t3) X0,
    (select i,j from

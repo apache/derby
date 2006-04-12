@@ -293,6 +293,18 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		// if (childResultOptimized)
 		// 	return costEstimate;
 
+		// It's possible that a call to optimize the left/right will cause
+		// a new "truly the best" plan to be stored in the underlying base
+		// tables.  If that happens and then we decide to skip that plan
+		// (which we might do if the call to "considerCost()" below decides
+		// the current path is infeasible or not the best) we need to be
+		// able to revert back to the "truly the best" plans that we had
+		// saved before we got here.  So with this next call we save the
+		// current plans using "this" node as the key.  If needed, we'll
+		// then make the call to revert the plans in OptimizerImpl's
+		// getNextDecoratedPermutation() method.
+		addOrLoadBestPlanMapping(true, this);
+
 		/* If the childResult is instanceof Optimizable, then we optimizeIt.
 		 * Otherwise, we are going into a new query block.  If the new query
 		 * block has already had its access path modified, then there is
@@ -379,7 +391,25 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		 */
 		if (childResult instanceof Optimizable)
 		{
-			return ((Optimizable) childResult).feasibleJoinStrategy(restrictionList, optimizer);
+			// With DERBY-805 it's possible that, when considering a nested
+			// loop join with this PRN, we pushed predicates down into the
+			// child if the child is a UNION node.  At this point, though, we
+			// may be considering doing a hash join with this PRN instead of a
+			// nested loop join, and if that's the case we need to pull any
+			// predicates back up so that they can be searched for equijoins
+			// that will in turn make the hash join possible.  So that's what
+			// the next call does.  Two things to note: 1) if no predicates
+			// were pushed, this call is a no-op; and 2) if we get here when
+			// considering a nested loop join, the predicates that we pull
+			// here (if any) will be re-pushed for subsequent costing/ 
+			// optimization as necessary (see OptimizerImpl.costPermutation(),
+			// which will call this class's optimizeIt() method and that's
+			// where the predicates are pushed down again).
+			if (childResult instanceof UnionNode)
+				((UnionNode)childResult).pullOptPredicates(restrictionList);
+
+			return ((Optimizable) childResult).
+				feasibleJoinStrategy(restrictionList, optimizer);
 		}
 		else
 		{
@@ -544,6 +574,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		** Do nothing if the child result set is not optimizable, as there
 		** can be nothing to modify.
 		*/
+		boolean alreadyPushed = false;
 		if ( ! (childResult instanceof Optimizable))
 		{
 			// Remember that the original child was not Optimizable
@@ -607,6 +638,17 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 				childResult = (ResultSetNode)
 					((SetOperatorNode) childResult).modifyAccessPath(
 						outerTables, restrictionList);
+
+				// Take note of the fact that we already pushed predicates
+				// as part of the modifyAccessPaths call.  This is necessary
+				// because there may still be predicates in restrictionList
+				// that we intentionally decided not to push (ex. if we're
+				// going to do hash join then we chose to not push the join
+				// predicates).  Whatever the reason for not pushing the
+				// predicates, we have to make sure we don't inadvertenly
+				// push them later (esp. as part of the "pushUsefulPredicates"
+				// call below).
+				alreadyPushed = true;
 			}
 			else {
 				childResult = 
@@ -615,7 +657,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			}
 		}
 
-		if (restrictionList != null)
+
+		if ((restrictionList != null) && !alreadyPushed)
 		{
 			restrictionList.pushUsefulPredicates((Optimizable) childResult);
 		}

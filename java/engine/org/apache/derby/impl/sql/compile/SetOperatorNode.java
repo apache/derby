@@ -117,8 +117,12 @@ public abstract class SetOperatorNode extends TableOperatorNode
 		// might depend on those predicates.  So now that we're preparing
 		// to generate the best paths, we have to push those same predicates
 		// down again (this is the last time) so that the children can use
-		// them as appropriate.
-		if (predList != null) 
+		// them as appropriate. NOTE: If our final choice for join strategy
+		// is a hash join, then we do not push the predicates because we'll
+		// need them to be at this level in order to find out which of them
+		// is the equijoin predicate that is required by hash join.
+		if ((predList != null) &&
+			!getTrulyTheBestAccessPath().getJoinStrategy().isHashJoin())
 		{
 			for (int i = predList.size() - 1; i >= 0; i--)
 				if (pushOptPredicate(predList.getOptPredicate(i)))
