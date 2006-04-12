@@ -478,6 +478,38 @@ select * from x;
 drop trigger tgood;
 delete from x;
 
+create trigger tgood after insert on x
+for each statement mode db2sql insert into x values (666), (999), (333);
+insert into x values 1;
+select * from x order by 1;
+drop trigger tgood;
+delete from x;
+
+create trigger tgood after insert on x
+referencing new as n
+for each row mode db2sql insert into x values (n.x);
+insert into x values 7;
+select * from x order by 1;
+drop trigger tgood;
+delete from x;
+
+create trigger tgood after insert on x
+referencing new as n
+for each row mode db2sql insert into x values (333), (999), (333);
+insert into x values 1;
+select * from x order by 1;
+drop trigger tgood;
+
+-- DERBY-1204 trigger causes StringIndexOutOfBoundsException
+-- which half closes connection and causes rest of test to
+-- fail. Enable this trigger test case to resolve 1204.
+-- create trigger tgood after insert on x
+-- referencing new as n
+-- for each row mode db2sql insert into x values (n.x), (999), (333);
+-- insert into x values 1;
+-- select * from x order by 1;
+-- drop trigger tgood;
+
 drop table x;
 
 -- Derby-388: When a set of inserts/updates is performed on a table
