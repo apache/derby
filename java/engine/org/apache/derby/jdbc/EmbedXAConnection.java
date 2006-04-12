@@ -39,7 +39,7 @@ import javax.sql.XAConnection;
 
 /** 
  */
-final class EmbedXAConnection extends EmbedPooledConnection
+class EmbedXAConnection extends EmbedPooledConnection
 		implements XAConnection
 
 {

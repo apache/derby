@@ -42,7 +42,7 @@ final class XAStatementControl implements BrokeredStatementControl {
 
 	/**
 	*/
-	private final EmbedPooledConnection	xaConnection;
+	private final EmbedXAConnection	xaConnection;
 	private final BrokeredConnection	applicationConnection;
 	BrokeredStatement		applicationStatement;
 	private EmbedConnection	realConnection;
@@ -50,13 +50,13 @@ final class XAStatementControl implements BrokeredStatementControl {
 	private PreparedStatement	realPreparedStatement;
 	private CallableStatement	realCallableStatement;
 
-	private XAStatementControl(EmbedPooledConnection xaConnection) {
+	private XAStatementControl(EmbedXAConnection xaConnection) {
 		this.xaConnection = xaConnection;
 		this.realConnection = xaConnection.realConnection;
 		this.applicationConnection = xaConnection.currentConnectionHandle;
 	}
 
-	XAStatementControl(EmbedPooledConnection xaConnection, 
+	XAStatementControl(EmbedXAConnection xaConnection, 
                                 Statement realStatement) throws SQLException {
 		this(xaConnection);
 		this.realStatement = realStatement;
@@ -65,7 +65,7 @@ final class XAStatementControl implements BrokeredStatementControl {
         ((EmbedStatement) realStatement).setApplicationStatement(
                 applicationStatement);
 	}
-	XAStatementControl(EmbedPooledConnection xaConnection, 
+	XAStatementControl(EmbedXAConnection xaConnection, 
                 PreparedStatement realPreparedStatement, 
                 String sql, Object generatedKeys) throws SQLException {            
 		this(xaConnection);
@@ -74,7 +74,7 @@ final class XAStatementControl implements BrokeredStatementControl {
         ((EmbedStatement) realPreparedStatement).setApplicationStatement(
                 applicationStatement);
 	}
-	XAStatementControl(EmbedPooledConnection xaConnection, 
+	XAStatementControl(EmbedXAConnection xaConnection, 
                 CallableStatement realCallableStatement, 
                 String sql) throws SQLException {
 		this(xaConnection);
