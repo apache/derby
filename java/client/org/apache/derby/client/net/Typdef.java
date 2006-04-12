@@ -153,7 +153,7 @@ public class Typdef implements java.lang.Cloneable {
     // lob length
     static final short LOBLENGTH = 4;
 
-    static final String UTF8ENCODING = "UTF8";
+    public static final String UTF8ENCODING = "UTF8";
 
     private static final int OVERRIDE_TABLE_SIZE = 0xff;
 

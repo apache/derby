@@ -21,6 +21,7 @@
 package org.apache.derby.client.am;
 
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.client.net.Typdef;
 
 public abstract class Sqlca {
     transient protected Connection connection_;
@@ -374,7 +375,8 @@ public abstract class Sqlca {
 
     private String bytes2String(byte[] bytes, int offset, int length)
             throws java.io.UnsupportedEncodingException {
-        return new String(bytes, offset, length);
+        // Network server uses utf8 encoding
+        return new String(bytes, offset, length, Typdef.UTF8ENCODING);
     }
 
     public int getUpdateCount() {
