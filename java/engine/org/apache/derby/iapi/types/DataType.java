@@ -993,7 +993,7 @@ public abstract class DataType
 		}
 	}
 
-	public void setValue(InputStream theStream, int streamLength) throws StandardException
+	public void setValue(InputStream theStream, int valueLength) throws StandardException
 	{
 		throwLangSetMismatch("java.io.InputStream");
 	}
@@ -1010,7 +1010,7 @@ public abstract class DataType
 
 
 	/**
-		Return an conversion exception for this type.
+		Return an conversion exception from this type to another.
 	*/
 	protected final StandardException dataTypeConversion(String targetType) {
 		return StandardException.newException(SQLState.LANG_DATA_TYPE_GET_MISMATCH, 

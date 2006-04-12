@@ -170,7 +170,7 @@ public class SQLBlob extends SQLBinary
 		throws SQLException
 	{
 			stream = resultSet.getBinaryStream(colNumber);
-			streamLength = -1; // unknown
+			streamValueLength = -1; // unknown
 			dataValue = null;
 	}
 
@@ -210,7 +210,7 @@ public class SQLBlob extends SQLBinary
         } catch (SQLException e) {
             throw dataTypeConversion("DAN-438-tmp");
        }
-        streamLength = -1; // unknown
+        streamValueLength = -1; // unknown
         dataValue = null;
     }
 }

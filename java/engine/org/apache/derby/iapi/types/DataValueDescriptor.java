@@ -759,9 +759,9 @@ public interface DataValueDescriptor extends Storable, Orderable
 		The format of the stream is required to be the format of this type.
 
 		@param	theStream	stream of correctly formatted data
-		@param	streamLength	logical length of the stream's value in units of this type (e.g. chars for string types).
+		@param	valueLength	logical length of the stream's value in units of this type (e.g. chars for string types).
 	*/
-	public void setValue(InputStream theStream, int streamLength) throws StandardException;
+	public void setValue(InputStream theStream, int valueLength) throws StandardException;
 
 	/**
 		Check the value to seem if it conforms to the restrictions

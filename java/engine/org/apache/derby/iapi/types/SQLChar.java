@@ -433,7 +433,10 @@ public class SQLChar
 		return stream;
 	}
 
-	public void setStream(InputStream newStream)
+    /**
+     * Set this value to the on-disk format stream.
+     */
+	public final void setStream(InputStream newStream)
 	{
 		this.value = null;
 		this.rawLength = -1;
@@ -1178,19 +1181,14 @@ readingLoop:
         SQLTime.timeToString( cal.get( Calendar.HOUR), cal.get( Calendar.MINUTE), cal.get( Calendar.SECOND), sb);
     }
 
-	/**
-	 * @see SQLChar#setValue
-	 *
-	 */
-	public void setValue(InputStream theStream, int streamLength)
+    /**
+     * Set the value from the stream which is in the on-disk format.
+     * @param theStream On disk format of the stream
+     * @param valueLength length of the logical value in characters.
+     */
+	public final void setValue(InputStream theStream, int valueLength)
 	{
-		value = null;
-		rawLength = -1;
-		stream = theStream;
-		// clear out the int array as well, so it will stay current
-		intArray = null;
-		intLength = 0;
-		cKey = null;
+        setStream(theStream);
 	}
 	
 	/**
@@ -2731,10 +2729,11 @@ readingLoop:
 
 	// For null strings, cKey = null.
 	private CollationKey cKey; 
-	/*
-	 * stream state
+
+    /**
+	 * The value as a stream in the on-disk format.
 	 */
-	protected InputStream stream;
+	InputStream stream;
 	
 	/* Comparison info for National subclasses) */
 	private int[]	intArray;

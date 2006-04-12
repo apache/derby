@@ -111,16 +111,23 @@ abstract class SQLBinary
 	 */
 	byte[] dataValue;
 
-	/*
-	 * stream state
+	/**
+	 * Value as a stream, this stream represents the on-disk
+     * format of the value. That is it has length information
+     * encoded in the first fe bytes.
 	 */
 	InputStream stream;
 
 	/**
-		Length of the stream in units relevant to the type,
-		in this case bytes.
+		Length of the value in bytes when this value
+        is set as a stream. Represents the length of the
+        value itself and not the length of the stream
+        which contains this length encoded as the first
+        few bytes. If the value of the stream is unknown
+        then this will be set to -1. If this value is
+        not set as a stream then this value should be ignored.
 	*/
-	int streamLength;
+	int streamValueLength;
 
 	/**
 		no-arg constructor, required by Formattable.
@@ -139,7 +146,7 @@ abstract class SQLBinary
 	{
 		dataValue = theValue;
 		stream = null;
-		streamLength = -1;
+		streamValueLength = -1;
 	}
 
 	/**
@@ -203,7 +210,7 @@ abstract class SQLBinary
 					readExternal(new FormatIdInputStream(stream));
 				}
 				stream = null;
-				streamLength = -1;
+				streamValueLength = -1;
 
 			}
 		}
@@ -223,8 +230,8 @@ abstract class SQLBinary
 	{
 		if (stream != null) {
 
-			if (streamLength != -1)
-				return streamLength;
+			if (streamValueLength != -1)
+				return streamValueLength;
 		}
 
 		return (getBytes() == null) ? 0 : getBytes().length;
@@ -283,7 +290,7 @@ abstract class SQLBinary
 		// need to clear stream first, in case this object is reused, and
 		// stream is set by previous use.  Track 3794.
 		stream = null;
-		streamLength = -1;
+		streamValueLength = -1;
 
 
 		int len = SQLBinary.readBinaryLength(in);
@@ -303,7 +310,7 @@ abstract class SQLBinary
 		// need to clear stream first, in case this object is reused, and
 		// stream is set by previous use.  Track 3794.
 		stream = null;
-		streamLength = -1;
+		streamValueLength = -1;
 
 		int len = SQLBinary.readBinaryLength(in);
 
@@ -356,7 +363,12 @@ abstract class SQLBinary
 		return len;
 	}
 
-	private void readFromStream(InputStream in) throws IOException {
+    /**
+     * Read the value from an input stream. The length
+     * encoded in the input stream has already been read
+     * and determined to be unknown.
+     */
+    private void readFromStream(InputStream in) throws IOException {
 
 		dataValue = null;	// allow gc of the old value before the new.
 		byte[] tmpData = new byte[32 * 1024];
@@ -395,7 +407,7 @@ abstract class SQLBinary
 	{
 		dataValue = null;
 		stream = null;
-		streamLength = -1;
+		streamValueLength = -1;
 	}
 
 	/**
@@ -515,11 +527,18 @@ abstract class SQLBinary
 		return stream;
 	}
 
+    /**
+     * Set me to the value represented by this stream.
+     * The format of the stream is the on-disk format
+     * described in this class's javadoc. That is the
+     * length is encoded in the first few bytes of the
+     * stream.
+     */
 	public final void setStream(InputStream newStream)
 	{
 		this.dataValue = null;
 		this.stream = newStream;
-		streamLength = -1;
+		streamValueLength = -1;
 	}
 
 	public final void loadStream() throws StandardException
@@ -542,14 +561,15 @@ abstract class SQLBinary
 	}
 
 	/**
-	 * @see SQLBit#setValue
-	 *
+     * Set the value from the stream which is in the on-disk format.
+     * @param theStream On disk format of the stream
+     * @param valueLength length of the logical value in bytes.
 	 */
-	public final void setValue(InputStream theStream, int streamLength)
+	public final void setValue(InputStream theStream, int valueLength)
 	{
 		dataValue = null;
 		stream = theStream;
-		this.streamLength = streamLength;
+		this.streamValueLength = valueLength;
 	}
 
 	protected final void setFrom(DataValueDescriptor theValue) throws StandardException {
@@ -559,7 +579,7 @@ abstract class SQLBinary
 			SQLBinary theValueBinary = (SQLBinary) theValue;
 			dataValue = theValueBinary.dataValue;
 			stream = theValueBinary.stream;
-			streamLength = theValueBinary.streamLength;
+			streamValueLength = theValueBinary.streamValueLength;
 		}
 		else
 		{
@@ -969,7 +989,7 @@ abstract class SQLBinary
 		}
 		else
 		{
-			variableLength = streamLength;
+			variableLength = streamValueLength;
 		}
 
 		if (variableLength != -1 && variableLength > declaredLength)
