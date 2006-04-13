@@ -39,6 +39,7 @@ import org.apache.derby.iapi.sql.execute.CursorActivation;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RawToBinaryFormatStream;
+import org.apache.derby.iapi.types.ReaderToUTF8Stream;
 import org.apache.derby.iapi.types.UserDataValue;
 import org.apache.derby.iapi.types.VariableSizeDataValue;
 import org.apache.derby.iapi.sql.ResultDescription;

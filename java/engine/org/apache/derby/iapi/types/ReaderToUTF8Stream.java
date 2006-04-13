@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.jdbc.ReaderToUTF8Stream
+   Derby - Class org.apache.derby.iapi.types.ReaderToUTF8Stream
 
    Copyright 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -18,7 +18,7 @@
 
  */
 
-package org.apache.derby.impl.jdbc;
+package org.apache.derby.iapi.types;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -28,12 +28,12 @@ import java.io.UTFDataFormatException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.LimitReader;
-import org.apache.derby.iapi.types.TypeId;
 
 /**
-	Converts a java.io.Reader to the on-disk UTF8 format used by Cloudscape.
+	Converts a java.io.Reader to the on-disk UTF8 format used by Derby
+    for character types.
 */
-final class ReaderToUTF8Stream
+public final class ReaderToUTF8Stream
 	extends InputStream
 {
 
@@ -60,7 +60,7 @@ final class ReaderToUTF8Stream
     // is needed.
     private int colWidth;  
     
-	ReaderToUTF8Stream(LimitReader reader,int length,int numCharsToTruncate)
+	public ReaderToUTF8Stream(LimitReader reader,int length,int numCharsToTruncate)
 	{
 		this.reader = reader;
 		buffer = new byte[BUFSIZE];
