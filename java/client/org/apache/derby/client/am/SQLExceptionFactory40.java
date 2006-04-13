@@ -48,8 +48,6 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
      * @param message description of the 
      * @param sqlState 
      * @param errCode derby error code
-     * @param cause root cause of the exception
-     * @return SQLException
      */
     public SQLException getSQLException (String message, String sqlState, 
                                                             int errCode) {        

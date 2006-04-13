@@ -68,7 +68,7 @@ public class Driver40 extends Driver30 {
      * returns a new EmbedStatement
      * @param  conn                 the EmbedConnection class associated with  
      *                              this statement object
-     * @param  forMetadata          boolean
+     * @param  forMetaData          boolean
      * @param  resultSetType        int
      * @param  resultSetConcurrency int
      * @param  resultSetHoldability int
@@ -139,7 +139,7 @@ public class Driver40 extends Driver30 {
     
     /**
      * Overwriting the super class boot method to set exception factory
-     * @see InternalDriver.boot
+     * @see InternalDriver#boot
      */
 
 	public void boot(boolean create, Properties properties) 

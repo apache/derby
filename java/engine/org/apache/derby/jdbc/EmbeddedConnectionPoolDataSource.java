@@ -93,10 +93,6 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
         
     /**
      * create and returns EmbedPooledConnection.
-     * @param user 
-     * @param password 
-     * @param requestPAssword 
-     * @return 
      */
         protected PooledConnection createPooledConnection (String user, 
                 String password, boolean requestPAssword) throws SQLException {
