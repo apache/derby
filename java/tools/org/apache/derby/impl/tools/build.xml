@@ -53,6 +53,7 @@
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/tools/**"/>
+      <exclude name="${derby.dir}/impl/tools/ij/mtGrammar.java"/>
       <exclude name="${derby.dir}/impl/tools/ij/xaHelper.java"/>
       <exclude name="${derby.dir}/impl/tools/ij/Main14.java"/>
       <exclude name="${derby.dir}/impl/tools/ij/utilMain14.java"/>
@@ -73,6 +74,7 @@
       <classpath>
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
+      <include name="${derby.dir}/impl/tools/ij/mtGrammar.java"/>
       <include name="${derby.dir}/impl/tools/ij/xaHelper.java"/>
       <include name="${derby.dir}/impl/tools/ij/Main14.java"/>
       <include name="${derby.dir}/impl/tools/ij/utilMain14.java"/>
