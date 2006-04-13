@@ -72,21 +72,32 @@ import java.sql.PreparedStatement;
   <P>
   Format : <encoded length><raw data>
   <BR>
-  Length is encoded to support 5.x databases where the length was stored as the number of bits.
-  The first bit of the first byte indicates if the format is an old (5.x) style or a new 8.1 style.
-  8.1 then uses the next two bits to indicate how the length is encoded.
+  Length is encoded to support Cloudscape 5.x databases where the length was stored as the number of bits.
+  The first bit of the first byte indicates if the format is an old (Cloudscape 5.x) style or a new Derby style.
+  Derby then uses the next two bits to indicate how the length is encoded.
   <BR>
   <encoded length> is one of N styles.
   <UL>
-  <LI> (5.x format) 4 byte Java format integer value 0 - either <raw data> is 0 bytes/bits  or an unknown number of bytes.
-  <LI> (5.x format) 4 byte Java format integer value >0 (positive) - number of bits in <raw data>, number of bytes in <raw data>
+  <LI> (5.x format zero) 4 byte Java format integer value 0 - either <raw data> is 0 bytes/bits  or an unknown number of bytes.
+  <LI> (5.x format bits) 4 byte Java format integer value >0 (positive) - number of bits in <raw data>, number of bytes in <raw data>
   is the minimum number of bytes required to store the number of bits.
-  <LI> (8.1 format) 1 byte encoded length (0 <= L <= 31) - number of bytes of <raw data> - encoded = 0x80 & L
-  <LI> (8.1 format) 3 byte encoded length (32 <= L < 64k) - number of bytes of <raw data> - encoded = 0xA0 <L as Java format unsigned short>
-  <LI> (8.1 format) 5 byte encoded length (64k <= L < 2G) - number of bytes of <raw data> - encoded = 0xC0 <L as Java format integer>
+  <LI> (Derby format) 1 byte encoded length (0 <= L <= 31) - number of bytes of <raw data> - encoded = 0x80 & L
+  <LI> (Derby format) 3 byte encoded length (32 <= L < 64k) - number of bytes of <raw data> - encoded = 0xA0 <L as Java format unsigned short>
+  <LI> (Derby format) 5 byte encoded length (64k <= L < 2G) - number of bytes of <raw data> - encoded = 0xC0 <L as Java format integer>
   <LI> (future) to be determined L >= 2G - encoded 0xE0 <encoding of L to be determined>
   (0xE0 is an esacape to allow any number of arbitary encodings in the future).
   </UL>
+  <BR>
+  When the value was written from a byte array the Derby encoded byte
+  length format was always used from Derby 10.0 onwards (ie. all open
+  source versions).
+  <BR>
+  When the value was written from a stream (e.g. PreparedStatement.setBinaryStream)
+  then the Cloudscape '5.x format zero' was used by 10.0 and 10.1.
+  The was due to the class RawToBinaryFormatStream always writing
+  four zero bytes for the length before the data.
+  <BR>
+  The Cloudscape '5.x format bits' format I think was never used by Derby.
  */
 abstract class SQLBinary
 	extends DataType implements BitDataValue
@@ -325,12 +336,18 @@ abstract class SQLBinary
 		}
 	}
 
+    /**
+     * Read the encoded length of the value from the on-disk format.
+     * 
+     * @see SQLBinary
+    */
 	private static int readBinaryLength(ObjectInput in) throws IOException {
-		int len = 0;
+		
 		int bl = in.read();
-		if (len < 0)
+		if (bl == -1)
 			throw new java.io.EOFException();
 
+        int len;
 		if ((bl & 0x80) != 0)
 		{
 			if (bl == 0xC0)
@@ -352,7 +369,7 @@ abstract class SQLBinary
 			int v2 = in.read();
 			int v3 = in.read();
 			int v4 = in.read();
-			if (v2 < 0 || v3 < 0 || v4 < 0)
+			if (v2 == -1 || v3 == -1 || v4 == -1)
 				throw new java.io.EOFException();
             int lenInBits = (((bl & 0xff) << 24) | ((v2 & 0xff) << 16) | ((v3 & 0xff) << 8) | (v4 & 0xff));
 

@@ -2658,8 +2658,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 			default:
 				throw dataTypeConversion(columnIndex, "java.io.InputStream");
 		}
-		if (length < 0) //we are doing the check here and not in updateBinaryStreamInternal becuase updateClob needs to pass -1 for length.
-			throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
 
 		if (x == null)
 		{
@@ -2670,12 +2668,24 @@ public abstract class EmbedResultSet extends ConnectionChild
 		updateBinaryStreamInternal(columnIndex, x, length,"updateBinaryStream");
 	}
 
-	protected void updateBinaryStreamInternal(int columnIndex,
-						java.io.InputStream x, int length, String updateMethodName)
+	private void updateBinaryStreamInternal(int columnIndex,
+						java.io.InputStream x, long length, String updateMethodName)
 	    throws SQLException
 	{
-		try {
-			getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(new RawToBinaryFormatStream(x, length), length);
+        if (length < 0)
+            throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
+        
+        // max number of bytes that can be set to be inserted 
+        // in Derby is 2Gb-1 (ie Integer.MAX_VALUE). 
+        // (e.g into a blob column).
+        if (length > Integer.MAX_VALUE ) {
+            throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
+                    getColumnSQLType(columnIndex));
+        }
+        
+        try {
+			getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(
+                    new RawToBinaryFormatStream(x, (int) length), (int) length);
 		} catch (StandardException t) {
 			throw noStateChangeException(t);
 		}
@@ -2719,30 +2729,35 @@ public abstract class EmbedResultSet extends ConnectionChild
 		updateCharacterStreamInternal(columnIndex, x, length, "updateCharacterStream");
 	}
 
-    protected void updateCharacterStreamInternal(int columnIndex,
-						java.io.Reader reader, int length, String updateMethodName)
+    private void updateCharacterStreamInternal(int columnIndex,
+						java.io.Reader reader, long length, String updateMethodName)
 	    throws SQLException
 	{
 		try {
-
-            // currently the max number of chars that is allowed in update
-            // via updateCharacterStream or updateClob interface
-            // is Integer.MAX_INT ( 2Gb -1) for clobs.
-            // check for -ve length here 
-            if (length < 0) 
-                throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
 
             if (reader == null)
             {
                 updateNull(columnIndex);
                 return;
             }
+            
+            // check for -ve length here 
+            if (length < 0) 
+                throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
+
+            // max number of characters that can be set to be inserted 
+            // in Derby is 2Gb-1 (ie Integer.MAX_VALUE). 
+            // (e.g into a CLOB column).
+            if (length > Integer.MAX_VALUE ) {
+                throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
+                        getColumnSQLType(columnIndex));
+            } 
 
             LimitReader limitIn = new LimitReader(reader);
             
             // length is +ve. at this point, all checks for negative
             // length has already been done
-            int usableLength = length;
+            int usableLength = (int) length;
             ReaderToUTF8Stream utfIn = null;
 
             // Currently long varchar does not allow for truncation of
@@ -2772,15 +2787,15 @@ public abstract class EmbedResultSet extends ConnectionChild
                 // needs to be truncated, and colWidth info to give proper
                 // truncation message
                 utfIn = new ReaderToUTF8Stream(
-                            limitIn, colWidth,     length - usableLength);
+                            limitIn, colWidth,     ((int) length) - usableLength);
             } else {
                 utfIn = new ReaderToUTF8Stream(
-                            limitIn, usableLength, length - usableLength);
+                            limitIn, usableLength, ((int)length) - usableLength);
             }
 
             limitIn.setLimit(usableLength);
             getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(
-                    utfIn, length);
+                    utfIn, (int) usableLength);
         } catch (StandardException t) {
             throw noStateChangeException(t);
         }
@@ -3881,8 +3896,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 
         if (x == null)
             updateNull(columnIndex);
-        else
-            updateBinaryStreamInternal(columnIndex, x.getBinaryStream(), -1, "updateBlob");
+        else {
+            long length = x.length();
+            updateBinaryStreamInternal(columnIndex, x.getBinaryStream(), length, "updateBlob");
+        }
 	}
 
 	/**
@@ -3931,23 +3948,8 @@ public abstract class EmbedResultSet extends ConnectionChild
         }
         else
         {
-
-            // 1. max number of characters that can be updated into a clob 
-            // column is 2Gb-1 which is Integer.MAX_INT.
-            // This means that we do not allow any updates of clobs where
-            // clob.length() > Integer.MAX_INT. For now, we cast the x.length()
-            // to int as a result. This will work ok for valid clob values that
-            // derby supports. If we ever decide to increase these limits for 
-            // clobs, in that case the cast of x.Length() to int would not be 
-            // appropriate.
-            //
-            // 2. Note, x.length() needs to be called before retrieving the
-            // stream using x.getCharacterStream() because EmbedClob.length()
-            // will read from the stream and drain the stream.
-            // Hence the need to declare this local variable to store the 
-            // length.  The cast from long to int, can make length -ve.  The 
-            // length will be checked later in updateCharacterStreamInternal
-            int length = (int)x.length();
+            
+            long length = x.length();
 
             updateCharacterStreamInternal(
                 columnIndex, x.getCharacterStream(),length, "updateClob");
@@ -4302,15 +4304,21 @@ public abstract class EmbedResultSet extends ConnectionChild
 			return ((NoPutResultSet) theResults).isForUpdate();
 		return false;
 	}
+    
+    final String getColumnSQLType(int column)
+    {
+        return resultDescription.getColumnDescriptor(column)
+                       .getType().getTypeId().getSQLTypeName();
+    }
 
-	protected final SQLException dataTypeConversion(String targetType, int column) {
+	private final SQLException dataTypeConversion(String targetType, int column) {
 		return newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH, targetType,
-			resultDescription.getColumnDescriptor(column).getType().getTypeId().getSQLTypeName());
+                getColumnSQLType(column));
 	}
 
-	protected final SQLException dataTypeConversion(int column, String targetType) {
+	private final SQLException dataTypeConversion(int column, String targetType) {
 		return newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH,
-			resultDescription.getColumnDescriptor(column).getType().getTypeId().getSQLTypeName(), targetType);
+                getColumnSQLType(column), targetType);
 	}
     
     /**
