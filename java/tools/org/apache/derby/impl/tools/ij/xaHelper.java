@@ -34,6 +34,7 @@ import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import javax.sql.DataSource;
 import javax.sql.ConnectionPoolDataSource;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 /*
  * The real xa helper class.  Load this class only if we know the javax classes
@@ -503,8 +504,22 @@ class xaHelper implements xaAbstractHelper
 			else if (isNetClient)
 				return (XADataSource) 
 					(Class.forName("org.apache.derby.jdbc.ClientXADataSource").newInstance());
-			else
-				return (XADataSource)(Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource").newInstance());
+			else {
+                            if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
+                                //running under jdk1.6 or higher 
+                                // try instantiating EmbeddedXADataSource40
+                                try {
+                                    return (XADataSource)(Class.forName(
+                                        "org.apache.derby.jdbc." +
+                                        "EmbeddedXADataSource40").newInstance());                                        
+                                }
+                                catch (ClassNotFoundException e) {
+                                    //probably it was not compiled with jdbc4.0
+                                    //support go ahead with EmbeddedXADataSource
+                                }
+                            }
+                            return (XADataSource)(Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource").newInstance());
+                        }
 		}
 		catch(ClassNotFoundException cnfe) {
 			throw new ijException(LocalizedResource.getMessage("IJ_XAClass"));

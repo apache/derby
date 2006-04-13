@@ -71,7 +71,7 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
 		@exception SQLException if a database-access error occurs.
 	*/
 	public final PooledConnection getPooledConnection() throws SQLException { 
-		return new EmbedPooledConnection(this, getUser(), getPassword(), false);
+		return createPooledConnection (getUser(), getPassword(), false);
 	}
 
 	/**
@@ -88,9 +88,20 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
 												String password)
 		 throws SQLException
 	{
-		return new EmbedPooledConnection(this, username, password, true);
+		return createPooledConnection (username, password, true);
 	}
-
+        
+    /**
+     * create and returns EmbedPooledConnection.
+     * @param user 
+     * @param password 
+     * @param requestPAssword 
+     * @return 
+     */
+        protected PooledConnection createPooledConnection (String user, 
+                String password, boolean requestPAssword) throws SQLException {
+            return new EmbedPooledConnection(this, user, password, true);
+        }
 }
 
 

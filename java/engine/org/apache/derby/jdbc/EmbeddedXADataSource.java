@@ -100,7 +100,7 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements
 		if (ra == null || !ra.isActive())
 			setupResourceAdapter(null, null, false);
 
-		return new EmbedXAConnection(this, ra, getUser(), getPassword(), false);
+		return createXAConnection (ra, getUser(), getPassword(), false);
 	}
 
 	/**
@@ -117,8 +117,7 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements
 	{
 		if (ra == null || !ra.isActive())
 			setupResourceAdapter(user, password, true);
-
-		return new EmbedXAConnection(this, ra, user, password, true);
+                return createXAConnection (ra, user, password, true);
 	}
 	
 	/*
@@ -189,4 +188,17 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements
 			}
 		}
 	}
+        
+    /**
+     * Intantiate and returns EmbedXAConnection.
+     * @param user 
+     * @param password 
+     * @return XAConnection
+     */
+        protected XAConnection createXAConnection (ResourceAdapter ra, 
+                String user, String password, 
+                boolean requestPassword) throws SQLException {
+            return new EmbedXAConnection(this, ra, user, 
+                    password, requestPassword);
+        }
 }
