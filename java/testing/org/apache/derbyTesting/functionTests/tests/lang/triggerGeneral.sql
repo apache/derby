@@ -554,3 +554,6 @@ select id, cost, length(bl) from t438 order by 1;
 update t438 set cost = cost + 1.23;
 select id, length(bl), l, nc, oc from t438_t order by 1,5,4;
 
+select id, cast (bl as blob(20)) from t438 order by 1;
+select id, cast (bl as blob(20)) from t438_t order by 1;
+
