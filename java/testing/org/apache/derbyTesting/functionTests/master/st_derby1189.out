@@ -1,0 +1,44 @@
+ij> drop table t1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+ij> create table t1 (i integer primary key, j integer, c char(200));
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 1, 'a');
+1 row inserted/updated/deleted
+ij> insert into t1 (select t1.i + 2,    t1.j + 2,    t1.c from t1);
+1 row inserted/updated/deleted
+ij> insert into t1 (select t1.i + 4,    t1.j + 4,    t1.c from t1);
+2 rows inserted/updated/deleted
+ij> insert into t1 (select t1.i + 8,    t1.j + 8,    t1.c from t1);
+4 rows inserted/updated/deleted
+ij> insert into t1 (select t1.i + 16,   t1.j + 16,   t1.c from t1);
+8 rows inserted/updated/deleted
+ij> insert into t1 (select t1.i + 32,   t1.j + 32,   t1.c from t1);
+16 rows inserted/updated/deleted
+ij> insert into t1 (select t1.i + 64,   t1.j + 64,   t1.c from t1);
+32 rows inserted/updated/deleted
+ij> insert into t1 (select t1.i + 128,  t1.j + 128,  t1.c from t1);
+64 rows inserted/updated/deleted
+ij> insert into t1 (select t1.i + 256,  t1.j + 256,  t1.c from t1);
+128 rows inserted/updated/deleted
+ij> insert into t1 (select t1.i + 512,  t1.j + 512,  t1.c from t1);
+256 rows inserted/updated/deleted
+ij> insert into t1 (select t1.i + 1024, t1.j + 1024, t1.c from t1);
+512 rows inserted/updated/deleted
+ij> delete from t1 where j=1;
+1 row inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('APP', 'T1', 1, 1, 1);
+0 rows inserted/updated/deleted
+ij> delete from t1 where j=2;
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('APP', 'T1', 1, 1, 1);
+0 rows inserted/updated/deleted
+ij> delete from t1 where i > 1024;
+512 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('APP', 'T1', 1, 1, 1);
+0 rows inserted/updated/deleted
+ij> delete from t1 where i < 512;
+255 rows inserted/updated/deleted
+ij> -- prior to the fix the following compress would result in a deadlock
+CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('APP', 'T1', 1, 1, 1);
+0 rows inserted/updated/deleted
+ij> 

@@ -2689,13 +2689,98 @@ abstract class FileContainer
 		return p;
 	}
 
+    /**
+     * Get candidate page to move a row for compressing the table.
+     * <p>
+     * The caller is moving rows from the end of the table toward the beginning,
+     * with the goal of freeing up a block of empty pages at the end of the
+     * container which can be returned to the OS.
+     * <p>
+     * On entry pageno will be latched by the caller.  Only return pages with
+     * numbers below pageno.  Attempting to return pageno will result in a
+     * latch/latch deadlock on the same thread.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
 	protected BasePage getPageForCompress(
     BaseContainerHandle handle,
     int                 flag,
     long                pageno)
 		 throws StandardException
 	{
-        return(getPageForInsert(handle, flag));
+		BasePage p = null;
+		boolean getLastInserted = 
+            (flag & ContainerHandle.GET_PAGE_UNFILLED) == 0;
+
+		if (getLastInserted)
+		{
+			// There is nothing protecting lastInsertePage from being changed
+			// by another thread.  Make a local copy.
+			long localLastInsertedPage = getLastInsertedPage();
+
+            if ((localLastInsertedPage < pageno) &&
+                (localLastInsertedPage != ContainerHandle.INVALID_PAGE_NUMBER))
+            {
+                // First try getting last inserted page.
+
+                p = getInsertablePage(
+                        handle, 
+                        localLastInsertedPage,
+                        true, /* wait */
+                        false /* no overflow page */);
+
+                // if localLastInsertedPage is not an insertable page, 
+                // don't waste time getting it again.
+                if (p == null)
+                {
+                    // There is a slight possibility that lastUnfilledPage and
+                    // lastInsertedPage will change between the if and the
+                    // assignment.  The worse that will happen is we lose the
+                    // optimization.  Don't want to slow down allocation by 
+                    // adding more synchronization.
+
+                    if (localLastInsertedPage == getLastUnfilledPage())
+                        setLastUnfilledPage(
+                            ContainerHandle.INVALID_PAGE_NUMBER);
+
+                    if (localLastInsertedPage == getLastInsertedPage())
+                        setLastInsertedPage(
+                            ContainerHandle.INVALID_PAGE_NUMBER);
+                }
+            }
+		}
+		else					
+		{
+            // get a relatively unfilled page that is not the last Inserted page
+
+			long localLastUnfilledPage = getLastUnfilledPage();
+
+			if (localLastUnfilledPage == ContainerHandle.INVALID_PAGE_NUMBER ||
+                localLastUnfilledPage >= pageno ||
+				localLastUnfilledPage == getLastInsertedPage())
+            {
+                // get an unfilled page, searching from beginning of container.
+				localLastUnfilledPage = 
+                    getUnfilledPageNumber(handle, 0);
+            }
+
+			if ((localLastUnfilledPage != 
+                    ContainerHandle.INVALID_PAGE_NUMBER) &&
+                (localLastUnfilledPage < pageno))
+			{
+				p = getInsertablePage(
+                        handle, localLastUnfilledPage, true, false);
+			}
+
+			// return this page for insert
+			if (p != null)
+			{
+				setLastUnfilledPage(localLastUnfilledPage);
+				setLastInsertedPage(localLastUnfilledPage);
+			}
+		}
+
+		return p;
     }
 
 	/**
