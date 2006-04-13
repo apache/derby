@@ -75,4 +75,5 @@ Value returned from stmt: 1E-15
 setObject Method sets the designated parameter with the Object
 Negative test setString with Invalid Timestamp:20
 SQLState: 22007 message: The syntax of the string representation of a datetime value is incorrect.
+Test jira614 completed successfully -- no Distributed Protocol Exception occurred
 prepStmt Test Ends

@@ -84,6 +84,13 @@ class DRDAResultSet
 
 
 
+	// splitQRYDTA is normally null. If it is non-null, it means that
+	// the last QRYDTA response which was sent for this statement was
+	// split according to the LMTBLKPRC protocol, and this array contains
+	// the bytes that didn't fit. These bytes should be the first bytes
+	// emitted in the next QRYDTA response to a CNTQRY request.
+	private byte []splitQRYDTA;
+
 	protected DRDAResultSet(ResultSet rs) throws SQLException
 	{
 		setResultSet(rs);
@@ -133,6 +140,15 @@ class DRDAResultSet
 	protected ResultSet getResultSet()
 	{
 		return rs;
+	}
+
+	public void setSplitQRYDTA(byte []data)
+	{
+		splitQRYDTA = data;
+	}
+	public byte[]getSplitQRYDTA()
+	{
+		return splitQRYDTA;
 	}
 
 	/** 
@@ -349,9 +365,11 @@ class DRDAResultSet
 		rsPrecision = null;
 		rsScale = null;
 		extDtaObjects = null;
+		splitQRYDTA = null;
 		rsExtPositions = null;
 		state=NOT_OPENED;
 		hasdata = true;
+		splitQRYDTA = null;
 	}
 
 

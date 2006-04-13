@@ -17,6 +17,39 @@ create table big(c1 varchar(30000), c2 varchar(2752));
 execute p1 using 'values 5';
 select * from big;
 
+-- Various tests for JIRA-614: handling of rows which span QRYDTA blocks.
+-- what happens when the SplitQRYDTA has to span 3+ blocks
+drop table big;
+create table big(c1 varchar(32672), c2 varchar(32672), c3 varchar(32672), c4 varchar(32672));
+execute p1 using 'values 9';
+select * from big;
+execute p1 using 'values 9';
+execute p1 using 'values 9';
+select * from big;
+get scroll insensitive cursor c1 as 'select * from big';
+first c1;
+next c1;
+previous c1;
+last c1;
+close c1;
+drop table big;
+-- Mix clob and varchar in the table.
+create table big(c1 clob(32672), c2 varchar(32672), c3 varchar(32672), c4 clob(32672));
+execute p1 using 'values 9';
+select * from big;
+execute p1 using 'values 9';
+execute p1 using 'values 9';
+select * from big;
+-- This seems to reveal some sort of different problem than JIRA 614. I get a
+-- DRDAProtocolException, but it isn't one which involves splitQRYDTA.
+-- get scroll insensitive cursor c1 as 'select * from big';
+-- first c1;
+-- next c1;
+-- previous c1;
+-- last c1;
+-- close c1;
+-- End of the JIRA-614 tests.
+
 -- what happens when the row + the ending SQLCARD is too big
 drop table big;
 create table big(c1 varchar(30000), c2 varchar(2750));
