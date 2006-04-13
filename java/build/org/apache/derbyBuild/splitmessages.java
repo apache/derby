@@ -69,6 +69,8 @@ public class splitmessages {
         clientMessageIds.add(SQLState.INVALID_COLUMN_NAME);
         clientMessageIds.add("J104");
         clientMessageIds.add(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
+        clientMessageIds.add(SQLState.LANG_RETURN_OUTPUT_PARAM_CANNOT_BE_SET);
+        clientMessageIds.add(SQLState.LANG_NULL_INTO_NON_NULL);
         clientMessageIds.add(SQLState.JDBC_METHOD_NOT_IMPLEMENTED);
         clientMessageIds.add(SQLState.JDBC_METHOD_NOT_SUPPORTED_BY_SERVER);
         clientMessageIds.add(SQLState.DRDA_NO_AUTOCOMMIT_UNDER_XA);
@@ -82,6 +84,10 @@ public class splitmessages {
         clientMessageIds.add(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT);
         clientMessageIds.add(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION);
         clientMessageIds.add(SQLState.LOB_METHOD_ON_CLOSED_CONNECTION);
+        clientMessageIds.add(SQLState.LANG_INVALID_PARAM_POSITION);
+        clientMessageIds.add(SQLState.LANG_MISSING_PARMS);
+        clientMessageIds.add(SQLState.LANG_NO_CURRENT_ROW);
+        clientMessageIds.add(SQLState.LANG_STREAM_RETRIEVED_ALREADY);
     }
 
 	public static void main(String[] args) throws Exception {

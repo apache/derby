@@ -27,7 +27,7 @@
 # compile errors saying "symbol not found"
 #
 s/fileName/"fileName"/g
-s/e.getMessage()/"e.getMessage"/g
+s/[[:space:]]e.getMessage()/"e.getMessage"/g
 s/Configuration.packageNameForDNC/"Configuration.packageNameForDNC"/g
 s/Configuration.dncDriverName/"Configuration.dncDriverName"/g
 s/[^\.]packageNameForDNC/"packageNameForDNC"/g
@@ -36,12 +36,26 @@ s/Types.getTypeString([^)]*)/"targetType"/g
 s/encoding/"encoding"/g
 s/source.getClass().getName()/"source"/g
 s/e.getException()/new Exception("foo")/g
-s/[[:space:]]e);/testException);/
-s/e.getClass().getName()/"exceptionClassName"/g
-s/[[:space:]]sourceType/"sourceType"/g
+s/[[:space:]]e);/ testException);/g
+s/[[:space:]]ae/ testException/g
+s/{ae/{testException/g
+s/[[:space:]]e.getClass().getName()/ "exceptionClassName"/g
+s/{e.getClass().getName()/{"exceptionClassName"/g
+s/[[:space:]]sourceType/ "sourceType"/g
 s/[[:space:]]targetType/ "targetType"/g
 s/[[:space:]]columnName/ "columnName"/g
 s/[[:space:]]charsetName/ "charsetName"/g
+s/[[:space:]]cursorName/ "cursorName"/g
+s/[[:space:]]cursorName/ "cursorName"/g
+s/[[:space:]]methodName/ "methodName"/g
+
+# 
+# Deal with extra updateCounts argument to BatchUpdateExceptoins.
+# This is a bit of a hack, but turn them into a Throwable.  Otherwise
+# the SqlException code thinks its another Object argument to the
+# message and we get a runtime assertion error
+s/updateCounts/(Throwable)null/g
+
 
 #
 # Subsitute Long and Integer params with 0 as a default

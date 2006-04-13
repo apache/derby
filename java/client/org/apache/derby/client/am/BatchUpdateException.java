@@ -20,69 +20,72 @@
 
 package org.apache.derby.client.am;
 
-import org.apache.derby.client.resources.ResourceKeys;
-
+import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.shared.common.i18n.MessageUtil;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 
 public class BatchUpdateException extends java.sql.BatchUpdateException {
 
-    //-----------------constructors-----------------------------------------------
+    /** 
+     *  The message utility instance we use to find messages
+     *  It's primed with the name of the client message bundle so that
+     *  it knows to look there if the message isn't found in the
+     *  shared message bundle.
+     */
+    private static MessageUtil msgutil_ = 
+        new MessageUtil(SqlException.CLIENT_MESSAGE_RESOURCE_NAME);
 
-    public BatchUpdateException(LogWriter logWriter, ErrorKey errorKey, int[] updateCounts) {
-        super(ResourceUtilities.getResource(ResourceKeys.driverOriginationIndicator) +
-                ResourceUtilities.getResource(errorKey.getResourceKey()),
-                errorKey.getSQLState(),
-                errorKey.getErrorCode(),
-                updateCounts);
+    public BatchUpdateException(LogWriter logWriter, MessageId msgid,
+        Object[] args, int[] updateCounts)
+    {
+        super(
+            msgutil_.getCompleteMessage(
+                msgid.msgid,
+                args),
+            ExceptionUtil.getSQLStateFromIdentifier(msgid.msgid),
+            ExceptionUtil.getSeverityFromIdentifier(msgid.msgid),
+            updateCounts);
+
         if (logWriter != null) {
             logWriter.traceDiagnosable(this);
         }
     }
-
-    public BatchUpdateException(LogWriter logWriter, ErrorKey errorKey, Object[] args, int[] updateCounts) {
-        super(ResourceUtilities.getResource(ResourceKeys.driverOriginationIndicator) +
-                ResourceUtilities.getResource(errorKey.getResourceKey(), args),
-                errorKey.getSQLState(),
-                errorKey.getErrorCode(),
-                updateCounts);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+    
+    // Syntactic sugar constructors to make it easier to create
+    // a BatchUpdateException with substitution parameters
+    public BatchUpdateException(LogWriter logWriter, MessageId msgid,
+        int[] updateCounts)
+    {
+        this(logWriter, msgid, (Object [])null, updateCounts);
     }
-
-    public BatchUpdateException(LogWriter logWriter, ErrorKey errorKey, Object arg, int[] updateCounts) {
-        this(logWriter, errorKey, new Object[]{arg}, updateCounts);
+    
+    public BatchUpdateException(LogWriter logWriter, MessageId msgid,
+        Object arg1, int[] updateCounts)
+    {
+        this(logWriter, msgid, new Object[] {arg1}, updateCounts);
     }
+    
+    //-----------------old constructors - to be removed when i18n is complete
+    //-----------------------------------------------
 
     // Temporary constructor until all error keys are defined.
     public BatchUpdateException(LogWriter logWriter) {
-        super(null, null, -99999, null);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, null, null, SqlException.DEFAULT_ERRCODE, null);
     }
 
     // Temporary constructor until all error keys are defined.
     public BatchUpdateException(LogWriter logWriter, int[] updateCounts) {
-        super(null, null, -99999, updateCounts);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, null, null, SqlException.DEFAULT_ERRCODE, updateCounts);
     }
 
     // Temporary constructor until all error keys are defined.
     public BatchUpdateException(LogWriter logWriter, String reason, int[] updateCounts) {
-        super(reason, null, -99999, updateCounts);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, reason, null, SqlException.DEFAULT_ERRCODE, updateCounts);
     }
 
     // Temporary constructor until all error keys are defined.
     public BatchUpdateException(LogWriter logWriter, String reason, String sqlState, int[] updateCounts) {
-        super(reason, sqlState, -99999, updateCounts);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
+        this(logWriter, reason, sqlState, SqlException.DEFAULT_ERRCODE, updateCounts);
     }
 
     // Temporary constructor until all error keys are defined.

@@ -2884,7 +2884,7 @@ SQL State: 24000
 Got expected exception: Invalid cursor state - no current row.
 Negative test 40 - Try to insert row from currentRow
 SQL State: XJ086
-Got expected exception: This method cannot be invoked unless the cursor is positioned on the insert row.
+Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Positive test 41 - try to insertRow from all posible positions
 Positive test 42 - InsertRow leaving a nullable columns = NULL
 Positive and negative tests 43 - Commit while on insertRow

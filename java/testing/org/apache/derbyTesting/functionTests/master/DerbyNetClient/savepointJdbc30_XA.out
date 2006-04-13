@@ -8,8 +8,8 @@ Test2 - Release and reuse a savepoint name
 Test3 - null name not allowed for named savepoints
 Expected Exception is Cannot pass null for savepoint name.
 Test4 - Verify names/ids of named/unnamed savepoints
-Expected Exception is This is an un-named savepoint.
-Expected Exception is This is a named savepoint.
+Expected Exception is No name for un-named savepoints.
+Expected Exception is No ID for named savepoints.
 Test5a - create two savepoints in two different transactions and release the first one in the subsequent transaction
 Expected Exception is SAVEPOINT, s1 does not  exist or is not active in the current transaction.
 Test5b - create two savepoints in two different transactions and rollback the first one in the subsequent transaction

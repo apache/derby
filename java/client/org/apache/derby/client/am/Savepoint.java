@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 import java.sql.SQLException;
 
 public class Savepoint implements java.sql.Savepoint {
@@ -49,7 +51,8 @@ public class Savepoint implements java.sql.Savepoint {
         if (savepointId_ != 0) {
             return savepointId_;
         } else {
-            throw new SqlException(agent_.logWriter_, "This is a named savepoint.").getSQLException();
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.NO_ID_FOR_NAMED_SAVEPOINT)).getSQLException();
         }
     }
 
@@ -57,7 +60,8 @@ public class Savepoint implements java.sql.Savepoint {
         if (savepointName_ != null) {
             return savepointName_;
         } else {
-            throw new SqlException(agent_.logWriter_, "This is an un-named savepoint.").getSQLException();
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.NO_NAME_FOR_UNNAMED_SAVEPOINT)).getSQLException();
         }
     }
 }

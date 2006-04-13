@@ -232,7 +232,7 @@ public class MessageUtil
                     int numExpected = countParams(message);
                     SanityManager.ASSERT(numExpected == arguments.length,
                         "Number of parameters expected for message id " +
-                        messageId + "(" + numExpected +
+                        messageId + " (" + numExpected +
                         ") does not match number of arguments received (" +
                         arguments.length + ")");
                 }

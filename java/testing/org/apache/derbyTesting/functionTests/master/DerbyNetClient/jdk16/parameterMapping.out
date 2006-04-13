@@ -152,8 +152,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getShort=0 was null true CLOUD EXT (OK)
   setUnicodeStream()  (22018):Invalid character string format for type SMALLINT. JDBC MATCH (INVALID)
   setUnicodeStream(null) getShort=0 was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getShort=46 was null false JDBC MATCH(OK)
   setObject(java.lang.String) as batch getShort=46 was null false JDBC MATCH(OK)
   setObject(java.math.BigDecimal) getShort=72 was null false JDBC MATCH(OK)
@@ -325,8 +325,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getInt=0 was null true CLOUD EXT (OK)
   setUnicodeStream()  (22018):Invalid character string format for type INTEGER. JDBC MATCH (INVALID)
   setUnicodeStream(null) getInt=0 was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getInt=46 was null false JDBC MATCH(OK)
   setObject(java.lang.String) as batch getInt=46 was null false JDBC MATCH(OK)
   setObject(java.math.BigDecimal) getInt=72 was null false JDBC MATCH(OK)
@@ -498,8 +498,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getLong=0 was null true CLOUD EXT (OK)
   setUnicodeStream()  (22018):Invalid character string format for type BIGINT. JDBC MATCH (INVALID)
   setUnicodeStream(null) getLong=0 was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getLong=46 was null false JDBC MATCH(OK)
   setObject(java.lang.String) as batch getLong=46 was null false JDBC MATCH(OK)
   setObject(java.math.BigDecimal) getLong=72 was null false JDBC MATCH(OK)
@@ -671,8 +671,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
   setUnicodeStream()  (22018):Invalid character string format for type REAL. JDBC MATCH (INVALID)
   setUnicodeStream(null) getFloat=0.0 was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getFloat=46.0 was null false JDBC MATCH(OK)
   setObject(java.lang.String) as batch getFloat=46.0 was null false JDBC MATCH(OK)
   setObject(java.math.BigDecimal) getFloat=72.0 was null false JDBC MATCH(OK)
@@ -845,8 +845,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
   setUnicodeStream()  (22018):Invalid character string format for type DOUBLE. JDBC MATCH (INVALID)
   setUnicodeStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getDouble=46.0 was null false JDBC MATCH(OK)
   setObject(java.lang.String) as batch getDouble=46.0 was null false JDBC MATCH(OK)
   setObject(java.math.BigDecimal) getDouble=72.0 was null false JDBC MATCH(OK)
@@ -1018,8 +1018,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
   setUnicodeStream()  (22018):Invalid character string format for type DOUBLE. JDBC MATCH (INVALID)
   setUnicodeStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getDouble=46.0 was null false JDBC MATCH(OK)
   setObject(java.lang.String) as batch getDouble=46.0 was null false JDBC MATCH(OK)
   setObject(java.math.BigDecimal) getDouble=72.0 was null false JDBC MATCH(OK)
@@ -1191,8 +1191,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
   setUnicodeStream()  (22018):Invalid character string format for type DECIMAL. JDBC MATCH (INVALID)
   setUnicodeStream(null) getBigDecimal=null was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getBigDecimal=46.00000 was null false JDBC MATCH(OK)
   setObject(java.lang.String) as batch getBigDecimal=46.00000 was null false JDBC MATCH(OK)
   setObject(java.math.BigDecimal) getBigDecimal=72.00000 was null false JDBC MATCH(OK)
@@ -1369,8 +1369,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getString=null was null true CLOUD EXT (OK)
   setUnicodeStream() getString=EncodedString: > 33347 51966 50 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 < was null false CLOUD EXT (OK)
   setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getString=46                                                           was null false JDBC MATCH(OK)
   setObject(java.lang.String) as batch getString=46                                                           was null false JDBC MATCH(OK)
   setObject(java.math.BigDecimal) getString=72                                                           was null false JDBC MATCH(OK)
@@ -1541,8 +1541,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getString=null was null true CLOUD EXT (OK)
   setUnicodeStream() getString=EncodedString: > 33347 51966 50 < was null false CLOUD EXT (OK)
   setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getString=46 was null false JDBC MATCH(OK)
   setObject(java.lang.String) as batch getString=46 was null false JDBC MATCH(OK)
   setObject(java.math.BigDecimal) getString=72 was null false JDBC MATCH(OK)
@@ -1713,8 +1713,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getString=null was null true CLOUD EXT (OK)
   setUnicodeStream() getString=EncodedString: > 33347 51966 50 < was null false CLOUD EXT (OK)
   setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getString=46 was null false JDBC MATCH(OK)
   setObject(java.lang.String) as batch getString=46 was null false JDBC MATCH(OK)
   setObject(java.math.BigDecimal) getString=72 was null false JDBC MATCH(OK)
@@ -1888,8 +1888,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getBytes=null was null true CLOUD EXT (OK)
   setUnicodeStream()  (XCL12):An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'. JDBC FAIL VARCHAR(60) FOR BIT DATA
   setUnicodeStream(null) getBytes=null was null true JDBC MATCH(OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (XCL12):An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'. JDBC FAIL VARCHAR(60) FOR BIT DATA
   setObject(java.lang.String) as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (XCL12):Error for batch element #0: An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'. JDBC FAIL VARCHAR(60) FOR BIT DATA
   setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
@@ -2063,8 +2063,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getDate=null was null true CLOUD EXT (OK)
   setUnicodeStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setUnicodeStream(null) getDate=null was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
   setObject(java.lang.String) as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
   setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
@@ -2236,8 +2236,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getTime=null was null true CLOUD EXT (OK)
   setUnicodeStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setUnicodeStream(null) getTime=null was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
   setObject(java.lang.String) as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
   setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
@@ -2409,8 +2409,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
   setUnicodeStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setUnicodeStream(null) getTimestamp=null was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
   setObject(java.lang.String) as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
   setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
@@ -2581,8 +2581,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getClob=null was null true CLOUD EXT (OK)
   setUnicodeStream() getClob=0x8243,0xcafe was null false CLOUD EXT (OK)
   setUnicodeStream(null) getClob=null was null true CLOUD EXT (OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getClob=0x34,0x36 was null false CLOUD EXT (OK)
   setObject(java.lang.String) as batch getClob=0x34,0x36 was null false CLOUD EXT (OK)
   setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
@@ -2754,8 +2754,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob(null) as batch getBlob=null was null true JDBC MATCH(OK)
   setUnicodeStream()  (XCL12):An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'BLOB'. JDBC FAIL BLOB(1k)
   setUnicodeStream(null) getBlob=null was null true JDBC MATCH(OK)
-  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
-  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null)  OK Type is not supported.
+  setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) IC JDBC MATCH (INVALID)
   setObject(java.lang.String) as batch IC JDBC MATCH (INVALID)
   setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)

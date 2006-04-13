@@ -8,10 +8,10 @@ ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
 othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
 deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
 JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
 WARNING 01J10: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
 requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
@@ -19,44 +19,44 @@ Jira issue Derby-154 : When client connects to Network Server using JCC, it inco
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
 Make sure that we got CONCUR_READ_ONLY? true
 JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test3 - request a read only resultset and attempt deleteRow and updateRow on it
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a deleteRow on a read only resultset.
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Now attempting to send an updateRow on a read only resultset.
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test4 - request a read only resultset and send a sql with FOR UPDATE clause and attempt deleteRow/updateRow on it
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a deleteRow on a read only resultset with FOR UPDATE clause in the SELECT sql.
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Now attempting to send a updateRow on a read only resultset with FOR UPDATE clause in the SELECT sql.
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test5 - request resultset with no FOR UPDATE clause and CONCUR_READ_ONLY
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a delete on a sql with no FOR UPDATE clause and CONCUR_READ_ONLY.
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Now attempting to send a updateRow on a sql with no FOR UPDATE clause and CONCUR_READ_ONLY.
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
 Make sure that we got CONCUR_READ_ONLY? true
 Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode
 Will see the warnings in embedded mode only
 Now attempting to send a delete on a sql with FOR READ ONLY clause.
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Now attempting to send a updateRow on a sql with FOR READ ONLY clause.
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when the resultset is not positioned on a row
 Make sure that we got CONCUR_UPDATABLE? true
 Now attempt a deleteRow without first doing next on the resultset.
@@ -64,20 +64,20 @@ SQL State : XCL08
 Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
 Now attempt a updateRow without first doing next on the resultset.
 updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX
-SQL State : null
-Got expected exception Invalid operation to update at current cursor position
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 ResultSet is positioned after the last row. attempt to deleteRow at this point should fail!
 SQL State : XCL07
 Got expected exception Cursor '<xxx-cursor-name-xxx>' is closed. Verify that autocommit is OFF.
 ResultSet is positioned after the last row. attempt to updateRow at this point should fail!
-SQL State : null
-Got expected exception Invalid operation to update at current cursor position
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 Negative Test8 - attempt deleteRow & updateRow on updatable resultset after closing the resultset
 Make sure that we got CONCUR_UPDATABLE? true
-SQL State : null
-Got expected exception Invalid operation: result set closed
-SQL State : null
-Got expected exception Invalid operation: result set closed
+SQL State : XJ012
+Got expected exception 'ResultSet' already closed.
+SQL State : XJ012
+Got expected exception 'ResultSet' already closed.
 Negative Test9 - try updatable resultset on system table
 SQL State : 42Y90
 Got expected exception FOR UPDATE is not permitted in this type of statement.  
@@ -109,12 +109,12 @@ Since autocommit is on, the constraint exception resulted in a runtime rollback 
 Jira entry Derby-160 : for Network Server because next should have failed
 FAIL!!! next should have failed because foreign key constraint failure resulted in a runtime rollback
 Negative Test15 - Can't call updateXXX methods on columns that do not correspond to a column in the table
-SQL State : null
-Got expected exception Column not updatable
+SQL State : XJ124
+Got expected exception Column not updatable.
 Negative Test16 - Call updateXXX method on out of the range column
 There are only 2 columns in the select list and we are trying to send updateXXX on column position 3
-SQL State : null
-Got expected exception Invalid argument: parameter index 3 is out of range.
+SQL State : XCL14
+Got expected exception The column position '3' is out of range.  The number of columns for this ResultSet is '2'.
 Positive Test1a - request updatable resultset for forward only type resultset
 requested TYPE_FORWARD_ONLY, CONCUR_UPDATABLE
 got TYPE_FORWARD_ONLY? true
@@ -123,8 +123,8 @@ JDBC 2.0 updatable resultset apis on this ResultSet object will pass because thi
 column 1 on this row before deleteRow is 1
 column 2 on this row before deleteRow is aa                  
 Since after deleteRow(), in embedded mode and Network Server mode using Derby Net Client, ResultSet is positioned before the next row, getXXX will fail
-SQL State : null
-Got expected exception Invalid operation to read at current cursor position.
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
 SQL State : XCL08
 Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
@@ -136,11 +136,11 @@ column 1 on this row after updateInt is 234
 column 2 on this row before updateString is aa                  
 now updateRow on the row
 Since after updateRow(), in embedded mode and Network Server mode using Derby Net Client, ResultSet is positioned before the next row, getXXX will fail
-SQL State : null
-Got expected exception Invalid operation to read at current cursor position.
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 calling updateRow again w/o first positioning the ResultSet on the next row will fail
-SQL State : null
-Got expected exception Invalid operation to update at current cursor position
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 Position the ResultSet with next()
 Should be able to updateRow() on the current row now
 Positive Test1c - use updatable resultset to do postitioned delete
@@ -162,8 +162,8 @@ now dow positioned update on the row
 column 1 on the updated  row is 1
 column 1 on the updated  row is aa                  
 Refreshing the row
-SQL State : null
-Got expected exception This method should only be called on ResultSet objects that are scrollable(type TYPE_SCROLL_SENSITIVE or TYPE_SCROLL_INSENSITIVE)
+SQL State : XJ125
+Got expected exception This method should only be called on ResultSet objects that are scrollable (type TYPE_SCROLL_SENSITIVE or TYPE_SCROLL_INSENSITIVE).
 doing positioned update again w/o positioning the RS will succeed
 because the cursor is still positioned
 Position the ResultSet with next()
@@ -188,8 +188,8 @@ got TYPE_FORWARD_ONLY? true
 got CONCUR_UPDATABLE? true
 column 1 on this row is 1
 Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
-SQL State : null
-Got expected exception Invalid operation to read at current cursor position.
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
 SQL State : XCL08
 Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
@@ -202,14 +202,14 @@ got CONCUR_UPDATABLE? true
 column 1 on this row is 1
 column 1 on this row after updateInt is 5
 Since after updateRow(), ResultSet is positioned before the next row, getXXX will fail
-SQL State : null
-Got expected exception Invalid operation to read at current cursor position.
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 calling updateRow/updateXXX again w/o first positioning the ResultSet on the next row will fail
-SQL State : null
-Got expected exception Invalid operation to update at current cursor position
-SQL State : null
-Got expected exception Invalid operation to update at current cursor position
-SQL State : null
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
+SQL State : XJ121
 Got expected exception Invalid operation at current cursor position.
 Position the ResultSet with next()
 Should be able to cancelRowUpdates() on the current row now
@@ -219,8 +219,8 @@ got TYPE_FORWARD_ONLY? true
 got CONCUR_UPDATABLE? true
 column 1 on this row is 1
 Since after deleteRow(), ResultSet is positioned before the next row, getXXX will fail
-SQL State : null
-Got expected exception Invalid operation to read at current cursor position.
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
 SQL State : XCL08
 Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
@@ -306,8 +306,8 @@ Table t1 after updateRow has following rows
 	{2,bb                  }
 	{3,cc                  }
 Positive Test9c - try to updateXXX on a readonly column. Should get error
-SQL State : null
-Got expected exception Column not updatable
+SQL State : XJ124
+Got expected exception Column not updatable.
 attempt to get an updatable resultset using correlation name for an readonly column. It should work
 The sql is SELECT c1, c2 as col2 FROM t1 abcde FOR UPDATE of c1
 Table t1 after updateRow has following rows
@@ -317,8 +317,8 @@ Table t1 after updateRow has following rows
 	{2,bb                  }
 	{3,cc                  }
 Positive Test9d - try to updateXXX on a readonly column with correlation name. Should get error
-SQL State : null
-Got expected exception Column not updatable
+SQL State : XJ124
+Got expected exception Column not updatable.
 Table t1 has following rows
 	 C1,C2
 	 -- --
@@ -412,8 +412,8 @@ Look at the current contents of table2WithTriggers
 	{4,4}
 column 1 on this row is 2
 this update row will fire the update trigger which will update all the rows in the table to have c1=1 and hence no more rows will qualify for the resultset
-SQL State : null
-Got expected exception Invalid operation to update at current cursor position
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 Verify that update trigger got fired by verifying that all column c1s have value 1 in table2WithTriggers
 	 C1,C2
 	 -- --
@@ -517,105 +517,105 @@ Verify that after rollback, table0WithTriggers is back to its original contents
 	{4,4}
 Positive Test17 - After deleteRow, resultset is positioned before the next row
 getXXX right after deleteRow will fail because resultset is not positioned on a row, instead it is right before the next row
-SQL State : null
-Got expected exception Invalid operation to read at current cursor position.
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 Positive Test18 - Test cancelRowUpdates method as the first updatable ResultSet api on a read-only resultset
-SQL State : null
-Got expected exception This method cannot be invoked while the cursor is on the insert row or if this ResultSet object has a concurrency of CONCUR_READ_ONLY.
+SQL State : XJ086
+Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Positive Test19 - Test updateRow method as the first updatable ResultSet api on a read-only resultset
-  Got expected exception : This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+  Got expected exception : This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on a read-only resultset
   Test updateShort on a readonly resultset
   Using column position as first parameter to updateShort
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateShort
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateInt on a readonly resultset
   Using column position as first parameter to updateInt
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateInt
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateLong on a readonly resultset
   Using column position as first parameter to updateLong
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateLong
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBigDecimal on a readonly resultset
   Using column position as first parameter to updateBigDecimal
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateBigDecimal
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateFloat on a readonly resultset
   Using column position as first parameter to updateFloat
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateFloat
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateDouble on a readonly resultset
   Using column position as first parameter to updateDouble
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateDouble
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateString on a readonly resultset
   Using column position as first parameter to updateString
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateString
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateAsciiStream on a readonly resultset
   Using column position as first parameter to updateAsciiStream
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateAsciiStream
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateCharacterStream on a readonly resultset
   Using column position as first parameter to updateCharacterStream
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateCharacterStream
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateByte on a readonly resultset
   Using column position as first parameter to updateByte
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateByte
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBytes on a readonly resultset
   Using column position as first parameter to updateBytes
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateBytes
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBinaryStream on a readonly resultset
   Using column position as first parameter to updateBinaryStream
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateBinaryStream
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateClob on a readonly resultset
   Using column position as first parameter to updateClob
   Using column name as first parameter to updateClob
   Test updateDate on a readonly resultset
   Using column position as first parameter to updateDate
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateDate
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateTime on a readonly resultset
   Using column position as first parameter to updateTime
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateTime
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateTimestamp on a readonly resultset
   Using column position as first parameter to updateTimestamp
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateTimestamp
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBlob on a readonly resultset
   Using column position as first parameter to updateBlob
   Using column name as first parameter to updateBlob
   Test updateBoolean on a readonly resultset
   Using column position as first parameter to updateBoolean
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateBoolean
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateNull on a readonly resultset
   Using column position as first parameter to updateNull
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateNull
-  Got expected exception : ResultSet is not updatable.
+  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateArray on a readonly resultset
   Using column position as first parameter to updateArray
   Using column name as first parameter to updateArray
@@ -2754,19 +2754,19 @@ column 1 on this row after cancelRowUpdates is 1
 Since after cancelRowUpdates(), ResultSet is positioned on the same row, a deleteRow at this point will pass
 PASS : deleteRow passed as expected
 calling updateRow after deleteRow w/o first positioning the ResultSet on the next row will fail
-SQL State : null
-Got expected exception Invalid operation to update at current cursor position
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 Position the ResultSet with next()
 Should be able to updateRow() on the current row now
 Positive Test25 - issue cancelRowUpdates without any updateXXX
 Positive Test26 - issue updateRow without any updateXXX will not move the resultset position
 Positive Test27 - issue updateXXX and then deleteRow
-SQL State : null
-Got expected exception Invalid operation to update at current cursor position
-SQL State : null
-Got expected exception Invalid operation to update at current cursor position
-SQL State : null
-Got expected exception Invalid operation to read at current cursor position.
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
+SQL State : XJ121
+Got expected exception Invalid operation at current cursor position.
 Positive Test28 - issue updateXXXs and then move off the row, the changes should be ignored
 	 C1,C2
 	 -- --
@@ -2827,8 +2827,8 @@ Positive Test32 - call updateXXX methods on column that is not in for update col
 	{22,xxxxxxx             }
 	{2,bb                  }
 	{3,cc                  }
-SQL State : null
-Got expected exception Column not updatable
+SQL State : XJ124
+Got expected exception Column not updatable.
 updateRow passed
   Make sure the contents of table are unchanged
 	 C1,C2
@@ -2914,13 +2914,13 @@ SQL State: 23502
 Got expected exception: Column 'C41'  cannot accept a NULL value.
 Negative Test 39 - run updateRow and deleterow when positioned at insertRow
 Negative Test 39.a - run updateRow on insertRow
-SQL State: null
-Got expected exception: This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State: XJ086
+Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative Test 39.a - run deleteRow on insertRow
-SQL State: null
-Got expected exception: This method cannot be invoked while the cursor is on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State: XJ086
+Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative test 40 - Try to insert row from currentRow
-SQL State: null
+SQL State: XJ086
 Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Positive test 41 - try to insertRow from all posible positions
 Positive test 42 - InsertRow leaving a nullable columns = NULL
@@ -2931,29 +2931,29 @@ This exception is expected with jdk 1.3: holdability not supported with jdk131 /
 Negative test 43 - Commit while on insertRow with not holdable cursor
 Negative test 44 - Closed RS
 Negative test 44.a - try insertRow on closed RS
-SQL State: null
-Got expected exception: Invalid operation: result set closed
+SQL State: XJ012
+Got expected exception: 'ResultSet' already closed.
 Negative test 44.b - try moveToCurrentRow on closed RS
-SQL State: null
-Got expected exception: Invalid operation: result set closed
+SQL State: XJ012
+Got expected exception: 'ResultSet' already closed.
 Negative test 44.c - try moveToInsertRow on closed RS
-SQL State: null
-Got expected exception: Invalid operation: result set closed
+SQL State: XJ012
+Got expected exception: 'ResultSet' already closed.
 Positive test 45 - try to insert without updating all columns. All columns allow nulls or have a default value
 Positive test 46 - Rollback with AutoCommit on
 Negative test 47 - insertRow and read-only RS
 Negative test 47.a - try moveToInsertRow on read-only RS
-SQL State: null
-Got expected exception: This method should only be called on ResultSet objects that are updatable(concurrency type CONCUR_UPDATABLE).
+SQL State: XJ083
+Got expected exception: 'moveToInsertRow()' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative test 47.b - try updateXXX on read-only RS
-SQL State: null
-Got expected exception: ResultSet is not updatable.
+SQL State: XJ083
+Got expected exception: 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative test 47.c - try insertRow on read-only RS
-SQL State: null
+SQL State: XJ086
 Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Negative test 47.d - try moveToCurrentRow on read-only RS
-SQL State: null
-Got expected exception: This method should only be called on ResultSet objects that are updatable(concurrency type CONCUR_UPDATABLE).
+SQL State: XJ083
+Got expected exception: 'moveToCurrentRow()' not allowed because the ResultSet is not an updatable ResultSet. 
 Positive test 48 - Test all updateXXX methods on all the supported sql datatypes
 Next datatype to test is SMALLINT
   Testing updateShort on SQL type SMALLINT

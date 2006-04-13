@@ -32,9 +32,9 @@ commit;
 ij> -- now try the fetch on cursors again after commit
 ----- cursors jdk1 and jdk2 will give errors
 next jdk1;
-ERROR (no SQLState): Invalid operation: result set closed
+ERROR XJ012: 'ResultSet' already closed.
 ij> next jdk2;
-ERROR (no SQLState): Invalid operation: result set closed
+ERROR XJ012: 'ResultSet' already closed.
 ij> next jdk4;
 C11 |C12        
 -----
@@ -72,11 +72,11 @@ rollback;
 ij> -- now try the fetch on cursors again after rollback
 ----- all the cursors will give errors
 next jdk1;
-ERROR (no SQLState): Invalid operation: result set closed
+ERROR XJ012: 'ResultSet' already closed.
 ij> next jdk2;
-ERROR (no SQLState): Invalid operation: result set closed
+ERROR XJ012: 'ResultSet' already closed.
 ij> next jdk4;
-ERROR (no SQLState): Invalid operation: result set closed
+ERROR XJ012: 'ResultSet' already closed.
 ij> -- clean up.
 close jdk1;
 ij> close jdk2;
@@ -94,16 +94,16 @@ C11 |C12
 -----
 1 |1          
 ij> -- wont' be able to drop table because of cursors jdk1 and jdk4
--- in DerbyNetClient, cursor is closed on server and DROP TABLE succeeds
+----- in DerbyNetClient, cursor is closed on server and DROP TABLE succeeds
 drop table t1;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- drop table still won't work because jdk4 is still open after commit
--- in DerbyNetClient, the table is already dropped
+----- in DerbyNetClient, the table is already dropped
 drop table t1;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
 ij> -- close cursor jdk4 and try then deleting the table
--- in DerbyNetClient, the table is already dropped
+----- in DerbyNetClient, the table is already dropped
 close jdk4;
 ij> drop table t1;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
@@ -129,12 +129,12 @@ C11 |C12
 -----
 1 |1          
 ij> -- try to change the isolation level. will give error because of jdk1 and jdk4
--- no error in DerbyNetClient because cursor is closed on server
+----- no error in DerbyNetClient because cursor is closed on server
 set current isolation RR;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- attempt to change isolation level should give error because of jdk4 hold cursor
--- no error in DerbyNetClient because cursor is closed on server
+----- no error in DerbyNetClient because cursor is closed on server
 set isolation = REPEATABLE READ;
 0 rows inserted/updated/deleted
 ij> -- close jdk4 and then should be able to change isolation
@@ -156,11 +156,11 @@ C11 |C12
 -----
 1 |1          
 ij> -- following should fail because of cursor jdk4
--- no error in DerbyNetClient because cursor is closed on server
+----- no error in DerbyNetClient because cursor is closed on server
 set isolation RS;
 0 rows inserted/updated/deleted
 ij> -- following should fail because of cursor jdk4
--- no error in DerbyNetClient because cursor is closed on server
+----- no error in DerbyNetClient because cursor is closed on server
 set isolation UR;
 0 rows inserted/updated/deleted
 ij> close jdk4;

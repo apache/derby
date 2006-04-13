@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.SQLException;
@@ -178,7 +180,8 @@ public class PreparedStatement extends Statement
             section_ = agent_.sectionManager_.getPositionedUpdateSection(cursorName, false); // false means get a regular section
 
             if (section_ == null) {
-                throw new SqlException(agent_.logWriter_, "Invalid cursor name \"" + cursorName + "\" in the Update/Delete statement.");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.CURSOR_INVALID_CURSOR_NAME), cursorName);
             }
 
             //scrollableRS_ = agent_.sectionManager_.getPositionedUpdateResultSet (cursorName);
@@ -250,9 +253,8 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "execute", sql);
         }
         throw new SqlException(agent_.logWriter_,
-                "The method java.sql.Statement.execute (String sql) cannot be called on a " +
-                " prepared statement instance." +
-                " Use java.sql.PreparedStatement.execute () with no sql string argument.").getSQLException();
+            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            "execute(String)").getSQLException();
     }
 
     public java.sql.ResultSet executeQuery(String sql) throws SQLException {
@@ -260,9 +262,8 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "executeQuery", sql);
         }
         throw new SqlException(agent_.logWriter_,
-                "The method java.sql.Statement.executeQuery (String sql) cannot be called on a " +
-                " prepared statement instance." +
-                " Use java.sql.PreparedStatement.executeQuery () with no sql string argument.").getSQLException();
+            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            "executeQuery(String)").getSQLException();
     }
 
     public int executeUpdate(String sql) throws SQLException {
@@ -270,9 +271,8 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "executeUpdate", sql);
         }
         throw new SqlException(agent_.logWriter_,
-                "The method java.sql.Statement.executeUpdate (String sql) cannot be called on a " +
-                " prepared statement instance." +
-                " Use java.sql.PreparedStatement.executeUpdate () with no sql string argument.").getSQLException();
+            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            "executeUpdate(String)").getSQLException();
     }
     // ---------------------------jdbc 1------------------------------------------
 
@@ -358,8 +358,9 @@ public class PreparedStatement extends Statement
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = jdbcType;
 
         if (!parameterMetaData_.nullable_[parameterIndex - 1]) {
-            throw new SqlException(agent_.logWriter_, "PreparedStatement: setNull method setting a non-nullable " +
-                    "input parameter " + parameterIndex + " to null.");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.LANG_NULL_INTO_NON_NULL),
+                new Integer(parameterIndex));
         }
         setInput(parameterIndex, null);
     }
@@ -574,7 +575,9 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x, calendar);
                 }
                 if (calendar == null) {
-                    throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.INVALID_API_PARAMETER),
+                        "null", "calendar", "setDate");
                 }
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
                 targetCalendar.clear();
@@ -628,7 +631,9 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setTime", parameterIndex, x, calendar);
                 }
                 if (calendar == null) {
-                    throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+                    throw new SqlException(agent_.logWriter_,
+                        new MessageId(SQLState.INVALID_API_PARAMETER),
+                        "null", "calendar", "setTime()");
                 }
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
                 targetCalendar.clear();
@@ -685,7 +690,9 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setTimestamp", parameterIndex, x, calendar);
                 }
                 if (calendar == null) {
-                    throw new SqlException(agent_.logWriter_, "Invalid parameter: calendar is null");
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.INVALID_API_PARAMETER),
+                        "null", "calendar", "setTimestamp()");
                 }
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
                 targetCalendar.clear();
@@ -929,7 +936,8 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setArray", parameterIndex, x);
                 }
                 parameterIndex = checkSetterPreconditions(parameterIndex);
-                throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
             }
         }
         catch ( SqlException se )
@@ -946,7 +954,8 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setRef", parameterIndex, x);
                 }
                 parameterIndex = checkSetterPreconditions(parameterIndex);
-                throw new SqlException(agent_.logWriter_, "jdbc 2 method not yet implemented").getSQLException();
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
             }
         }
         catch ( SqlException se )
@@ -1002,8 +1011,8 @@ public class PreparedStatement extends Statement
                     setByte(parameterIndex, ((Byte) x).byteValue());
                 } else {
                     checkSetterPreconditions(parameterIndex);
-                    throw new SqlException(agent_.logWriter_, "Invalid data conversion:" +
-                            " Parameter object type is invalid for requested conversion.");
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.UNSUPPORTED_TYPE));
                 }
             }
         }
@@ -1075,7 +1084,9 @@ public class PreparedStatement extends Statement
         } catch (ArithmeticException ae) {
             // Any problems with scale should have already been caught by
             // checkForvalidScale
-            throw new SqlException(agent_.logWriter_, ae.getMessage());
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.JAVA_EXCEPTION),
+                new Object[] {ae.getClass().getName(), ae.getMessage()}, ae);
         }
         try { 
             setObject(parameterIndex, x);
@@ -1227,9 +1238,8 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "execute", sql, autoGeneratedKeys);
         }
         throw new SqlException(agent_.logWriter_,
-                "The method java.sql.Statement.execute (String sql, int autoGeneratedKeys) cannot be called on a " +
-                " prepared statement instance." +
-                " Use java.sql.PreparedStatement.execute () with no arguments.").getSQLException();
+            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            "execute(String, int)").getSQLException();
     }
 
     public boolean execute(String sql, String[] columnNames) throws SQLException {
@@ -1237,9 +1247,8 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "execute", sql, columnNames);
         }
         throw new SqlException(agent_.logWriter_,
-                "The method java.sql.Statement.execute (String sql, String[] columnNames) cannot be called on a " +
-                " prepared statement instance." +
-                " Use java.sql.PreparedStatement.execute () with no arguments.").getSQLException();
+            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            "execute(String, String[])").getSQLException();
     }
 
     public boolean execute(String sql, int[] columnIndexes) throws SQLException {
@@ -1247,9 +1256,8 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "execute", sql, columnIndexes);
         }
         throw new SqlException(agent_.logWriter_,
-                "The method java.sql.Statement.execute (String sql, int[] columnIndexes) cannot be called on a " +
-                " prepared statement instance." +
-                " Use java.sql.PreparedStatement.execute () with no arguments.").getSQLException();
+            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            "execute(String, int[])").getSQLException();
     }
 
     public int executeUpdate(String sql, int autoGeneratedKeys) throws SQLException {
@@ -1257,9 +1265,8 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "executeUpdate", autoGeneratedKeys);
         }
         throw new SqlException(agent_.logWriter_,
-                "The method java.sql.Statement.executeUpdate (String sql, int autoGeneratedKeys) cannot be called on a " +
-                " prepared statement instance." +
-                " Use java.sql.PreparedStatement.executeUpdate () with no arguments.").getSQLException();
+            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            "executeUpdate(String, int)").getSQLException();
     }
 
     public int executeUpdate(String sql, String[] columnNames) throws SQLException {
@@ -1267,9 +1274,8 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "executeUpdate", columnNames);
         }
         throw new SqlException(agent_.logWriter_,
-                "The method java.sql.Statement.executeUpdate (String sql, String[] columnNames) cannot be called on a " +
-                " prepared statement instance." +
-                " Use java.sql.PreparedStatement.executeUpdate () with no arguments.").getSQLException();
+            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            "executeUpdate(String, String[])").getSQLException();
     }
 
     public int executeUpdate(String sql, int[] columnIndexes) throws SQLException {
@@ -1277,9 +1283,8 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "executeUpdate", columnIndexes);
         }
         throw new SqlException(agent_.logWriter_,
-                "The method java.sql.Statement.executeUpdate (String sql, int[] columnIndexes) cannot be called on a " +
-                " prepared statement instance." +
-                " Use java.sql.PreparedStatement.executeUpdate () with no arguments.").getSQLException();
+            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            "execute(String, int[])").getSQLException();
     }
 
     public void setURL(int parameterIndex, java.net.URL x) throws SQLException {
@@ -1532,8 +1537,7 @@ public class PreparedStatement extends Statement
             {
                 // Generate a SqlException for this, we don't want to throw
                 // SQLException in this internal method
-                throw new SqlException(agent_.logWriter_, se, se.getMessage(),
-                    se.getSQLState(), se.getErrorCode());
+                throw new SqlException(se);
             }
             boolean chainAutoCommit = false;
             boolean commitSubstituted = false;
@@ -1718,8 +1722,9 @@ public class PreparedStatement extends Statement
 
             // Throw an exception if holdability returned by the server is different from requested.
             if (resultSet_ != null && resultSet_.resultSetHoldability_ != resultSetHoldability_ && sqlMode_ != isCall__) {
-                throw new SqlException(agent_.logWriter_, "Unable to open resultSet with requested " +
-                        "holdability " + resultSetHoldability_ + ".");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.UNABLE_TO_OPEN_RESULTSET_WITH_REQUESTED_HOLDABILTY),
+                        new Integer(resultSetHoldability_));
             }
     }
 
@@ -1755,7 +1760,9 @@ public class PreparedStatement extends Statement
 		// and the values 0 and 0xffff are reserved as special values. So
 		// that imposes an upper limit on the batch size we can support:
 		if (batchSize > 65534)
-            throw new BatchUpdateException(agent_.logWriter_, "No more than 65534 commands may be added to a single batch", updateCounts);
+            throw new BatchUpdateException(agent_.logWriter_, 
+                new MessageId(SQLState.TOO_MANY_COMMANDS_FOR_BATCH), 
+                new Integer(65534), updateCounts);
 
         // Initialize all the updateCounts to indicate failure
         // This is done to account for "chain-breaking" errors where we cannot
@@ -1765,10 +1772,13 @@ public class PreparedStatement extends Statement
         }
 
         if (!supportsQueryBatchRequest && sqlMode_ == isQuery__) {
-            throw new BatchUpdateException(agent_.logWriter_, "Batching of queries not allowed by J2EE compliance", updateCounts);
+            throw new BatchUpdateException(agent_.logWriter_, 
+                new MessageId(SQLState.CANNOT_BATCH_QUERIES), updateCounts);
         }
         if (supportsQueryBatchRequest && sqlMode_ != isQuery__) {
-            throw new BatchUpdateException(agent_.logWriter_, "Query batch requested on a non-query statement", updateCounts);
+            throw new BatchUpdateException(agent_.logWriter_, 
+                new MessageId(SQLState.QUERY_BATCH_ON_NON_QUERY_STATEMENT), 
+                updateCounts);
         }
 
         resultSetList_ = null;
@@ -1812,7 +1822,9 @@ public class PreparedStatement extends Statement
                         chainAutoCommit || (i != batchSize - 1));  // more statements to chain
             } else if (outputRegistered_) // make sure no output parameters are registered
             {
-                throw new BatchUpdateException(agent_.logWriter_, "No output parameters are allowed in batch updates", updateCounts);
+                throw new BatchUpdateException(agent_.logWriter_, 
+                    new MessageId(SQLState.OUTPUT_PARAMS_NOT_ALLOWED),
+                    updateCounts);
             } else {
                 writeExecuteCall(false, // no output expected for batched CALLs
                         null, // no procedure name supplied for prepared CALLs
@@ -1930,8 +1942,10 @@ public class PreparedStatement extends Statement
 
     void checkForValidParameterIndex(int parameterIndex) throws SqlException {
         if (parameterMetaData_ == null || parameterIndex < 1 || parameterIndex > parameterMetaData_.columns_) {
-            throw new SqlException(agent_.logWriter_, "Invalid argument: parameter index " +
-                    parameterIndex + " is out of range.");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.LANG_INVALID_PARAM_POSITION),
+                new Integer(parameterIndex), 
+                new Integer(parameterMetaData_.columns_));
         }
     }
 
@@ -1939,7 +1953,8 @@ public class PreparedStatement extends Statement
         if (parameterMetaData_ != null) {
             for (int i = 0; i < parameterMetaData_.columns_; i++) {
                 if (!parameterSet_[i] && !parameterRegistered_[i]) {
-                    throw new SqlException(agent_.logWriter_, "At least one parameter to the current statement is uninitialized.", "07000");
+                    throw new SqlException(agent_.logWriter_, 
+                        new MessageId(SQLState.LANG_MISSING_PARMS));
                 }
             }
         }
@@ -1950,8 +1965,7 @@ public class PreparedStatement extends Statement
         if (escapedProcedureCallWithResult_) {
             if (parameterIndex == 1) {
                 throw new SqlException(agent_.logWriter_,
-                        "Invalid attempt to set the return value parameter of a CALL statement." +
-                        "Return value parameter of {?=CALL foo(?,?)} statement is parameter 1.");
+                    new MessageId(SQLState.LANG_RETURN_OUTPUT_PARAM_CANNOT_BE_SET));
             } else {
                 parameterIndex--;
             }
@@ -1961,7 +1975,9 @@ public class PreparedStatement extends Statement
 
     void checkForValidScale(int scale) throws SqlException {
         if (scale < 0 || scale > 31) {
-            throw new SqlException(agent_.logWriter_, "Invalid argument: scale must be greater than or equal to 0 and less than 32.");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.BAD_SCALE_VALUE),
+                new Integer(scale));
         }
     }
 
@@ -1979,8 +1995,9 @@ public class PreparedStatement extends Statement
             }
             // if the new Decimal (with bigger scale) cannot fit into the DA
             if ((32 - scaleDifference) < inputLength) {
-                throw new SqlException(agent_.logWriter_, "The scale supplied by the registerOutParameter method does " +
-                        "not match with the setter method. Possible loss of precision!");
+                // TODO - FINISH THIS
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.REGOUTPARAM_SCALE_DOESNT_MATCH_SETTER));
             }
             // if the new Decimal (with bigger scale) can fit
             else {
@@ -1997,8 +2014,8 @@ public class PreparedStatement extends Statement
                 parameterMetaData_.sqlScale_[parameterIndex - 1] = registerOutScale;
             } catch (ArithmeticException e) {
                 // if the new Decimal (with smaller scale) cannot fit into the DA
-                throw new SqlException(agent_.logWriter_, "The scale supplied by the registerOutParameter method does " +
-                        "not match with the setter method. Possible loss of precision!");
+                throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.REGOUTPARAM_SCALE_DOESNT_MATCH_SETTER));
             }
         }
     }
@@ -2048,8 +2065,9 @@ public class PreparedStatement extends Statement
                         parameterIndex, reader, new Long(length));
             }
             if(length > Integer.MAX_VALUE)
-                throw new SQLException("CLOB length exceeds maximum " +
-                        "possible limit");
+                throw new SqlException(agent_.logWriter_,
+                    new MessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
+                    new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
             else
                 setInput(parameterIndex, new Clob(agent_, reader, (int)length));
         }
@@ -2078,8 +2096,9 @@ public class PreparedStatement extends Statement
                         inputStream, new Long(length));
             }
             if(length > Integer.MAX_VALUE)
-                throw new SQLException("BLOB length exceeds maximum " +
-                        "possible limit");
+                throw new SqlException(agent_.logWriter_,
+                    new MessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
+                    new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
             else {
                 try {
                     setBinaryStreamX(parameterIndex, inputStream, (int)length);

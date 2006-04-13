@@ -2244,7 +2244,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 
         // 3)Make sure JDBC ResultSet is positioned on insertRow
         if (!isOnInsertRow) {
-            throw newSQLException(SQLState.NOT_POSITIONED_ON_INSERT_ROW);
+            throw newSQLException(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW);
         }
 
         // 4)Make sure underneath language resultset is not closed

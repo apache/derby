@@ -2761,7 +2761,7 @@ insert into clob_table ( typecol ) values cast ( X'0074007200750065'  AS clob (2
 === Columntype int
 select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, col_0 as col_0_5, col_0 as col_0_6, col_0 as col_0_7, col_0 as col_0_8, col_0 as col_0_9, col_0 as col_0_10, col_0 as col_0_11, col_0 as col_0_12, col_0 as col_0_13, col_0 as col_0_14, col_0 as col_0_15, col_0 as col_0_16, col_0 as col_0_17, col_0 as col_0_18, col_0 as col_0_19, col_0 as col_0_20, col_0 as col_0_21 from clob_table
 	0 getObject            ->		EXCEPTION (null)
-	0 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	0 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	0 getAsciiStream       ->		EXCEPTION (null)
 	0 getBigDecimal        ->		EXCEPTION (null)
 	0 getBinaryStream      ->		EXCEPTION (null)
@@ -2776,7 +2776,7 @@ select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, c
 	0 getFloat             ->'0.0'    	: java.lang.Float
 	0 getInt               ->'0'    	: java.lang.Integer
 	0 getLong              ->'0'    	: java.lang.Long
-	0 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	0 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	0 getShort             ->'0'    	: java.lang.Short
 	0 getString            ->		EXCEPTION (null)
 	0 getTime              ->		EXCEPTION (null)
@@ -2807,7 +2807,7 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from clob_table
 	2 getObject            ->		EXCEPTION (null)
-	2 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	2 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	2 getAsciiStream       ->		EXCEPTION (null)
 	2 getBigDecimal        ->		EXCEPTION (null)
 	2 getBinaryStream      ->		EXCEPTION (null)
@@ -2822,7 +2822,7 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getFloat             ->'0.0'    	: java.lang.Float
 	2 getInt               ->'0'    	: java.lang.Integer
 	2 getLong              ->'0'    	: java.lang.Long
-	2 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	2 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	2 getShort             ->'0'    	: java.lang.Short
 	2 getString            ->		EXCEPTION (null)
 	2 getTime              ->		EXCEPTION (null)
@@ -2830,7 +2830,7 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from clob_table
 	3 getObject            ->		EXCEPTION (null)
-	3 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	3 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	3 getAsciiStream       ->		EXCEPTION (null)
 	3 getBigDecimal        ->		EXCEPTION (null)
 	3 getBinaryStream      ->		EXCEPTION (null)
@@ -2845,7 +2845,7 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getFloat             ->'0.0'    	: java.lang.Float
 	3 getInt               ->'0'    	: java.lang.Integer
 	3 getLong              ->'0'    	: java.lang.Long
-	3 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	3 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	3 getShort             ->'0'    	: java.lang.Short
 	3 getString            ->		EXCEPTION (null)
 	3 getTime              ->		EXCEPTION (null)
@@ -2853,7 +2853,7 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from clob_table
 	4 getObject            ->		EXCEPTION (null)
-	4 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	4 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	4 getAsciiStream       ->		EXCEPTION (null)
 	4 getBigDecimal        ->		EXCEPTION (null)
 	4 getBinaryStream      ->		EXCEPTION (null)
@@ -2868,7 +2868,7 @@ select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, c
 	4 getFloat             ->'0.0'    	: java.lang.Float
 	4 getInt               ->'0'    	: java.lang.Integer
 	4 getLong              ->'0'    	: java.lang.Long
-	4 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	4 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	4 getShort             ->'0'    	: java.lang.Short
 	4 getString            ->		EXCEPTION (null)
 	4 getTime              ->		EXCEPTION (null)
@@ -2876,7 +2876,7 @@ select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, c
 === Columntype long varchar for bit data
 select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, col_5 as col_5_5, col_5 as col_5_6, col_5 as col_5_7, col_5 as col_5_8, col_5 as col_5_9, col_5 as col_5_10, col_5 as col_5_11, col_5 as col_5_12, col_5 as col_5_13, col_5 as col_5_14, col_5 as col_5_15, col_5 as col_5_16, col_5 as col_5_17, col_5 as col_5_18, col_5 as col_5_19, col_5 as col_5_20, col_5 as col_5_21 from clob_table
 	5 getObject            ->		EXCEPTION (null)
-	5 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	5 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	5 getAsciiStream       ->		EXCEPTION (null)
 	5 getBigDecimal        ->		EXCEPTION (null)
 	5 getBinaryStream      ->		EXCEPTION (null)
@@ -2891,7 +2891,7 @@ select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, c
 	5 getFloat             ->'0.0'    	: java.lang.Float
 	5 getInt               ->'0'    	: java.lang.Integer
 	5 getLong              ->'0'    	: java.lang.Long
-	5 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	5 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	5 getShort             ->'0'    	: java.lang.Short
 	5 getString            ->		EXCEPTION (null)
 	5 getTime              ->		EXCEPTION (null)
@@ -2899,7 +2899,7 @@ select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, c
 === Columntype blob(80)
 select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, col_6 as col_6_5, col_6 as col_6_6, col_6 as col_6_7, col_6 as col_6_8, col_6 as col_6_9, col_6 as col_6_10, col_6 as col_6_11, col_6 as col_6_12, col_6 as col_6_13, col_6 as col_6_14, col_6 as col_6_15, col_6 as col_6_16, col_6 as col_6_17, col_6 as col_6_18, col_6 as col_6_19, col_6 as col_6_20, col_6 as col_6_21 from clob_table
 	6 getObject            ->		EXCEPTION (null)
-	6 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	6 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	6 getAsciiStream       ->		EXCEPTION (null)
 	6 getBigDecimal        ->		EXCEPTION (null)
 	6 getBinaryStream      ->		EXCEPTION (null)
@@ -2914,7 +2914,7 @@ select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, c
 	6 getFloat             ->'0.0'    	: java.lang.Float
 	6 getInt               ->'0'    	: java.lang.Integer
 	6 getLong              ->'0'    	: java.lang.Long
-	6 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	6 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	6 getShort             ->'0'    	: java.lang.Short
 	6 getString            ->		EXCEPTION (null)
 	6 getTime              ->		EXCEPTION (null)
@@ -2922,7 +2922,7 @@ select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, c
 === Columntype clob (2 K)
 select typecol as typecol_1, typecol as typecol_2, typecol as typecol_3, typecol as typecol_4, typecol as typecol_5, typecol as typecol_6, typecol as typecol_7, typecol as typecol_8, typecol as typecol_9, typecol as typecol_10, typecol as typecol_11, typecol as typecol_12, typecol as typecol_13, typecol as typecol_14, typecol as typecol_15, typecol as typecol_16, typecol as typecol_17, typecol as typecol_18, typecol as typecol_19, typecol as typecol_20, typecol as typecol_21 from clob_table
 	7 getObject            ->		EXCEPTION (null)
-	7 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	7 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	7 getAsciiStream       ->		EXCEPTION (null)
 	7 getBigDecimal        ->		EXCEPTION (null)
 	7 getBinaryStream      ->		EXCEPTION (null)
@@ -2937,7 +2937,7 @@ select typecol as typecol_1, typecol as typecol_2, typecol as typecol_3, typecol
 	7 getFloat             ->'0.0'    	: java.lang.Float
 	7 getInt               ->'0'    	: java.lang.Integer
 	7 getLong              ->'0'    	: java.lang.Long
-	7 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	7 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	7 getShort             ->'0'    	: java.lang.Short
 	7 getString            ->		EXCEPTION (null)
 	7 getTime              ->		EXCEPTION (null)
@@ -3314,7 +3314,7 @@ insert into clob_table ( typecol ) values cast ( X'0074007200750065'  AS clob (6
 === Columntype int
 select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, col_0 as col_0_5, col_0 as col_0_6, col_0 as col_0_7, col_0 as col_0_8, col_0 as col_0_9, col_0 as col_0_10, col_0 as col_0_11, col_0 as col_0_12, col_0 as col_0_13, col_0 as col_0_14, col_0 as col_0_15, col_0 as col_0_16, col_0 as col_0_17, col_0 as col_0_18, col_0 as col_0_19, col_0 as col_0_20, col_0 as col_0_21 from clob_table
 	0 getObject            ->		EXCEPTION (null)
-	0 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	0 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	0 getAsciiStream       ->		EXCEPTION (null)
 	0 getBigDecimal        ->		EXCEPTION (null)
 	0 getBinaryStream      ->		EXCEPTION (null)
@@ -3329,7 +3329,7 @@ select col_0 as col_0_1, col_0 as col_0_2, col_0 as col_0_3, col_0 as col_0_4, c
 	0 getFloat             ->'0.0'    	: java.lang.Float
 	0 getInt               ->'0'    	: java.lang.Integer
 	0 getLong              ->'0'    	: java.lang.Long
-	0 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	0 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	0 getShort             ->'0'    	: java.lang.Short
 	0 getString            ->		EXCEPTION (null)
 	0 getTime              ->		EXCEPTION (null)
@@ -3360,7 +3360,7 @@ select col_1 as col_1_1, col_1 as col_1_2, col_1 as col_1_3, col_1 as col_1_4, c
 === Columntype varchar(80)
 select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, col_2 as col_2_5, col_2 as col_2_6, col_2 as col_2_7, col_2 as col_2_8, col_2 as col_2_9, col_2 as col_2_10, col_2 as col_2_11, col_2 as col_2_12, col_2 as col_2_13, col_2 as col_2_14, col_2 as col_2_15, col_2 as col_2_16, col_2 as col_2_17, col_2 as col_2_18, col_2 as col_2_19, col_2 as col_2_20, col_2 as col_2_21 from clob_table
 	2 getObject            ->		EXCEPTION (null)
-	2 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	2 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	2 getAsciiStream       ->		EXCEPTION (null)
 	2 getBigDecimal        ->		EXCEPTION (null)
 	2 getBinaryStream      ->		EXCEPTION (null)
@@ -3375,7 +3375,7 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 	2 getFloat             ->'0.0'    	: java.lang.Float
 	2 getInt               ->'0'    	: java.lang.Integer
 	2 getLong              ->'0'    	: java.lang.Long
-	2 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	2 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	2 getShort             ->'0'    	: java.lang.Short
 	2 getString            ->		EXCEPTION (null)
 	2 getTime              ->		EXCEPTION (null)
@@ -3383,7 +3383,7 @@ select col_2 as col_2_1, col_2 as col_2_2, col_2 as col_2_3, col_2 as col_2_4, c
 === Columntype long varchar
 select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, col_3 as col_3_5, col_3 as col_3_6, col_3 as col_3_7, col_3 as col_3_8, col_3 as col_3_9, col_3 as col_3_10, col_3 as col_3_11, col_3 as col_3_12, col_3 as col_3_13, col_3 as col_3_14, col_3 as col_3_15, col_3 as col_3_16, col_3 as col_3_17, col_3 as col_3_18, col_3 as col_3_19, col_3 as col_3_20, col_3 as col_3_21 from clob_table
 	3 getObject            ->		EXCEPTION (null)
-	3 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	3 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	3 getAsciiStream       ->		EXCEPTION (null)
 	3 getBigDecimal        ->		EXCEPTION (null)
 	3 getBinaryStream      ->		EXCEPTION (null)
@@ -3398,7 +3398,7 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 	3 getFloat             ->'0.0'    	: java.lang.Float
 	3 getInt               ->'0'    	: java.lang.Integer
 	3 getLong              ->'0'    	: java.lang.Long
-	3 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	3 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	3 getShort             ->'0'    	: java.lang.Short
 	3 getString            ->		EXCEPTION (null)
 	3 getTime              ->		EXCEPTION (null)
@@ -3406,7 +3406,7 @@ select col_3 as col_3_1, col_3 as col_3_2, col_3 as col_3_3, col_3 as col_3_4, c
 === Columntype char(10) for bit data
 select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, col_4 as col_4_5, col_4 as col_4_6, col_4 as col_4_7, col_4 as col_4_8, col_4 as col_4_9, col_4 as col_4_10, col_4 as col_4_11, col_4 as col_4_12, col_4 as col_4_13, col_4 as col_4_14, col_4 as col_4_15, col_4 as col_4_16, col_4 as col_4_17, col_4 as col_4_18, col_4 as col_4_19, col_4 as col_4_20, col_4 as col_4_21 from clob_table
 	4 getObject            ->		EXCEPTION (null)
-	4 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	4 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	4 getAsciiStream       ->		EXCEPTION (null)
 	4 getBigDecimal        ->		EXCEPTION (null)
 	4 getBinaryStream      ->		EXCEPTION (null)
@@ -3421,7 +3421,7 @@ select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, c
 	4 getFloat             ->'0.0'    	: java.lang.Float
 	4 getInt               ->'0'    	: java.lang.Integer
 	4 getLong              ->'0'    	: java.lang.Long
-	4 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	4 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	4 getShort             ->'0'    	: java.lang.Short
 	4 getString            ->		EXCEPTION (null)
 	4 getTime              ->		EXCEPTION (null)
@@ -3429,7 +3429,7 @@ select col_4 as col_4_1, col_4 as col_4_2, col_4 as col_4_3, col_4 as col_4_4, c
 === Columntype long varchar for bit data
 select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, col_5 as col_5_5, col_5 as col_5_6, col_5 as col_5_7, col_5 as col_5_8, col_5 as col_5_9, col_5 as col_5_10, col_5 as col_5_11, col_5 as col_5_12, col_5 as col_5_13, col_5 as col_5_14, col_5 as col_5_15, col_5 as col_5_16, col_5 as col_5_17, col_5 as col_5_18, col_5 as col_5_19, col_5 as col_5_20, col_5 as col_5_21 from clob_table
 	5 getObject            ->		EXCEPTION (null)
-	5 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	5 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	5 getAsciiStream       ->		EXCEPTION (null)
 	5 getBigDecimal        ->		EXCEPTION (null)
 	5 getBinaryStream      ->		EXCEPTION (null)
@@ -3444,7 +3444,7 @@ select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, c
 	5 getFloat             ->'0.0'    	: java.lang.Float
 	5 getInt               ->'0'    	: java.lang.Integer
 	5 getLong              ->'0'    	: java.lang.Long
-	5 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	5 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	5 getShort             ->'0'    	: java.lang.Short
 	5 getString            ->		EXCEPTION (null)
 	5 getTime              ->		EXCEPTION (null)
@@ -3452,7 +3452,7 @@ select col_5 as col_5_1, col_5 as col_5_2, col_5 as col_5_3, col_5 as col_5_4, c
 === Columntype blob(80)
 select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, col_6 as col_6_5, col_6 as col_6_6, col_6 as col_6_7, col_6 as col_6_8, col_6 as col_6_9, col_6 as col_6_10, col_6 as col_6_11, col_6 as col_6_12, col_6 as col_6_13, col_6 as col_6_14, col_6 as col_6_15, col_6 as col_6_16, col_6 as col_6_17, col_6 as col_6_18, col_6 as col_6_19, col_6 as col_6_20, col_6 as col_6_21 from clob_table
 	6 getObject            ->		EXCEPTION (null)
-	6 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	6 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	6 getAsciiStream       ->		EXCEPTION (null)
 	6 getBigDecimal        ->		EXCEPTION (null)
 	6 getBinaryStream      ->		EXCEPTION (null)
@@ -3467,7 +3467,7 @@ select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, c
 	6 getFloat             ->'0.0'    	: java.lang.Float
 	6 getInt               ->'0'    	: java.lang.Integer
 	6 getLong              ->'0'    	: java.lang.Long
-	6 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	6 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	6 getShort             ->'0'    	: java.lang.Short
 	6 getString            ->		EXCEPTION (null)
 	6 getTime              ->		EXCEPTION (null)
@@ -3475,7 +3475,7 @@ select col_6 as col_6_1, col_6 as col_6_2, col_6 as col_6_3, col_6 as col_6_4, c
 === Columntype clob (64  )
 select typecol as typecol_1, typecol as typecol_2, typecol as typecol_3, typecol as typecol_4, typecol as typecol_5, typecol as typecol_6, typecol as typecol_7, typecol as typecol_8, typecol as typecol_9, typecol as typecol_10, typecol as typecol_11, typecol as typecol_12, typecol as typecol_13, typecol as typecol_14, typecol as typecol_15, typecol as typecol_16, typecol as typecol_17, typecol as typecol_18, typecol as typecol_19, typecol as typecol_20, typecol as typecol_21 from clob_table
 	7 getObject            ->		EXCEPTION (null)
-	7 getArray             ->		EXCEPTION (jdbc 2 method not yet implemented)
+	7 getArray             ->		EXCEPTION (JDBC method is not yet implemented.)
 	7 getAsciiStream       ->		EXCEPTION (null)
 	7 getBigDecimal        ->		EXCEPTION (null)
 	7 getBinaryStream      ->		EXCEPTION (null)
@@ -3490,7 +3490,7 @@ select typecol as typecol_1, typecol as typecol_2, typecol as typecol_3, typecol
 	7 getFloat             ->'0.0'    	: java.lang.Float
 	7 getInt               ->'0'    	: java.lang.Integer
 	7 getLong              ->'0'    	: java.lang.Long
-	7 getRef               ->		EXCEPTION (jdbc 2 method not yet implemented)
+	7 getRef               ->		EXCEPTION (JDBC method is not yet implemented.)
 	7 getShort             ->'0'    	: java.lang.Short
 	7 getString            ->		EXCEPTION (null)
 	7 getTime              ->		EXCEPTION (null)
