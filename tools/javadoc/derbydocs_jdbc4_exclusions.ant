@@ -1,0 +1,17 @@
+# for new packages.
+#
+# IMPORTANT: if you are adding a new package, be sure to add it to
+#            the list of packages in the publishedapi target in
+#            the toplevel build.xml file.
+#
+# Please do not add whitespace in front of class names.
+# Blank lines and comments are allowed.
+#
+# The classes in this file are the JDBC4 support which choke
+# the 1.4 javadoc tool. These classes are excluded if we
+# are not building the JDBC4 support.
+#
+
+**/*40.java
+org/apache/derby/impl/jdbc/EmbedRowId.java
+org/apache/derby/client/am/RowId.java

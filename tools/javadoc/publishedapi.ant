@@ -1,4 +1,6 @@
-# This file contains a list of the files that constitute the public API
+# This file contains a list of the files that constitute the public
+# API. This includes the whole public API for Derby's JDBC3
+# implementation.
 # 
 # IMPORTANT: all names should be like package names, but with slashes
 #            instead of dots.

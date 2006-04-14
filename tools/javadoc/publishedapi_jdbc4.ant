@@ -1,0 +1,24 @@
+# This file contains the additional files that constitute the public
+# JDBC4 API. This list supplements the JDBC3 list found in
+# publishedapi.ant.
+# 
+# IMPORTANT: all names should be like package names, but with slashes
+#            instead of dots.
+#
+# Add new files to the appropriate package section; add new sections
+# for new packages.
+#
+# IMPORTANT: if you are adding a new package, be sure to add it to
+#            the list of packages in the publishedapi target in
+#            the toplevel build.xml file.
+#
+# Please do not add whitespace in front of class names.
+# Blank lines and comments are allowed.
+
+# package: org.apache.derby.jdbc
+
+org/apache/derby/jdbc/ClientDataSource40.java
+org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource40.java
+org/apache/derby/jdbc/EmbeddedDataSource40.java
+org/apache/derby/jdbc/EmbeddedXADataSource40.java
+

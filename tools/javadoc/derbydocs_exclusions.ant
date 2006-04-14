@@ -13,14 +13,6 @@
 # Please do not add whitespace in front of class names.
 # Blank lines and comments are allowed.
 
-org/apache/derby/jdbc/*40.java
-org/apache/derby/client/net/*40.java
-org/apache/derby/iapi/jdbc/*40.java
-org/apache/derby/impl/jdbc/*40.java
-org/apache/derby/impl/jdbc/EmbedRowId.java
-org/apache/derby/client/*40.java
-org/apache/derby/client/am/*40.java
-org/apache/derby/client/am/RowId.java
 **/build.xml
 **/*.properties
 **/*.jj

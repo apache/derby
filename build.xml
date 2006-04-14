@@ -19,6 +19,10 @@
   <!-- Release and version info -->
   <property file="${properties.dir}/release.properties"/>
 
+  <property name="javadoc.temp.dir" value="${out.javadoc.dir}/temp"/>
+  <property name="javadoc.exclusions" value="${javadoc.temp.dir}/javadoc_exclusions"/>
+  <property name="javadoc.inclusions" value="${javadoc.temp.dir}/javadoc_inclusions"/>
+
 <!-- Targets -->
 
   <target name="buildsource" depends="init,engine,tools,drda,client,build,versioninfo,localeinfo"/>
@@ -535,9 +539,24 @@
 <!--                           Javadoc targets                           -->
 <!-- =================================================================== -->
 
-  <target name="javadoc" depends="init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs"/>
+  <target name="dummy">
+    <echo message="java.home = ${java.home}"/>
+  </target>
 
-  <target name="publishedapi" depends="initjars">
+  <target name="javadoc"
+    depends="init-javadoc-tool,init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs"/>
+
+  <target name="init-javadoc-tool" depends="init-javadoc-not-jdk16,init-javadoc-jdk16"/>
+
+  <target name="init-javadoc-not-jdk16" unless="jdk16">
+    <property name="javadoc.tool" value="${java.home}/../bin/javadoc"/>
+  </target>
+
+  <target name="init-javadoc-jdk16" if="jdk16">
+    <property name="javadoc.tool" value="${jdk16}/bin/javadoc"/>
+  </target>
+
+  <target name="publishedapi" depends="init-javadoc-tool,initjars">
  
     <tstamp>
       <format 
@@ -552,7 +571,15 @@
     <delete dir="${out.javadoc.dir}/publishedapi"/>
     <mkdir dir="${out.javadoc.dir}/publishedapi"/>
 
+    <!--  Only include the files we want customers to see.  -->
+    <mkdir dir="${javadoc.temp.dir}"/>
+    <antcall target="include-in-javadoc">
+      <param name="more_inclusions" value="publishedapi.ant"/>
+    </antcall>
+    <antcall target="publishedapi-jdk16-includes"/>
+
     <javadoc sourcepath="${out.javadoc.dir}/sourcedir"
+             executable="${javadoc.tool}"
              classpath="${compile.classpath};${osgi};${servlet24};${out.dir}"
              breakiterator="true"
              destdir="${out.javadoc.dir}/publishedapi"
@@ -562,20 +589,21 @@
              Footer="${javadoc.Footer}"
              bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 1997,2006 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;">
       <fileset dir="${derby.engine.src.dir}"
-               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+               includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.client.src.dir}"
-               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+               includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.drda.src.dir}"
-               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+               includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.tools.src.dir}"
-               includesfile="${javadoctools.dir}/publishedapi.ant"/>
+               includesfile="${javadoc.inclusions}"/>
     </javadoc>
 
     <delete dir="${out.javadoc.dir}/sourcedir"/>
+    <delete dir="${javadoc.temp.dir}"/>
 
   </target>
 
-  <target name="derbydocs" depends="initjars">
+  <target name="derbydocs" depends="init-javadoc-tool,initjars">
 
     <delete dir="${out.javadoc.dir}/engine"/>
     <mkdir dir="${out.javadoc.dir}/engine"/>
@@ -586,7 +614,15 @@
     <copy file="${javadoctools.dir}/package-list" 
           todir="${out.javadoc.dir}/engine"/>
 
+    <!--  Build scripts and other cruft choke javadoc. Exclude these files.  -->
+    <mkdir dir="${javadoc.temp.dir}"/>
+    <antcall target="exclude-from-javadoc">
+      <param name="more_exclusions" value="derbydocs_exclusions.ant"/>
+    </antcall>
+    <antcall target="derbydocs-not-jdk16-excludes"/>
+
     <javadoc
+        executable="${javadoc.tool}"
         additionalparam="-J-mx320M"
         packagenames="org.*"
         access="private"
@@ -610,18 +646,77 @@
         <taglet name="org.apache.derbyBuild.javadoc.EndFormatTaglet" 
                 path="${basedir}/classes"/>
       <fileset dir="${derby.engine.src.dir}"
-               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+               excludesfile="${javadoc.exclusions}"/>
       <fileset dir="${derby.client.src.dir}"
-               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+               excludesfile="${javadoc.exclusions}"/>
       <fileset dir="${derby.drda.src.dir}"
-               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+               excludesfile="${javadoc.exclusions}"/>
       <fileset dir="${derby.shared.src.dir}"
-               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/>
+               excludesfile="${javadoc.exclusions}"/>
       <fileset dir="${derby.tools.src.dir}"
-               excludesfile="${javadoctools.dir}/derbydocs_exclusions.ant"/> 
+               excludesfile="${javadoc.exclusions}"/> 
       <link href="."/>
     </javadoc>
 
+    <delete dir="${javadoc.temp.dir}"/>
+
+  </target>
+
+  <!--
+     Optionally include extra JDBC4 support in public API.
+  -->
+  <target name="publishedapi-jdk16-includes" if="jdk16">
+
+    <!--  Include extra JDBC4 support.  -->
+    <antcall target="include-in-javadoc">
+      <param name="more_inclusions" value="publishedapi_jdbc4.ant"/>
+    </antcall>
+
+  </target>
+
+  <!--
+     Include more files in the javadoc. Successive calls to this
+     target append more inclusions to the master file that tells
+	 javadoc which files to notice.
+
+	 Parameters:
+
+	     more_inclusions    Additional file to append to master inclusions file.
+  -->
+  <target name="include-in-javadoc">
+    <concat destfile="${javadoc.inclusions}" append="yes">
+       <filelist dir="${javadoctools.dir}" 
+         files="${more_inclusions}"
+       />
+    </concat>
+  </target>
+
+  <!--
+     Optionally exclude the JDBC4 classes, which choke the jdk14 javadoc tool.
+  -->
+  <target name="derbydocs-not-jdk16-excludes" unless="jdk16">
+
+    <antcall target="exclude-from-javadoc">
+      <param name="more_exclusions" value="derbydocs_jdbc4_exclusions.ant"/>
+    </antcall>
+
+  </target>
+
+  <!--
+     Exclude more files from the javadoc. Successive calls to this
+     target append more exclusions to the master file that tells
+	 javadoc which files to ignore.
+
+	 Parameters:
+
+	     more_exclusions    Additional file to append to master exclusions file.
+  -->
+  <target name="exclude-from-javadoc">
+    <concat destfile="${javadoc.exclusions}" append="yes">
+       <filelist dir="${javadoctools.dir}" 
+         files="${more_exclusions}"
+       />
+    </concat>
   </target>
 
   <target name="toolsdocs">
