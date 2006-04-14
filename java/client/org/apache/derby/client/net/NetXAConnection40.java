@@ -28,13 +28,6 @@ public class NetXAConnection40 extends NetXAConnection {
     
     /**
      * creates NetXAConnection40.
-     * @param netLogWriter
-     * @param user
-     * @param password
-     * @param dataSource
-     * @param rmId
-     * @param isXAConn
-     * @return
      */
     public NetXAConnection40(NetLogWriter netLogWriter,
             String user,
