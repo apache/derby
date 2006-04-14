@@ -5163,17 +5163,24 @@ public class DRDAConnThread extends Thread {
 	
 	
 	// Delimiters for SQLERRMC values.
-	
+    // The token delimiter value will be used to parse the MessageId from the 
+    // SQLERRMC in MessageService.getLocalizedMessage and the MessageId will be
+    // used to retrive the localized message. If this delimiter value is changed
+    // please make sure to make appropriate changes in
+    // MessageService.getLocalizedMessage that gets called from 
+    // SystemProcedures.SQLCAMESSAGE
 	/**
-	 * <code>SQLERRMC_TOKEN_DELIMITER</code> separates message argument tokens 
-	 */
-	private static String SQLERRMC_TOKEN_DELIMITER = new String(new byte[] {20});
+	 * <code>SQLERRMC_TOKEN_DELIMITER</code> separates message argument tokens
+ 	 */
+	private static String SQLERRMC_TOKEN_DELIMITER = new String(new char[] {(char)20});
 	
+    // This token delimiter value is used to separate the tokens for multiple 
+    // error messages.  This is used in SystemProcedures.SQLCAMESSAGE.
 	/**
 	 * <code>SQLERRMC_MESSAGE_DELIMITER</code> When message argument tokes are sent,
 	 * this value separates the tokens for mulitiple error messages 
 	 */
-	private static String SQLERRMC_MESSAGE_DELIMITER = new String(new byte[] {20,20,20});
+	private static String SQLERRMC_MESSAGE_DELIMITER = new String(new char[] {(char)20,(char)20,(char)20});
 	
 	/**
 	 * <code>SQLERRMC_PREFORMATTED_MESSAGE_DELIMITER</code>, When full message text is 
@@ -5190,6 +5197,18 @@ public class DRDAConnThread extends Thread {
 	 * This method will also truncate the value according the client capacity.
 	 * CCC can only handle 70 characters.
 	 * 
+     * Server sends the sqlerrmc using UTF8 encoding to the client.
+     * To get the message, client sends back information to the server
+     * calling SYSIBM.SQLCAMESSAGE (see Sqlca.getMessage).  Several parameters 
+     * are sent to this procedure including the locale, the sqlerrmc that the 
+     * client received from the server. 
+     * On server side, the procedure SQLCAMESSAGE in SystemProcedures then calls
+     * the MessageService.getLocalizedMessage to retrieve the localized error message. 
+     * In MessageService.getLocalizedMessage the sqlerrmc that is passed in, 
+     * is parsed to retrieve the message id. The value it uses to parse the MessageId
+     * is char value of 20, otherwise it uses the entire sqlerrmc as the message id. 
+     * This messageId is then used to retrieve the localized message if present, to 
+     * the client.
 	 * @param se  SQLException to build SQLERRMC
 	 *  
 	 * @return  String which is either the message arguments to be passed to 

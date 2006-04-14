@@ -93,7 +93,9 @@ public class SystemProcedures  {
 										String[] msg, int[] rc)
 	{
 		int numMessages = 1;
-		byte[] b = {20, 20, 20};
+        // This corresponds to the DRDAConnThread.SQLERRMC_MESSAGE_DELIMITER
+        // delimiter for multiple messages that are set in sqlerrmc.
+        char[] b = {(char)20, (char)20, (char)20};
 		String errSeparator = new String(b);
 
 		// Figure out if there are multiple exceptions in sqlerrmc. If so get each one
