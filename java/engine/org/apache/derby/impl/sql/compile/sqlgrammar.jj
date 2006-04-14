@@ -8,7 +8,6 @@ options
 	ERROR_REPORTING = true;
 	USER_TOKEN_MANAGER = false;
 	USER_CHAR_STREAM = true;
-	OPTIMIZE_TOKEN_MANAGER = true;
 	COMMON_TOKEN_ACTION = true;
 	CACHE_TOKENS = true;
 	UNICODE_INPUT = true;
