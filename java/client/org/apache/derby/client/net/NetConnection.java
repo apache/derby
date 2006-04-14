@@ -19,7 +19,7 @@
 */
 package org.apache.derby.client.net;
 
-import org.apache.derby.jdbc.ClientBaseDataSource;
+import java.sql.SQLException;
 import org.apache.derby.client.am.CallableStatement;
 import org.apache.derby.client.am.DatabaseMetaData;
 import org.apache.derby.client.am.DisconnectException;
@@ -31,8 +31,6 @@ import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientDriver;
-import org.apache.derby.client.am.ClientJDBCObjectFactory;
-
 
 public class NetConnection extends org.apache.derby.client.am.Connection {
 
@@ -1399,6 +1397,12 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     public void setIndoubtTransactions(java.util.Hashtable indoubtTransactions) {
+        if (isXAConnection_) {
+            if (indoubtTransactions_ != null) {
+                indoubtTransactions_.clear();
+            }
+            indoubtTransactions_ = indoubtTransactions;
+        }
     }
 
     protected void setReadOnlyTransactionFlag(boolean flag) {
@@ -1528,6 +1532,113 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             (NetDatabaseMetaData) databaseMetaData_;
         return metadata.serverSupportsQryclsimp();
     }
-
+    
+    /**
+     * Returns if a transaction is in process
+     * @return open
+     */
+    public boolean isOpen() {
+        return open_;
+    }
+    
+    /**
+     * closes underlying connection and associated resource.
+     */
+    synchronized public void close() throws SQLException {
+        // call super.close*() to do the close*
+        super.close();
+        if (!isXAConnection_)
+            return;
+        if (isOpen()) {
+            return; // still open, return
+        }
+        if (xares_ != null) {
+            xares_.removeXaresFromSameRMchain();
+        }
+    }
+    
+    /**
+     * closes underlying connection and associated resource.
+     */
+    synchronized public void closeX() throws SQLException {
+        // call super.close*() to do the close*
+        super.closeX();
+        if (!isXAConnection_)
+            return;
+        if (isOpen()) {
+            return; // still open, return
+        }
+        if (xares_ != null) {
+            xares_.removeXaresFromSameRMchain();
+        }
+    }
+    
+    /**
+     * Invalidates connection but keeps socket open.
+     */
+    synchronized public void closeForReuse() throws SqlException {
+        // call super.close*() to do the close*
+        super.closeForReuse();
+        if (!isXAConnection_)
+            return;
+        if (isOpen()) {
+            return; // still open, return
+        }
+        if (xares_ != null) {
+            xares_.removeXaresFromSameRMchain();
+        }
+    }
+    
+    /**
+     * closes resources connection will be not available 
+     * for reuse.
+     */
+    synchronized public void closeResources() throws SQLException {
+        // call super.close*() to do the close*
+        super.closeResources();
+        if (!isXAConnection_)
+            return;
+        
+        if (isOpen()) {
+            return; // still open, return
+        }
+        if (xares_ != null) {
+            xares_.removeXaresFromSameRMchain();
+        }
+    }
+    
+    
+    /**
+     * Invokes write commit on NetXAConnection
+     */
+    protected void writeXACommit_() throws SqlException {
+        xares_.netXAConn_.writeCommit();
+    }
+    
+    /**
+     * Invokes readCommit on NetXAConnection
+     */
+    protected void readXACommit_() throws SqlException {
+        xares_.netXAConn_.readCommit();
+    }
+    
+    /**
+     * Invokes writeRollback on NetXAConnection
+     */
+    protected void writeXARollback_() throws SqlException {
+        xares_.netXAConn_.writeRollback();
+    }
+    
+    /**
+     * Invokes writeRollback on NetXAConnection
+     */
+    protected void readXARollback_() throws SqlException {
+            xares_.netXAConn_.readRollback();
+    }
+    
+    
+    protected void writeXATransactionStart(Statement statement) throws SqlException {
+        xares_.netXAConn_.writeTransactionStart(statement);
+    }
 }
 

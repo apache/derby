@@ -20,9 +20,9 @@
 package org.apache.derby.client;
 
 import java.sql.SQLException;
+import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientDriver;
-import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.client.am.MessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
@@ -94,13 +94,12 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             password_ = password;
             rmId_ = rmId;
             listeners_ = new java.util.Vector();
-            netXAPhysicalConnection_ = new org.apache.derby.client.net.NetXAConnection((NetLogWriter) logWriter_,
+            netXAPhysicalConnection_ = getNetXAConnection(ds,
+                    (NetLogWriter) logWriter_,
                     user,
                     password,
-                    ds,
-                    rmId,
-                    true);
-            physicalConnection_ = netXAPhysicalConnection_;
+                    rmId);
+            physicalConnection_ = netXAPhysicalConnection_.getNetConnection();
         } catch ( SqlException se ) {
             throw se.getSQLException();
         }
@@ -249,5 +248,29 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     // Used by LogicalConnection close when it disassociates itself from the ClientPooledConnection
     public synchronized void nullLogicalConnection() {
         logicalConnection_ = null;
+    }
+    
+    /**
+     * creates and returns NetXAConnection. 
+     * Overwrite this method to create different version of NetXAConnection
+     * @param ds 
+     * @param logWriter 
+     * @param user 
+     * @param password 
+     * @param rmId 
+     * @return NetXAConnection
+     */
+    protected NetXAConnection getNetXAConnection (ClientDataSource ds,
+                                  NetLogWriter logWriter,
+                                  String user,
+                                  String password,
+                                  int rmId) throws SqlException {
+          return new NetXAConnection(logWriter,
+                    user,
+                    password,
+                    ds,
+                    rmId,
+                    true);
+        
     }
 }

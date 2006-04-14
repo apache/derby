@@ -21,9 +21,12 @@
 package org.apache.derby.client;
 
 import java.sql.SQLException;
-import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.jdbc.ClientDataSource;
 import javax.sql.StatementEventListener;
+import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.net.NetLogWriter;
+import org.apache.derby.client.net.NetXAConnection40;
 
 public class ClientPooledConnection40 extends ClientPooledConnection {
     
@@ -57,6 +60,26 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
     public void removeStatementEventListener(StatementEventListener listener){
         throw new java.lang.UnsupportedOperationException();
     }
-    
-    
+
+    /**
+     * creates and returns NetXAConnection40.
+     * @param ds
+     * @param logWriter
+     * @param user
+     * @param password
+     * @param rmId
+     * @return NetXAConnection
+     */
+    protected NetXAConnection getNetXAConnection (ClientDataSource ds,
+                                  NetLogWriter logWriter,
+                                  String user,
+                                  String password,
+                                  int rmId) throws SqlException {
+        return new NetXAConnection40 (logWriter,
+                user,
+                password,
+                ds,
+                rmId,
+                true);
+    }
 }

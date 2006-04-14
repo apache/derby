@@ -115,7 +115,8 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
                     dataSource,
                     rmId,
                     isXAConn);
-            controlCon_.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+            controlCon_.getNetConnection().setTransactionIsolation(
+                    Connection.TRANSACTION_READ_UNCOMMITTED);
 
             if (logWriter_ != null) {
                 logWriter_.traceExit(this, "createControlConnection", controlCon_);

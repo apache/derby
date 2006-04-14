@@ -98,8 +98,8 @@ public class NetXACallInfo {
     }
 
     public void saveConnectionVariables() {
-        in_ = actualConn_.getInputStream();
-        out_ = actualConn_.getOutputStream();
+        in_ = actualConn_.getNetConnection().getInputStream();
+        out_ = actualConn_.getNetConnection().getOutputStream();
         crrtkn_ = actualConn_.getCorrelatorToken();
     }
 

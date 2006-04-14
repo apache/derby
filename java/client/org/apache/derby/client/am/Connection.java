@@ -609,9 +609,7 @@ public abstract class Connection implements java.sql.Connection,
 
     public void writeCommit() throws SqlException {
         if (isXAConnection_) {
-            if ((xaState_ == XA_T0_NOT_ASSOCIATED) ) {
-                writeLocalXACommit_();
-            }
+            writeXACommit_ ();
         } else {
             writeLocalCommit_();
         }
@@ -626,9 +624,7 @@ public abstract class Connection implements java.sql.Connection,
 
     public void readCommit() throws SqlException {
         if (isXAConnection_) {
-            if ((xaState_ == XA_T0_NOT_ASSOCIATED) ) {
-                readLocalXACommit_();               
-            }
+            readXACommit_ ();
         } else {
             readLocalCommit_();
         }
@@ -686,7 +682,7 @@ public abstract class Connection implements java.sql.Connection,
 
     public void writeRollback() throws SqlException {
         if (isXAConnection_) {
-            writeLocalXARollback_();
+            writeXARollback_ ();
         } else {
             writeLocalRollback_();
         }
@@ -1738,12 +1734,19 @@ public abstract class Connection implements java.sql.Connection,
     public abstract void readLocalXAStart_() throws SqlException;
 
     public abstract void writeLocalXACommit_() throws SqlException;
+    
+    protected abstract void writeXACommit_() throws SqlException;
 
-    public abstract void readLocalXACommit_() throws SqlException;
+    public abstract void readLocalXACommit_() throws SqlException;   
+    
+    protected abstract void readXACommit_() throws SqlException;   
 
     public abstract void writeLocalCommit_() throws SqlException;
 
     public abstract void readLocalCommit_() throws SqlException;
+    
+    protected abstract void writeXATransactionStart(Statement statement) 
+                                                throws SqlException;
 
     public void completeLocalCommit() {
     	java.util.Set keySet = CommitAndRollbackListeners_.keySet();
@@ -1772,10 +1775,17 @@ public abstract class Connection implements java.sql.Connection,
 
 
     public abstract void writeLocalXARollback_() throws SqlException;
+    
+    protected abstract void writeXARollback_() throws SqlException;
 
     public abstract void readLocalXARollback_() throws SqlException;
+    
+    protected abstract void readXARollback_() throws SqlException;
 
     public void writeTransactionStart(Statement statement) throws SqlException {
+        if (isXAConnection_) {
+            writeXATransactionStart (statement);
+        }
     }
 
     public void readTransactionStart() throws SqlException {
