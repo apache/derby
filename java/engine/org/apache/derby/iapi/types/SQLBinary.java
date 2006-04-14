@@ -205,22 +205,14 @@ abstract class SQLBinary
 		try
 		{
 			if ((dataValue == null) && (stream != null)) {
-
+        
 				if (stream instanceof FormatIdInputStream) {
 					readExternal((FormatIdInputStream) stream);
-				} else if ( stream instanceof NewByteArrayInputStream )
-				{
-					// this piece of code handles the case that a stream has been
-					// opened on the bit value. the stream will have already called
-					// readExternal() on the underlying FormatableBitSet. we just need to
-					// retrieve the byte array from that stream.
-					NewByteArrayInputStream	nbais = (NewByteArrayInputStream) stream;
-					dataValue = nbais.getData();
 				}
 				else {
 					readExternal(new FormatIdInputStream(stream));
 				}
-				stream = null;
+ 				stream = null;
 				streamValueLength = -1;
 
 			}
@@ -346,25 +338,28 @@ abstract class SQLBinary
 		int bl = in.read();
 		if (bl == -1)
 			throw new java.io.EOFException();
+        
+        byte li = (byte) bl;
 
         int len;
-		if ((bl & 0x80) != 0)
+		if ((li & ((byte) 0x80)) != 0)
 		{
-			if (bl == 0xC0)
-			{
+			if (li == ((byte) 0xC0))
+			{             
 				len = in.readInt();
-			}
-			else if (bl == 0xA0)
+ 			}
+			else if (li == ((byte) 0xA0))
 			{
 				len = in.readUnsignedShort();
 			}
 			else
 			{
-				len = bl & 0x1F;
+				len = li & 0x1F;
 			}
 		}
 		else
 		{
+            
 			// old length in bits
 			int v2 = in.read();
 			int v3 = in.read();
@@ -376,7 +371,7 @@ abstract class SQLBinary
 			len = lenInBits / 8;
 			if ((lenInBits % 8) != 0)
 				len++;
-		}
+ 		}
 		return len;
 	}
 

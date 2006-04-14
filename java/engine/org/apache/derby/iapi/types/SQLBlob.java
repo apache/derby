@@ -164,14 +164,17 @@ public class SQLBlob extends SQLBinary
 	 * @see DataValueDescriptor#setValueFromResultSet 
 	 *
 	 * @exception SQLException		Thrown on error
+	 * @throws StandardException 
 	 */
 	public void setValueFromResultSet(ResultSet resultSet, int colNumber,
 									  boolean isNullable)
-		throws SQLException
+		throws SQLException, StandardException
 	{
-			stream = resultSet.getBinaryStream(colNumber);
-			streamValueLength = -1; // unknown
-			dataValue = null;
+        Blob blob = resultSet.getBlob(colNumber);
+        if (blob == null)
+            setToNull();
+        else
+            setObject(blob);
 	}
 
 
@@ -205,13 +208,19 @@ public class SQLBlob extends SQLBinary
         throws StandardException
     {
         Blob vb = (Blob) theValue;
+        
         try {
-            stream = vb.getBinaryStream();
+            long vbl = vb.length();
+            if (vbl < 0L || vbl > Integer.MAX_VALUE)
+                throw this.outOfRange();
+            
+            setValue(new RawToBinaryFormatStream(
+                    vb.getBinaryStream(), (int) vbl),
+                    (int) vbl);
+            
         } catch (SQLException e) {
             throw dataTypeConversion("DAN-438-tmp");
        }
-        streamValueLength = -1; // unknown
-        dataValue = null;
     }
 }
 
