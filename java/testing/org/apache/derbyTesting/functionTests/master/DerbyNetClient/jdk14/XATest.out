@@ -183,7 +183,6 @@ ResultSet CLOSE_CURSORS_AT_COMMIT 2
 Non-held ResultSet correctly closed after commit
 BGBC 0
 BGAC 1
-DERBY-1025 Call conn.commit to avoid exception with client
 START GLOBAL TRANSACTION
 Global transaction open ResultSets 12
 EXPECTED SQLSTATE(XJ05C): Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.

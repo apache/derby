@@ -88,14 +88,6 @@ public class checkDataSource
 	// Tests for setting isolation level this way only run in embedded for now.
 	private boolean canSetIsolationWithStatement = TestUtil.isEmbeddedFramework();
 	  
-	 	
-	// DERBY-1025 client  XAResource.start() does not commit an active local transaction 
-	// when auto commit is true. Embedded XAResource.start() implementation commits 
-	// the active local transaction on the Connection associated with the XAResource.
-	// Client incorrectly throws an error.
-	// run only for embedded for now.
-	private static boolean autocommitCommitsOnXa_Start =TestUtil.isEmbeddedFramework();
-	
 	//	 DERBY-1148 - Client Connection state does not
 	// get set properly when joining a global transaction.
 	private static boolean isolationSetProperlyOnJoin = TestUtil.isEmbeddedFramework();
@@ -625,51 +617,48 @@ public class checkDataSource
 		conn3.close();
 		xac3.close();
 
-		if (autocommitCommitsOnXa_Start)
-		{
-			// test that an xastart in auto commit mode commits the existing work.(beetle 5178)
-			XAConnection xac4 = dsx.getXAConnection();
-			Xid xid4a = new cdsXid(4, (byte) 23, (byte) 76);
-			Connection conn4 = xac4.getConnection();
-			System.out.println("conn4 autcommit " + conn4.getAutoCommit());
+		// test that an xastart in auto commit mode commits the existing work.(beetle 5178)
+		XAConnection xac4 = dsx.getXAConnection();
+		Xid xid4a = new cdsXid(4, (byte) 23, (byte) 76);
+		Connection conn4 = xac4.getConnection();
+		System.out.println("conn4 autcommit " + conn4.getAutoCommit());
 
-			Statement s4 = conn4.createStatement();
-			s4.executeUpdate("create table autocommitxastart(i int)");
-			s4.executeUpdate("insert into autocommitxastart values 1,2,3,4,5");
+		Statement s4 = conn4.createStatement();
+		s4.executeUpdate("create table autocommitxastart(i int)");
+		s4.executeUpdate("insert into autocommitxastart values 1,2,3,4,5");
 
-			ResultSet rs4 = s4.executeQuery("select i from autocommitxastart");
-			rs4.next(); System.out.println("acxs " + rs4.getInt(1));
-			rs4.next(); System.out.println("acxs " + rs4.getInt(1));
+		ResultSet rs4 = s4.executeQuery("select i from autocommitxastart");
+		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
+		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
 
-			xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
-			xac4.getXAResource().end(xid4a, XAResource.TMSUCCESS);
+		xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
+		xac4.getXAResource().end(xid4a, XAResource.TMSUCCESS);
 
-			try {
-				rs4.next(); System.out.println("acxs " + rs.getInt(1));
-			} catch (SQLException sqle) {
-				System.out.println("autocommitxastart expected " + sqle.getMessage());
-			}
-
-			conn4.setAutoCommit(false);
-
-			rs4 = s4.executeQuery("select i from autocommitxastart");
-			rs4.next(); System.out.println("acxs " + rs4.getInt(1));
-			rs4.next(); System.out.println("acxs " + rs4.getInt(1));
-
-			try {
-				xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
-			} catch (XAException xae) {
-				showXAException("autocommitxastart expected ", xae);
-			}
-			rs4.next(); System.out.println("acxs " + rs4.getInt(1));
-			rs4.close();
-
-			conn4.rollback();
-			conn4.close();
-			xac4.close();
-		
+		try {
+			rs4.next(); System.out.println("acxs " + rs.getInt(1));
+		} catch (SQLException sqle) {
+			System.out.println("autocommitxastart expected " + sqle.getMessage());
 		}
 
+		conn4.setAutoCommit(false);
+
+		rs4 = s4.executeQuery("select i from autocommitxastart");
+		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
+		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
+		
+		try {
+			xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
+		} catch (XAException xae) {
+			showXAException("autocommitxastart expected ", xae);
+		}
+		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
+		rs4.close();
+
+		conn4.rollback();
+		conn4.close();
+		xac4.close();
+		
+		
 		// test jira-derby 95 - a NullPointerException was returned when passing
 		// an incorrect database name (a url in this case) - should now give error XCY00
 		Connection dmc95 = ij.startJBMS();

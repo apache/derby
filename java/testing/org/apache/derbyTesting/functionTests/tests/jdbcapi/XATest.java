@@ -904,16 +904,15 @@ public class XATest {
             rs.next(); System.out.println("BGBC " + rs.getInt(1));
             conn.commit();
             rs.next(); System.out.println("BGAC " + rs.getInt(1));
-            
+            rs.close();
+           
+            // ensure a transaction is active to test DERBY-1025
+            rs = sdh.executeQuery("SELECT * FROM APP.FOO");
+           
             // This switch to global is ok because conn
             // is in auto-commit mode, thus the start performs
             // an implicit commit to complete the local transaction.
             
-            // DERBY-1025 Client only bug
-            if (TestUtil.isDerbyNetClientFramework()) {
-                System.out.println("DERBY-1025 Call conn.commit to avoid exception with client");
-                conn.commit();
-            }
             System.out.println("START GLOBAL TRANSACTION");
             // start a global xact and test those statements.
             xar.start(xid, XAResource.TMNOFLAGS);

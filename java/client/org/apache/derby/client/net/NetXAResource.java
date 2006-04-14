@@ -553,6 +553,17 @@ public class NetXAResource implements XAResource {
         if (conn_.isPhysicalConnClosed()) {
             connectionClosedFailure();
         }
+        
+        // DERBY-1025 - Flow an auto-commit if in auto-commit mode before 
+        // entering a global transaction
+        try {
+        	if(conn_.autoCommit_)
+        		conn_.flowAutoCommit();
+        } catch (SqlException sqle) {
+        	rc = XAException.XAER_RMERR;
+            exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
+                    (sqle, exceptionsOnXA);
+        } 
 
         // update the XACallInfo
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
