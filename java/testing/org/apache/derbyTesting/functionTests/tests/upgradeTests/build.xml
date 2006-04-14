@@ -42,7 +42,7 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compilet1,copyfiles"/>
+  <target name="FTOtestsubdir" depends="compilet1,copyfiles,setpropertydefault,setproperty"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
@@ -77,6 +77,17 @@
     </copy>
   </target> 
 
+  <target name="setpropertydefault" unless="derbyTesting.jar.path">
+  	<propertyfile file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_2_app.properties">
+		<entry key="jvmflags" value="-DderbyTesting.jar.path=${src.dir}/tools/testing/derby" />
+	</propertyfile>
+  </target>
+	
+  <target name="setproperty" if="derbyTesting.jar.path">
+  	<propertyfile file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_2_app.properties">
+  		<entry key="jvmflags" value="-DderbyTesting.jar.path=${derbyTesting.jar.path}" />
+  	</propertyfile>
+  </target> 	
 
 <!--             ============= End Targets ==============                -->
 

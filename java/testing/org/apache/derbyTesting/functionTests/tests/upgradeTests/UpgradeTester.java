@@ -33,6 +33,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
+import org.apache.derbyTesting.functionTests.harness.jvm;
 
 /**
  * Tests upgrades including soft upgrade. Test consists of following phases:
@@ -54,8 +55,6 @@ import javax.sql.DataSource;
 	property is set to true, in which case this program modifies the expected
 	behaviour.
 	<P>
-	Currently checking for pass/failure is a manual process of looking
-	at the output.
 	
     <P>
 	This tests the following specifically.
@@ -67,6 +66,11 @@ import javax.sql.DataSource;
 	</UL>
 	
 	Metadata tests
+	
+	10.2 Upgrade tests:
+	
+	caseReusableRecordIdSequenceNumber
+	
  */
 public class UpgradeTester {
 	
@@ -138,8 +142,6 @@ public class UpgradeTester {
 	/**
 	 * Constructor
 	 * 
-	 * @param oldJarLoc Location of old release jar files
-	 * @param newJarLoc Location of new version jar files
 	 * @param oldMajorVersion Major version number of old release
 	 * @param oldMinorVersion Minor version number of old release
 	 * @param newMajorVersion Major version number of new release
@@ -148,17 +150,56 @@ public class UpgradeTester {
 	 * 'derby.database.allowPreReleaseUpgrade' to indicate alpha/beta releases 
 	 * to support upgrade.
 	 */
-	public UpgradeTester(String oldJarLoc, String newJarLoc, 
-						int oldMajorVersion, int oldMinorVersion,
+	public UpgradeTester(int oldMajorVersion, int oldMinorVersion,
 						int newMajorVersion, int newMinorVersion,
 						boolean allowPreReleaseUpgrade) {
-		this.oldJarLoc = oldJarLoc;
-		this.newJarLoc = newJarLoc;
 		this.oldMajorVersion = oldMajorVersion;
 		this.oldMinorVersion = oldMinorVersion;
 		this.newMajorVersion = newMajorVersion;
 		this.newMinorVersion = newMinorVersion;
 		this.allowPreReleaseUpgrade = allowPreReleaseUpgrade; 
+	}
+	
+	/**
+	 * Set the location of jar files for old and new release
+	 */
+	private void setJarLocations() {
+		this.oldJarLoc = getOldJarLocation();
+		this.newJarLoc = getNewJarLocation();
+	}
+	
+	/**
+	 * Get the location of jars of old release. The location is specified 
+	 * in the property "derbyTesting.jar.path".
+	 *  
+	 * @return location of jars of old release
+	 */
+	private String getOldJarLocation() {
+		String jarLocation = null;
+		
+		String jarPath = System.getProperty("derbyTesting.jar.path");
+		
+		if((jarPath != null) && (jarPath.compareTo("JAR_PATH_NOT_SET") == 0)) {
+			System.out.println("FAIL: Path to previous release jars not set");
+			System.out.println("Check if derbyTesting.jar.path property has been set in ant.properties file");
+			System.exit(-1);
+		}
+		
+		String version = oldMajorVersion + "." + oldMinorVersion;
+		jarLocation = jarPath + File.separator + version;
+		
+		return jarLocation;
+	}
+	
+	/**
+	 * Get the location of jar of new release. This is obtained from the
+	 * classpath using findCodeBase method in jvm class.
+	 * 
+	 * @return location of jars of new release
+	 */
+	private String getNewJarLocation() {
+		boolean[] isJar = new boolean[1];
+		return jvm.findCodeBase(isJar);
 	}
 	
 	/**
@@ -225,6 +266,7 @@ public class UpgradeTester {
 			System.setProperty("derby.database.allowPreReleaseUpgrade", 
 								"false");
 		
+		setJarLocations();
 		createClassLoaders();
 		runPhase(OLD_RELEASE, PH_CREATE);
 		runPhase(NEW_RELEASE, PH_SOFT_UPGRADE);
@@ -267,12 +309,8 @@ public class UpgradeTester {
 		
 		setClassLoader(classLoader);
 		
-		try {
-			conn = getConnection(classLoader, dbName, phase);
-		} catch (SQLException sqle) {
-			
-		}
-		
+		conn = getConnection(classLoader, dbName, phase);
+				
 		if(conn != null) {
 			passed = caseVersionCheck(version, conn);
 			passed = caseReusableRecordIdSequenceNumber(conn, phase, 
@@ -354,17 +392,24 @@ public class UpgradeTester {
 	private Connection getConnectionUsingDataSource(URLClassLoader classLoader, Properties prop) throws Exception{
 		Connection conn = null;
 		
-		Class testUtilClass = Class.forName("org.apache.derbyTesting.functionTests.util.TestUtil", 
-											true, classLoader);
-		Object testUtilObject = testUtilClass.newInstance();
+		try {
+			Class testUtilClass = Class.forName("org.apache.derbyTesting.functionTests.util.TestUtil", 
+												true, classLoader);
+			Object testUtilObject = testUtilClass.newInstance();
 		
-		// Instead of calling TestUtil.getDataSourceConnection, call 
-		// TestUtil.getDataSource and then call its getConnection method.
-		// This is because we do not want to lose the SQLException
-		// which we get when shutting down the database. 
-		java.lang.reflect.Method method = testUtilClass.getMethod("getDataSource", new Class[] { prop.getClass() });
-      	DataSource ds = (DataSource) method.invoke(testUtilClass, new Object[] { prop });
+			// Instead of calling TestUtil.getDataSourceConnection, call 
+			// TestUtil.getDataSource and then call its getConnection method.
+			// This is because we do not want to lose the SQLException
+			// which we get when shutting down the database. 
+			java.lang.reflect.Method method = testUtilClass.getMethod("getDataSource", new Class[] { prop.getClass() });
+	      	DataSource ds = (DataSource) method.invoke(testUtilClass, new Object[] { prop });
       	conn = ds.getConnection();
+		} catch(SQLException sqle) {
+			throw sqle;
+		} catch (Exception e) {
+			handleReflectionExceptions(e);
+			throw e;
+		} 
 
       	return conn;
 	}
@@ -613,18 +658,25 @@ public class UpgradeTester {
 	 */
 	private void runMetadataTest(URLClassLoader classLoader, Connection conn) 
 				throws Exception{
-      	Statement stmt = conn.createStatement();
-      	
-		Class metadataClass = Class.forName("org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata", 
+		try {
+	      	Statement stmt = conn.createStatement();
+	      	
+			Class metadataClass = Class.forName("org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata", 
 							  				true, classLoader);
-		Object metadataObject = metadataClass.newInstance();
-		java.lang.reflect.Field f1 = metadataClass.getField("con");
-      	f1.set(metadataObject, conn);
-      	java.lang.reflect.Field f2 = metadataClass.getField("s");
-      	f2.set(metadataObject, stmt);
-		java.lang.reflect.Method method = metadataClass.getMethod("runTest", 
-																  null);
-      	method.invoke(metadataObject, null);
+			Object metadataObject = metadataClass.newInstance();
+			java.lang.reflect.Field f1 = metadataClass.getField("con");
+	      	f1.set(metadataObject, conn);
+	      	java.lang.reflect.Field f2 = metadataClass.getField("s");
+	      	f2.set(metadataObject, stmt);
+			java.lang.reflect.Method method = metadataClass.getMethod("runTest", 
+																	  null);
+	      	method.invoke(metadataObject, null);
+		} catch(SQLException sqle) {
+			throw sqle;
+		} catch (Exception e) {
+			handleReflectionExceptions(e);
+			throw e;
+		} 
     }
 	
 	/**
@@ -662,6 +714,23 @@ public class UpgradeTester {
 			sqle = sqle.getNextException();
 		} while (sqle != null);
 	}
+	
+	/**
+	 * Prints the possible causes for exceptions thrown when trying to
+	 *  load classes and invoke methods.
+	 * 
+	 * @param e Exception
+	 */
+	private void handleReflectionExceptions(Exception e) {
+		System.out.println("FAIL - Unexpected exception - " + e.getMessage());
+		System.out.println("Possible Reason - Test could not find the " +
+				"location of jar files. Please check if you are running " +
+				"with jar files in the classpath. The test does not run with " +
+				"classes folder in the classpath. Also, check that old " +
+				"jars are checked out from the repository or specified in " +
+				"derbyTesting.jar.path property in ant.properties");
+		e.printStackTrace();
+	}
 
 	// The main method is only used for testing on command-line. This class is
 	// not intended to be used for adding to the harness. For harness tests, 
@@ -669,14 +738,12 @@ public class UpgradeTester {
 	// e.g: Upgrade_10_1_10_2 
 	public static void main(String[] args) {
 		
-		if(args.length != 6) {
-			System.out.println("USAGE: java UpgradeTester <location of old jars> <location of new jars> <old major version> <old minor version> <new major version> <new minor version>");
-			System.out.println("e.g: java UpgradeTester C:\\derby\\10.1\\lib C:\\derby\\trunk\\lib 10 1 10 2");
+		if(args.length != 4) {
+			System.out.println("USAGE: java UpgradeTester <old major version> <old minor version> <new major version> <new minor version>");
+			System.out.println("e.g: java UpgradeTester 10 1 10 2");
 			return;
 		}
 		
-		String oldJarLoc = args[0];
-		String newJarLoc = args[1];
 		int oldMajorVersion = Integer.valueOf(args[2]).intValue();
 		int oldMinorVersion = Integer.valueOf(args[3]).intValue();
 		int newMajorVersion = Integer.valueOf(args[4]).intValue();
@@ -684,7 +751,7 @@ public class UpgradeTester {
 		boolean allowPreReleaseUpgrade = true;
 		
 		try {
-			UpgradeTester upgradeTester = new UpgradeTester(oldJarLoc, newJarLoc, oldMajorVersion, oldMinorVersion, newMajorVersion, newMinorVersion, allowPreReleaseUpgrade);
+			UpgradeTester upgradeTester = new UpgradeTester(oldMajorVersion, oldMinorVersion, newMajorVersion, newMinorVersion, allowPreReleaseUpgrade);
 			upgradeTester.runUpgradeTests();
 		} catch(MalformedURLException mue) {
 			System.out.println("MalformedURLException: " + mue.getMessage());

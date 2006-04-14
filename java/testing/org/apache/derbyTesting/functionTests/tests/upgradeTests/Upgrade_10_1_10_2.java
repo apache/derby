@@ -22,18 +22,12 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 import java.net.MalformedURLException;
 import java.sql.SQLException;
 
-import org.apache.derbyTesting.functionTests.harness.jvm;
-
 /**
  * Test upgrade from 10.1 to 10.2 
  */
 public class Upgrade_10_1_10_2 {
 
 	public static void main(String[] args) {
-		
-		String oldJarLoc = System.getProperty("derbyTesting.oldJarLocation");
-		boolean[] isJar = new boolean[1];
-		String newJarLoc = jvm.findCodeBase(isJar);
 		
 		int oldMajorVersion = 10;
 		int oldMinorVersion = 1;
@@ -42,10 +36,10 @@ public class Upgrade_10_1_10_2 {
 		boolean allowPreReleaseUpgrade = true;
 		
 		try {
-			UpgradeTester upgradeTester = new UpgradeTester(oldJarLoc, newJarLoc,
-												oldMajorVersion, oldMinorVersion,
-												newMajorVersion, newMinorVersion,
-												allowPreReleaseUpgrade);
+			UpgradeTester upgradeTester = new UpgradeTester(
+											oldMajorVersion, oldMinorVersion,
+											newMajorVersion, newMinorVersion,
+											allowPreReleaseUpgrade);
 			upgradeTester.runUpgradeTests();
 		} catch(MalformedURLException mue) {
 			System.out.println("MalformedURLException: " + mue.getMessage());
