@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.tools.sysinfo.Main
 
-   Copyright 1998, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1998, 2004, 2006 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.security.CodeSource;
-import java.security.PrivilegedAction;
 import java.security.AccessController;
 
 import org.apache.derby.iapi.services.info.PropertyNames;
@@ -56,13 +55,16 @@ import org.apache.derby.iapi.tools.i18n.*;
 
 
 /**
-  <i>Copyright &#169; 1998, Cloudscape, Inc.   All rights reserved.</i>
+  <P>
+  Sysinfo reports values relevant to the current Derby configuration.
 
   <P>
-  SysInfo reports values relevant to the Cloudscape product found on
-  the CLASSPATH.  It looks for a file called sysinfo.properties in
-  the CLASSPATH using getResourceAsStream. If the file
-  is not found, or some other exception occurs, the
+  Sysinfo looks for properties files in org.apache.derby.info named after
+  the genus names in org.apache.derby.tools.sysinfo, and gets their location
+  using getResource. It also searches the classpath and attempts to load
+  the info properties files from the directory or jar locations on the
+  classpath, and eliminates any duplicated information. If no files
+  are found, or some other exception occurs, the
   value returned will be that set for the key
   SysInfo.failureTag, or be the value "<info unavailable>".
 
@@ -380,8 +382,6 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                   }
               }
            );      
-      	
-      	
       	
         if (is == null) {
 //           localAW.println("resource is null: " + localeResource);
@@ -719,8 +719,33 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                                     ".properties"
                                 };
 
+    /**
+     *  Get all the info we can obtain from the local execution context
+     *  as to the availability of the Derby classes by attempting to load
+     *  the info files with loadZipFromResource() and checking classpath
+     *  locations with checkForInfo if the classpath is accessible.
+     *
+     *  @param classpath the classpath, or null if not accessible
+     *  @return an array of ZipInfoProperties with the locations of the located
+     *          resources
+     *  @see #loadZipFromResource()
+     *  @see #checkForInfo(String)
+     */
     public static ZipInfoProperties[] getAllInfo(String classpath)
     {
+        ZipInfoProperties zips[] = loadZipFromResource();
+
+        // No info properties files found, but here we are in sysinfo.
+        // Avoid an NPE in mergeZips by creating a ZipInfoProperties array
+        // with the location of the sysinfo that is currently executing.
+        if (zips == null)
+        {
+            zips = new ZipInfoProperties[1];
+            ZipInfoProperties zip = new ZipInfoProperties(ProductVersionHolder.getProductVersionHolderFromMyEnv(org.apache.derby.tools.sysinfo.TOOLS));
+            zip.setLocation(getFileWhichLoadedClass(new Main().getClass()));
+            zips[0] = zip;
+        }
+
         try
         {
 			if (classpath != null) {
@@ -736,12 +761,12 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 				}
 				if (v.size() > 0)
 				{
-					ZipInfoProperties zips[] = new ZipInfoProperties[v.size()];
-					v.copyInto(zips);
-					return zips;
+					ZipInfoProperties cpzips[] = new ZipInfoProperties[v.size()];
+					v.copyInto(cpzips);
+					return mergeZips(zips, cpzips);
 				}
 			}
-            return loadZipFromResource();
+            return mergeZips(zips, null);
 
         }
         catch (SecurityException se)
@@ -754,10 +779,13 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     }
 
     /**
-        This method returns exactly one ZipInfoProperty in the array.
-        If it is able to load the sysinfo file as a resource, it returns
-        the ZipInfoProperty associated with that. Otherwise, the ZipInfoProperty
-        will be empty.
+     *  Attempt to load the info properties files specified in infoNames[i]
+     *  using getResourceAsStream(). If none are able to be loaded, return
+     *  a null array.
+     *
+     *  @return An array of ZipInfoProperties with the locations from which
+     *          the info properties files were loaded.
+     *  @see #infoNames
      */
     private static ZipInfoProperties [] loadZipFromResource()
     {
@@ -781,7 +809,17 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 				continue;
 
 			ZipInfoProperties ze = new ZipInfoProperties(ProductVersionHolder.getProductVersionHolderFromMyEnv(is));
-			ze.setLocation(resource);
+ 
+                        // get the real location of the info file
+                        URL locUrl = (URL) AccessController.doPrivileged
+                        (new PrivilegedAction() {
+                            public Object run() {
+                                URL realUrl = new Main().getClass().getResource(resource);
+                                return realUrl;
+                            }
+                        });
+
+			ze.setLocation(formatURL(locUrl));
 
 			al.add(ze);
         }
@@ -798,6 +836,12 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
         return zip;
     }
 
+    /**
+     *  Split the classpath into separate elements.
+     *
+     *  @param cp the classpath, if accessible.
+     *  @return a String array with the individual classpath elements.
+     */
     private static String [] parseClasspath(String cp)
     {
         StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
@@ -815,6 +859,14 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
         return vals;
     }
 
+    /**
+     *  Given an individual element of the element of the classpath, call
+     *  checkDirectory() if the element is a directory or checkFile()
+     *  if the element is a file.
+     *
+     *  @param cpEntry the classpath element
+     *  @return a ZipInfoProperties if an info properties file is found.
+     */
     private static ZipInfoProperties checkForInfo(String cpEntry)
     {
         File f = new File(cpEntry);
@@ -835,10 +887,15 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
             return zip;
         }
         return null;
-
-
     }
 
+    /**
+     *  Check a given directory for the presence of an info properties file in
+     *  org/apache/derby/info inside the directory.
+     *
+     *  @param dirname the directory to check as a String
+     *  @return a ZipInfoProperties if a file is found, otherwise null.
+     */
     private static ZipInfoProperties checkDirectory(String dirname)
     {
         boolean foundOne = false;
@@ -874,6 +931,16 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
     }
 
+    /**
+     *  Check inside a jar file for the presence of a Derby info properties
+     *  file. There is a special case for db2jcc, which does not have a Derby
+     *  info propeties file. If db2jcc is in the filename, acquire DB2Driver
+     *  via reflection and get the version number from it.
+     *
+     *  @param filename the jar file to check
+     *  @return ZipInfoProperties with the jar file set as the location
+     *          or null if not found.
+     */
     private static ZipInfoProperties checkFile(String filename)
     {
         // try to create a ZipFile from it
@@ -1036,26 +1103,103 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      
                 URL result = cs.getLocation ();
      
-                String loc;
-
-                // If the class is found directly as a class file, loc has the
-                // filename of that classfile. If the class is found in a jar,
-                // loc has the format: 
-                //   file:[jarName]!className
-                // In that case, we fetch the jarName and return it.
-                if ("file".equals(result.getProtocol()))
-                {
-                    loc = result.getPath();
-                    if (loc.indexOf("!") > 0)
-                        loc = loc.substring(0, loc.indexOf("!"));
-                }
-                else
-                {
-                    loc = result.toString();
-                }
-                return loc;
+                return formatURL(result);
             }
         });
     }
+
+    /**
+     *  <P>
+     *  Merge and flatten two arrays of ZipInfoProperties, removing any 
+     *  duplicates. There may be duplicates in the arrays because
+     *  loadZipFromResource may find all the properties files in the same
+     *  location, such as when loading from compiled source instead of
+     *  packaged jars. Also, a poorly constructed classpath may contain
+     *  duplicate entries that each contain the Derby classes, and we
+     *  need only report the first of each such instances found.
+     *  <P>
+     *  The second array may be null if the classpath was empty, in which
+     *  case we still remove the duplicates from the first array and return 
+     *  the shortened array.
+     *
+     *  @param zip1 the first array from loadZipWithResource
+     *  @param zip2 the second array from analyzing the classpath
+     *  @return the merged array
+     */
+    private static ZipInfoProperties[] mergeZips(ZipInfoProperties[] zip1,
+                                                 ZipInfoProperties[] zip2)
+    {
+        Vector v = new Vector();
+        boolean foundDup = false;
+  
+        // remove duplicates from first array
+        for (int i = 0; i < zip1.length; i++)
+        {
+            if (zip1[i] != null && zip1.length > 1)
+            {
+                for (int j = i + 1; j < zip1.length; j++)
+                {
+                    if (zip1[i].getLocation().equals(zip1[j].getLocation()))
+                    zip1[j] = null;
+                }
+            }
+            if (zip1[i] != null)
+              v.addElement(zip1[i]);
+        }
+  
+        // if provided a second array, remove any locations in second array
+        // still in first array.
+        if (zip2 != null)
+        {
+          for (int j = 0; j < zip2.length; j++)
+          {
+            for (int k = 0; k < v.size(); k++)
+            {
+                ZipInfoProperties z = (ZipInfoProperties)v.get(k);
+                if (zip2[j].getLocation().equals(z.getLocation()))
+                  foundDup = true;
+            }
+            if (!foundDup)
+            {
+                v.addElement(zip2[j]);
+            }
+            foundDup = false;
+          }
+        }
+  
+        ZipInfoProperties[] merged = new ZipInfoProperties[v.size()];
+        v.copyInto(merged);
+        return merged;
+    }
+
+    /**
+     *  Strip a given URL down to the filename. The URL will be a jarfile or
+     *  directory containing a Derby info properties file. Return the canonical
+     *  path for the filename, with the path separators normalized.
+     */
+    private static String formatURL(URL loc)
+    {
+        String filename = loc.toString();
+
+        if (filename.startsWith("jar:")) { filename = filename.substring(4); }
+        if (filename.startsWith("file:")) { filename = filename.substring(5); }
+        if (filename.indexOf("!") > -1) { filename = filename.substring(0, filename.indexOf("!")); }
+        if (filename.indexOf("/org/apache/derby") > -1) { 
+            filename = filename.substring(0, filename.indexOf("/org/apache/derby")); 
+        }
+        if (filename.charAt(0) == '/' && 
+            Character.isLetter(filename.charAt(1)) &&
+            filename.charAt(2) == ':' &&
+            filename.charAt(2) == '/') { filename = filename.substring(1); }
+
+        String result = ""; 
+        try {
+            result = new File(filename).getCanonicalPath().replace('/', File.separatorChar);
+        } catch (IOException e) {
+            result = "IOException";
+        }
+        return result;
+    }
+
 } // end of class Main
 
