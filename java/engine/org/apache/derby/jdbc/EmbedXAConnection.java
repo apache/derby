@@ -165,6 +165,7 @@ class EmbedXAConnection extends EmbedPooledConnection
 		Wrap and control a PreparedStatement
 	*/
 	public PreparedStatement wrapStatement(PreparedStatement ps, String sql, Object generatedKeys) throws SQLException {
+                ps = super.wrapStatement(ps,sql,generatedKeys);
 		XAStatementControl sc = new XAStatementControl(this, ps, sql, generatedKeys);
 		return (PreparedStatement) sc.applicationStatement;
 	}
@@ -172,6 +173,7 @@ class EmbedXAConnection extends EmbedPooledConnection
 		Wrap and control a PreparedStatement
 	*/
 	public CallableStatement wrapStatement(CallableStatement cs, String sql) throws SQLException {
+                cs = super.wrapStatement(cs,sql);
 		XAStatementControl sc = new XAStatementControl(this, cs, sql);
 		return (CallableStatement) sc.applicationStatement;
 	}

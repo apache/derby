@@ -102,4 +102,20 @@ public interface BrokeredConnectionControl
 		Optionally wrap a CallableStatement with an CallableStatement.
 	*/
 	public CallableStatement wrapStatement(CallableStatement realStatement, String sql) throws SQLException;
+        
+        /**
+         * Close called on the associated PreparedStatement object
+         * @param statement PreparedStatement object on which the close event 
+         * occurred     
+         */
+        public void onStatementClose(PreparedStatement statement);
+        
+        /**
+         * Error occurred on associated PreparedStatement object
+         * @param statement PreparedStatement object on which the 
+         * error occured
+         * @param sqle      The SQLExeption that caused the error
+         */
+        public void onStatementErrorOccurred(PreparedStatement statement,SQLException sqle);
+        
 }

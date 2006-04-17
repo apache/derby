@@ -307,16 +307,7 @@ public class TestUtil {
 		if(HAVE_DRIVER_CLASS)
 		{
 			classname = getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource";
-			// The JDBC 4.0 implementation of the DataSource interface
-			// is suffixed with "40". Use it if it is available and
-			// the JVM version is at least 1.6.
-			if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
-				String classname40 = classname + "40";
-				try {
-					Class.forName(classname40);
-					classname = classname40;
-				} catch (ClassNotFoundException e) {}
-			}
+			classname = checkForJDBC40Implementation(classname);
 			return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
 		}
 		else
@@ -357,8 +348,32 @@ public class TestUtil {
 	public static javax.sql.ConnectionPoolDataSource getConnectionPoolDataSource(Properties attrs)
 	{
 		String classname = getDataSourcePrefix() + CONNECTION_POOL_DATASOURCE_STRING + "DataSource";
+                classname = checkForJDBC40Implementation(classname);
 		return (javax.sql.ConnectionPoolDataSource) getDataSourceWithReflection(classname, attrs);
 	}
+        
+        /**
+         * returns the class name for the JDBC40 implementation
+         * if present. otherwise returns the class name of the class
+         * written for the lower jdk versions
+         * @param classname String
+         * @return String containing the name of the appropriate 
+         *         implementation
+         */
+        public static String checkForJDBC40Implementation(String classname) {
+                String classname_ = classname;
+                // The JDBC 4.0 implementation of the  
+                // interface is suffixed with "40". Use it if it is available 
+                // and the JVM version is at least 1.6.
+                if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
+                        String classname40 = classname_ + "40";
+                        try {
+                                Class.forName(classname40);
+                                classname_ = classname40;
+                        } catch (ClassNotFoundException e) {}
+                }
+                return classname_;
+        }
 
 	public static String getDataSourcePrefix()
 		{

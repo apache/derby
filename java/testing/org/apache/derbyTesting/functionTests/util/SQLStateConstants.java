@@ -339,5 +339,5 @@ public class SQLStateConstants
     //The SQLState of the SQLExcepion thrown when a class for which 
     //isWrapperFor returns false is passed as a parameter to the 
     //unwrap method.
-    public static final String UNABLE_TO_UNWRAP = "XJ120";
+    public static final String UNABLE_TO_UNWRAP = "XJ128";
 }

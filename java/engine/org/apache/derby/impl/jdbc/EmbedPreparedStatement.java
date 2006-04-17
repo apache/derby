@@ -68,6 +68,7 @@ import java.io.EOFException;
 import java.io.Reader;
 import java.sql.Types;
 
+import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 
 /**
  *
@@ -94,6 +95,8 @@ public abstract class EmbedPreparedStatement
 
 	protected PreparedStatement	preparedStatement;
 	private Activation			activation;
+        
+        private BrokeredConnectionControl bcc=null;
 
     // By default a PreparedStatement is poolable when it is created
     //required for jdbc4.0 methods        
@@ -208,6 +211,8 @@ public abstract class EmbedPreparedStatement
 	 */
 	void closeActions() throws SQLException {
 
+                if (bcc!=null)
+                        bcc.onStatementClose(this);
 		//we release the resource for preparedStatement
 		preparedStatement = null;
 
@@ -246,15 +251,19 @@ public abstract class EmbedPreparedStatement
 	 * @exception SQLException thrown on failure.
      */
 	public final java.sql.ResultSet executeQuery() throws SQLException {
-		executeStatement(activation, true, false);
-
-		if (SanityManager.DEBUG) {
-			if (results == null)
-				SanityManager.THROWASSERT("no results returned on executeQuery()");
-		}
-
-		return results;
-	}
+            try {
+                executeStatement(activation, true, false);
+            } catch(SQLException sqle) {
+                checkStatementValidity(sqle);
+            }
+            
+            if (SanityManager.DEBUG) {
+                if (results == null)
+                    SanityManager.THROWASSERT("no results returned on executeQuery()");
+            }
+            
+            return results;
+        }
 
     /**
      * Execute a SQL INSERT, UPDATE or DELETE statement. In addition,
@@ -265,10 +274,14 @@ public abstract class EmbedPreparedStatement
      * for SQL statements that return nothing
 	 * @exception SQLException thrown on failure.
      */
-	public final int executeUpdate() throws SQLException {
-		executeStatement(activation, false, true);
-		return updateCount;
-	}
+        public final int executeUpdate() throws SQLException {
+            try {
+                executeStatement(activation, false, true);
+            } catch(SQLException sqle) {
+                checkStatementValidity(sqle);
+            }
+            return updateCount;
+        }
 
     /**
      * Set a parameter to SQL NULL.
@@ -1107,9 +1120,15 @@ public abstract class EmbedPreparedStatement
      * @see java.sql.Statement#execute
 	 * @exception SQLException thrown on failure.
      */
-    public final boolean execute() throws SQLException {
-		return executeStatement(activation, false, false);
-	}
+        public final boolean execute() throws SQLException {
+            boolean ret=false;
+            try{
+                ret = executeStatement(activation, false, false);
+            } catch(SQLException sqle) {
+                checkStatementValidity(sqle);
+            }
+            return ret;
+        }
     /**
      * Set a parameter to a java.sql.Date value.  The driver converts this
      * to a SQL DATE value when it sends it to the database.
@@ -1433,7 +1452,49 @@ public abstract class EmbedPreparedStatement
 			sourceType);
 		return se;
 	}
-
+        /*
+         * This method is used to initialize the BrokeredConnectionControl 
+         * variable with its implementation. This method will be called in the  
+         * BrokeredConnectionControl class 
+         *
+         * @param control used to call the onStatementClose and 
+         * onStatementErrorOccurred methods that have logic to 
+         * raise StatementEvents for the close and error events
+         * on the PreparedStatement
+         *
+         */
+        public void setBrokeredConnectionControl(BrokeredConnectionControl control) {
+            bcc = control;
+        }
+        
+        /*
+         * Method calls onStatementError occurred on the 
+         * BrokeredConnectionControl class after checking the 
+         * SQLState of the SQLException thrown.
+         */
+        
+        private void checkStatementValidity(SQLException sqle) throws SQLException {
+            /*
+             * The subclass of SQLException thrown when the SQLState class value is
+             * '42'. This indicates that the in-progress query has violated SQL
+             * syntax rules.
+             *
+             * Check if the exception has occurred because the connection
+             * associated with the PreparedStatement has been closed
+             *
+             * This exception has the SQLState of 08003 which is represented
+             * by the constant SQLState.ERROR_CLOSE
+             */
+            if(bcc != null && (sqle.getSQLState().equals("08003")
+            || sqle.getSQLState().startsWith(SQLState.LSE_COMPILATION_PREFIX)) ) {
+                //call the BrokeredConnectionControl interface method
+                //onStatementErrorOccurred
+                bcc.onStatementErrorOccurred(this,sqle);
+            }
+            throw sqle;
+        }
+        
+               
    //jdbc 4.0 methods
 
    
@@ -1518,5 +1579,4 @@ public abstract class EmbedPreparedStatement
 
         return isPoolable;
     }                
-        
 }

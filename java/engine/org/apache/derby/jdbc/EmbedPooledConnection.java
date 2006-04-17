@@ -31,6 +31,8 @@ import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.EngineConnection;
+import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
+import org.apache.derby.impl.jdbc.EmbedCallableStatement;
 
 
 import java.sql.Connection;
@@ -88,7 +90,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	*/
 	private final boolean requestPassword;
 
-	private boolean isActive;
+	protected boolean isActive;
     
     private synchronized int nextId()
     {
@@ -428,16 +430,45 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		return s;
 	}
 	/**
-		No need to wrap statements for PooledConnections.
-	*/
+         * Call the setBrokeredConnectionControl method inside the 
+         * EmbedPreparedStatement class to set the BrokeredConnectionControl 
+         * variable to this instance of EmbedPooledConnection
+         * This will then be used to call the onStatementErrorOccurred
+         * and onStatementClose events when the corresponding events
+         * occur on the PreparedStatement
+         *
+         * @param  ps            PreparedStatment to be wrapped
+         * @param  sql           String
+         * @param  generatedKeys Object
+         * @return returns the wrapped PreparedStatement
+         * @throws java.sql.SQLException
+	 */
 	public PreparedStatement wrapStatement(PreparedStatement ps, String sql, Object generatedKeys) throws SQLException {
-		return ps;
+               /*
+                    
+                */
+                EmbedPreparedStatement ps_ = (EmbedPreparedStatement)ps;
+                ps_.setBrokeredConnectionControl(this);
+		return (PreparedStatement)ps_;
 	}
-	/**
-		No need to wrap statements for PooledConnections.
-	*/
+        
+        /**
+         * Call the setBrokeredConnectionControl method inside the 
+         * EmbedCallableStatement class to set the BrokeredConnectionControl 
+         * variable to this instance of EmbedPooledConnection
+         * This will then be used to call the onStatementErrorOccurred
+         * and onStatementClose events when the corresponding events
+         * occur on the CallableStatement
+         *
+         * @param  cs            CallableStatment to be wrapped
+         * @param  sql           String
+         * @return returns the wrapped CallableStatement
+         * @throws java.sql.SQLException
+	 */
 	public CallableStatement wrapStatement(CallableStatement cs, String sql) throws SQLException {
-		return cs;
+                EmbedCallableStatement cs_ = (EmbedCallableStatement)cs;
+                cs_.setBrokeredConnectionControl(this);
+		return (CallableStatement)cs_;
 	}
     
     /** 
@@ -468,5 +499,34 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
         
         return connString;
     }
-
+    
+    /*-----------------------------------------------------------------*/
+    /*
+     * These methods are from the BrokeredConnectionControl interface. 
+     * These methods are needed to provide StatementEvent support for 
+     * derby. 
+     * They are actually implemented in EmbedPooledConnection40 but have
+     * a dummy implementation here so that the compilation wont fail when they
+     * are compiled with jdk1.4
+     */
+    
+    /**
+     * Dummy implementation for the actual methods found in 
+     * org.apache.derby.jdbc.EmbedPooledConnection40
+     * @param statement PreparedStatement
+     */
+    public void onStatementClose(PreparedStatement statement) {
+        
+    }
+    
+    /**
+     * Dummy implementation for the actual methods found in 
+     * org.apache.derby.jdbc.EmbedPooledConnection40
+     * @param statement PreparedStatement
+     * @param sqle      SQLException 
+     */
+    public void onStatementErrorOccurred(PreparedStatement statement,
+            SQLException sqle) {
+        
+    }
 }
