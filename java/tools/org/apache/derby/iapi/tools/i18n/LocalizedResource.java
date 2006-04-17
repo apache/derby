@@ -212,6 +212,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 		timeSize=len;
 
 	}
+
 	public LocalizedInput getNewInput(InputStream i) {
 		try {
 			if (encode != null)
@@ -222,6 +223,16 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 		}
 		return new LocalizedInput(i);
 	}
+
+	public LocalizedInput getNewEncodedInput(InputStream i, String encoding) {
+		try {
+	          return new LocalizedInput(i,encoding);
+		}
+		catch (UnsupportedEncodingException e){
+			
+		}
+		return new LocalizedInput(i);
+        }
 
 	public LocalizedOutput getNewOutput(OutputStream o){
 		try {

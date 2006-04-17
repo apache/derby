@@ -199,7 +199,22 @@ public class FileCompare
 		    {
 		        System.out.println("SED Error: " + cfe.getMessage());
 		    }
-		}
+		}	
+        else 
+        {
+            // read in in fixed format, but write out relying on default encoding
+            File EncodedOutFile = new File(outDir, testBase + ".tmpmstr");
+            BufferedReader inFile = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            
+            PrintWriter pw = new PrintWriter
+            ( new BufferedWriter(new FileWriter(EncodedOutFile), 10000), true );
+            int c;
+            while ((c = inFile.read()) != -1)
+                pw.write(c);
+            pw.flush();
+            pw.close();
+            is = new FileInputStream(EncodedOutFile);
+        }	
         
         // Define the input and output files
         outFile = new BufferedReader(new FileReader(outfile));

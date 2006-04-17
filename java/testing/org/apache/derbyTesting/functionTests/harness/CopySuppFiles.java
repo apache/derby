@@ -66,17 +66,31 @@ public class CopySuppFiles
 		    fw.close();
 		    suppFile = new File(f.getCanonicalPath());
 		}
-
-
-    			FileOutputStream fos = new FileOutputStream(suppFile);
-                byte[] data = new byte[4096];
-                int len;
-    			while ((len = is.read(data)) != -1)
-    			{
-    			    fos.write(data, 0, len);
-    			}
-    			fos.close();
-			}
+                // need to make a guess so we copy text files to local encoding
+                // on non-ascii systems...
+		        if ((fileName.indexOf("sql") > 0) || (fileName.indexOf("txt") > 0) || (fileName.indexOf(".view") > 0) || (fileName.indexOf(".policy") > 0))
+                {
+                    BufferedReader inFile = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                    PrintWriter pw = new PrintWriter
+                       ( new BufferedWriter(new FileWriter(suppFile), 10000), true );
+                    int c;
+                    while ((c = inFile.read()) != -1)
+                        pw.write(c);
+                    pw.flush();
+                    pw.close();
+                }
+                else
+                {
+                    FileOutputStream fos = new FileOutputStream(suppFile);
+                    byte[] data = new byte[4096];
+                    int len;
+                    while ((len = is.read(data)) != -1)
+                    {
+                        fos.write(data, 0, len);
+                    }
+                    fos.close();
+                }
+    		}
         }
 	}
 }

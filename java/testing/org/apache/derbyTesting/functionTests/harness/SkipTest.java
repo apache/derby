@@ -53,7 +53,7 @@ public class SkipTest
         }
         
         // Create a BufferedReader to read the list of tests to skip
-        BufferedReader listFile = new BufferedReader(new InputStreamReader(is));
+        BufferedReader listFile = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         String str = "";
         // Read the list of tests to skip, compare to testName
         while ( (str = listFile.readLine()) != null )

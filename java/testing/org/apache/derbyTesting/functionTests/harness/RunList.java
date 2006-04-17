@@ -227,7 +227,7 @@ public class RunList
             }
 
             // Create a BufferedReader to read the list of tests to run
-            runlistFile = new BufferedReader(new InputStreamReader(is));
+            runlistFile = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             if (runlistFile == null)
             {
                 System.out.println("The suite runall file could not be read.");

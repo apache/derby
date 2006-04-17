@@ -36,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.PrintStream;
 import java.io.IOException;
@@ -103,6 +104,7 @@ public class RunTest
 	static boolean upgradetest = false;
 	static boolean encryption = false; // requires jdk12ext plus encryptionProtocol
 	static boolean jdk12exttest = false; // requires jdk12ext
+    static boolean generateUTF8Out = false; // setting to create a utf8 encoded master file.
 	static String runningdir = ""; // where the tests are run and suppfiles placed
 	static String outputdir = ""; // user can specify as a property (optional)
 	static String canondir; // optional (to specify other than "master")
@@ -135,8 +137,9 @@ public class RunTest
 	static String testOutName; // output name without path or extension (optional)
 	static String passFileName; // file listing passed tests
 	static String failFileName; // file listing failed tests
-	static String JCCOutName; //file name for JCC corrected master
-    static File passFile;
+    static String UTF8OutName; // file name for utf8 encoded out - not used for file comparison
+	static String tempMasterName; //file name for master, converted to local encoding, and for network server, corrected master
+	static File passFile;
     static File failFile;
 	static String shutdownurl = "";
     static boolean useOutput; // use output or assume .tmp file is produced?
@@ -152,9 +155,10 @@ public class RunTest
     static File runDir; // where test is run and where support files are expected
     static File canonDir; // allows setting master dir other than default
     static File tmpOutFile; // tmp output file (before sed)
-    static File JCCOutFile; // master file processed for JCC
+    static File tempMasterFile; // master file copied into local encoding - with networkserver, also processed
     static File stdOutFile; // for tests with useoutput false
     static File finalOutFile; // final output file (after sed)
+    static File UTF8OutFile; // file name for out file copied into utf8 encoding
     static File appPropFile; // testname_app.properties or default
     static File clPropFile; // testname_derby.properties or default
     static File diffFile; // To indicate diffs
@@ -409,9 +413,10 @@ public class RunTest
     		pwDiff.flush();
         }
 
+        generateUTF8OutFile(finalOutFile);
+        
 		// Cleanup files
 		doCleanup(javaVersion);
-
 	}
 
     private static void testRun(String propString, Properties sysProp)
@@ -643,7 +648,7 @@ public class RunTest
 
             // Read the test file and copy it to the outDir
             // except for multi tests (for multi we just need to locate it)
-            BufferedReader in = new BufferedReader(new InputStreamReader(is));
+            BufferedReader in = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             if (upgradetest)
 		
                 //these calls to getCanonicalPath catch IOExceptions as a workaround to
@@ -765,11 +770,10 @@ public class RunTest
 
         // Create a .tmp file for doing sed later to create testBase.out
         tmpOutFile = new File(outDir, testOutName + ".tmp");
-		if (NetServer.isClientConnection(framework))
-		{
-			JCCOutName = testOutName+".tmpmstr";
-		}
-
+        // Always create a.tmpmstr copy of the master file in local encoding.
+        // With network server, this gets adjusted for displaywidth 
+        tempMasterName = testOutName+".tmpmstr";
+		UTF8OutName = testOutName+".utf8out";
 		// Define the .out file which will be created by massaging the tmp.out
 		finalOutFile = new File(outDir, testOutName + ".out");
 
@@ -801,18 +805,18 @@ public class RunTest
         // Delete any old .out or .tmp files
         if (tmpOutFile.exists())
             status = tmpOutFile.delete();
-		if (NetServer.isClientConnection(framework))
-		{
-        	JCCOutFile = new File(outDir, JCCOutName);
-        	if (JCCOutFile.exists())
-            	status = JCCOutFile.delete();
-		}
-        if (finalOutFile.exists())
+        tempMasterFile = new File(outDir, tempMasterName);
+        if (tempMasterFile.exists())
+            status = tempMasterFile.delete();
+		if (finalOutFile.exists())
             status = finalOutFile.delete();
         if (diffFile.exists())
             status = diffFile.delete();
         if (stdOutFile.exists())
             status = stdOutFile.delete();
+        UTF8OutFile = new File (outDir, UTF8OutName);
+        if (UTF8OutFile.exists())
+            status = UTF8OutFile.delete();
 
         // Delete any old pass or fail files
         if (!isSuiteRun)
@@ -849,6 +853,10 @@ public class RunTest
         if (hostName == null)
            hostName="localhost";
 		
+        String generateUTF8OutProp = sp.getProperty("generateUTF8Out");
+        if (generateUTF8OutProp != null && generateUTF8OutProp.equals("true"))
+        	generateUTF8Out = true;
+        
         // Some tests will not work with some frameworks,
         // so check suite exclude files for tests to be skipped
         String skipFile = framework + ".exclude";
@@ -1408,6 +1416,7 @@ clp.list(System.out);
 			{
 				ap.put("derby.ui.codeset",fileEnc);
 			}
+
 			if (verbose)
 				System.out.println("console.encoding:" + conEnc + 
 								   " file.encoding:" + fileEnc +
@@ -1820,8 +1829,8 @@ clp.list(System.out);
         //printWriter.close();
         //printWriter = null;
 
-        //Always cleanup the script files
-        if ( !(script == null) && (script.exists()) )
+        //Always cleanup the script files - except when keepfiles is true
+        if ( !(script == null) && (script.exists()) && (!keepfiles) )
         {
             status = script.delete();
             //System.out.println("Status was: " + status);
@@ -1850,13 +1859,12 @@ clp.list(System.out);
                 tmpOutFile = null;
             status = finalOutFile.delete();
             if (skiptest == false)
-                status = diffFile.delete();
-			// delete JCC filtered master file
-			if (NetServer.isClientConnection(framework))
-			{
-        		JCCOutFile = new File(outDir, JCCOutName);
-            	status = JCCOutFile.delete();
-			}
+                status = diffFile.delete();           
+            // delete the copied (and for Network Server, modified) master file 
+            tempMasterFile = new File(outDir, tempMasterName);
+            status = tempMasterFile.delete();
+            UTF8OutFile = new File(outDir, UTF8OutName);
+            status = UTF8OutFile.delete();
             if (deleteBaseDir)
             {
                 if (useCommonDB == false) 
@@ -1995,7 +2003,7 @@ clp.list(System.out);
     {
         PrintWriter tmpPw = new PrintWriter(bos);
         // reader for stderr
-        BufferedReader errReader = new BufferedReader(new InputStreamReader(is));
+        BufferedReader errReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         String s = null;
         int lines = 0;
         while ((s = errReader.readLine()) != null)
@@ -2133,18 +2141,23 @@ clp.list(System.out);
         Vector v = jvm.getCommandLine();
         if ( ij.startsWith("ij") )
         {
-            // as of cn1411-20030930, the system takes the default console encoding
-            // which in the US, on windows, is Cp437.
-            // Sun on the other hand, always forces a console encoding of 1252.
-            // To get the same result for ibm141 & jdk14*, we need to force 
-            // the console encoding to Cp1252 for ij tests.
-            // see beetle 5475.
-            v.addElement("-Dconsole.encoding=Cp1252" );
+            // As of cn1411-20030930 IBM jvm the system takes the default
+            // console encoding which in the US, on windows, is Cp437.
+            // Sun jvms, however, always force a console encoding of 1252.
+            // To get the same result for ibm141 & jdk14*, the harness needs to
+            // force the console encoding to Cp1252 for ij tests - unless 
+            // we're on non-ascii systems.
+            String isNotAscii = System.getProperty("platform.notASCII");
+            if ( (isNotAscii == null) || (isNotAscii.equals("false"))) 
+                v.addElement("-Dconsole.encoding=Cp1252" );
             v.addElement("org.apache.derby.tools." + ij);
             if (ij.equals("ij"))
             {
-                v.addElement("-fr");
-                v.addElement(scriptFileName);
+                //TODO: is there a setting/property we could check after which
+            	// we can use v.addElement("-fr"); (read from the classpath?)
+                // then we can also use v.addElement(scriptFile);
+            	v.addElement("-f");
+                v.addElement(outDir.toString() + File.separatorChar + scriptFileName);
             }
             v.addElement("-p");
             v.addElement(propString);
@@ -2568,6 +2581,29 @@ clp.list(System.out);
     	}
         
         return installedSecurityManager;
+    }
+    
+    // copy the .out file in utf8 format. 
+    // This can then be used as a new master in the source.
+    // It is assumed that if one runs with this property, keepfiles should be true.
+    private static void generateUTF8OutFile(File FinalOutFile) throws IOException
+    {
+        if (generateUTF8Out) 
+        {
+            keepfiles=true;
+        	File UTF8OutFile = new File(UTF8OutName);
+        	
+        	// start reading the .out file back in, using default encoding
+        	BufferedReader inFile = new BufferedReader(new FileReader(FinalOutFile));
+        	FileOutputStream fos = new FileOutputStream(UTF8OutFile);
+        	BufferedWriter bw = new BufferedWriter (new OutputStreamWriter(fos, "UTF-8"));  
+        	int c;
+        	while ((c = inFile.read()) != -1)
+        		bw.write(c);
+        	bw.flush();
+        	bw.close();
+        	fos.close();     
+        }
     }
 
 }
