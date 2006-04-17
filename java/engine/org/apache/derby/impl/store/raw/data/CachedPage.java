@@ -49,14 +49,14 @@ import java.io.IOException;
 	Since there are multiple page formats, use this abstract class to implement
 	cacheable interface.
 
-
 */
 
 public abstract class CachedPage extends BasePage implements Cacheable
 {
-	protected boolean		alreadyReadPage;	// set to true when the page was read by another class
+	protected boolean   alreadyReadPage;    // true when page read by another 
+                                            // class
 
-	protected byte[]		pageData;		// the actual page data - this is
+	protected byte[]    pageData;		    // the actual page data - this is
 											// the 'buffer' in the buffer cache
 
 	// The isDirty flag indicates if the pageData or pageHeader has been
@@ -70,17 +70,18 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	// is to stop the cache cleaning from skipping over this (latched) page
 	// even though it has not really been modified yet.  
 
-	protected boolean		isDirty;		// must be set to true
-								// whenever the pageData array is touched directly
-								// or indirectly.
+	protected boolean		isDirty;		// must be set to true whenever the
+                                            // pageData array is touched 
+                                            // directly or indirectly.
 
 	protected boolean		preDirty;		// set to true if the page is clean
-								// and the pageData array is about to be
-								// touched directly or indirectly.
+								            // and the pageData array is about 
+                                            // to be touched directly or 
+                                            // indirectly.
 
 
-	protected int		initialRowCount; // keep a running count of rows for
-										 // estimated row count.
+	protected int		initialRowCount;    // keep a running count of rows for
+										    // estimated row count.
 
 	private long 		containerRowCount;	// the number of rows in the
 											// container when this page is read
@@ -129,10 +130,11 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		super();
 	}
 
-	public final void setFactory(BaseDataFileFactory factory) {
-		dataFactory = factory;
-		pageCache = factory.getPageCache();
-		containerCache = factory.getContainerCache();
+	public final void setFactory(BaseDataFileFactory factory) 
+    {
+		dataFactory     = factory;
+		pageCache       = factory.getPageCache();
+		containerCache  = factory.getContainerCache();
 	}
 
 	/**
@@ -144,29 +146,34 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	protected void initialize()
 	{
 		super.initialize();
-		isDirty = false;
-		preDirty = false;
-		initialRowCount = 0;
-		containerRowCount = 0;
+		isDirty             = false;
+		preDirty            = false;
+		initialRowCount     = 0;
+		containerRowCount   = 0;
 	}
 
 	/*
 	** Methods of Cacheable
 	*/
 
-	/**
-		Find the container and then read the page from that container.
-
-		@return always true, higher levels have already checked the page number is
-		valid for an open.
-
-		@exception StandardException Standard Cloudscape policy.
-
-		@see Cacheable#setIdentity
-	*/
-	public Cacheable setIdentity(Object key) throws StandardException {
-
-		if (SanityManager.DEBUG) {
+    /**
+     * Find the container and then read the page from that container.
+     * <p>
+     * This is the way new pages enter the page cache.
+     * <p>
+     *
+	 * @return always true, higher levels have already checked the page number 
+     *         is valid for an open.
+     *
+     * @exception StandardException Standard Cloudscape policy.
+     *
+     * @see Cacheable#setIdentity
+     **/
+	public Cacheable setIdentity(Object key) 
+        throws StandardException 
+    {
+		if (SanityManager.DEBUG) 
+        {
 			SanityManager.ASSERT(key instanceof PageKey);
 		}
 
@@ -175,15 +182,22 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		PageKey newIdentity = (PageKey) key;
 
 		FileContainer myContainer = 
-				(FileContainer) containerCache.find(newIdentity.getContainerId());
+            (FileContainer) containerCache.find(newIdentity.getContainerId());
+
 		setContainerRowCount(myContainer.getEstimatedRowCount(0));
 
 		try
 		{
 			if (!alreadyReadPage)
-				readPage(myContainer, newIdentity);	// read in the pageData array from disk
+            {
+                // Fill in the pageData array by reading bytes from disk.
+				readPage(myContainer, newIdentity);	
+            }
 			else
+            {
+                // pageData array already filled
 				alreadyReadPage = false;
+            }
 
 			// if the formatID on disk is not the same as this page instance's
 			// format id, instantiate the real page object
@@ -192,7 +206,8 @@ public abstract class CachedPage extends BasePage implements Cacheable
 			int onPageFormatId = FormatIdUtil.readFormatIdInteger(pageData);
 			if (fmtId != onPageFormatId)
 			{
-				return changeInstanceTo(onPageFormatId, newIdentity).setIdentity(key);
+				return changeInstanceTo(
+                            onPageFormatId, newIdentity).setIdentity(key);
 			}
 
 			// this is the correct page instance
@@ -211,19 +226,33 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		return this;
 	}
 
-	/**
-		Find the container and then create the page in that container.
+    /**
+     * Find the container and then create the page in that container.
+     * <p>
+     * This is the process of creating a new page in a container, in that
+     * case no need to read the page from disk - just need to initialize it
+     * in the cache.
+     * <p>
+     *
+	 * @return new page, higher levels have already checked the page number is 
+     *         valid for an open.
+     *
+     * @param key               Which page is this?
+     * @param createParameter   details needed to create page like size, 
+     *                          format id, ...
+     *
+	 * @exception  StandardException  Standard exception policy.
+     *
+     * @see Cacheable#createIdentity
+     **/
+	public Cacheable createIdentity(
+    Object  key, 
+    Object  createParameter) 
+        throws StandardException 
+    {
 
-		@return new page, higher levels have already checked the page number is
-		valid for an open.
-
-		@exception StandardException Standard Cloudscape policy.
-
-		@see Cacheable#createIdentity
-	*/
-	public Cacheable createIdentity(Object key, Object createParameter) throws StandardException {
-
-		if (SanityManager.DEBUG) {
+		if (SanityManager.DEBUG) 
+        {
 			SanityManager.ASSERT(key instanceof PageKey);
 		}
 
@@ -239,12 +268,14 @@ public abstract class CachedPage extends BasePage implements Cacheable
                     SQLState.DATA_UNKNOWN_PAGE_FORMAT, newIdentity);
         }
 
-		// createArgs[0] contains the interger form of the formatId 
+		// createArgs[0] contains the integer form of the formatId 
 		// if it is not the same as this instance's formatId, instantiate the
 		// real page object
 		if (createArgs[0] != getTypeFormatId())
 		{
-			return changeInstanceTo(createArgs[0], newIdentity).createIdentity(key, createParameter);
+			return(
+                changeInstanceTo(createArgs[0], newIdentity).createIdentity(
+                        key, createParameter));
 		}
 		
 		// this is the correct page instance
@@ -257,7 +288,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 		/*
 		 * if we need to grow the container and the page has not been
-		 * preallocated , writing page before the log is written so that we
+		 * preallocated, writing page before the log is written so that we
 		 * know if there is an IO error - like running out of disk space - then
 		 * we don't write out the log record, because if we do, it may fail
 		 * after the log goes to disk and then the database may not be
@@ -277,23 +308,37 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		{
 			if (SanityManager.DEBUG_ON(FileContainer.SPACE_TRACE))
 			{
-				String syncFlag = ((createArgs[1] & WRITE_SYNC) != 0) ? "Write_Sync" :
+				String syncFlag = 
+                    ((createArgs[1] & WRITE_SYNC) != 0)     ? "Write_Sync" :
 					(((createArgs[1] & WRITE_NO_SYNC) != 0) ? "Write_NO_Sync" : 
-					 "No_write");
-				SanityManager.DEBUG(FileContainer.SPACE_TRACE,
-									"creating new page " + newIdentity + 
-									" with " + syncFlag);
+					                                          "No_write");
+
+				SanityManager.DEBUG(
+                    FileContainer.SPACE_TRACE,
+                    "creating new page " + newIdentity + " with " + syncFlag);
 			}
 		}
 
 		return this;
 	}
 
-	/*
-	 * this object is instantiated to the wrong subtype of cachedPage, 
-	 * this routine will create an object with the correct subtype, transfer all 
-	 * pertinent information from this to the new correct object.
-	 */
+    /**
+     * Convert this page to requested type, as defined by input format id.
+     * <p>
+     * The current cache entry is a different format id than the requested
+     * type, change it.  This object is instantiated to the wrong subtype of 
+     * cachedPage, this routine will create an object with the correct subtype,
+     * and transfer all pertinent information from this to the new correct 
+     * object.
+     * <p>
+     *
+	 * @return The new object created with the input fid and transfered info.
+     *
+     * @param fid          The format id of the new page.
+     * @param newIdentity  The key of the new page.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
 	private CachedPage changeInstanceTo(int fid, PageKey newIdentity)
 		 throws StandardException
 	{
@@ -322,15 +367,19 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		// avoid creating the data buffer if possible, transfer it to the new 
         // page if this is the first time the page buffer is used, then 
         // createPage will create the page array with the correct page size
-		if (this.pageData != null) {
+		if (this.pageData != null) 
+        {
 			realPage.alreadyReadPage = true;
 			realPage.usePageBuffer(this.pageData);
 		}
 
+        // RESOLVE (12/15/06) - the following code is commented out, but
+        // not sure why.
+
 		// this page should not be used any more, null out all its content and
 		// wait for GC to clean it up  
 
-		//destroyPage();	// let this subtype have a chance to get rid of stuff
+		//destroyPage();// let this subtype have a chance to get rid of stuff
 		//this.pageData = null;	// this instance no longer own the data array
 		//this.pageCache = null;
 		//this.dataFactory = null;
@@ -339,111 +388,143 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		return realPage;
 	}
 
-	/**
-		Has the page or its header been modified or about to be modified.
-		See comment on class header on meaning of isDirty and preDirty bits.
-
-		@see Cacheable#isDirty
-	*/
-	public boolean isDirty() {
-
-		synchronized (this) {
+    /**
+     * Is the page dirty?
+     * <p>
+     * The isDirty flag indicates if the pageData or pageHeader has been
+     * modified.  The preDirty flag indicates that the pageData or the
+     * pageHeader is about to be modified.  The reason for these 2 flags
+     * instead of just one is to accomodate checkpoint.  After a clean
+     * (latched) page sends a log record to the log stream but before that page
+     * is dirtied by the log operation, a checkpoint could be taken.  If so,
+     * then the redoLWM will be after the log record but, without preDirty, the
+     * cache cleaning will not have waited for the change.  So the preDirty bit
+     * is to stop the cache cleaning from skipping over this (latched) page
+     * even though it has not really been modified yet.  
+     *
+	 * @return true if the page is dirty.
+     *
+     * @see Cacheable#isDirty
+     **/
+	public boolean isDirty() 
+    {
+		synchronized (this) 
+        {
 			return isDirty || preDirty;
 		}
 	}
 
-	/**
-		Has the page or its header been modified.
-		See comment on class header on meaning of isDirty and preDirty bits.
-	*/
-	public boolean isActuallyDirty() {
-
-		synchronized (this) {
+    /**
+     * Has the page or its header been modified.
+     * <p>
+     * See comment on class header on meaning of isDirty and preDirty bits.
+     * <p>
+     *
+	 * @return true if changes have actually been made to the page in memory.
+     **/
+	public boolean isActuallyDirty() 
+    {
+		synchronized (this) 
+        {
 			return isDirty;
 		}
-		
 	}
 
-	/**
-		The page or its header is about to be modified.
-		See comment on class header on meaning of isDirty and preDirty bits.
-	*/
+    /**
+     * Set state to indicate the page or its header is about to be modified.
+     * <p>
+     * See comment on class header on meaning of isDirty and preDirty bits.
+     **/
 	public void preDirty()
 	{
-		synchronized (this) {
+		synchronized (this) 
+        {
 			if (!isDirty)
 				preDirty = true;
 		}
 	}
 
-	/**
-		Ensure that container row count is updated if it is too out of sync
-	 */
+    /**
+     * Set state to indicate the page or its header has been modified.
+     * <p>
+     * See comment on class header on meaning of isDirty and preDirty bits.
+     * <p>
+     **/
+	protected void setDirty() 
+    {
+		synchronized (this) 
+        {
+			isDirty  = true;
+			preDirty = false;
+		}
+	}
+
+    /**
+     * exclusive latch on page is being released.
+     * <p>
+     * The only work done in CachedPage is to update the row count on the
+     * container if it is too out of sync.
+     **/
 	protected void releaseExclusive()
 	{
-		// look at dirty bit without latching
+		// look at dirty bit without latching, the updating of the row
+        // count is just an optimization so does not need the latch.
+        //
 		// if this page actually has > 1/8 rows of the entire container, then
-		// consider updating the row count if it is different
-		// Since allocation page has recordCount of zero, the if clause will
-		// never be true for an allocation page.
+		// consider updating the row count if it is different.
+        //
+        // No need to special case allocation pages because it has recordCount 
+        // of zero, thus the if clause will never be true for an allocation 
+        // page.
 		if (isDirty && !isOverflowPage() &&
 			(containerRowCount / 8) < recordCount())
 		{
 			int currentRowCount = internalNonDeletedRecordCount();	
-			int delta = currentRowCount-initialRowCount;
-			int posDelta = delta > 0 ? delta : (-delta);
+			int delta           = currentRowCount-initialRowCount;
+			int posDelta        = delta > 0 ? delta : (-delta);
+
 			if ((containerRowCount/8) < posDelta)
 			{
-				// we are actually doing quite a bit of change, 
-				// update container row count
+				// This pages delta row count represents a significant change
+                // with respect to current container row count so update 
+                // container row count
 				FileContainer myContainer = null;
 
 				try
 				{
-					myContainer = (FileContainer) containerCache.find(identity.getContainerId());
+					myContainer = (FileContainer) 
+                        containerCache.find(identity.getContainerId());
+
 					if (myContainer != null)
 					{
 						myContainer.updateEstimatedRowCount(delta);
-						setContainerRowCount(myContainer.getEstimatedRowCount(0));
+						setContainerRowCount(
+                                myContainer.getEstimatedRowCount(0));
+
 						initialRowCount = currentRowCount;
 
 						// since I have the container, might as well update the
 						// unfilled information
-						myContainer.trackUnfilledPage(identity.getPageNumber(),
-													  unfilled());
+						myContainer.trackUnfilledPage(
+                            identity.getPageNumber(), unfilled());
 					}
 				}
-				catch(StandardException se)
+				catch (StandardException se)
 				{
-					// do nothing
+					// do nothing, not sure what could fail but this update
+                    // is just an optimization so no need to throw error.
 				}
 				finally
 				{
 					if (myContainer != null)
 						containerCache.release(myContainer);
 				}
-
 			}
 		}
 
 		super.releaseExclusive();
 	}
 
-	protected void setDirty() {
-		synchronized (this) {
-			isDirty = true;
-			preDirty = false;
-		}
-	}
-
-
-	/**
-		Write the page to disk.
-
-		@exception StandardException  Error writing the page,
-
-		@see Cacheable#clean
-	*/
 
     /**
      * Write the page to disk.
@@ -456,7 +537,6 @@ public abstract class CachedPage extends BasePage implements Cacheable
      *      Also someday it would be fine to allow reads of this page
      *      while the I/O was taking place.  
      *
-     *      So first 
      *
 	 * @return The identifier to be used to open the conglomerate later.
      *
@@ -464,22 +544,29 @@ public abstract class CachedPage extends BasePage implements Cacheable
      *
      * @see Cacheable#clean
      **/
-	public void clean(boolean remove) throws StandardException {
+	public void clean(boolean remove) throws StandardException 
+    {
 
 		// must wait for the page to be unlatched
-		synchronized (this) {
-
+		synchronized (this) 
+        {
 			if (!isDirty())
 				return;
 
 			// is someone else cleaning it
-			while (inClean) {
-				try {
+			while (inClean) 
+            {
+				try 
+                {
 					wait();
-				} catch (InterruptedException ie) {
+				} 
+                catch (InterruptedException ie) 
+                {
 					throw StandardException.interrupt(ie);
 				}
 			}
+
+            // page is not "inClean" by other thread at this point.
 
 			if (!isDirty())
 				return;
@@ -492,9 +579,11 @@ public abstract class CachedPage extends BasePage implements Cacheable
             // (owner != null), and preLatch.
 			while ((owner != null) && !preLatch) 
             {
-				try {
-						wait();
-				} catch (InterruptedException ie) 
+				try 
+                { 
+                    wait();
+				} 
+                catch (InterruptedException ie) 
 				{
 					inClean = false;
 					throw StandardException.interrupt(ie);
@@ -504,10 +593,12 @@ public abstract class CachedPage extends BasePage implements Cacheable
 			// The page is now effectively latched by the cleaner.
 			// We only want to clean the page if the page is actually dirtied,
 			// not when it is just pre-dirtied.
-			if (!isActuallyDirty()) {
-				preDirty = false; // the person who latched it gives up the
-								  // latch without really dirtying the page
-				inClean = false;
+			if (!isActuallyDirty()) 
+            {
+                // the person who latched it gives up the
+                // latch without really dirtying the page
+				preDirty = false; 
+				inClean  = false;
 				notifyAll();
 				return;
 			}
@@ -519,45 +610,85 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		}
 		catch(StandardException se)
 		{
+            // If we get an error while trying to write a page, current
+            // recovery system requires that entire DB is shutdown.  Then
+            // when system is rebooted we will run redo recovery which 
+            // if it does not encounter disk errors will guarantee to recover
+            // to a transaction consistent state.  If this write is a 
+            // persistent device problem, redo recovery will likely fail
+            // attempting to the same I/O.  Mark corrupt will stop all further
+            // writes of data and log by the system.
 			throw dataFactory.markCorrupt(se);
 		}
 		finally
 		{
-			// if there is something wrong in writing out the page, do not leave
-			// it inClean state or it will block the next cleaner forever
+			// if there is something wrong in writing out the page, 
+            // do not leave it inClean state or it will block the next cleaner 
+            // forever
 
-			synchronized (this) {
-
+			synchronized (this) 
+            {
 				inClean = false;
 				notifyAll();
 			}
 		}
 	}
 
-	public void clearIdentity() {
+	public void clearIdentity() 
+    {
 		alreadyReadPage = false;
 		super.clearIdentity();
 	}
 
-	private void readPage(FileContainer myContainer, PageKey newIdentity) throws StandardException 
+    /**
+     * read the page from disk into this CachedPage object.
+     * <p>
+     * A page is read in from disk into the pageData array of this object,
+     * and then put in the cache.
+     * <p>
+     *
+     * @param myContainer the container to read the page from.
+     * @param newIdentity indentity (ie. page number) of the page to read
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	private void readPage(
+    FileContainer   myContainer, 
+    PageKey         newIdentity) 
+        throws StandardException 
 	{
 		int pagesize = myContainer.getPageSize();
+
+        // we will reuse the existing page array if it is same size, the
+        // cache does support caching various sized pages.
 		setPageArray(pagesize);
 
-		for(int i=0;;){
-			try {
-
+		for (int io_retry_count = 0;;)
+        {
+			try 
+            {
 				myContainer.readPage(newIdentity.getPageNumber(), pageData);
 				break;
-
-			} catch (IOException ioe) {
-				i++;	
-
+			} 
+            catch (IOException ioe) 
+            {
+				io_retry_count++;	
 								
-				// we try to read four times because there might have been
-				// thread interrupts when we tried to read the data.
-				if(i>4){
-			
+				// Retrying read I/O's has been found to be successful sometimes
+                // in completing the read without having to fail the calling
+                // query, and in some cases avoiding complete db shutdown.
+                // Some situations are:
+                //     spurious interrupts being sent to thread by clients.
+                //     unreliable hardware like a network mounted file system.
+                //
+                // The only option other than retrying is to fail the I/O 
+                // immediately and throwing an error, thus performance cost
+                // not really a consideration.
+                //
+                // The retry max of 4 is arbitrary, but has been enough that
+                // not many read I/O errors have been reported.
+				if (io_retry_count > 4)
+                {
 					// page cannot be physically read
 	
 					StandardException se = 
@@ -565,18 +696,33 @@ public abstract class CachedPage extends BasePage implements Cacheable
 								   SQLState.FILE_READ_PAGE_EXCEPTION, 
 								   ioe, newIdentity, new Integer(pagesize));
 
-					//if we are in rollforward recovery, it is possible that
-					//this page actually does not exist on the disk yet because
-					//the log record we are proccessing now is actually create page,
-					//we will recreate the page if we are in rollforward
-					//recovery, so just throw the exception.
 						
-				   if(dataFactory.getLogFactory().inRFR())
-					   throw se;
-
-					if (SanityManager.DEBUG)
+				    if (dataFactory.getLogFactory().inRFR())
                     {
+                        //if in rollforward recovery, it is possible that this 
+                        //page actually does not exist on the disk yet because
+                        //the log record we are proccessing now is actually 
+                        //creating the page, we will recreate the page if we 
+                        //are in rollforward recovery, so just throw the 
+                        //exception.
+                        throw se;
+                    }
+                    else
+                    {
+                        if (SanityManager.DEBUG)
+                        {
+                            // by shutting down system in debug mode, maybe
+                            // we can catch root cause of the interrupt.
                             throw dataFactory.markCorrupt(se);
+                        }
+                        else
+                        {
+                            // No need to shut down runtime database on read
+                            // error in delivered system, throwing exception 
+                            // should be enough.  Thrown exception has nested
+                            // IO exception which is root cause of error.
+                            throw se;
+                        }
 					}
 				}
 			}
@@ -584,14 +730,27 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	}
 
 
-	private void writePage(PageKey identity, boolean syncMe) 
+    /**
+     * write the page from this CachedPage object to disk.
+     * <p>
+     *
+     * @param newIdentity indentity (ie. page number) of the page to read
+     * @param syncMe      does the write of this single page have to be sync'd?
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	private void writePage(
+    PageKey identity, 
+    boolean syncMe) 
 		 throws StandardException 
 	{
 
-		writeFormatId(identity); // make subclass write the page format
+        // make subclass write the page format
+		writeFormatId(identity); 
 
-		writePage(identity);	// let subclass have a chance to write any cached
-								// data to page data array
+        // let subclass have a chance to write any cached data to page data 
+        // array
+		writePage(identity);	 
 
 		// force WAL - and check to see if database is corrupt or is frozen.
 		// last log Instant may be null if the page is being forced
@@ -600,18 +759,22 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		LogInstant flushLogTo = getLastLogInstant();
 		dataFactory.flush(flushLogTo);
 
-		if (flushLogTo != null) {					
+		if (flushLogTo != null) 
+        {					
 			clearLastLogInstant();
 		}
 
 
 		// find the container and file access object
-		FileContainer myContainer = (FileContainer) containerCache.find(identity.getContainerId());
+		FileContainer myContainer = 
+            (FileContainer) containerCache.find(identity.getContainerId());
 
-		if (myContainer != null) {
-			try {
-
-				myContainer.writePage(identity.getPageNumber(), pageData, syncMe);
+		if (myContainer != null) 
+        {
+			try 
+            {
+				myContainer.writePage(
+                    identity.getPageNumber(), pageData, syncMe);
 
 				//
 				// Do some in memory unlogged bookkeeping tasks while we have
@@ -621,10 +784,10 @@ public abstract class CachedPage extends BasePage implements Cacheable
 				if (!isOverflowPage() && isDirty())
 				{
 
-					// let the container knows whether this page is a not filled,
-					// non-overflow page
-					myContainer.trackUnfilledPage(identity.getPageNumber(),
-												  unfilled());
+					// let the container knows whether this page is a not 
+                    // filled, non-overflow page
+					myContainer.trackUnfilledPage(
+                        identity.getPageNumber(), unfilled());
 
 					// if this is not an overflow page, see if the page's row
 					// count has changed since it come into the cache.
@@ -638,13 +801,19 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 					if (currentRowCount != initialRowCount)
 					{
-						myContainer.updateEstimatedRowCount(currentRowCount-initialRowCount);
-						setContainerRowCount(myContainer.getEstimatedRowCount(0));
+						myContainer.updateEstimatedRowCount(
+                            currentRowCount - initialRowCount);
+
+						setContainerRowCount(
+                            myContainer.getEstimatedRowCount(0));
+
 						initialRowCount = currentRowCount;
 					}
 				}
 
-			} catch (IOException ioe) {
+			} 
+            catch (IOException ioe) 
+            {
 				// page cannot be written
 				throw StandardException.newException(
                     SQLState.FILE_WRITE_PAGE_EXCEPTION, 
@@ -658,26 +827,28 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		} 
 		else
 		{
-			StandardException nested = StandardException.newException(SQLState.DATA_CONTAINER_VANISHED, identity.getContainerId());
+			StandardException nested = 
+                StandardException.newException(
+                    SQLState.DATA_CONTAINER_VANISHED, 
+                    identity.getContainerId());
 			throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.FILE_WRITE_PAGE_EXCEPTION, nested, 
                     identity, new Integer(myContainer.getPageSize())));
 		}
 
-		synchronized (this) {
-			isDirty = false;
-			preDirty = false;
+		synchronized (this) 
+        {
+            // change page state to not dirty after the successful write
+			isDirty     = false;
+			preDirty    = false;
 		}
-
 	}
 
 	public void setContainerRowCount(long rowCount)
 	{
 		containerRowCount = rowCount;
 	}
-
-
 
 	/*
 	** if the page size is different from the page buffer, then make a
@@ -686,7 +857,8 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 	protected void setPageArray(int pageSize) throws StandardException
 	{
-		if ((pageData == null) || (pageData.length != pageSize)) {
+		if ((pageData == null) || (pageData.length != pageSize)) 
+        {
 			pageData = new byte[pageSize];
 
 			if (pageData == null || pageData.length != pageSize)
@@ -708,17 +880,18 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 
 	// initialize in memory structure using the read in buffer in pageData
-	protected abstract void initFromData(FileContainer container, PageKey id) throws StandardException;
+	protected abstract void initFromData(FileContainer container, PageKey id) 
+        throws StandardException;
 
 
 	// create the page
-	protected abstract void createPage(PageKey id, int[] args) throws StandardException;
+	protected abstract void createPage(PageKey id, int[] args) 
+        throws StandardException;
 
 	// page is about to be written, write everything to pageData array
 	protected abstract void writePage(PageKey id) throws StandardException;		
 
 	// write out the formatId to the pageData
-	protected abstract void writeFormatId(PageKey identity) throws StandardException;
-
-
+	protected abstract void writeFormatId(PageKey identity) 
+        throws StandardException;
 }
