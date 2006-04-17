@@ -300,7 +300,7 @@ public class Sed
         if (is == null)
             inFile = new BufferedReader(new FileReader(srcFile));
         else
-            inFile = new BufferedReader(new InputStreamReader(is));
+            inFile = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         outFile = new PrintWriter
         ( new BufferedWriter(new FileWriter(dstFile), 10000), true );
 

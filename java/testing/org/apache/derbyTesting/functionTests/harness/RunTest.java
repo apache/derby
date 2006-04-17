@@ -133,7 +133,7 @@ public class RunTest
 	static String testOutName; // output name without path or extension (optional)
 	static String passFileName; // file listing passed tests
 	static String failFileName; // file listing failed tests
-	static String JCCOutName; //file name for JCC corrected master
+	static String tempMasterName; //file name for JCC corrected/local encoded master
     static File passFile;
     static File failFile;
 	static String shutdownurl = "";
@@ -150,7 +150,7 @@ public class RunTest
     static File runDir; // where test is run and where support files are expected
     static File canonDir; // allows setting master dir other than default
     static File tmpOutFile; // tmp output file (before sed)
-    static File JCCOutFile; // master file processed for JCC
+    static File tempMasterFile; // master file processed for JCC/local encoding
     static File stdOutFile; // for tests with useoutput false
     static File finalOutFile; // final output file (after sed)
     static File appPropFile; // testname_app.properties or default
@@ -630,7 +630,7 @@ public class RunTest
 
             // Read the test file and copy it to the outDir
             // except for multi tests (for multi we just need to locate it)
-            BufferedReader in = new BufferedReader(new InputStreamReader(is));
+            BufferedReader in = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             if (upgradetest)
 		
                 //these calls to getCanonicalPath catch IOExceptions as a workaround to
@@ -752,10 +752,10 @@ public class RunTest
 
         // Create a .tmp file for doing sed later to create testBase.out
         tmpOutFile = new File(outDir, testOutName + ".tmp");
-		if (NetServer.isClientConnection(framework))
-		{
-			JCCOutName = testOutName+".tmpmstr";
-		}
+        // Always create a .tmpmstr in local encoding so we can do Diff in locale encoding
+        // With Network server, this also will get adjusted for displaywidth
+//TODO: always, except when setting a special property to force .out creation in UTF-8?
+			tempMasterName = testOutName+".tmpmstr";
 
 		// Define the .out file which will be created by massaging the tmp.out
 		finalOutFile = new File(outDir, testOutName + ".out");
@@ -788,12 +788,9 @@ public class RunTest
         // Delete any old .out or .tmp files
         if (tmpOutFile.exists())
             status = tmpOutFile.delete();
-		if (NetServer.isClientConnection(framework))
-		{
-        	JCCOutFile = new File(outDir, JCCOutName);
-        	if (JCCOutFile.exists())
-            	status = JCCOutFile.delete();
-		}
+        tempMasterFile = new File (outDir, tempMasterName);
+        if (tempMasterFile.exists())
+            status = tempMasterFile.delete();
         if (finalOutFile.exists())
             status = finalOutFile.delete();
         if (diffFile.exists())
@@ -1768,8 +1765,8 @@ clp.list(System.out);
         //printWriter.close();
         //printWriter = null;
 
-        //Always cleanup the script files
-        if ( !(script == null) && (script.exists()) )
+        //Always cleanup the script files - except when keepfiles is true
+        if ( !(script == null) && (script.exists()) && (!keepfiles) )
         {
             status = script.delete();
             //System.out.println("Status was: " + status);
@@ -1799,12 +1796,11 @@ clp.list(System.out);
             status = finalOutFile.delete();
             if (skiptest == false)
                 status = diffFile.delete();
-			// delete JCC filtered master file
-			if (NetServer.isClientConnection(framework))
-			{
-        		JCCOutFile = new File(outDir, JCCOutName);
-            	status = JCCOutFile.delete();
-			}
+
+            // delete the copied (and, for network server, modified) master file
+            tempMasterFile = new File(outDir, tempMasterName);
+            status = tempMasterFile.delete();
+
             if (deleteBaseDir)
             {
                 if (useCommonDB == false) 
@@ -2064,18 +2060,23 @@ clp.list(System.out);
         Vector v = jvm.getCommandLine();
         if ( ij.startsWith("ij") )
         {
-            // as of cn1411-20030930, the system takes the default console encoding
-            // which in the US, on windows, is Cp437.
-            // Sun on the other hand, always forces a console encoding of 1252.
-            // To get the same result for ibm141 & jdk14*, we need to force 
-            // the console encoding to Cp1252 for ij tests.
-            // see beetle 5475.
-            v.addElement("-Dconsole.encoding=Cp1252" );
+            // As of cn1411-20030930 IBM jvm the system takes the default
+            // console encoding, which in the US, on windows, is Cp437.
+            // Sun jvms, however, always force a console encoding of 1252.
+            // To get the same result for ibm141 & jdk14*, the harness needs to
+            // force the console encoding to Cp1252 for ij tests - unless 
+            // we're on non-ascii systems.
+            String isNotAscii = System.getProperty("platform.notASCII");
+            if ( isNotAscii == null || (isNotAscii.equals("false")))
+                v.addElement("-Dconsole.encoding=Cp1252" );
             v.addElement("org.apache.derby.tools." + ij);
             if (ij.equals("ij"))
             {
-                v.addElement("-fr");
-                v.addElement(scriptFileName);
+                // TODO is there a setting/property we could check after which 
+                // we can use v.addElement("-fr"); (read from classpath)
+                // then we can also use v.addElement(scriptFile);
+                v.addElement("-f");
+                v.addElement(outDir.toString() + File.separatorChar + scriptFileName);
             }
             v.addElement("-p");
             v.addElement(propString);

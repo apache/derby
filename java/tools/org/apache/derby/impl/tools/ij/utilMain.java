@@ -541,7 +541,7 @@ public class utilMain implements java.security.PrivilegedAction {
 		if (is==null) throw ijException.resourceNotFound();
 		oldGrabbers.push(commandGrabber[currCE]);
 	    commandGrabber[currCE] = 
-                new StatementFinder(langUtil.getNewInput(new BufferedInputStream(is, BUFFEREDFILESIZE)));
+                new StatementFinder(langUtil.getNewEncodedInput(new BufferedInputStream(is, BUFFEREDFILESIZE), "UTF8"));
 		fileInput = true;
 	}
 

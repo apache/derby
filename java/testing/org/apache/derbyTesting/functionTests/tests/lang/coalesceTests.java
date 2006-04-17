@@ -1147,18 +1147,18 @@ public class coalesceTests
     } catch(Exception ex) {}
 			s.executeUpdate("create table tC (cbd1 char(254) for bit data, cbd2 char(40) for bit data, vcbd1 varchar(253) for bit data, vcbd2 varchar(2000) for bit data, lvcbd1 long varchar for bit data, lvcbd2 long varchar for bit data, blob1 BLOB(200), blob2 BLOB(33K))");
 			ps = conn.prepareStatement("insert into tC values (?,?,?,?,?,?,?,?)");
-			ps.setBytes(1, "cbd1 not null".getBytes());
-			ps.setBytes(2, "cbd2 not null".getBytes());
-			ps.setBytes(3, "vcbd1 not null".getBytes());
-			ps.setBytes(4, "vcbd2 not null".getBytes());
-			ps.setBytes(5, "lvcbd1 not null".getBytes());
-			ps.setBytes(6, "lvcbd2 not null".getBytes());
-			ps.setBytes(7, "blob1 not null".getBytes());
-			ps.setBytes(8, "blob2 not null".getBytes());
+			ps.setBytes(1, "cbd1 not null".getBytes("US-ASCII"));
+			ps.setBytes(2, "cbd2 not null".getBytes("US-ASCII"));
+			ps.setBytes(3, "vcbd1 not null".getBytes("US-ASCII"));
+			ps.setBytes(4, "vcbd2 not null".getBytes("US-ASCII"));
+			ps.setBytes(5, "lvcbd1 not null".getBytes("US-ASCII"));
+			ps.setBytes(6, "lvcbd2 not null".getBytes("US-ASCII"));
+			ps.setBytes(7, "blob1 not null".getBytes("US-ASCII"));
+			ps.setBytes(8, "blob2 not null".getBytes("US-ASCII"));
 			ps.executeUpdate();
-			ps.setBytes(1, "cbd1 not null but cbd2 is".getBytes());
+			ps.setBytes(1, "cbd1 not null but cbd2 is".getBytes("US-ASCII"));
 			ps.setBytes(2, null);
-			ps.setBytes(3, "vcbd1 not null but vcbd2 is".getBytes());
+			ps.setBytes(3, "vcbd1 not null but vcbd2 is".getBytes("US-ASCII"));
 			ps.setBytes(4, null);
 			ps.setBytes(5, null);
 			ps.setBytes(6, null);
@@ -1166,13 +1166,13 @@ public class coalesceTests
 			ps.setBytes(8, null);
 			ps.executeUpdate();
 			ps.setBytes(1, null);
-			ps.setBytes(2, "cbd2 not null but cbd1 is".getBytes());
+			ps.setBytes(2, "cbd2 not null but cbd1 is".getBytes("US-ASCII"));
 			ps.setBytes(3, null);
-			ps.setBytes(4, "vcbd2 not null but vcbd1 is".getBytes());
-			ps.setBytes(5, "lvcbd1 not null again".getBytes());
-			ps.setBytes(6, "lvcbd2 not null again".getBytes());
-			ps.setBytes(7, "blob1 not null again".getBytes());
-			ps.setBytes(8, "blob2 not null again".getBytes());
+			ps.setBytes(4, "vcbd2 not null but vcbd1 is".getBytes("US-ASCII"));
+			ps.setBytes(5, "lvcbd1 not null again".getBytes("US-ASCII"));
+			ps.setBytes(6, "lvcbd2 not null again".getBytes("US-ASCII"));
+			ps.setBytes(7, "blob1 not null again".getBytes("US-ASCII"));
+			ps.setBytes(8, "blob2 not null again".getBytes("US-ASCII"));
 			ps.executeUpdate();
 			ps.setBytes(1, null);
 			ps.setBytes(2, null);
@@ -1467,12 +1467,9 @@ public class coalesceTests
 				try{
 				row.append(s.getString(i));
 				} catch(SQLException ex){
-					if (ex.getSQLState().equals("22005")) {
-						if (s.getBytes(i) != null)
-                row.append(new String(s.getBytes(i)));
-						else
-                row.append(s.getBytes(i));
-					} else throw ex;
+					if (ex.getSQLState().equals("22005")) 
+					    row.append("Invalid Conversion Error\n");
+					else throw ex;
 				}
 			}
 			row.append("}\n");
