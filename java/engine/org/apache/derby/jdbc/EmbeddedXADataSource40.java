@@ -30,9 +30,30 @@ import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 
 /**
- * This class is JDBC4.0 implementation of XADataSource
- * This class extends from  EmbeddedDataSource40 so it inherits the
- * new method introduced in ConnectionPoolDataSource from EmbeddedDataSource40
+
+	EmbeddedXADataSource40 is Derby's XADataSource implementation for JDBC4.0.
+	
+
+	<P>An XADataSource is a factory for XAConnection objects.  It represents a
+	RM in a DTP environment.  An object that implements the XADataSource
+	interface is typically registered with a JNDI service provider.   	
+	<P>
+	EmbeddedXADataSource40 supports the JDBC 4.0 specification
+	for the J2SE 6.0 Java Virtual Machine environment. Use EmbeddedXADataSource
+	if your application runs in the following environments:
+	<UL>
+	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
+	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+	</UL>
+
+	<P>EmbeddedXADataSource40 object only works on a local database.  There is no
+	client/server support.  An EmbeddedXADataSource40 object must live in the same jvm as
+	the database. 
+
+	<P>EmbeddedXADataSource40 is serializable and referenceable.
+
+	<P>See EmbeddedDataSource40 for DataSource properties.
+
  */
 public class EmbeddedXADataSource40 extends EmbeddedXADataSource {
     /** Creates a new instance of EmbeddedXADataSource40 */

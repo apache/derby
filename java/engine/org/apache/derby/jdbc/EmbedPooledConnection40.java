@@ -25,9 +25,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.StatementEventListener;
 
-/**
- * This class supports jdbc4.0 javax.sql.PooledConnection
- * older methods are inherited from EmbedPooledConnection
+/** 
+	A PooledConnection object is a connection object that provides hooks for
+	connection pool management.
+
+	<P>This is Derby's implementation of a PooledConnection for use in
+	the following environments:
+	<UL>
+	<LI> JDBC 4.0 - J2SE 6.0
+	</UL>
+
  */
 class EmbedPooledConnection40 extends EmbedPooledConnection {
 

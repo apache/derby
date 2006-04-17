@@ -52,7 +52,12 @@ import javax.sql.ConnectionEvent;
 	A PooledConnection object is a connection object that provides hooks for
 	connection pool management.
 
-	<P>This is Cloudscape's implementation of a PooledConnection.  
+	<P>This is Derby's implementation of a PooledConnection for use in
+	the following environments:
+	<UL>
+	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
+	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+	</UL>
 
  */
 class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConnectionControl

@@ -43,7 +43,7 @@ import org.apache.derby.impl.jdbc.Util;
 /** 
 	
 
-	EmbeddedDataSource is Derby's DataSource implementation.
+	EmbeddedDataSource is Derby's DataSource implementation for JDBC3.0 and JDBC2.0.
 	
 
 	<P>A DataSource  is a factory for Connection objects. An object that

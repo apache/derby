@@ -43,7 +43,7 @@ import javax.sql.XAConnection;
 
 /**
 
-	EmbeddedXADataSource is Derby's XADataSource implementation.
+	EmbeddedXADataSource is Derby's XADataSource implementation for JDBC3.0 and JDBC2.0.
 	
 
 	<P>An XADataSource is a factory for XAConnection objects.  It represents a

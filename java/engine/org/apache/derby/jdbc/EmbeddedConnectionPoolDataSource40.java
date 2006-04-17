@@ -26,12 +26,29 @@ import java.sql.SQLException;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
-/**
- * This class is meant to be used while running the applications with jdbc4.0
- * support. It extends EmbeddedDataSource40 which implements jdbc 4.0 
- * specific methods.
- */
+/** 
+	EmbeddedConnectionPoolDataSource40 is Derby's ConnectionPoolDataSource
+	implementation for the JDBC4.0 environment.
+	
 
+	<P>A ConnectionPoolDataSource is a factory for PooledConnection
+	objects. An object that implements this interface will typically be
+	registered with a JNDI service.
+	<P>
+	EmbeddedConnectionPoolDataSource40 supports the JDBC 4.0 specification
+	for the J2SE 6.0 Java Virtual Machine environment. Use
+	EmbeddedConnectionPoolDataSource if your application runs in the
+	following environments:
+	<UL>
+	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
+	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+	</UL>	
+
+	<P>EmbeddedConnectionPoolDataSource40 is serializable and referenceable.
+
+	<P>See EmbeddedDataSource40 for DataSource properties.
+
+ */
 public class EmbeddedConnectionPoolDataSource40 
                                 extends EmbeddedConnectionPoolDataSource 
                                 implements ConnectionPoolDataSource {    
