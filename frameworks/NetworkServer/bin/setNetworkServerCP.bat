@@ -10,8 +10,18 @@
 @REM -- 
 @REM ---------------------------------------------------------
 
-rem set DERBY_INSTALL=
+@rem set DERBY_INSTALL=
 
-FOR %%X in ("%DERBY_INSTALL%") DO SET DERBY_INSTALL=%%~sX
+@if "%DERBY_HOME%"=="" set DERBY_HOME=%DERBY_INSTALL%
+@if "%DERBY_HOME%"=="" goto noderbyhome
 
-set CLASSPATH=%DERBY_INSTALL%\lib\derby.jar;%DERBY_INSTALL%\lib\derbytools.jar;%DERBY_INSTALL%\lib\derbynet.jar;%CLASSPATH%
+@FOR %%X in ("%DERBY_HOME%") DO SET DERBY_INSTALL=%%~sX
+
+set CLASSPATH=%DERBY_HOME%\lib\derby.jar;%DERBY_HOME%\lib\derbytools.jar;%DERBY_HOME%\lib\derbynet.jar;%CLASSPATH%
+@goto end
+
+:noderbyhome
+@echo DERBY_HOME or DERBY_INSTALL not set. Set one of these variables
+@echo to the location of your Derby installation.
+
+:end

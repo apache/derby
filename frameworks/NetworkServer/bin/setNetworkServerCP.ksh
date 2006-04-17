@@ -11,4 +11,12 @@
 # ---------------------------------------------------------
 # DERBY_INSTALL=
 
-export CLASSPATH="${DERBY_INSTALL}/lib/derby.jar:${DERBY_INSTALL}/lib/derbytools.jar:${DERBY_INSTALL}/lib/derbynet.jar:${CLASSPATH}"
+DERBY_HOME=${DERBY_HOME:-$DERBY_INSTALL}
+
+[ -z "$DERBY_HOME" ] && {
+  echo "\$DERBY_HOME or \$DERBY_INSTALL not set. Please set one of these variables"
+  echo "to the location of your Derby installation."
+  exit 1
+}
+
+export CLASSPATH="${DERBY_HOME}/lib/derby.jar:${DERBY_HOME}/lib/derbytools.jar:${DERBY_HOME}/lib/derbynet.jar:${CLASSPATH}"

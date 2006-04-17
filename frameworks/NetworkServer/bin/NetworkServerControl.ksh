@@ -13,15 +13,34 @@
 
 # DERBY_INSTALL=
 
+DERBY_HOME=${DERBY_HOME:-$DERBY_INSTALL}
+
+[ -z "$DERBY_HOME" ] && {
+  echo "\$DERBY_HOME or \$DERBY_INSTALL not set. Please set one of these variables"
+  echo "to the location of your Derby installation."
+  exit 1
+}
+
+[ -z "$JAVA_HOME" ] && {
+  [ -x /usr/java/bin/java ] && {
+    JAVA_HOME=/usr/java
+  }
+  [ -z "$JAVA_HOME" ] && {
+    echo "JAVA_HOME not set. Please set JAVA_HOME to the location of your Java"
+    echo "installation."
+    exit 1
+  }
+} 
+
 [ -z "$CLASSPATH" ] && {
-  . "$DERBY_INSTALL"/frameworks/NetworkServer/bin/setNetworkServerCP.ksh
+  . "$DERBY_HOME"/frameworks/NetworkServer/bin/setNetworkServerCP.ksh
 }
 
 # ---------------------------------------------------------
 # -- start Derby Network Server
 # ---------------------------------------------------------
 
-java org.apache.derby.drda.NetworkServerControl $*
+"$JAVA_HOME/bin/java" org.apache.derby.drda.NetworkServerControl $*
 
 
 # ---------------------------------------------------------

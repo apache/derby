@@ -4,11 +4,14 @@
 @echo off
 @rem set DERBY_INSTALL=
 
+@if "%DERBY_HOME%"=="" set DERBY_HOME=%DERBY_INSTALL%
+@if "%DERBY_HOME%"=="" goto noderbyhome
 
-@if !"%CLASSPATH%"==! call "%DERBY_INSTALL%"/frameworks/NetworkServer/bin/setNetworkServerCP.bat
-@if "%CLASSPATH%" == "" call "%DERBY_INSTALL%"/frameworks/NetworkServer/bin/setNetworkServerCP.bat
+@if "%JAVA_HOME%"=="" goto nojavahome
+@if not exist "%JAVA_HOME%\bin\java.exe" goto nojavahome
 
-if   "%JAVA_HOME%" == "" goto setjavaMsg
+@if !"%CLASSPATH%"==! call "%DERBY_HOME%"/frameworks/NetworkServer/bin/setNetworkServerCP.bat
+@if "%CLASSPATH%" == "" call "%DERBY_HOME%"/frameworks/NetworkServer/bin/setNetworkServerCP.bat
 
 :set_host
 
@@ -45,7 +48,7 @@ set derbyPort=%DERBY_SERVER_PORT%
 @REM ---------------------------------------------------------
 @REM -- start Derby as a Network server
 @REM ---------------------------------------------------------
-%JAVA_HOME%\bin\java org.apache.derby.drda.NetworkServerControl start -h %derbyHost% -p %derbyPort%
+"%JAVA_HOME%\bin\java" org.apache.derby.drda.NetworkServerControl start -h %derbyHost% -p %derbyPort%
 
 goto end
 @REM ---------------------------------------------------------
@@ -53,8 +56,15 @@ goto end
 @REM -- this file
 @REM ---------------------------------------------------------
 
-:setJavaMsg
-echo Please set JAVA_HOME in order to start the Network Server
+:nojavahome
+echo JAVA_HOME not set or could not find java executable in JAVA_HOME.
+echo Please set JAVA_HOME to the location of a valid Java installation.
+goto end
+
+:noderbyhome
+echo DERBY_HOME or DERBY_INSTALL not set. Set one of these variables
+echo to the location of your Derby installation.
+goto end
 
 :end
 set derbyPort=

@@ -16,14 +16,29 @@
 
 # DERBY_INSTALL=
 
-[ -z "$CLASSPATH" ] && {
-  . "$DERBY_INSTALL"/frameworks/NetworkServer/bin/setNetworkServerCP.ksh
+DERBY_HOME=${DERBY_HOME:-$DERBY_INSTALL}
+
+[ -z "$DERBY_HOME" ] && {
+  echo "\$DERBY_HOME or \$DERBY_INSTALL not set. Please set one of these variables"
+  echo "to the location of your Derby installation."
+  exit 1
+} 
+
+[ -z "$JAVA_HOME" ] && {
+  [ -x /usr/java/bin/java ] && {
+    JAVA_HOME=/usr/java
+  }
+  [ -z "$JAVA_HOME" ] && {
+    echo "JAVA_HOME not set. Please set JAVA_HOME to the location of your Java"
+    echo "installation."
+    exit 1
+  }
 }
 
-if [ -z "$JAVA_HOME" ]
-then
-   JAVA_HOME=/usr/java
-fi
+[ -z "$CLASSPATH" ] && {
+  . "$DERBY_HOME"/frameworks/NetworkServer/bin/setNetworkServerCP.ksh
+}
+
 
 # ---------------------------------------------------------
 # -- Determine the host and port to use by:
@@ -52,7 +67,7 @@ then
    DERBY_SERVER_PORT=1527
 fi
 
-$JAVA_HOME/bin/java org.apache.derby.drda.NetworkServerControl start -h $DERBY_SERVER_HOST -p $DERBY_SERVER_PORT
+"$JAVA_HOME/bin/java" org.apache.derby.drda.NetworkServerControl start -h $DERBY_SERVER_HOST -p $DERBY_SERVER_PORT
 
 # ---------------------------------------------------------
 # -- To use a different JVM with a different syntax, simply edit
