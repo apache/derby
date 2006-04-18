@@ -275,15 +275,14 @@ public final class util implements java.security.PrivilegedAction {
 	}
 
 	/**
-	  Verify the ij line arguments command arguments.
+	  Verify the ij line arguments command arguments. Also used to detect --help.
 	  @return true if the args are invalid
 	  <UL>
 	  <LI>Only legal argument provided.
 	  <LI>Only specify a quantity once.
 	  </UL>
 	 */
-	static public boolean invalidArgs(String[] args, boolean gotProp, String file,
-									   String inputResourceName) {
+	static public boolean invalidArgs(String[] args) {
 		int countSupported = 0;
 		boolean haveInput = false;
 		for (int ix=0; ix < args.length; ix++)
@@ -303,8 +302,7 @@ public final class util implements java.security.PrivilegedAction {
 				// next arg is the file/resource name
 				ix++;
 				if (ix >= args.length) return true;
-			}
-
+			} else if (args[ix].equals("--help")) { return true; }
 
 			//
 			//Assume the first unknown arg is a file name.

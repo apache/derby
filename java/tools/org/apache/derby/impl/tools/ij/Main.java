@@ -84,28 +84,29 @@ public class Main {
 		String file;
 		String inputResourceName;
 		boolean gotProp;
-
 		Properties connAttributeDefaults = null;
+
+		LocalizedResource langUtil = LocalizedResource.getInstance();
+		LocalizedOutput out = langUtil.getNewOutput(System.out);
+
+                // Validate arguments, check for --help.
+		if (util.invalidArgs(args)) {
+			util.Usage(out);
+      		return;
+		}
 
 		// load the property file if specified
 		gotProp = util.getPropertyArg(args);
 
 		// get the default connection attributes
 		connAttributeDefaults = util.getConnAttributeArg(args);
-		// adjust the application in accordance with derby.ui.locale and derby.ui.codeset
-    main.initAppUI();
 
-		LocalizedResource langUtil = LocalizedResource.getInstance();
-        
-		LocalizedOutput out = langUtil.getNewOutput(System.out);
+		// adjust the application in accordance with derby.ui.locale and derby.ui.codeset
+                main.initAppUI();
 
 		file = util.getFileArg(args);
 		inputResourceName = util.getInputResourceNameArg(args);
-		if (util.invalidArgs(args, gotProp, file, inputResourceName)) {
-			util.Usage(out);
-      		return;
-		}
-		else if (inputResourceName != null) {
+		if (inputResourceName != null) {
 			in = langUtil.getNewInput(util.getResourceAsStream(inputResourceName));
 			if (in == null) {
 				out.println(langUtil.getTextMessage("IJ_IjErroResoNo",inputResourceName));
@@ -113,24 +114,24 @@ public class Main {
 			}
 		} else if (file == null) {
 			in = langUtil.getNewInput(System.in);
-            out.flush();
-    	} else {
-      		try {
-				in1 = new FileInputStream(file);
-				if (in1 != null) {
-                    in1 = new BufferedInputStream(in1, utilMain.BUFFEREDFILESIZE);
-					in = langUtil.getNewInput(in1);
+                        out.flush();
+    	        } else {
+                    try {
+                        in1 = new FileInputStream(file);
+                        if (in1 != null) {
+                            in1 = new BufferedInputStream(in1, utilMain.BUFFEREDFILESIZE);
+                            in = langUtil.getNewInput(in1);
+                        }
+                    } catch (FileNotFoundException e) {
+                        if (Boolean.getBoolean("ij.searchClassPath")) {
+                            in = langUtil.getNewInput(util.getResourceAsStream(file));
+                        }
+                        if (in == null) {
+                        out.println(langUtil.getTextMessage("IJ_IjErroFileNo",file));
+            		  return;
+                        }
+                    }
                 }
-      		} catch (FileNotFoundException e) {
-				if (Boolean.getBoolean("ij.searchClassPath")) {
-					in = langUtil.getNewInput(util.getResourceAsStream(file));
-                }
-				if (in == null) {
-				  out.println(langUtil.getTextMessage("IJ_IjErroFileNo",file));
-        		  return;
-				}
-      		}
-    	}
 
 		String outFile = util.getSystemProperty("ij.outfile");
 		if (outFile != null && outFile.length()>0) {
