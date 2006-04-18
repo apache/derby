@@ -191,6 +191,11 @@ public class Sed
 			searchStrings.addElement("java.sql.SQLTransactionRollbackException:");
 			searchStrings.addElement("java.sql.SQLTransientConnectionException:");
 			searchStrings.addElement("java.sql.SQLTransientException:");
+
+			// The JDBC4 error from the driver is a little chattier
+			searchStrings.addElement("No suitable driver found for [0-9A-Za-z:]*");			
+			searchStrings.addElement("No suitable driver;[0-9A-Za-z:=]*");			
+			searchStrings.addElement("SQL Exception: No suitable driver");			
 		}
 		
         Vector subStrings = new Vector();
@@ -248,6 +253,10 @@ public class Sed
 			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
 			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
 			subStrings.addElement(SQL_EXCEPTION_FILTERED_SUBSTITUTION);
+
+			subStrings.addElement("No suitable driver");
+			subStrings.addElement("No suitable driver");
+			subStrings.addElement("java.sql.SQLException: No suitable driver");
 		}
 
 		doWork(srcFile, dstFile, null, deleteLines, searchStrings, subStrings, isSed, isI18N);
