@@ -462,7 +462,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     
     // log file that is yet to be copied to backup, updates to this variable 
     // needs to visible  checkpoint thread. 
-	private volatile long firstLogFileToBackup ; 
+	private volatile long logFileToBackup ; 
     // It is set to true when  online backup is in progress,  updates to 
     // this variable needs to visible to checkpoint thread. 
     private volatile boolean backupInProgress = false; 
@@ -2064,10 +2064,20 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		if ((firstLogNeeded = getFirstLogNeeded(checkpoint))==-1)
 			return;
 		
-		// when  backup is in progress, Any that are yet to be copied to the
-		// backup should not be deleted,  even if they are
-        // not required  for crash recovery.
-		firstLogNeeded = (backupInProgress ? firstLogFileToBackup : firstLogNeeded);
+		// when  backup is in progress, log files that are yet to
+        // be copied to the backup should not be deleted,  even 
+        // if they are not required  for crash recovery.
+        if(backupInProgress) {
+            long logFileNeededForBackup = logFileToBackup;
+            // check if the log file number is yet to be copied 
+            // to the backup is less than the log file required 
+            // for crash recovery, if it is then make the first 
+            // log file that should not be deleted is the log file 
+            // that is yet to  be copied to the backup.  
+            if (logFileNeededForBackup < firstLogNeeded)
+                firstLogNeeded = logFileNeededForBackup;
+        }
+
 		oldFirstLog = firstLogFileNumber;
 		firstLogFileNumber = firstLogNeeded;
 
@@ -3205,15 +3215,23 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		StorageFile logDir;
 		//find the first  log file number that is  useful
 		long firstLogNeeded = getFirstLogNeeded(currentCheckpoint);
-        
-        		
-		// when  backup is in progress, Any that are yet to be copied to the
-		// backup should not be deleted,  even if they are
-        // not required  for crash recovery.
-		firstLogNeeded = (backupInProgress ? firstLogFileToBackup : firstLogNeeded);
-		
         if (firstLogNeeded == -1)
 			return;
+
+        // when  backup is in progress, log files that are yet to
+        // be copied to the backup should not be deleted,  even 
+        // if they are not required  for crash recovery.
+        if(backupInProgress) {
+            long logFileNeededForBackup = logFileToBackup;
+            // check if the log file number is yet to be copied 
+            // to the backup is less than the log file required 
+            // for crash recovery, if it is then make the first 
+            // log file that should not be deleted is the log file 
+            // that is yet to  be copied to the backup.  
+            if (logFileNeededForBackup < firstLogNeeded)
+                firstLogNeeded = logFileNeededForBackup;
+        }
+
 		try{
 			logDir = getLogDirectory();
 		}catch (StandardException se)
@@ -4481,7 +4499,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			}
 
 			// find the first  log file number that is  active
-			firstLogFileToBackup = getFirstLogNeeded(currentCheckpoint);
+			logFileToBackup = getFirstLogNeeded(currentCheckpoint);
 		}
 
 		// copy all the log files that has to go into the backup 
@@ -4497,16 +4515,16 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         throws StandardException
 	{
 
-		while(firstLogFileToBackup <= lastLogFileToBackup)
+		while(logFileToBackup <= lastLogFileToBackup)
 		{
-			StorageFile fromFile = getLogFileName(firstLogFileToBackup);
+			StorageFile fromFile = getLogFileName(logFileToBackup);
 			File toFile = new File(toDir, fromFile.getName());
 			if(!privCopyFile(fromFile, toFile))
 			{
 				throw StandardException.newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
 													 fromFile, toFile);
 			}
-			firstLogFileToBackup++;
+			logFileToBackup++;
 		}
 	}
 
