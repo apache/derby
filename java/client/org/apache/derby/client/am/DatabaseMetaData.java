@@ -68,22 +68,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     /** The JDBC minor version supported by the server. */
     private final int serverJdbcMinorVersion;
 
-    private ResultSet lastGetColumnPrivilegesResultSet_ = null;
-    private ResultSet lastGetColumnsResultSet_ = null;
-    private ResultSet lastGetForeignKeysResultSet_ = null;
-    private ResultSet lastGetPrimaryKeysResultSet_ = null;
-    private ResultSet lastGetProcedureColumnsResultSet_ = null;
-    private ResultSet lastGetProceduresResultSet_ = null;
-    private ResultSet lastGetSpecialColumnsResultSet_ = null;
-    private ResultSet lastGetStatisticsResultSet_ = null;
-    private ResultSet lastGetTablePrivilegesResultSet_ = null;
-    private ResultSet lastGetTablesResultSet_ = null;
-    private ResultSet lastGetUDTsResultSet_ = null;
-    private ResultSet lastGetTypeInfoResultSet_ = null;
-    private ResultSet lastGetAttrResultSet_ = null;
-    private ResultSet lastGetSuperTypesResultSet_ = null;
-    private ResultSet lastGetSuperTablesResultSet_ = null;
-
     public boolean useServerXAState_ = true;
 
     //---------------------constructors/finalizer---------------------------------
@@ -1067,8 +1051,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(2, schemaPattern);
         cs.setStringX(3, procedureNamePattern);
         cs.setStringX(4, getOptions());
-        lastGetProceduresResultSet_ = executeCatalogQuery(cs);
-        return lastGetProceduresResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1114,8 +1097,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(3, procedureNamePattern);
         cs.setStringX(4, columnNamePattern);
         cs.setStringX(5, getOptions());
-        lastGetProcedureColumnsResultSet_ = executeCatalogQuery(cs);
-        return lastGetProcedureColumnsResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1192,8 +1174,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(2, schemaPattern);
         cs.setStringX(3, functionNamePattern);
         cs.setStringX(4, getOptions());
-        lastGetProceduresResultSet_ = executeCatalogQuery(cs);
-        return lastGetProceduresResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1271,8 +1252,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             cs.setStringX(4, tableTypes);
         }
         cs.setStringX(5, getOptions());
-        lastGetTablesResultSet_ = executeCatalogQuery(cs);
-        return lastGetTablesResultSet_;
+        return executeCatalogQuery(cs);
     }
 
     // call stored procedure SQLTables
@@ -1378,8 +1358,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             cursorHold = 0;
         }
         cs.setStringX(5, "DATATYPE='JDBC';GETTABLETYPES=1; CURSORHOLD=" + cursorHold);
-        lastGetTablesResultSet_ = executeCatalogQuery(cs);
-        return lastGetTablesResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1424,8 +1403,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(3, tableNamePattern);
         cs.setStringX(4, columnNamePattern); //Always null  for JDBC
         cs.setStringX(5, getOptions());
-        lastGetColumnsResultSet_ = executeCatalogQuery(cs);
-        return lastGetColumnsResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1475,8 +1453,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(3, table);
         cs.setStringX(4, columnNamePattern);
         cs.setStringX(5, getOptions());
-        lastGetColumnPrivilegesResultSet_ = executeCatalogQuery(cs);
-        return lastGetColumnPrivilegesResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1517,8 +1494,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(2, schemaPattern);
         cs.setStringX(3, tableNamePattern);
         cs.setStringX(4, getOptions());
-        lastGetTablePrivilegesResultSet_ = executeCatalogQuery(cs);
-        return lastGetTablePrivilegesResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1580,8 +1556,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             cs.setShortX(6, (short) 0);
         }
         cs.setStringX(7, getOptions());
-        lastGetSpecialColumnsResultSet_ = executeCatalogQuery(cs);
-        return lastGetSpecialColumnsResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1624,8 +1599,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setShortX(6, (short) 0);
         cs.setStringX(7, getOptions());
 
-        lastGetSpecialColumnsResultSet_ = executeCatalogQuery(cs);
-        return lastGetSpecialColumnsResultSet_;
+        return executeCatalogQuery(cs);
     }
 
     // call stored procedure SQLPrimaryKeys
@@ -1671,8 +1645,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(2, schema);
         cs.setStringX(3, table);
         cs.setStringX(4, getOptions());
-        lastGetPrimaryKeysResultSet_ = executeCatalogQuery(cs);
-        return lastGetPrimaryKeysResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1724,8 +1697,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         } else {
             cs.setStringX(7, "DATATYPE='JDBC';IMPORTEDKEY=1; CURSORHOLD=0");
         }
-        lastGetForeignKeysResultSet_ = executeCatalogQuery(cs);
-        return lastGetForeignKeysResultSet_;
+        return executeCatalogQuery(cs);
     }
 
     // call stored procedure SQLForeignKeys
@@ -1777,8 +1749,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         } else {
             cs.setStringX(7, "DATATYPE='JDBC';EXPORTEDKEY=1; CURSORHOLD=0");
         }
-        lastGetForeignKeysResultSet_ = executeCatalogQuery(cs);
-        return lastGetForeignKeysResultSet_;
+        return executeCatalogQuery(cs);
     }
 
     // call stored procedure SQLForeignKeys
@@ -1845,8 +1816,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(5, foreignSchema);
         cs.setStringX(6, foreignTable);
         cs.setStringX(7, getOptions());
-        lastGetForeignKeysResultSet_ = executeCatalogQuery(cs);
-        return lastGetForeignKeysResultSet_;
+        return executeCatalogQuery(cs);
     }
 
     // call stored procedure SQLGetTypeInfo
@@ -1879,8 +1849,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
         cs.setShortX(1, (short) 0);
         cs.setStringX(2, getOptions());
-        lastGetTypeInfoResultSet_ = executeCatalogQuery(cs);
-        return lastGetTypeInfoResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1944,8 +1913,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
 
         cs.setStringX(6, getOptions());
-        lastGetStatisticsResultSet_ = executeCatalogQuery(cs);
-        return lastGetStatisticsResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -1993,8 +1961,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
         cs.setStringX(4, udtTypes);
         cs.setStringX(5, getOptions());
-        lastGetUDTsResultSet_ = executeCatalogQuery(cs);
-        return lastGetUDTsResultSet_;
+        return executeCatalogQuery(cs);
     }
 
 
@@ -2082,8 +2049,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 "VARCHAR('', 128) AS SUPERTYPE_NAME " +
                 "FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR ";
         PreparedStatement ps = connection_.prepareDynamicCatalogQuery(sql);
-        lastGetSuperTypesResultSet_ = ps.executeQueryX();
-        return lastGetSuperTypesResultSet_;
+        return ps.executeQueryX();
     }
 
     public java.sql.ResultSet getSuperTables(String catalog,
@@ -2112,8 +2078,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 "VARCHAR('', 128) AS SUPERTABLE_NAME FROM SYSIBM.SYSDUMMY1 " +
                 "WHERE 1=0 WITH UR";
         PreparedStatement ps = connection_.prepareDynamicCatalogQuery(sql);
-        lastGetSuperTablesResultSet_ = ps.executeQueryX();
-        return lastGetSuperTablesResultSet_;
+        return ps.executeQueryX();
     }
 
 
@@ -2161,8 +2126,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 "CAST(NULL AS SMALLINT) AS SOURCE_DATA_TYPE " +
                 "FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR";
         PreparedStatement ps = connection_.prepareDynamicCatalogQuery(sql);
-        lastGetAttrResultSet_ = ps.executeQueryX();
-        return lastGetAttrResultSet_;
+        return ps.executeQueryX();
     }
 
     public boolean supportsResultSetHoldability(int holdability) throws SQLException {
