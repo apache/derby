@@ -35,5 +35,12 @@ endDdm
 endDdm
 endDss
 flush
-skipDss	//ignore OPNQRYRM
-skipDss	//ignore QRYDSC
+readReplyDss
+readLengthAndCodepoint OPNQRYRM
+skipBytes
+readReplyDss
+readLengthAndCodepoint QRYDSC
+skipBytes
+readReplyDss
+readLengthAndCodepoint QRYDTA
+skipBytes

@@ -149,12 +149,8 @@ ij(CONNECTION1)> -- by default, holdability of ResultSet objects created using t
 NoHoldForConnection;
 ij(CONNECTION1)> prepare s1 as 'select * from t';
 ij(CONNECTION1)> execute s1;
-I          
------
 ERROR 40XL1: A lock could not be obtained within the time requested
 ij(CONNECTION1)> execute s1;
-I          
------
 ERROR 40XL1: A lock could not be obtained within the time requested
 ij(CONNECTION1)> -- Bug 5967 - Selecting from 2 lob columns w/ the first one having data of length 0
 create table t1 (c1 clob(10), c2 clob(10));

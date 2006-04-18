@@ -574,6 +574,41 @@ class DRDAConnThread extends Thread {
 		}
 	}
 
+    /**
+     * Cleans up and closes a result set if an exception is thrown
+     * when collecting QRYDTA in response to OPNQRY or CNTQRY.
+     *
+     * @param stmt the DRDA statement to clean up
+     * @param sqle the exception that was thrown
+     * @param writerMark start index for the first DSS to clear from
+     * the output buffer
+     * @exception DRDAProtocolException if a DRDA protocol error is
+     * detected
+     */
+    private void cleanUpAndCloseResultSet(DRDAStatement stmt,
+                                          SQLException sqle,
+                                          int writerMark)
+        throws DRDAProtocolException
+    {
+        if (stmt != null) {
+            writer.clearDSSesBackToMark(writerMark);
+            if (!stmt.rsIsClosed()) {
+                try {
+                    stmt.rsClose();
+                } catch (SQLException ec) {
+                    if (SanityManager.DEBUG) {
+                        trace("Warning: Error closing result set");
+                    }
+                }
+                writeABNUOWRM();
+                writeSQLCARD(sqle, CodePoint.SVRCOD_ERROR, 0, 0);
+            }
+        } else {
+            writeSQLCARDs(sqle, 0);
+        }
+        errorInChain(sqle);
+    }
+
 	/**
 	 * Process DRDA commands we can receive once server attributes have been
 	 * exchanged.
@@ -614,30 +649,9 @@ class DRDAConnThread extends Thread {
 					}
 					catch(SQLException e)
 					{
-						if (stmt != null)
- 						{
-							// if we got a SQLException we need to clean up and
- 							// close the statement Beetle 4758
-							writer.clearDSSesBackToMark(writerMark);
- 							if (! stmt.rsIsClosed())
- 							{
- 								try {
- 									stmt.rsClose();
- 								}
- 								catch (SQLException ec)
- 								{
- 									if (SanityManager.DEBUG)
- 										trace("Warning: Error closing statement");
-								}
-								writeABNUOWRM();
-								writeSQLCARD(e,CodePoint.SVRCOD_ERROR,0,0);
-							}
-						}
-						else 
-						{
-							writeSQLCARDs(e, 0);
-						}
-						errorInChain(e);
+						// if we got a SQLException we need to clean up and
+						// close the result set Beetle 4758
+						cleanUpAndCloseResultSet(stmt, e, writerMark);
 					}
 					break;
 				case CodePoint.EXCSQLIMM:
@@ -737,11 +751,25 @@ class DRDAConnThread extends Thread {
 							checkWarning(null, ps, null, 0, false, true);
 
 							writeQRYDSC(stmt, false);
-							// We could send QRYDTA here if there's no LOB data
-							// in the result set, and if we are using LMTBLKPRC, as
-							// allowed by drda spec, as an option.
 
 							stmt.rsSuspend();
+
+							if (stmt.getQryprctyp() == CodePoint.LMTBLKPRC) {
+								// The DRDA spec allows us to send
+								// QRYDTA here if there are no LOB
+								// columns.
+								DRDAResultSet drdars =
+									stmt.getCurrentDrdaResultSet();
+								try {
+									if (drdars != null &&
+										!drdars.hasLobColumns()) {
+										writeQRYDTA(stmt);
+									}
+								} catch (SQLException sqle) {
+									cleanUpAndCloseResultSet(stmt, sqle,
+															 writerMark);
+								}
+							}
 						}
 					}
 					catch (SQLException e)

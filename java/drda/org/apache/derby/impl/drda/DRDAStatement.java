@@ -306,13 +306,25 @@ class DRDAStatement
 	
 
 	/**
-	 * Delegation method to call DRDAResultSet to set query 
-	 * options sent on OPNQRY.
+	 * Set query options sent on OPNQRY and pass options down to the
+	 * current <code>DRDAResultSet</code> object.
+	 *
+	 * @param blksize QRYBLKSZ (Query Block Size)
+	 * @param qryblkctl QRYPRCTYP (Query Protocol Type)
+	 * @param maxblkext MAXBLKEXT (Maximum Number of Extra Blocks)
+	 * @param outovropt OUTOVROPT (Output Override Option)
+	 * @param qryrowset QRYROWSET (Query Rowset Size)
+	 * @param qryclsimpl QRYCLSIMP (Query Close Implicit)
 	 * @see DRDAResultSet#setOPNQRYOptions(int, int, int, int, int, int)
 	 */
 	protected void setOPNQRYOptions(int blksize, int qryblkctl,
 								  int maxblkext, int outovropt,int qryrowset,int qryclsimpl)
 	{
+		this.blksize = blksize;
+		this.qryprctyp = qryblkctl;
+		this.maxblkext = maxblkext;
+		this.outovropt = outovropt;
+		this.qryrowset = qryrowset;
 		currentDrdaRs.setOPNQRYOptions( blksize, qryblkctl, maxblkext, 
 				outovropt, qryrowset, qryclsimpl);
 	}

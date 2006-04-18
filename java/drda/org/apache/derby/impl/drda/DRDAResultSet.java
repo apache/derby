@@ -439,7 +439,7 @@ class DRDAResultSet
 	 *  column; false otherwise.
 	 ****/
  
-	private boolean hasLobColumns()	throws SQLException
+	protected boolean hasLobColumns() throws SQLException
 	{
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int ncols = rsmd.getColumnCount();
@@ -562,5 +562,15 @@ class DRDAResultSet
 		this.qryrowset = qryrowset;
 		this.qryclsimp = (qryclsimpl == CodePoint.QRYCLSIMP_SERVER_CHOICE)
 			? DRDAResultSet.QRYCLSIMP_DEFAULT : qryclsimpl;
+
+		// Assume that we are returning data until a CNTQRY command
+		// tells us otherwise. (DERBY-822)
+		qryrtndta = true;
+
+		// For scrollable result sets, we don't know the fetch
+		// orientation until we get a CNTQRY command. Set orientation
+		// and row number to make pre-fetching possible. (DERBY-822)
+		qryscrorn = CodePoint.QRYSCRREL;
+		qryrownbr = 1;
 	}
 }
