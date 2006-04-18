@@ -37,4 +37,3 @@ getURL() = jdbc:derby:db name with spaces
 getUserName() = APP
 CURRENT SCHEMA = APP
 PASSED:Connection Successful with url: jdbc:derby:db name with spaces;create=true
-testDbNameWithSpaces PASSED - Database created successfully

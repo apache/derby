@@ -398,8 +398,11 @@ public class checkDriver {
 	 * the first occurence of space separator. Hence the database which gets 
 	 * created is wrong. e.g, if we specified database name as 
 	 * "db name with spaces", the database that got created by client driver 
-	 * was "db", which was wrong. The URL returned by call to 
-	 * conn.getMetaData().getURL() was also wrong.      
+	 * was "db", which was wrong. We can check this by checking the correct URL
+	 * is returned by call to conn.getMetaData().getURL(). This is currently 
+	 * checked inside the testConnect method. We do not explicilty check the 
+	 * database directory creation since this check fails in remote server 
+	 * testing.       
 	 * 
 	 * @param driver
 	 * @throws SQLException
@@ -426,14 +429,6 @@ public class checkDriver {
 		conn = testConnect(driver, url, info);
 		if(conn != null)
 			System.out.println("PASSED:Connection Successful with url: " + url );
-		
-		// Check that the specified database (with spaces) is created
-		File file = new File(DERBY_SYSTEM_HOME + File.separator + DB_NAME_WITH_SPACES);
-		if(file.exists())
-			System.out.println("testDbNameWithSpaces PASSED - Database created successfully");
-		else
-			System.out.println("testDbNameWithSpaces FAILED - Database not created correctly");
-		
 	}
 	
 	/**

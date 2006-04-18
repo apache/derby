@@ -11,4 +11,3 @@ getURL() = jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/db name with spaces;cre
 getUserName() = tester
 CURRENT SCHEMA = TESTER
 PASSED:Connection Successful with url: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/db name with spaces;create=true
-testDbNameWithSpaces PASSED - Database created successfully
