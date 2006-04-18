@@ -2,80 +2,80 @@ Fetching result sets with getMoreResults()
   PASS 1 got result set true
      RS (1) val 2
   PASS 2 got result set true
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (2) val 3
   PASS 3 got result set true
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (3) val 4
   PASS 4 got result set true
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (4) val 5
   PASS 5 got result set true
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (5) val 6
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
 Fetching result sets with getMoreResults(Statement.CLOSE_CURRENT_RESULT)
   PASS 1 got result set true
      RS (1) val 2
   PASS 2 got result set true
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (2) val 3
   PASS 3 got result set true
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (3) val 4
   PASS 4 got result set true
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (4) val 5
   PASS 5 got result set true
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (5) val 6
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
 Fetching result sets with getMoreResults(Statement.CLOSE_ALL_RESULTS)
   PASS 1 got result set true
      RS (1) val 2
   PASS 2 got result set true
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (2) val 3
   PASS 3 got result set true
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (3) val 4
   PASS 4 got result set true
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (4) val 5
   PASS 5 got result set true
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (5) val 6
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
 Fetching result sets with getMoreResults(Statement.KEEP_CURRENT_RESULT)
   PASS 1 got result set true
      RS (1) val 2
@@ -108,24 +108,24 @@ Fetching result sets with getMoreResults(<mixture>)
      RS (2) val 3
  third with CLOSE_CURRENT_RESULT
      RS (1) val 3
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (3) val 4
  fourth with KEEP_CURRENT_RESULT
      RS (1) val 4
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (3) val 5
      RS (4) val 5
  fifth with CLOSE_ALL_RESULTS
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (5) val 6
  no more results with with KEEP_CURRENT_RESULT
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
      RS (5) val 7
 Fetching result sets with getMoreResults(Statement.KEEP_CURRENT_RESULT) and checking that cs.execute() closes them
   PASS 1 got result set true
@@ -155,11 +155,11 @@ Fetching result sets with getMoreResults(Statement.KEEP_CURRENT_RESULT) and chec
      RS (4) val 7
      RS (5) val 7
  executing statement
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
 Fetching result sets with getMoreResults(Statement.KEEP_CURRENT_RESULT) and checking that cs.close() closes them
   PASS 1 got result set true
      RS (1) val 2
@@ -188,8 +188,8 @@ Fetching result sets with getMoreResults(Statement.KEEP_CURRENT_RESULT) and chec
      RS (4) val 7
      RS (5) val 7
  closing statement
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
-     Exception - 'ResultSet' already closed.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.
+     Exception - ResultSet not open.  Verify that autocommit is OFF.

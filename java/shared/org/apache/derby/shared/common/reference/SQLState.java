@@ -1285,7 +1285,8 @@ public interface SQLState {
 	String LANG_INVALID_PARAM_POSITION                                 = "XCL13.S";
 	String LANG_INVALID_COLUMN_POSITION                                 = "XCL14.S";
 	String LANG_INVALID_COMPARE_TO                                     = "XCL15.S";
-	String LANG_RESULT_SET_NOT_OPEN                                    = "XCL16.S";
+	String LANG_RESULT_SET_NOT_OPEN                                    = "XCL16.S.0";
+    String CLIENT_RESULT_SET_NOT_OPEN                                  = "XCL16.S.1";
     String LANG_STREAM_RETRIEVED_ALREADY = "XCL18.S";
 	String LANG_MISSING_ROW                                            = "XCL19.S";
 	String LANG_CANT_UPGRADE_CATALOGS                                  = "XCL20.S";

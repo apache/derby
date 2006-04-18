@@ -88,6 +88,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.LANG_MISSING_PARMS);
         clientMessageIds.add(SQLState.LANG_NO_CURRENT_ROW);
         clientMessageIds.add(SQLState.LANG_STREAM_RETRIEVED_ALREADY);
+        clientMessageIds.add(SQLState.CLIENT_RESULT_SET_NOT_OPEN);
     }
 
 	public static void main(String[] args) throws Exception {

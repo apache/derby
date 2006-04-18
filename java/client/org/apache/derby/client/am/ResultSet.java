@@ -23,6 +23,7 @@ package org.apache.derby.client.am;
 import java.io.IOException;
 import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.i18n.MessageUtil;
 
 public abstract class ResultSet implements java.sql.ResultSet,
         ResultSetCallbackInterface,
@@ -4571,8 +4572,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (!openOnClient_) {
             agent_.checkForDeferredExceptions();
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.ALREADY_CLOSED),
-                "ResultSet");
+                new MessageId(SQLState.CLIENT_RESULT_SET_NOT_OPEN));
         } else {
             agent_.checkForDeferredExceptions();
         }

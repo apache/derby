@@ -9,7 +9,7 @@ checkResultSet after commit
 checkResultSet before commit
 21, testtable2-one
 checkResultSet after commit
-EXPECTED EXCEPTION:'ResultSet' already closed.
+EXPECTED EXCEPTION:ResultSet not open.  Verify that autocommit is OFF.
 testStatementsInProcedure()
 checkResultSet before commit
 11, testtable1-one
@@ -28,7 +28,7 @@ checkResultSet after commit
 checkResultSet before commit
 21, testtable2-one
 checkResultSet after commit
-EXPECTED EXCEPTION:'ResultSet' already closed.
+EXPECTED EXCEPTION:ResultSet not open.  Verify that autocommit is OFF.
 testStatementsInProcedure()
 checkResultSet before commit
 11, testtable1-one

@@ -74,10 +74,10 @@ SQL State : XJ121
 Got expected exception Invalid operation at current cursor position.
 Negative Test8 - attempt deleteRow & updateRow on updatable resultset after closing the resultset
 Make sure that we got CONCUR_UPDATABLE? true
-SQL State : XJ012
-Got expected exception 'ResultSet' already closed.
-SQL State : XJ012
-Got expected exception 'ResultSet' already closed.
+SQL State : XCL16
+Got expected exception ResultSet not open.  Verify that autocommit is OFF.
+SQL State : XCL16
+Got expected exception ResultSet not open.  Verify that autocommit is OFF.
 Negative Test9 - try updatable resultset on system table
 SQL State : 42Y90
 Got expected exception FOR UPDATE is not permitted in this type of statement.  
@@ -3195,18 +3195,18 @@ Positive test 42 - InsertRow leaving a nullable columns = NULL
 Positive and negative tests 43 - Commit while on insertRow
 Positive test 43 - Commit while on insertRow with holdable cursor
 Negative test 43 - Commit while on insertRow with not holdable cursor
-SQL State: XJ012
-Got expected exception: 'ResultSet' already closed.
+SQL State: XCL16
+Got expected exception: ResultSet not open.  Verify that autocommit is OFF.
 Negative test 44 - Closed RS
 Negative test 44.a - try insertRow on closed RS
-SQL State: XJ012
-Got expected exception: 'ResultSet' already closed.
+SQL State: XCL16
+Got expected exception: ResultSet not open.  Verify that autocommit is OFF.
 Negative test 44.b - try moveToCurrentRow on closed RS
-SQL State: XJ012
-Got expected exception: 'ResultSet' already closed.
+SQL State: XCL16
+Got expected exception: ResultSet not open.  Verify that autocommit is OFF.
 Negative test 44.c - try moveToInsertRow on closed RS
-SQL State: XJ012
-Got expected exception: 'ResultSet' already closed.
+SQL State: XCL16
+Got expected exception: ResultSet not open.  Verify that autocommit is OFF.
 Positive test 45 - try to insert without updating all columns. All columns allow nulls or have a default value
 Positive test 46 - Rollback with AutoCommit on
 Negative test 47 - insertRow and read-only RS

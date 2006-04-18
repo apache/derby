@@ -969,7 +969,7 @@ getTime(bl): null
 getTimestamp(16): null
 getTimestamp(bl): null
 rs.next() on closed result set got exception 
-ERROR XJ012: 'ResultSet' already closed.
+Result Set Closed Exception
 just auto commit
   bug4810 1, 1
   bug4810 1, 2
@@ -984,7 +984,7 @@ commit with auto commit
   bug4810 1, 2
 commit
   LOCK TABLE
-ERROR XJ012: 'ResultSet' already closed.
+Result Set Closed Exception
   LOCK TABLE
   LOCK TABLE
 rollback with auto commit
@@ -992,7 +992,7 @@ rollback with auto commit
   bug4810 1, 2
 rollback
   LOCK TABLE
-ERROR XJ012: 'ResultSet' already closed.
+Result Set Closed Exception
   LOCK TABLE
   LOCK TABLE
 START testMutableValues
