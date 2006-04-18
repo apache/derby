@@ -646,10 +646,15 @@ public class checkDataSource
 		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
 		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
 		
+		 // Get a new xid to begin another transaction. 
+		 // This should give XAER_OUTSIDE exception because
+		 // the resource manager is busy in the local transaction
+		 xid4a = new cdsXid(4, (byte) 93, (byte) 103);
 		try {
 			xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
 		} catch (XAException xae) {
 			showXAException("autocommitxastart expected ", xae);
+			System.out.println("Expected XA error code: " + xae.errorCode);
 		}
 		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
 		rs4.close();
