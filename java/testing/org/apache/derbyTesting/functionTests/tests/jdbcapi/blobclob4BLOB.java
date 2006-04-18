@@ -20,6 +20,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -43,6 +44,7 @@ import java.sql.SQLException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.zip.CRC32;
 
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.tools.ij;
@@ -58,6 +60,7 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 public class blobclob4BLOB { 
 
 	static String[] fileName;
+    static long[] fileCRC32;
 	static String[] basefileName; // for printing messages so that no path info is in .out
 	static String filePath;
 	static String unicodeFilePath;
@@ -81,6 +84,7 @@ public class blobclob4BLOB {
 		fileName = new String[numFiles];
 		basefileName = new String[numFiles];
 		fileLength = new long[numFiles];
+        fileCRC32 = new long[numFiles];
 
 		fileName[0] = "short.txt";	// set up a short (fit in one page) blob/clob
 		fileName[1] = "littleclob.txt"; // set up a long (longer than a page) blob/clob
@@ -127,6 +131,9 @@ public class blobclob4BLOB {
             for (int i=0; i < numFiles; i++) 
             {
                 fileName[i] = filePath + sep + fileName[i];
+                
+                FileInputStream fis = new FileInputStream(fileName[i]);
+                fileCRC32[i] = getStreamCheckSum(fis);
             }
             unicodeFileName = unicodeFilePath + sep + unicodeFileName;
 
@@ -260,10 +267,11 @@ public class blobclob4BLOB {
     }
 
     private static void insertRow(PreparedStatement ps, byte[] b)
-        throws SQLException
+        throws SQLException, IOException
     {
         ps.setBytes(1, b);
         ps.setInt(2, b.length);
+        ps.setLong(3, getStreamCheckSum(new ByteArrayInputStream(b)));
         ps.executeUpdate();
     }
 
@@ -2707,8 +2715,10 @@ public class blobclob4BLOB {
 			// creating table to fit within default 4k table size, then add large column
 			stmt.execute("create table testBlob (b integer)");
 			stmt.execute("alter table testBlob add column a blob(300k)");
+            stmt.execute("alter table testBlob add column crc32 BIGINT");
+            
             PreparedStatement ps = conn.prepareStatement(
-                "insert into testBlob (a, b) values(?,?)");
+                "insert into testBlob (a, b, crc32) values(?,?,?)");
 
             // insert small strings
 			insertRow(ps,"".getBytes("US-ASCII"));
@@ -2716,7 +2726,7 @@ public class blobclob4BLOB {
             insertRow(ps,"a stitch in time says ouch".getBytes("US-ASCII"));
             insertRow(ps,"here is a string with a return \n character".getBytes("US-ASCII"));
 
-            // insert larger strings using setAsciiStream
+            // insert larger strings using setBinaryStream
             for (int i = 0; i < numFiles; i++)
             {
                 // prepare an InputStream from the file
@@ -2730,6 +2740,7 @@ public class blobclob4BLOB {
                 // insert a streaming column
                 ps.setBinaryStream(1, fileIn, (int)fileLength[i]);
                 ps.setInt(2, (int)fileLength[i]);
+                ps.setLong(3, fileCRC32[i]);
                 ps.executeUpdate();
                 fileIn.close();
             }
@@ -2737,6 +2748,7 @@ public class blobclob4BLOB {
             // insert a null
             ps.setNull(1, Types.BLOB);
             ps.setInt(2, 0);
+            ps.setNull(3, Types.BIGINT);
             ps.executeUpdate();
 
             conn.commit();
@@ -2775,9 +2787,9 @@ public class blobclob4BLOB {
 		try
         {
 			stmt = conn.createStatement();
-			stmt.execute("create table testBinary (a blob(80), b integer)");
+			stmt.execute("create table testBinary (a blob(80), b integer, crc32 bigint)");
             PreparedStatement ps = conn.prepareStatement(
-                "insert into testBinary values(?,?)");
+                "insert into testBinary values(?,?,?)");
 
             // insert small strings
 			insertRow(ps,"".getBytes("US-ASCII"));
@@ -2820,8 +2832,9 @@ public class blobclob4BLOB {
 			// creating table to fit within default 4k table size, then add large column
 			stmt.execute("create table searchBlob (b integer)");
 			stmt.execute("alter table searchBlob add column a blob(300k)");
+            stmt.execute("alter table searchBlob add column crc32 BIGINT");
             PreparedStatement ps = conn.prepareStatement(
-                "insert into searchBlob (a, b) values(?,?)");
+                "insert into searchBlob (a, b, crc32) values(?,?,?)");
             insertRow(ps,"horse".getBytes("US-ASCII"));
             insertRow(ps,"ouch".getBytes("US-ASCII"));
             insertRow(ps,"\n".getBytes("US-ASCII"));
@@ -2845,6 +2858,7 @@ public class blobclob4BLOB {
                 // insert a streaming column
                 ps.setBinaryStream(1, fileIn, (int)fileLength[i]);
                 ps.setInt(2, (int)fileLength[i]);
+                ps.setLong(3, fileCRC32[i]);
                 ps.executeUpdate();
                 fileIn.close();
             }
@@ -2852,6 +2866,7 @@ public class blobclob4BLOB {
             // insert a null
             ps.setNull(1, Types.BLOB);
             ps.setInt(2, 0);
+            ps.setNull(3, Types.BIGINT);
             ps.executeUpdate();
 
             conn.commit();
@@ -2879,7 +2894,7 @@ public class blobclob4BLOB {
         try
         {
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery("select a,b from testBlob");
+			rs = stmt.executeQuery("select a,b,crc32 from testBlob");
 			byte[] buff = new byte[128];
 			// fetch row back, get the long varbinary column as a blob.
             Blob blob;
@@ -2888,8 +2903,22 @@ public class blobclob4BLOB {
                 i++;
 				// get the first column as a clob
                 blob = rs.getBlob(1);
-                if (blob == null)
+                long crc32 = rs.getLong(3);
+                boolean crc2Null = rs.wasNull();
+                if (blob == null) {
+                    if (!crc2Null) 
+                        System.out.println("FAIL: NULL BLOB but non-NULL checksum");
                     continue;
+                }
+                
+                long blobcrc32 = getStreamCheckSum(blob.getBinaryStream());
+                
+                if (blobcrc32 != crc32) {
+                    System.out.println("FAIL: mismatched checksums for blob with length " +
+                            blob.length());
+                }
+                
+                
 				InputStream fin = blob.getBinaryStream();
 				int columnSize = 0;
 				for (;;) {
@@ -3622,6 +3651,7 @@ public class blobclob4BLOB {
             if (file.length() < 10000)
                 System.out.println("ERROR: wrong file tested");
             InputStream fileIn = new FileInputStream(file);
+            
             ps.setBinaryStream(5, fileIn, (int)file.length());
             ps.executeUpdate();
             fileIn.close();
@@ -3630,8 +3660,10 @@ public class blobclob4BLOB {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("select e from testLongRowBlob");
             Blob blob = null;
-			while (rs.next())
+			while (rs.next()) {
                 blob = rs.getBlob(1);
+                checkBlobAgainstFile(1, blob);
+           }
             rs.close();
 
             Connection conn2 = ij.startJBMS();
@@ -4246,6 +4278,49 @@ public class blobclob4BLOB {
 			
 		return false;
 	}
+    
+    /**
+     * Run some simple checks comparing the Blob
+     * to the file's length and checksum.
+     * @throws SQLException 
+     * @throws IOException 
+     *
+     */
+    private static void checkBlobAgainstFile(int fileid,
+            Blob blob) throws SQLException, IOException {
+
+        if (blob.length() != fileLength[fileid])
+            System.out.println("FAIL BLOB length mismatch: "
+                    + "BLOB " + blob.length()
+                    + " FILE " + fileLength[fileid]);
+        
+        long blobsum = getStreamCheckSum(blob.getBinaryStream());
+        if (blobsum != fileCRC32[fileid])
+            System.out.println("FAIL BLOB checksum mismatch: "
+                    + "BLOB " + blobsum
+                    + " FILE " + fileCRC32[fileid]); 
+    }
+  
+    /**
+     * Get the CRC32 checksum of a stream, reading
+     * its contents entirely and closing it.
+     */
+    private static long getStreamCheckSum(InputStream in)
+       throws IOException
+    {
+        CRC32 sum = new CRC32();
+        
+        byte[] buf = new byte[32*1024];
+        
+        for (;;) {
+            int read = in.read(buf);
+            if (read == -1)
+                break;
+            sum.update(buf, 0, read);
+        }
+        in.close();
+        return sum.getValue();
+    }
 }
 
 
