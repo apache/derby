@@ -369,6 +369,36 @@ public class SystemProcedures  {
 				catalogName, schemaName, procName, paramName)
 			: getDMD().getProcedureColumns(catalogName, schemaName, procName, paramName);
 	}
+	
+	/**
+	 *  Map SQLFunctionParameters to
+	 *  EmbedDatabaseMetaData.getFunctionParameters()
+	 *
+	 * @param catalogName SYSIBM.SQLFunctionParameters CatalogName
+	 * varchar(128),
+	 * @param schemaName SYSIBM.SQLFunctionParameters SchemaName
+	 * varchar(128),
+	 * @param funcName SYSIBM.SQLFunctionParameters FuncName
+	 * varchar(128),
+	 * @param funcName SYSIBM.SQLFunctionParameters ParamName
+	 * varchar(128),
+	 * @param options SYSIBM.SQLFunctionParameters Options
+	 * varchar(4000))
+	 * @param rs output parameter, the resultset object containing the
+	 * result of getFunctionParameters(). 
+	 */
+	public static void SQLFUNCTIONPARAMS(String catalogName,
+										 String schemaName,
+										 String funcName,
+										 String paramName,
+										 String options,
+										 ResultSet[] rs) throws SQLException
+        {
+			rs[0] = ((EmbedDatabaseMetaData)getDMD()).
+				getFunctionParameters(catalogName, schemaName, funcName, 
+									  paramName);
+        }
+	
 
 	/**
 	 *  Map SQLColumns to EmbedDatabaseMetaData.getColumns

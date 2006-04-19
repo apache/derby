@@ -69,15 +69,6 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
     }
 
     
-    public ResultSet getFunctionParameters(java.lang.String catalog,
-                                java.lang.String schemaPattern,
-                                java.lang.String functionNamePattern,
-                                java.lang.String parameterNamePattern)
-                                throws SQLException
-    {
-        return getSimpleQuery("getFunctionParameters");
-    }
-    
     /**
      * Returns false unless <code>interfaces</code> is implemented 
      * 

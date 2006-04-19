@@ -1546,6 +1546,48 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			"odbc_getProcedureColumns");
 	}
 
+    /**
+     * Implements DatabaseMetaData.getFunctionParameters() for an embedded
+     * database. Queries the database to get information about
+     * function parameters. Executes the
+     * 'getFunctionParameters' query from metadata.properties to obtain the
+     * ResultSet.<p> Compatibility: This is a new method in
+     * the API which is only available with with Derby versions > 10.1 and
+     * JDK versions >= 1.6 <p>Upgrade: Since this is a new query it
+     * does not have an SPS, and will be available as soon as any
+     * database, new or old, is booted with the new version of Derby,
+     * (in <b>soft and hard</b> upgrade).
+     * @param catalog limit the search to functions in this catalog
+     * (not used)
+     * @param schemaPattern limit the search to functions in schemas
+     * matching this pattern
+     * @param functionNamePattern limit the search to functions
+     * matching this pattern
+     * @param parameterNamePattern limit the search parameters
+     * matching this pattern
+     * @return a ResultSet with metadata information
+     * @throws SQLException if a database error occurs
+     */
+	public ResultSet getFunctionParameters(String catalog,
+										   String schemaPattern,
+										   String functionNamePattern,
+										   String parameterNamePattern) 
+		throws SQLException {
+		PreparedStatement s = getPreparedQuery("getFunctionParameters");
+
+		// Cannot use doGetProcCols() because our query requires
+		// parameterNamePattern twice, because both LIKE and = is
+		// required to select parameters with an empty parameter
+		// name. That is, WHERE paramName LIKE ? will not match an
+		// empty paramName, but WHERE paramName LIKE ? OR paramName =
+		// ? will.
+		s.setString(1, swapNull(schemaPattern));
+		s.setString(2, swapNull(functionNamePattern));
+		s.setString(3, swapNull(parameterNamePattern));
+		s.setString(4, swapNull(parameterNamePattern));
+		return s.executeQuery();
+	}
+
 	/**
 	 * Does the actual work for the getProcedureColumns metadata
 	 * calls. See getProcedureColumns() method above for parameter

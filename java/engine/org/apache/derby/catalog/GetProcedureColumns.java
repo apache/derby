@@ -24,6 +24,7 @@ import java.sql.Types;
 import java.lang.reflect.*;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.DatabaseMetaData;
 import org.apache.derby.catalog.TypeDescriptor;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -32,6 +33,7 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
+import org.apache.derby.shared.common.reference.JDBC40Translation;
 /**
     <P>Use of VirtualTableInterface to provide support for
     DatabaseMetaData.getProcedureColumns().
@@ -81,15 +83,36 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate 
 {
+	private boolean isFunction;
+	private int translate(int val) {
+		if (!isFunction) { return val; }
+		switch (val) {
+		case DatabaseMetaData.procedureColumnUnknown:
+			return JDBC40Translation.FUNCTION_PARAMETER_UNKNOWN;	
+		case DatabaseMetaData.procedureColumnIn:
+			return JDBC40Translation.FUNCTION_PARAMETER_IN;
+		case DatabaseMetaData.procedureColumnInOut:
+			return JDBC40Translation.FUNCTION_PARAMETER_INOUT;	
+		case DatabaseMetaData.procedureColumnOut:
+			return JDBC40Translation.FUNCTION_PARAMETER_OUT;
+		case DatabaseMetaData.procedureColumnReturn:
+			return JDBC40Translation.FUNCTION_RETURN;
+		default:
+			return JDBC40Translation.FUNCTION_PARAMETER_UNKNOWN;	
+		}
+    }
 
 	private boolean isProcedure;
 	// state for procedures.
 	private RoutineAliasInfo procedure;
-	private int paramCursor = -1;
+	private int paramCursor;
     private short method_count;
     private short param_number;
 
     private TypeDescriptor sqlType;
+    private String columnName;
+    private short columnType;
+    private final short nullable;
 
     public ResultSetMetaData getMetaData()
     {        
@@ -106,23 +129,41 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
     {
 		// compile time aliasInfo will be null.
 		if (aliasInfo != null) {
-
 			isProcedure = aliasType.equals("P");
+			isFunction = aliasType.equals("F");
 			procedure = (RoutineAliasInfo) aliasInfo;
 			method_count = (short) procedure.getParameterCount();
 		}
+		if (aliasType == null) { 
+			nullable = 0;
+			return;
+		}
+
+		if (isFunction) {
+			nullable = (short) JDBC40Translation.FUNCTION_NULLABLE;
+			sqlType = procedure.getReturnType();
+			columnName = "";  // COLUMN_NAME is VARCHAR NOT NULL
+			columnType = (short) JDBC40Translation.FUNCTION_RETURN;
+			paramCursor = -2;
+			return;
+		}
+		nullable = (short) DatabaseMetaData.procedureNullable;
+
+		paramCursor = -1;
     }
 
     public boolean next() throws SQLException {
 		if (++paramCursor >= procedure.getParameterCount())
 			return false;
 
-		sqlType = procedure.getParameterTypes()[paramCursor];
-
+		if (paramCursor > -1) {
+			sqlType      = procedure.getParameterTypes()[paramCursor];
+			columnName   = procedure.getParameterNames()[paramCursor];
+			columnType   = 
+				(short)translate(procedure.getParameterModes()[paramCursor]);
+		}
 		param_number = (short) paramCursor;
-
 		return true;
-
 	}   
 
     //
@@ -136,7 +177,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
         switch (column) 
         {
 		case 1: // COLUMN_NAME:
-				return procedure.getParameterNames()[paramCursor];
+			return columnName;
 
 		case 4: //_TYPE_NAME: 
                return sqlType.getTypeName();
@@ -198,7 +239,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
         switch (column) 
         {
 		case 2: // COLUMN_TYPE:
-			return (short) (procedure.getParameterModes()[paramCursor]);
+			return columnType;
 
 		case 3: // DATA_TYPE:
                 if (sqlType != null)
@@ -229,8 +270,9 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
                 // No corresponding SQL type
                 return 0;
 
+		//FIXME
 		case 9: // NULLABLE:
-                return (short)java.sql.DatabaseMetaData.procedureNullable;
+			return nullable;
 
 		case 11: // METHOD_ID: 
                 return method_count;

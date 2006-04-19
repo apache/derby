@@ -30,6 +30,7 @@ import java.sql.Statement;
 
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
+import org.apache.derby.shared.common.reference.JDBC40Translation;
 
 /**
  * Test of database metadata for new methods in JDBC 40.
@@ -98,6 +99,35 @@ public class TestDbMetaData {
             dumpSQLExceptions(e);
         }
 
+		// Make sure the constants provided in JDBC40Translation is correct
+
+		// Uncomment this when jdk16 contains functionParameterUnknown
+//  		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_UNKNOWN == 
+// 							   DatabaseMetaData.functionParameterUnknown));
+		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_IN == 
+							   DatabaseMetaData.functionParameterIn));
+		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_INOUT == 
+							   DatabaseMetaData.functionParameterInOut));
+		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_OUT == 
+							   DatabaseMetaData.functionParameterOut));
+		System.out.println(""+(JDBC40Translation.FUNCTION_RETURN == 
+							   DatabaseMetaData.functionReturn));
+    
+		System.out.println(""+(JDBC40Translation.FUNCTION_NO_NULLS ==
+							   DatabaseMetaData.functionNoNulls));
+		System.out.println(""+(JDBC40Translation.FUNCTION_NULLABLE ==
+							   DatabaseMetaData.functionNullable));
+		System.out.println(""+(JDBC40Translation.FUNCTION_NULLABLE_UNKNOWN ==
+							   DatabaseMetaData.functionNullableUnknown));
+
+		// Since JDBC40Translation cannot be accessed in queries in
+		// metadata.properties, the query has to use
+		// DatabaseMetaData.procedureNullable. Hence it is necessary
+		// to verify that that value of
+		// DatabaseMetaData.functionNullable is the same.
+		System.out.println(""+(DatabaseMetaData.functionNullable == 
+							   DatabaseMetaData.procedureNullable));
+		
         // Create some functions in the default schema (app) to make
         // the output from getFunctions() and getFunctionParameters
         // more interesting
@@ -114,19 +144,6 @@ public class TestDbMetaData {
                   "RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE "+
                   "JAVA EXTERNAL NAME 'java.some.func'");
 
-        try {
-			checkEmptyRS(met.getFunctionParameters(null,null,null,null));
-        } catch (SQLException e) {
-            // TODO: remove try/catch once method is implemented!
-            System.out.println("getFunctionParameters():");
-            dumpSQLExceptions(e);
-        } catch (AbstractMethodError ame) {
-            // TODO: No implementation on client yet, so catch
-            // AbstractMethodError for now. Remove when implemented.
-            System.out.println("getFunctionParameters():");
-            ame.printStackTrace(System.out);
-        }
-
         // Any function in any schema in any catalog
         dumpRS(met.getFunctions(null, null, null));
         // Any function in any schema in "Dummy
@@ -142,6 +159,13 @@ public class TestDbMetaData {
         // NO catalog (none)
         checkEmptyRS(met.getFunctions("", "", null));
 
+		// Test getFunctionParameters
+		// Dump parameters for all functions beigging with DUMMY
+		dumpRS(met.getFunctionParameters(null,null,"DUMMY%",null));
+		
+		// Dump return value for all DUMMY functions
+		dumpRS(met.getFunctionParameters(null,null,"DUMMY%",""));
+	  
         try {
             // 
             // Test the new getSchemas() with no schema qualifiers

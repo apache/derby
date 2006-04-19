@@ -422,15 +422,15 @@ public abstract class metadata_test {
 			// the current version of Derby
 			try {
 				Class s = "".getClass();
-				Class [] a = new Class [] { s, s, s };
 				
 				// Make sure the method is actually implemented
 				java.lang.reflect.Method gf = 
-					met.getClass().getMethod("getFunctions", a);
+					met.getClass().getMethod("getFunctions", 
+											 new Class [] { s, s, s });
 				if (!java.lang.reflect.Modifier.isAbstract(gf.getModifiers())){
 					// Any function in any schema in any catalog
 					System.out.println("getFunctions(null,null,null):");
-					dumpRS(0, (ResultSet)gf.
+					dumpRS(IGNORE_PROC_ID, (ResultSet)gf.
 						   invoke(met, new String [] {null, null, null}));
 
 					// Any function in any schema in "Dummy
@@ -438,30 +438,62 @@ public abstract class metadata_test {
 					// argument is ignored (is always null)
 					System.out.println("getFunctions(\"Dummy Catalog\",null,"+
 									   "null):");
-					dumpRS(0, (ResultSet)gf.
+					dumpRS(IGNORE_PROC_ID, (ResultSet)gf.
 						   invoke(met, new String [] {"Dummy Catalog", 
 													  null, null}));
 
 					// Any function in a schema starting with "SYS"
 					System.out.println("getFunctions(null,\"%SYS%\",null):");
-					dumpRS(0, (ResultSet)gf.
+					dumpRS(IGNORE_PROC_ID, (ResultSet)gf.
 						   invoke(met, new String [] {null, "SYS%", null}));
 
 					// All functions containing "GET" in any schema
 					// (and any catalog)
 					System.out.println("getFunctions(null,null,\"%GET%\"):");
-					dumpRS(0, (ResultSet)gf.
+					dumpRS(IGNORE_PROC_ID, (ResultSet)gf.
 						   invoke(met, new String [] {null, null, "%GET%"}));
 
 					// Any function that belongs to NO schema and
 					// NO catalog (none)
 					System.out.println("getFunctions(\"\",\"\",null):");
-					dumpRS(0, (ResultSet)gf.
+					dumpRS(IGNORE_PROC_ID, (ResultSet)gf.
 						   invoke(met, new String [] {"", "", null}));
 
 				}
+				
+				// Test getFunctionParameters(String,String,String,String)
+				java.lang.reflect.Method gfp = 
+					met.getClass().getMethod("getFunctionParameters", 
+											 new Class [] { s, s, s, s });
+
+				if (!java.lang.reflect.Modifier.
+					isAbstract(gfp.getModifiers())){
+					System.out.println("getFunctionParameters(null,"+
+									   "null,null,null):");
+					dumpRS(IGNORE_PROC_ID, (ResultSet)gfp.
+						   invoke(met, 
+								  new String [] {null, null, null, null}));
+
+					System.out.println("getFunctionParameters(null,\"APP\","+
+									   "\"DUMMY%\",\"X\"):");
+					dumpRS(IGNORE_PROC_ID, (ResultSet)gfp.
+						   invoke(met, 
+								  new String [] {null, "APP", "DUMMY%", "X"}));
+
+					System.out.println("getFunctionParameters(null,\"APP\","+
+									   "\"DUMMY%\",\"\"):");
+					dumpRS(IGNORE_PROC_ID, (ResultSet)gfp.
+						   invoke(met, 
+								  new String [] {null, "APP", "DUMMY%", ""}));
+
+				}
 			} 
-			catch (NoSuchMethodException e) {}
+			catch (NoSuchMethodException e) {
+				if (org.apache.derby.iapi.services.info.JVMInfo.JDK_ID >= 
+					org.apache.derby.iapi.services.info.JVMInfo.J2SE_16) {
+					e.printStackTrace();
+				}
+			}
 			catch (Exception e) { e.printStackTrace(); }
 
 			System.out.println("getUDTs() with user-named types null :");
