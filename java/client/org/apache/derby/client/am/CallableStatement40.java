@@ -42,11 +42,6 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
         super(agent, connection, sql, type, concurrency, holdability);        
     }
     
-    public Reader getCharacterStream(int parameterIndex)
-        throws SQLException {
-        throw SQLExceptionFactory.notImplemented("getCharacterStream(int)");
-    }
-    
     public Reader getCharacterStream(String parameterName)
         throws SQLException {
         throw SQLExceptionFactory.notImplemented("getCharacterStream(String)");

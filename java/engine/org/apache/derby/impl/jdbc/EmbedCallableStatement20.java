@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 
 /* ---- New jdbc 2.0 types ----- */
 import java.sql.Array;
@@ -36,14 +37,20 @@ import java.sql.Ref;
 import java.net.URL;
 import java.util.Map;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 
 import java.util.Calendar;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.sql.conn.StatementContext;
+import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -1073,15 +1080,149 @@ public class EmbedCallableStatement20
 		}
 		return false;
 	}
+
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //	JDBC 4.0	-	New public methods
+    //
+    /////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * Retrieves the value of the designated parameter as a 
+     * <code>java.io.Reader</code> object in the Java programming language.
+     * Introduced in JDBC 4.0.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @return a <code>java.io.Reader</code> object that contains the parameter
+     *         value; if the value is SQL <code>NULL</code>, the value returned
+     *         is <code>null</code> in the Java programming language.
+     * @throws SQLException if a database access error occurs or this method is
+     *                      called on a closed <code>CallableStatement</code>
+     */
+    public Reader getCharacterStream(int parameterIndex)
+        throws SQLException {
+        checkStatus();
+        // Make sure the specified parameter has mode OUT or IN/OUT.
+        switch (getParms().getParameterMode(parameterIndex)) {
+            case JDBC30Translation.PARAMETER_MODE_IN:
+            case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
+                throw newSQLException(SQLState.LANG_NOT_OUTPUT_PARAMETER,
+                                      Integer.toString(parameterIndex));
+        }
+        Reader reader = null;
+        int paramType = getParameterJDBCType(parameterIndex);
+        switch (paramType) {
+            // Handle character/string types.
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.CLOB:
+                boolean pushStack = false;
+                Object syncObject = getConnectionSynchronization();
+                synchronized (syncObject) {
+                try {
+                    DataValueDescriptor param = 
+                        getParms().getParameterForGet(parameterIndex -1);
+                    if (param.isNull()) {
+                        break;
+                    }
+                    pushStack = true;
+                    setupContextStack();
+
+                    StreamStorable ss = (StreamStorable)param;
+                    InputStream stream = ss.returnStream();
+                    if (stream == null) {
+                        reader = new StringReader(param.getString());
+                    } else {
+                        reader = new UTF8Reader(stream, 0, this, syncObject);
+                    }
+                } catch (Throwable t) {
+                    throw EmbedResultSet.noStateChangeException(t);
+                } finally {
+                    if (pushStack) {
+                        restoreContextStack();
+                    }
+                }
+                } // End synchronized block
+                break;
+
+            // Handle binary types.
+            // JDBC says to support these, but no defintion exists for the output.
+            // Match JCC which treats the bytes as a UTF-16BE stream.
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+            case Types.BLOB:
+                try {
+                    InputStream is = getBinaryStream(parameterIndex);
+                    if (is != null) {
+                        reader = new InputStreamReader(is, "UTF-16BE");
+                    }
+                    break;
+                } catch (UnsupportedEncodingException uee) {
+                    throw newSQLException(uee.getMessage());
+                }
+
+            default:
+                throw newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH, 
+                        "java.io.Reader", Util.typeName(paramType));
+        } 
+        // Update wasNull. 
+        wasNull = (reader == null);
+        return reader;
+    }
+    
+    // Private utility classes
+
+    /**
+     * Get binary stream for a parameter.
+     *
+     * @param parameterIndex first parameter is 1, second is 2 etc.
+     * @return a stream for the binary parameter, or <code>null</code>.
+     *
+     * @throws SQLException if a database access error occurs.
+     */
+    private InputStream getBinaryStream(int parameterIndex)
+        throws SQLException {
+        int paramType = getParameterJDBCType(parameterIndex); 
+        switch (paramType) {
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+            case Types.BLOB:
+                break;
+            default:
+                throw newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH, 
+                        "java.io.InputStream", Util.typeName(paramType));
+        }
+
+        boolean pushStack = false;
+        synchronized (getConnectionSynchronization()) {
+            try {
+                DataValueDescriptor param = 
+                    getParms().getParameterForGet(parameterIndex -1);
+                wasNull = param.isNull();
+                if (wasNull) {
+                    return null;
+                }
+                pushStack = true;
+                setupContextStack();
+
+                StreamStorable ss = (StreamStorable)param;
+                InputStream stream = ss.returnStream();
+                if (stream == null) {
+                    stream = new ByteArrayInputStream(param.getBytes());
+                } else {
+                    stream = new BinaryToRawStream(stream, param);
+                }
+                return stream;
+            } catch (Throwable t) {
+                throw EmbedResultSet.noStateChangeException(t);
+            } finally {
+                if (pushStack) {
+                    restoreContextStack();
+                }
+            }
+        } // End synchronized block
+    }
 }
-
-
-
-
-
-
-
-
-
-
-

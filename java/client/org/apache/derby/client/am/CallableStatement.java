@@ -20,8 +20,10 @@
 
 package org.apache.derby.client.am;
 
-import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.SQLState;
+
+import java.io.Reader;
+import java.sql.SQLException;
 
 public class CallableStatement extends PreparedStatement
         implements java.sql.PreparedStatement,
@@ -1377,6 +1379,34 @@ public class CallableStatement extends PreparedStatement
         throw jdbcMethodNotImplemented();
     }
 
+    //-------------------------- JDBC 4.0 methods --------------------------------
+    
+    public Reader getCharacterStream(int parameterIndex)
+        throws SQLException {
+        try {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getCharacterStream", parameterIndex);
+                }
+                super.checkForClosedStatement();
+                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
+                checkGetterPreconditions(parameterIndex);
+                setWasNull(parameterIndex);
+                Reader reader = null;
+                if (this.wasNull_ == WAS_NOT_NULL) {
+                    reader = singletonRowData_.getCharacterStream(parameterIndex);
+                }
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getCharacterStream", reader);
+                }
+                return reader;
+            }
+             
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+    
     //----------------------------helper methods----------------------------------
 
     private int checkForEscapedCallWithResult(int parameterIndex) throws SqlException {

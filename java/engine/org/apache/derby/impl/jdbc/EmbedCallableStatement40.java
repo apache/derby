@@ -43,11 +43,6 @@ public class EmbedCallableStatement40 extends EmbedCallableStatement30 {
         super(conn, sql, resultSetType, resultSetConcurrency, resultSetHoldability);     
     }
     
-    public Reader getCharacterStream(int parameterIndex)
-        throws SQLException {
-        throw Util.notImplemented();
-    }
-
     public Reader getCharacterStream(String parameterName)
         throws SQLException {
         throw Util.notImplemented();
