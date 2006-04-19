@@ -466,6 +466,22 @@ to specify your environment and options:
  
       jsr169compile.classpath=C:/wctme5.7/ive/lib/jclFoundation10/classes.zip;C:/wctme5.7/ive/lib/jdbc.jar
 
+      
+    - Optional - derbyTesting.jar.path
+    
+      This property is required to run upgrade tests. Set this property 
+      to point to the location of jar files from a previous release from 
+      which we need to test upgrade. This property needs to be set only if 
+      the source files will not be available when running tests. In this case,
+       the jars can be copied to any location with the following relative path 
+      ${jar_location}/{majorversion.minorversion}. The property should be set 
+      as follows:
+      
+      derbyTesting.jar.path=${jar_location}
+      
+      If the test is run on the machine where the svn source files are available, 
+      it is not required to set this property. The jars checked into svn will be used.
+      
 3.3   Run Derby build
 
 (1) Go to directory ${derby.source}.
