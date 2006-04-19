@@ -28,13 +28,14 @@ import org.apache.derby.tools.sysinfo;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 /**
+  <p>
   The run class facilitates running the various Derby utilities with the
   java -jar command. For example:
-
-  java -jar derbyrun.jar ij
-  java -jar derbyrun.jar sysinfo
-  java -jar derbyrun.jar dblook
-  java -jar derbyrun.jar NetworkServerControl
+  <p>
+  java -jar derbyrun.jar ij [-p propertiesfile] [sql script]<br>
+  java -jar derbyrun.jar sysinfo [-cp ...] [-cp help]<br>
+  java -jar derbyrun.jar dblook [args] (or no arguments for usage)<br>
+  java -jar derbyrun.jar server [args] (or no arguments for usage)<br>
 */
 public class run {
 
@@ -51,18 +52,18 @@ public class run {
           sysinfo.main(trimArgs(args));
       } else if (args[0].equals("dblook")) {
           dblook.main(trimArgs(args));
-      } else if (args[0].equals("NetworkServerControl")) {
+      } else if (args[0].equals("server")) {
           NetworkServerControl.main(trimArgs(args));
       } else printUsage();
   }
 
-  /*
+  /**
        Private constructor. No instances allowed.
    */
   private run() { 
   }
   
-  /*
+  /**
        Utility method to trim one element off of the argument array.
        @param args the arguments array
        @return trimmed the trimmed array
@@ -74,7 +75,7 @@ public class run {
       return trimmed; 
   }
 
-  /*
+  /**
        Print the usage statement if the user didn't enter a valid choice
        of tool.
    */

@@ -1,0 +1,41 @@
+java -jar C:/derby-trunk/jars/sane/derbyrun.jar ij --help:
+Usage: java org.apache.derby.tools.ij [-p propertyfile] [-ca connectionAttributePropertyFile] [inputfile]
+java -jar C:/derby-trunk/jars/sane/derbyrun.jar sysinfo -cp help:
+USAGE: java org.apache.derby.tools.sysinfo -cp [ [ embedded ][ server ][ client] [ tools ] [  anyClass.class ] ]
+java -jar C:/derby-trunk/jars/sane/derbyrun.jar dblook:
+ USAGE:
+ java org.apache.derby.tools.dblook -d <sourceDBUrl> [OPTIONS]
+ 	where the source URL is the full URL, including the connection protocol
+ 	and any connection attributes that might apply.  For example, use
+ 	'jdbc:derby:myDB', or 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/myDB;user=usr;'. 
+ 	options include: 
+ 	-z <schemaName> to specify a schema to which the DDL generation
+ 	 should be limited.  Only database objects with that schema will have
+ 	 their DDL generated.
+ 	-t <tableOne> <tableTwo> ... to specify a list of tables for which
+ 	 the DDL will be generated; any tables not in the list will be ignored.
+ 	-td <value> to specify what should be appended to the end
+ 	 of each DDL statement.
+		This defaults to ';'.
+ 	-noview to prevent the generation of DDL for views.
+ 	-append to keep from overwriting the output files.
+ 	-verbose to have error messages printed to the console (in addition
+ 	 to the log file).  If not specified, errors will only be printed to the
+ 	 log file.
+ 	-o <filename> to specify the file name to which the generated DDL
+ 	 will be written.
+ 		If not specified, default is the console. 
+java -jar C:/derby-trunk/jars/sane/derbyrun.jar server:
+No arguments given.
+Usage: NetworkServerControl <commands> 
+Commands:
+start [-h <host>] [-p <portnumber>]
+shutdown [-h <host>][-p <portnumber>]
+ping [-h <host>][-p <portnumber>]
+sysinfo [-h <host>][-p <portnumber>]
+runtimeinfo [-h <host>][-p <portnumber>]
+logconnections {on|off}[-h <host>][-p <portnumber>]
+maxthreads <max>[-h <host>][-p <portnumber>]
+timeslice <milliseconds>[-h <host>][-p <portnumber>]
+trace {on|off} [-s <session id>][-h <host>][-p <portnumber>]
+tracedirectory <traceDirectory>[-h <host>][-p <portnumber>]
