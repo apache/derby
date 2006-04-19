@@ -26,6 +26,9 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.io.Reader;
 import java.io.InputStream;
+import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.MessageId;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedStatement{
     
@@ -74,5 +77,37 @@ public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedSt
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) 
                 throws SQLException{
         throw SQLExceptionFactory.notImplemented ("setSQLXML (int, SQLXML)");
-    }    
+    }
+    /**
+     * Returns false unless <code>interfaces</code> is implemented 
+     * 
+     * @param  interfaces             a Class defining an interface.
+     * @return true                   if this implements the interface or 
+     *                                directly or indirectly wraps an object 
+     *                                that does.
+     * @throws java.sql.SQLException  if an error occurs while determining 
+     *                                whether this is a wrapper for an object 
+     *                                with the given interface.
+     */
+    public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        return interfaces.isInstance(this);
+    }
+    
+    /**
+     * Returns <code>this</code> if this class implements the interface
+     *
+     * @param  interfaces a Class defining an interface
+     * @return an object that implements the interface
+     * @throws java.sql.SQLExption if no object if found that implements the 
+     * interface
+     */
+    public <T> T unwrap(java.lang.Class<T> interfaces)
+                                   throws SQLException {
+        try { 
+            return interfaces.cast(this);
+        } catch (ClassCastException cce) {
+            throw new SqlException(null,new MessageId(SQLState.UNABLE_TO_UNWRAP),
+                    interfaces).getSQLException();
+        }
+    }
 }

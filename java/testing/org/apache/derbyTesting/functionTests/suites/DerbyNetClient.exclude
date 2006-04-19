@@ -26,12 +26,8 @@ largedata/LobLimits.java
 jdbc4/TestDbMetaData.java
 jdbc4/TestJDBC40Exception.java
 jdbcapi/SURTest.junit
-#temporarily exclude until wrapper support for the client side is also added
-#begin
-jdbc4/DataSourceTest.junit
-jdbc4/ResultSetMetaDataTest.junit
+#Tests BrokeredConnection class which is presnt only on the embedded side
 jdbc4/EmbeddedBrokeredConnectionWrapperTest.junit
-#end
 #temporarily disable checkDataSourceTests with client
 #failing (hanging?)  on jdk 1.5/jdk 1.6
 jdbcapi/checkDataSource.java

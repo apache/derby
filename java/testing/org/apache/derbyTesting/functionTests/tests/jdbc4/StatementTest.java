@@ -240,12 +240,6 @@ public class StatementTest
      *
      */
     public void testisWrapperReturnsTrue() throws SQLException {
-        //wrapper support is currently provided 
-        //only for embedded side so return if 
-        //running in DerbyNetClient framework
-        if(usingDerbyNetClient())
-            return;
-        
         Class<Statement> wrap_class = Statement.class;
         
         //The if should return true enabling us  to call the unwrap method
@@ -271,12 +265,6 @@ public class StatementTest
      *
      */
     public void testisWrapperReturnsFalse() throws SQLException {
-        //wrapper support is currently provided 
-        //only for embedded side so return if 
-        //running in DerbyNetClient framework
-         if(usingDerbyNetClient())
-            return;
-         
         //test for the case when isWrapper returns false
         //using some class that will return false when
         //passed to isWrapperFor

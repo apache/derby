@@ -125,7 +125,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             if (nullSqlca && peekNumOfColumns() == 0) {
                 netSqlca = parseSQLDARD(columnMetaData, true); // true means to skip the rest of SQLDARD bytes
             } else {
-                columnMetaData = new ColumnMetaData(netAgent_.logWriter_);
+                columnMetaData = ClientDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
                 netSqlca = parseSQLDARD(columnMetaData, false); // false means do not skip SQLDARD bytes.
             }
 
@@ -152,7 +152,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             ColumnMetaData columnMetaData = null;
 
             if (columnMetaData == null) {
-                columnMetaData = new ColumnMetaData(netAgent_.logWriter_);
+                columnMetaData = ClientDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
             }
 
             NetSqlca netSqlca = parseSQLDARD(columnMetaData, false);  // false means do not skip SQLDARD bytes
@@ -451,7 +451,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             peekCP = parseTypdefsOrMgrlvlovrs();
 
             if (peekCP == CodePoint.SQLDARD) {
-                ColumnMetaData columnMetaData = new ColumnMetaData(netAgent_.logWriter_);
+                ColumnMetaData columnMetaData = ClientDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
                 NetSqlca netSqlca = parseSQLDARD(columnMetaData, false);  // false means do not skip SQLDARD bytes
 
                 //For java stored procedure, we got the resultSetMetaData from server,
@@ -1890,7 +1890,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     // reply data in the response to an EXCSQLSTT command that invodes a stored
     // procedure
     ColumnMetaData parseSQLCINRDarray() throws DisconnectException {
-        ColumnMetaData columnMetaData = new ColumnMetaData(netAgent_.logWriter_);
+        ColumnMetaData columnMetaData = ClientDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
 
         parseSQLDHROW(columnMetaData);
 

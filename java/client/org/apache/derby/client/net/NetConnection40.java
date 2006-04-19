@@ -24,7 +24,6 @@ import java.sql.BaseQuery;
 import java.sql.QueryObjectFactory;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.jdbc.InternalDriver;
 import java.sql.Blob;
 import java.sql.ClientInfoException;
 import java.sql.Clob;
@@ -32,11 +31,10 @@ import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.util.Properties;
-import org.apache.derby.client.am.SqlException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
-
-
+import org.apache.derby.client.am.MessageId;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class  NetConnection40 extends org.apache.derby.client.net.NetConnection {
     
@@ -159,6 +157,39 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     
     public java.util.Map<String,Class<?>> getTypeMap(){
         throw new java.lang.UnsupportedOperationException("getTypeMap()");
+    }
+    
+    /**
+     * Returns false unless <code>interfaces</code> is implemented 
+     * 
+     * @param  interfaces             a Class defining an interface.
+     * @return true                   if this implements the interface or 
+     *                                directly or indirectly wraps an object 
+     *                                that does.
+     * @throws java.sql.SQLException  if an error occurs while determining 
+     *                                whether this is a wrapper for an object 
+     *                                with the given interface.
+     */
+    public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        return interfaces.isInstance(this);
+    }
+    
+    /**
+     * Returns <code>this</code> if this class implements the interface
+     *
+     * @param  interfaces a Class defining an interface
+     * @return an object that implements the interface
+     * @throws java.sql.SQLExption if no object if found that implements the 
+     * interface
+     */
+    public <T> T unwrap(java.lang.Class<T> interfaces)
+                                   throws SQLException {
+        try { 
+            return interfaces.cast(this);
+        } catch (ClassCastException cce) {
+            throw new SqlException(null,new MessageId(SQLState.UNABLE_TO_UNWRAP),
+                    interfaces).getSQLException();
+        }
     }
     
 }

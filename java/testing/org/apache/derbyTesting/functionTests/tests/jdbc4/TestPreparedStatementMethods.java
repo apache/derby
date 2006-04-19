@@ -573,6 +573,7 @@ public class TestPreparedStatementMethods {
                                  // poolable hint set/get test methods below
             t_isPoolable();
             t_setPoolable();
+            t_wrapper();
         } catch(SQLException sqle) {
             sqle.printStackTrace();
         } finally {

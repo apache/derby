@@ -24,6 +24,7 @@ import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Statement;
+import org.apache.derby.jdbc.ClientDriver;
 
 public class NetStatement implements org.apache.derby.client.am.MaterialStatement {
 
@@ -74,7 +75,7 @@ public class NetStatement implements org.apache.derby.client.am.MaterialStatemen
 
     // Called by abstract Connection.createStatement().newStatement() for jdbc 1 statements
     NetStatement(NetAgent netAgent, NetConnection netConnection) throws SqlException {
-        this(new Statement(netAgent, netConnection),
+        this(ClientDriver.getFactory().newStatement(netAgent, netConnection),
                 netAgent,
                 netConnection);
     }
@@ -90,7 +91,7 @@ public class NetStatement implements org.apache.derby.client.am.MaterialStatemen
 
     // Called by abstract Connection.createStatement().newStatement() for jdbc 2 statements with scroll attributes
     NetStatement(NetAgent netAgent, NetConnection netConnection, int type, int concurrency, int holdability) throws SqlException {
-        this(new Statement(netAgent, netConnection, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, null),
+        this(ClientDriver.getFactory().newStatement(netAgent, netConnection, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, null),
                 netAgent,
                 netConnection);
     }

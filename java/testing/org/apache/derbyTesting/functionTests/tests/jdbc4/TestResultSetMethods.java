@@ -614,8 +614,7 @@ public class TestResultSetMethods {
 			TestResultSetMethods trsm = new TestResultSetMethods();
                         
 			trsm.startTestResultSetMethods(conn_main,ps_main,rs_main);
-                        if(usingEmbeddedClient())
-                            trsm.t_wrapper(rs_main);
+                        trsm.t_wrapper(rs_main);
 		} catch(Exception e) {
 			System.out.println(""+e);
 			e.printStackTrace();

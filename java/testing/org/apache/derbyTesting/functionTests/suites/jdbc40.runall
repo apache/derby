@@ -11,3 +11,4 @@ jdbc4/StatementTest.junit
 jdbc4/DataSourceTest.junit
 jdbc4/ResultSetMetaDataTest.junit
 jdbc4/EmbeddedBrokeredConnectionWrapperTest.junit
+jdbc4/ParameterMetaDataWrapperTest.junit

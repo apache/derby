@@ -440,6 +440,7 @@ public class TestConnectionMethods {
         t_setClientInfo2();
         t_getClientInfo1();
         t_getClientInfo2();
+        t_wrapper();
     }
     
     public void startTestConnectionMethods_Embedded() {

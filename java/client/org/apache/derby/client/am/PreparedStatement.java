@@ -25,6 +25,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.SQLException;
+import org.apache.derby.jdbc.ClientDriver;
 
 public class PreparedStatement extends Statement
         implements java.sql.PreparedStatement,
@@ -1316,9 +1317,10 @@ public class PreparedStatement extends Statement
 
     private ParameterMetaData getParameterMetaDataX() throws SqlException {
         super.checkForClosedStatement();
-        ParameterMetaData pm = new ParameterMetaData(parameterMetaData_ != null
+        ParameterMetaData pm = ClientDriver.getFactory().newParameterMetaData
+                (parameterMetaData_ != null
                 ? parameterMetaData_
-                : new ColumnMetaData(agent_.logWriter_, 0));
+                : ClientDriver.getFactory().newColumnMetaData(agent_.logWriter_, 0));
         if (escapedProcedureCallWithResult_) {
             pm.escapedProcedureCallWithResult_ = true;
         }

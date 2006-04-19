@@ -169,8 +169,7 @@ public class TestDbMetaData {
             dumpSQLExceptions(e);
         }
         
-        if(usingEmbeddedClient())
-            t_wrapper(met);
+        t_wrapper(met);
         
         s.close();
     }
