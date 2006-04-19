@@ -261,9 +261,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 		 * decoding tuples in SYSDEPENDS.
 		 */
 
-		dm.invalidateFor(td, cascade ?
-						DependencyManager.DROP_TABLE_CASCADE : DependencyManager.DROP_TABLE,
-						lcc);
+		dm.invalidateFor(td, DependencyManager.DROP_TABLE, lcc);
 
 		/* Drop the table */
 		dd.dropTableDescriptor(td, sd, tc);

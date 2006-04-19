@@ -820,17 +820,8 @@ public class BasicDependencyManager implements DependencyManager {
 			case COMPRESS_TABLE:
 				return "COMPRESS TABLE";
 
-			case DROP_TABLE_CASCADE:
-				return "DROP TABLE CASCADE";
-
-			case DROP_VIEW_CASCADE:
-				return "DROP VIEW CASCADE";
-
 			case DROP_COLUMN:
 				return "DROP COLUMN";
-
-			case DROP_COLUMN_CASCADE:
-				return "DROP COLUMN CASCADE";
 
 		    case DROP_STATISTICS:
 				return "DROP STATISTICS";

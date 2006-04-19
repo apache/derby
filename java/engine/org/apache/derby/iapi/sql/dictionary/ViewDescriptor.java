@@ -253,9 +253,6 @@ public class ViewDescriptor extends TupleDescriptor
 
 		    case DependencyManager.BULK_INSERT:
 		    case DependencyManager.COMPRESS_TABLE:
-		    case DependencyManager.DROP_TABLE_CASCADE:
-		    case DependencyManager.DROP_COLUMN_CASCADE:
-		    case DependencyManager.DROP_VIEW_CASCADE:
 		    case DependencyManager.RENAME_INDEX:
 			case DependencyManager.UPDATE_STATISTICS:
 			case DependencyManager.DROP_STATISTICS:
@@ -317,12 +314,6 @@ public class ViewDescriptor extends TupleDescriptor
 			case DependencyManager.TRUNCATE_TABLE:
 				break;
 		
-			case DependencyManager.DROP_TABLE_CASCADE:
-			case DependencyManager.DROP_COLUMN_CASCADE:
-			case DependencyManager.DROP_VIEW_CASCADE:
-				dropViewCascade(lcc);
-				break;
-
 		    default:
 
 				/* We should never get here, since we can't have dangling references */
@@ -373,40 +364,6 @@ public class ViewDescriptor extends TupleDescriptor
 			return "";
 		}
 	}
-	/**
-	   Drops the dependent view as part of a drop table cascade
-	 
-	   @exception StandardException thrown if failure occurs in dropping view
-	 */
-	private void dropViewCascade(LanguageConnectionContext lcc) throws StandardException
-	{
-		DataDictionary dd = getDataDictionary();
-
-		DependencyManager dm = dd.getDependencyManager();
-		TransactionController tc = lcc.getTransactionCompile();
-		SchemaDescriptor sd= dd.getSchemaDescriptor(compSchemaId, tc);
-
-		TableDescriptor td = dd.getTableDescriptor(uuid);
-
-		// we may have already dropped this view if it was a view on top of
-		// another view
-		// For example a->va->vva, creates 3 dependencies va->a, vva->a, vva->va
-		if (td == null)
-			return;
-
-		// make sure the table is a view
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT((td.getTableType() == TableDescriptor.VIEW_TYPE), 
-							"table descriptor not view type for view "+viewName);
-		}
-
-		// drop the View
-		dropViewWork(dd, dm, lcc, tc, sd, td, true);
-		lcc.getLastActivation().addWarning(
-						StandardException.newWarning(SQLState.LANG_VIEW_DROPPED,
- 							td.getName()));
-	}
 
 	public void dropViewWork(DataDictionary dd, DependencyManager dm,
 							  LanguageConnectionContext lcc, TransactionController tc,
@@ -421,8 +378,7 @@ public class ViewDescriptor extends TupleDescriptor
 		 * cursor referencing a table/view that the user is attempting to
 		 * drop.) If no one objects, then invalidate any dependent objects.
 		 */
-		dm.invalidateFor(td,
-			cascade ? DependencyManager.DROP_VIEW_CASCADE : DependencyManager.DROP_VIEW, lcc);
+		dm.invalidateFor(td, DependencyManager.DROP_VIEW, lcc);
 
 		/* Clear the dependencies for the view */
 		dm.clearDependencies(lcc, this);

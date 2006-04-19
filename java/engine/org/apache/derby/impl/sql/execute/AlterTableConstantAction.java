@@ -701,9 +701,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		toDrop.set(columnPosition);
 		td.setReferencedColumnMap(toDrop);
 
-		dm.invalidateFor(td, cascade ?
-							 DependencyManager.DROP_COLUMN_CASCADE :
-							 DependencyManager.DROP_COLUMN, lcc);
+		dm.invalidateFor(td, DependencyManager.DROP_COLUMN, lcc);
 					
 		// If column has a default we drop the default and any dependencies
 		if (columnDescriptor.getDefaultInfo() != null)

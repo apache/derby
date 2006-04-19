@@ -232,10 +232,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 	<p>
 	I do not know if it would be worthwhile to consider using the 
 	dependency manager to aid in the implementation of the SQL DROP
-	statements or not. SQL DROP statements tend to have CASCADE or
-	RESTRICT actions, where they either also DROP all objects that
-	somehow use or depend on the object being dropped, or refuse
-	to drop the object if any such objects exist.  Past implementations
+	statements or not. Past implementations
 	of database systems have not used the dependency system to implement
 	this functionality, but have instead hard-coded the lookups like so:
 
@@ -297,10 +294,7 @@ public interface DependencyManager {
 	public static final int COMPRESS_TABLE = 33;
 	//using same action for rename table/column
 	public static final int RENAME = 34;
-	public static final int DROP_TABLE_CASCADE = 35;
-	public static final int DROP_VIEW_CASCADE = 36;
 	public static final int DROP_COLUMN = 37;
-	public static final int DROP_COLUMN_CASCADE = 38;
 	public static final int DROP_STATISTICS = 39;
 	public static final int UPDATE_STATISTICS = 40;
 	//rename index dependency behavior is not as stringent as rename table and column and

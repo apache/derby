@@ -889,10 +889,7 @@ public class SPSDescriptor extends TupleDescriptor
 			case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
 			case DependencyManager.CREATE_TRIGGER:
 			case DependencyManager.DROP_TRIGGER:
-			case DependencyManager.DROP_TABLE_CASCADE:
-			case DependencyManager.DROP_VIEW_CASCADE:
 			case DependencyManager.DROP_COLUMN:
-			case DependencyManager.DROP_COLUMN_CASCADE:
 		    case DependencyManager.UPDATE_STATISTICS:
 		    case DependencyManager.DROP_STATISTICS:
     		case DependencyManager.TRUNCATE_TABLE:
@@ -966,10 +963,7 @@ public class SPSDescriptor extends TupleDescriptor
 			case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
 			case DependencyManager.CREATE_TRIGGER:
 			case DependencyManager.DROP_TRIGGER:
-			case DependencyManager.DROP_TABLE_CASCADE:
-			case DependencyManager.DROP_VIEW_CASCADE:
 			case DependencyManager.DROP_COLUMN:
-			case DependencyManager.DROP_COLUMN_CASCADE:
 		    case DependencyManager.UPDATE_STATISTICS:
 		    case DependencyManager.DROP_STATISTICS:
 			case DependencyManager.TRUNCATE_TABLE:
