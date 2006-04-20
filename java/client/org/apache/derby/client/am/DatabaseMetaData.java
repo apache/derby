@@ -2497,6 +2497,131 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         return false;
     }
 
+    /**
+     * Get the schema names available in this database. The results
+     * are ordered by schema name.
+     *
+     * <p>The schema columns are:
+     *  <ol>
+     *  <li><strong>TABLE_SCHEM</strong> String =&gt; schema name</li>
+     *  <li><strong>TABLE_CATALOG</strong> String =&gt; catalog name
+     *  (may be <code>null</code>)</li>
+     *  </ol>
+     *
+     * @param catalog catalog name used to narrow down the search; ""
+     * means no catalog, <code>null</code> means any catalog
+     * @param schemaPattern schema name used to narrow down the
+     * search, <code>null</code> means schema name should not be used
+     * to narrow down search
+     * @return a <code>ResultSet</code> object in which each row is a
+     * schema description
+     * @exception SQLException if a database error occurs
+     */
+    public ResultSet getSchemas(String catalog, String schemaPattern)
+        throws SQLException
+    {
+        try {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getSchemas");
+                }
+                return getSchemasX(catalog, schemaPattern);
+            }
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+
+    /**
+     * Untraced version of <code>getSchemas(String, String)</code>.
+     *
+     * @param catalog catalog name
+     * @param schemaPattern pattern for schema name
+     * @return a <code>ResultSet</code> value
+     * @exception SqlException if a database error occurs
+     * @see #getSchemas(String, String)
+     */
+    private ResultSet getSchemasX(String catalog, String schemaPattern)
+        throws SqlException
+    {
+        checkForClosedConnectionX();
+
+        // If the server has not implemented support for JDBC 4.0,
+        // SYSIBM.SQLTABLES does not recognize the GETSCHEMAS=2
+        // option, and it will call getTables() instead of
+        // getSchemas(). Therefore, check server version and throw an
+        // exception if the server does not support JDBC 4.0.
+        checkServerJdbcVersionX("getSchemas(String, String)", 4, 0);
+
+        String call = "SYSIBM.SQLTABLES(?, ?, '', '', 'GETSCHEMAS=2')";
+        PreparedStatement cs = prepareMetaDataQuery(call);
+        if (catalog == null) {
+            cs.setNullX(1, java.sql.Types.VARCHAR);
+        } else {
+            cs.setStringX(1, catalog);
+        }
+        if (schemaPattern == null) {
+            cs.setNullX(2, java.sql.Types.VARCHAR);
+        } else {
+            cs.setStringX(2, schemaPattern);
+        }
+        return cs.executeQueryX();
+    }
+
+    /**
+     * Returns a list of the client info properties supported by the
+     * driver. The result set contains the following columns:
+     *
+     * <p>
+     * <ol>
+     *  <li>NAME String=&gt; The name of the client info property.</li>
+     *  <li>MAX_LEN int=&gt; The maximum length of the value for the
+     *      property.</li>
+     *  <li>DEFAULT_VALUE String=&gt; The default value of the property.</li>
+     *  <li>DESCRIPTION String=&gt; A description of the property.</li>
+     * </ol>
+     *
+     * <p>The <code>ResultSet</code> is sorted by the NAME column.
+     *
+     * @return A <code>ResultSet</code> object; each row is a
+     * supported client info property
+     * @exception SQLException if an error occurs
+     */
+    public ResultSet getClientInfoProperties() throws SQLException {
+        try {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this,
+                                                 "getClientInfoProperties");
+                }
+                return getClientInfoPropertiesX();
+            }
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+
+    /**
+     * Untraced version of <code>getClientInfoProperties()</code>.
+     * Returns an empty <code>ResultSet</code> with the correct column
+     * names.
+     *
+     * @return a <code>ResultSet</code> value
+     * @exception SqlException if a database error occurs
+     * @see #getClientInfoProperties
+     */
+    private ResultSet getClientInfoPropertiesX() throws SqlException {
+        checkForClosedConnectionX();
+        final String sql =
+            "SELECT CAST(NULL AS VARCHAR(128)) AS NAME, " +
+            "CAST(NULL AS INT) AS MAX_LEN, " +
+            "CAST(NULL AS VARCHAR(128)) AS DEFAULT_VALUE, " +
+            "CAST(NULL AS VARCHAR(128)) AS DESCRIPTION " +
+            "FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR";
+        PreparedStatement ps = connection_.prepareDynamicCatalogQuery(sql);
+        return ps.executeQueryX();
+    }
+
     //----------------------------helper methods----------------------------------
 
 

@@ -42,15 +42,6 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
         return RowIdLifetime.ROWID_UNSUPPORTED;
     }
 
-    
-    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-		PreparedStatement s = getPreparedQuery("getSchemasWithParams");
-		s.setString(1, swapNull(catalog));
-		s.setString(2, swapNull(schemaPattern));
-		return s.executeQuery();
-    }
-    
-    
     public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
         return true;
     }
@@ -58,10 +49,6 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
     public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
         // TODO - find out what this really should be 
         return false;
-    }
-   
-    public ResultSet getClientInfoProperties() throws SQLException {
-        return getSimpleQuery("getClientInfoProperties");
     }
    
     public boolean providesQueryObjectGenerator() throws SQLException {

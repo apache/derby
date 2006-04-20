@@ -3217,6 +3217,68 @@ public class EmbedDatabaseMetaData extends ConnectionChild
         return getSimpleQuery("getAttributes");
 	}
 	
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //  JDBC 4.0 - New public methods
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /**
+     * JDBC 4.0
+     *
+     * <p>Returns a list of the client info properties supported by
+     * the driver. The result set contains the following columns:
+     *
+     * <p>
+     * <ol>
+     *  <li>NAME String=&gt; The name of the client info property.</li>
+     *  <li>MAX_LEN int=&gt; The maximum length of the value for the
+     *      property.</li>
+     *  <li>DEFAULT_VALUE String=&gt; The default value of the property.</li>
+     *  <li>DESCRIPTION String=&gt; A description of the property.</li>
+     * </ol>
+     *
+     * <p>The <code>ResultSet</code> is sorted by the NAME column.
+     *
+     * @return A <code>ResultSet</code> object; each row is a
+     * supported client info property
+     * @exception SQLException if an error occurs
+     */
+    public ResultSet getClientInfoProperties() throws SQLException {
+        return getSimpleQuery("getClientInfoProperties");
+    }
+
+    /**
+     * JDBC 4.0
+     *
+     * <p>Get the schema names available in this database. The results
+     * are ordered by schema name.
+     *
+     * <p>The schema columns are:
+     *  <ol>
+     *  <li><strong>TABLE_SCHEM</strong> String =&gt; schema name</li>
+     *  <li><strong>TABLE_CATALOG</strong> String =&gt; catalog name
+     *  (may be <code>null</code>)</li>
+     *  </ol>
+     *
+     * @param catalog catalog name used to narrow down the search; ""
+     * means no catalog, <code>null</code> means any catalog
+     * @param schemaPattern schema name used to narrow down the
+     * search, <code>null</code> means schema name should not be used
+     * to narrow down search
+     * @return a <code>ResultSet</code> object in which each row is a
+     * schema description
+     * @exception SQLException if a database error occurs
+     */
+    public ResultSet getSchemas(String catalog, String schemaPattern)
+        throws SQLException
+    {
+        PreparedStatement s = getPreparedQuery("getSchemasWithParams");
+        s.setString(1, swapNull(catalog));
+        s.setString(2, swapNull(schemaPattern));
+        return s.executeQuery();
+    }
+
 	//////////////////////////////////////////////////////////////
 	//
 	// MISC 

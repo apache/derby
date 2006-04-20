@@ -34,6 +34,7 @@ SYSFUN
 SYSIBM
 SYSPROC
 SYSSTAT
+DatabaseMetaData.getSchemas(String, String) is not available.
 getCatalogs():
 TABLE_CAT[CHAR]
 getSearchStringEscape(): 
@@ -58,6 +59,7 @@ getUDTs() with user-named types in ('DISTINCT') :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR]
 getUDTs() with user-named types in ('JAVA_OBJECT', 'STRUCT') :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR]
+DatabaseMetaData.getClientInfoProperties() is not available.
 allProceduresAreCallable(): true
 getUserName(): APP
 isReadOnly(): false
@@ -718,6 +720,31 @@ SYSFUN
 SYSIBM
 SYSPROC
 SYSSTAT
+getSchemas(String, String):
+TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
+APP,null
+NULLID,null
+SQLJ,null
+SYS,null
+SYSCAT,null
+SYSCS_DIAG,null
+SYSCS_UTIL,null
+SYSFUN,null
+SYSIBM,null
+SYSPROC,null
+SYSSTAT,null
+TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
+SYS,null
+SYSCAT,null
+SYSCS_DIAG,null
+SYSCS_UTIL,null
+SYSFUN,null
+SYSIBM,null
+SYSPROC,null
+SYSSTAT,null
+TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
+APP,null
+TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
 getCatalogs():
 TABLE_CAT[CHAR]
 getSearchStringEscape(): 
@@ -802,6 +829,8 @@ getUDTs() with user-named types in ('DISTINCT') :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR]
 getUDTs() with user-named types in ('JAVA_OBJECT', 'STRUCT') :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR]
+getClientInfoProperties():
+NAME[VARCHAR],MAX_LEN[INTEGER],DEFAULT_VALUE[VARCHAR],DESCRIPTION[VARCHAR]
 allProceduresAreCallable(): true
 getUserName(): APP
 isReadOnly(): false
@@ -1423,6 +1452,7 @@ SYSFUN
 SYSIBM
 SYSPROC
 SYSSTAT
+DatabaseMetaData.getSchemas(String, String) is not available.
 getCatalogs():
 TABLE_CAT[CHAR]
 getSearchStringEscape(): 
@@ -1447,6 +1477,7 @@ getUDTs() with user-named types in ('DISTINCT') :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR]
 getUDTs() with user-named types in ('JAVA_OBJECT', 'STRUCT') :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR]
+DatabaseMetaData.getClientInfoProperties() is not available.
 allProceduresAreCallable(): true
 getUserName(): APP
 isReadOnly(): false
@@ -2106,6 +2137,31 @@ SYSFUN
 SYSIBM
 SYSPROC
 SYSSTAT
+getSchemas(String, String):
+TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
+APP,null
+NULLID,null
+SQLJ,null
+SYS,null
+SYSCAT,null
+SYSCS_DIAG,null
+SYSCS_UTIL,null
+SYSFUN,null
+SYSIBM,null
+SYSPROC,null
+SYSSTAT,null
+TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
+SYS,null
+SYSCAT,null
+SYSCS_DIAG,null
+SYSCS_UTIL,null
+SYSFUN,null
+SYSIBM,null
+SYSPROC,null
+SYSSTAT,null
+TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
+APP,null
+TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
 getCatalogs():
 TABLE_CAT[CHAR]
 getSearchStringEscape(): 
@@ -2190,6 +2246,8 @@ getUDTs() with user-named types in ('DISTINCT') :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR]
 getUDTs() with user-named types in ('JAVA_OBJECT', 'STRUCT') :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR]
+getClientInfoProperties():
+NAME[VARCHAR],MAX_LEN[INTEGER],DEFAULT_VALUE[VARCHAR],DESCRIPTION[VARCHAR]
 allProceduresAreCallable(): true
 getUserName(): APP
 isReadOnly(): false

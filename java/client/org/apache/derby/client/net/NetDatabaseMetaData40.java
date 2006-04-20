@@ -48,15 +48,6 @@ public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDataba
         return RowIdLifetime.ROWID_UNSUPPORTED;
     }
     
-    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("getSchemas (String, String)");
-    }
-    
-    public ResultSet getClientInfoProperties()
-    throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("getClientInfoProperties ()");
-    }
-    
     /**
      * Returns false unless <code>interfaces</code> is implemented 
      * 

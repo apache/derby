@@ -38,8 +38,12 @@ import java.math.BigDecimal;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import java.lang.reflect.Method;
+
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 
 /**
  * Test of database meta-data.  This program simply calls each of the meta-data
@@ -400,6 +404,8 @@ public abstract class metadata_test {
 			System.out.println("getSchemas():");
 			dumpRS(met.getSchemas());
 
+			testGetSchemasWithTwoParams(met);
+
 			System.out.println();
 			System.out.println("getCatalogs():");
 			dumpRS(met.getCatalogs());
@@ -517,6 +523,8 @@ public abstract class metadata_test {
  			userNamedTypes[0] = java.sql.Types.JAVA_OBJECT;
  			userNamedTypes[1] = java.sql.Types.STRUCT;
  			dumpRS(met.getUDTs("a", null, null, userNamedTypes));
+
+			testGetClientInfoProperties(met);
 
 			/*
 			 * any methods that were not tested above using code written
@@ -1384,6 +1392,84 @@ public abstract class metadata_test {
 		
 	}
 
+    /**
+     * Run tests for <code>getSchemas()</code> with two
+     * parameters. (New method introduced by JDBC 4.0.)
+     *
+     * @param dmd a <code>DatabaseMetaData</code> object
+     */
+    private void testGetSchemasWithTwoParams(DatabaseMetaData dmd) {
+        // not implemented in JCC
+        if (TestUtil.isJCCFramework()) return;
+
+        Class[] paramTypes = { String.class, String.class };
+
+        Method method = null;
+        try {
+            method = dmd.getClass().getMethod("getSchemas", paramTypes);
+        } catch (NoSuchMethodException nsme) { }
+
+        if (method == null || Modifier.isAbstract(method.getModifiers())) {
+            System.out.println("DatabaseMetaData.getSchemas(String, String) " +
+                               "is not available.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("getSchemas(String, String):");
+
+        // array of argument lists
+        String[][] args = {
+            // no qualifiers
+            { null, null },
+            // wildcard
+            { null, "SYS%" },
+            // exact match
+            { null, "APP" },
+            // no match
+            { null, "BLAH" },
+        };
+
+        for (int i = 0; i < args.length; ++i) {
+            try {
+                dumpRS((ResultSet) method.invoke(dmd, args[i]));
+            } catch (Exception e) {
+                dumpAllExceptions(e);
+            }
+        }
+    }
+
+    /**
+     * Run tests for <code>getClientInfoProperties()</code> introduced
+     * by JDBC 4.0.
+     *
+     * @param dmd a <code>DatabaseMetaData</code> object
+     */
+    private void testGetClientInfoProperties(DatabaseMetaData dmd) {
+        // not implemented in JCC
+        if (TestUtil.isJCCFramework()) return;
+
+        Method method = null;
+        try {
+            method = dmd.getClass().getMethod("getClientInfoProperties", null);
+        } catch (NoSuchMethodException nsme) {}
+
+        if (method == null || Modifier.isAbstract(method.getModifiers())) {
+            System.out.println("DatabaseMetaData.getClientInfoProperties() " +
+                               "is not available.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("getClientInfoProperties():");
+
+        try {
+            dumpRS((ResultSet) method.invoke(dmd, null));
+        } catch (Exception e) {
+            dumpAllExceptions(e);
+        }
+    }
+
 	static private void showSQLExceptions (SQLException se) {
 		while (se != null) {
 			System.out.println("SQLSTATE("+se.getSQLState()+"): " + se.getMessage());
@@ -1399,6 +1485,25 @@ public abstract class metadata_test {
 			se = se.getNextException();
 		}
 	}
+
+    /**
+     * Print the entire exception chain.
+     *
+     * @param t a <code>Throwable</code>
+     */
+    private static void dumpAllExceptions(Throwable t) {
+        System.out.println("FAIL -- unexpected exception");
+        do {
+            t.printStackTrace(System.out);
+            if (t instanceof SQLException) {
+                t = ((SQLException) t).getNextException();
+            } else if (t instanceof InvocationTargetException) {
+                t = ((InvocationTargetException) t).getTargetException();
+            } else {
+                break;
+            }
+        } while (t != null);
+    }
 
 	/**
 	 * This method is responsible for executing a metadata query and returning

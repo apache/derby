@@ -91,13 +91,7 @@ public class TestDbMetaData {
                  "return false");
         }
 
-        try {
-			checkEmptyRS(met.getClientInfoProperties());
-        } catch (SQLException e) {
-            // TODO: remove try/catch once method is implemented!
-            System.out.println("getClientInfoProperties():");
-            dumpSQLExceptions(e);
-        }
+        checkEmptyRS(met.getClientInfoProperties());
 
 		// Make sure the constants provided in JDBC40Translation is correct
 
@@ -165,33 +159,16 @@ public class TestDbMetaData {
 		
 		// Dump return value for all DUMMY functions
 		dumpRS(met.getFunctionParameters(null,null,"DUMMY%",""));
-	  
-        try {
-            // 
-            // Test the new getSchemas() with no schema qualifiers
-            //
-            dumpRS(met.getSchemas(null, null));
-            
-            //
-            // Test the new getSchemas() with a schema wildcard qualifier
-            // 
-            dumpRS(met.getSchemas(null, "SYS%"));
-            
-            // 
-            // Test the new getSchemas() with an exact match
-            //
-            dumpRS(met.getSchemas(null, "APP"));
-            
-            //
-            // Make sure that getSchemas() returns an empty result
-            // set when a schema is passed with no match
-            //
-            checkEmptyRS(met.getSchemas(null, "BLAH"));
-        } catch (SQLException e) {
-            // TODO: remove try/catch once method is implemented!
-            System.out.println("getSchemas():");
-            dumpSQLExceptions(e);
-        }
+
+        // Test the new getSchemas() with no schema qualifiers
+        dumpRS(met.getSchemas(null, null));
+        // Test the new getSchemas() with a schema wildcard qualifier
+        dumpRS(met.getSchemas(null, "SYS%"));
+        // Test the new getSchemas() with an exact match
+        dumpRS(met.getSchemas(null, "APP"));
+        // Make sure that getSchemas() returns an empty result
+        // set when a schema is passed with no match
+        checkEmptyRS(met.getSchemas(null, "BLAH"));
         
         t_wrapper(met);
         

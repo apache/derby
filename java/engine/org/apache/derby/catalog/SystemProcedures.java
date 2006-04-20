@@ -231,20 +231,29 @@ public class SystemProcedures  {
 	}
 
 	/**
-	 *  Map SQLTables to EmbedDatabaseMetaData.getSchemas, getCatalogs, getTableTypes and getTables
+	 * Map SQLTables to EmbedDatabaseMetaData.getSchemas, getCatalogs,
+	 * getTableTypes and getTables, and return the result of the
+	 * DatabaseMetaData calls.
 	 *
-	 *                     containing the result of the DatabaseMetaData calls
+	 * <p>JCC and DNC overload this method:
+	 * <ul>
+	 * <li>If options contains the string 'GETSCHEMAS=1',
+	 *     call getSchemas()</li>
+	 * <li>If options contains the string 'GETSCHEMAS=2',
+	 *     call getSchemas(String, String)</li>
+	 * <li>If options contains the string 'GETCATALOGS=1',
+	 *     call getCatalogs()</li>
+	 * <li>If options contains the string 'GETTABLETYPES=1',
+	 *     call getTableTypes()</li>
+	 * <li>otherwise, call getTables()</li>
+	 * </ul>
+	 *
 	 *  @param catalogName SYSIBM.SQLTables CatalogName varchar(128),
 	 *  @param schemaName  SYSIBM.SQLTables SchemaName  varchar(128),
 	 *  @param tableName   SYSIBM.SQLTables TableName   varchar(128),
 	 *  @param tableType   SYSIBM.SQLTables TableType   varchar(4000))
 	 *  @param options     SYSIBM.SQLTables Options     varchar(4000))
 	 *  @param rs          output parameter, the resultset object 
-	 *			JCC overloads this method:
-	 *  			If options contains the string 'GETSCHEMAS=1', call getSchemas
-	 *  			If options contains the string 'GETCATALOGS=1', call getCatalogs
-	 *  			If options contains the string 'GETTABLETYPES=1', call getTableTypes
-	 *  			otherwise, call getTables
 	 */
 	public static void SQLTABLES (String catalogName, String schemaName, String tableName,
 										String tableType, String options, ResultSet[] rs)
@@ -264,10 +273,17 @@ public class SystemProcedures  {
 			return;
 		}
 		optionValue = getOption("GETSCHEMAS", options);
-		if (optionValue != null && optionValue.trim().equals("1"))
-		{
-			rs[0] = getDMD().getSchemas();
-			return;
+		if (optionValue != null) {
+			optionValue = optionValue.trim();
+			if (optionValue.equals("1")) {
+				rs[0] = getDMD().getSchemas();
+				return;
+			}
+			if (optionValue.equals("2")) {
+				EmbedDatabaseMetaData edmd = (EmbedDatabaseMetaData) getDMD();
+				rs[0] = edmd.getSchemas(catalogName, schemaName);
+				return;
+			}
 		}
 			 	
 
