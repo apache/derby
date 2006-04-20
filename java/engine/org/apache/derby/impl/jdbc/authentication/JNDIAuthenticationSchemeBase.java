@@ -97,16 +97,19 @@ public abstract class JNDIAuthenticationSchemeBase implements UserAuthenticator
 
 		//
 		// We retrieve JNDI properties set at the database level	
-		// if any.
+		// if any. If dbProps == null, there are obviously no database
+		// properties to retrieve.
 		//
 		initDirContextEnv = new Properties();
+                
+		if(dbProps != null) {
+			for (Enumeration keys = dbProps.propertyNames(); keys.hasMoreElements(); ) {
 
-		for (Enumeration keys = dbProps.propertyNames(); keys.hasMoreElements(); ) {
+				String key = (String) keys.nextElement();
 
-			String key = (String) keys.nextElement();
-
-			if (key.startsWith("java.naming.")) {
-				initDirContextEnv.put(key, dbProps.getProperty(key));
+				if (key.startsWith("java.naming.")) {
+					initDirContextEnv.put(key, dbProps.getProperty(key));
+				}
 			}
 		}
 	}
