@@ -39,6 +39,7 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${compile.classpath}"/>
+        <pathelement path="${jta1_2}"/>
       </classpath>
       <include name="${derby.dir}/${cur.dir}/*.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredConnection.java"/>

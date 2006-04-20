@@ -53,10 +53,10 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${compile.classpath}"/>
+        <pathelement path="${jta1_2}"/>
       </classpath>
       <include name="${derby.dir}/impl/tools/**"/>
       <exclude name="${derby.dir}/impl/tools/ij/mtGrammar.java"/>
-      <exclude name="${derby.dir}/impl/tools/ij/xaHelper.java"/>
       <exclude name="${derby.dir}/impl/tools/ij/Main14.java"/>
       <exclude name="${derby.dir}/impl/tools/ij/utilMain14.java"/>
     </javac>
@@ -79,7 +79,6 @@
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/tools/ij/mtGrammar.java"/>
-      <include name="${derby.dir}/impl/tools/ij/xaHelper.java"/>
       <include name="${derby.dir}/impl/tools/ij/Main14.java"/>
       <include name="${derby.dir}/impl/tools/ij/utilMain14.java"/>
     </javac>
