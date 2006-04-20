@@ -12,8 +12,7 @@
 org.apache.derbyTesting<!--mozToc h1 1 h2 2 h3 3 h4 4 h5 5 h6 6--><br>
 </h2>
 <p>
-<small>created by myrna@golux.com<br>
-last updated on 04/18/2005 by: m.v.lunteren@gmail.com<br>
+<small><br>
 </small>
 </p>
 <ul>
@@ -54,7 +53,7 @@ jvm</a></li>
 test</a></li>
   <li style="margin-left: 40px;"><a href="#frameworks">4.11 Frameworks</a></li>
   <li style="margin-left: 40px;"><a href="#props">4.12 Some test
-harness properties</a> </li>
+harness properties</a></li>
 </ul>
 <br>
 <h2>1. <a name="intro"></a>Introduction</h2>
@@ -71,7 +70,8 @@ refer to $ANT_HOME, for DOS, this would be %ANT_HOME%.<br>
 <p>In the following the top
 directory under which the subversion tree is placed is referred to as
 ${derby.source} - see also the
-derby <a href="http://svn.apache.org/repos/asf/db/derby/branches/10.1/BUILDING.txt">BUILDING.txt</a>.<br>
+derby <a
+ href="http://svn.apache.org/repos/asf/db/derby/branches/10.1/BUILDING.txt">BUILDING.txt</a>.<br>
 </p>
 <p>The version of the classes and supporting files of the derbyTesting
 package have to match the version of the classes of the derby package.
@@ -269,46 +269,49 @@ output directory will not be emptied out before testing is
 begun, although individual test files and result files will be cleaned
 out and overwritten.&nbsp;
 </p>
-<p>	
-To run a suite with J2ME/CDC/Foundation:
+<p> To run a suite with J2ME/CDC/Foundation:
 </p>
 <table
  style="text-align: left; width: 546px; height: 32px; margin-left: 40px;"
  border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
-      <td style="vertical-align: top;"><small>(note that the command below
+      <td style="vertical-align: top;"><small>(note that the command
+below
 has carriage returns for formatting reasons):<br>
-		  syntax:<br></small>
-&nbsp; <small>&lt;java&gt;
--Xbootclasspath/a:$jardir/&lt;jdbc_jar&gt; -Dbootcp=$jardir/&lt;jdbc_jar&gt; <br>
+syntax:<br>
+      </small>&nbsp; <small>&lt;java&gt;
+-Xbootclasspath/a:$jardir/&lt;jdbc_jar&gt;
+-Dbootcp=$jardir/&lt;jdbc_jar&gt; <br>
 -Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource <br>
--Djvmflags="-Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource" <br>
+-Djvmflags="-Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource"
+      <br>
 org.apache.derbyTesting.functionTests.harness.RunSuite&nbsp;
 &lt;testsuite&gt;</small><br>
       <small>where <br>
       </small>
       <ul>
-        <li><small>&nbsp;&nbsp; &lt;java&gt; is the jvm with any jvm flags. 
-        For testing with CDC/Foundation Profile using j9 jvm from IBM, 
-        this will be 'j9 -jcl:foun10'. </small></li>
-		<li><small>&nbsp;&nbsp; &lt;jdbc_jar&gt; is the jar file which implements 
-		the JDBC API for CDC/Foundation Profile (JSR169). </small></li>
-        <li><small>&nbsp;&nbsp; &lt;testsuite&gt; is one of the suites under
+        <li><small>&nbsp;&nbsp; &lt;java&gt; is the jvm with any jvm
+flags. For testing with CDC/Foundation Profile using j9 jvm from IBM,
+this will be 'j9 -jcl:foun10'. </small></li>
+        <li><small>&nbsp;&nbsp; &lt;jdbc_jar&gt; is the jar file which
+implements the JDBC API for CDC/Foundation Profile (JSR169). </small></li>
+        <li><small>&nbsp;&nbsp; &lt;testsuite&gt; is one of the suites
+under
 org/apache/derbyTesting/suites</small></li>
       </ul>
       <small>for example for running&nbsp; the suite derbyall:<br>
-      </small><small>&nbsp;&nbsp; j9 -jcl:foun10 -Xbootclasspath/a:$jardir/jdbc.jar 
-      -Dbootcp=$jardir/jdbc.jar <br>
-	  -Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource <br>
-      -Djvmflags="-Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource" <br>
-      org.apache.derbyTesting.functionTests.harness.RunSuite derbyall</small><br>
+      </small><small>&nbsp;&nbsp; j9 -jcl:foun10
+-Xbootclasspath/a:$jardir/jdbc.jar -Dbootcp=$jardir/jdbc.jar <br>
+-Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource <br>
+-Djvmflags="-Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource"
+      <br>
+org.apache.derbyTesting.functionTests.harness.RunSuite derbyall</small><br>
       </td>
     </tr>
   </tbody>
-</table>		  
-<p>
-The suites provided are:
+</table>
+<p>The suites provided are:
 </p>
 <ul>
   <li>derbylang: <br>
@@ -667,6 +670,10 @@ file with expected output it is compared to.</li>
   <li>a .pass or .fail file. This file lists the test if it passes
 under .pass, and under .fail if the output in .out is different from
 the expected output in the master.</li>
+  <li>a .tmpmstr file. This file is a copy of the master file created
+in
+local encoding, and in the case of networkserver, massaged to eliminate
+irrelevant differences. This is the file the .out file is compared with.</li>
 </ul>
 <p>
 possibly created:<br>
@@ -674,9 +681,6 @@ possibly created:<br>
 <ul>
   <li>additional files used in a specific test may get copied over to
 the test directory. These normally do not get cleaned up.</li>
-  <li>.tmpstr file is created for network server tests and is a
-possibly
-massaged copy of the master file the output needs to be compared with.</li>
   <li>.err and .out files in network server database files for any
 additional error output.</li>
 </ul>
@@ -874,7 +878,11 @@ files without changes to the _app.properties files.
 <p>For example, in the file
 (org/apache/derbyTesting/functionTests/tests/)tools/dblook_test_app.properties:<br>
 <small>&nbsp;&nbsp;&nbsp;
-supportfiles=tools/dblook_makeDB.sql,tools/dblook_test.jar</small><br>
+supportfiles=tools/dblook_makeDB.sql,tools/dblook_test.jar<br>
+</small><br>
+To support running on non-ISO-5889 systems, the harness copies files
+ending in sql, .view, .multi, .properties, .txt and .policy into local
+encoding; all other files are copied into UTF-8 encoding.<br>
 </p>
 <h3><a class="mozTocH3" name="mozTocId427577"></a>4.3 <a name="ov3"></a>&lt;testname&gt;_app.properties</h3>
 <p>
@@ -981,7 +989,7 @@ remove a string from the output or to replace it.</li>
 </ol>
 <p>
 The diff is executed between the final resulting output and the master
-file found.<br>
+file found copied into local encoding as .tmpmstr.<br>
 <br>
 </p>
 <h3><a name="Adding_a_new_test"></a>4.7<span style="font-weight: bold;">&nbsp;
@@ -1003,13 +1011,23 @@ _derby.properties file.</li>
 specific directory</li>
   <li>run the test. The first time around, the test will fail because
 no master file will be found. </li>
-  <li>if the output is correct, copy it to the master directory. Note
+  <li>if the output is correct, copy it to the master directory. <br>
+  </li>
+  <li>Build. This will copy the new master into the classes directory,
+and when building jars, into derbyTesting.jar, so it is found by the
+test harness at runtime. Note
 that there is no copyfiles.ant file needed for the master directory,
 all .out files are automatically copied.</li>
   <li>run the test again. Investigate if any differences need to be
 masked out using a test specific sed.properties file (e.g.
 newfunctest_sed.properties). If so, ensure this is added to
 copyfiles.ant.</li>
+  <li>ensure that the test does not cause any problems on non-ISO-5889
+systems. This includes avoiding use of non portable constructors such
+as String(byte[]) or String(byte[],int,int); and usage of appropriate
+readers (FileInputStream for specifying encoding, FileReader for
+accessing fixed encoding files).<br>
+  </li>
   <li>add the test to a specific suites/*.xml file, maintaining proper
 xml syntax. </li>
   <li>run the suite, and correct any problems found.</li>
@@ -1238,7 +1256,8 @@ org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql<br>
 testSpecialProps<br>
 &nbsp;&nbsp;&nbsp; sets additional properties. Several can be set
 using '^' as separator: <br>
-&nbsp;&nbsp;&nbsp; -DtestSpecialProps=&lt;prop-1&gt;=&lt;value-1&gt;^ ... ^&lt;prop-n&gt;=&lt;value-n&gt;<br>
+&nbsp;&nbsp;&nbsp; -DtestSpecialProps=&lt;prop-1&gt;=&lt;value-1&gt;^
+... ^&lt;prop-n&gt;=&lt;value-n&gt;<br>
 &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java
 -DTestSpecialProps=derby.infolog.append=true
 org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql <br>
@@ -1246,8 +1265,7 @@ jvmflags<br>
 &nbsp;&nbsp;&nbsp; sets specific jvm properties for the jvm used in the
 test harness, for
 instance initial memory, and heap size, or properties normally passed
-on with a -D. For instance:
-      <br>
+on with a -D. For instance: <br>
 &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java
 -Djvmflags=ms32M -mx128M
 org.apache.derbyTesting.functionTests.RunTest lang/streamingColumn.java
@@ -1256,15 +1274,14 @@ excludeJCC<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; See above section <a
  href="#skipping">4.10</a><br>
 useprocess<br>
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (default=true) Controls whether RunTest
-runs the test in a separate VM or in a  <br> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; thread in harness VM. It is potentially
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (default=true) Controls
+whether RunTest
+runs the test in a separate VM or in a <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; thread in harness VM. It is
+potentially
 useful for debugging tests. Unit tests are <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; not (yet) runnable with 
-"useprocess=false", though. 
-
-      </td>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; not (yet) runnable with
+"useprocess=false", though. </td>
     </tr>
   </tbody>
 </table>

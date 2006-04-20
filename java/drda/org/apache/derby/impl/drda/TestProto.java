@@ -25,7 +25,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.DataOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.io.StreamTokenizer;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -175,7 +177,7 @@ public class TestProto {
 	{
 		String prev_filename = current_filename;
 		current_filename = filename;
-		FileReader fr = new FileReader(filename);
+		BufferedReader fr = new BufferedReader(new InputStreamReader(new FileInputStream(filename),"UTF-8"));
 		tkn = new StreamTokenizer(fr);
 		int val;
 		while ( (val = tkn.nextToken()) != StreamTokenizer.TT_EOF)

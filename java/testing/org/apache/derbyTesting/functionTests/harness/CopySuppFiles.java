@@ -68,7 +68,7 @@ public class CopySuppFiles
 		}
                 // need to make a guess so we copy text files to local encoding
                 // on non-ascii systems...
-                if ((fileName.indexOf("sql") > 0) || (fileName.indexOf("txt") > 0) || (fileName.indexOf(".view") > 0))
+                if ((fileName.indexOf("sql") > 0) || (fileName.indexOf("txt") > 0) || (fileName.indexOf(".view") > 0) || (fileName.indexOf(".multi") > 0) || (fileName.indexOf(".properties") > 0))
                 {
                     BufferedReader inFile = new BufferedReader(new InputStreamReader(is, "UTF-8"));
                     PrintWriter pw = new PrintWriter
