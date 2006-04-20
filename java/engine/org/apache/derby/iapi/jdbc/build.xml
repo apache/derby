@@ -52,8 +52,6 @@
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredCallableStatement40.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredStatement.java"/>
           <exclude name="${derby.dir}/${cur.dir}/BrokeredStatement40.java"/>
-	  <exclude name="${derby.dir}/${cur.dir}/JDBCBoot.java"/>
-	  <exclude name="${derby.dir}/${cur.dir}/ResourceAdapter.java"/>
     </javac>
   </target>
 
@@ -121,7 +119,7 @@
 	  <include name="${derby.dir}/${cur.dir}/BrokeredConnection30.java"/>
 	  <include name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement30.java"/>
 	  <include name="${derby.dir}/${cur.dir}/BrokeredCallableStatement30.java"/>
-	  <include name="${derby.dir}/${cur.dir}/ResourceAdapter.java"/>
+	  <!-- <include name="${derby.dir}/${cur.dir}/ResourceAdapter.java"/> -->
     </javac>
   </target>
 
