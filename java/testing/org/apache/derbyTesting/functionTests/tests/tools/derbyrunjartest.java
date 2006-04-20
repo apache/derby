@@ -20,6 +20,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.tools;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.Process;
 import java.lang.Runtime;
 import java.lang.SecurityException;
@@ -30,7 +32,7 @@ import org.apache.derbyTesting.functionTests.harness.BackgroundStreamSaver;
 
 public class derbyrunjartest {
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
         // get location of run class.
         CodeSource cs = null;
@@ -41,9 +43,8 @@ public class derbyrunjartest {
         }
  
         URL result = cs.getLocation();
-     
-        if (!result.toString().startsWith("file:")) { exitNow(); } else
-        {
+
+        if (result.toString().endsWith(".jar")) {
             String derbyrunloc = result.toString().substring(5);
             if (System.getProperty("os.name").startsWith("Windows"))
               derbyrunloc = derbyrunloc.substring(1);
@@ -51,6 +52,22 @@ public class derbyrunjartest {
             runtool(derbyrunloc, "sysinfo -cp help");
             runtool(derbyrunloc, "dblook");
             runtool(derbyrunloc, "server");
+        } else {
+            String[] ij = {"ij", "--help"};
+            System.out.println("ij --help:");
+            org.apache.derby.iapi.tools.run.main(ij);
+
+            String[] sysinfo = {"sysinfo", "-cp", "help"}; 
+            System.out.println("sysinfo -cp help:");
+            org.apache.derby.iapi.tools.run.main(sysinfo);
+
+            String[] dblook = {"dblook"};
+            System.out.println("dblook:");
+            org.apache.derby.iapi.tools.run.main(dblook);
+
+            String[] server = {"server"};
+            System.out.println("server:");
+            org.apache.derby.iapi.tools.run.main(server);
         }
     }
 
@@ -59,7 +76,7 @@ public class derbyrunjartest {
         String command = "java -jar " + loc + ' ' + tool;
         Process pr = null;
 
-        System.out.println(command + ':');
+        System.out.println(tool + ':');
         try
         {
             pr = Runtime.getRuntime().exec(command);
@@ -75,10 +92,5 @@ public class derbyrunjartest {
                 pr = null;
             }
         }
-    }
-
-    public static void exitNow()
-    {
-        System.out.println("This test must be run from jar files. Exiting.");
     }
 }

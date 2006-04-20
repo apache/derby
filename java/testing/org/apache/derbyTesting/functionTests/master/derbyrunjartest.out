@@ -1,8 +1,8 @@
-java -jar C:/derby-trunk/jars/sane/derbyrun.jar ij --help:
+ij --help:
 Usage: java org.apache.derby.tools.ij [-p propertyfile] [-ca connectionAttributePropertyFile] [inputfile]
-java -jar C:/derby-trunk/jars/sane/derbyrun.jar sysinfo -cp help:
+sysinfo -cp help:
 USAGE: java org.apache.derby.tools.sysinfo -cp [ [ embedded ][ server ][ client] [ tools ] [  anyClass.class ] ]
-java -jar C:/derby-trunk/jars/sane/derbyrun.jar dblook:
+dblook:
  USAGE:
  java org.apache.derby.tools.dblook -d <sourceDBUrl> [OPTIONS]
  	where the source URL is the full URL, including the connection protocol
@@ -25,7 +25,7 @@ java -jar C:/derby-trunk/jars/sane/derbyrun.jar dblook:
  	-o <filename> to specify the file name to which the generated DDL
  	 will be written.
  		If not specified, default is the console. 
-java -jar C:/derby-trunk/jars/sane/derbyrun.jar server:
+server:
 No arguments given.
 Usage: NetworkServerControl <commands> 
 Commands:

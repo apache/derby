@@ -1132,6 +1132,9 @@
     	<section name="org/apache/derby/impl/tools/sysinfo/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
+      	<section name="org/apache/derby/tools/">
+    	  <attribute name="Sealed" value="false"/>
+    	</section>
     </manifest> 
 
     <delete file="${derby.jar.dir}/derbynet.jar"/>
@@ -1181,6 +1184,9 @@
     <manifest file="${derby.jar.dir}/lists/smfclient.mf">
       	<attribute name="Sealed" value="true"/>
     	<section name="org/apache/derby/jdbc/">
+    	  <attribute name="Sealed" value="false"/>
+    	</section>
+      	<section name="org/apache/derby/tools">
     	  <attribute name="Sealed" value="false"/>
     	</section>
     </manifest> 

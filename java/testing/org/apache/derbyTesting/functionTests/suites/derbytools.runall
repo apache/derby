@@ -1,4 +1,5 @@
 tools/dblook_test.java
+tools/derbyrunjartest.java
 tools/importExport.java
 tools/importExportThruIJ.sql
 tools/ieptests.sql
