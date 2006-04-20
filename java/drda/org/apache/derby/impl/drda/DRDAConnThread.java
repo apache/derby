@@ -44,6 +44,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.apache.derby.catalog.SystemProcedures;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.JDBC30Translation;
@@ -4122,7 +4123,7 @@ public class DRDAConnThread extends Thread {
 			{
 				byte[] paramVal = reader.readBytes();
 				if (SanityManager.DEBUG) 
-					trace("fix bytes parameter value is: "+new String(paramVal));
+					trace("fix bytes parameter value is: "+ convertToHexString(paramVal));
 				ps.setBytes(i+1, paramVal);
 				break;
 			}
@@ -5174,14 +5175,7 @@ public class DRDAConnThread extends Thread {
  	 */
 	private static String SQLERRMC_TOKEN_DELIMITER = new String(new char[] {(char)20});
 	
-    // This token delimiter value is used to separate the tokens for multiple 
-    // error messages.  This is used in SystemProcedures.SQLCAMESSAGE.
-	/**
-	 * <code>SQLERRMC_MESSAGE_DELIMITER</code> When message argument tokes are sent,
-	 * this value separates the tokens for mulitiple error messages 
-	 */
-	private static String SQLERRMC_MESSAGE_DELIMITER = new String(new char[] {(char)20,(char)20,(char)20});
-	
+
 	/**
 	 * <code>SQLERRMC_PREFORMATTED_MESSAGE_DELIMITER</code>, When full message text is 
 	 * sent for severe errors. This value separates the messages. 
@@ -5266,7 +5260,7 @@ public class DRDAConnThread extends Thread {
 	 * Build Tokenized SQLERRMC to just send the tokenized arguments to the client.
 	 * for a Derby SQLException
 	 * Message argument tokens are separated by SQLERRMC_TOKEN_DELIMITER 
-	 * Multiple messages are separated by SQLERRMC_MESSAGE_DELIMITER
+	 * Multiple messages are separated by SystemProcedures.SQLERRMC_MESSAGE_DELIMITER
 	 * 
 	 *                 ...
 	 * @param se   SQLException to print
@@ -5285,7 +5279,7 @@ public class DRDAConnThread extends Thread {
 			se = (EmbedSQLException) se.getNextException();
 			if (se != null)
 			{
-				sqlerrmc += SQLERRMC_MESSAGE_DELIMITER + se.getSQLState() + ":";				
+				sqlerrmc += SystemProcedures.SQLERRMC_MESSAGE_DELIMITER + se.getSQLState() + ":";				
 			}
 		} while (se != null);
 		return sqlerrmc;
@@ -5447,13 +5441,10 @@ public class DRDAConnThread extends Thread {
 			String sqlState = se.getSQLState();
 			int sqlCode = getSqlCode(getExceptionSeverity(se));
 			String sqlerrmc = "";
-			byte[] sep = {20};	// use it as separator of sqlerrmc tokens
-			String separator = new String(sep);
-				
 			// arguments are variable part of a message
 			Object[] args = ((EmbedSQLException)se).getArguments();
 			for (int i = 0; args != null &&  i < args.length; i++)
-				sqlerrmc += args[i].toString() + separator;
+				sqlerrmc += args[i].toString() + SQLERRMC_TOKEN_DELIMITER;
 
 			String dbname = null;
 			if (database != null)

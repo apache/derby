@@ -63,6 +63,15 @@ public class SystemProcedures  {
 	private final static int SQL_ROWVER = 2;
 	private final static String DRIVER_TYPE_OPTION = "DATATYPE";
 	private final static String ODBC_DRIVER_OPTION = "'ODBC'";
+    // This token delimiter value is used to separate the tokens for multiple 
+    // error messages.  This is used in DRDAConnThread
+    /**
+     * <code>SQLERRMC_MESSAGE_DELIMITER</code> When message argument tokes are sent,
+     * this value separates the tokens for mulitiple error messages 
+     * Used by Server
+     */
+    public static String SQLERRMC_MESSAGE_DELIMITER = 
+                    new String(new char[] {(char)20,(char)20,(char)20});
 
 	/**
 	  Method used by Cloudscape Network Server to get localized message (original call
@@ -93,18 +102,14 @@ public class SystemProcedures  {
 										String[] msg, int[] rc)
 	{
 		int numMessages = 1;
-        // This corresponds to the DRDAConnThread.SQLERRMC_MESSAGE_DELIMITER
-        // delimiter for multiple messages that are set in sqlerrmc.
-        char[] b = {(char)20, (char)20, (char)20};
-		String errSeparator = new String(b);
 
 		// Figure out if there are multiple exceptions in sqlerrmc. If so get each one
 		// translated and append to make the final result.
 		for (int index=0; ; numMessages++)
 		{
-			if (sqlerrmc.indexOf(errSeparator, index) == -1)
+			if (sqlerrmc.indexOf(SQLERRMC_MESSAGE_DELIMITER, index) == -1)
 				break;
-			index = sqlerrmc.indexOf(errSeparator, index) + errSeparator.length();
+			index = sqlerrmc.indexOf(SQLERRMC_MESSAGE_DELIMITER, index) + SQLERRMC_MESSAGE_DELIMITER.length();
 		}
 
 		// Putting it here instead of prepareCall it directly is because inter-jar reference tool
@@ -120,7 +125,7 @@ public class SystemProcedures  {
 			String[] errMsg = new String[2];
 			for (int i=0; i<numMessages; i++)
 			{
-				endIdx = sqlerrmc.indexOf(errSeparator, startIdx);
+				endIdx = sqlerrmc.indexOf(SQLERRMC_MESSAGE_DELIMITER, startIdx);
 				if (i == numMessages-1)				// last error message
 					sqlError = sqlerrmc.substring(startIdx);
 				else sqlError = sqlerrmc.substring(startIdx, endIdx);
@@ -143,7 +148,7 @@ public class SystemProcedures  {
 						msg[0] = errMsg[0];
 					else msg[0] += errMsg[0];	// append the new message
 				}
-				startIdx = endIdx + errSeparator.length();
+				startIdx = endIdx + SQLERRMC_MESSAGE_DELIMITER.length();
 			}
 		}
 	}
