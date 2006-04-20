@@ -21,6 +21,8 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.MessageId;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * A concrete implementation of a CcsidMgr used to convert between Java UCS2 and Ebcdic as needed to handle character
@@ -138,7 +140,8 @@ public class EbcdicCcsidManager extends CcsidManager {
             if (c > 0xff)
             // buffer[offset++] = (byte) 63;
             {
-                throw new SqlException(agent.logWriter_, "Unicode string can't convert to Ebcdic string");
+                throw new SqlException(agent.logWriter_, 
+                    new MessageId(SQLState.CANT_CONVERT_UNICODE_TO_EBCDIC));
             } else {
                 buffer[offset++] = (byte) (conversionArrayToEbcdic[c]);
             }

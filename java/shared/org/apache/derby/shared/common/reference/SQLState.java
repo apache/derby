@@ -672,6 +672,7 @@ public interface SQLState {
 	String LANG_DATA_TYPE_GET_MISMATCH                                 = "22005"; // same 22005 error
     String UNSUPPORTED_ENCODING                                        = "22005.S.1";
     String CHARACTER_CONVERTER_NOT_AVAILABLE                           = "22005.S.2";
+    String CANT_CONVERT_UNICODE_TO_EBCDIC                              = "22005.S.3";
 
 	String LANG_DATE_RANGE_EXCEPTION                                   = "22007.S.180";
 	String LANG_DATE_SYNTAX_EXCEPTION                                  = "22007.S.181";

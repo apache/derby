@@ -57,6 +57,8 @@ s/[[:space:]]charsetName/ "charsetName"/g
 s/[[:space:]]cursorName/ "cursorName"/g
 s/[[:space:]]cursorName/ "cursorName"/g
 s/[[:space:]]methodName/ "methodName"/g
+s/[[:space:]]interfaces/ "interfaces"/g
+s/[[:space:]]method/ "method"/g
 s/[[:space:]]instance/ "instance"/g
 s/[[:space:]]method)/ "method")/g
 s/[[:space:]]b.toString()/ "bytes"/g
