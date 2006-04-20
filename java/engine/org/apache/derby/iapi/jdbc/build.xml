@@ -25,6 +25,8 @@
 
   <target name="compile_iapi_jdbc_jsr169">
 	    <javac
+	      source="1.3"
+	      target="1.3"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -57,6 +59,8 @@
 
   <target name="compile_iapi_jdbc_jdbc2" depends="compile_iapi_jdbc_stmt,compile_iapi_jdbc_jsr169">
     <javac
+      source="1.3"
+      target="1.3"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -78,6 +82,8 @@
 
   <target name="compile_iapi_jdbc_stmt">
     <javac
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -97,6 +103,8 @@
 
   <target name="compile_iapi_jdbc_jdbc3" depends="compile_iapi_jdbc_jdbc2">
     <javac
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -119,6 +127,8 @@
 
   <target name="compile_jdbc4" if="jdk16">
       <javac
+          source="1.6"
+          target="1.6"
           fork="yes"
           executable="${jdk16}/bin/javac"
           bootclasspath="${empty}"

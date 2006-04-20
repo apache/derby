@@ -50,6 +50,8 @@
 
   <target name="compilex_nosource">
     <javac
+      source="1.3"
+      target="1.3"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -72,6 +74,8 @@
   <!-- Jikes 1.22 in the gump nightly build.                      -->
   <target name="compilex_gump" if="jikes.source.set">
     <javac
+      source="${jikes.source}"
+      target="1.3"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -80,7 +84,6 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}" 
-      source="${jikes.source}"
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>

@@ -20,6 +20,8 @@
 
   <target name="compile_reference">
     <javac
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -38,6 +40,8 @@
       <exclude name="${derby.dir}/iapi/reference/JDBC30Translation.java"/>
     </javac>
     <javac
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"

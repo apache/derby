@@ -23,6 +23,8 @@
     <copy file="${derby.build.src.dir}/org/apache/derbyBuild/odbcgen_fragments.properties" tofile="${out.dir}/org/apache/derbyBuild/odbcgen_fragments.properties"/>
 
     <javac
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"

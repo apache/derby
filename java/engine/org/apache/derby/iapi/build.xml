@@ -28,6 +28,8 @@
   <target name="compile_iapi_error_jsr169">
     <ant dir="${derby.engine.dir}/iapi/reference"/>
     <javac
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"

@@ -39,6 +39,8 @@
   <target name="compile_tools_impl">
 
     <javac
+      source="1.3"
+      target="1.3"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -61,6 +63,8 @@
    </target>
   <target name="compile_tools_impl_jdk14" depends="compile_tools_impl">
     <javac
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
