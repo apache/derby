@@ -271,7 +271,7 @@ A |B |C
 A |B |C                   
 -----
 70 |831 |45.700              
-EXPECTED SQL Exception: BigDecimal conversion exception [converters] Overflow occurred during numeric data type conversion of "10243".. See attached Throwable.
+EXPECTED SQL Exception: Overflow occurred during numeric data type conversion of '10243' to packed decimal.
 A |B |C                   
 -----
 80 |993 |1234.567            
@@ -352,7 +352,7 @@ OP4INOUT 14+23.5 >37.50< null ? false
 No ResultSet or update count returned
 OP4INOUT 9+23.505 >32.50< null ? false
 EXPECTED SQL Exception: The resulting value is outside the range for the data type DECIMAL/NUMERIC(4,2).
-EXPECTED SQL Exception: BigDecimal conversion exception [converters] Overflow occurred during numeric data type conversion of "102.33".. See attached Throwable.
+EXPECTED SQL Exception: Overflow occurred during numeric data type conversion of '102.33' to packed decimal.
 EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
 SQL Control
 CREATE PROCEDURE SQLC.SQLCONTROL1_0 (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128))  PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.sqlControl'

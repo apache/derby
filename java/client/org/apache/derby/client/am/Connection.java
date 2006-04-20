@@ -1835,7 +1835,8 @@ public abstract class Connection implements java.sql.Connection,
         try {
             reset_(logWriter, user, password, ds, recomputeFromDataSource);
         } catch (SqlException sqle) {
-            DisconnectException de = new DisconnectException(agent_, "An error occurred during connect reset and the connection has been terminated.  See chained exceptions for details.");
+            DisconnectException de = new DisconnectException(agent_, 
+                new MessageId(SQLState.CONNECTION_FAILED_ON_RESET));
             de.setNextException(sqle);
             throw de;
         }
@@ -1848,7 +1849,8 @@ public abstract class Connection implements java.sql.Connection,
         try {
             reset_(logWriter, ds, recomputeFromDataSource);
         } catch (SqlException sqle) {
-            DisconnectException de = new DisconnectException(agent_, "An error occurred during connect reset and the connection has been terminated.  See chained exceptions for details.");
+            DisconnectException de = new DisconnectException(agent_, 
+                new MessageId(SQLState.CONNECTION_FAILED_ON_RESET));
             de.setNextException(sqle);
             throw de;
         }

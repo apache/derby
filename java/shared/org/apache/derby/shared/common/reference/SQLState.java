@@ -665,6 +665,9 @@ public interface SQLState {
 	String LANG_STRING_TRUNCATION                                      = "22001";
 	String LANG_CONCAT_STRING_OVERFLOW                                      = "54006";
 	String LANG_OUTSIDE_RANGE_FOR_DATATYPE                             = "22003";
+    String YEAR_EXCEEDS_MAXIMUM                                        = "22003.S.1";
+    String DECIMAL_TOO_MANY_DIGITS                                     = "22003.S.2";
+    String NUMERIC_OVERFLOW                                            = "22003.S.3";
 
 	String LANG_DATA_TYPE_GET_MISMATCH                                 = "22005"; // same 22005 error
     String UNSUPPORTED_ENCODING                                        = "22005.S.1";
@@ -678,6 +681,7 @@ public interface SQLState {
     String LANG_SQRT_OF_NEG_NUMBER                                     = "22013";
     String LANG_INVALID_PARAMETER_FOR_SEARCH_POSITION                  = "22014";
     String LANG_INVALID_TYPE_FOR_LOCATE_FUNCTION                       = "22015";
+    String LOSS_OF_PRECISION_EXCEPTION                                 = "22015.S.1";
 	String LANG_FORMAT_EXCEPTION                                       = "22018";
 	String LANG_INVALID_ESCAPE_CHARACTER                               = "22019";
 	String LANG_INVALID_ESCAPE_SEQUENCE                                = "22025";
@@ -1005,6 +1009,7 @@ public interface SQLState {
 	String LANG_UNSUPPORTED_TRIGGER_STMT		   					   = "42Z9D";
     String LANG_DROP_CONSTRAINT_TYPE                                   = "42Z9E";
     String LANG_QUERY_TOO_COMPLEX                                      = "42ZA0";
+    String LANG_INVALID_SQL_IN_BATCH                                   = "42ZA1";
 
 	//following 3 matches the DB2 sql states
 	String LANG_DECLARED_GLOBAL_TEMP_TABLE_ONLY_IN_SESSION_SCHEMA = "428EK";
@@ -1346,6 +1351,9 @@ public interface SQLState {
     String NOT_IMPLEMENTED                                          = "0A000.S";
     String JDBC_METHOD_NOT_IMPLEMENTED                              = "0A000.S.1";
     String JDBC_METHOD_NOT_SUPPORTED_BY_SERVER                      = "0A000.S.2";
+    String UNSUPPORTED_HOLDABILITY_PROPERTY                         = "0A000.S.3";
+    String CANCEL_NOT_SUPPORTED_BY_SERVER                           = "0A000.S.4";
+
 
 	
 
@@ -1485,7 +1493,20 @@ public interface SQLState {
     String CURSOR_INVALID_FOR_SENSITIVE_DYNAMIC = "XJ126.S";
     //wrapper related
     String UNABLE_TO_UNWRAP = "XJ128.S";
-
+    
+    String EXCEEDED_MAX_SECTIONS = "XJ200.S";
+    String MULTIPLE_RESULTS_ON_EXECUTE_QUERY = "XJ201.S";
+    String CURSOR_INVALID_NAME = "XJ202.S";
+    String CURSOR_DUPLICATE_NAME = "XJ203.S";
+    String UNABLE_TO_OPEN_RS_WITH_REQUESTED_HOLDABILITY = "XJ204.S";
+    String USE_EXECUTE_UPDATE_WITH_NO_RESULTS = "XJ205.S";
+    String NO_TOKENS_IN_SQL_TEXT = "XJ206.S";
+    String CANT_USE_EXEC_QUERY_FOR_UPDATE = "XJ207.S";
+    String BATCH_NON_ATOMIC_FAILURE = "XJ208.S";
+    String STORED_PROC_NOT_INSTALLED = "XJ209.S";
+    String STORED_PROC_LOAD_MODULE_NOT_FOUND = "XJ210.S";
+    String BATCH_CHAIN_BREAKING_EXCEPTION = "XJ211.S";
+    
     String INTERNAL_ERROR = "XJ999.S";
     String CONN_GENERIC = "X0RQB.S";
 
@@ -1513,8 +1534,12 @@ public interface SQLState {
     // you *must* add a severity code
     String NOGETCONN_ON_CLOSED_POOLED_CONNECTION = "08003.C.1";
     String LOB_METHOD_ON_CLOSED_CONNECTION = "08003.C.2";
+    
+    // 08006 means connection exception - connection failure
+    String CONNECTION_FAILED_ON_RESET = "08006.C.1";
+        
     // system severity
-    String SHUTDOWN_DATABASE = "08006.D";   
+    String SHUTDOWN_DATABASE = "08006.D";  
         
     //the following 2 exceptions are internal and never get seen by the user.
     String CLOSE_REQUEST = "close.C.1"; // no message in messages.properties as it is never printed

@@ -272,15 +272,15 @@ This test works in embedded mode since Derby can handle the change in the name o
 But it fails under Network Server mode because JCC and Derby Net Client do not allow statement name change when there an open resultset against it
 change the cursor name(case sensitive name) with setCursorName and then try to deleteRow
 change the cursor name one more time with setCursorName and then try to deleteRow
-SQL State : null
-Got expected exception Invalid operation: setCursorName() called when there are open ResultSet's on the Statement.
+SQL State : X0X95
+Got expected exception Operation 'setCursorName()' cannot be performed on object 'Statement' because there is an open ResultSet dependent on that object.
 Positive Test8b - change the name of the statement when the resultset is open and see if updateRow still works
 This test works in embedded mode since Derby can handle the change in the name of the statement with an open resultset
 But it fails under Network Server mode because JCC and Derby Net Client do not allow statement name change when there an open resultset against it
 change the cursor name one more time with setCursorName and then try to updateRow
 change the cursor name(case sensitive name) with setCursorName and then try to updateRow
-SQL State : null
-Got expected exception Invalid operation: setCursorName() called when there are open ResultSet's on the Statement.
+SQL State : X0X95
+Got expected exception Operation 'setCursorName()' cannot be performed on object 'Statement' because there is an open ResultSet dependent on that object.
 Positive Test9a - using correlation name for the table in the select sql works in embedded mode and Network Server using Derby Net Client driver
 Correlation name for table does not work in Network Server mode (using JCC) because the drivers construct the delete sql with the correlation name rather than the base table name
 column 1 on this row is 1

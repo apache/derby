@@ -254,7 +254,7 @@ Try passing array with Statement.execute
 PASS - expected exception - Feature not implemented
 Try passing array with Statement.executeUpdate
 PASS -- expected exception
-SQLSTATE(null): Driver not capable
+SQLSTATE(0A000): Feature not implemented: executeUpdate(String, int[]).
 Test21ps - insert select with columnIndexes[] array should fail
 Try passing array with Connection.prepareStatement
 PASS -- expected exception
@@ -262,10 +262,10 @@ SQLSTATE(0A000): Feature not implemented: prepareStatement(String, int[]).
 Test22 - insert select with columnNames[] array should fail
 Try passing array with Statement.execute
 PASS -- expected exception
-SQLSTATE(null): Driver not capable
+SQLSTATE(0A000): Feature not implemented: Connection.prepareStatement(String sql, String[] columnNames).
 Try passing array with Statement.executeUpdate
 PASS -- expected exception
-SQLSTATE(null): Driver not capable
+SQLSTATE(0A000): Feature not implemented: Connection.prepareStatement(String sql, String[] columnNames).
 Test22ps - insert select with columnNames[] array should fail
 Try passing array with Connection.prepareStatement
 PASS -- expected exception

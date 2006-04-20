@@ -3,6 +3,7 @@ package org.apache.derbyTesting.functionTests.tests.i18n;
 import org.apache.derby.client.am.MessageId; 
 import org.apache.derby.client.am.SqlException; 
 import org.apache.derby.shared.common.reference.SQLState; 
+import org.apache.derby.client.am.SqlCode;
 
 /** 
  * This class is a GENERATED FILE that tests as many of the messages 

@@ -19,6 +19,9 @@
 */
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.i18n.MessageUtil;
+import org.apache.derby.shared.common.reference.SQLState;
+
 import java.io.UnsupportedEncodingException;
 
 
@@ -72,7 +75,10 @@ public class DateTime {
             monthIndx = 5;
             dayIndx = 8;
         } else {
-            throw new java.lang.IllegalArgumentException("Unsupported date format!");
+            throw new java.lang.IllegalArgumentException(
+                MessageUtil.getCompleteMessage(SQLState.LANG_FORMAT_EXCEPTION,
+                    SqlException.CLIENT_MESSAGE_RESOURCE_NAME,
+                    (Object[])null));
         }
 
         int zeroBase = ((int) '0');
@@ -224,10 +230,12 @@ public class DateTime {
      */
     public static final int dateToDateBytes(byte[] buffer,
                                             int offset,
-                                            java.sql.Date date) throws ConversionException {
+                                            java.sql.Date date) throws SqlException {
         int year = date.getYear() + 1900;
         if (year > 9999) {
-            throw new ConversionException("Year exceeds the maximum \"9999\".");
+            throw new SqlException(null,
+                new MessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
+                new Integer(year), "9999");
         }
         int month = date.getMonth() + 1;
         int day = date.getDate();
@@ -283,10 +291,12 @@ public class DateTime {
      */
     public static final int timestampToTimestampBytes(byte[] buffer,
                                                       int offset,
-                                                      java.sql.Timestamp timestamp) throws ConversionException {
+                                                      java.sql.Timestamp timestamp) throws SqlException {
         int year = timestamp.getYear() + 1900;
         if (year > 9999) {
-            throw new ConversionException("Year exceeds the maximum \"9999\".");
+            throw new SqlException(null,
+                new MessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
+                new Integer(year), "9999");
         }
         int month = timestamp.getMonth() + 1;
         int day = timestamp.getDate();
@@ -544,10 +554,12 @@ public class DateTime {
      */
     public static final int timestampToDateBytes(byte[] buffer,
                                                  int offset,
-                                                 java.sql.Timestamp timestamp) throws ConversionException {
+                                                 java.sql.Timestamp timestamp) throws SqlException {
         int year = timestamp.getYear() + 1900;
         if (year > 9999) {
-            throw new ConversionException("Year exceeds the maximum \"9999\".");
+            throw new SqlException(null,
+                new MessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
+                new Integer(year), "9999");
         }
         int month = timestamp.getMonth() + 1;
         int day = timestamp.getDate();
@@ -603,10 +615,12 @@ public class DateTime {
      */
     public static final int dateToTimestampBytes(byte[] buffer,
                                                  int offset,
-                                                 java.sql.Date date) throws ConversionException {
+                                                 java.sql.Date date) throws SqlException {
         int year = date.getYear() + 1900;
         if (year > 9999) {
-            throw new ConversionException("Year exceeds the maximum \"9999\".");
+            throw new SqlException(null,
+                new MessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
+                new Integer(year), "9999");
         }
         int month = date.getMonth() + 1;
         int day = date.getDate();

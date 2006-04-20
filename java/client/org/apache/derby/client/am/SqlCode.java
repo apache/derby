@@ -30,7 +30,7 @@ package org.apache.derby.client.am;
 public class SqlCode {
     private int code_;
 
-    private SqlCode(int code) {
+    public SqlCode(int code) {
         code_ = code;
     }
 
@@ -52,7 +52,7 @@ public class SqlCode {
     public final static SqlCode disconnectError = new SqlCode(-4499);
 
     public final static SqlCode undefinedError = new SqlCode(-99999);
-
+    
     /** SQL code for SQL state 02000 (end of data). DRDA does not
      * specify the SQL code for this SQL state, but Derby uses 100. */
     public final static SqlCode END_OF_DATA = new SqlCode(100);

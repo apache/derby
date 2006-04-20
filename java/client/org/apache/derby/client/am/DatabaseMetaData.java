@@ -2071,12 +2071,12 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         } catch (SqlException e) {
             if (e.getErrorCode() == -440) {
                 SqlException newException = new SqlException(agent_.logWriter_,
-                        "The required stored procedure is not installed on the server.");
+                        new MessageId(SQLState.STORED_PROC_NOT_INSTALLED));
                 newException.setNextException(e);
                 throw newException;
             } else if (e.getErrorCode() == -444) {
                 SqlException newException = new SqlException(agent_.logWriter_,
-                        "The load module name for the stored procedure on the server is not found. ");
+                    new MessageId(SQLState.STORED_PROC_LOAD_MODULE_NOT_FOUND));
                 newException.setNextException(e);
                 throw newException;
             } else {
@@ -2556,9 +2556,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         if (serverJdbcMajorVersion < major ||
             (serverJdbcMajorVersion == major &&
              serverJdbcMinorVersion < minor)) {
-            MessageId mid =
-                new MessageId(SQLState.JDBC_METHOD_NOT_SUPPORTED_BY_SERVER);
-            throw new SqlException(agent_.logWriter_, mid, method);
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.JDBC_METHOD_NOT_SUPPORTED_BY_SERVER), method);
         }
     }
 }

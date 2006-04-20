@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 public abstract class Agent {
     public SqlException accumulatedReadExceptions_ = null;
 
@@ -264,12 +266,9 @@ public abstract class Agent {
             }
         }
         if (accumulatedExceptions != null) {
-            BatchUpdateException bue =
-                    new BatchUpdateException(logWriter_,
-                            "Non-atomic batch failure.  The batch was submitted, but " +
-                    "at least one exception occurred on an individual member of the batch. " +
-                    "Use getNextException() to retrieve the exceptions for specific batched elements.",
-                            updateCounts);
+            BatchUpdateException bue = new BatchUpdateException(logWriter_,
+                new MessageId(SQLState.BATCH_NON_ATOMIC_FAILURE),
+                updateCounts);
             bue.setNextException(accumulatedExceptions.getSQLException());
             throw bue;
         }

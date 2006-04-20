@@ -67,7 +67,6 @@ public class splitmessages {
         clientMessageIds.add(SQLState.LANG_STATEMENT_CLOSED_NO_REASON);
         clientMessageIds.add(SQLState.LANG_INVALID_COLUMN_POSITION);
         clientMessageIds.add(SQLState.INVALID_COLUMN_NAME);
-        clientMessageIds.add("J104");
         clientMessageIds.add(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
         clientMessageIds.add(SQLState.LANG_RETURN_OUTPUT_PARAM_CANNOT_BE_SET);
         clientMessageIds.add(SQLState.LANG_NULL_INTO_NON_NULL);
@@ -84,10 +83,21 @@ public class splitmessages {
         clientMessageIds.add(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT);
         clientMessageIds.add(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION);
         clientMessageIds.add(SQLState.LOB_METHOD_ON_CLOSED_CONNECTION);
+        clientMessageIds.add(SQLState.LANG_INVALID_CALL_TO_EXECUTE_UPDATE);
+        clientMessageIds.add(SQLState.LANG_CANT_INVALIDATE_OPEN_RESULT_SET);
+        clientMessageIds.add(SQLState.YEAR_EXCEEDS_MAXIMUM);
         clientMessageIds.add(SQLState.LANG_INVALID_PARAM_POSITION);
         clientMessageIds.add(SQLState.LANG_MISSING_PARMS);
         clientMessageIds.add(SQLState.LANG_NO_CURRENT_ROW);
         clientMessageIds.add(SQLState.LANG_STREAM_RETRIEVED_ALREADY);
+        clientMessageIds.add(SQLState.CONNECTION_FAILED_ON_RESET);
+        clientMessageIds.add(SQLState.DECIMAL_TOO_MANY_DIGITS);
+        clientMessageIds.add(SQLState.NUMERIC_OVERFLOW);
+        clientMessageIds.add(SQLState.UNSUPPORTED_HOLDABILITY_PROPERTY);
+        clientMessageIds.add(SQLState.CANCEL_NOT_SUPPORTED_BY_SERVER);
+        clientMessageIds.add(SQLState.LANG_INVALID_CALL_STATEMENT);
+        clientMessageIds.add(SQLState.LOSS_OF_PRECISION_EXCEPTION);
+        clientMessageIds.add(SQLState.LANG_INVALID_SQL_IN_BATCH);
         clientMessageIds.add(SQLState.CLIENT_RESULT_SET_NOT_OPEN);
     }
 
@@ -191,9 +201,9 @@ public class splitmessages {
     /**
      * Determine if this is a message that the client is using
      *
-     * We assume all message ids starting with "XJ" are client messages
+     * We assume all message ids starting with "XJ" or "J" are client messages
      * (even though many of them may not be, it saves the coder the effort
-     * of explicitly adding each XJ shared message, and covers 90% of the
+     * of explicitly adding each XJ or J shared message, and covers 90% of the
      * shared messages
      *
      * All other shared message ids should be added to the static array
@@ -201,7 +211,7 @@ public class splitmessages {
      */
     static boolean isClientMessage(String messageId)
     {
-        if ( messageId.startsWith("XJ") )
+        if ( messageId.startsWith("XJ") || messageId.startsWith("J") )
         {
             return true;
         }

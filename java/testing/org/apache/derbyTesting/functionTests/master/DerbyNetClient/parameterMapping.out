@@ -131,7 +131,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setTimestamp(null) getShort=0 was null true CLOUD EXT (OK)
   setTimestamp(null) as batch getShort=0 was null true CLOUD EXT (OK)
   setAsciiStream()  (22018):Invalid character string format for type SMALLINT. JDBC MATCH (INVALID)
-  setAsciiStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type SMALLINT. JDBC MATCH (INVALID)
+  setAsciiStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type SMALLINT. JDBC MATCH (INVALID)
   setAsciiStream(null) getShort=0 was null true CLOUD EXT (OK)
   setAsciiStream(null) as batch getShort=0 was null true CLOUD EXT (OK)
   setBinaryStream() IC JDBC MATCH (INVALID)
@@ -304,7 +304,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setTimestamp(null) getInt=0 was null true CLOUD EXT (OK)
   setTimestamp(null) as batch getInt=0 was null true CLOUD EXT (OK)
   setAsciiStream()  (22018):Invalid character string format for type INTEGER. JDBC MATCH (INVALID)
-  setAsciiStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type INTEGER. JDBC MATCH (INVALID)
+  setAsciiStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type INTEGER. JDBC MATCH (INVALID)
   setAsciiStream(null) getInt=0 was null true CLOUD EXT (OK)
   setAsciiStream(null) as batch getInt=0 was null true CLOUD EXT (OK)
   setBinaryStream() IC JDBC MATCH (INVALID)
@@ -477,7 +477,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setTimestamp(null) getLong=0 was null true CLOUD EXT (OK)
   setTimestamp(null) as batch getLong=0 was null true CLOUD EXT (OK)
   setAsciiStream()  (22018):Invalid character string format for type BIGINT. JDBC MATCH (INVALID)
-  setAsciiStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type BIGINT. JDBC MATCH (INVALID)
+  setAsciiStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type BIGINT. JDBC MATCH (INVALID)
   setAsciiStream(null) getLong=0 was null true CLOUD EXT (OK)
   setAsciiStream(null) as batch getLong=0 was null true CLOUD EXT (OK)
   setBinaryStream() IC JDBC MATCH (INVALID)
@@ -650,7 +650,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setTimestamp(null) getFloat=0.0 was null true CLOUD EXT (OK)
   setTimestamp(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
   setAsciiStream()  (22018):Invalid character string format for type REAL. JDBC MATCH (INVALID)
-  setAsciiStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type REAL. JDBC MATCH (INVALID)
+  setAsciiStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type REAL. JDBC MATCH (INVALID)
   setAsciiStream(null) getFloat=0.0 was null true CLOUD EXT (OK)
   setAsciiStream(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
   setBinaryStream() IC JDBC MATCH (INVALID)
@@ -824,7 +824,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setTimestamp(null) getDouble=0.0 was null true CLOUD EXT (OK)
   setTimestamp(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
   setAsciiStream()  (22018):Invalid character string format for type DOUBLE. JDBC MATCH (INVALID)
-  setAsciiStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type DOUBLE. JDBC MATCH (INVALID)
+  setAsciiStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type DOUBLE. JDBC MATCH (INVALID)
   setAsciiStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
   setAsciiStream(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
   setBinaryStream() IC JDBC MATCH (INVALID)
@@ -997,7 +997,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setTimestamp(null) getDouble=0.0 was null true CLOUD EXT (OK)
   setTimestamp(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
   setAsciiStream()  (22018):Invalid character string format for type DOUBLE. JDBC MATCH (INVALID)
-  setAsciiStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type DOUBLE. JDBC MATCH (INVALID)
+  setAsciiStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type DOUBLE. JDBC MATCH (INVALID)
   setAsciiStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
   setAsciiStream(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
   setBinaryStream() IC JDBC MATCH (INVALID)
@@ -1170,7 +1170,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setTimestamp(null) getBigDecimal=null was null true CLOUD EXT (OK)
   setTimestamp(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
   setAsciiStream()  (22018):Invalid character string format for type DECIMAL. JDBC MATCH (INVALID)
-  setAsciiStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type DECIMAL. JDBC MATCH (INVALID)
+  setAsciiStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22018):Error for batch element #0: Invalid character string format for type DECIMAL. JDBC MATCH (INVALID)
   setAsciiStream(null) getBigDecimal=null was null true CLOUD EXT (OK)
   setAsciiStream(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
   setBinaryStream() IC JDBC MATCH (INVALID)
@@ -1891,7 +1891,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (XCL12):An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'. JDBC FAIL VARCHAR(60) FOR BIT DATA
-  setObject(java.lang.String) as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (XCL12):Error for batch element #0: An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'. JDBC FAIL VARCHAR(60) FOR BIT DATA
+  setObject(java.lang.String) as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (XCL12):Error for batch element #0: An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'. JDBC FAIL VARCHAR(60) FOR BIT DATA
   setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
   setObject(java.math.BigDecimal) as batch IC JDBC MATCH (INVALID)
   setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
@@ -2021,7 +2021,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBoolean() IC JDBC MATCH (INVALID)
   setBoolean() as batch IC JDBC MATCH (INVALID)
   setString()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
-  setString() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
+  setString() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
   setString(null) getDate=null was null true JDBC MATCH(OK)
   setString(null) as batch getDate=null was null true JDBC MATCH(OK)
  setString("Invalid Value")  IC (Expected)
@@ -2042,7 +2042,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setTimestamp(null) getDate=null was null true JDBC MATCH(OK)
   setTimestamp(null) as batch getDate=null was null true JDBC MATCH(OK)
   setAsciiStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setAsciiStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
+  setAsciiStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setAsciiStream(null) getDate=null was null true CLOUD EXT (OK)
   setAsciiStream(null) as batch getDate=null was null true CLOUD EXT (OK)
   setBinaryStream() IC JDBC MATCH (INVALID)
@@ -2050,11 +2050,11 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBinaryStream(null) getDate=null was null true CLOUD EXT (OK)
   setBinaryStream(null) as batch getDate=null was null true CLOUD EXT (OK)
   setCharacterStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setCharacterStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
+  setCharacterStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setCharacterStream(null) getDate=null was null true CLOUD EXT (OK)
   setCharacterStream(null) as batch getDate=null was null true CLOUD EXT (OK)
   setClob()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setClob() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
+  setClob() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setClob(null) getDate=null was null true CLOUD EXT (OK)
   setClob(null) as batch getDate=null was null true CLOUD EXT (OK)
   setBlob() IC JDBC MATCH (INVALID)
@@ -2066,7 +2066,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
-  setObject(java.lang.String) as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
+  setObject(java.lang.String) as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
   setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
   setObject(java.math.BigDecimal) as batch IC JDBC MATCH (INVALID)
   setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
@@ -2194,7 +2194,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBoolean() IC JDBC MATCH (INVALID)
   setBoolean() as batch IC JDBC MATCH (INVALID)
   setString()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
-  setString() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
+  setString() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
   setString(null) getTime=null was null true JDBC MATCH(OK)
   setString(null) as batch getTime=null was null true JDBC MATCH(OK)
  setString("Invalid Value")  IC (Expected)
@@ -2215,7 +2215,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setTimestamp(null) getTime=null was null true JDBC MATCH(OK)
   setTimestamp(null) as batch getTime=null was null true JDBC MATCH(OK)
   setAsciiStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setAsciiStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
+  setAsciiStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setAsciiStream(null) getTime=null was null true CLOUD EXT (OK)
   setAsciiStream(null) as batch getTime=null was null true CLOUD EXT (OK)
   setBinaryStream() IC JDBC MATCH (INVALID)
@@ -2223,11 +2223,11 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBinaryStream(null) getTime=null was null true CLOUD EXT (OK)
   setBinaryStream(null) as batch getTime=null was null true CLOUD EXT (OK)
   setCharacterStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setCharacterStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
+  setCharacterStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setCharacterStream(null) getTime=null was null true CLOUD EXT (OK)
   setCharacterStream(null) as batch getTime=null was null true CLOUD EXT (OK)
   setClob()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setClob() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
+  setClob() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setClob(null) getTime=null was null true CLOUD EXT (OK)
   setClob(null) as batch getTime=null was null true CLOUD EXT (OK)
   setBlob() IC JDBC MATCH (INVALID)
@@ -2239,7 +2239,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
-  setObject(java.lang.String) as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
+  setObject(java.lang.String) as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
   setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
   setObject(java.math.BigDecimal) as batch IC JDBC MATCH (INVALID)
   setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
@@ -2367,7 +2367,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBoolean() IC JDBC MATCH (INVALID)
   setBoolean() as batch IC JDBC MATCH (INVALID)
   setString()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
-  setString() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
+  setString() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
   setString(null) getTimestamp=null was null true JDBC MATCH(OK)
   setString(null) as batch getTimestamp=null was null true JDBC MATCH(OK)
  setString("Invalid Value")  IC (Expected)
@@ -2388,7 +2388,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setTimestamp(null) getTimestamp=null was null true JDBC MATCH(OK)
   setTimestamp(null) as batch getTimestamp=null was null true JDBC MATCH(OK)
   setAsciiStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setAsciiStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
+  setAsciiStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setAsciiStream(null) getTimestamp=null was null true CLOUD EXT (OK)
   setAsciiStream(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
   setBinaryStream() IC JDBC MATCH (INVALID)
@@ -2396,11 +2396,11 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBinaryStream(null) getTimestamp=null was null true CLOUD EXT (OK)
   setBinaryStream(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
   setCharacterStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setCharacterStream() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
+  setCharacterStream() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setCharacterStream(null) getTimestamp=null was null true CLOUD EXT (OK)
   setCharacterStream(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
   setClob()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setClob() as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
+  setClob() as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
   setClob(null) getTimestamp=null was null true CLOUD EXT (OK)
   setClob(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
   setBlob() IC JDBC MATCH (INVALID)
@@ -2412,7 +2412,7 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
-  setObject(java.lang.String) as batch  (?????):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
+  setObject(java.lang.String) as batch  (XJ208):Non-atomic batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch. Use getNextException() to retrieve the exceptions for specific batched elements. (22007):Error for batch element #0: The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
   setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
   setObject(java.math.BigDecimal) as batch IC JDBC MATCH (INVALID)
   setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)

@@ -214,19 +214,10 @@ public class StatementTest
         try {
             stmt.executeQuery("select count(*) from stmtTable");
         } catch (SQLException sqle) {
-            // Different error messages are returned for embedded and client.
-            if (usingEmbedded()) {
-                assertEquals("Unexpected SQL state for performing " +
-                        "operations on a closed statement.",
-                        SQLState.NO_CURRENT_CONNECTION,
-                        sqle.getSQLState());
-            } else {
-                // TODO: Compare with SQLState when implemented on client side.
-                assertEquals("Unexpected SQL state for performing " +
-                        "operations on a closed statement.",
-                        "Invalid operation: statement closed",
-                        sqle.getMessage());
-            }
+            assertEquals("Unexpected SQL state for performing " +
+                    "operations on a closed statement.",
+                    SQLStateConstants.CONNECTION_EXCEPTION_CONNECTION_DOES_NOT_EXIST,
+                    sqle.getSQLState());
         }
         assertTrue("Statement should be closed, because " +
                 "the connection has been closed", stmt.isClosed()); 

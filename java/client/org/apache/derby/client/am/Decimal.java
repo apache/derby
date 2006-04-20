@@ -19,6 +19,9 @@
 */
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.i18n.MessageUtil;
+
 /**
  * Converters from fixed point decimal bytes to <code>java.math.BigDecimal</code>, <code>double</code>, or
  * <code>long</code>.
@@ -28,6 +31,9 @@ public class Decimal {
      * Packed Decimal representation
      */
     public final static int PACKED_DECIMAL = 0x30;
+    
+    private static MessageUtil msgutil = new MessageUtil(
+        SqlException.CLIENT_MESSAGE_RESOURCE_NAME);
 
     //--------------------------private constants---------------------------------
 
@@ -243,7 +249,8 @@ public class Decimal {
             return new java.math.BigDecimal(new java.math.BigInteger(signum, magnitude), scale);
         } else {
             // throw an exception here if nibbles is greater than 31
-            throw new java.lang.IllegalArgumentException("Decimal may only be up to 31 digits!");
+            throw new java.lang.IllegalArgumentException(
+                msgutil.getTextMessage(SQLState.DECIMAL_TOO_MANY_DIGITS));
         }
     }
 
@@ -304,7 +311,8 @@ public class Decimal {
                     hi * Math.pow(10, 27 - scale));
         } else {
             // throw an exception here if nibbles is greater than 31
-            throw new java.lang.IllegalArgumentException("Decimal may only be up to 31 digits!");
+            throw new java.lang.IllegalArgumentException(
+                msgutil.getTextMessage(SQLState.DECIMAL_TOO_MANY_DIGITS));
         }
     }
 
@@ -319,7 +327,8 @@ public class Decimal {
                                      int scale) throws java.io.UnsupportedEncodingException {
         if (precision > 31) {
             // throw an exception here if nibbles is greater than 31
-            throw new java.lang.IllegalArgumentException("Decimal may only be up to 31 digits!");
+            throw new java.lang.IllegalArgumentException(
+                msgutil.getTextMessage(SQLState.DECIMAL_TOO_MANY_DIGITS));
         }
 
         // The byte-length of a packed decimal with precision <code>p</code> is always <code>p/2 + 1</code>
@@ -361,10 +370,11 @@ public class Decimal {
                                                            java.math.BigDecimal b,
                                                            int declaredPrecision,
                                                            int declaredScale)
-            throws ConversionException {
+            throws SqlException {
         // packed decimal may only be up to 31 digits.
         if (declaredPrecision > 31) {
-            throw new ConversionException("Packed decimal may only be up to 31 digits!");
+            throw new SqlException(null,
+                new MessageId(SQLState.DECIMAL_TOO_MANY_DIGITS));
         }
 
         // get absolute unscaled value of the BigDecimal as a String.
@@ -374,11 +384,9 @@ public class Decimal {
         int bigPrecision = unscaledStr.length();
 
         if (bigPrecision > 31) {
-            throw new ConversionException("The numeric literal \"" +
-                    b.toString() +
-                    "\" is not valid because its value is out of range.",
-                    "42820",
-                    -405);
+            throw new SqlException(null,
+                new MessageId(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+                "packed decimal", new SqlCode(-405));
         }
 
         int bigScale = b.scale();
@@ -387,11 +395,9 @@ public class Decimal {
             // if whole integer part exists, check if overflow.
             int declaredWholeIntegerLength = declaredPrecision - declaredScale;
             if (bigWholeIntegerLength > declaredWholeIntegerLength) {
-                throw new ConversionException("Overflow occurred during numeric data type conversion of \"" +
-                        b.toString() +
-                        "\".",
-                        "22003",
-                        -413);
+                throw new SqlException(null,
+                    new MessageId(SQLState.NUMERIC_OVERFLOW),
+                    b.toString(), "packed decimal", new SqlCode(-413));
             }
         }
 

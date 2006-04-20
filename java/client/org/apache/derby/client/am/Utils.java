@@ -21,6 +21,8 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLException;
+import org.apache.derby.iapi.types.SQLBit;
+import org.apache.derby.shared.common.i18n.MessageUtil;
 
 // Self-contained utilities.
 // Don't reference any other driver classes, except Configuration, from within this class.
@@ -80,7 +82,10 @@ public final class Utils {
         byte[] bBytes = decimal.unscaledValue().abs().toByteArray();
 
         if (byteArrayCmp(bBytes, tenRadixArr[tenRadixArr.length - 1]) >= 0) {
-            throw new java.lang.IllegalArgumentException("Precision exceeds 31 digits!");
+            throw new java.lang.IllegalArgumentException(
+                MessageUtil.getCompleteMessage("J105",
+                    SqlException.CLIENT_MESSAGE_RESOURCE_NAME,
+                    (Object[])null));
         }
 
         int lo = 0, hi = tenRadixArr.length - 1, mi = (hi + lo) / 2;

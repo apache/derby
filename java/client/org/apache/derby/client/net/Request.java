@@ -1518,24 +1518,14 @@ public class Request {
                                int declaredPrecision,
                                int declaredScale) throws SqlException {
         ensureLength(offset_ + 16);
-        try {
-            int length = org.apache.derby.client.am.Decimal.bigDecimalToPackedDecimalBytes(bytes_, offset_, v, declaredPrecision, declaredScale);
-            offset_ += length;
-        } catch (org.apache.derby.client.am.ConversionException e) {
-            throw new SqlException(netAgent_.logWriter_, e,
-                    "BigDecimal conversion exception " + e.getMessage() + ". See attached Throwable.");
-        }
+        int length = org.apache.derby.client.am.Decimal.bigDecimalToPackedDecimalBytes(bytes_, offset_, v, declaredPrecision, declaredScale);
+        offset_ += length;
     }
 
     final void writeDate(java.sql.Date date) throws SqlException {
-        try {
-            ensureLength(offset_ + 10);
-            org.apache.derby.client.am.DateTime.dateToDateBytes(bytes_, offset_, date);
-            offset_ += 10;
-        } catch (org.apache.derby.client.am.ConversionException e) {
-            throw new SqlException(netAgent_.logWriter_, e,
-                    "Date conversion exception " + e.getMessage() + ". See attached Throwable.");
-        }
+        ensureLength(offset_ + 10);
+        org.apache.derby.client.am.DateTime.dateToDateBytes(bytes_, offset_, date);
+        offset_ += 10;
     }
 
     final void writeTime(java.sql.Time time) throws SqlException {
@@ -1545,14 +1535,9 @@ public class Request {
     }
 
     final void writeTimestamp(java.sql.Timestamp timestamp) throws SqlException {
-        try {
-            ensureLength(offset_ + 26);
-            org.apache.derby.client.am.DateTime.timestampToTimestampBytes(bytes_, offset_, timestamp);
-            offset_ += 26;
-        } catch (org.apache.derby.client.am.ConversionException e) {
-            throw new SqlException(netAgent_.logWriter_, e,
-                    "Timestamp conversion exception " + e.getMessage() + ". See attached Throwable.");
-        }
+        ensureLength(offset_ + 26);
+        org.apache.derby.client.am.DateTime.timestampToTimestampBytes(bytes_, offset_, timestamp);
+        offset_ += 26;
     }
 
     // insert a java boolean into the buffer.  the boolean is written

@@ -21,7 +21,22 @@
 package org.apache.derby.client.am;
 
 public class DisconnectException extends SqlException {
+    public DisconnectException(Agent agent, MessageId msgid, SqlCode sqlcode) {
+        super(agent != null ? agent.logWriter_ : null, msgid, sqlcode);
+    }
 
+    public DisconnectException(Agent agent, MessageId msgid) {
+        super(agent != null ? agent.logWriter_ : null, msgid, 
+            SqlCode.disconnectError);
+        
+        // make the call to close the streams and socket.
+        if (agent != null) {
+            agent.disconnectEvent();
+        }
+    }
+        
+    // Old constructors for backward compatibility until all classes
+    // have been internationalized
     public DisconnectException(Agent agent, String reason, SqlState sqlstate, SqlCode sqlcode) {
         super(agent.logWriter_, reason, sqlstate, sqlcode);
     }

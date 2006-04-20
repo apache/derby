@@ -22,10 +22,19 @@
     }
 
 #
+# Calling super is the same as new SqlException for subclasses...
+#
+/super(/i\
+      try { \
+          testException = new SqlException(
+s/super(//
+
+#
 # Add substitution for various message parameters where you replace
 # the variable with a string containing the variable.  This prevents
 # compile errors saying "symbol not found"
 #
+s/logWriter/null/g
 s/fileName/"fileName"/g
 s/[[:space:]]e.getMessage()/"e.getMessage"/g
 s/Configuration.packageNameForDNC/"Configuration.packageNameForDNC"/g
@@ -43,11 +52,18 @@ s/[[:space:]]e.getClass().getName()/ "exceptionClassName"/g
 s/{e.getClass().getName()/{"exceptionClassName"/g
 s/[[:space:]]sourceType/ "sourceType"/g
 s/[[:space:]]targetType/ "targetType"/g
-s/[[:space:]]columnName/ "columnName"/g
+s/[[:space:]]columnName)/ "columnName")/g
 s/[[:space:]]charsetName/ "charsetName"/g
 s/[[:space:]]cursorName/ "cursorName"/g
 s/[[:space:]]cursorName/ "cursorName"/g
 s/[[:space:]]methodName/ "methodName"/g
+s/[[:space:]]instance/ "instance"/g
+s/[[:space:]]method)/ "method")/g
+s/[[:space:]]b.toString()/ "bytes"/g
+s/[[:space:]]jdbcInterfaceName/ "jdbcInterfaceName"/g
+s/[[:space:]]jdbcStatementInterfaceName/ "jdbcInterfaceName"/g
+s/[[:space:]]name)/ "name")/g
+s/[[:space:]]sql)/ "sql")/g
 
 # 
 # Deal with extra updateCounts argument to BatchUpdateExceptoins.

@@ -22,6 +22,8 @@ package org.apache.derby.client.am;
 
 import org.apache.derby.shared.common.reference.JDBC30Translation;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 
 public class SectionManager {
     String collection_;
@@ -116,7 +118,9 @@ public class SectionManager {
         } else if (resultSetHoldability == JDBC30Translation.CLOSE_CURSORS_AT_COMMIT) {
             return getSection(freeSectionsNonHold_, packageNameWithNoHold__, cursorNamePrefixWithNoHold__, resultSetHoldability);
         } else {
-            throw new SqlException(agent_.logWriter_, "resultSetHoldability property " + resultSetHoldability + " not supported");
+            throw new SqlException(agent_.logWriter_,
+                new MessageId(SQLState.UNSUPPORTED_HOLDABILITY_PROPERTY), 
+                new Integer(resultSetHoldability));
         }
     }
 
@@ -131,7 +135,9 @@ public class SectionManager {
         } else
         // unfortunately we have run out of sections
         {
-            throw new SqlException(agent_.logWriter_, "Run out of sections to use,sections limited to 32k currently");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.EXCEEDED_MAX_SECTIONS),
+                "32k");
         }
     }
 
@@ -183,8 +189,8 @@ public class SectionManager {
     ResultSet getPositionedUpdateResultSet(String cursorName) throws SqlException {
         ResultSet rs = (ResultSet) positionedUpdateCursorNameToResultSet_.get(cursorName);
         if (rs == null) {
-            throw new SqlException(agent_.logWriter_, "ResultSet for cursor " +
-                    cursorName + " is closed.");
+            throw new SqlException(agent_.logWriter_, 
+                new MessageId(SQLState.CLIENT_RESULT_SET_NOT_OPEN));
         }
         return (rs.resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) ? null : rs;
     }

@@ -1,5 +1,5 @@
 Test scrollCurors2 starting
-Invalid maxRows value: -1
+Invalid parameter value '-1' for Statement.setMaxRows(int maxRows).  Parameter value must be >= 0.
 This method should only be called on ResultSet objects that are scrollable (type TYPE_SCROLL_SENSITIVE or TYPE_SCROLL_INSENSITIVE).
 This method should only be called on ResultSet objects that are scrollable (type TYPE_SCROLL_SENSITIVE or TYPE_SCROLL_INSENSITIVE).
 This method should only be called on ResultSet objects that are scrollable (type TYPE_SCROLL_SENSITIVE or TYPE_SCROLL_INSENSITIVE).
@@ -14,7 +14,7 @@ warning = java.sql.SQLWarning: Scroll sensitive result sets are not supported by
 warning = java.sql.SQLWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
 warning = java.sql.SQLWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
 warning = java.sql.SQLWarning: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
-Invalid maxRows value: -1
+Invalid parameter value '-1' for Statement.setMaxRows(int maxRows).  Parameter value must be >= 0.
 Invalid parameter value '-5' for ResultSet.setFetchSize(int rows).
 warning = java.sql.SQLWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
 warning = java.sql.SQLWarning: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor

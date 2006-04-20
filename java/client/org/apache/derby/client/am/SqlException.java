@@ -86,6 +86,11 @@ public class SqlException extends Exception implements Diagnosable {
     public static String CLIENT_MESSAGE_RESOURCE_NAME =
         "org.apache.derby.loc.clientmessages";
     
+    // Constants for message ids used in text we print out -- not used
+    // in SqlExceptions
+    public static final String CAUSED_BY_EXCEPTION_ID           = "J106";
+    public static final String BATCH_POSITION_ID                = "J107";
+    
     //SQLException factory initialised with default factory
     //It will be over written by the SQLException factory of the 
     //supported jdbc version    
@@ -124,6 +129,30 @@ public class SqlException extends Exception implements Diagnosable {
         if ( cause != null ) {
             this.setThrowable(cause);
         }
+    }
+    
+    /**
+     * Use this to override the standard error code that is derived
+     * from the message severity
+     */
+    public SqlException(LogWriter logWriter, MessageId msgid, Object[] args,
+        SqlCode sqlcode) {
+        this(logWriter, msgid, args);
+        this.errorcode_ = sqlcode.getCode();
+    }
+        
+    public SqlException(LogWriter logWriter, MessageId msgid, SqlCode sqlcode) {
+        this(logWriter, msgid, (Object[])null, sqlcode);
+    }
+    
+    public SqlException(LogWriter logWriter, MessageId msgid, Object arg1,
+        SqlCode sqlcode) {
+        this(logWriter, msgid, new Object[] {arg1}, sqlcode);
+    }
+        
+    public SqlException(LogWriter logWriter, MessageId msgid, Object arg1,
+        Object arg2, SqlCode sqlcode) {
+        this(logWriter, msgid, new Object[] {arg1, arg2}, sqlcode);
     }
  
     public SqlException (LogWriter logwriter, 
@@ -225,7 +254,8 @@ public class SqlException extends Exception implements Diagnosable {
             // by getMessage() when it composes the message string.
             if (JVMInfo.JDK_ID < JVMInfo.J2SE_14 )
             {
-                causeString_ = " Caused by exception " + 
+                causeString_ = " " + 
+                    msgutil_.getTextMessage(CAUSED_BY_EXCEPTION_ID)  + " " +
                     throwable.getClass() + ": " + throwable.getMessage();
             }
             else
@@ -331,7 +361,8 @@ public class SqlException extends Exception implements Diagnosable {
     // when getMessage() is called.
     // Called by the Agent.
     void setBatchPositionLabel(int index) {
-        batchPositionLabel_ = "Error for batch element #" + index + ": ";
+        batchPositionLabel_ = msgutil_.getTextMessage(BATCH_POSITION_ID) + 
+            index + ": ";
     }
 
     public Sqlca getSqlca() {
@@ -467,31 +498,6 @@ public class SqlException extends Exception implements Diagnosable {
 }
 
 // An intermediate exception encapsulation to provide code-reuse
-// for common ResultSet and ResultSetMetaData column access exceptions.
-
-class ColumnIndexOutOfBoundsException extends SqlException {
-    ColumnIndexOutOfBoundsException(LogWriter logWriter, Throwable throwable, int resultSetColumn) {
-        super(logWriter, throwable,
-                "Invalid argument:" +
-                " Result column index " + resultSetColumn + " is out of range.");
-    }
-}
-
-// An intermediate exception encapsulation to provide code-reuse
-// for common ResultSet data conversion exceptions.
-
-class NumberFormatConversionException extends SqlException {
-    NumberFormatConversionException(LogWriter logWriter, String instance) {
-        super(logWriter,
-                "Invalid data conversion:" +
-                " Result column instance " +
-                instance +
-                " is either an invalid numeric representation" +
-                " or is out of range.");
-    }
-}
-
-// An intermediate exception encapsulation to provide code-reuse
 // for common ResultSet data conversion exceptions.
 
 class ColumnTypeConversionException extends SqlException {
@@ -508,9 +514,7 @@ class ColumnTypeConversionException extends SqlException {
 
 class LossOfPrecisionConversionException extends SqlException {
     LossOfPrecisionConversionException(LogWriter logWriter, String instance) {
-        super(logWriter,
-                "Invalid data conversion:" +
-                "Requested conversion would result in a loss of precision of " +
-                instance);
+        super(logWriter, new MessageId(SQLState.LOSS_OF_PRECISION_EXCEPTION), 
+            instance);
     }
 }
