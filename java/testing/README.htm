@@ -100,6 +100,9 @@ test</a> </p>
   <li><a href="#hostName">4.14 Testing with Network Server on a remote
 host</a></li>
   <li>
+    <p><a href="#4.15_Encoding_issues">4.15 Encoding Issues</a></p>
+  </li>
+  <li>
     <p><a
  href="./org/apache/derbyTesting/functionTests/tests/junitTests/compatibility/README.html">5.
 Compatibility Tests</a></p>
@@ -666,6 +669,17 @@ simple ascii scope do not result in errors. </p>
     </ul>
   </li>
   <li>
+    <p>encodingTests</p>
+  </li>
+  <ul>
+    <li>
+      <p>runs tests with derbyTesting=UTF-16. </p>
+    </li>
+    <li>
+      <p>takes 2 to 5 minutes</p>
+    </li>
+  </ul>
+  <li>
     <p style="margin-bottom: 0in;">derbyall </p>
     <ul>
       <li>
@@ -850,7 +864,12 @@ compared to. </p>
   <li>
     <p>a .pass or .fail file. This file lists the test if it passes
 under .pass, and under .fail if the output in .out is different from
-the expected output in the master. </p>
+the expected output in the master.</p>
+  </li>
+  <li>
+    <p>.tmpmstr file. This file is a copy of the master file created in
+local encoding, and in the case of networkserver, massaged to eliminate
+irrelevant differences. This is the file the .out file is compared with.</p>
   </li>
 </ul>
 <p>possibly created:</p>
@@ -861,13 +880,16 @@ test may get copied over to the test directory. These normally do not
 get cleaned up. </p>
   </li>
   <li>
-    <p style="margin-bottom: 0in;">.tmpstr file is created for network
-server tests and is a possibly massaged copy of the master file the
-output needs to be compared with. </p>
+    <p>.err and .out files in network server database files for any
+additional error output.</p>
   </li>
   <li>
-    <p>.err and .out files in network server database files for any
-additional error output. </p>
+    <p>one or more database directories</p>
+  </li>
+  <li>
+    <p>.utf8out file - see section on <a href="#4.15_Encoding_issues">Encoding</a>
+Issues.<br>
+    </p>
   </li>
 </ul>
 <p>When the test is successful, cleanup will occur unless the test
@@ -1067,14 +1089,13 @@ org/apache/derbyTesting/unitTests. These tests test more underlying
 functionality than the (rest of the) functionTests, which are more
 geared toward how end-users might use functionality.</p>
   </li>
-  <li>.junit&nbsp;&nbsp;&nbsp;&nbsp; junit tests. These require
+  <li>
+    <p>.junit&nbsp;&nbsp;&nbsp;&nbsp; junit tests. These require
 junit.jar to run and are actually run with junit.textui.TestRunner. The
-actual tests are .java files. <br>
+actual tests are .java files.<br>
+    </p>
   </li>
 </ul>
-<p><br>
-<br>
-</p>
 <h3><a name="mozTocId809770"></a><a name="ov2"></a>4.2 Supporting
 files for tests</h3>
 <p>Various additional files may be used by a test, for instance, to
@@ -1089,7 +1110,11 @@ changes to the _app.properties files. </p>
 <p>For example, in the file
 (org/apache/derbyTesting/functionTests/tests/)tools/dblook_test_app.properties:<br>
 &nbsp;&nbsp;&nbsp;
-<font size="2">supportfiles=tools/dblook_makeDB.sql,tools/dblook_test.jar</font></p>
+<font size="2">supportfiles=tools/dblook_makeDB.sql,tools/dblook_test.jar<br>
+</font></p>
+<p>To support running on non-ISO-5889 systems, the harness copies files
+ending in sql, .view, .multi, .properties, .txt and .policy into local
+encoding; all other files are copied into UTF-8 encoding.</p>
 <h3><a name="mozTocId427577"></a><a name="ov3"></a>4.3
 &lt;testname&gt;_app.properties</h3>
 <p>Every test directory has a default_app.properties. This file is
@@ -1208,7 +1233,7 @@ remove a string from the output or to replace it. </p>
   </li>
 </ol>
 <p>The diff is executed between the final resulting output and the
-master file found.</p>
+master file found copied into local encoding as .tmpmstr.</p>
 <h3><a name="Adding_a_new_test"></a>4.7&nbsp; Adding a new test</h3>
 <p>To add a new test: </p>
 <ul>
@@ -1237,8 +1262,21 @@ the test will fail because no master file will be found. </p>
   </li>
   <li>
     <p style="margin-bottom: 0in;">if the output is correct, copy it to
-the master directory. Note that there is no copyfiles.ant file needed
-for the master directory, all .out files are automatically copied. </p>
+the master directory.&nbsp; If you are running the on a non-ISO5889
+encoded system, run the test with -DgenerateUTF8Out=true. This will
+create a .utf8out file in fixed UTF-8 encoding - use that file to copy
+into svn.<br>
+    </p>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">Build. This will copy the newly
+created master into a matching directory structure in the classes
+directory and, when building jars, the master files will be included in
+the
+derbyTesting.jar, so it can be found by the harness at run time. Note
+that there is no copyfiles.ant file needed
+for the master directory, all .out files are automatically copied to
+the classes directory on build. </p>
   </li>
   <li>
     <p style="margin-bottom: 0in;">run the test again. Investigate if
@@ -1271,10 +1309,16 @@ different from what is defined in the &lt;test&gt;_app.properties file.
 For instance, to shutdown a database one can use:</p>
   </li>
 </ul>
-<div style="margin-left: 80px;">TestUtil.getConnection("wombat","shutdown=true");</div>
+<div style="margin-left: 80px;">
+<p>TestUtil.getConnection("wombat","shutdown=true");</p>
+</div>
 <ul>
   <ul>
   </ul>
+  <li>
+    <p>ensure that the test does not cause any problems on non-ISO-5889
+systems. See section <a href="#4.15_Encoding_issues">4.15.</a></p>
+  </li>
   <li>
     <p style="margin-bottom: 0in;">ensure the test does not have hard
 coded 'localhost' for network
@@ -1286,7 +1330,10 @@ a hostName was specified for remote server testing.</p>
 suites/*.xml file, maintaining proper xml syntax. </p>
   </li>
   <li>
-    <p>run the suite, and correct any problems found. </p>
+    <p>run the suite, and correct any problems found.</p>
+  </li>
+  <li>make sure you svn add all new files, and that the svn:eol-style
+is native for all text files, and not for any binary files.<br>
   </li>
 </ul>
 <p><br>
@@ -1564,7 +1611,8 @@ encoding. Only supported with jdk15. Example: <br>
 -DderbyTesting.encoding=UTF-16
 org.apache.derbyTesting.functionTests.harness.RunTest
 jdbcapi/resultset.java</small><br>
-      <br>
+generateUTF8Out - copies the test .out into UTF-8 encoding. See section
+      <a href="#4.15_Encoding_issues">4.15</a>.<br>
       </td>
     </tr>
   </tbody>
@@ -1707,7 +1755,7 @@ hostName, like so:</li>
 </ol>
 </div>
 <table
- style="width: 786px; height: 31px; text-align: left; margin-right: auto; margin-left: 40px;"
+ style="text-align: left; margin-right: auto; margin-left: 40px; height: 31px; width: 786px;"
  border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
@@ -1798,7 +1846,108 @@ New .exclude files for the current frameworks (i.e.
 DerbyNetRemote.exclude and DerbyNetClientRemote.exclude) have been
 created to skip some tests that cannot be run against a remote server
 because of those implications. <br>
-<br>
+<h3><a name="encoding"></a></h3>
+<h3><a name="4.15_Encoding_issues"></a>4.15 Encoding issues</h3>
+<p>There are three aspects to dealing with encoding issues, how to run
+a test with specific encoding, what to do to ensure a test can be run
+without relying on a certain encoding, and how to generate test output
+in fixed encoding.<br>
+</p>
+<ul>
+  <li>
+    <h4>Run a test with a specific encoding</h4>
+  </li>
+</ul>
+<p style="margin-left: 40px;">To force a specific test to run with a
+specific
+encoding one can use the property derbyTesting.encoding. This is
+currently only supported with jdk15. For instance,
+to run a specific .java test one time only with
+-DderbyTesting.encoding:
+</p>
+<table
+ style="margin-left: auto; margin-right: auto; text-align: left; height: 32px; width: 760px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">java
+-DderbyTesting.encoding=UTF-16
+org.apache.derbyTesting.functionTests.harness.RunTest
+jdbcapi/lobStreams.java<small><br>
+      </small></td>
+    </tr>
+  </tbody>
+</table>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; The test
+encodingTests contains tests that run with derbyTesting.encoding=UTF-16
+in the encodingTests.properties file:</p>
+<table style="width: 50%; text-align: left; margin-left: 40px;"
+ border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">derbyTesting.encoding=UTF-16</td>
+    </tr>
+  </tbody>
+</table>
+<ul>
+  <li>
+    <h4>ensure running on non-ISO-5889 systems is possible</h4>
+  </li>
+</ul>
+<p style="margin-left: 40px;">Special care is required to ensure that
+individual tests can be run successfully on non-ISO-5889 systems. This
+includes:<br>
+</p>
+<ul style="margin-left: 40px;">
+  <li>
+    <p>Ensure reading of files is done in an appropriate manner. The
+test harness will copy supportfiles with extension .*sql, .multi,
+.view, .txt, .properties, and .policy in local encoding. This means,
+that accessing such a file should be done with an appropriate
+mechanism; i.e. from within ij (i.e. a .sql test) use 'run', and from
+within a .java test use FileReader. The test harness will copy other
+supportfiles in fixed encoding, i.e. using UTF-8. To access these files
+and you will have to use an input mechanism that supports specifying
+of&nbsp; the encoding, such as FileInputStream and BufferedReader.
+Various .sql tests that run other .sql scripts use the test-specific
+mechanismn in ij to access files from the classpath: 'run resource'.
+This construct assumes the files listed are in the classpath - the
+classes dir or derbyTesting.jar - and they are assumed to be in UTF-8.</p>
+  </li>
+  <li>
+    <p>Avoid usage of non-encoding safe constructors for Strings. i.e.
+Avoid String(byte[]) and String(byte[],int,int) to create a string.</p>
+  </li>
+</ul>
+<p style="margin-left: 40px;"> </p>
+<ul>
+  <li>
+    <h4>Generating master files on non-ISO-5889 systems</h4>
+  </li>
+</ul>
+<ul style="margin-left: 40px;">
+  <li>
+    <p>Special care is required when developing tests and running them
+on non-ISO-5889 systems. The output files cannot be checked into a svn
+tree which is assumed to be ISO-5889 compatible. To avoid surprises,
+use the property -DgenerateUTF8Out which will create a .utf8out file
+which is a copy of the test output converted into UTF-8. Be careful not
+to let a file transfer program modify this file (for instance. ftp in
+ascii mode may try to convert the file).<br>
+    </p>
+    <table style="width: 90%; text-align: left;" border="1"
+ cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">java
+-DgenerateUTF8Out=true
+org.apache.derbyTesting.functionTests.harness.RunTest
+lang/supersimple.sql</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
 <h2>Notes</h2>
 <p style="margin-bottom: 0in;"><a name="Note1:"></a><font size="2">Note1:</font></p>
 <p style="margin-left: 0.42in; margin-bottom: 0in;"><font size="2">A

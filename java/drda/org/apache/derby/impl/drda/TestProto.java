@@ -20,21 +20,21 @@
 
 package org.apache.derby.impl.drda;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.DataOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileReader;
 import java.io.StreamTokenizer;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Hashtable;
 import java.util.Enumeration;
-import java.util.Vector;
+import java.util.Hashtable;
 import java.util.Locale;
-import java.io.UnsupportedEncodingException;
-import java.io.FileNotFoundException;
+import java.util.Vector;
 
 /**
 	This class is used to test error conditions in the protocol.
@@ -178,16 +178,16 @@ public class TestProto {
 		String prev_filename = current_filename;
 		current_filename = filename;
         	String hostName=getHostName();
-		FileReader fr;
+		BufferedReader fr;
                 try
 		{
-			fr = new FileReader(filename);
+			fr = new BufferedReader(new InputStreamReader(new FileInputStream(filename),"UTF-8"));
 		} catch (FileNotFoundException fnfe) {
 			// if useprocess=false & we're running in a suite, 
 			// the location is different, try it
 			String userdir =  System.getProperty("user.dir");
 			String sep =  System.getProperty("file.separator");
-			fr = new FileReader(userdir + sep + ".." + sep + filename);
+			fr = new BufferedReader (new InputStreamReader(new FileInputStream(userdir + sep + ".." + sep + filename),"UTF-8"));
 		}
 		tkn = new StreamTokenizer(fr);
 		int val;
