@@ -20,7 +20,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
