@@ -20,8 +20,8 @@
 
   <target name="compile">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.3"
+      target="1.3"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -34,13 +34,13 @@
       destdir="${out.dir}"
       includes="Simple*">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java13compile.classpath}"/>
         <pathelement location="${jcc}"/>
       </classpath>
     </javac>
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.3"
+      target="1.3"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -54,7 +54,7 @@
       includes="nserverdemo/**"
       excludes="nserverdemo/Simple*">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java13compile.classpath}"/>
         <pathelement location="${jcc}"/>
       </classpath>
     </javac>

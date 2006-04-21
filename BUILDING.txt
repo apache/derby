@@ -11,7 +11,7 @@ Contents
 2     Downloads
 2.1   Download source code
 2.2   Download required software
-2.2.1 Download and install Apache Ant 1.6.x2
+2.2.1 Download and install Apache Ant 1.6.3 or higher
 2.2.2 Download and install Java Development Kit release 1.4.x
 2.2.3 Download and install Java Development Kit release 1.3.x
 2.2.4 Download extensions for Java Development Kit release 1.3.x
@@ -118,7 +118,7 @@ Notes:
 
 
 
-2.2.1 Download and install Apache Ant 1.6.x
+2.2.1 Download and install Apache Ant 1.6.3 or higher
 
 (1) Download a binary distribution of Ant 1.6.x from:
          http://ant.apache.org/bindownload.cgi
