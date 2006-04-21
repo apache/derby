@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -38,9 +39,11 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.tools.ij;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  * This class is used to test the implementations of the JDBC 4.0 methods
@@ -183,10 +186,9 @@ public class TestConnectionMethods {
     }
 
     /**
-     * Test the Connection.isValid method in the embedded driver.
+     * Test the Connection.isValid method
      */
-    void t_isValid_Embed() {
-
+    void t_isValid() {
         /*
          * Test illegal parameter values
          */
@@ -243,9 +245,7 @@ public class TestConnectionMethods {
                                "Unexpected exception: " + e);
         }
 
-        /*
-         * Open a new connection and test it
-         */
+        /* Open a new connection and test it */
         try {
             conn = ij.startJBMS();
         } catch (Exception e) {
@@ -264,17 +264,11 @@ public class TestConnectionMethods {
         }
 
         /*
-         * Test on stopped DB: stop Derby
+         * Test on stopped database
          */
-        try {
-            DriverManager.getConnection("jdbc:derby:;shutdown=true");
-        } catch(SQLException e) {
-            // Ignore any exceptions from shutdown
-        }
+        shutdownDatabase();
 
-        /*
-         * Test if the connection is still valid
-         */
+        /* Test if that connection is not valid */
         try {
             if (conn.isValid(0)) {
                 System.out.println("FAIL: isValid(0) on stopped database: " + 
@@ -285,16 +279,15 @@ public class TestConnectionMethods {
                                "Unexpected exception: " + e);
         } 
 
-        /*
-         * Start Derby by getting a new connection and check that
-         * the new connection is valid.
-         */
+        /* Start the database by getting a new connection to it */
         try {
             conn = ij.startJBMS();
         } catch (Exception e) {
             System.out.println("FAIL: failed to re-start database: " +
                                "Unexpected exception: " + e);
         }
+
+        /* Check that a new connection to the newly started database is valid */
         try {
             if (!conn.isValid(0)) {
                 System.out.println("FAIL: isValid(0) on new connection: " + 
@@ -304,22 +297,52 @@ public class TestConnectionMethods {
             System.out.println("FAIL: isValid(0) on new connection: " + 
                                "Unexpected exception: " + e);
         }
-    }
 
-    void t_isValid_Client() {
-        boolean ret;
-        try {
-            ret = conn.isValid(0);
-            System.out.println("unimplemented exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
+        /*
+         * Test on stopped Network Server client
+         */
+        if ( !usingEmbeddedClient() ) {
+            stopNetworkServer();
+
+            /* Test that the connection is not valid */
+            try {
+                if (conn.isValid(0)) {
+                    System.out.println("FAIL: isValid(0) on stopped database: " +
+                                      "returned true");
+                }
+            } catch(Exception e) {
+                System.out.println("FAIL: isValid(0) on a stopped database: " + 
+                                   "Unexpected exception: " + e);
+            } 
+
+            /*
+             * Start the network server and get a new connection and check that
+             * the new connection is valid.
+             */
+            startNetworkServer();
+
+            try {
+                // Get a new connection to the database
+                conn = ij.startJBMS();
+            } catch (Exception e) {
+                System.out.println("FAIL: failed to re-start database: " +
+                                   "Unexpected exception: " + e);
+                e.printStackTrace();
             }
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught in function"+e);
+
+            /* Check that a new connection to the newly started Derby is valid */
+            try {
+                if (!conn.isValid(0)) {
+                    System.out.println("FAIL: isValid(0) on new connection: " + 
+                                       "returned false");
+                }
+            } catch(Exception e) {
+                System.out.println("FAIL: isValid(0) on new connection: " + 
+                                  "Unexpected exception: " + e);
+            }
         }
     }
-    
+
     void t_setClientInfo1(){
         try {
             conn.setClientInfo("prop1","value1");
@@ -435,7 +458,7 @@ public class TestConnectionMethods {
         t_createBlob_Client();
         t_createNClob();
         t_createSQLXML();
-        t_isValid_Client();
+        t_isValid();
         t_setClientInfo1();
         t_setClientInfo2();
         t_getClientInfo1();
@@ -448,13 +471,96 @@ public class TestConnectionMethods {
         t_createBlob();
         t_createNClob();
         t_createSQLXML();
-        t_isValid_Embed();
+        t_isValid();
         t_setClientInfo1();
         t_setClientInfo2();
         t_getClientInfo1();
         t_getClientInfo2();
         t_wrapper();
     }
+
+    /**
+     * Shut down the test database
+     */
+    private void shutdownDatabase() {
+        try {
+            // Get the name for the database from the test's property file
+            String databaseName = System.getProperty("ij.dataSource.databaseName");
+            if (databaseName != null) {
+                TestUtil.getConnection(databaseName, "shutdown=true");
+            }
+            else {
+                System.out.println("FAIL: shutdownDatabase: " +
+                           "property ij.dataSource.databaseName not defined");
+            }
+	 } catch (Exception e) {
+            // Ignore any exeptions from shutdown
+	 }
+    }
+
+
+    /**
+     * Stop the network server
+     */
+    private void stopNetworkServer() {
+        try {
+            NetworkServerControl networkServer = new NetworkServerControl();
+            networkServer.shutdown();
+        } catch(Exception e) {
+            System.out.println("INFO: Network server shutdown returned: " + e);
+        }
+    }
+
+
+    /**
+     * Start the network server
+     */
+    private void startNetworkServer() {
+        String hostName = null;
+        int serverPort;
+
+        // Determines which host and port to run the network server on
+        // This is based how it is done in the test testSecMec.java
+        String serverName = TestUtil.getHostName();
+        if (serverName.equals("localhost")) {
+            serverPort = 1527;
+        }
+        else {
+            serverPort = 20000;
+        }
+
+        try {
+            NetworkServerControl networkServer = 
+                     new NetworkServerControl(InetAddress.getByName(serverName), 
+                                              serverPort);
+            networkServer.start(null);
+
+            // Wait for the network server to start
+            boolean started = false;
+            int retries = 10;         // Max retries = max seconds to wait
+            while (!started && retries > 0) {
+                try {
+                    // Sleep 1 second and then ping the network server
+		      Thread.sleep(1000);
+                    networkServer.ping();
+
+                    // If ping does not throw an exception the server has started
+                    started = true;
+                } catch(Exception e) {
+                    System.out.println("INFO: ping returned: " + e);
+                    retries--;
+	         }
+	     }
+
+            // Check if we got a reply on ping
+            if (!started) {
+                System.out.println("FAIL: Failed to start network server");
+            }
+        } catch (Exception e) {
+            System.out.println("FAIL: startNetworkServer got exception: " + e);
+        }
+    }
+
 
 	/**
 	 * <p>

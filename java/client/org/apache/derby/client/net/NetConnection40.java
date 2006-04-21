@@ -28,6 +28,8 @@ import java.sql.Blob;
 import java.sql.ClientInfoException;
 import java.sql.Clob;
 import java.sql.NClob;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.util.Properties;
@@ -37,7 +39,13 @@ import org.apache.derby.client.am.MessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class  NetConnection40 extends org.apache.derby.client.net.NetConnection {
-    
+    /**
+     * Prepared statement that is used each time isValid() is called on this
+     * connection. The statement is created the first time isValid is called
+     * and closed when the connection is closed (by the close call).
+     */
+    private PreparedStatement isValidStmt = null;
+
     /*
      *-------------------------------------------------------
      * JDBC 4.0 
@@ -117,10 +125,71 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
         throw SQLExceptionFactory.notImplemented ("createSQLXML ()");
     }
 
+    /**
+     * Checks if the connection has not been closed and is still valid. 
+     * The validity is checked by running a simple query against the 
+     * database.
+     *
+     * @param timeout The time in seconds to wait for the database
+     * operation used to validate the connection to complete. If the 
+     * timeout period expires before the operation completes, this 
+     * method returns false. A value of 0 indicates a timeout is not 
+     * applied to the database operation.
+     * @return true if the connection is valid, false otherwise
+     * @exception SQLException if the parameter value is illegal or if a
+     * database error has occured
+     */
     public boolean isValid(int timeout) throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("isValid ()");
+        // Validate that the timeout has a legal value
+        if (timeout < 0) {
+            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,
+                                              new Integer(timeout), "timeout",
+                                              "java.sql.Connection.isValid");
+        }
+
+        // Check if the connection is closed
+        if (isClosed()) {
+            return false;
+        }
+
+        // Do a simple query against the database
+        synchronized(this) {
+            try {
+                // If this is the first time this method is called on this 
+                // connection we prepare the query 
+                if (isValidStmt == null) {
+                    isValidStmt = prepareStatement("VALUES (1)");
+                }
+
+                // Set the query timeout
+                isValidStmt.setQueryTimeout(timeout);
+
+                // Run the query against the database
+                ResultSet rs = isValidStmt.executeQuery();
+                rs.close();
+            } catch(SQLException e) {
+                // If an SQL exception is thrown the connection is not valid,
+                // we ignore the exception and return false.
+                return false;
+            }
+	 }
+
+        return true;  // The connection is valid
     }
 
+    /**
+     * Close the connection and release its resources. 
+     * @exception SQLException if a database-access error occurs.
+     */
+    synchronized public void close() throws SQLException {
+        // Release resources owned by the prepared statement used by isValid
+        if (isValidStmt != null) {
+            isValidStmt.close();
+            isValidStmt = null;
+        }
+        super.close();
+    }
+   
     public void setClientInfo(String name, String value)
 		throws SQLException{
 	throw SQLExceptionFactory.notImplemented ("setClientInfo (String, String)");
