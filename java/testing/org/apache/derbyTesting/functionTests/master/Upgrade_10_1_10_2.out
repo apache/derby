@@ -751,14 +751,14 @@ getSearchStringEscape():
 getSQLKeywords(): ALIAS,BIGINT,BOOLEAN,CALL,CLASS,COPY,DB2J_DEBUG,EXECUTE,EXPLAIN,FILE,FILTER,GETCURRENTCONNECTION,INDEX,INSTANCEOF,METHOD,NEW,OFF,PROPERTIES,PUBLICATION,RECOMPILE,REFRESH,RENAME,RUNTIMESTATISTICS,STATEMENT,STATISTICS,TIMING,WAIT
 getDefaultTransactionIsolation(): 2
 getProcedures():
-PROCEDURE_CAT[VARCHAR],PROCEDURE_SCHEM[VARCHAR],PROCEDURE_NAME[VARCHAR],RESERVED1[INTEGER],RESERVED2[INTEGER],RESERVED3[INTEGER],REMARKS[VARCHAR],PROCEDURE_TYPE[SMALLINT]
-,APP,GETPCTEST1,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1
-,APP,GETPCTEST2,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1
-,APP,GETPCTEST3A,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1
-,APP,GETPCTEST3B,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1
-,APP,GETPCTEST4A,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4a,1
-,APP,GETPCTEST4B,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b,1
-,APP,GETPCTEST4BX,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b,1
+PROCEDURE_CAT[VARCHAR],PROCEDURE_SCHEM[VARCHAR],PROCEDURE_NAME[VARCHAR],RESERVED1[INTEGER],RESERVED2[INTEGER],RESERVED3[INTEGER],REMARKS[VARCHAR],PROCEDURE_TYPE[SMALLINT],SPECIFIC_NAME[VARCHAR]
+,APP,GETPCTEST1,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST2,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST3A,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST3B,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST4A,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4a,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST4B,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST4BX,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b,1,xxxxGENERATED-IDxxxx
 getFunctions(null,null,null):
 FUNCTION_CAT[VARCHAR],FUNCTION_SCHEM[VARCHAR],FUNCTION_NAME[VARCHAR],REMARKS[VARCHAR],SPECIFIC_NAME[VARCHAR]
 null,APP,DUMMY1,java.some.func,xxxxGENERATED-IDxxxx
@@ -2168,14 +2168,14 @@ getSearchStringEscape():
 getSQLKeywords(): ALIAS,BIGINT,BOOLEAN,CALL,CLASS,COPY,DB2J_DEBUG,EXECUTE,EXPLAIN,FILE,FILTER,GETCURRENTCONNECTION,INDEX,INSTANCEOF,METHOD,NEW,OFF,PROPERTIES,PUBLICATION,RECOMPILE,REFRESH,RENAME,RUNTIMESTATISTICS,STATEMENT,STATISTICS,TIMING,WAIT
 getDefaultTransactionIsolation(): 2
 getProcedures():
-PROCEDURE_CAT[VARCHAR],PROCEDURE_SCHEM[VARCHAR],PROCEDURE_NAME[VARCHAR],RESERVED1[INTEGER],RESERVED2[INTEGER],RESERVED3[INTEGER],REMARKS[VARCHAR],PROCEDURE_TYPE[SMALLINT]
-,APP,GETPCTEST1,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1
-,APP,GETPCTEST2,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1
-,APP,GETPCTEST3A,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1
-,APP,GETPCTEST3B,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1
-,APP,GETPCTEST4A,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4a,1
-,APP,GETPCTEST4B,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b,1
-,APP,GETPCTEST4BX,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b,1
+PROCEDURE_CAT[VARCHAR],PROCEDURE_SCHEM[VARCHAR],PROCEDURE_NAME[VARCHAR],RESERVED1[INTEGER],RESERVED2[INTEGER],RESERVED3[INTEGER],REMARKS[VARCHAR],PROCEDURE_TYPE[SMALLINT],SPECIFIC_NAME[VARCHAR]
+,APP,GETPCTEST1,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST2,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST3A,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST3B,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST4A,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4a,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST4B,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b,1,xxxxGENERATED-IDxxxx
+,APP,GETPCTEST4BX,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b,1,xxxxGENERATED-IDxxxx
 getFunctions(null,null,null):
 FUNCTION_CAT[VARCHAR],FUNCTION_SCHEM[VARCHAR],FUNCTION_NAME[VARCHAR],REMARKS[VARCHAR],SPECIFIC_NAME[VARCHAR]
 null,APP,DUMMY1,java.some.func,xxxxGENERATED-IDxxxx

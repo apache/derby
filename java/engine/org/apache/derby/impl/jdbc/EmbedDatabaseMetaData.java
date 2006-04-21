@@ -1416,6 +1416,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> procedureNoResult - Does not return a result
      *      <LI> procedureReturnsResult - Returns a result
      *      </UL>
+     *  <LI><B>SPECIFIC_NAME</B> String => The name which uniquely 
+     *  identifies this procedure within its schema (since JDBC 4.0)
      *  </OL>
      *
      * @param catalog a catalog name; "" retrieves those without a
@@ -1425,13 +1427,16 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @param procedureNamePattern a procedure name pattern
      * @return ResultSet - each row is a procedure description
      * @see #getSearchStringEscape
-	 * @exception SQLException thrown on failure.
+     * @exception SQLException thrown on failure.
      */
 	public ResultSet getProcedures(String catalog, String schemaPattern,
 			String procedureNamePattern) throws SQLException {
 
+        // Using the new JDBC 4.0 version of the query here. The query
+        // was given a new name to allow the old query to
+        // be used by ODBCMetaDataGenerator.
 		return doGetProcs(catalog, schemaPattern,
-			procedureNamePattern, "getProcedures");
+			procedureNamePattern, "getProcedures40");
 	}
 
 	/**
@@ -1442,6 +1447,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public ResultSet getProceduresForODBC(String catalog, String schemaPattern,
 			String procedureNamePattern) throws SQLException {
 
+        // For ODBC we still use the transformed version of the JDBC
+        // 3.0 query, (may change in the future).
 		return doGetProcs(catalog, schemaPattern,
 			procedureNamePattern, "odbc_getProcedures");
 	}
