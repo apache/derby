@@ -779,6 +779,21 @@ restartScan:
 		throw Util.notImplemented();
 	}
 
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //	JDBC 4.0	-	New public methods
+    //
+    /////////////////////////////////////////////////////////////////////////
+	
+    public void free()
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public java.io.Reader getCharacterStream(long pos, long length)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
 
 	/*
 	**

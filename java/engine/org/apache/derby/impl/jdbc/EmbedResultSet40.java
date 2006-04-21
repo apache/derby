@@ -20,11 +20,13 @@
 
 package org.apache.derby.impl.jdbc;
 
+import org.apache.derby.iapi.sql.ResultSet;
+
+import java.io.Reader;
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
-import org.apache.derby.iapi.sql.ResultSet;
 import java.sql.Statement;
 
 import org.apache.derby.iapi.reference.SQLState;
@@ -62,6 +64,16 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
         throw Util.notImplemented();
     }
     
+    public void updateNCharacterStream(int columnIndex, Reader x, int length) 
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+    
+    public void updateNCharacterStream(String columnName, Reader x, int length)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public void updateNString(int columnIndex, String nString) throws SQLException {
         throw Util.notImplemented();
     }
@@ -78,11 +90,27 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
         throw Util.notImplemented();
     }
     
+    public Reader getNCharacterStream(int columnIndex) throws SQLException {
+        throw Util.notImplemented();
+    }
+    
+    public Reader getNCharacterStream(String columnName) throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public NClob getNClob(int i) throws SQLException {
         throw Util.notImplemented();
     }
     
     public NClob getNClob(String colName) throws SQLException {
+        throw Util.notImplemented();
+    }
+    
+    public String getNString(int columnIndex) throws SQLException {
+        throw Util.notImplemented();
+    }
+    
+    public String getNString(String columnName) throws SQLException {
         throw Util.notImplemented();
     }
     

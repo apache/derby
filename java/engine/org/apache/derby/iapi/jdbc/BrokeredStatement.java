@@ -539,4 +539,13 @@ public class BrokeredStatement implements EngineStatement
 		getStatement().getConnection();
 		return control;
 	}
+
+    public boolean isClosed()
+        throws SQLException {
+        // NOTE 1: Depending on implementation, this method may have to be
+        //  duplicated in the 3 *Statement40 classes.
+        // NOTE 2: This is the only method using the Util class. Remove
+        //  import when method is implemented.
+        throw Util.notImplemented();
+    }
 }

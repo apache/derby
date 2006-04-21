@@ -20,6 +20,8 @@
 
 package org.apache.derby.iapi.jdbc;
 
+import java.sql.BaseQuery;
+import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ClientInfoException;
 import java.sql.NClob;
@@ -37,6 +39,10 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
         super(control);
     }
     
+    public Blob createBlob() throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public Clob createClob() throws SQLException{
         throw Util.notImplemented();
     }
@@ -79,7 +85,8 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
         throw Util.notImplemented();
     }
     
-    public <T> T createQueryObject(Class<T> ifc) throws SQLException{
+    public <T extends BaseQuery>T createQueryObject(Class<T> ifc) 
+        throws SQLException {
         throw Util.notImplemented();
     }
     
