@@ -139,7 +139,8 @@ public interface ClientJDBCObjectFactory {
      * which implements java.sql.ResultSet
      */
     ResultSet newNetResultSet(Agent netAgent,MaterialStatement netStatement,
-            Cursor cursor,int sqlcsrhld,int qryattscr,int qryattsns,
+            Cursor cursor,
+            int qryprctyp, int sqlcsrhld, int qryattscr, int qryattsns,
             int qryattset,long qryinsid,int actualResultSetType,
             int actualResultSetConcurrency,int actualResultSetHoldability)
             throws SqlException;

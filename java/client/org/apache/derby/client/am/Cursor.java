@@ -86,6 +86,12 @@ public abstract class Cursor {
     protected java.util.ArrayList columnDataIsNullCache_ = new java.util.ArrayList();
     public java.util.ArrayList isUpdateDeleteHoleCache_ = new java.util.ArrayList();
     public boolean isUpdateDeleteHole_;
+
+    // State to keep track of when a row has been updated,
+    // cf. corresponding set and get accessors.  Only implemented for
+    // scrollable updatable insensitive result sets for now.
+    private boolean isRowUpdated_;
+
     final static public java.lang.Boolean ROW_IS_NULL = new Boolean(true);
     final static public java.lang.Boolean ROW_IS_NOT_NULL = new Boolean(false);
 
@@ -111,6 +117,7 @@ public abstract class Cursor {
 
     public Cursor(Agent agent) {
         agent_ = agent;
+        isRowUpdated_ = false;
         dataBufferStream_ = new java.io.ByteArrayOutputStream();
     }
 
@@ -156,6 +163,8 @@ public abstract class Cursor {
         
         // Moving out of the hole, set isUpdateDeleteHole to false
         isUpdateDeleteHole_ = false;
+
+        isRowUpdated_ = false;
 
         // Drive the CNTQRY outside of calculateColumnOffsetsForRow() if the dataBuffer_
         // contains no data since it has no abilities to handle replies other than
@@ -263,6 +272,38 @@ public abstract class Cursor {
             isUpdateDeleteHoleCache_.set(row, nullIndicator);
         }
     }
+
+    /**
+     * Keep track of updated status for this row.
+     *
+     * @param isRowUpdated true if row has been updated
+     *
+     * @see Cursor#getIsRowUpdated
+     */
+    public final void setIsRowUpdated(boolean isRowUpdated) {
+        isRowUpdated_ = isRowUpdated;
+    }
+
+    /**
+     * Get updated status for this row. 
+     * Minion of ResultSet#rowUpdated.
+     *
+     * @see Cursor#setIsRowUpdated
+     */
+    public final boolean getIsRowUpdated() {
+        return isRowUpdated_;
+    }
+
+    /**
+     * Get deleted status for this row. 
+     * Minion of ResultSet#rowDeleted.
+     *
+     * @see Cursor#setIsUpdataDeleteHole
+     */
+    public final boolean getIsUpdateDeleteHole() {
+        return isUpdateDeleteHole_;
+    }
+    
     //---------------------------cursor positioning-------------------------------
 
     final int getPosition() {

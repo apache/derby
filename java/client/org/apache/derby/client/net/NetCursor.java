@@ -29,6 +29,8 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.SqlWarning;
 import org.apache.derby.client.am.Types;
 import org.apache.derby.client.am.SqlCode;
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 public class NetCursor extends org.apache.derby.client.am.Cursor {
 
@@ -132,6 +134,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         int[] columnDataPosition = null;
         int[] columnDataComputedLength = null;
         boolean[] columnDataIsNull = null;
+        boolean receivedDeleteHoleWarning = false;
 
         if ((position_ == lastValidBytePosition_) &&
                 (netResultSet_ != null) && (netResultSet_.scrollable_)) {
@@ -139,6 +142,23 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         }
 
         NetSqlca netSqlca = this.parseSQLCARD(qrydscTypdef_);
+
+        if (netResultSet_ != null && netResultSet_.scrollable_) {
+            if (netSqlca != null && 
+                    netSqlca.getSqlState().equals(SQLState.ROW_DELETED)) {
+                receivedDeleteHoleWarning = true;
+                netSqlca = null;
+            } else {
+                setIsUpdataDeleteHole(rowIndex, false);
+            }
+            if (netSqlca != null && 
+                    netSqlca.getSqlState().equals(SQLState.ROW_UPDATED)) {
+                setIsRowUpdated(true);
+                netSqlca = null;
+            } else {
+                setIsRowUpdated(false);
+            }
+        }
 
         if (netSqlca != null) {
             int sqlcode = netSqlca.getSqlCode();
@@ -185,6 +205,9 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         // If data flows....
         if (daNullIndicator == 0x0) {
 
+	    if (SanityManager.DEBUG && receivedDeleteHoleWarning) {
+		SanityManager.THROWASSERT("Delete hole warning received: nulldata expected");
+	    }
             incrementRowsReadEvent();
 
             // netResultSet_ is null if this method is invoked from Lob.position()
@@ -312,12 +335,18 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
                     }
                 }
             }
-        }
-
-        // Else if this row is null, only add to the isRowNullCache_ if the cursor is scrollable.
-        else {
+        } else {
             if (netResultSet_ != null && netResultSet_.scrollable_) {
-                setIsUpdataDeleteHole(rowIndex, true);
+		if (receivedDeleteHoleWarning) {
+		    setIsUpdataDeleteHole(rowIndex, true);
+		} else {
+		    if (SanityManager.DEBUG) {
+			// Invariant: for SUR, we introduced the warning
+			// in addition to null data.
+			SanityManager
+			    .THROWASSERT("Delete hole warning expected");
+		    }
+		}
             }
         }
 

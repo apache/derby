@@ -133,7 +133,8 @@ public class SURQueryMixTest extends SURBaseTest
             deleteRandomSampleOfNRecords(rs, rows, deletedRows, 10);
             testNavigation(rs, rows, updatedRows, deletedRows); 
         } else {
-            println("Skipped testing updatability");
+            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
+                       false);
         }
         
         rs.close();
@@ -339,11 +340,15 @@ public class SURQueryMixTest extends SURBaseTest
     
     
     /**
-     * Tests navigation in ResultSet. This test requires that the ResultSet
-     * is not empty, and positioned before the first row. Also the 
-     * ResultSet needs to contain column a or column id as the first column from
-     * the SURDataModel (for checksum test)
-     * @return a Map with all rows in the resultset (concatnated as a string)
+     * Tests navigation in ResultSet.
+     * @param ResultSet rs ResultSet to test navigation of. 
+     *                     Needs to be scrollable
+     * @param Map rows a sample of the rows which are in the ResultSet. Maps
+     *                   position to a concatenation of the string values
+     * @param Set updatedRows a integer set of which rows that have been 
+     *            updated. Used to test rowUpdated()
+     * @param Set deletedRows a integer set of which rows that have been
+     *            deleted. Used to test rowDeleted()
      */
     private void testNavigation(final ResultSet rs, final Map rows, 
                                 final Set updatedRows, final Set deletedRows) 
@@ -359,7 +364,8 @@ public class SURQueryMixTest extends SURBaseTest
                              "forward.", rows.get(new Integer(i)), rowString);
                 
                 
-                if (checkRowUpdated && updatedRows.contains(new Integer(i))) {
+                if (checkRowUpdated && updatedRows.contains(new Integer(i)) &&
+                        !deletedRows.contains(new Integer(i))) {
                     assertTrue("Expected rs.rowUpdated() to return true on " + 
                                "updated row " + rowString, rs.rowUpdated());
                 } 
@@ -379,7 +385,8 @@ public class SURQueryMixTest extends SURBaseTest
                          " when navigating forward.", 
                          rows.get(new Integer(i)),
                          rowString);
-            if (checkRowUpdated && updatedRows.contains(new Integer(i))) {
+            if (checkRowUpdated && updatedRows.contains(new Integer(i)) &&
+                    !deletedRows.contains(new Integer(i))) {
                 assertTrue("Expected rs.rowUpdated() to return true on " +
                            "updated row " + rowString, rs.rowUpdated());
             }

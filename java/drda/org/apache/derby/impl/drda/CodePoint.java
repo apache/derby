@@ -305,6 +305,9 @@ class CodePoint
 	// Insensitive SCROLL
 	static final int QRYINS = 0x1;
 
+	// Sensitive static
+	static final int QRYSNSSTC = 0x2;
+
 	// Number of fetch or Insert Rows
 	static final int NBRROW = 0x213A;
 

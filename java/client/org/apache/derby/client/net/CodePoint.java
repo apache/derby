@@ -343,6 +343,9 @@ public class CodePoint {
     // Query Insensitive to Changes
     static final int QRYINS = 1;
 
+    // Sensitive static
+    static final int QRYSNSSTC = 0x2;
+
     // Query Attributes is Unknown or Undefined
     static final int QRYUNK = 0;
 

@@ -917,13 +917,14 @@ public class TableScanResultSet extends NoPutResultSetImpl
 				try {
 					scanController.fetchLocation(rl);
 				} catch (StandardException se) {
-					if (se.getMessageId().equals(SQLState.AM_SCAN_NOT_POSITIONED)) {
-						
+					if (se.getMessageId().
+						equals(SQLState.HEAP_SCAN_NOT_POSITIONED)) {
 						//Have a easier to understand error message than what 
 						//we get from store 
 						throw StandardException.
 							newException(SQLState.NO_CURRENT_ROW);
 					}
+                    throw se;
 				}
 			} else {
 				rl = null;

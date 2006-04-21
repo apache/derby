@@ -18,7 +18,6 @@
  * language governing permissions and limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import junit.framework.*;
 import java.sql.*;
@@ -274,6 +273,22 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
                    failedCorrect);
     }
     
+    /**
+     * Assert that a warning was received
+     */
+    protected void assertWarning(SQLWarning warn, String sqlState) 
+        throws SQLException
+    {
+        if (warn!=null || usingEmbedded()) {
+            assertEquals("Unexpected SQL state", 
+                         sqlState,
+                         warn.getSQLState());
+        } else {
+            println("Expected warning with SQLState = '" + sqlState +
+                    "', however warning not propagated to client driver");
+        }
+    }
+    
     protected Connection con = null; // Connection established in setUp()
     final int recordCount;
     
@@ -288,4 +303,5 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
     final static String LOCK_TIMEOUT_EXPRESSION_SQL_STATE = "38000";
     final static String INVALID_CURSOR_STATE_NO_CURRENT_ROW = "24000";
     final static String CURSOR_OPERATION_CONFLICT = "01001";
+    final static String QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET = "01J06";
 }

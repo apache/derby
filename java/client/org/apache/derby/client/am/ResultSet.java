@@ -140,7 +140,15 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public boolean isLast_ = false;
     public boolean rowsetContainsLastRow_ = false;
     public Sqlca[] rowsetSqlca_;
+
+    // Gets its initial value from the statement when the result set is created.
+    // It can be modified by setFetchSize and retrieved via getFetchSize.
+    protected int suggestedFetchSize_;
+
+    // Set by the net layer based on suggestedFetchSize_, protocol
+    // type, scrollability and presence of lobs.
     public int fetchSize_;
+
     public int fetchDirection_;
 
     public long rowCount_ = -1;
@@ -214,7 +222,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         resultSetConcurrency_ = resultSetConcurrency;
         resultSetHoldability_ = resultSetHoldability;
         fetchDirection_ = statement_.fetchDirection_;
-        fetchSize_ = statement_.fetchSize_;
+        suggestedFetchSize_ = statement_.fetchSize_;
 
         maxRows_ = statement_.maxRows_;
         
@@ -237,12 +245,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // CONCUR_READ_ONLY = 1007
         // CONCUR_UPDATABLE = 1008
         if (resultSetConcurrency_ < statement_.resultSetConcurrency_) {
-            statement_.accumulateWarning(
+            accumulateWarning(
                 new SqlWarning(
                     agent_.logWriter_,
-                    new MessageId(SQLState.INVALID_RESULTSET_CONCURRENCY),
-                        new Integer(resultSetConcurrency_),
-                        new Integer(statement_.resultSetConcurrency_)));
+                    new MessageId(
+                    SQLState.QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET)));
                 
         }
 
@@ -2455,11 +2462,19 @@ public abstract class ResultSet implements java.sql.ResultSet,
         
         // relative(0) is a null-operation, but the retruned result is
         // dependent on wether the cursorposition is on a row or not.
+        // Scroll insensitive updatable should see own changes, so relative(0)
+        // has to refetch the row.
         if (rows == 0) {
-            if (isBeforeFirstX() || isAfterLastX()) {
-                isValidCursorPosition_ = false;
+            if (resultSetConcurrency_ == ResultSet.CONCUR_UPDATABLE &&
+                resultSetType_ == ResultSet.TYPE_SCROLL_INSENSITIVE) {
+                // re-fetch currentRow
+                isValidCursorPosition_ = getAbsoluteRowset(absolutePosition_);
             } else {
-                isValidCursorPosition_ = true;
+                if (isBeforeFirstX() || isAfterLastX()) {
+                    isValidCursorPosition_ = false;
+                } else {
+                    isValidCursorPosition_ = true;
+                }
             }
             return isValidCursorPosition_;
         }
@@ -2668,7 +2683,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceExit(this, "getFetchSize", fetchSize_);
             }
             checkForClosedResultSet();
-            return fetchSize_;
+            return suggestedFetchSize_;
         }
         catch ( SqlException se )
         {
@@ -2711,9 +2726,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public boolean rowUpdated() throws SQLException {
         try
         {
-            // we cannot tell whether the ResultSet has been updated, so always return false here.
-            boolean rowUpdated = false;
             checkForClosedResultSet();
+
+            boolean rowUpdated = cursor_.getIsRowUpdated();
+
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "rowUpdated", rowUpdated);
             }
@@ -2744,10 +2760,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public boolean rowDeleted() throws SQLException {
         try
         {
-            // rowDeleted is visible through a delete hole, (sqlcode +222).
-            // Always return false and do not check the return code for now.
-            boolean rowDeleted = false;
             checkForClosedResultSet();
+
+            boolean rowDeleted = (resultSetType_ == ResultSet.TYPE_SCROLL_INSENSITIVE) ?
+		cursor_.getIsUpdateDeleteHole() :
+		false;
+
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "rowDeleted", rowDeleted);
             }
@@ -2768,7 +2786,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateNull", column);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateNull");
                 if (!resultSetMetaData_.nullable_[column - 1]) {
                     throw new SqlException(agent_.logWriter_, 
                         new MessageId(SQLState.LANG_NULL_INTO_NON_NULL),
@@ -2790,7 +2808,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateBoolean", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateBoolean");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2807,7 +2825,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateByte", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateByte");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2824,7 +2842,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateShort", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateShort");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2841,7 +2859,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateInt", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateInt");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2858,7 +2876,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateLong", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateLong");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2875,7 +2893,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateFloat", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateFloat");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2892,7 +2910,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateDouble", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateDouble");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2909,7 +2927,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateBigDecimal", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateBigDecimal");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2926,7 +2944,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateDate", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateDate");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2943,7 +2961,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateTime", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateTime");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2960,7 +2978,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateTimestamp", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateTimestamp");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2977,7 +2995,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateString", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateString");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -2994,7 +3012,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateBytes", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateBytes");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -3013,7 +3031,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateBinaryStream", column, x, length);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateBinaryStream");
                 updateColumn(column, agent_.crossConverters_.setObjectFromBinaryStream(resultSetMetaData_.types_[column - 1], x, length));
             }
         }
@@ -3032,7 +3050,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateAsciiStream", column, x, length);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateAsciiStream");
                 updateColumn(column, agent_.crossConverters_.setObjectFromCharacterStream(resultSetMetaData_.types_[column - 1], x, "US-ASCII", length));
             }
         }
@@ -3051,7 +3069,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateCharacterStream", column, x, length);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateCharacterStream");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x, length));
             }
         }
@@ -3068,7 +3086,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateObject", column, x, scale);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateObject");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -3085,7 +3103,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateObject", column, x);
                 }
-                checkUpdatePreconditions(column);
+                checkUpdatePreconditions(column, "updateObject");
                 updateColumn(column, agent_.crossConverters_.setObject(resultSetMetaData_.types_[column - 1], x));
             }
         }
@@ -3389,7 +3407,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private void insertRowX() throws SqlException {
         checkForClosedResultSet();
-        if (isOnCurrentRow_ || resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+	checkForUpdatableResultSet("insertRow");
+        if (isOnCurrentRow_) {
             throw new SqlException(agent_.logWriter_, 
                 new MessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
        }
@@ -3441,10 +3460,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "updateRow");
                 }
-                //If updateXXX were issued on the row before updateRow, then
-                //position the ResultSet to right before the next row after updateRow
-                if (updateRowX())
+                // If updateXXX were issued on the row before updateRow and
+                // the result set if forward only, then position the ResultSet
+                // to right before the next row after updateRow.
+                if (updateRowX() && (getType() == 
+                                     ResultSet.TYPE_FORWARD_ONLY)) {
                     isValidCursorPosition_ = false;
+                }
             }
         }
         catch ( SqlException se )
@@ -3456,7 +3478,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
     //if no updateXXX were issued before this updateRow, then return false
     private boolean updateRowX() throws SqlException {
         checkForClosedResultSet();
-        if (isOnInsertRow_ || resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+        
+        checkForUpdatableResultSet("updateRow");
+        
+        if (isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, 
                 new MessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
         }
@@ -3529,7 +3554,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // alternative is to check for updateCount_ in "positionToCurrentRowAndUpdate".
         // cancelRowUpdates if updateCount_ != 1, else set updateRowCalled_ to true.
         try {
-            if (isRowsetCursor_ || sensitivity_ == sensitivity_sensitive_dynamic__) {
+            if (isRowsetCursor_ || 
+                    sensitivity_ == sensitivity_sensitive_dynamic__ ||
+                    sensitivity_ == sensitivity_sensitive_static__) {
                 update();
             } else {
                 positionToCurrentRowAndUpdate();
@@ -3543,6 +3570,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             throw e;
         }
+
+        // other result set types don't implement detectability
+        if (resultSetType_ == ResultSet.TYPE_SCROLL_INSENSITIVE) {
+            cursor_.setIsRowUpdated(true);
+        }
+
         return true;
     }
 
@@ -3568,11 +3601,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private void deleteRowX() throws SqlException {
         checkForClosedResultSet();
+        
+        checkForUpdatableResultSet("deleteRow");
 
         // discard all previous updates
         resetUpdatedColumns();
 
-        if (isOnInsertRow_ || resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+        if (isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, 
                 new MessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
         }
@@ -3581,7 +3616,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
             getPreparedStatementForDelete();
         }
 
-        if (isRowsetCursor_ || sensitivity_ == sensitivity_sensitive_dynamic__) {
+        if (isRowsetCursor_ || 
+                sensitivity_ == sensitivity_sensitive_dynamic__ ||
+                sensitivity_ == sensitivity_sensitive_static__) {
             delete();
         } else {
             positionToCurrentRowAndDelete();
@@ -3615,12 +3652,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
     private void refreshRowX() throws SqlException {
         checkForClosedResultSet();
         checkThatResultSetTypeIsScrollable();
-        if (isBeforeFirstX() || isAfterLastX() || isOnInsertRow_ ||
-                resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+	checkForUpdatableResultSet("refreshRow");
+        if (isBeforeFirstX() || isAfterLastX() || isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_,
                 new MessageId(SQLState.CURSOR_CANNOT_INVOKE_ON_INSROW_OR_INVALIDROW_OR_READONLY));
         }
-
 	
         // this method does nothing if ResultSet is TYPE_SCROLL_INSENSITIVE
         if (resultSetType_ == java.sql.ResultSet.TYPE_SCROLL_SENSITIVE) {
@@ -3644,7 +3680,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     agent_.logWriter_.traceEntry(this, "cancelRowUpdates");
                 }
                 checkForClosedResultSet();
-                if (isOnInsertRow_ || resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+                checkForUpdatableResultSet("cancelRowUpdates");
+                if (isOnInsertRow_) {
                     throw new SqlException(agent_.logWriter_, 
                         new MessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
                 }
@@ -3675,7 +3712,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     agent_.logWriter_.traceEntry(this, "moveToInsertRow");
                 }
                 checkForClosedResultSet();
-                checkUpdatableCursor("moveToInsertRow()");
+                checkForUpdatableResultSet("moveToInsertRow");
 
                 resetUpdatedColumnsForInsert();
 
@@ -3698,7 +3735,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     agent_.logWriter_.traceEntry(this, "moveToCurrentRow");
                 }
                 checkForClosedResultSet();
-                checkUpdatableCursor("moveToCurrentRow()");
+                checkForUpdatableResultSet("moveToCurrentRow");
 
                 if (!isOnInsertRow_) {
                     // no affect
@@ -4158,10 +4195,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     public void readUpdateRow() throws DisconnectException, SqlException {
         preparedStatementForUpdate_.materialPreparedStatement_.readExecute_();
+        accumulateWarning(preparedStatementForUpdate_.getSqlWarnings());
     }
 
     public void readDeleteRow() throws DisconnectException, SqlException {
         preparedStatementForDelete_.materialPreparedStatement_.readExecute_();
+        accumulateWarning(preparedStatementForDelete_.getSqlWarnings());
     }
 
     //------------------material layer event callback methods-----------------------
@@ -4528,14 +4567,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
         checkForValidCursorPosition();
     }
 
-    private final void checkUpdatePreconditions(int column) throws SqlException {
+    private final void checkUpdatePreconditions(int column, 
+						String operation)
+	throws SqlException {
+
         checkForClosedResultSet();
         checkForValidColumnIndex(column);
-        if (resultSetConcurrency_ != java.sql.ResultSet.CONCUR_UPDATABLE) {
-            throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.UPDATABLE_RESULTSET_API_DISALLOWED),
-                "updateXXX");
-        }
+	checkForUpdatableResultSet(operation);
+
         if (!isOnCurrentRow_ && !isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, 
                 new MessageId(SQLState.CURSOR_NOT_ON_CURRENT_OR_INSERT_ROW));
@@ -4560,14 +4599,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    private void checkUpdatableCursor(String methodName) throws SqlException {
-        if (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
-            throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.UPDATABLE_RESULTSET_API_DISALLOWED),
-                methodName);
-        }
-    }
-
     protected final void checkForClosedResultSet() throws SqlException {
         if (!openOnClient_) {
             agent_.checkForDeferredExceptions();
@@ -4578,6 +4609,15 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
+    private final void checkForUpdatableResultSet(String operation) 
+        throws SqlException {
+        if (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+            throw new SqlException(agent_.logWriter_, 
+                    new MessageId(SQLState.UPDATABLE_RESULTSET_API_DISALLOWED),
+                    operation);
+        }
+    }
+    
     private final void checkForValidCursorPosition() throws SqlException {
         if (!isValidCursorPosition_) {
             throw new SqlException(agent_.logWriter_, 

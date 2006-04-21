@@ -592,7 +592,8 @@ public class scrollCursors2 {
 
 		s_s_u = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
 									 ResultSet.CONCUR_UPDATABLE);
-		// We should have gotten 2 warnings and a read only scroll insensitive cursor
+		// We should have gotten 1 warning and a updatable scroll 
+		// insensitive cursor.
 		warning = conn.getWarnings();
 		while (warning != null)
 		{
@@ -609,11 +610,10 @@ public class scrollCursors2 {
 			System.out.println("cursor type = " + rs.getType() +
 							   ", not " + ResultSet.TYPE_SCROLL_INSENSITIVE);
 		}
-		if ((rs.getConcurrency() != ResultSet.CONCUR_READ_ONLY) && 
-				isDerbyNetClient)
+		if (rs.getConcurrency() != ResultSet.CONCUR_UPDATABLE)
 		{
 			System.out.println("concurrency = " + rs.getConcurrency() +
-							   ", not " + ResultSet.CONCUR_READ_ONLY);
+							   ", not " + ResultSet.CONCUR_UPDATABLE);
 		}
 		rs.close();
 
@@ -635,11 +635,9 @@ public class scrollCursors2 {
 	{
 		boolean 	passed = true;
 		PreparedStatement ps_i_r = null;
-		PreparedStatement ps_i_u = null;
 		ResultSet	rs;
 		SQLWarning	warning;
 		Statement	s_i_r = null; // insensitive, read only
-		Statement	s_i_u = null; // insensitive, updatable
 
 
 		s_i_r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -838,21 +836,6 @@ public class scrollCursors2 {
 
 		rs.close();
 
-		// Scroll insensitive and updatable
-		s_i_u = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-									 ResultSet.CONCUR_UPDATABLE);
-
-		// We should have gotten 1 warning 
-		// and a read only scroll insensitive cursor
-		warning = conn.getWarnings();
-		while (warning != null)
-		{
-			System.out.println("warning = " + warning);
-			warning = warning.getNextWarning();
-		}
-		conn.clearWarnings();
-		s_i_u.close();
-
 		ps_i_r = conn.prepareStatement(
 									 "select * from t",
 									 ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -874,22 +857,6 @@ public class scrollCursors2 {
 		rs.last();
 		rs.close();
 		ps_i_r.close();
-
-		ps_i_u = conn.prepareStatement(
-									 "select * from t",
-									 ResultSet.TYPE_SCROLL_INSENSITIVE,
-									 ResultSet.CONCUR_UPDATABLE);
-
-		// We should have gotten 1 warning 
-		// and a read only scroll insensitive cursor
-		warning = conn.getWarnings();
-		while (warning != null)
-		{
-			System.out.println("warning = " + warning);
-			warning = warning.getNextWarning();
-		}
-		conn.clearWarnings();
-		ps_i_u.close();
 
 		// Check setMaxRows()/getMaxRows()
 		if (s_i_r.getMaxRows() != 0)
@@ -1183,7 +1150,6 @@ public class scrollCursors2 {
 		CallableStatement	cs_s_r = null; // sensitive, read only
 		CallableStatement	cs_s_u = null; // sensitive, updatable
 		CallableStatement	cs_i_r = null; // insensitive, read only
-		CallableStatement	cs_i_u = null; // insensitive, updatable
 		CallableStatement	cs_f_r = null; // forward only, read only
 
 		cs_s_r = conn.prepareCall(
@@ -1222,13 +1188,8 @@ public class scrollCursors2 {
 			warning = warning.getNextWarning();
 			warningCount++;
 		}
-		if (warningCount != 2 && isDerbyNetClient)
-		{
-			System.out.println("warningCount expected to be 2, not " + warningCount);
-			passed = false;
-		}
-		// Embedded implements SCROLL_INSENSITIVE and UPDATABLE
-		if (warningCount != 1 && !isDerbyNetClient)
+		// SCROLL_INSENSITIVE and UPDATABLE implemented
+		if (warningCount != 1)
 		{
 			System.out.println("warningCount expected to be 1, not " + warningCount);
 			passed = false;
@@ -1258,34 +1219,6 @@ public class scrollCursors2 {
 		}
 		conn.clearWarnings();
 		cs_i_r.close();	
-
-		cs_i_u = conn.prepareCall(
-								"values cast (? as Integer)",
-								ResultSet.TYPE_SCROLL_INSENSITIVE,
-								ResultSet.CONCUR_UPDATABLE);
-
-		// We should have gotten 1 warnings
-		warningCount = 0;
-		warning = conn.getWarnings();
-		while (warning != null)
-		{
-			System.out.println("warning = " + warning);
-			warning = warning.getNextWarning();
-			warningCount++;
-		}
-		if (warningCount != 1 && isDerbyNetClient)
-		{
-			System.out.println("warningCount expected to be 1, not " + warningCount);
-			passed = false;
-		}
-		// Embedded implements SCROLL_INSENSITIVE and UPDATABLE
-		if (warningCount != 0 && !isDerbyNetClient)
-		{
-			System.out.println("warningCount expected to be 0, not " + warningCount);
-			passed = false;
-		}
-		conn.clearWarnings();
-		cs_i_u.close();	
 
 		cs_f_r = conn.prepareCall(
 								"values cast (? as Integer)",

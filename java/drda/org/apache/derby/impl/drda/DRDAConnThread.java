@@ -2433,25 +2433,36 @@ class DRDAConnThread extends Thread {
 			if (stmt.isScrollable())
 			{
 				writer.writeScalar1Byte(CodePoint.QRYATTSCR, CodePoint.TRUE);
-				//Cloudscape only supports insensitive scroll cursors
-				writer.writeScalar1Byte(CodePoint.QRYATTSNS, CodePoint.QRYINS);
-				//Cloudscape only supports read only scrollable cursors
+				if ((stmt.getConcurType() == ResultSet.CONCUR_UPDATABLE) &&
+						(stmt.getResultSet().getType() == 
+						 ResultSet.TYPE_SCROLL_INSENSITIVE)) {
+					writer.writeScalar1Byte(CodePoint.QRYATTSNS, 
+											CodePoint.QRYSNSSTC);
+				} else {
+					writer.writeScalar1Byte(CodePoint.QRYATTSNS, 
+											CodePoint.QRYINS);
+				}
+			}
+			if (stmt.getConcurType() == ResultSet.CONCUR_UPDATABLE) {
+				if (stmt.getResultSet() != null) { 
+					// Resultset concurrency can be less than statement
+					// concurreny if the underlying language resultset
+					// is not updatable.
+					if (stmt.getResultSet().getConcurrency() == 
+						ResultSet.CONCUR_UPDATABLE) {
+						writer.writeScalar1Byte(CodePoint.QRYATTUPD, 
+												CodePoint.QRYUPD);
+					} else {
+						writer.writeScalar1Byte(CodePoint.QRYATTUPD, 
+												CodePoint.QRYRDO);
+					}
+				} else {
+					writer.writeScalar1Byte(CodePoint.QRYATTUPD, 
+											CodePoint.QRYUPD);
+				}
+			} else {
 				writer.writeScalar1Byte(CodePoint.QRYATTUPD, CodePoint.QRYRDO);
 			}
-			else
-			{
-				if (stmt.getConcurType() == ResultSet.CONCUR_UPDATABLE) {
-					if (stmt.getResultSet() != null) { //resultset concurrency can be less than statement concurreny if the underlying language resultset is not updatable
-						if (stmt.getResultSet().getConcurrency() == ResultSet.CONCUR_UPDATABLE)
-							writer.writeScalar1Byte(CodePoint.QRYATTUPD, CodePoint.QRYUPD);
-						else
-							writer.writeScalar1Byte(CodePoint.QRYATTUPD, CodePoint.QRYRDO);
-					} else
-						writer.writeScalar1Byte(CodePoint.QRYATTUPD, CodePoint.QRYUPD);
-				} else
-					writer.writeScalar1Byte(CodePoint.QRYATTUPD, CodePoint.QRYRDO);
-			}
-
 		}
 		writer.endDdmAndDss ();
 	}
@@ -3336,13 +3347,11 @@ class DRDAConnThread extends Thread {
 		//let Cloudscape handle any errors in the types it doesn't support
 		//just set the attributes
 
-		boolean insensitive = false;
 		boolean validAttribute = false;
 		if (attrs.indexOf("INSENSITIVE SCROLL") != -1 || attrs.indexOf("SCROLL INSENSITIVE") != -1) //CLI
 		{
 			stmt.scrollType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 			stmt.concurType = ResultSet.CONCUR_READ_ONLY;
-			insensitive = true;
 			validAttribute = true;
 		}
 		if ((attrs.indexOf("SENSITIVE DYNAMIC SCROLL") != -1) || (attrs.indexOf("SENSITIVE STATIC SCROLL") != -1))
@@ -3354,7 +3363,6 @@ class DRDAConnThread extends Thread {
 		if ((attrs.indexOf("FOR UPDATE") != -1))
 		{
 			validAttribute = true;
-			if (!insensitive)
 			stmt.concurType = ResultSet.CONCUR_UPDATABLE;
 		}
 
@@ -6200,6 +6208,30 @@ class DRDAConnThread extends Thread {
 			
 			// Send ResultSet warnings if there are any
 			SQLWarning sqlw = (rs != null)? rs.getWarnings(): null;
+
+			// for updatable, insensitive result sets we signal the
+			// row updated condition to the client via a warning which
+			// is pushed on top of any other warnings on the result
+			// set, to be popped by client onto its rowUpdated state,
+			// i.e.  this warning should not reach API level.
+			if (rs != null && rs.rowUpdated()) {
+				SQLWarning w = new SQLWarning(null, SQLState.ROW_UPDATED);
+				if (sqlw != null) {
+					w.setNextWarning(sqlw);
+				} 
+				sqlw = w;
+			}
+			// Delete holes are manifest as a row consisting of a non-null
+			// SQLCARD and a null data group. The SQLCARD has a warning
+			// SQLSTATE of 02502
+			if (rs != null && rs.rowDeleted()) {
+				SQLWarning w = new SQLWarning(null, SQLState.ROW_DELETED);
+				if (sqlw != null) {
+					w.setNextWarning(sqlw);
+				} 
+				sqlw = w;
+			}
+
 			if (sqlw == null)
                 writeSQLCAGRP(nullSQLState, 0, -1, -1);
 			else
@@ -6207,7 +6239,9 @@ class DRDAConnThread extends Thread {
 
 			// if we were asked not to return data, mark QRYDTA null; do not
 			// return yet, need to make rowCount right
-			boolean noRetrieveRS = (rs != null && !stmt.getQryrtndta());
+			// if the row has been deleted return QRYDTA null (delete hole)
+			boolean noRetrieveRS = (rs != null && 
+					(!stmt.getQryrtndta() || rs.rowDeleted()));
 			if (noRetrieveRS)
 				writer.writeByte(0xFF);  //QRYDTA null indicator: IS NULL
 			else

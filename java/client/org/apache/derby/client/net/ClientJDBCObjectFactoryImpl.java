@@ -154,11 +154,13 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      */
     public org.apache.derby.client.am.ResultSet newNetResultSet(Agent netAgent,
             org.apache.derby.client.am.MaterialStatement netStatement,
-            Cursor cursor,int sqlcsrhld,int qryattscr,int qryattsns,
+            Cursor cursor,
+            int qryprctyp,int sqlcsrhld,int qryattscr,int qryattsns,
             int qryattset,long qryinsid,int actualResultSetType,
             int actualResultSetConcurrency,
             int actualResultSetHoldability) throws SqlException {
-        return new NetResultSet((NetAgent)netAgent,(NetStatement)netStatement,cursor,sqlcsrhld,qryattscr,
+        return new NetResultSet((NetAgent)netAgent,
+                (NetStatement)netStatement,cursor,qryprctyp,sqlcsrhld,qryattscr,
                 qryattsns,qryattset,qryinsid,actualResultSetType,
                 actualResultSetConcurrency,actualResultSetHoldability);
     }

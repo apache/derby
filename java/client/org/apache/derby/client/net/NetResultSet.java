@@ -38,6 +38,10 @@ public class NetResultSet extends org.apache.derby.client.am.ResultSet {
     // Alias for (NetAgent) super.agent
     final private NetAgent netAgent_;
 
+    // Indicates whether the fixed row protocol is being used. If so,
+    // the fetch size will always be 1.
+    private boolean isFixedRowProtocol = false;
+    
     //-----------------------------state------------------------------------------
 
     // This is used to avoid sending multiple outovr over subsequent next()'s
@@ -50,10 +54,13 @@ public class NetResultSet extends org.apache.derby.client.am.ResultSet {
     NetResultSet(NetAgent netAgent,
                  NetStatement netStatement,
                  Cursor cursor,
-                 //int qryprctyp,  //protocolType, CodePoint.FIXROWPRC | CodePoint.LMTBLKPRC
+                 int qryprctyp,  //protocolType, CodePoint.FIXROWPRC |
+                                 //              CodePoint.LMTBLKPRC
                  int sqlcsrhld, // holdOption, 0xF0 for false (default) | 0xF1 for true.
                  int qryattscr, // scrollOption, 0xF0 for false (default) | 0xF1 for true.
-                 int qryattsns, // sensitivity, CodePoint.QRYUNK | CodePoint.QRYINS
+                 int qryattsns, // sensitivity, CodePoint.QRYUNK | 
+                                //              CodePoint.QRYINS |
+                                //              CodePoint.QRYSNSSTC
                  int qryattset, // rowsetCursor, 0xF0 for false (default) | 0xF1 for true.
                  long qryinsid, // instanceIdentifier, 0 (if not returned, check default) or number
                  int actualResultSetType,
@@ -84,12 +91,24 @@ public class NetResultSet extends org.apache.derby.client.am.ResultSet {
             scrollable_ = true;
         }
 
+        // The number of rows returned by the server will always be 1 when the
+        // Fixed Row Protocol is being used.
+        if (qryprctyp == CodePoint.FIXROWPRC) {
+            isFixedRowProtocol = true;
+            fetchSize_ = 1;
+        } else {
+            fetchSize_ = suggestedFetchSize_;
+        }
+
         switch (qryattsns) {
         case CodePoint.QRYUNK:
             sensitivity_ = sensitivity_unknown__;
             break;
         case CodePoint.QRYINS:
             sensitivity_ = sensitivity_insensitive__;
+            break;
+        case CodePoint.QRYSNSSTC:
+            sensitivity_ = sensitivity_sensitive_static__;
             break;
         default:   // shouldn't happen
             break;
@@ -125,7 +144,8 @@ public class NetResultSet extends org.apache.derby.client.am.ResultSet {
         //    are returned to the user.  the specific error is not returned until the next fetch.
         while (rowsReceivedInCurrentRowset_ != fetchSize_ &&
                 !netCursor_.allRowsReceivedFromServer() && !isRowsetCursor_ &&
-                sensitivity_ != sensitivity_sensitive_dynamic__) {
+                sensitivity_ != sensitivity_sensitive_dynamic__ &&
+                sensitivity_ != sensitivity_sensitive_static__) {
             flowFetchToCompleteRowset();
             while (netCursor_.calculateColumnOffsetsForRow_(row, true)) {
                 rowsReceivedInCurrentRowset_++;
@@ -136,7 +156,11 @@ public class NetResultSet extends org.apache.derby.client.am.ResultSet {
     }
 
     public void setFetchSize_(int rows) {
-        fetchSize_ = (rows == 0) ? 64 : rows;
+        // Do not change the fetchSize for Fixed Row Protocol
+        suggestedFetchSize_ = (rows == 0) ? 64 : rows;
+        if (!isFixedRowProtocol) {
+            fetchSize_ = suggestedFetchSize_;
+        }
     }
 
     //-----------------------------helper methods---------------------------------

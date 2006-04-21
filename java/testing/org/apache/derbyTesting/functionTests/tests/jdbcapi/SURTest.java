@@ -56,7 +56,7 @@ public class SURTest extends SURBaseTest {
         assertEquals("Expected resultset to be read only",
                      ResultSet.CONCUR_READ_ONLY,
                      rs.getConcurrency());
-        assertNotNull("Expected to get a warning", warn);
+        assertWarning(warn, QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET);
         scrollForward(rs);
         rs.close();
     }
@@ -80,7 +80,7 @@ public class SURTest extends SURBaseTest {
         assertEquals("Expected resultset to be read only",
                      ResultSet.CONCUR_READ_ONLY,
                      rs.getConcurrency());
-        assertNotNull("Expected to get a warning", warn);
+        assertWarning(warn, QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET);
         scrollForward(rs);
         rs.close();
     }

@@ -39,17 +39,22 @@ public class NetResultSet40 extends NetResultSet{
     NetResultSet40(NetAgent netAgent,
         NetStatement netStatement,
         Cursor cursor,
-        //int qryprctyp,  //protocolType, CodePoint.FIXROWPRC | CodePoint.LMTBLKPRC
+        int qryprctyp,  //protocolType, CodePoint.FIXROWPRC | 
+                        //              CodePoint.LMTBLKPRC
         int sqlcsrhld, // holdOption, 0xF0 for false (default) | 0xF1 for true.
         int qryattscr, // scrollOption, 0xF0 for false (default) | 0xF1 for true.
-        int qryattsns, // sensitivity, CodePoint.QRYUNK | CodePoint.QRYINS
+        int qryattsns, // sensitivity, CodePoint.QRYUNK | 
+                       //              CodePoint.QRYINS | 
+                       //              CodePoint.QRYSNSSTC
         int qryattset, // rowsetCursor, 0xF0 for false (default) | 0xF1 for true.
         long qryinsid, // instanceIdentifier, 0 (if not returned, check default) or number
         int actualResultSetType,
         int actualResultSetConcurrency,
         int actualResultSetHoldability) //throws DisconnectException
     {
-        super(netAgent,netStatement,cursor,sqlcsrhld,qryattscr,qryattsns,qryattset,qryinsid,actualResultSetType,actualResultSetConcurrency,actualResultSetHoldability);
+        super(netAgent, netStatement, cursor, qryprctyp, sqlcsrhld, qryattscr,
+              qryattsns, qryattset, qryinsid, actualResultSetType,
+              actualResultSetConcurrency, actualResultSetHoldability);
     }
     
     public RowId getRowId(int columnIndex) throws SQLException {

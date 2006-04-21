@@ -258,8 +258,8 @@ public class HoldabilityTest extends SURBaseTest {
         ResultSet rs = s.executeQuery(selectStatement);
         
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            println("Test disabled");
-            return;
+            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
+                       false);
         }
         con.commit(); // scan initialized
         
@@ -278,9 +278,9 @@ public class HoldabilityTest extends SURBaseTest {
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            println("Test disabled");
-            return;
-        }
+            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
+                       false);
+        }        
         for (int i=0; i<this.recordCount/2; i++) {
             rs.next();
             verifyTuple(rs);
@@ -305,8 +305,8 @@ public class HoldabilityTest extends SURBaseTest {
         ResultSet rs = s.executeQuery(selectStatement);
         
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            println("Test disabled");
-            return;
+            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
+                       false);
         }
       
         scrollForward(rs); // Scan is done
@@ -328,8 +328,8 @@ public class HoldabilityTest extends SURBaseTest {
         ResultSet rs = s.executeQuery(selectStatement);
         
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            println("Test disabled");
-            return;
+            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
+                       false);
         }
         rs.next();
         con.commit();
@@ -355,8 +355,8 @@ public class HoldabilityTest extends SURBaseTest {
         ResultSet rs = s.executeQuery(selectStatement);
         
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            println("Test disabled");
-            return;
+            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
+                       false);
         }
         rs.next();
         con.commit();
@@ -384,8 +384,8 @@ public class HoldabilityTest extends SURBaseTest {
         
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            println("Test disabled");
-            return;
+            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
+                       false);
         }
         con.commit(); // commit
         
@@ -406,8 +406,8 @@ public class HoldabilityTest extends SURBaseTest {
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            println("Test disabled");
-            return;
+            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
+                       false);
         }
         rs.next(); // Scan is in progress.
         
@@ -429,8 +429,8 @@ public class HoldabilityTest extends SURBaseTest {
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            println("Test disabled");
-            return;
+            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
+                       false);
         }
         
         scrollForward(rs); // scan is done
@@ -547,10 +547,7 @@ public class HoldabilityTest extends SURBaseTest {
         rs.updateInt(2, -100);
         rs.updateRow();
         SQLWarning warn = rs.getWarnings();
-        assertNotNull("Expected warning when updating deleted tuple", warn);
-        assertEquals("Unexpected SQL State on warning", 
-                     CURSOR_OPERATION_CONFLICT, 
-                     warn.getSQLState());        
+        assertWarning(warn, CURSOR_OPERATION_CONFLICT);
         rs.clearWarnings();
         
         // Update first tuple
@@ -558,10 +555,7 @@ public class HoldabilityTest extends SURBaseTest {
         rs.updateInt(2, -100);
         updateTuple(rs); 
         warn = rs.getWarnings();
-        assertNotNull("Expected warning when updating deleted tuple", warn);
-        assertEquals("Unexpected SQL State on warning", 
-                     CURSOR_OPERATION_CONFLICT, 
-                     warn.getSQLState());
+        assertWarning(warn, CURSOR_OPERATION_CONFLICT);
         con.commit();
         
         // Verify data

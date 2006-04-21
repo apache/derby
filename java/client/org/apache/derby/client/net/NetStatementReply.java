@@ -846,10 +846,13 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
                         (netAgent_,
                         (NetStatement) statement.materialStatement_,
                         statement.cachedCursor_,
-                        //qryprctyp, //protocolType, CodePoint.FIXROWPRC | CodePoint.LMTBLKPRC
+                        qryprctyp, //protocolType, CodePoint.FIXROWPRC | 
+                                   //              CodePoint.LMTBLKPRC
                         sqlcsrhld, //holdOption, 0xF0 for false (default) | 0xF1 for true.
                         qryattscr, //scrollOption, 0xF0 for false (default) | 0xF1 for true.
-                        qryattsns, //sensitivity, CodePoint.QRYUNK | CodePoint.QRYINS
+                        qryattsns, //sensitivity, CodePoint.QRYUNK | 
+                                   //             CodePoint.QRYINS |
+                                   //             CodePoint.QRYSNSSTC
                         qryattset,
                         qryinsid, //instanceIdentifier, 0 (if not returned, check default) or number
                         calculateResultSetType(qryattscr, qryattsns, statement.resultSetType_),
@@ -864,7 +867,8 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
                         (netAgent_,
                         (NetStatement) statement.materialStatement_,
                         new NetCursor(netAgent_, qryprctyp),
-                        //qryprctyp, //protocolType, CodePoint.FIXROWPRC | CodePoint.LMTBLKPRC
+                        qryprctyp, //protocolType, CodePoint.FIXROWPRC | 
+                                   //              CodePoint.LMTBLKPRC
                         sqlcsrhld, //holdOption, 0xF0 for false (default) | 0xF1 for true.
                         qryattscr, //scrollOption, 0xF0 for false (default) | 0xF1 for true.
                         qryattsns, //sensitivity, CodePoint.QRYUNK | CodePoint.QRYINS
@@ -1694,6 +1698,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         int qryattsns = readFastUnsignedByte();
         switch (qryattsns) {
         case CodePoint.QRYUNK:
+        case CodePoint.QRYSNSSTC:
         case CodePoint.QRYINS:
             break;
         default:

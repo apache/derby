@@ -261,68 +261,24 @@ public class updatableResultSet {
 			setup(true);
 
 			System.out.println("Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset");
-			conn.clearWarnings();
-			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-			JDBCDisplayUtil.ShowWarnings(System.out, conn);
-			System.out.println("requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported");
-			System.out.println("Make sure that we got TYPE_SCROLL_INSENSITIVE? " +  (stmt.getResultSetType() == ResultSet.TYPE_SCROLL_INSENSITIVE));
-			System.out.println("Make sure that we got CONCUR_READ_ONLY? " +  (stmt.getResultSetConcurrency() == ResultSet.CONCUR_READ_ONLY));
-			dbmt = conn.getMetaData();
-			System.out.println("ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + dbmt.ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
-			System.out.println("othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + dbmt.othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
-			System.out.println("deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? " + dbmt.deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
-			System.out.println("JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset");
-			rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
-			rs.next();
-			try {
-				rs.deleteRow();
-				System.out.println("FAIL!!! deleteRow should have failed because Derby does not yet support scroll insensitive updatable resultsets");
-			}
-			catch (SQLException e) {
-				System.out.println("SQL State : " + e.getSQLState());
-				System.out.println("Got expected exception " + e.getMessage());
-			}
-			try {
-				rs.updateRow();
-				System.out.println("FAIL!!! updateRow should have failed because Derby does not yet support scroll insensitive updatable resultsets");
-			}
-			catch (SQLException e) {
-				System.out.println("SQL State : " + e.getSQLState());
-				System.out.println("Got expected exception " + e.getMessage());
-			}
-			rs.next();
-			//have to close the resultset because by default, resultsets are held open over commit
-			rs.close();
+			System.out.println("This test has been removed because scrollable " +
+												 "insensitive updatable result sets have been " + 
+												 "implemented.");
 
-			System.out.println("Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset");
+			System.out.println("Negative Test2 - request for scroll sensitive " + 
+												 "updatable resultset will give an updatable " + 
+												 "scroll insensitive resultset");
 			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			JDBCDisplayUtil.ShowWarnings(System.out, conn);
       System.out.println("requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported");
 			System.out.println("Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets");
       System.out.println("Make sure that we got TYPE_SCROLL_INSENSITIVE? " +  (stmt.getResultSetType() == ResultSet.TYPE_SCROLL_INSENSITIVE));
-      System.out.println("Make sure that we got CONCUR_READ_ONLY? " +  (stmt.getResultSetConcurrency() == ResultSet.CONCUR_READ_ONLY));
-			System.out.println("JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset");
-      rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
-			rs.next();
-			try {
-				rs.deleteRow();
-				System.out.println("FAIL!!! deleteRow should have failed because Derby does not yet support scroll sensitive updatable resultsets");
-			}
-			catch (SQLException e) {
-				System.out.println("SQL State : " + e.getSQLState());
-				System.out.println("Got expected exception " + e.getMessage());
-			}
-			try {
-				rs.updateRow();
-				System.out.println("FAIL!!! updateRow should have failed because Derby does not yet support scroll sensitive updatable resultsets");
-			}
-			catch (SQLException e) {
-				System.out.println("SQL State : " + e.getSQLState());
-				System.out.println("Got expected exception " + e.getMessage());
-			}
-			rs.next();
-			//have to close the resultset because by default, resultsets are held open over commit
-			rs.close();
+			System.out.println("Make sure that we got CONCUR_UPDATABLE? " +  
+												 (stmt.getResultSetConcurrency() == 
+													ResultSet.CONCUR_UPDATABLE));
+			System.out.println("Rest of the test removed because scrollable " + 
+												 "insensitive updatable result sets have been " + 
+												 "implemented.");
 
 			System.out.println("Negative Test3 - request a read only resultset and attempt deleteRow and updateRow on it");
 			stmt = conn.createStatement();//the default is a read only forward only resultset
@@ -407,7 +363,6 @@ public class updatableResultSet {
 			rs = stmt.executeQuery("select * from t1 FOR READ ONLY");
 			System.out.println("Make sure that we got CONCUR_READ_ONLY? " + (rs.getConcurrency() == ResultSet.CONCUR_READ_ONLY));
 			System.out.println("Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode");
-			System.out.println("Will see the warnings in embedded mode only");
 			JDBCDisplayUtil.ShowWarnings(System.out, rs);
 			rs.next();
       System.out.println("Now attempting to send a delete on a sql with FOR READ ONLY clause.");

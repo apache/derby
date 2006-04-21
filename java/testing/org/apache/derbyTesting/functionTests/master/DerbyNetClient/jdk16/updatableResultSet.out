@@ -1,62 +1,47 @@
 Start testing delete and update using JDBC2.0 updateable resultset apis
 Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset
-WARNING 01J11: Insensitive updatable result sets are not supported by server; remapping to insensitive read-only cursor
-requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported
-Make sure that we got TYPE_SCROLL_INSENSITIVE? true
-Make sure that we got CONCUR_READ_ONLY? true
-ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
-othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
-deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
-JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
-Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
+This test has been removed because scrollable insensitive updatable result sets have been implemented.
+Negative Test2 - request for scroll sensitive updatable resultset will give an updatable scroll insensitive resultset
 WARNING 01J10: Scroll sensitive result sets are not supported by server; remapping to forward-only cursor
 requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
 Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
-Make sure that we got CONCUR_READ_ONLY? true
-JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+Make sure that we got CONCUR_UPDATABLE? true
+Rest of the test removed because scrollable insensitive updatable result sets have been implemented.
 Negative Test3 - request a read only resultset and attempt deleteRow and updateRow on it
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a deleteRow on a read only resultset.
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ083
+Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Now attempting to send an updateRow on a read only resultset.
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ083
+Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative Test4 - request a read only resultset and send a sql with FOR UPDATE clause and attempt deleteRow/updateRow on it
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a deleteRow on a read only resultset with FOR UPDATE clause in the SELECT sql.
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ083
+Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Now attempting to send a updateRow on a read only resultset with FOR UPDATE clause in the SELECT sql.
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ083
+Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative Test5 - request resultset with no FOR UPDATE clause and CONCUR_READ_ONLY
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a delete on a sql with no FOR UPDATE clause and CONCUR_READ_ONLY.
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ083
+Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Now attempting to send a updateRow on a sql with no FOR UPDATE clause and CONCUR_READ_ONLY.
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ083
+Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
 Make sure that we got CONCUR_READ_ONLY? true
 Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode
-Will see the warnings in embedded mode only
+WARNING 01J06: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
 Now attempting to send a delete on a sql with FOR READ ONLY clause.
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ083
+Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Now attempting to send a updateRow on a sql with FOR READ ONLY clause.
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ083
+Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when the resultset is not positioned on a row
 Make sure that we got CONCUR_UPDATABLE? true
 Now attempt a deleteRow without first doing next on the resultset.
@@ -520,71 +505,71 @@ getXXX right after deleteRow will fail because resultset is not positioned on a 
 SQL State : XJ121
 Got expected exception Invalid operation at current cursor position.
 Positive Test18 - Test cancelRowUpdates method as the first updatable ResultSet api on a read-only resultset
-SQL State : XJ086
-Got expected exception This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State : XJ083
+Got expected exception 'cancelRowUpdates' not allowed because the ResultSet is not an updatable ResultSet. 
 Positive Test19 - Test updateRow method as the first updatable ResultSet api on a read-only resultset
-  Got expected exception : This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+  Got expected exception : 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on a read-only resultset
   Test updateShort on a readonly resultset
   Using column position as first parameter to updateShort
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateShort' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateShort
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateShort' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateInt on a readonly resultset
   Using column position as first parameter to updateInt
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateInt
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateLong on a readonly resultset
   Using column position as first parameter to updateLong
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateLong' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateLong
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateLong' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBigDecimal on a readonly resultset
   Using column position as first parameter to updateBigDecimal
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateBigDecimal' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateBigDecimal
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateBigDecimal' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateFloat on a readonly resultset
   Using column position as first parameter to updateFloat
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateFloat' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateFloat
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateFloat' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateDouble on a readonly resultset
   Using column position as first parameter to updateDouble
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateDouble' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateDouble
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateDouble' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateString on a readonly resultset
   Using column position as first parameter to updateString
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateString' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateString
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateString' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateAsciiStream on a readonly resultset
   Using column position as first parameter to updateAsciiStream
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateAsciiStream' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateAsciiStream
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateAsciiStream' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateCharacterStream on a readonly resultset
   Using column position as first parameter to updateCharacterStream
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateCharacterStream' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateCharacterStream
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateCharacterStream' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateByte on a readonly resultset
   Using column position as first parameter to updateByte
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateByte' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateByte
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateByte' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBytes on a readonly resultset
   Using column position as first parameter to updateBytes
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateBytes' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateBytes
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateBytes' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBinaryStream on a readonly resultset
   Using column position as first parameter to updateBinaryStream
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateBinaryStream' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateBinaryStream
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateBinaryStream' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateClob on a readonly resultset
   Using column position as first parameter to updateClob
   Got expected exception : JDBC 3 method called - not yet supported
@@ -592,19 +577,19 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : JDBC 3 method called - not yet supported
   Test updateDate on a readonly resultset
   Using column position as first parameter to updateDate
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateDate' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateDate
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateDate' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateTime on a readonly resultset
   Using column position as first parameter to updateTime
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateTime' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateTime
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateTime' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateTimestamp on a readonly resultset
   Using column position as first parameter to updateTimestamp
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateTimestamp' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateTimestamp
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateTimestamp' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBlob on a readonly resultset
   Using column position as first parameter to updateBlob
   Got expected exception : JDBC 3 method called - not yet supported
@@ -612,14 +597,14 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : JDBC 3 method called - not yet supported
   Test updateBoolean on a readonly resultset
   Using column position as first parameter to updateBoolean
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateBoolean' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateBoolean
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateBoolean' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateNull on a readonly resultset
   Using column position as first parameter to updateNull
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateNull' not allowed because the ResultSet is not an updatable ResultSet. 
   Using column name as first parameter to updateNull
-  Got expected exception : 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+  Got expected exception : 'updateNull' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateArray on a readonly resultset
   Using column position as first parameter to updateArray
   Got expected exception : JDBC 3 method called - not yet supported
@@ -3212,16 +3197,16 @@ Positive test 46 - Rollback with AutoCommit on
 Negative test 47 - insertRow and read-only RS
 Negative test 47.a - try moveToInsertRow on read-only RS
 SQL State: XJ083
-Got expected exception: 'moveToInsertRow()' not allowed because the ResultSet is not an updatable ResultSet. 
+Got expected exception: 'moveToInsertRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative test 47.b - try updateXXX on read-only RS
 SQL State: XJ083
-Got expected exception: 'updateXXX' not allowed because the ResultSet is not an updatable ResultSet. 
+Got expected exception: 'updateInt' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative test 47.c - try insertRow on read-only RS
-SQL State: XJ086
-Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State: XJ083
+Got expected exception: 'insertRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Negative test 47.d - try moveToCurrentRow on read-only RS
 SQL State: XJ083
-Got expected exception: 'moveToCurrentRow()' not allowed because the ResultSet is not an updatable ResultSet. 
+Got expected exception: 'moveToCurrentRow' not allowed because the ResultSet is not an updatable ResultSet. 
 Positive test 48 - Test all updateXXX methods on all the supported sql datatypes
 Next datatype to test is SMALLINT
   Testing updateShort on SQL type SMALLINT

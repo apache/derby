@@ -16,8 +16,9 @@ getColumnType(1): 4
 getPrecision(1): 10
 getScale(1): 0
 getColumnTypeName(1): INTEGER
-isReadOnly(1): true
-isDefinitelyWritable(1): false
+isReadOnly(1): false
+isWritable(1): Expected isWritable value
+isDefinitelyWritable(1): true
 isAutoIncrement(2): false
 isCaseSensitive(2): false
 isSearchable(2): true
@@ -34,8 +35,9 @@ getColumnType(2): 5
 getPrecision(2): 5
 getScale(2): 0
 getColumnTypeName(2): SMALLINT
-isReadOnly(2): true
-isDefinitelyWritable(2): false
+isReadOnly(2): false
+isWritable(2): Expected isWritable value
+isDefinitelyWritable(2): true
 isAutoIncrement(3): false
 isCaseSensitive(3): false
 isSearchable(3): true
@@ -52,8 +54,9 @@ getColumnType(3): 7
 getPrecision(3): 7
 getScale(3): 0
 getColumnTypeName(3): REAL
-isReadOnly(3): true
-isDefinitelyWritable(3): false
+isReadOnly(3): false
+isWritable(3): Expected isWritable value
+isDefinitelyWritable(3): true
 isAutoIncrement(4): false
 isCaseSensitive(4): false
 isSearchable(4): true
@@ -70,8 +73,9 @@ getColumnType(4): 8
 getPrecision(4): 15
 getScale(4): 0
 getColumnTypeName(4): DOUBLE
-isReadOnly(4): true
-isDefinitelyWritable(4): false
+isReadOnly(4): false
+isWritable(4): Expected isWritable value
+isDefinitelyWritable(4): true
 isAutoIncrement(5): false
 isCaseSensitive(5): false
 isSearchable(5): true
@@ -88,8 +92,9 @@ getColumnType(5): 91
 getPrecision(5): 10
 getScale(5): 0
 getColumnTypeName(5): DATE
-isReadOnly(5): true
-isDefinitelyWritable(5): false
+isReadOnly(5): false
+isWritable(5): Expected isWritable value
+isDefinitelyWritable(5): true
 isAutoIncrement(6): false
 isCaseSensitive(6): false
 isSearchable(6): true
@@ -106,8 +111,9 @@ getColumnType(6): 92
 getPrecision(6): 8
 getScale(6): 0
 getColumnTypeName(6): TIME
-isReadOnly(6): true
-isDefinitelyWritable(6): false
+isReadOnly(6): false
+isWritable(6): Expected isWritable value
+isDefinitelyWritable(6): true
 isAutoIncrement(7): false
 isCaseSensitive(7): false
 isSearchable(7): true
@@ -124,8 +130,9 @@ getColumnType(7): 93
 getPrecision(7): 26
 getScale(7): 6
 getColumnTypeName(7): TIMESTAMP
-isReadOnly(7): true
-isDefinitelyWritable(7): false
+isReadOnly(7): false
+isWritable(7): Expected isWritable value
+isDefinitelyWritable(7): true
 isAutoIncrement(8): false
 isCaseSensitive(8): true
 isSearchable(8): true
@@ -142,8 +149,9 @@ getColumnType(8): 1
 getPrecision(8): 10
 getScale(8): 0
 getColumnTypeName(8): CHAR
-isReadOnly(8): true
-isDefinitelyWritable(8): false
+isReadOnly(8): false
+isWritable(8): Expected isWritable value
+isDefinitelyWritable(8): true
 isAutoIncrement(9): false
 isCaseSensitive(9): true
 isSearchable(9): true
@@ -160,8 +168,9 @@ getColumnType(9): 12
 getPrecision(9): 40
 getScale(9): 0
 getColumnTypeName(9): VARCHAR
-isReadOnly(9): true
-isDefinitelyWritable(9): false
+isReadOnly(9): false
+isWritable(9): Expected isWritable value
+isDefinitelyWritable(9): true
 isAutoIncrement(10): false
 isCaseSensitive(10): false
 isSearchable(10): true
@@ -178,8 +187,9 @@ getColumnType(10): 3
 getPrecision(10): 10
 getScale(10): 2
 getColumnTypeName(10): DECIMAL
-isReadOnly(10): true
-isDefinitelyWritable(10): false
+isReadOnly(10): false
+isWritable(10): Expected isWritable value
+isDefinitelyWritable(10): true
 isAutoIncrement(11): false
 isCaseSensitive(11): false
 isSearchable(11): true
@@ -196,8 +206,9 @@ getColumnType(11): -5
 getPrecision(11): 19
 getScale(11): 0
 getColumnTypeName(11): BIGINT
-isReadOnly(11): true
-isDefinitelyWritable(11): false
+isReadOnly(11): false
+isWritable(11): Expected isWritable value
+isDefinitelyWritable(11): true
 isAutoIncrement(12): false
 isCaseSensitive(12): false
 isSearchable(12): true
@@ -214,8 +225,9 @@ getColumnType(12): -2
 getPrecision(12): 10
 getScale(12): 0
 getColumnTypeName(12): CHAR FOR BIT DATA
-isReadOnly(12): true
-isDefinitelyWritable(12): false
+isReadOnly(12): false
+isWritable(12): Expected isWritable value
+isDefinitelyWritable(12): true
 isAutoIncrement(13): false
 isCaseSensitive(13): false
 isSearchable(13): true
@@ -232,8 +244,9 @@ getColumnType(13): -3
 getPrecision(13): 10
 getScale(13): 0
 getColumnTypeName(13): VARCHAR FOR BIT DATA
-isReadOnly(13): true
-isDefinitelyWritable(13): false
+isReadOnly(13): false
+isWritable(13): Expected isWritable value
+isDefinitelyWritable(13): true
 isAutoIncrement(14): false
 isCaseSensitive(14): false
 isSearchable(14): true
@@ -250,8 +263,9 @@ getColumnType(14): -4
 getPrecision(14): 32700
 getScale(14): 0
 getColumnTypeName(14): LONG VARCHAR FOR BIT DATA
-isReadOnly(14): true
-isDefinitelyWritable(14): false
+isReadOnly(14): false
+isWritable(14): Expected isWritable value
+isDefinitelyWritable(14): true
 isAutoIncrement(15): false
 isCaseSensitive(15): true
 isSearchable(15): true
@@ -268,8 +282,9 @@ getColumnType(15): 2005
 getPrecision(15): 2147483647
 getScale(15): 0
 getColumnTypeName(15): CLOB
-isReadOnly(15): true
-isDefinitelyWritable(15): false
+isReadOnly(15): false
+isWritable(15): Expected isWritable value
+isDefinitelyWritable(15): true
 isAutoIncrement(16): false
 isCaseSensitive(16): false
 isSearchable(16): true
@@ -286,8 +301,9 @@ getColumnType(16): 2004
 getPrecision(16): 1073741824
 getScale(16): 0
 getColumnTypeName(16): BLOB
-isReadOnly(16): true
-isDefinitelyWritable(16): false
+isReadOnly(16): false
+isWritable(16): Expected isWritable value
+isDefinitelyWritable(16): true
 getBigDecimal(1,1): 1
 beetle 5328 - JCC returns incorrect scale for getBigDecimal(String,int)
 getBigDecimal(i,1): 1

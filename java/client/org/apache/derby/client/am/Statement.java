@@ -46,7 +46,6 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     public MaterialStatement materialStatement_ = null;
 
     public Connection connection_;
-    private SqlWarning warnings_ = null;
     public Section section_;
     public Agent agent_;
 
@@ -190,8 +189,10 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     // This flag makes sure that only one copy of this statement
     // will be in connection_.commitListeners_.
 
+    private SqlWarning warnings_ = null;
 
-    //---------------------constructors/finalizer---------------------------------
+
+    //---------------------constructors/finalizer/accessors--------------------
 
     private Statement() throws SqlException {
         initStatement();
@@ -380,6 +381,13 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             markClosed();
         }
         super.finalize();
+    }
+
+    /*
+     * Accessor to state variable warnings_
+     */
+    protected SqlWarning getSqlWarnings() {
+        return warnings_;
     }
 
     // ---------------------------jdbc 1------------------------------------------
@@ -1371,7 +1379,8 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         if (resultSet_.fetchSize_ == 0 &&
                 (resultSet_.resultSetType_ == java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE ||
                 resultSet_.resultSetType_ == java.sql.ResultSet.TYPE_SCROLL_SENSITIVE)) {
-            resultSet_.fetchSize_ = org.apache.derby.client.am.Configuration.defaultFetchSize;
+            resultSet_.setFetchSize_(org.apache.derby.client.am.
+                                     Configuration.defaultFetchSize);
         }
     }
 

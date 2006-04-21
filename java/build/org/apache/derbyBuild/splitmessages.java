@@ -83,6 +83,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT);
         clientMessageIds.add(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION);
         clientMessageIds.add(SQLState.LOB_METHOD_ON_CLOSED_CONNECTION);
+	clientMessageIds.add(SQLState.QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET);
         clientMessageIds.add(SQLState.LANG_INVALID_CALL_TO_EXECUTE_UPDATE);
         clientMessageIds.add(SQLState.LANG_CANT_INVALIDATE_OPEN_RESULT_SET);
         clientMessageIds.add(SQLState.YEAR_EXCEEDS_MAXIMUM);

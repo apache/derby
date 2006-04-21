@@ -25,7 +25,6 @@ jdbcapi/dataSourceReference.java
 largedata/LobLimits.java
 jdbc4/TestDbMetaData.java
 jdbc4/TestJDBC40Exception.java
-jdbcapi/SURTest.junit
 #Tests BrokeredConnection class which is presnt only on the embedded side
 jdbc4/EmbeddedBrokeredConnectionWrapperTest.junit
 #temporarily disable checkDataSourceTests with client

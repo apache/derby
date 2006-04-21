@@ -1508,6 +1508,15 @@ public interface SQLState {
     String STORED_PROC_LOAD_MODULE_NOT_FOUND = "XJ210.S";
     String BATCH_CHAIN_BREAKING_EXCEPTION = "XJ211.S";
     
+    // Used by server for scrollable updatable insensitive result sets
+    // to transmit updated state to client. Internal, not seen by user.
+    // Has no message in messages.properties as it is never printed.
+    String ROW_UPDATED = "rwupd"; 
+    // Used by server to signal delete holes to the client. Internal, not 
+    // seen by user. Has no message in messages.properties as it is never 
+    // printed.
+    String ROW_DELETED = "02502";
+
     String INTERNAL_ERROR = "XJ999.S";
     String CONN_GENERIC = "X0RQB.S";
 
