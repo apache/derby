@@ -24,6 +24,8 @@ import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 
+import org.apache.derby.iapi.services.sanity.SanityManager;
+
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -115,28 +117,54 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 
 	}
 
-	private static Properties queryDescriptions;
-	protected final Properties getQueryDescriptions() {
-		Properties p = EmbedDatabaseMetaData.queryDescriptions;
-		if (p != null)
-			return p;
+    /** Cached query descriptions from metadata.properties. */
+    private static Properties queryDescriptions;
+    /** Cached query descriptions from metadata_net.properties. */
+    private static Properties queryDescriptions_net;
+    /**
+     * Return all queries found in either metadata.properties or
+     * metadata_net.properties.
+     *
+     * @param net if <code>true</code>, read metadata_net.properties;
+     * otherwise, read metadata.properties.
+     * @return a <code>Properties</code> value with the queries
+     */
+    private Properties getQueryDescriptions(boolean net) {
+        Properties p = net ? queryDescriptions_net : queryDescriptions;
+        if (p != null) {
+            return p;
+        }
+        loadQueryDescriptions();
+        return net ? queryDescriptions_net : queryDescriptions;
+    }
 
-		return (EmbedDatabaseMetaData.queryDescriptions = loadQueryDescriptions());
-	}
-
-	private Properties PBloadQueryDescriptions() {
-		Properties p = new Properties();
-		try {
-
-			// SECURITY PERMISSION - IP3
-			InputStream is = getClass().getResourceAsStream("metadata.properties");
-			
-			p.load(is);
-			is.close();
-		} catch (IOException ioe) {
-		}
-		return p;
-	}
+    /**
+     * Read the query descriptions from metadata.properties and
+     * metadata_net.properties. This method must be invoked from
+     * within a privileged block.
+     */
+    private void PBloadQueryDescriptions() {
+        String[] files = {
+            "metadata.properties",
+            "/org/apache/derby/impl/sql/catalog/metadata_net.properties"
+        };
+        Properties[] props = new Properties[files.length];
+        for (int i = 0; i < files.length; ++i) {
+            try {
+                props[i] = new Properties();
+                // SECURITY PERMISSION - IP3
+                InputStream is = getClass().getResourceAsStream(files[i]);
+                props[i].load(is);
+                is.close();
+            } catch (IOException ioe) {
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT("Error reading " + files[i], ioe);
+                }
+            }
+        }
+        queryDescriptions = props[0];
+        queryDescriptions_net = props[1];
+    }
 
 	//////////////////////////////////////////////////////////////
 	//
@@ -1648,7 +1676,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			ResultSet rs = null;
 			try {
 			
-			String queryText = getQueryDescriptions().getProperty("getTables");
+			String queryText =
+				getQueryDescriptions(false).getProperty("getTables");
 
 			/*
 			 * The query text is assumed to end with a "where" clause, so
@@ -2187,7 +2216,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * This can happen if we are in soft upgrade mode. Since in soft upgrade 
      * mode, we can't change these stored metadata queries in a backward 
      * incompatible way, engine needs to read the metadata sql from 
-     * metadata.properties file rather than rely on system tables.
+     * metadata.properties or metadata_net.properties file rather than
+     * rely on system tables.
      * 
      * @return true if we are not in soft upgrade mode
      * @throws SQLException
@@ -2918,7 +2948,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
       ResultSet rs = null;
       int getClassTypes = 0;
       try {
-        String queryText = getQueryDescriptions().getProperty("getUDTs");
+        String queryText = getQueryDescriptions(false).getProperty("getUDTs");
 
         if (types != null  &&  types.length >= 1) {
           for (int i=0; i<types.length; i++){
@@ -3285,20 +3315,67 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	//
 	//////////////////////////////////////////////////////////////
 	
+    /**
+     * Get metadata that the client driver will cache. The metadata is
+     * fetched using SYSIBM.METADATA (found in metadata_net.properties).
+     *
+     * @return the result set returned by SYSIBM.METADATA
+     * @exception SQLException if a database error occurs
+     */
+    public ResultSet getClientCachedMetaData() throws SQLException {
+        return getSimpleQuery("METADATA", true);
+    }
+
 	/*
 	 * utility helper routines:
 	 */
 
-	protected ResultSet getSimpleQuery(String nameKey) throws SQLException
+    /**
+     * Execute a query in metadata.properties (or SPS in the SYS
+     * schema) or metadata_net.properties (or SPS in the SYSIBM
+     * schema).
+     *
+     * @param nameKey the name of the query
+     * @param net if <code>true</code>, execute a query in
+     * metadata_net.properties; otherwise, execute a query in
+     * metadata.properties
+     * @return a <code>ResultSet</code> value
+     * @exception SQLException if a database error occurs
+     */
+    private ResultSet getSimpleQuery(String nameKey, boolean net)
+        throws SQLException
 	{
-		PreparedStatement ps = getPreparedQuery(nameKey);
+		PreparedStatement ps = getPreparedQuery(nameKey, net);
 		if (ps == null)
 			return null;
 	
 		return ps.executeQuery();
 	}
 
-	private PreparedStatement getPreparedQueryUsingSystemTables(String nameKey) throws SQLException 
+    /**
+     * Execute a query in metadata.properties, or an SPS in the SYS
+     * schema.
+     *
+     * @param nameKey the name of the query
+     * @return a <code>ResultSet</code> value
+     * @exception SQLException if a database error occurs
+     */
+    protected ResultSet getSimpleQuery(String nameKey) throws SQLException {
+        return getSimpleQuery(nameKey, false);
+    }
+
+    /**
+     * Get a stored prepared statement from the system tables.
+     *
+     * @param nameKey the name of the query
+     * @param net if <code>true</code>, find query in SYSIBM schema;
+     * otherwise, find query in SYS schema
+     * @return a <code>PreparedStatement</code> value
+     * @exception SQLException if a database error occurs
+     */
+    private PreparedStatement getPreparedQueryUsingSystemTables(String nameKey,
+                                                                boolean net)
+        throws SQLException 
 	{
 		synchronized (getConnectionSynchronization())
 		{
@@ -3307,13 +3384,14 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 
 			try
 			{
-				String queryText = getQueryDescriptions().getProperty(nameKey);
+				String queryText =
+					getQueryDescriptions(net).getProperty(nameKey);
 				if (queryText == null)
 				{
                     throw Util.notImplemented(nameKey);
 				}
 				
-                ps = prepareSPS(nameKey, queryText);
+                ps = prepareSPS(nameKey, queryText, net);
 			}
 
 			catch (Throwable t) 
@@ -3331,7 +3409,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 
 	/**
 	 * Either get the prepared query for the metadata call from the
-	 * system tables or from the metadata.properties file.
+	 * system tables, or from the metadata.properties or
+	 * metadata_net.properties file.
 	 * In soft upgrade mode, the queries stored in the system tables
 	 * might not be upto date with the Derby engine release because
 	 * system tables can't be modified in backward incompatible way in
@@ -3339,7 +3418,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * soft upgrade mode, get the queries from metadata.properties
 	 * file rather than from the system tables.
 	 *
-	 * Getting queries from metadata.properties might cause problems
+	 * Getting queries from metadata(_net).properties might cause problems
 	 * if system catalogs have been changed between versions either by
 	 * addition of columns or have new catalogs. To continue
 	 * to support soft upgrade from older versions of database, find
@@ -3347,21 +3426,26 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 *
 	 * @param queryName Name of the metadata query for which we need
 	 * a prepared statement
+	 * @param net if <code>true</code>, use metadata_net.properties
+	 * instead of metadata.properties
 	 * @return PreparedStatement
+	 * @exception SQLException if a database error occurs
 	 */
-	protected PreparedStatement getPreparedQuery(String queryName)
+	private PreparedStatement getPreparedQuery(String queryName,
+											   boolean net)
 			throws SQLException {
 		PreparedStatement s;
 		//We can safely goto system table since we are not in soft upgrade
 		//mode and hence metadata sql in system tables are uptodate
 		//with this Derby release.
 		if (notInSoftUpgradeMode())
-			s = getPreparedQueryUsingSystemTables(queryName);
+			s = getPreparedQueryUsingSystemTables(queryName, net);
 		else {
 			try {
 				//Can't use stored prepared statements because we are in soft upgrade
 				//mode and hence need to get metadata sql from metadata.properties file 
-				String queryText = getQueryFromDescription(queryName);
+				//or metadata_net.properties
+				String queryText = getQueryFromDescription(queryName, net);
 				s = getEmbedConnection().prepareMetaDataStatement(queryText);
 			} catch (Throwable t) {
 				throw handleException(t);
@@ -3370,7 +3454,20 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		return s;
 	}	
 
-	/*
+    /**
+     * Get a prepared query from system tables or metadata.properties.
+     *
+     * @param queryName name of the query
+     * @return a <code>PreparedStatement</code> value
+     * @exception SQLException if a database error occurs
+     */
+    protected PreparedStatement getPreparedQuery(String queryName)
+        throws SQLException
+    {
+        return getPreparedQuery(queryName, false);
+    }
+
+	/**
 	 * Given a queryName, find closest match in queryDescriptions. This method
 	 * should be called in soft-upgrade mode only, where current software version
 	 * doesn't match dictionary version. For these cases, there may be
@@ -3385,8 +3482,14 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * all Major_Minor versions between software version and dictionary version
 	 * and try each one from Dictionary version to current version. Since only
 	 * needed for two queries, overhead may not be worth it yet.
+	 *
+	 * @param queryName name of the query
+	 * @param net if <code>true</code>, get the query from
+	 * metadata_net.properties instead of metadata.properties
+	 * @return the query text
+	 * @exception StandardException if an error occurs
 	 */
-	private String getQueryFromDescription(String queryName)
+	private String getQueryFromDescription(String queryName, boolean net)
 		throws StandardException
 	{
 		DataDictionary dd = getLanguageConnectionContext().getDataDictionary();
@@ -3403,7 +3506,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 				queryName = "getTablePrivileges_10_1";
 		}
 
-		return getQueryDescriptions().getProperty(queryName);
+		return getQueryDescriptions(net).getProperty(queryName);
 	}
 
 	/*
@@ -3413,7 +3516,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	** 
 	*/
 	private PreparedStatement prepareSPS(String	spsName, 
-										 String	spsText)
+										 String	spsText,
+										 boolean net)
 		throws StandardException, SQLException
 	{
 
@@ -3428,6 +3532,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		DataDictionary dd = getLanguageConnectionContext().getDataDictionary();
 		SPSDescriptor spsd = dd.getSPSDescriptor(
 										spsName, 
+										net ? dd.getSysIBMSchemaDescriptor() :
 										dd.getSystemSchemaDescriptor());
 		lcc.commitNestedTransaction();
 
@@ -3446,8 +3551,10 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		** statement, but we have no (easy) way of turning
 		** the statement into a java.sql.PreparedStatement.
 		*/	
-		return getEmbedConnection().prepareMetaDataStatement(
-									"EXECUTE STATEMENT SYS.\""+spsName+"\"");
+		String queryText =
+			"EXECUTE STATEMENT " + (net ? "SYSIBM" : "SYS") +
+			".\"" + spsName + "\"";
+		return getEmbedConnection().prepareMetaDataStatement(queryText);
 
 	}
 
@@ -3490,13 +3597,24 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	** Priv block code, moved out of the old Java2 version.
 	*/
 
-	private final Properties loadQueryDescriptions() {
-		return (Properties) java.security.AccessController.doPrivileged(this);
-	}
+    /**
+     * Loads the query descriptions from metadata.properties and
+     * metadata_net.properties into <code>queryDescriptions</code> and
+     * <code>queryDescriptions_net</code>.
+     */
+    private void loadQueryDescriptions() {
+        java.security.AccessController.doPrivileged(this);
+    }
 
+	/**
+	 * Performs a privileged action. Reads the query descriptions.
+	 *
+	 * @return <code>null</code>
+	 */
 	public final Object run() {
 		// SECURITY PERMISSION - IP3
-		return PBloadQueryDescriptions();
+		PBloadQueryDescriptions();
+		return null;
 	}
 
 }

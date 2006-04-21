@@ -635,11 +635,7 @@ public class SystemProcedures  {
 	public static void METADATA (ResultSet[] rs)
 		throws SQLException
 	{
-		
-		Connection conn = getDefaultConn();
-		PreparedStatement ps = conn.prepareStatement("execute statement SYSIBM.METADATA");
-		rs[0] = ps.executeQuery();
-		conn.close();
+		rs[0] = ((EmbedDatabaseMetaData) getDMD()).getClientCachedMetaData();
 	}
 
 	/**

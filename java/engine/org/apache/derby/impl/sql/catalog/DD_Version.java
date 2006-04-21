@@ -321,7 +321,7 @@ public	class DD_Version implements	Formatable
 		//This is to make sure that we have the stored versions of JDBC database
 		//metadata queries matching with this release of the engine.
 		dropJDBCMetadataSPSes(tc, false);
-		bootingDictionary.createSPSSet(tc, false, bootingDictionary.getSystemSchemaDescriptor().getUUID());
+		bootingDictionary.createSystemSps(tc);
 
 		/*
 		 * OLD Cloudscape 5.1 upgrade code, Derby does not support
@@ -440,6 +440,10 @@ public	class DD_Version implements	Formatable
 	 * on upgrade time).
 	 *
 	 * @param tc the xact
+	 * @param removeSYSIBMonly if <code>true</code>, remove stored
+	 * prepared statements in the SYSIBM schema only; otherwise,
+	 * remove stored prepared statements in all system schemas
+	 * (including SYSIBM)
 	 *
 	 * @exception StandardException  Standard Cloudscape error policy.
 	 */
@@ -452,16 +456,21 @@ public	class DD_Version implements	Formatable
 			SchemaDescriptor sd = spsd.getSchemaDescriptor();
 			// need to compare the name, old SYSIBM is not built-in
 			boolean isSYSIBM = sd.getSchemaName().equals(SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME);
-			if (! sd.isSystemSchema() && ! isSYSIBM)
+
+			// don't drop statements in non-system schemas
+			if (!sd.isSystemSchema() && !isSYSIBM) {
 				continue;
-			/*
-			** Is it in SYS? if so, zap it.
-			*/
-			if ((removeSYSIBMonly && isSYSIBM) || (! removeSYSIBMonly && ! isSYSIBM))
-			{
-				bootingDictionary.dropSPSDescriptor(spsd, tc);
-				bootingDictionary.dropDependentsStoredDependencies(spsd.getUUID(), tc);
 			}
+
+			// don't drop statements outside the SYSIBM schema if
+			// we're told not to
+			if (removeSYSIBMonly && !isSYSIBM) {
+				continue;
+			}
+
+			bootingDictionary.dropSPSDescriptor(spsd, tc);
+			bootingDictionary.dropDependentsStoredDependencies(spsd.getUUID(),
+															   tc);
 		}
 	}
 
