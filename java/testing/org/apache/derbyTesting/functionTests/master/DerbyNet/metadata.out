@@ -18,18 +18,18 @@ DatabaseMetaData.getURL test passed
 allTablesAreSelectable(): true
 maxColumnNameLength(): 128
 getSchemas():
-TABLE_SCHEM[VARCHAR]
-APP
-NULLID
-SQLJ
-SYS
-SYSCAT
-SYSCS_DIAG
-SYSCS_UTIL
-SYSFUN
-SYSIBM
-SYSPROC
-SYSSTAT
+TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
+APP,null
+NULLID,null
+SQLJ,null
+SYS,null
+SYSCAT,null
+SYSCS_DIAG,null
+SYSCS_UTIL,null
+SYSFUN,null
+SYSIBM,null
+SYSPROC,null
+SYSSTAT,null
 getCatalogs():
 TABLE_CAT[CHAR]
 getSearchStringEscape(): 

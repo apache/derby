@@ -1733,17 +1733,18 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * Get the schema names available in this database.  The results
      * are ordered by schema name.
      *
-     * <P>The schema column is:
+     * <P>The schema columns are:
      *  <OL>
-     *	<LI><B>TABLE_SCHEM</B> String => schema name
+     *  <li><strong>TABLE_SCHEM</strong> String =&gt; schema name</li>
+     *  <li><strong>TABLE_CATALOG</strong> String =&gt; catalog name
+     *  (may be <code>null</code>)</li>
      *  </OL>
      *
-     * @return ResultSet - each row has a single String column that is a
-     * schema name
+     * @return ResultSet - each row is a schema description
 	 * @exception SQLException thrown on failure.
      */
 	public ResultSet getSchemas() throws SQLException {
-		return getSimpleQuery("getSchemas");
+		return getSchemas(null, null);
 	}
 
     /**
@@ -3310,7 +3311,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
     public ResultSet getSchemas(String catalog, String schemaPattern)
         throws SQLException
     {
-        PreparedStatement s = getPreparedQuery("getSchemasWithParams");
+        PreparedStatement s = getPreparedQuery("getSchemas");
         s.setString(1, swapNull(catalog));
         s.setString(2, swapNull(schemaPattern));
         return s.executeQuery();
