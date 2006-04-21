@@ -73,7 +73,7 @@
   </target>
 
   <target name="compilet2">
-    <javac
+    <!--javac
       source="1.4"
       target="1.4"
       bootclasspath="${empty}"
@@ -90,14 +90,13 @@
         <pathelement path="${java14compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
-      <!--exclude name=""/-->
-	<exclude name="**/jdbc4/*"/>
-      <!--include name=""/-->
-    </javac>
+      <exclude name="**/jdbc4/*"/>
+      <include name="${this.dir}/*.java">
+    </javac-->
   </target>
 
   <target name="compilet3">
-    <javac
+    <!--javac
       source="1.4"
       target="1.4"
       bootclasspath="${empty}"
@@ -113,8 +112,8 @@
       <classpath>
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
-      <!--include name=""/-->
-    </javac>
+      <include name=""/>
+    </javac-->
   </target> 
 
   <target name="copyfiles">

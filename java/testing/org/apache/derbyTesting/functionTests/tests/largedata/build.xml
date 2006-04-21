@@ -42,7 +42,7 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compilet1,copyfiles"/>
+  <target name="FTOtestsubdir" depends="compilet1,compilet2,copyfiles"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
@@ -68,6 +68,28 @@
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
+      <exclude name="${this.dir}/LobLimits.java"/>
+    </javac>
+  </target>
+
+  <target name="compilet2">
+    <javac
+      source="1.4"
+      target="1.4"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}" 
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java14compile.classpath}"/>
+      </classpath>
+      <include name="${this.dir}/LobLimits.java"/>
     </javac>
   </target>
 

@@ -43,6 +43,7 @@
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/harness"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/util"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.unittest.dir}"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/compatibility"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/derbyNet"/>
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/lang"/>

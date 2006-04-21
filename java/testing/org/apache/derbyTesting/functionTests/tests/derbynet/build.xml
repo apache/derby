@@ -68,6 +68,7 @@
       </classpath>
       <include name="${this.dir}/*.java"/>
       <exclude name="${this.dir}/dataSourcePermissions_net.java"/>
+      <exclude name="${this.dir}/SqlExceptionTest.java"/>
     </javac>
   </target>
 
@@ -86,9 +87,11 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
+        <pathelement path="${junit}"/>
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${this.dir}/dataSourcePermissions_net.java"/>
+      <include name="${this.dir}/SqlExceptionTest.java"/>
     </javac>
   </target> 
 
