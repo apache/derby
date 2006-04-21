@@ -21,8 +21,12 @@ package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.EncryptionManager;
+import org.apache.derby.client.am.MessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils;
+import org.apache.derby.shared.common.reference.SQLState;
+
+import java.io.UnsupportedEncodingException;
 
 public class Request {
 
@@ -1523,21 +1527,40 @@ public class Request {
     }
 
     final void writeDate(java.sql.Date date) throws SqlException {
-        ensureLength(offset_ + 10);
-        org.apache.derby.client.am.DateTime.dateToDateBytes(bytes_, offset_, date);
-        offset_ += 10;
+        try
+        {
+            ensureLength(offset_ + 10);
+            org.apache.derby.client.am.DateTime.dateToDateBytes(bytes_, offset_, date);
+            offset_ += 10;
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new SqlException(netAgent_.logWriter_, 
+                    new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                    "java.sql.Date", "DATE", e);
+        }
     }
 
     final void writeTime(java.sql.Time time) throws SqlException {
-        ensureLength(offset_ + 8);
-        org.apache.derby.client.am.DateTime.timeToTimeBytes(bytes_, offset_, time);
-        offset_ += 8;
+        try{
+            ensureLength(offset_ + 8);
+            org.apache.derby.client.am.DateTime.timeToTimeBytes(bytes_, offset_, time);
+            offset_ += 8;
+        } catch(UnsupportedEncodingException e) {
+            throw new SqlException(netAgent_.logWriter_, 
+                    new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                    "java.sql.Time", "TIME", e);
+      }
     }
 
     final void writeTimestamp(java.sql.Timestamp timestamp) throws SqlException {
-        ensureLength(offset_ + 26);
-        org.apache.derby.client.am.DateTime.timestampToTimestampBytes(bytes_, offset_, timestamp);
-        offset_ += 26;
+        try{
+            ensureLength(offset_ + 26);
+            org.apache.derby.client.am.DateTime.timestampToTimestampBytes(bytes_, offset_, timestamp);
+            offset_ += 26;
+        }catch(UnsupportedEncodingException e) {
+            throw new SqlException(netAgent_.logWriter_,  
+                    new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                    "java.sql.Timestamp", "TIMESTAMP", e);
+        }
     }
 
     // insert a java boolean into the buffer.  the boolean is written
