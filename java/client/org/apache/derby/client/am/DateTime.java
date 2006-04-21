@@ -20,6 +20,7 @@
 package org.apache.derby.client.am;
 
 import java.io.UnsupportedEncodingException;
+import org.apache.derby.client.net.Typdef;
 
 
 /**
@@ -219,12 +220,20 @@ public class DateTime {
     // ********************************************************
 
     /**
-     * The returned character representation is in JDBC date format: <code>yyyy-mm-dd</code> date format in DERBY string
-     * representation of a date.
+     * Date is converted to a char representation in JDBC date format: <code>yyyy-mm-dd</code> date format
+     * and then converted to bytes using UTF8 encoding
+     * @param buffer  bytes in UTF8 encoding of the date
+     * @param offset  write into the buffer from this offset 
+     * @param date    date value
+     * @return DateTime.dateRepresentationLength. This is the fixed length in 
+     * bytes taken to represent the date value
+     * @throws SqlException
+     * @throws UnsupportedEncodingException if UTF8 Encoding is not supported
      */
     public static final int dateToDateBytes(byte[] buffer,
                                             int offset,
-                                            java.sql.Date date) throws ConversionException {
+                                            java.sql.Date date) 
+    throws ConversionException,UnsupportedEncodingException {
         int year = date.getYear() + 1900;
         if (year > 9999) {
             throw new ConversionException("Year exceeds the maximum \"9999\".");
@@ -244,19 +253,32 @@ public class DateTime {
         dateChars[7] = '-';
         dateChars[8] = (char) (day / 10 + zeroBase);
         dateChars[9] = (char) (day % 10 + zeroBase);
-        byte[] dateBytes = (new String(dateChars)).getBytes();
+        
+        // Network server expects to read the date parameter value bytes with
+        // UTF-8 encoding.  Reference - DERBY-1127
+        // see DRDAConnThread.readAndSetParams
+        byte[] dateBytes = (new String(dateChars)).getBytes(Typdef.UTF8ENCODING);
         System.arraycopy(dateBytes, 0, buffer, offset, DateTime.dateRepresentationLength);
 
         return DateTime.dateRepresentationLength;
     }
 
     /**
-     * The returned character representation is in JDBC time escape format: <code>hh:mm:ss</code>, which is the same as
-     * JIS time format in DERBY string representation of a time.
+     * java.sql.Time is converted to character representation which is in JDBC time escape
+     * format: <code>hh:mm:ss</code>, which is the same as JIS time format in DERBY string 
+     * representation of a time.  The char representation is converted to bytes using UTF8 
+     * encoding.
+     * @param buffer  bytes in UTF8 encoding of the time
+     * @param offset  write into the buffer from this offset 
+     * @param time  java.sql.Time value
+     * @return DateTime.timeRepresentationLength. This is the fixed length in 
+     * bytes taken to represent the time value
+     * @throws UnsupportedEncodingException
      */
     public static final int timeToTimeBytes(byte[] buffer,
                                             int offset,
-                                            java.sql.Time time) {
+                                            java.sql.Time time)
+    throws UnsupportedEncodingException {
         int hour = time.getHours();
         int minute = time.getMinutes();
         int second = time.getSeconds();
@@ -271,19 +293,32 @@ public class DateTime {
         timeChars[5] = ':';
         timeChars[6] = (char) (second / 10 + zeroBase);
         timeChars[7] = (char) (second % 10 + zeroBase);
-        byte[] timeBytes = (new String(timeChars)).getBytes();
+        
+        // Network server expects to read the time parameter value bytes with
+        // UTF-8 encoding.  Reference - DERBY-1127
+        // see DRDAConnThread.readAndSetParams
+        byte[] timeBytes = (new String(timeChars)).getBytes(Typdef.UTF8ENCODING);
         System.arraycopy(timeBytes, 0, buffer, offset, DateTime.timeRepresentationLength);
 
         return DateTime.timeRepresentationLength;
     }
 
     /**
-     * The returned character representation is in DERBY string representation of a timestamp:
-     * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
+     * java.sql.Timestamp is converted to a character representation which is in DERBY string 
+     * representation of a timestamp: <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
+     * and then converted to bytes using UTF8 encoding
+     * @param buffer  bytes in UTF8 encoding of the timestamp
+     * @param offset  write into the buffer from this offset 
+     * @param timestamp  timestamp value
+     * @return DateTime.timestampRepresentationLength. This is the fixed 
+     * length in bytes, taken to represent the timestamp value
+     * @throws SqlException
+     * @throws UnsupportedEncodingException
      */
     public static final int timestampToTimestampBytes(byte[] buffer,
                                                       int offset,
-                                                      java.sql.Timestamp timestamp) throws ConversionException {
+                                                      java.sql.Timestamp timestamp) 
+    throws ConversionException,UnsupportedEncodingException {
         int year = timestamp.getYear() + 1900;
         if (year > 9999) {
             throw new ConversionException("Year exceeds the maximum \"9999\".");
@@ -323,8 +358,11 @@ public class DateTime {
         timestampChars[23] = (char) ((microsecond % 1000) / 100 + zeroBase);
         timestampChars[24] = (char) ((microsecond % 100) / 10 + zeroBase);
         timestampChars[25] = (char) (microsecond % 10 + zeroBase);
-
-        byte[] timestampBytes = (new String(timestampChars)).getBytes();
+        
+        // Network server expects to read the timestamp parameter value bytes with
+        // UTF-8 encoding.  Reference - DERBY-1127
+        // see DRDAConnThread.readAndSetParams
+        byte[] timestampBytes = (new String(timestampChars)).getBytes(Typdef.UTF8ENCODING);
         System.arraycopy(timestampBytes, 0, buffer, offset, DateTime.timestampRepresentationLength);
 
         return DateTime.timestampRepresentationLength;
@@ -539,12 +577,21 @@ public class DateTime {
     // *********************************************************
 
     /**
-     * The returned character representation is in JDBC date escape format: <code>yyyy-mm-dd</code>, which is the same
-     * as JIS date format in DERBY string representation of a date.
+     * java.sql.Timestamp is converted to character representation that is in JDBC date escape 
+     * format: <code>yyyy-mm-dd</code>, which is the same as JIS date format in DERBY string representation of a date.
+     * and then converted to bytes using UTF8 encoding.
+     * @param buffer  
+     * @param offset  write into the buffer from this offset 
+     * @param timestamp  timestamp value
+     * @return DateTime.dateRepresentationLength. This is the fixed length 
+     * in bytes, that is taken to represent the timestamp value as a date.
+     * @throws ConversionException
+     * @throws UnsupportedEncodingException
      */
     public static final int timestampToDateBytes(byte[] buffer,
                                                  int offset,
-                                                 java.sql.Timestamp timestamp) throws ConversionException {
+                                                 java.sql.Timestamp timestamp)
+    throws ConversionException,UnsupportedEncodingException {
         int year = timestamp.getYear() + 1900;
         if (year > 9999) {
             throw new ConversionException("Year exceeds the maximum \"9999\".");
@@ -564,19 +611,31 @@ public class DateTime {
         dateChars[7] = '-';
         dateChars[8] = (char) (day / 10 + zeroBase);
         dateChars[9] = (char) (day % 10 + zeroBase);
-        byte[] dateBytes = (new String(dateChars)).getBytes();
+        // Network server expects to read the date parameter value bytes with
+        // UTF-8 encoding.  Reference - DERBY-1127
+        // see DRDAConnThread.readAndSetParams
+        byte[] dateBytes = (new String(dateChars)).getBytes(Typdef.UTF8ENCODING);
         System.arraycopy(dateBytes, 0, buffer, offset, DateTime.dateRepresentationLength);
 
         return DateTime.dateRepresentationLength;
     }
 
     /**
-     * The returned character representation is in JDBC time escape format: <code>hh:mm:ss</code>, which is the same as
-     * JIS time format in DERBY string representation of a time.
+     * java.sql.Timestamp is converted to character representation in JDBC time escape format:
+     *  <code>hh:mm:ss</code>, which is the same as
+     * JIS time format in DERBY string representation of a time. The char representation is 
+     * then converted to bytes using UTF8 encoding and written out into the buffer
+     * @param buffer
+     * @param offset  write into the buffer from this offset 
+     * @param timestamp timestamp value
+     * @return DateTime.timeRepresentationLength. This is the fixed length 
+     * in bytes taken to represent the timestamp value as Time.
+     * @throws UnsupportedEncodingException
      */
     public static final int timestampToTimeBytes(byte[] buffer,
                                                  int offset,
-                                                 java.sql.Timestamp timestamp) {
+                                                 java.sql.Timestamp timestamp)
+        throws UnsupportedEncodingException {
         int hour = timestamp.getHours();
         int minute = timestamp.getMinutes();
         int second = timestamp.getSeconds();
@@ -591,19 +650,32 @@ public class DateTime {
         timeChars[5] = ':';
         timeChars[6] = (char) (second / 10 + zeroBase);
         timeChars[7] = (char) (second % 10 + zeroBase);
-        byte[] timeBytes = (new String(timeChars)).getBytes();
+        
+        // Network server expects to read the time parameter value bytes with
+        // UTF-8 encoding.  Reference - DERBY-1127
+        // see DRDAConnThread.readAndSetParams 
+        byte[] timeBytes = (new String(timeChars)).getBytes(Typdef.UTF8ENCODING);
         System.arraycopy(timeBytes, 0, buffer, offset, DateTime.timeRepresentationLength);
 
         return DateTime.timeRepresentationLength;
     }
 
     /**
-     * The returned character representation is in DERBY string representation of a timestamp:
-     * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
+     * java.sql.Date is converted to character representation that is in DERBY string 
+     * representation of a timestamp:<code>yyyy-mm-dd-hh.mm.ss.ffffff</code> and then 
+     * converted to bytes using UTF8 encoding and written out to the buffer
+     * @param buffer
+     * @param offset offset in buffer to start writing to
+     * @param date date value
+     * @return DateTime.timestampRepresentationLength. This is the fixed length
+     * in bytes, taken to represent the timestamp value.
+     * @throws ConversionException
+     * @throws UnsupportedEncodingException
      */
     public static final int dateToTimestampBytes(byte[] buffer,
                                                  int offset,
-                                                 java.sql.Date date) throws ConversionException {
+                                                 java.sql.Date date)
+    throws ConversionException, UnsupportedEncodingException {
         int year = date.getYear() + 1900;
         if (year > 9999) {
             throw new ConversionException("Year exceeds the maximum \"9999\".");
@@ -639,20 +711,30 @@ public class DateTime {
         timestampChars[23] = '0';
         timestampChars[24] = '0';
         timestampChars[25] = '0';
-
-        byte[] timestampBytes = (new String(timestampChars)).getBytes();
+        
+        // Network server expects to read the timestamp parameter value bytes with
+        // UTF-8 encoding.  Reference - DERBY-1127
+        // see DRDAConnThread.readAndSetParams 
+        byte[] timestampBytes = (new String(timestampChars)).getBytes(Typdef.UTF8ENCODING);
         System.arraycopy(timestampBytes, 0, buffer, offset, DateTime.timestampRepresentationLength);
 
         return DateTime.timestampRepresentationLength;
     }
 
     /**
-     * The returned character representation is in DERBY string representation of a timestamp:
-     * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
+     * java.sql.Time is converted to a character representation that is in DERBY string representation of a timestamp:
+     * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code> and converted to bytes using UTF8 encoding 
+     * @param buffer
+     * @param offset offset in buffer to start writing to
+     * @param time time value
+     * @return DateTime.timestampRepresentationLength which is the fixed length
+     * taken up by the conversion of time to timestamp in bytes
+     * @throws UnsupportedEncodingException
      */
     public static final int timeToTimestampBytes(byte[] buffer,
                                                  int offset,
-                                                 java.sql.Time time) {
+                                                 java.sql.Time time)
+    throws UnsupportedEncodingException {
         int hour = time.getHours();
         int minute = time.getMinutes();
         int second = time.getSeconds();
@@ -686,7 +768,10 @@ public class DateTime {
         timestampChars[24] = '0';
         timestampChars[25] = '0';
 
-        byte[] timestampBytes = (new String(timestampChars)).getBytes();
+        // Network server expects to read the timestamp parameter value bytes with
+        // UTF-8 encoding.  Reference - DERBY-1127
+        // see DRDAConnThread.readAndSetParams for TIMESTAMP
+        byte[] timestampBytes = (new String(timestampChars)).getBytes(Typdef.UTF8ENCODING);
         System.arraycopy(timestampBytes, 0, buffer, offset, DateTime.timestampRepresentationLength);
 
         return DateTime.timestampRepresentationLength;

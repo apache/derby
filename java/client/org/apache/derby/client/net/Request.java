@@ -24,6 +24,8 @@ import org.apache.derby.client.am.EncryptionManager;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils;
 
+import java.io.UnsupportedEncodingException;
+
 public class Request {
 
     // byte array buffer used for constructing requests.
@@ -1538,12 +1540,21 @@ public class Request {
             throw new SqlException(netAgent_.logWriter_, e,
                     "Date conversion exception " + e.getMessage() + ". See attached Throwable.");
         }
+        catch (java.io.UnsupportedEncodingException uee) {
+            throw new SqlException(netAgent_.logWriter_, uee,
+                    "Date conversion exception " + uee.getMessage() + ". See attached Throwable.");
+        }
     }
 
     final void writeTime(java.sql.Time time) throws SqlException {
-        ensureLength(offset_ + 8);
-        org.apache.derby.client.am.DateTime.timeToTimeBytes(bytes_, offset_, time);
-        offset_ += 8;
+        try{
+            ensureLength(offset_ + 8);
+            org.apache.derby.client.am.DateTime.timeToTimeBytes(bytes_, offset_, time);
+            offset_ += 8;
+        } catch(UnsupportedEncodingException uee) {
+            throw new SqlException(netAgent_.logWriter_,uee, 
+                "Time conversion exception "+uee.getMessage() +". See attached Throwable.");
+      }
     }
 
     final void writeTimestamp(java.sql.Timestamp timestamp) throws SqlException {
@@ -1554,6 +1565,10 @@ public class Request {
         } catch (org.apache.derby.client.am.ConversionException e) {
             throw new SqlException(netAgent_.logWriter_, e,
                     "Timestamp conversion exception " + e.getMessage() + ". See attached Throwable.");
+        }
+        catch(UnsupportedEncodingException uee) {
+            throw new SqlException(netAgent_.logWriter_,  uee,
+                    "Timestamp conversion exception " + uee.getMessage() + ". See attached Throwable.");
         }
     }
 
