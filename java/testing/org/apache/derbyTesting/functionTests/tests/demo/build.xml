@@ -38,7 +38,7 @@
   <!-- derby testing specific properties files -->
   <property file="${ant.home}/properties/derbytesting.properties"/>
   <property file="${user.home}/properties/derbytesting.properties"/>
-  <property name="this.dir" value="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/demo"/>
+  <property name="this.dir" value="${derby.testing.functest.dir}/tests/demo"/>
 
 <!--             ============ Begin Targets ==============                -->
  
@@ -74,7 +74,7 @@
 
   <target name="copy">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/demo">
-      <fileset dir="${this.dir}"
+      <fileset dir="${derby.testing.src.dir}/${this.dir}"
                includes="*.sql,*.properties"/>
     </copy>
   </target>
