@@ -101,7 +101,10 @@ public class Main {
 		// get the default connection attributes
 		connAttributeDefaults = util.getConnAttributeArg(args);
 
-		// adjust the application in accordance with derby.ui.locale and derby.ui.codeset
+		// readjust output to derby.ui.locale and derby.ui.codeset if 
+                // they were loaded from a property file.
+		langUtil.init();
+		out = langUtil.getNewOutput(System.out);
                 main.initAppUI();
 
 		file = util.getFileArg(args);

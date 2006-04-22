@@ -1,4 +1,4 @@
-ij versi EnC:>65533<  EnC:>171<  EnC:>209< n 10.1
+Versi EnC:>232<  EnC:>180<  EnC:>8212< n ij 10.2
 ij> drop table localtab;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'LOCALTAB' because it does not exist.
 ij> create table localtab( EnC:>9< ndec decimal(5,3), 
