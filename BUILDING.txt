@@ -719,10 +719,9 @@ version information properties files are generated.
 With Mac OS X, Java is now distributed as core technology, so no 
 downloads are needed except to upgrade to the latest release. The
 distribution includes both JDK 1.4 and JDK 1.3. Beginning with
-Mac OS X 10.4, JDK 1.5 may also be included as a supplemental
-download. However, only the JDK 1.4 and JDK 1.3 Java runtime
-libraries are needed to compile or run Derby.
-
+Mac OS X 10.4, JDK 1.5 may also be included. However, only the JDK 
+1.4 and JDK 1.3 Java runtime libraries are needed to compile or
+run Derby.
 
 
 5.1   Mac OS X ant.properties
@@ -753,37 +752,5 @@ ${j14lib}/jce.jar:
 ${j14lib}/charsets.jar
 
 compile.classpath=${java13compile.classpath}
-
-
-
-5.2   Handling of RandomAccessFiles in Mac OS X 10.3
-
-MacOS X 10.3 with JDK 1.4.2 has a bug in the handling of RandomAccessFiles
-that causes problems with Derby. This bug causes an exception to be thrown
-when reopening a file using specific RandomAccessFile modes for write sync
-behavior, preventing Derby from creating or modifying a database on 
-Mac OS X 10.3 without the use of the following workaround. This bug has 
-been fixed in Mac OS X 10.4.
-
-For full details, please see DERBY-1 in JIRA:
-
-http://issues.apache.org/jira/browse/DERBY-1
-
-The workaround is to provide a derby.properties file with the entry:
-
-derby.storage.fileSyncTransactionLog=true
-
-The derby.properties file should be located in your derby.system.home 
-directory. For more information, see:
-
-http://db.apache.org/derby/docs/dev/tuning/rtunproper32066.html 
-
-While this bug has been fixed in Mac OS X 10.4, please be aware that
-Derby applications that may be deployed on Mac OS X 10.3 will need the
-workaround described above to create or modify a Derby database.
-
-NOTE: A workaround for this issue has been committed to versions of
-Derby from 10.1.2.0 onward. It is not necessary to set the
-derby.storage.fileSyncTransactionLog property for versions of Derby
-newer than 10.1.2.0 to work properly on the affected VMs.
+javadoc.tool=${java.home}/bin/javadoc
 

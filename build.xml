@@ -19,10 +19,6 @@
   <!-- Release and version info -->
   <property file="${properties.dir}/release.properties"/>
 
-  <property name="javadoc.temp.dir" value="${out.javadoc.dir}/temp"/>
-  <property name="javadoc.exclusions" value="${javadoc.temp.dir}/javadoc_exclusions"/>
-  <property name="javadoc.inclusions" value="${javadoc.temp.dir}/javadoc_inclusions"/>
-
 <!-- Targets -->
 
   <target name="buildsource" depends="init,engine,tools,drda,client,build,versioninfo,localeinfo"/>
@@ -541,9 +537,11 @@
 <!--                           Javadoc targets                           -->
 <!-- =================================================================== -->
 
-  <target name="dummy">
-    <echo message="java.home = ${java.home}"/>
-  </target>
+  <!-- javadoc specific properties -->
+
+  <property name="javadoc.temp.dir" value="${out.javadoc.dir}/temp"/>
+  <property name="javadoc.exclusions" value="${javadoc.temp.dir}/javadoc_exclusions"/>
+  <property name="javadoc.inclusions" value="${javadoc.temp.dir}/javadoc_inclusions"/>
 
   <target name="javadoc"
     depends="init-javadoc-tool,init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs"/>
