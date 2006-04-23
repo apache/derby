@@ -66,6 +66,7 @@
       <include name="${this.dir}/*.java"/> 
       <include name="${this.dir}/StaticInitializers/*.java"/> 
       <include name="${this.dir}/VTIClasses/*.java"/> 
+      <include name="${this.dir}/corruptio/*.java"/>
       <exclude name="${this.dir}/TestUtil.java"/>
       <exclude name="${this.dir}/XATestUtil.java"/>
     </javac>
