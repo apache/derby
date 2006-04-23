@@ -52,6 +52,7 @@ import org.apache.derby.catalog.UUID;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.HashMap;
 
 /**
  * A FromTable represents a table in the FROM clause of a DML statement.
@@ -99,6 +100,14 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
     
 	private boolean considerSortAvoidancePath;
 
+	// Set of optimizer->trulyTheBestAccessPath mappings used to keep track
+	// of which of this Optimizable's "trulyTheBestAccessPath" was the best
+	// with respect to a specific outer query; the outer query is represented
+	// by an instance of Optimizer.  Each outer query could potentially have
+	// a different idea of what this Optimizable's "best access path" is, so
+	// we have to keep track of them all.
+	HashMap optimizerToBestPlanMap;
+
   //this flag tells you if all the columns from this table are projected using * from it.
   //Used by replication enabled databases where the target-only view failure is detected
   //using this boolean
@@ -123,6 +132,7 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		this.correlationName = (String) correlationName;
 		this.tableProperties = (Properties) tableProperties;
 		tableNumber = -1;
+		optimizerToBestPlanMap = null;
 	}
 
 	/*
@@ -490,8 +500,56 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		return absolutePosition;
 	}
 
+	/** @see Optimizable#addOrLoadBestPlanMapping */
+	public void addOrLoadBestPlanMapping(boolean doAdd,
+		Optimizer optimizer) throws StandardException
+	{
+		AccessPathImpl ap = null;
+		if (doAdd)
+		{
+			// If the optimizerToBestPlanMap already exists, search for an
+			// AccessPath for the target optimizer and use that if we can.
+			if (optimizerToBestPlanMap == null)
+				optimizerToBestPlanMap = new HashMap();
+			else
+				ap = (AccessPathImpl)optimizerToBestPlanMap.get(optimizer);
+
+			// If we don't already have an AccessPath for the optimizer,
+			// create a new one.
+			if (ap == null)
+				ap = new AccessPathImpl(optimizer);
+
+			ap.copy(getTrulyTheBestAccessPath());
+			optimizerToBestPlanMap.put(optimizer, ap);
+			return;
+		}
+
+		// If we get here, we want to load the best plan from our map
+		// into this Optimizable's trulyTheBestAccessPath field.
+
+		// If we don't have any plans saved, then there's nothing to load.
+		// This can happen if the optimizer tried some join order for which
+		// there was no valid plan.
+		if (optimizerToBestPlanMap == null)
+			return;
+
+		ap = (AccessPathImpl)optimizerToBestPlanMap.get(optimizer);
+
+		// Again, might be the case that there is no plan stored for
+		// the optimizer if no valid plans have been discovered for
+		// that optimizer's current join order.
+		if (ap == null)
+			return;
+
+		// We found a best plan in our map, so load it into this Optimizable's
+		// trulyTheBestAccessPath field.
+		getTrulyTheBestAccessPath().copy(ap);
+		return;
+	}
+
 	/** @see Optimizable#rememberAsBest */
-	public void rememberAsBest(int planType) throws StandardException
+	public void rememberAsBest(int planType, Optimizer optimizer)
+		throws StandardException
 	{
 		AccessPath bestPath = null;
 
@@ -514,6 +572,12 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		}
 
 		getTrulyTheBestAccessPath().copy(bestPath);
+
+		// Since we just set trulyTheBestAccessPath for the current
+		// join order of the received optimizer, take note of what
+		// that path is, in case we need to "revert" back to this
+		// path later.  See Optimizable.addOrLoadBestPlanMapping().
+		addOrLoadBestPlanMapping(true, optimizer);
 		 
 		/* also store the name of the access path; i.e index name/constraint
 		 * name if we're using an index to access the base table.

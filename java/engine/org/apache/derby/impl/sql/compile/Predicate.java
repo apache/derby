@@ -74,6 +74,10 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 */
 	private Hashtable searchClauseHT;
 
+	// Whether or not this predicate has been scoped; see the
+	// getPredScopedForResultSet() method of this class for more.
+	private boolean scoped;
+
 	/**
 	 * Initializer.
 	 *
@@ -86,6 +90,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		this.andNode = (AndNode) andNode;
 		pushable = false;
 		this.referencedSet = (JBitSet) referencedSet;
+		scoped = false;
 	}
 
 	/*
@@ -358,6 +363,20 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	public boolean getPushable()
 	{
 		return pushable;
+	}
+
+	/**
+	 * Set whether or not this predicate is pushable.  This method
+	 * is intended for use when creating a copy of the predicate, ex
+	 * for predicate pushdown.  We choose not to add this assignment
+	 * to copyFields() because the comments for that method say that
+	 * it should copy all fields _except_ the two specified at init
+	 * time; "pushable" is one of the two specified at init time.
+	 *
+	 * @param pushable Whether or not the predicate is pushable.
+	 */
+	public void setPushable(boolean pushable) {
+		this.pushable = pushable;
 	}
 
 	/**
@@ -709,14 +728,66 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "referencedSet: " + referencedSet  + "\n" +
-			   "pushable: " + pushable + "\n" +
+			return binaryRelOpColRefsToString() + "\nreferencedSet: " +
+				referencedSet  + "\n" + "pushable: " + pushable + "\n" +
 				super.toString();
 		}
 		else
 		{
 			return "";
 		}
+	}
+
+	/**
+	 * Get a string version of the column references for this predicate
+	 * IF it's a binary relational operator.  We only print out the
+	 * names of the operands if they are column references; otherwise
+	 * we just print a dummy value.  This is for debugging purposes
+	 * only--it's a convenient way to see what columns the predicate
+	 * is referencing, especially when tracing through code and printing
+	 * assert failure.
+	 */
+	public String binaryRelOpColRefsToString()
+	{
+		// We only consider binary relational operators here.
+		if (!(getAndNode().getLeftOperand()
+			instanceof BinaryRelationalOperatorNode))
+		{
+			return "";
+		}
+
+		final String DUMMY_VAL = "<expr>";
+		java.lang.StringBuffer sBuf = new java.lang.StringBuffer();
+		BinaryRelationalOperatorNode opNode =
+			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
+
+		// Get left operand's name.
+		if (opNode.getLeftOperand() instanceof ColumnReference)
+		{
+			sBuf.append(
+				((ColumnReference)opNode.getLeftOperand()).getTableName() +
+				"." +
+				((ColumnReference)opNode.getLeftOperand()).getColumnName()
+			);
+		}
+		else
+			sBuf.append(DUMMY_VAL);
+
+		// Get the operator type.
+		sBuf.append(" " + opNode.operator + " ");
+
+		// Get right operand's name.
+		if (opNode.getRightOperand() instanceof ColumnReference) {
+			sBuf.append(
+				((ColumnReference)opNode.getRightOperand()).getTableName() +
+				"." +
+				((ColumnReference)opNode.getRightOperand()).getColumnName()
+			);
+		}
+		else
+			sBuf.append(DUMMY_VAL);
+
+		return sBuf.toString();
 	}
 
 	/**
@@ -787,6 +858,177 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 
 	public Hashtable getSearchClauseHT() {
 		return searchClauseHT;
+	}
+
+	/**
+	 * Determine whether or not this predicate is eligible for
+	 * push-down into subqueries.  Right now the only predicates
+	 * we consider to be eligible are those which 1) are Binary
+	 * Relational operator nodes, and 2) have a column reference
+	 * on BOTH sides.
+	 *
+	 * @return Whether or not this predicate is eligible to be
+	 *  pushed into subqueries.
+	 */
+	protected boolean pushableToSubqueries()
+		throws StandardException
+	{
+		// If the predicate isn't a binary relational operator,
+		// then we don't push it.
+		if (!(getAndNode().getLeftOperand()
+			instanceof BinaryRelationalOperatorNode))
+		{
+			return false;
+		}
+
+		BinaryRelationalOperatorNode opNode =
+			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
+
+		return ((opNode.getLeftOperand() instanceof ColumnReference) &&
+				(opNode.getRightOperand() instanceof ColumnReference));
+	}
+
+	/**
+	 * If this predicate's operator is a BinaryRelationalOperatorNode,
+	 * then look at the operands and return a new, equivalent predicate
+	 * that is "scoped" to the received ResultSetNode.  By "scoped" we
+	 * mean that the operands, which shold be column references, have been
+	 * mapped to the appropriate result columns in the received RSN.
+	 * This is useful for pushing predicates from outer queries down
+	 * into inner queries, in which case the column references need
+	 * to be remapped.
+	 *
+	 * For example, let V1 represent
+	 *
+	 *    select i,j from t1 UNION select i,j from t2
+	 * 
+	 * and V2 represent
+	 *
+	 *    select a,b from t3 UNION select a,b from t4
+	 * 
+	 * Then assume we have the following query:
+	 *
+	 *    select * from V1, V2 where V1.j = V2.b
+	 *
+	 * Let's further assume that this Predicate object represents the
+	 * "V1.j = V2.b" operator and that the childRSN we received
+	 * as a parameter represents one of the subqueries to which we
+	 * want to push the predicate; let's say it's:
+	 *
+	 *    select i,j from t1
+	 *
+	 * Then this method will return a new predicate whose binary
+	 * operator represents the expression "T1.j = V2.b" (that is, V1.j
+	 * will be mapped to the corresponding column in T1).  For more on
+	 * how that mapping is made, see the "getScopedOperand()" method
+	 * in BinaryRelationalOperatorNode.java.
+	 *
+	 * ASSUMPTION: We should only get to this method if we know that
+	 * at least one operand in this predicate can and should be mapped
+	 * to the received childRSN.  For an example of where that check is
+	 * made, see the pushOptPredicate() method in SetOperatorNode.java.
+	 *
+	 * @param parentRSNsTables Set of all table numbers referenced by
+	 *  the ResultSetNode that is _parent_ to the received childRSN.
+	 *  We need this to make sure we don't scope the operands to a
+	 *  ResultSetNode to which they don't apply.
+	 * @param childRSN The result set node for which we want to create
+	 *  a scoped predicate.
+	 * @return A new predicate whose operands have been scoped to the
+	 *  received childRSN.
+	 */
+	protected Predicate getPredScopedForResultSet(
+		JBitSet parentRSNsTables, ResultSetNode childRSN)
+		throws StandardException
+	{
+		// We only deal with binary relational operators here.
+		if (!(getAndNode().getLeftOperand()
+			instanceof BinaryRelationalOperatorNode))
+		{
+			return this;
+		}
+
+		// The predicate must have an AndNode in CNF, so we
+		// need to create an AndNode representing:
+		//    <scoped_bin_rel_op> AND TRUE
+		// First create the boolean constant for TRUE.
+		ValueNode trueNode = (ValueNode) getNodeFactory().getNode(
+			C_NodeTypes.BOOLEAN_CONSTANT_NODE,
+			Boolean.TRUE,
+			getContextManager());
+
+		BinaryRelationalOperatorNode opNode =
+			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
+
+		// Create a new op node with left and right operands that point
+		// to the received result set's columns as appropriate.
+		BinaryRelationalOperatorNode newOpNode = 
+			(BinaryRelationalOperatorNode) getNodeFactory().getNode(
+				opNode.getNodeType(),
+				opNode.getScopedOperand(
+					BinaryRelationalOperatorNode.LEFT,
+					parentRSNsTables,
+					childRSN),
+				opNode.getScopedOperand(
+					BinaryRelationalOperatorNode.RIGHT,
+					parentRSNsTables,
+					childRSN),
+				getContextManager());
+
+		// Bind the new op node.
+		newOpNode.bindComparisonOperator();
+
+		// Create and bind a new AND node in CNF form,
+		// i.e. "<newOpNode> AND TRUE".
+		AndNode newAnd = (AndNode) getNodeFactory().getNode(
+			C_NodeTypes.AND_NODE,
+			newOpNode,
+			trueNode,
+			getContextManager());
+		newAnd.postBindFixup();
+
+		// Categorize the new AND node; among other things, this
+		// call sets up the new operators's referenced table map,
+		// which is important for correct pushing of the new
+		// predicate.
+		JBitSet tableMap = new JBitSet(
+			childRSN.getReferencedTableMap().size());
+		newAnd.categorize(tableMap, false);
+
+		// Now put the pieces together to get a new predicate.
+		Predicate newPred = (Predicate) getNodeFactory().getNode(
+			C_NodeTypes.PREDICATE,
+			newAnd,
+			tableMap,
+			getContextManager());
+
+		// Copy all of this predicates other fields into the new predicate.
+		newPred.clearScanFlags();
+		newPred.copyFields(this);
+		newPred.setPushable(getPushable());
+
+		// Take note of the fact that the new predicate is scoped for
+		// the sake of pushing; we need this information during optimization
+		// to figure out what we should and should not "pull" back up.
+		newPred.markAsScopedForPush();
+		return newPred;
+	}
+
+	/**
+	 * Indicate that this predicate is a scoped copy of some other
+	 * predicate (i.e. it was created as the result of a call to
+	 * getPredScopedForResultSet() on some other predicate).
+	 */
+	protected void markAsScopedForPush() {
+		this.scoped = true;
+	}
+
+	/**
+	 * Return whether or not this predicate is a scoped copy of
+	 * another predicate.
+	 */
+	protected boolean isScopedForPush() {
+		return scoped;
 	}
 
 }

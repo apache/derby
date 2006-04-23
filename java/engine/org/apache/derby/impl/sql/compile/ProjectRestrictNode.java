@@ -198,12 +198,12 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	/** @see Optimizable#rememberAsBest 
 		@exception StandardException	Thrown on error
 	 */
-	public void rememberAsBest(int planType)
+	public void rememberAsBest(int planType, Optimizer optimizer)
 		throws StandardException
 	{
-		super.rememberAsBest(planType);
+		super.rememberAsBest(planType, optimizer);
 		if (childResult instanceof Optimizable)
-			((Optimizable) childResult).rememberAsBest(planType);
+			((Optimizable) childResult).rememberAsBest(planType, optimizer);
 	}
 
 	/* Don't print anything for a PRN, as their

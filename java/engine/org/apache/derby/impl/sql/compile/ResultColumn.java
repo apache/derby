@@ -1769,4 +1769,50 @@ public class ResultColumn extends ValueNode
 			}
 		}
 	}
+
+	/**
+	 * Search the tree beneath this ResultColumn until we find
+	 * the number of the table to which this RC points, and
+	 * return that table number.  If we can't determine which
+	 * table this RC is for, then return -1.
+	 *
+	 * There are two places we can find the table number: 1) if
+	 * our expression is a ColumnReference, then we can get the
+	 * target table number from the ColumnReference and that's
+	 * it; 2) if expression is a VirtualColumnNode, then if
+	 * the VirtualColumnNode points to a FromBaseTable, we can
+	 * get that FBT's table number; otherwise, we walk the
+	 * VirtualColumnNode-ResultColumn chain and do a recursive
+	 * search.
+	 *
+	 * @return The number of the table to which this ResultColumn	
+	 *  points, or -1 if we can't determine that from where we are.
+	 */
+	public int getTableNumber()
+		throws StandardException
+	{
+		if (expression instanceof ColumnReference)
+			return ((ColumnReference)expression).getTableNumber();
+		else if (expression instanceof VirtualColumnNode)
+		{
+			VirtualColumnNode vcn = (VirtualColumnNode)expression;
+
+			// If the VCN points to a FromBaseTable, just get that
+			// table's number.
+			if (vcn.getSourceResultSet() instanceof FromBaseTable)
+			{
+				return ((FromBaseTable)vcn.getSourceResultSet()).
+					getTableNumber();
+			}
+
+			// Else recurse down the VCN.
+			return vcn.getSourceColumn().getTableNumber();
+		}
+
+		// We can get here if expression has neither a column
+		// reference nor a FromBaseTable beneath it--for example,
+		// if it is of type BaseColumnNode. 
+		return -1;
+	}
+
 }
