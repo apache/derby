@@ -1540,11 +1540,18 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> procedureNullableUnknown - nullability unknown
      *      </UL>
      *	<LI><B>REMARKS</B> String => comment describing parameter/column
+     *	<LI><B>COLUMN_DEF</B> String
+     *	<LI><B>SQL_DATA_TYPE</B> int
+     *	<LI><B>SQL_DATETIME_SUB</B> int
+     *	<LI><B>CHAR_OCTET_LENGTH</B> int
+     *	<LI><B>ORDINAL_POSITION</B> int
+     *	<LI><B>IS_NULLABLE</B> String
+     *	<LI><B>SPECIFIC_NAME</B> String
      *  </OL>
      *
      * <P><B>Note:</B> Some databases may not return the column
      * descriptions for a procedure. Additional columns beyond
-     * REMARKS can be defined by the database.
+     * SPECIFIC_NAME can be defined by the database.
      *
      * @param catalog a catalog name; "" retrieves those without a
      * catalog; null means drop catalog name from the selection criteria
@@ -1562,9 +1569,12 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			String procedureNamePattern,
 			String columnNamePattern) throws SQLException {
 
+		// Using the new JDBC 4.0 version of the query here. The query
+		// was given a new name to allow the old query to
+		// be used by ODBCMetaDataGenerator.
 		return doGetProcCols(catalog, schemaPattern,
 			procedureNamePattern, columnNamePattern,
-			"getProcedureColumns");
+			"getProcedureColumns40");
 	}
 
 	/**
@@ -1576,6 +1586,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			String schemaPattern, String procedureNamePattern,
 			String columnNamePattern) throws SQLException {
 
+		// For ODBC we still use the transformed version of the JDBC
+		// 3.0 query, (may change in the future).
 		return doGetProcCols(catalog, schemaPattern,
 			procedureNamePattern, columnNamePattern,
 			"odbc_getProcedureColumns");
