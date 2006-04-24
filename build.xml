@@ -889,12 +889,13 @@
           append="true"
           message="org/apache/derby/info/DBMS.properties"/>
 
-    <!-- copy license file to lists dir for inclusion in derby.jar -->
+    <!-- copy boilerplate common to derby jar files -->
+    <antcall target="meta-inf-common"/>
 
-    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
-    <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
-    </copy>
+    <!-- declare the embedded driver for autoloading by the JDBC 4 DriverManager -->
+    <antcall target="declare-autoloadable-driver">
+      <param name="driver.name" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+    </antcall>
 
     <!-- the next two targets are orthogonal. Only one will be executed, -->
     <!-- depending on whether or not osgi.jar is available.              -->
@@ -1063,12 +1064,8 @@
       <param name="info.file" value="${out.dir}/org/apache/derby/info/tools.properties"/>
     </antcall>
 
-    <!-- copy license file to lists dir for inclusion in derbytools.jar -->
-
-    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
-    <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
-    </copy>
+    <!-- copy boilerplate common to derby jar files -->
+    <antcall target="meta-inf-common"/>
 
     <delete file="${derby.jar.dir}/derbytools.jar"/>
     <jar destfile="${derby.jar.dir}/derbytools.jar"
@@ -1115,13 +1112,9 @@
       <param name="info.file" value="${out.dir}/org/apache/derby/info/net.properties"/>
     </antcall>
 
-    <!-- copy license file to lists dir for inclusion in derbynet.jar -->
+    <!-- copy boilerplate common to derby jar files -->
+    <antcall target="meta-inf-common"/>
 
-    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
-    <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
-    </copy>
-  	
     <manifest file="${derby.jar.dir}/lists/smfnet.mf">
       <attribute name="Main-Class" value="org.apache.derby.drda.NetworkServerControl"/>
       <attribute name="Class-Path" value="derby.jar"/>
@@ -1174,13 +1167,14 @@
       <param name="info.file" value="${out.dir}/org/apache/derby/info/dnc.properties"/>
     </antcall>
 
-    <!-- copy license file to lists dir for inclusion in derbyclient.jar -->
+    <!-- copy boilerplate common to derby jar files -->
+    <antcall target="meta-inf-common"/>
 
-    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
-    <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
-    </copy>
- 	
+    <!-- declare the client driver for autoloading by the JDBC 4 DriverManager -->
+    <antcall target="declare-autoloadable-driver">
+      <param name="driver.name" value="org.apache.derby.jdbc.ClientDriver"/>
+    </antcall>
+
     <manifest file="${derby.jar.dir}/lists/smfclient.mf">
       	<attribute name="Sealed" value="true"/>
     	<section name="org/apache/derby/jdbc/">
@@ -1254,12 +1248,8 @@
 
   <target name="derbylocalejars" depends="initjars">
  
-    <!-- copy license file to lists dir for inclusion in derbynet.jar -->
-
-    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
-    <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
-    </copy>
+    <!-- copy boilerplate common to derby jar files -->
+    <antcall target="meta-inf-common"/>
 
     <!-- call localejar for each locale -->
 
@@ -1376,6 +1366,36 @@
   <target name="cleanjars" depends="setsanityname">
     <delete dir="${basedir}/jars/${sanity.name}"/>
   </target>
+
+<!-- - - - - - - - - - - - - - targets for populating META-INF  - - - - - - - - - - - -->
+
+  <!-- copy boilerplate common to derby jar files -->
+
+  <target name="meta-inf-common">
+ 
+    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
+    <copy todir="${derby.jar.dir}/lists/META-INF">
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
+    </copy>
+
+  </target>
+
+  <!--
+    Declare the jdbc driver for autoloading under JDBC 4.
+
+    Parameters:
+
+      driver.name   Class name of driver to be autoloaded by JDBC 4 DriverManager
+  -->
+
+  <target name="declare-autoloadable-driver">
+ 
+    <mkdir dir="${derby.jar.dir}/lists/META-INF/services"/>
+    <echo file="${derby.jar.dir}/lists/META-INF/services/java.sql.Driver">${driver.name}
+</echo>
+
+  </target>
+
 
 <!-- =================================================================== -->
 <!--                         Nightly build targets                       -->

@@ -19,9 +19,10 @@
  */
 package org.apache.derbyTesting.functionTests.util;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+import java.security.*;
 import java.util.Properties;
+
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 /**
  * Class which holds information about the configuration of a Test.
@@ -41,6 +42,7 @@ public class TestConfiguration {
      */
     private TestConfiguration(Properties props) 
         throws NumberFormatException {
+		systemStartupProperties = props;
         dbName = props.getProperty(KEY_DBNAME, DEFAULT_DBNAME);
         userName = props.getProperty(KEY_USER_NAME, DEFAULT_USER_NAME);
         userPassword = props.getProperty(KEY_USER_PASSWORD, 
@@ -71,6 +73,14 @@ public class TestConfiguration {
         }
         url = createJDBCUrlWithDatabaseName(dbName);
     }
+
+    /**
+     * Get the given system property as specified at startup.
+     */
+	public	String	getSystemStartupProperty( String key )
+	{
+		return systemStartupProperties.getProperty( key );
+	}
 
     /**
      * Get the system properties in a privileged block.
@@ -176,6 +186,11 @@ public class TestConfiguration {
     }
     
     /**
+     * Set the verbosity, i.e., whether debug statements print.
+     */
+    public void	setVerbosity( boolean isChatty )	{ isVerbose = isChatty; }
+    
+    /**
      * Return verbose flag.
      *
      * @return verbose flag.
@@ -184,9 +199,39 @@ public class TestConfiguration {
         return isVerbose;
     }
     
+ 	/**
+ 	 * <p>
+	 * Return true if the client supports JDBC4, i.e., if the VM level is at
+	 * least 1.6.
+	 * </p>
+	 */
+	public	boolean	supportsJDBC4()
+	{
+		if ( JVMInfo.JDK_ID >= JVMInfo.J2SE_16 ) { return true; }
+		else { return false; }
+	}
+
+	/**
+	 * <p>
+	 * Return true if we classes are being loaded from jar files. For the time
+	 * being, this simply tests that the JVMInfo class (common to the client and
+	 * the server) comes out of a jar file.
+	 * </p>
+	 */
+	public	boolean	loadingFromJars()
+	{
+		//
+		// jvm.java sets this property to the build jar directory
+		// if we are using derbyTesting.jar.
+		//
+		
+		return ( !UNUSED.equals( getSystemStartupProperty( "derbyTesting.codejar" ) ) );
+	}
+
     /**
      * Immutable data members in test configuration
      */
+	private	final Properties systemStartupProperties;
     private final String dbName;
     private final String url;
     private final String userName; 
@@ -194,7 +239,7 @@ public class TestConfiguration {
     private final int port;
     private final String hostName;
     private final JDBCClient jdbcClient;
-    private final boolean isVerbose;
+    private boolean isVerbose;
     
     /**
      * Default values for configurations
@@ -216,5 +261,10 @@ public class TestConfiguration {
     private final static String KEY_HOSTNAME = "hostName";
     private final static String KEY_PORT = "port";
     private final static String KEY_VERBOSE = "derby.tests.debug";
+
+    /**
+     * Possible values of system properties.
+     */
+    private final static String UNUSED = "file://unused/";
 
 }

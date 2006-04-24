@@ -20,8 +20,8 @@
 package org.apache.derbyTesting.functionTests.util;
 
 import java.sql.*;
-import javax.sql.DataSource;
 import java.util.Properties;
+import javax.sql.DataSource;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.XADataSource;
 
