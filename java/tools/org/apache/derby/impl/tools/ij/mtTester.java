@@ -40,6 +40,7 @@ public class mtTester implements Runnable
 	private LocalizedOutput	log;
 	private LocalizedOutput	out;
 	private boolean		stop = false;
+	private boolean   testOK = false;
 							
 	public mtTester(String name, mtTestSuite suite, LocalizedOutput out, LocalizedOutput log)
 	{ 
@@ -109,11 +110,16 @@ public class mtTester implements Runnable
 		{
 			log.println(name + ": stopping on request after " + numIterations +
 						" iterations");
+			testOK = true;
 		}
 	}
 
 	public void stop()
 	{
 		stop = true;
+	}
+	public boolean noFailure()
+	{
+		return testOK;
 	}
 }
