@@ -57,6 +57,26 @@ public class NetResultSet40 extends NetResultSet{
               actualResultSetConcurrency, actualResultSetHoldability);
     }
     
+    public Reader getNCharacterStream(int columnIndex)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("getNCharacterStream(int)");
+    }
+
+    public Reader getNCharacterStream(String columnName)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("getNCharacterStream(String)");
+    }
+
+    public String getNString(int columnIndex)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("getNString(int)");
+    }
+
+    public String getNString(String columnName)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("getNString(String)");
+    }
+    
     public RowId getRowId(int columnIndex) throws SQLException {
         throw SQLExceptionFactory.notImplemented ("getRowId (int)");
     }
@@ -80,6 +100,18 @@ public class NetResultSet40 extends NetResultSet{
     
     public void updateNString(String columnName, String nString) throws SQLException {
         throw SQLExceptionFactory.notImplemented ("updateNString (String, String)");
+    }
+    
+    public void updateNCharacterStream(int columnIndex, Reader x, int length)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "updateNCharacterStream(int,Reader,int)");
+    }
+    
+    public void updateNCharacterStream(String columnName, Reader x, int length)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "updateNCharacterStream(String,Reader,int)");
     }
     
     public void updateNClob(int columnIndex, NClob nClob) throws SQLException {

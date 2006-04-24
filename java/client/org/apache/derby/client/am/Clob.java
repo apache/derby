@@ -20,7 +20,9 @@
 
 package org.apache.derby.client.am;
 
+import java.io.Reader;
 import java.sql.SQLException;
+
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Clob extends Lob implements java.sql.Clob {
@@ -538,6 +540,19 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
+    //---------------------------- jdbc 4.0 -------------------------------------
+
+    public void free()
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("free()");
+    }
+
+    public Reader getCharacterStream(long pos, long length)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "getCharacterStream(long,long");
+    }
+    
     //----------------------------helper methods----------------------------------
 
     public boolean isString() {

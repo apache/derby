@@ -20,8 +20,11 @@
 
 package org.apache.derby.client.am;
 
+import java.io.InputStream;
 import java.sql.SQLException;
+
 import org.apache.derby.shared.common.reference.SQLState;
+
 public class Blob extends Lob implements java.sql.Blob {
     //-----------------------------state------------------------------------------
 
@@ -362,6 +365,18 @@ public class Blob extends Lob implements java.sql.Blob {
         {
             throw se.getSQLException();
         }
+    }
+
+    // -------------------------- JDBC 4.0 -----------------------------------
+
+    public void free()
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("free()");
+    }
+
+    public InputStream getBinaryStream(long pos, long length)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("getBinaryStream(long,long)");
     }
 
     //------------------ Material layer event callback methods -------------------
