@@ -546,9 +546,22 @@ public class XATest {
             try {
                 conn.setAutoCommit(true);
                 System.out
-                        .println("FAIL: setAutoCommit(true) allowed in global xact");
+                        .println("FAIL: setAutoCommit(true) allowed "+
+				 "in global xact");
             } catch (SQLException e) {
             }
+            try {
+                conn.setSavepoint();
+                System.out
+                    .println("FAIL: setSavepoint() allowed in global xact");
+            } catch (SQLException e) {}
+            try {
+                conn.setSavepoint("badsavepoint");
+                System.out
+                    .println("FAIL: setAutoCommit(String) allowed in "+
+                             "global xact");
+            } catch (SQLException e) {}
+
             conn.setAutoCommit(false);
 
             // s was created in local mode so it has holdibilty
