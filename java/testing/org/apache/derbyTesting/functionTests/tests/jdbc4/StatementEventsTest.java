@@ -32,8 +32,11 @@ import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 */
 public class StatementEventsTest extends BaseJDBCTestCase 
         implements StatementEventListener {
-    
+    //used to test StatementEvents raised from PooledConnection
     PooledConnection pooledConnection;
+    //used to test StatementEvents raised from XAConnection
+    XAConnection xaconnection;
+    
     Connection conn;
     PreparedStatement ps_close;
     PreparedStatement ps_error;
@@ -57,36 +60,19 @@ public class StatementEventsTest extends BaseJDBCTestCase
      *
      */
     public void setUp() throws SQLException {
+        XADataSource xadatasource = getXADataSource();
         ConnectionPoolDataSource cpds = getConnectionPoolDataSource();
+        
         pooledConnection = cpds.getPooledConnection();
+        xaconnection = xadatasource.getXAConnection();
         //register this class as a event listener for the
         //statement events
+        //registering as a listener for the 
+        //PooledConnection object
         pooledConnection.addStatementEventListener(this);
-        
-        //Get a connection from the PooledConnection object
-        conn = pooledConnection.getConnection();
-    }
-    
-    /**
-     *
-     * Close the PooledConnection object and the connection and the 
-     * statements obtained from it.
-     * 
-     */
-    
-    public void tearDown() throws SQLException {
-        if(ps_close != null && !ps_close.isClosed()) {
-            ps_close.close();
-        }
-        if(ps_error != null && !ps_error.isClosed()) {
-            ps_error.close();
-        }
-        if(conn != null && !conn.isClosed()) {
-            conn.rollback();
-            conn.close();
-        }
-        if(pooledConnection != null)
-            pooledConnection.close();
+        //registering as a listener for the 
+        //XAConnection
+        xaconnection.addStatementEventListener(this);
     }
     
     /*
@@ -95,8 +81,7 @@ public class StatementEventsTest extends BaseJDBCTestCase
     */
     void raiseCloseEvent() {
         try {
-            ps_close = conn.prepareStatement("create table temp(n int)");
-
+            ps_close = conn.prepareStatement("values 1");
             //call the close method on this prepared statement object
             //this should result in a statement event being generated 
             //control is transferred to the sattementCLosed function
@@ -115,7 +100,7 @@ public class StatementEventsTest extends BaseJDBCTestCase
     */
     void raiseErrorEvent() {
         try {
-            ps_error = conn.prepareStatement("create table temp(n int)");
+            ps_error = conn.prepareStatement("values 1");
             
             //close the connection associated with this prepared statement
             conn.close();
@@ -156,17 +141,99 @@ public class StatementEventsTest extends BaseJDBCTestCase
         }
     }
     
-    /*
-        Check to see if the events were properly raised during execution
+    /**
+     *
+     * Check to see if the events were properly raised during execution.
+     * raise the close and the error event for the PooledConnection and
+     * check if they occur properly.
+     * 
+     * @throws java.sql.SQLException 
+     *
      */
-    public void testIfEventOccurred() {
+    public void testIfEventOccurredInPooledConnection() throws SQLException {
+        //Get a connection from the PooledConnection object
+        conn = pooledConnection.getConnection();
         raiseCloseEvent();
         raiseErrorEvent();
+        
+        //reset the flags to enable it to be used for 
+        //both the cases of XAConnection and PooledConnection
         if(statementCloseEventOccurred != true) {
             System.out.println("The Close Event did not occur");
         }
+        else {
+            statementCloseEventOccurred = false;
+        }
+            
         if(statementErrorEventOccurred != true) {
             System.out.println("The Error Event did not occur");
+        }
+        else {
+            statementErrorEventOccurred = false;
+        }
+        
+        //close the used prepared statements and connections
+        //for the PooledConnection StatementEventListener tests
+        //so that if tests on PooledConnection is the first instance of the 
+        //tests that are run then we can run the same for
+        //XAConnection.
+        if(ps_close != null && !ps_close.isClosed()) {
+            ps_close.close();
+        }
+        if(ps_error != null && !ps_error.isClosed()) {
+            ps_error.close();
+        }
+        if(conn != null && !conn.isClosed()) {
+            conn.rollback();
+            conn.close();
+        }
+        if(pooledConnection != null)
+            pooledConnection.close();
+    }
+    
+    /**
+     * Check to see if the events were properly raised during execution.
+     * Raise the close and the error event for the XAConnection and check if 
+     * if they occur properly.
+     *
+     * @throws java.sql.SQLExeption
+     */
+    public void testIfEventOccurredInXAConnection() throws SQLException {
+        //Get a connection from the XAConnection object
+        conn = xaconnection.getConnection();
+        raiseCloseEvent();
+        raiseErrorEvent();
+        
+        //reset the flags to enable it to be used for 
+        //both the cases of XAConnection and PooledConnection
+        if(statementCloseEventOccurred != true) {
+            System.out.println("The Close Event did not occur");
+        }
+        else {
+            statementCloseEventOccurred = false;
+        }
+        
+        if(statementErrorEventOccurred != true) {
+            System.out.println("The Error Event did not occur");
+        }
+        else {
+            statementErrorEventOccurred = false;
+        }
+        
+        //close the used prepared statements and connections
+        //for the XAConnection StatementEventListener tests
+        //so that if tests on XAConnection is the first instance of the 
+        //tests that are run then we can run the same for
+        //PooledConnection.
+        if(ps_close != null) {
+            ps_close.close();
+        }
+        if(ps_error != null) {
+            ps_error.close();
+        }
+        if(conn != null && !conn.isClosed()) {
+            conn.rollback();
+            conn.close();
         }
     }
     

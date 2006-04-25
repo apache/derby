@@ -205,14 +205,32 @@ public abstract class EmbedPreparedStatement
 
 
 	/**
-		Additional close to close our activation.
-
-		@exception SQLException	thrown on failure
+	 * Additional close to close our activation.
+	 * In the case that a XAConnection is involved in the creation of this
+	 * PreparedStatement for e.g in the following case
+	 *
+	 *      <code>
+	 *      XAConnection xaconn = xadatasource.getXAConnection();//where xadatasource is an object of XADataSource
+	 *      Connection conn = xaconnection.getConnection();
+	 *      PreparedStatement ps = conn.preparedStatement("values 1");
+	 *      </code>
+	 *
+	 * In the above case the PreparedStatement will actually be a 
+	 * BrokeredPreparedStatement40 object. Hence when we call 
+	 * bcc.onStatementClose and pass the PreparedStatement that caused it
+	 * applicationStatement will be the appropriate choice since it will 
+	 * contain the appropriate instance of PreparedStatement in each case
+	 *
+	 * @throws SQLException upon failure
+	 *
 	 */
 	void closeActions() throws SQLException {
 
-                if (bcc!=null)
-                        bcc.onStatementClose(this);
+		if (bcc!=null) {
+			java.sql.PreparedStatement ps_app = 
+				(java.sql.PreparedStatement)applicationStatement;
+			bcc.onStatementClose(ps_app);
+		}
 		//we release the resource for preparedStatement
 		preparedStatement = null;
 
@@ -1471,25 +1489,34 @@ public abstract class EmbedPreparedStatement
          * Method calls onStatementError occurred on the 
          * BrokeredConnectionControl class after checking the 
          * SQLState of the SQLException thrown.
+         *
+         * In the case that a XAConnection is involved in the creation of this
+         * PreparedStatement for e.g in the following case
+         *
+         *      <code>
+         *      XAConnection xaconn = xadatasource.getXAConnection();//where xadatasource is an object of XADataSource
+         *      Connection conn = xaconnection.getConnection();
+         *      PreparedStatement ps = conn.preparedStatement("values 1");
+         *      </code>
+         *
+         * In the above case the PreparedStatement will actually be a 
+         * BrokeredPreparedStatement40 object. Hence when we call 
+         * bcc.onStatementClose and pass the PreparedStatement that caused it
+         * applicationStatement will be the appropriate choice since it will 
+         * contain the appropriate instance of PreparedStatement in each case
+         *
          */
         
         private void checkStatementValidity(SQLException sqle) throws SQLException {
             /*
-             * The subclass of SQLException thrown when the SQLState class value is
-             * '42'. This indicates that the in-progress query has violated SQL
-             * syntax rules.
-             *
              * Check if the exception has occurred because the connection
              * associated with the PreparedStatement has been closed
-             *
-             * This exception has the SQLState of 08003 which is represented
-             * by the constant SQLState.ERROR_CLOSE
              */
-            if(bcc != null && (sqle.getSQLState().equals("08003")
-            || sqle.getSQLState().startsWith(SQLState.LSE_COMPILATION_PREFIX)) ) {
+            if(bcc != null && isClosed()) {
                 //call the BrokeredConnectionControl interface method
                 //onStatementErrorOccurred
-                bcc.onStatementErrorOccurred(this,sqle);
+                bcc.onStatementErrorOccurred((java.sql.PreparedStatement)
+                                                applicationStatement,sqle);
             }
             throw sqle;
         }

@@ -333,6 +333,7 @@ public class TestUtil {
 	{
 		
 		String classname = getDataSourcePrefix() + XA_DATASOURCE_STRING + "DataSource";
+		classname = checkForJDBC40Implementation(classname);
 		return (javax.sql.XADataSource) getDataSourceWithReflection(classname, attrs);
 	}
 

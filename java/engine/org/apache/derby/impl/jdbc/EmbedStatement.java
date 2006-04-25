@@ -68,8 +68,12 @@ public class EmbedStatement extends ConnectionChild
      * this Statement. Normally set to this, but if this was
      * created by a Connection from an XAConnection then this
      * will be a reference to the BrokeredStatement.
+     *
+     * Making it protected to allow access from EmbedPreparedStatement40
+     * to be used for StatementEvents
+     *
      */
-    private EngineStatement applicationStatement;
+    protected EngineStatement applicationStatement;
 
 	int updateCount = -1;
 	java.sql.ResultSet results;
