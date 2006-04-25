@@ -4,3 +4,5 @@ ResultSet is: null
 Test prepStmtNull starting
 ResultSet is: blob
 ResultSet is: null
+Test3 prepStmtNull starting
+ResultSet is: null
