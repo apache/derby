@@ -27,6 +27,7 @@ import java.util.Properties;
 import javax.naming.NamingException;
 import javax.naming.RefAddr;
 import javax.naming.Reference;
+import org.apache.derby.jdbc.ClientBaseDataSource;
 
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.shared.common.reference.Attribute;
@@ -986,7 +987,7 @@ public class LogWriter {
     // Including protocol manager levels, and driver configuration
 
     // Jdbc 2
-    public void traceConnectEntry(ClientDataSource dataSource) {
+    public void traceConnectEntry(ClientBaseDataSource dataSource) {
         if (traceSuspended()) {
             return;
         }
@@ -1014,7 +1015,8 @@ public class LogWriter {
         }
     }
 
-    public void traceConnectResetEntry(Object instance, LogWriter logWriter, String user, ClientDataSource ds) {
+    public void traceConnectResetEntry(Object instance, LogWriter logWriter, 
+                                        String user, ClientBaseDataSource ds) {
         if (traceSuspended()) {
             return;
         }
@@ -1045,7 +1047,7 @@ public class LogWriter {
 
     // ---------------------- tracing connects -----------------------------------
 
-    private void traceConnectsResetEntry(ClientDataSource dataSource) {
+    private void traceConnectsResetEntry(ClientBaseDataSource dataSource) {
         try {
             if (traceSuspended()) {
                 return;
@@ -1059,7 +1061,7 @@ public class LogWriter {
         }
     }
 
-    private void traceConnectsEntry(ClientDataSource dataSource) {
+    private void traceConnectsEntry(ClientBaseDataSource dataSource) {
         try {
             if (traceSuspended()) {
                 return;
@@ -1223,9 +1225,9 @@ public class LogWriter {
     }
     
     /**
-     * Obtain a set of Properties for the ClientDataSource
+     * Obtain a set of Properties for the ClientBaseDataSource
      */
-    private Properties getProperties(ClientDataSource cds)
+    private Properties getProperties(ClientBaseDataSource cds)
     throws SqlException {
         
         Properties properties = new Properties();

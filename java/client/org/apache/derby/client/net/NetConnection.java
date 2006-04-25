@@ -29,6 +29,7 @@ import org.apache.derby.client.am.ProductLevel;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.Utils;
+import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientDriver;
 
@@ -171,7 +172,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     public NetConnection(NetLogWriter netLogWriter,
-                         org.apache.derby.jdbc.ClientDataSource dataSource,
+                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                          String user,
                          String password) throws SqlException {
         super(netLogWriter, user, password, dataSource);
@@ -191,8 +192,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             throw netAgent_.exceptionOpeningSocket_;
         }
         checkDatabaseName();
-        String password = ClientDataSource.getPassword(properties);
-        securityMechanism_ = ClientDataSource.getSecurityMechanism(properties);
+        String password = ClientBaseDataSource.getPassword(properties);
+        securityMechanism_ = ClientBaseDataSource.getSecurityMechanism(properties);
         flowConnect(password, securityMechanism_);
         if(!isConnectionNull())
         	completeConnect();
@@ -202,7 +203,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     public NetConnection(NetLogWriter netLogWriter,
                          String user,
                          String password,
-                         org.apache.derby.jdbc.ClientDataSource dataSource,
+                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                          int rmId,
                          boolean isXAConn) throws SqlException {
         super(netLogWriter, user, password, isXAConn, dataSource);
@@ -213,7 +214,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     public NetConnection(NetLogWriter netLogWriter,
                          String ipaddr,
                          int portNumber,
-                         org.apache.derby.jdbc.ClientDataSource dataSource,
+                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                          boolean isXAConn) throws SqlException {
         super(netLogWriter, isXAConn, dataSource);
         netAgent_ = (NetAgent) super.agent_;
@@ -229,7 +230,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     private void initialize(String user,
                             String password,
-                            org.apache.derby.jdbc.ClientDataSource dataSource,
+                            org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                             int rmId,
                             boolean isXAConn) throws SqlException {
         securityMechanism_ = dataSource.getSecurityMechanism(password);
@@ -249,7 +250,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     public void resetNetConnection(org.apache.derby.client.am.LogWriter logWriter,
                                    String user,
                                    String password,
-                                   org.apache.derby.jdbc.ClientDataSource ds,
+                                   org.apache.derby.jdbc.ClientBaseDataSource ds,
                                    boolean recomputeFromDataSource) throws SqlException {
         super.resetConnection(logWriter, user, ds, recomputeFromDataSource);
         //----------------------------------------------------
@@ -285,22 +286,22 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     protected void reset_(org.apache.derby.client.am.LogWriter logWriter,
                           String user, String password,
-                          ClientDataSource ds,
+                          ClientBaseDataSource ds,
                           boolean recomputeFromDataSource) throws SqlException {
         checkResetPreconditions(logWriter, user, password, ds);
         resetNetConnection(logWriter, user, password, ds, recomputeFromDataSource);
     }
 
     protected void reset_(org.apache.derby.client.am.LogWriter logWriter,
-                          ClientDataSource ds,
+                          ClientBaseDataSource ds,
                           boolean recomputeFromDataSource) throws SqlException {
         checkResetPreconditions(logWriter, null, null, ds);
         resetNetConnection(logWriter, ds, recomputeFromDataSource);
     }
 
     private void resetNetConnection(org.apache.derby.client.am.LogWriter logWriter,
-                                    org.apache.derby.jdbc.ClientDataSource ds,
-                                    boolean recomputeFromDataSource) throws SqlException {
+                            org.apache.derby.jdbc.ClientBaseDataSource ds,
+                            boolean recomputeFromDataSource) throws SqlException {
         super.resetConnection(logWriter, null, ds, recomputeFromDataSource);
         //----------------------------------------------------
         if (recomputeFromDataSource) {
@@ -329,7 +330,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     protected void checkResetPreconditions(org.apache.derby.client.am.LogWriter logWriter,
                                            String user,
                                            String password,
-                                           ClientDataSource ds) throws SqlException {
+                                           ClientBaseDataSource ds) throws SqlException {
         if (inUnitOfWork_) {
             throw new SqlException(logWriter, "Connection reset is not allowed when inside a unit of work.");
         }

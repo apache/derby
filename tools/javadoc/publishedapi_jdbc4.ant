@@ -17,7 +17,9 @@
 
 # package: org.apache.derby.jdbc
 
+org/apache/derby/jdbc/ClientConnectionPoolDataSource40.java
 org/apache/derby/jdbc/ClientDataSource40.java
+org/apache/derby/jdbc/ClientXADataSource40.java
 org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource40.java
 org/apache/derby/jdbc/EmbeddedDataSource40.java
 org/apache/derby/jdbc/EmbeddedXADataSource40.java

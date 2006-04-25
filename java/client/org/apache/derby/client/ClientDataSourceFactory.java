@@ -25,6 +25,7 @@ import java.util.Enumeration;
 
 import javax.naming.RefAddr;
 import javax.naming.Reference;
+import org.apache.derby.jdbc.ClientBaseDataSource;
 
 import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
@@ -79,7 +80,7 @@ public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
         javax.naming.Reference ref = (javax.naming.Reference) refObj;
 
         // Create the proper data source object shell.
-        ClientDataSource ds = null;
+        ClientBaseDataSource ds = null;
         if (ref.getClassName().equals(ClientDataSource.className__)) {
             ds = new ClientDataSource();
         } else if (ref.getClassName().equals(ClientXADataSource.className__)) {

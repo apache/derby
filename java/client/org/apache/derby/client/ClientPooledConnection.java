@@ -21,6 +21,7 @@ package org.apache.derby.client;
 
 import java.sql.SQLException;
 import org.apache.derby.client.net.NetXAConnection;
+import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.am.MessageId;
@@ -43,14 +44,14 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     protected int rmId_ = 0;
 
     // Cached stuff from constructor
-    private ClientDataSource ds_;
+    private ClientBaseDataSource ds_;
     private String user_;
     private String password_;
 
     // Constructor for Non-XA pooled connections.
     // Using standard Java APIs, a CPDS is passed in.
     // user/password overrides anything on the ds.
-    public ClientPooledConnection(ClientDataSource ds,
+    public ClientPooledConnection(ClientBaseDataSource ds,
                                   org.apache.derby.client.am.LogWriter logWriter,
                                   String user,
                                   String password) throws SQLException {
@@ -82,7 +83,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     // Constructor for XA pooled connections only.
     // Using standard Java APIs, a CPDS is passed in.
     // user/password overrides anything on the ds.
-    public ClientPooledConnection(ClientDataSource ds,
+    public ClientPooledConnection(ClientBaseDataSource ds,
                                   org.apache.derby.client.am.LogWriter logWriter,
                                   String user,
                                   String password,
@@ -105,7 +106,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
-    public ClientPooledConnection(ClientDataSource ds,
+    public ClientPooledConnection(ClientBaseDataSource ds,
                                   org.apache.derby.client.am.LogWriter logWriter) throws SQLException {
         logWriter_ = logWriter;
         ds_ = ds;
@@ -260,7 +261,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * @param rmId 
      * @return NetXAConnection
      */
-    protected NetXAConnection getNetXAConnection (ClientDataSource ds,
+    protected NetXAConnection getNetXAConnection (ClientBaseDataSource ds,
                                   NetLogWriter logWriter,
                                   String user,
                                   String password,

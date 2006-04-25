@@ -22,6 +22,7 @@ package org.apache.derby.client;
 
 import java.sql.SQLException;
 import org.apache.derby.client.net.NetXAConnection;
+import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
 import javax.sql.StatementEventListener;
 import org.apache.derby.client.am.SqlException;
@@ -30,7 +31,7 @@ import org.apache.derby.client.net.NetXAConnection40;
 
 public class ClientPooledConnection40 extends ClientPooledConnection {
     
-    public ClientPooledConnection40(ClientDataSource ds,
+    public ClientPooledConnection40(ClientBaseDataSource ds,
         org.apache.derby.client.am.LogWriter logWriter,
         String user,
         String password) throws SQLException {
@@ -39,7 +40,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
     }
     
     
-    public ClientPooledConnection40(ClientDataSource ds,
+    public ClientPooledConnection40(ClientBaseDataSource ds,
         org.apache.derby.client.am.LogWriter logWriter,
         String user,
         String password,
@@ -48,7 +49,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
         
     }
     
-    public ClientPooledConnection40(ClientDataSource ds,
+    public ClientPooledConnection40(ClientBaseDataSource ds,
         org.apache.derby.client.am.LogWriter logWriter) throws SQLException {
         super(ds,logWriter);
     }
@@ -70,7 +71,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      * @param rmId
      * @return NetXAConnection
      */
-    protected NetXAConnection getNetXAConnection (ClientDataSource ds,
+    protected NetXAConnection getNetXAConnection (ClientBaseDataSource ds,
                                   NetLogWriter logWriter,
                                   String user,
                                   String password,

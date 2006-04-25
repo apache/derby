@@ -37,7 +37,7 @@ public class NetXAConnection {
     public NetXAConnection(NetLogWriter netLogWriter,
                            String user,
                            String password,
-                           org.apache.derby.jdbc.ClientDataSource dataSource,
+                           org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                            int rmId,
                            boolean isXAConn) throws SqlException {
         netCon = createNetConnection (netLogWriter, user, password, 
@@ -225,7 +225,7 @@ public class NetXAConnection {
     protected NetConnection createNetConnection (NetLogWriter netLogWriter,
                            String user,
                            String password,
-                           org.apache.derby.jdbc.ClientDataSource dataSource,
+                           org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                            int rmId,
                            boolean isXAConn) throws SqlException {        
         return new NetConnection (netLogWriter, user, password, 

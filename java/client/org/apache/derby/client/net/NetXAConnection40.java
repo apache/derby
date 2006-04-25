@@ -32,7 +32,7 @@ public class NetXAConnection40 extends NetXAConnection {
     public NetXAConnection40(NetLogWriter netLogWriter,
             String user,
             String password,
-            org.apache.derby.jdbc.ClientDataSource dataSource,
+            org.apache.derby.jdbc.ClientBaseDataSource dataSource,
             int rmId,
             boolean isXAConn) throws SqlException {
         super(netLogWriter, user, password,

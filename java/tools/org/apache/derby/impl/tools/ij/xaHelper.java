@@ -501,9 +501,24 @@ class xaHelper implements xaAbstractHelper
 			if (isJCC)
 				return (XADataSource) 
 					(Class.forName("com.ibm.db2.jcc.DB2XADataSource").newInstance());
-			else if (isNetClient)
-				return (XADataSource) 
-					(Class.forName("org.apache.derby.jdbc.ClientXADataSource").newInstance());
+			else if (isNetClient){
+                            if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
+                                //running under jdk1.6 or higher 
+                                // try instantiating EmbeddedXADataSource40
+                                try {
+                                    return (XADataSource)(Class.forName(
+                                        "org.apache.derby.jdbc." +
+                                        "ClientXADataSource40").newInstance());                                        
+                                }
+                                catch (ClassNotFoundException e) {
+                                    //probably it was not compiled with jdbc4.0
+                                    //support go ahead with EmbeddedXADataSource
+                                }
+                            }
+                            return (XADataSource) (Class.forName(
+                                    "org.apache.derby.jdbc.ClientXADataSource"
+                                    ).newInstance());
+                        }
 			else {
                             if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
                                 //running under jdk1.6 or higher 

@@ -20,11 +20,10 @@
 
 package org.apache.derby.client.am;
 
-import java.rmi.UnexpectedException;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.jdbc.ClientDataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
+import org.apache.derby.jdbc.ClientBaseDataSource;
 
 /**
  *
@@ -41,7 +40,7 @@ public interface ClientJDBCObjectFactory {
      * ClientPooledConnection (or ClientPooledConnection40) class which
      * implements javax.sql.PooledConnection
      */
-    ClientPooledConnection newClientPooledConnection(ClientDataSource ds,
+    ClientPooledConnection newClientPooledConnection(ClientBaseDataSource ds,
             LogWriter logWriter,String user,String password)
             throws SQLException;
     
@@ -50,7 +49,7 @@ public interface ClientJDBCObjectFactory {
      * ClientPooledConnection(or ClientPooledConnection40) class which
      * implements javax.sql.PooledConnection
      */
-    ClientPooledConnection newClientPooledConnection(ClientDataSource ds,
+    ClientPooledConnection newClientPooledConnection(ClientBaseDataSource ds,
             LogWriter logWriter,String user,String password,int rmId)
             throws SQLException;
     
@@ -97,7 +96,7 @@ public interface ClientJDBCObjectFactory {
      */
     org.apache.derby.client.am.Connection newNetConnection(
             LogWriter netLogWriter,
-            org.apache.derby.jdbc.ClientDataSource clientDataSource,String user,
+            org.apache.derby.jdbc.ClientBaseDataSource clientDataSource,String user,
             String password) throws SqlException;
     
     /**
@@ -119,7 +118,7 @@ public interface ClientJDBCObjectFactory {
     org.apache.derby.client.am.Connection newNetConnection(
             LogWriter netLogWriter,
             String user,String password,
-            org.apache.derby.jdbc.ClientDataSource dataSource,int rmId,
+            org.apache.derby.jdbc.ClientBaseDataSource dataSource,int rmId,
             boolean isXAConn) throws SqlException;
     
     /**
@@ -130,7 +129,7 @@ public interface ClientJDBCObjectFactory {
      */
     org.apache.derby.client.am.Connection newNetConnection(
             LogWriter netLogWriter,String ipaddr,
-            int portNumber,org.apache.derby.jdbc.ClientDataSource dataSource,
+            int portNumber,org.apache.derby.jdbc.ClientBaseDataSource dataSource,
             boolean isXAConn) throws SqlException;
     
     /**

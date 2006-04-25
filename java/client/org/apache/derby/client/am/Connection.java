@@ -20,6 +20,7 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.shared.common.reference.JDBC30Translation;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -127,7 +128,7 @@ public abstract class Connection implements java.sql.Connection,
     public int xaHostVersion_ = 0;
 
     public int loginTimeout_;
-    public org.apache.derby.jdbc.ClientDataSource dataSource_;
+    public org.apache.derby.jdbc.ClientBaseDataSource dataSource_;
     public String serverNameIP_;
     public int portNumber_;
 
@@ -144,7 +145,8 @@ public abstract class Connection implements java.sql.Connection,
     protected Connection(org.apache.derby.client.am.LogWriter logWriter,
                          String user,
                          String password,
-                         org.apache.derby.jdbc.ClientDataSource dataSource) throws SqlException {
+                         org.apache.derby.jdbc.ClientBaseDataSource dataSource) 
+                                                           throws SqlException {
         initConnection(logWriter, user, dataSource);
     }
 
@@ -152,7 +154,8 @@ public abstract class Connection implements java.sql.Connection,
                          String user,
                          String password,
                          boolean isXAConn,
-                         org.apache.derby.jdbc.ClientDataSource dataSource) throws SqlException {
+                         org.apache.derby.jdbc.ClientBaseDataSource dataSource) 
+                                                           throws SqlException {
         isXAConnection_ = isXAConn;
         initConnection(logWriter, user, dataSource);
     }
@@ -160,7 +163,8 @@ public abstract class Connection implements java.sql.Connection,
     // For jdbc 2 connections
     protected void initConnection(org.apache.derby.client.am.LogWriter logWriter,
                                   String user,
-                                  org.apache.derby.jdbc.ClientDataSource dataSource) throws SqlException {
+                                  org.apache.derby.jdbc.ClientBaseDataSource
+                                            dataSource) throws SqlException {
         if (logWriter != null) {
             logWriter.traceConnectEntry(dataSource);
         }
@@ -193,7 +197,8 @@ public abstract class Connection implements java.sql.Connection,
     // For jdbc 2 connections
     protected Connection(org.apache.derby.client.am.LogWriter logWriter,
                          boolean isXAConn,
-                         org.apache.derby.jdbc.ClientDataSource dataSource) throws SqlException {
+                         org.apache.derby.jdbc.ClientBaseDataSource dataSource) 
+                                                            throws SqlException {
         if (logWriter != null) {
             logWriter.traceConnectEntry(dataSource);
         }
@@ -222,7 +227,7 @@ public abstract class Connection implements java.sql.Connection,
     // This is a callback method, called by subsystem - NetConnection
     protected void resetConnection(LogWriter logWriter,
                                    String user,
-                                   ClientDataSource ds,
+                                   ClientBaseDataSource ds,
                                    boolean recomputeFromDataSource) throws SqlException {
         // clearWarningsX() will re-initialize the following properties
         clearWarningsX();
@@ -1813,9 +1818,12 @@ public abstract class Connection implements java.sql.Connection,
     // can this be called in a unit of work
     // can this be called from within a stored procedure
     //
-    synchronized public void reset(LogWriter logWriter, String user, String password, ClientDataSource ds, boolean recomputeFromDataSource) throws SqlException {
+    synchronized public void reset(LogWriter logWriter, String user, 
+            String password, ClientBaseDataSource ds, 
+            boolean recomputeFromDataSource) throws SqlException {
         if (logWriter != null) {
-            logWriter.traceConnectResetEntry(this, logWriter, user, (ds != null) ? ds : dataSource_);
+            logWriter.traceConnectResetEntry(this, logWriter, user, 
+                                            (ds != null) ? ds : dataSource_);
         }
         try {
             reset_(logWriter, user, password, ds, recomputeFromDataSource);
@@ -1827,7 +1835,8 @@ public abstract class Connection implements java.sql.Connection,
         }
     }
 
-    synchronized public void reset(LogWriter logWriter, ClientDataSource ds, boolean recomputeFromDataSource) throws SqlException {
+    synchronized public void reset(LogWriter logWriter, ClientBaseDataSource ds, 
+            boolean recomputeFromDataSource) throws SqlException {
         if (logWriter != null) {
             logWriter.traceConnectResetEntry(this, logWriter, null, (ds != null) ? ds : dataSource_);
         }
@@ -1849,9 +1858,13 @@ public abstract class Connection implements java.sql.Connection,
         availableForReuse_ = false;
     }
 
-    abstract protected void reset_(LogWriter logWriter, String user, String password, ClientDataSource ds, boolean recomputerFromDataSource) throws SqlException;
+    abstract protected void reset_(LogWriter logWriter, String user, 
+            String password, ClientBaseDataSource ds, 
+            boolean recomputerFromDataSource) throws SqlException;
 
-    abstract protected void reset_(LogWriter logWriter, ClientDataSource ds, boolean recomputerFromDataSource) throws SqlException;
+    abstract protected void reset_(LogWriter logWriter, 
+            ClientBaseDataSource ds, 
+            boolean recomputerFromDataSource) throws SqlException;
 
     protected void completeReset(boolean isDeferredReset, boolean recomputeFromDataSource) throws SqlException {
         open_ = true;
