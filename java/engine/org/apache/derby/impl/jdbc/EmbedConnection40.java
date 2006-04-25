@@ -129,10 +129,6 @@ public class EmbedConnection40 extends EmbedConnection30 {
         return QueryObjectFactory.createDefaultQueryObject (ifc, this);
     } 
     
-    public java.util.Map<String,Class<?>> getTypeMap() {
-        throw new java.lang.UnsupportedOperationException();
-    }
-    
     /**
      * Returns false unless <code>interfaces</code> is implemented 
      * 

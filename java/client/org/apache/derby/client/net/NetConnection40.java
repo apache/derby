@@ -224,10 +224,6 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
         return QueryObjectFactory.createDefaultQueryObject (ifc, this);
     } 
     
-    public java.util.Map<String,Class<?>> getTypeMap(){
-        throw new java.lang.UnsupportedOperationException("getTypeMap()");
-    }
-    
     /**
      * Returns false unless <code>interfaces</code> is implemented 
      * 
