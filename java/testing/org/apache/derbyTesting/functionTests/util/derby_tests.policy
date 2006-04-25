@@ -146,6 +146,10 @@ grant codeBase "${derbyTesting.codejar}derbyTesting.jar" {
 // super-set of the jar permissions for running out of the classes directory
 //
 grant codeBase "${derbyTesting.codeclasses}" {
+  // BUG DERBY-622 derbynet/sysinfo.java
+  permission java.io.FilePermission "${derbyTesting.codedir}${/}*", "read";
+  permission java.io.FilePermission "${derbyTesting.codedir}", "read";
+  
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
   
