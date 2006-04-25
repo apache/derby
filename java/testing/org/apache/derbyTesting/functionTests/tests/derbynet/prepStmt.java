@@ -148,12 +148,12 @@ class prepStmt
 			ps.setBigDecimal(7, new BigDecimal("77.77"));
 			ps.setBigDecimal(8, new BigDecimal("8.1"));
 			ps.setString(9, "column9string");
-			byte[] c10ba = new String("column10vcstring").getBytes();
+			byte[] c10ba = new String("column10vcstring").getBytes("UTF-8");
 			int len = c10ba.length;
 			ps.setAsciiStream(10, new ByteArrayInputStream(c10ba), len);
-			byte[] c11ba = new String("column11lvcstring").getBytes();
+			byte[] c11ba = new String("column11lvcstring").getBytes("UTF-8");
 			len = c11ba.length;
-			ps.setCharacterStream(11, new InputStreamReader(new ByteArrayInputStream(c11ba)),len);
+			ps.setCharacterStream(11, new InputStreamReader(new ByteArrayInputStream(c11ba),"UTF-8"),len);
 			ps.setBytes(12,ba);
 			// Calling setBytes on the varchar for bit data type because it 
 			// Appears DB2 UDB accepts this only for the BLOB data type...

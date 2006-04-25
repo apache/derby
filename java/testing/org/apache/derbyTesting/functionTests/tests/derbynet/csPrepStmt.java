@@ -148,12 +148,12 @@ class csPrepStmt
 			ps.setBigDecimal(8, new BigDecimal("88.88"));
 			ps.setBigDecimal(9, new BigDecimal("99.1"));
 			ps.setString(10, "column11string");
-			byte[] c11ba = new String("column11vcstring").getBytes();
+			byte[] c11ba = new String("column11vcstring").getBytes("UTF-8");
 			int len = c11ba.length;
 			ps.setAsciiStream(11, new ByteArrayInputStream(c11ba), len);
-			byte[] c12ba = new String("column12lvcstring").getBytes();
+			byte[] c12ba = new String("column12lvcstring").getBytes("UTF-8");
 			len = c12ba.length;
-			ps.setCharacterStream(12, new InputStreamReader(new ByteArrayInputStream(c12ba)),len);
+			ps.setCharacterStream(12, new InputStreamReader(new ByteArrayInputStream(c12ba),"UTF-8"),len);
 			ps.setBytes(13,ba);
 			ps.setBinaryStream(14, new ByteArrayInputStream(ba), ba.length);
 			ps.setBytes(15,ba);
