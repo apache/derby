@@ -198,6 +198,7 @@ public class blobclob4BLOB {
             blobTest54(conn);
             blobTest6(conn);
             blobTest7(conn);
+            blobTest8Trigger(conn);
 			blobTest91(conn);
             blobTest92(conn);
             blobTest93(conn);
@@ -2751,6 +2752,7 @@ public class blobclob4BLOB {
             ps.setNull(3, Types.BIGINT);
             ps.executeUpdate();
 
+            ps.close();
             conn.commit();
 
             // set numRows
@@ -2762,6 +2764,9 @@ public class blobclob4BLOB {
                 System.out.println("FAIL. No rows in table testCLOB_MAIN");
             if (realNumRows != numRows)
                 System.out.println("FAIL. numRows is incorrect");
+            
+            stmt.close();
+            conn.commit();
 
         }
 		catch (SQLException e) {
@@ -2895,46 +2900,8 @@ public class blobclob4BLOB {
         {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("select a,b,crc32 from testBlob");
-			byte[] buff = new byte[128];
-			// fetch row back, get the long varbinary column as a blob.
-            Blob blob;
-            int blobLength = 0, i = 0;
-			while (rs.next()) {
-                i++;
-				// get the first column as a clob
-                blob = rs.getBlob(1);
-                long crc32 = rs.getLong(3);
-                boolean crc2Null = rs.wasNull();
-                if (blob == null) {
-                    if (!crc2Null) 
-                        System.out.println("FAIL: NULL BLOB but non-NULL checksum");
-                    continue;
-                }
-                
-                long blobcrc32 = getStreamCheckSum(blob.getBinaryStream());
-                
-                if (blobcrc32 != crc32) {
-                    System.out.println("FAIL: mismatched checksums for blob with length " +
-                            blob.length());
-                }
-                
-                
-				InputStream fin = blob.getBinaryStream();
-				int columnSize = 0;
-				for (;;) {
-					int size = fin.read(buff);
-					if (size == -1)
-						break;
-					columnSize += size;
-				}
-                blobLength = rs.getInt(2);
-                if (columnSize != blobLength)
-					System.out.println("test failed, columnSize should be " + blobLength
-					   + ", but it is " + columnSize + ", i = " + i);
-                if (columnSize != blob.length())
-					System.out.println("test failed, blob.length() should be " +  columnSize
-					   + ", but it is " + blob.length() + ", i = " + i);
-			}
+            testBlobContents(rs);        
+            stmt.close();
             conn.commit();
             System.out.println("blobTest0 finished");
         }
@@ -2947,6 +2914,63 @@ public class blobclob4BLOB {
 		}
     }
 
+    /**
+     * Test the contents of the testBlob table or ResultSet
+     * with identical shape.
+     * @param rs
+     * @throws SQLException
+     * @throws IOException
+     */
+    private static void testBlobContents(ResultSet rs)
+    throws SQLException, IOException
+    {
+        int nullCount = 0;
+        int rowCount = 0;
+        byte[] buff = new byte[128];
+        // fetch row back, get the long varbinary column as a blob.
+        Blob blob;
+        int blobLength = 0, i = 0;
+        while (rs.next()) {
+            i++;
+            // get the first column as a clob
+            blob = rs.getBlob(1);
+            long crc32 = rs.getLong(3);
+            boolean crc2Null = rs.wasNull();
+            if (blob == null) {
+                if (!crc2Null) 
+                    System.out.println("FAIL: NULL BLOB but non-NULL checksum");
+                nullCount++;
+                continue;
+            }
+            
+            rowCount++;
+            
+            long blobcrc32 = getStreamCheckSum(blob.getBinaryStream());
+            
+            if (blobcrc32 != crc32) {
+                System.out.println("FAIL: mismatched checksums for blob with length " +
+                        blob.length());
+            }
+            
+            
+            InputStream fin = blob.getBinaryStream();
+            int columnSize = 0;
+            for (;;) {
+                int size = fin.read(buff);
+                if (size == -1)
+                    break;
+                columnSize += size;
+            }
+            blobLength = rs.getInt(2);
+            if (columnSize != blobLength)
+                System.out.println("test failed, columnSize should be " + blobLength
+                   + ", but it is " + columnSize + ", i = " + i);
+            if (columnSize != blob.length())
+                System.out.println("test failed, blob.length() should be " +  columnSize
+                   + ", but it is " + blob.length() + ", i = " + i);
+        }
+        System.out.println("Row Count " + rowCount + " Null Row " + nullCount);
+    }
 
     /*
     test getBytes
@@ -2996,7 +3020,9 @@ public class blobclob4BLOB {
                     else
                         System.out.println(new String(res, "US-ASCII")); // ensure fixed string
                 }
-            }
+            }     
+            stmt.close();
+            conn.commit();
             System.out.println("blobTest2 finished");
         }
 		catch (SQLException e) {
@@ -3047,6 +3073,8 @@ public class blobclob4BLOB {
                 blobclob4BLOB.printPosition(i,"I-am-hiding-here-at-position-5910",5911,blob, blobLength);
                 blobclob4BLOB.printPosition(i,"Position-9907",1,blob, blobLength);
             }
+            stmt.close();
+            conn.commit();
             System.out.println("blobTest3 finished");
         }
 		catch (SQLException e) {
@@ -3112,7 +3140,10 @@ public class blobclob4BLOB {
 
                     printPositionBlob(i,searchStr,1,blob,j,searchBlob);
                 }
+                stmt2.close();
             }
+            stmt.close();
+            conn.commit();
             System.out.println("blobTest4 finished");
         }
 		catch (SQLException e) {
@@ -3122,6 +3153,47 @@ public class blobclob4BLOB {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
 			if (debug) e.printStackTrace();
 		}
+    }
+    
+    /**
+     * Test triggers on BLOB columns.
+    */
+    private static void blobTest8Trigger(Connection conn)
+    {
+        System.out.println(START + "blobTest8Trigger");
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("CREATE TABLE blobTest8TriggerA (a BLOB(300k), b int, crc32 BIGINT)");
+            stmt.executeUpdate("CREATE TABLE blobTest8TriggerB (a BLOB(200k), b int, crc32 BIGINT)");
+            stmt.executeUpdate(
+                    "create trigger T8A after update on testBlob " +
+                    "referencing new as n old as o " + 
+                    "for each row mode db2sql "+ 
+                    "insert into blobTest8TriggerA(a, b, crc32) values (n.a, n.b, n.crc32)");
+            
+            conn.commit();
+            ResultSet rs = stmt.executeQuery(
+                    "select a,b,crc32 from blobTest8TriggerA");
+            testBlobContents(rs);
+            rs.close();
+            conn.commit();
+            stmt.executeUpdate("UPDATE testBlob set b = b + 0");
+            conn.commit();
+            rs = stmt.executeQuery(
+                "select a,b,crc32 from blobTest8TriggerA");
+            testBlobContents(rs);
+            stmt.close();
+            conn.commit();
+            System.out.println("blobTest8Trigger finished");
+        }
+        catch (SQLException e) {
+            TestUtil.dumpSQLExceptions(e);
+        }
+        catch (Throwable e) {
+            System.out.println("FAIL -- unexpected exception:" + e.toString());
+            if (debug) e.printStackTrace();
+        }
+        
     }
 
 
@@ -3209,6 +3281,9 @@ public class blobclob4BLOB {
                         " Got blob length : " + blob.length());
                 j++;
 			}
+            ps.close();
+            stmt.close();
+            conn.commit();
             System.out.println("blobTest51 finished");
         }
 		catch (SQLException e) {
@@ -3224,33 +3299,41 @@ public class blobclob4BLOB {
    // make sure cannot get a blob from an int column
 	private static void blobTest52(Connection conn) {
 
-		ResultSetMetaData met;
-		ResultSet rs;
-		Statement stmt;
+		Statement stmt = null;
 		System.out.println(START + "blobTest52");
 		try {
 			stmt = conn.createStatement();
 			stmt.execute("create table testInteger2 (a integer)");
 
-            int i = 1;
             PreparedStatement ps = conn.prepareStatement("insert into testInteger2 values(158)");
             ps.executeUpdate();
+            ps.close();
 
-			rs = stmt.executeQuery("select a from testInteger2");
-			met = rs.getMetaData();
+			ResultSet rs = stmt.executeQuery("select a from testInteger2");
 			while (rs.next()) {
 				// get the first column as a clob
-                Blob blob = rs.getBlob(1);
+                try {
+                    Blob blob = rs.getBlob(1);
+                    System.out.println("FAIL fetched java.sql.Blob from INT column");
+                } catch (SQLException e) {
+                    TestUtil.dumpSQLExceptions(e,
+                            "22005".equals(e.getSQLState()) ||
+                            "XCL12".equals(e.getSQLState()));
+                    break;
+                }
 			}
-            System.out.println("blobTest52 finished");
+            stmt.close();
+            conn.commit();
+           
         }
 		catch (SQLException e) {
-			expectedExceptionForNSOnly(e);
-		}
+            TestUtil.dumpSQLExceptions(e);
+ 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
 			if (debug) e.printStackTrace();
 		}
+        System.out.println("blobTest52 finished");
     }
 
 
@@ -3265,7 +3348,7 @@ public class blobclob4BLOB {
 		try {
 			stmt = conn.createStatement();
 			stmt.execute("create table testBlobColumn (a blob(1K))");
-
+            stmt.close();
             System.out.println("blobTest53 finished");
         }
 		catch (SQLException e) {
@@ -3284,16 +3367,15 @@ public class blobclob4BLOB {
 	private static void blobTest54(Connection conn)
     {
 		ResultSet rs;
-		Statement stmt1, stmt2;
+		Statement stmt;
 		System.out.println(START + "blobTest54");
 		try
         {
-			stmt1 = conn.createStatement();
-			stmt1.execute("create table testBlob2 (a integer, b integer)");
+			stmt = conn.createStatement();
+			stmt.execute("create table testBlob2 (a integer, b integer)");
             PreparedStatement ps = conn.prepareStatement(
                 "insert into testBlob2 values(?,?)");
-			stmt2 = conn.createStatement();
-			rs = stmt2.executeQuery("select a,b from testBlob");
+			rs = stmt.executeQuery("select a,b from testBlob");
             Blob blob;
             int blobLength;
 			while (rs.next())
@@ -3303,22 +3385,31 @@ public class blobclob4BLOB {
                 if (blob == null)
                     continue;
                 blobLength = rs.getInt(2);
-                ps.setBlob(1,blob);
-                ps.setInt(2,blobLength);
-                ps.executeUpdate();
+                try {
+                    ps.setBlob(1,blob);                
+                    ps.setInt(2,blobLength);
+                    ps.executeUpdate();
+                    System.out.println("FAIL setBlob worked on INT column");
+                } catch (SQLException e) {
+                    TestUtil.dumpSQLExceptions(e,
+                            "22005".equals(e.getSQLState()) ||
+                            "XCL12".equals(e.getSQLState()));
+                     break;
+                }
 			}
             rs.close();
             conn.commit();
-
-            System.out.println("blobTest54 finished");
+            stmt.close();
+            
         }
 		catch (SQLException e) {
-		    expectedExceptionForNSOnly(e);
+            TestUtil.dumpSQLExceptions(e);
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
 			if (debug) e.printStackTrace();
 		}
+        System.out.println("blobTest54 finished");
     }
 
 
@@ -3413,6 +3504,8 @@ public class blobclob4BLOB {
 			        TestUtil.dumpSQLExceptions(e,isNullSearchPattern(e));
 		        }
             }
+            stmt.close();
+            conn.commit();
             System.out.println("blobTest6 finished");
         }
 		catch (SQLException e) {
@@ -3481,6 +3574,8 @@ public class blobclob4BLOB {
 			}
             rs2.close();
 
+            stmt1.close();
+            stmt2.close();
             conn.commit();
             System.out.println("blobTest7 finished");
         }

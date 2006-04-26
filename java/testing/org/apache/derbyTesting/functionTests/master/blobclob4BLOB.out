@@ -557,6 +557,7 @@ START: prepareSearchBlobTable
 ===> inserting searchclob.utf length = 5000
 ===> inserting aclob.utf length = 300000
 START: blobTest0
+Row Count 9 Null Row 1
 blobTest0 finished
 START: blobTest2
 testing Blob.getBytes() with pos 9905 > 0
@@ -755,13 +756,13 @@ blobTest4 finished
 START: blobTest51
 blobTest51 finished
 START: blobTest52
-FAIL -- unexpected exception ****************
-SQLSTATE(22005): An attempt was made to get a data value of type 'java.sql.Blob' from a data value of type 'INTEGER'.
+EXPECTED SQLSTATE(22005): An attempt was made to get a data value of type 'java.sql.Blob' from a data value of type 'INTEGER'.
+blobTest52 finished
 START: blobTest53
 blobTest53 finished
 START: blobTest54
-FAIL -- unexpected exception ****************
-SQLSTATE(22005): An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Blob'.
+EXPECTED SQLSTATE(22005): An attempt was made to get a data value of type 'INTEGER' from a data value of type 'java.sql.Blob'.
+blobTest54 finished
 START: blobTest6
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
 EXPECTED SQLSTATE(XJ071): Zero or negative length argument '-76' passed in a BLOB or CLOB method.
@@ -773,6 +774,10 @@ EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB 
 blobTest6 finished
 START: blobTest7
 blobTest7 finished
+START: blobTest8Trigger
+Row Count 0 Null Row 0
+Row Count 9 Null Row 1
+blobTest8Trigger finished
 START: blobTest91
 done row 0, length was 0
 done row 1, length was 65

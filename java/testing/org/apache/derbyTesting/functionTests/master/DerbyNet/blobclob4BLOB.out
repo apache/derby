@@ -536,6 +536,7 @@ START: prepareSearchBlobTable
 ===> inserting searchclob.utf length = 5000
 ===> inserting aclob.utf length = 300000
 START: blobTest0
+Row Count 9 Null Row 1
 blobTest0 finished
 START: blobTest2
 testing Blob.getBytes() with pos 9905 > 0
@@ -706,11 +707,14 @@ blobTest4 finished
 START: blobTest51
 blobTest51 finished
 START: blobTest52
-EXPECTED SQLSTATE(null): Invalid data conversion: Wrong result column type for requested conversion.
+FAIL -- unexpected exception ****************
+SQLSTATE(null): Invalid data conversion: Wrong result column type for requested conversion.
+blobTest52 finished
 START: blobTest53
 blobTest53 finished
 START: blobTest54
 EXPECTED SQLSTATE(XCL12): An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'.
+blobTest54 finished
 START: blobTest6
 EXPECTED SQLSTATE(null): Invalid position 0 or length 5
 EXPECTED SQLSTATE(null): Invalid position 1 or length -76
@@ -719,6 +723,10 @@ EXPECTED SQLSTATE(null): Search pattern cannot be null.
 blobTest6 finished
 START: blobTest7
 blobTest7 finished
+START: blobTest8Trigger
+Row Count 0 Null Row 0
+Row Count 9 Null Row 1
+blobTest8Trigger finished
 START: blobTest91
 done row 0, length was 0
 done row 1, length was 65
