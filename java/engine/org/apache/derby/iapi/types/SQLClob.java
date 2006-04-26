@@ -29,7 +29,10 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -298,4 +301,25 @@ public class SQLClob
 	{
 		throwLangSetMismatch("byte[]");
 	}
+    
+    /**
+     * Set the value from an non-null Java.sql.Clob object.
+     */
+    final void setObject(Object theValue)
+        throws StandardException
+    {
+        Clob vc = (Clob) theValue;
+        
+        try {
+            long vcl = vc.length();
+            if (vcl < 0L || vcl > Integer.MAX_VALUE)
+                throw this.outOfRange();
+            
+            setValue(new ReaderToUTF8Stream(vc.getCharacterStream(),
+                    (int) vcl, 0), (int) vcl);
+            
+        } catch (SQLException e) {
+            throw dataTypeConversion("DAN-438-tmp");
+       }
+    }
 }

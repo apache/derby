@@ -557,3 +557,25 @@ select id, length(bl), l, nc, oc from t438_t order by 1,5,4;
 select id, cast (bl as blob(20)) from t438 order by 1;
 select id, cast (bl as blob(20)) from t438_t order by 1;
 
+drop table t438;
+drop table t438_t;
+
+-- now re-start with CLOB types
+create table t438 (id int,  cost decimal(6,2), cl clob);
+create table t438_t (id int, cl clob, l int, nc decimal(6,2), oc decimal(6,2));
+create trigger tr_438 after update on t438
+referencing new as n old as o
+for each row mode db2sql
+insert into t438_t(id, cl, l, nc, oc) values (n.id, n.cl, length(n.cl), n.cost, o.cost);
+
+-- initially just some small CLOB values.
+insert into t438 values (1, 34.53, cast ('Italy''s centre-left leader Romano Prodi insists his poll victory is valid as contested ballots are checked.' as clob));
+insert into t438 values (0, 95.32, null);
+insert into t438 values (2, 22.21, cast ('free' as clob));
+select id, cost, length(cl) from t438 order by 1;
+
+update t438 set cost = cost + 1.23;
+select id, length(cl), l, nc, oc from t438_t order by 1,5,4;
+
+select id, cast (cl as clob(60)) from t438 order by 1;
+select id, cast (cl as clob(60)) from t438_t order by 1;

@@ -998,4 +998,51 @@ ID         |2
 0          |NULL                                    
 1          |124594322143423214ab35f2e34c            
 2          |aa                                      
+ij> drop table t438;
+0 rows inserted/updated/deleted
+ij> drop table t438_t;
+0 rows inserted/updated/deleted
+ij> -- now re-start with CLOB types
+create table t438 (id int,  cost decimal(6,2), cl clob);
+0 rows inserted/updated/deleted
+ij> create table t438_t (id int, cl clob, l int, nc decimal(6,2), oc decimal(6,2));
+0 rows inserted/updated/deleted
+ij> create trigger tr_438 after update on t438
+referencing new as n old as o
+for each row mode db2sql
+insert into t438_t(id, cl, l, nc, oc) values (n.id, n.cl, length(n.cl), n.cost, o.cost);
+0 rows inserted/updated/deleted
+ij> -- initially just some small CLOB values.
+insert into t438 values (1, 34.53, cast ('Italy''s centre-left leader Romano Prodi insists his poll victory is valid as contested ballots are checked.' as clob));
+1 row inserted/updated/deleted
+ij> insert into t438 values (0, 95.32, null);
+1 row inserted/updated/deleted
+ij> insert into t438 values (2, 22.21, cast ('free' as clob));
+1 row inserted/updated/deleted
+ij> select id, cost, length(cl) from t438 order by 1;
+ID         |COST     |3          
+---------------------------------
+0          |95.32    |NULL       
+1          |34.53    |107        
+2          |22.21    |4          
+ij> update t438 set cost = cost + 1.23;
+3 rows inserted/updated/deleted
+ij> select id, length(cl), l, nc, oc from t438_t order by 1,5,4;
+ID         |2          |L          |NC       |OC       
+-------------------------------------------------------
+0          |NULL       |NULL       |96.55    |95.32    
+1          |107        |107        |35.76    |34.53    
+2          |4          |4          |23.44    |22.21    
+ij> select id, cast (cl as clob(60)) from t438 order by 1;
+ID         |2                                                           
+------------------------------------------------------------------------
+0          |NULL                                                        
+1          |Italy's centre-left leader Romano Prodi insists his poll vic
+2          |free                                                        
+ij> select id, cast (cl as clob(60)) from t438_t order by 1;
+ID         |2                                                           
+------------------------------------------------------------------------
+0          |NULL                                                        
+1          |Italy's centre-left leader Romano Prodi insists his poll vic
+2          |free                                                        
 ij> 
