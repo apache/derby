@@ -86,11 +86,11 @@ public class blobclob4BLOB {
 		fileLength = new long[numFiles];
         fileCRC32 = new long[numFiles];
 
-		fileName[0] = "short.txt";	// set up a short (fit in one page) blob/clob
-		fileName[1] = "littleclob.txt"; // set up a long (longer than a page) blob/clob
-		fileName[2] = "empty.txt"; // set up a blob/clob with nothing in it
-		fileName[3] = "searchclob.txt"; // set up a blob/clob to search with
-		fileName[4] = "aclob.txt"; // set up a really long (over 300K) blob/clob
+		fileName[0] = "short.utf";	// set up a short (fit in one page) blob/clob
+		fileName[1] = "littleclob.utf"; // set up a long (longer than a page) blob/clob
+		fileName[2] = "empty.utf"; // set up a blob/clob with nothing in it
+		fileName[3] = "searchclob.utf"; // set up a blob/clob to search with
+		fileName[4] = "aclob.utf"; // set up a really long (over 300K) blob/clob
 
 		for (int i = 0 ; i < numFiles; i++)
 		{
@@ -4106,18 +4106,23 @@ public class blobclob4BLOB {
 			}
 			TestUtil.dumpSQLExceptions(e,expected);
 		}
-		
-		catch (Exception e)
+		catch (StringIndexOutOfBoundsException obe)
 		{
 			// Known bug.  JCC 5914.  
-			if ((pos > clobLength) && isDerbyNet && (e.getMessage() != null &&
-													e.getMessage().indexOf("String index out of range") >= 0))
+			if ((pos > clobLength) && isDerbyNet)
+			{
 				System.out.println("EXPECTED Out of bounds exception");
+			} 
 			else
 			{
-				System.out.println("FAIL -- unexpected exception:" + e.toString());
-	            if (debug) e.printStackTrace();
+				System.out.println("FAIL -- unexpected exception:" + obe.toString());
+				if (debug) obe.printStackTrace();
 			}
+		}
+		catch (Exception e)
+		{
+			System.out.println("FAIL -- unexpected exception:" + e.toString());
+	        if (debug) e.printStackTrace();
 		}
     }
 

@@ -73,20 +73,20 @@ public class resultsetStream {
 				"insert into t2 (len, data) values (?, ?)");
 			String filePath = "extin";
 			String sep = System.getProperty("file.separator");
-			boolean exists = (new File("extin", "littleclob.txt")).exists();
+			boolean exists = (new File("extin", "littleclob.utf")).exists();
 			if (!exists)
 			{
 				String userDir = System.getProperty("user.dir");
 					filePath = userDir + sep + ".." + sep + filePath;
 			}
-			File file = new File(filePath + sep + "littleclob.txt");
+			File file = new File(filePath + sep + "littleclob.utf");
 			int fileSize = (int) file.length();
 			BufferedInputStream fileData = new BufferedInputStream(new FileInputStream(file));
 			ppw.setInt(1, fileSize);
 			ppw.setBinaryStream(2, fileData, fileSize);
 			ppw.executeUpdate();
 
-			file = new File(filePath + sep + "short.txt");
+			file = new File(filePath + sep + "short.utf");
 			fileSize = (int) file.length();
 			fileData = new BufferedInputStream(new FileInputStream(file));
 			ppw.setInt(1, fileSize);

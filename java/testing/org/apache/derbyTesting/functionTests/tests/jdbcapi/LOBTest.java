@@ -87,7 +87,7 @@ public class LOBTest {
 		System.out.println("creating");
 		s.executeUpdate("CREATE TABLE atable (a INT, b LONG VARCHAR FOR BIT DATA)");
 		conn.commit();
-		java.io.File file = new java.io.File("short.txt");
+		java.io.File file = new java.io.File("short.utf");
 		int fileLength = (int) file.length();
 
 		// first, create an input stream

@@ -656,7 +656,7 @@ A
 ij> ---test with a file which has a differen records seperators (\n, \r , \r\n)
 create table nt1( a int , b char(30));
 0 rows inserted/updated/deleted
-ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'NT1', 'extin/mixednl.del',null, null, null,0);
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'NT1', 'extin/mixednl.del',null, null, 'UTF-8',0);
 Statement executed.
 ij> select * from nt1;
 A |B                             
@@ -690,7 +690,7 @@ create table position_info
     );
 0 rows inserted/updated/deleted
 ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE ('APP', 'POSITION_INFO', 'extin/position_info.del',
-                                    null, null, null, 1);
+                                    null, null, 'US-ASCII', 1);
 Statement executed.
 ij> select count(*) from position_info ;
 1          

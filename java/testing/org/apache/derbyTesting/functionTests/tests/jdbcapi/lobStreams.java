@@ -48,10 +48,10 @@ public class lobStreams {
 
         static
         {
-//            fileName[0] = "extin" + sep + "aclob.txt";
- //           fileName[1] = "extin" + sep + "littleclob.txt";
-            fileName[0] =  "aclob.txt";
-            fileName[1] =  "littleclob.txt";
+//            fileName[0] = "extin" + sep + "aclob.utf";
+ //           fileName[1] = "extin" + sep + "littleclob.utf";
+            fileName[0] =  "aclob.utf";
+            fileName[1] =  "littleclob.utf";
         }
         
         public static void main(String[] args)
