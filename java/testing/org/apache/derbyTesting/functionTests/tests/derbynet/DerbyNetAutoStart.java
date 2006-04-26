@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
@@ -386,7 +388,7 @@ public class DerbyNetAutoStart
                     stopServer( serverProcess);
                     return;
                 }
-                if( !checkLog( logFile, new String[] {"An exception was thrown during network server startup"}))
+                if( !checkLog( logFileName, new String[] {"An exception was thrown during network server startup"}))
                 {
                     // Was the network server started? Print out the names of the threads
                     System.out.println( "Active threads:");
@@ -466,13 +468,15 @@ public class DerbyNetAutoStart
         serverProcess.destroy();
     } // end of stopServer
         
-    private static boolean checkLog( RandomAccessFile logFile, String[] expected) throws IOException
+    private static boolean checkLog( String logFileName, String[] expected) throws IOException
     {
         boolean allFound = true;
         boolean[] found = new boolean[ expected.length];
-        while( logFile.getFilePointer() < logFile.length())
+        FileInputStream is = new FileInputStream(logFileName);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        String logLine; 
+        while((logLine = br.readLine()) != null)            
         {
-            String logLine = logFile.readLine();
             for( int i = 0; i < expected.length; i++)
             {
                 if( (! found[i]) && logLine.indexOf( expected[i]) >= 0)
