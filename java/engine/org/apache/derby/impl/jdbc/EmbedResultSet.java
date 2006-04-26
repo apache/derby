@@ -2753,13 +2753,11 @@ public abstract class EmbedResultSet extends ConnectionChild
                 throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
                         getColumnSQLType(columnIndex));
             } 
-
-            LimitReader limitIn = new LimitReader(reader);
-            
+           
             // length is +ve. at this point, all checks for negative
             // length has already been done
             int usableLength = (int) length;
-            ReaderToUTF8Stream utfIn = null;
+            int truncationLength = 0;
 
             // Currently long varchar does not allow for truncation of
             // trailing blanks.  For char and varchar types, current mechanism 
@@ -2781,20 +2779,15 @@ public abstract class EmbedResultSet extends ConnectionChild
                 // usableLength is the length of the data from stream
                 // that can be used which is min(colWidth,length) provided
                 // length - colWidth has trailing blanks only
-                if (colWidth < length)
+                if (usableLength > colWidth) {                   
+                    truncationLength = usableLength - colWidth;
                     usableLength = colWidth;
-
-                // keep information with the stream about how much data
-                // needs to be truncated, and colWidth info to give proper
-                // truncation message
-                utfIn = new ReaderToUTF8Stream(
-                            limitIn, colWidth,     ((int) length) - usableLength);
-            } else {
-                utfIn = new ReaderToUTF8Stream(
-                            limitIn, usableLength, ((int)length) - usableLength);
+                }
             }
 
-            limitIn.setLimit(usableLength);
+            ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(
+                    reader, usableLength, truncationLength);
+            
             getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(
                     utfIn, (int) usableLength);
         } catch (StandardException t) {

@@ -27,10 +27,10 @@ import java.io.IOException;
 	A  Reader that provides methods to limit the range that
 	can be read from the reader.
 */
-public class LimitReader extends Reader implements Limit 
+public final class LimitReader extends Reader implements Limit 
 {
-	protected int remainingBytes;
-	protected boolean limitInPlace;
+	private int remainingCharacters;
+	private boolean limitInPlace;
 	private	Reader	reader;
 
 	/**
@@ -49,13 +49,13 @@ public class LimitReader extends Reader implements Limit
 		if (!limitInPlace)
 			return reader.read();
 		
-		if (remainingBytes == 0)
+		if (remainingCharacters == 0)
 			return -1; // end of file
 
 		
 		int value = reader.read();
 		if (value >= 0)
-			remainingBytes--;
+			remainingCharacters--;
 		return value;
 
 	}
@@ -65,17 +65,17 @@ public class LimitReader extends Reader implements Limit
 		if (!limitInPlace)
 			return reader.read(c, off, len);
 
-		if (remainingBytes == 0)
+		if (remainingCharacters == 0)
 			return -1;
 
-		if (remainingBytes < len) 
+		if (remainingCharacters < len) 
 		{
-			len = remainingBytes; // end of file
+			len = remainingCharacters; // end of file
 		}
 
 		len = reader.read(c, off, len);
 		if (len >= 0)
-			remainingBytes -= len;
+			remainingCharacters -= len;
 		return len;
 	}
 
@@ -85,14 +85,14 @@ public class LimitReader extends Reader implements Limit
 		if (!limitInPlace)
 			return reader.skip(count);
 
-		if (remainingBytes == 0)
+		if (remainingCharacters == 0)
 			return 0; // end of file
 
-		if (remainingBytes < count)
-			count = remainingBytes;
+		if (remainingCharacters < count)
+			count = remainingCharacters;
 
 		count = reader.skip(count);
-		remainingBytes -= count;
+		remainingCharacters -= count;
 		return count;
 	}
 
@@ -104,8 +104,9 @@ public class LimitReader extends Reader implements Limit
 
 	/**
 		Set the limit of the stream that can be read. After this
-		call up to and including length bytes can be read from or skipped in
-		the stream. Any attempt to read more than length bytes will
+		call up to and including length characters can be read from
+        or skipped in the stream.
+        Any attempt to read more than length characters will
 		result in an EOFException
 
 		@exception IOException IOException from some underlying stream
@@ -114,7 +115,7 @@ public class LimitReader extends Reader implements Limit
 	*/
 	public void setLimit(int length) 
 	{
-		remainingBytes = length;
+		remainingCharacters = length;
 		limitInPlace = true;
 		return;
 	}
@@ -122,11 +123,11 @@ public class LimitReader extends Reader implements Limit
     /**
      * return limit of the stream that can be read without throwing
      * EOFException
-     * @return the remaining bytes left to be read from the stream
+     * @return the remaining characters left to be read from the stream
      */
     public final int getLimit()
     {
-        return remainingBytes;
+        return remainingCharacters;
     }
 
 	/**
@@ -138,9 +139,9 @@ public class LimitReader extends Reader implements Limit
 	*/
 	public int clearLimit() 
 	{
-		int leftOver = remainingBytes;
+		int leftOver = remainingCharacters;
 		limitInPlace = false;
-		remainingBytes = -1;
+		remainingCharacters = -1;
 		return leftOver;
 	}
 }

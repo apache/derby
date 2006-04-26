@@ -681,11 +681,10 @@ public abstract class EmbedPreparedStatement
         int intLength = (int)length;		    
 
 	    try {
-           
-            LimitReader limitIn = new LimitReader(reader);
+
 			ParameterValueSet pvs = getParms();
             int usableLength = intLength;
-            ReaderToUTF8Stream utfIn = null;
+            int truncationLength = 0;
 
             // Currently long varchar does not allow for truncation of trailing
             // blanks.  
@@ -711,26 +710,18 @@ public abstract class EmbedPreparedStatement
                 // length - colWidth has trailing blanks only
                 // we have used intLength into which the length variable had
                 // been cast to an int and stored  
-                if (colWidth < intLength)
+                if (intLength > colWidth) {                 
                     usableLength = colWidth;
-                
-                // keep information with the stream about how much data needs 
-                // to be truncated, and colWidth info to give proper truncation
-                // message
-                utfIn = new ReaderToUTF8Stream(
-                            limitIn, colWidth, intLength - usableLength);
-            }
-            else
-            {
-                utfIn = new ReaderToUTF8Stream(
-                            limitIn,usableLength,intLength - usableLength);
+                    truncationLength = intLength - usableLength;
+                }
             }
 
-            limitIn.setLimit(usableLength);
+            ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(
+                    reader, usableLength, truncationLength);
 
             /* JDBC is one-based, DBMS is zero-based */
             pvs.getParameterForSet(
-                parameterIndex - 1).setValue(utfIn,usableLength);
+                parameterIndex - 1).setValue(utfIn, usableLength);
 
 		} catch (StandardException t) {
 			throw EmbedResultSet.noStateChangeException(t);

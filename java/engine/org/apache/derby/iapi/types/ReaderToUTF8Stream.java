@@ -36,7 +36,9 @@ import org.apache.derby.iapi.services.io.LimitReader;
 public final class ReaderToUTF8Stream
 	extends InputStream
 {
-
+    /**
+     * Application's reader wrapped in a LimitReader.
+     */
 	private LimitReader reader;
 
 	private byte[] buffer;
@@ -48,25 +50,34 @@ public final class ReaderToUTF8Stream
     // and converted to UTF8 format
     private final static int BUFSIZE = 32768;
     
-    // Number of characters to truncate from this stream
-    // The SQL standard allows for truncation of trailing spaces 
-    // for clobs,varchar,char.
+    /** Number of characters to truncate from this stream
+     The SQL standard allows for truncation of trailing spaces 
+     for clobs,varchar,char.
+     If zero, no characters are truncated.
+     */
     private int charsToTruncate;
-    private final char SPACE =' ';
+    private static final char SPACE =' ';
     
-    // this stream needs to fit into a column of colWidth
-    // if truncation error happens ,then the error message includes 
-    // information about the column width which is why this variable
-    // is needed.
-    private int colWidth;  
+    /**
+     * Length of the final value, after truncation if any,
+     * in characters.
+     this stream needs to fit into a column of colWidth
+     if truncation error happens ,then the error message includes 
+     information about the column width.
+    */
+    private final int valueLength; 
     
-	public ReaderToUTF8Stream(LimitReader reader,int length,int numCharsToTruncate)
+    /**
+     * Create a stream with truncation.
+     */
+ 	public ReaderToUTF8Stream(Reader appReader, int valueLength,int numCharsToTruncate)
 	{
-		this.reader = reader;
-		buffer = new byte[BUFSIZE];
-		blen = -1;
+        this.reader = new LimitReader(appReader);
+        reader.setLimit(valueLength);
+        buffer = new byte[BUFSIZE];
+        blen = -1;        
         this.charsToTruncate = numCharsToTruncate;
-        this.colWidth = length;
+        this.valueLength = valueLength;
 	}
 
     /**
@@ -218,7 +229,7 @@ public final class ReaderToUTF8Stream
         {
             reader.setLimit(charsToTruncate);
             int c = 0;
-            do
+            for (;;)
             {
                 c = reader.read();
                 
@@ -237,10 +248,9 @@ public final class ReaderToUTF8Stream
                             SQLState.LANG_STRING_TRUNCATION,
                             TypeId.CLOB_NAME, 
                             "XXXX", 
-                            String.valueOf(colWidth)));
+                            String.valueOf(valueLength)));
                 }
             }
-            while (c == SPACE);
         }
         
         int remainingBytes = reader.clearLimit();
