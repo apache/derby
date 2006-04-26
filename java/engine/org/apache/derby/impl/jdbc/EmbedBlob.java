@@ -70,9 +70,15 @@ import java.io.IOException;
 
 final class EmbedBlob extends ConnectionChild implements Blob
 {
-    // clob is either bytes or stream
+    // blob is either bytes or stream
     private boolean         isBytes;
     private InputStream     myStream;
+    /*
+     * Length of the BLOB if known. Set to -1 if
+     * the current length of the BLOB is not known.
+     */
+    private long myLength = -1;
+    
     private byte[]          myBytes;
     // note: cannot control position of the stream since user can do a getBinaryStream
     private long            pos;
@@ -107,6 +113,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(dvdBytes != null,"blob has a null value underneath");
 
+            myLength = dvdBytes.length;
             myBytes = new byte[dvdBytes.length];
             System.arraycopy(dvdBytes, 0, myBytes, 0, dvdBytes.length);
         }
@@ -208,12 +215,13 @@ final class EmbedBlob extends ConnectionChild implements Blob
     public long length()
         throws SQLException
     {
+        if (myLength != -1)
+            return myLength;
+        
         boolean pushStack = false;
         try
         {
-            if (isBytes)
-                return myBytes.length;
-            // we have a stream
+           // we have a stream
             synchronized (getConnectionSynchronization())
             {
                 pushStack = !getEmbedConnection().isClosed();
@@ -221,6 +229,14 @@ final class EmbedBlob extends ConnectionChild implements Blob
                     setupContextStack();
 
                 setPosition(0);
+                // If possible get the length from the encoded
+                // length at the front of the raw stream.
+                if ((myLength = biStream.getLength()) != -1) {
+                    biStream.close();
+                   return myLength;
+                }
+                
+                // Otherwise have to read the entire stream!
                 for (;;)
                 {
                     int size = biStream.read(buf);
@@ -228,6 +244,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
                         break;
                     pos += size;
                 }
+                // Save for future uses.
+                myLength = pos;
+                biStream.close();
                 return pos;
             }
         }
