@@ -132,6 +132,7 @@ public class EmbedCallableStatement20
      */
 	public Object  getObject (int i, java.util.Map map) throws SQLException 
 	{
+		checkStatus();
 		if( map == null)
             throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
                                               "java.sql.CallableStatement.getObject");
@@ -968,6 +969,7 @@ public class EmbedCallableStatement20
 	public Object getObject(String parameterName)
     throws SQLException
 	{
+		checkStatus();
 		throw Util.notImplemented();
 	}
 
@@ -985,6 +987,7 @@ public class EmbedCallableStatement20
 	public Object getObject(String parameterName, Map map)
     throws SQLException
 	{
+		checkStatus();
 		if( map == null)
             throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
                                               "java.sql.CallableStatement.getObject");

@@ -55,6 +55,7 @@ public class EmbedStatement40 extends EmbedStatement {
      *                                with the given interface.
      */
     public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        checkStatus();
         return interfaces.isInstance(this);
     }
     
@@ -68,6 +69,7 @@ public class EmbedStatement40 extends EmbedStatement {
      */
     public <T> T unwrap(java.lang.Class<T> interfaces)
     throws SQLException{
+        checkStatus();
         try {
             return interfaces.cast(this);
         } catch (ClassCastException cce) {

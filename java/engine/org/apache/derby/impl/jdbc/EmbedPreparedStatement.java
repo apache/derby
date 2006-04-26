@@ -632,6 +632,7 @@ public abstract class EmbedPreparedStatement
        			  java.io.Reader reader,
 			  int length) throws SQLException
 	{
+		checkStatus();
 		int jdbcTypeId = getParameterJDBCType(parameterIndex);
 		switch (jdbcTypeId) {
 		case Types.CHAR:
@@ -647,15 +648,13 @@ public abstract class EmbedPreparedStatement
 		setCharacterStreamInternal(parameterIndex, reader, length);
 	}
 
-    protected void setCharacterStreamInternal(int parameterIndex,
+    private void setCharacterStreamInternal(int parameterIndex,
 						Reader reader, long length)
 	    throws SQLException
 	{
         // check for -ve length
         if (length < 0) 
           throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
-      
-        checkStatus();
 
 	    int jdbcTypeId = getParameterJDBCType(parameterIndex);
 
@@ -749,6 +748,8 @@ public abstract class EmbedPreparedStatement
 	    throws SQLException
 		{
 
+		checkStatus();
+
 		int jdbcTypeId = getParameterJDBCType(parameterIndex);
 		switch (jdbcTypeId) {
 		case Types.BINARY:
@@ -763,7 +764,7 @@ public abstract class EmbedPreparedStatement
     	setBinaryStreamInternal(parameterIndex, x, length);
 	}
 
-    protected void setBinaryStreamInternal(int parameterIndex, InputStream x,
+    private void setBinaryStreamInternal(int parameterIndex, InputStream x,
 				long length)
 	    throws SQLException
 	{
@@ -771,7 +772,6 @@ public abstract class EmbedPreparedStatement
         if ( length < 0 ) 
             throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
         
-		checkStatus();
 		int jdbcTypeId = getParameterJDBCType(parameterIndex);
 		if (x == null) {
 			setNull(parameterIndex, jdbcTypeId);
@@ -1223,6 +1223,7 @@ public abstract class EmbedPreparedStatement
     public void setBlob (int i, Blob x)
         throws SQLException
     {
+        checkStatus();
         int colType;
         synchronized (getConnectionSynchronization())
         {
@@ -1256,6 +1257,7 @@ public abstract class EmbedPreparedStatement
     public void setClob (int i, Clob x)
         throws SQLException
     {
+        checkStatus();
         int colType;
         synchronized (getConnectionSynchronization())
         {
@@ -1539,6 +1541,7 @@ public abstract class EmbedPreparedStatement
     
     public void setClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
+        checkStatus();
         int colType;
         synchronized(getConnectionSynchronization()) {
             colType = getParameterJDBCType(parameterIndex);
@@ -1566,6 +1569,7 @@ public abstract class EmbedPreparedStatement
     
     public void setBlob(int parameterIndex, InputStream inputStream, long length)
     throws SQLException{
+        checkStatus();
         int colType;
         synchronized (getConnectionSynchronization()) {
             colType = getParameterJDBCType(parameterIndex);

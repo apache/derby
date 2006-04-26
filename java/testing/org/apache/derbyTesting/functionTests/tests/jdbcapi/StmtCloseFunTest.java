@@ -166,18 +166,12 @@ public class StmtCloseFunTest {
 
 			if (! isDerbyNet)
 			{
+				// DerbyNet and DerbyNetClient don't throw exception
 				try {
-					// currently derby only supports returning 0 in this case.
-					
-					int qry_timeout = s.getQueryTimeout();
-					
-					if (qry_timeout != 0)
-						System.out.println("Statement Test failed, must return 0.");
+					s.getQueryTimeout();
+					System.out.println("Statement Test failed (9)");
 				}
-				catch(SQLException e)
-				{
-					System.out.println("Statement Test failed (9) " + e.toString());
-				}
+				catch(SQLException e) { }
 			}
 			try {
 				s.setQueryTimeout(20);
@@ -426,18 +420,12 @@ public class StmtCloseFunTest {
 
 			if (! isDerbyNet)
 			{
+				// DerbyNet and DerbyNetClient don't throw exception
 				try {
-					// currently derby only supports returning 0 in this case.
-					
-					int qry_timeout = ps.getQueryTimeout();
-					
-					if (qry_timeout != 0)
-						System.out.println("Statement Test failed, must return 0.");
+					ps.getQueryTimeout();
+					System.out.println("Prepared Statement Test failed");
 				}
-				catch(SQLException e)
-				{ 
-					System.out.println("Statement Test failed");
-				}
+				catch(SQLException e) { }
 			}
 
 			try {
@@ -714,18 +702,12 @@ public class StmtCloseFunTest {
 
 			if (! isDerbyNet)
 			{
+				// DerbyNet and DerbyNetClient don't throw exception
 				try {
-					// currently derby only supports returning 0 in this case.
-					
-					int qry_timeout = cs.getQueryTimeout();
-					
-					if (qry_timeout != 0)
-						System.out.println("Statement Test failed, must return 0.");
+					cs.getQueryTimeout();
+					System.out.println("Callable Statement Test failed");
 				}
-				catch(SQLException e)
-				{ 
-					System.out.println("Statement Test failed");
-				}
+				catch(SQLException e) { }
 			}
 			
 			try {

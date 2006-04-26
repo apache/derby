@@ -208,6 +208,7 @@ public class EmbedCallableStatement40 extends EmbedCallableStatement30 {
      *                                with the given interface.
      */
     public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        checkStatus();
         return interfaces.isInstance(this);
     }
     
@@ -221,6 +222,7 @@ public class EmbedCallableStatement40 extends EmbedCallableStatement30 {
      */
     public <T> T unwrap(java.lang.Class<T> interfaces) 
                             throws SQLException{
+        checkStatus();
         try {
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
