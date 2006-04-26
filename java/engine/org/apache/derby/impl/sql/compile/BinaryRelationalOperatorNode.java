@@ -1280,6 +1280,18 @@ public class BinaryRelationalOperatorNode
 		 * position (namely, the position w.r.t the ProjectRestrictNode above
 		 * the FromBaseTable) needs to be.  So that's the column number we
 		 * use.
+		 *
+		 * As a final note, we have to be sure we only set the column
+		 * reference's column number if the reference points to a base table.
+		 * If the reference points to some other ResultSetNode--esp. another
+		 * subquery node--then it (the reference) already holds the correct
+		 * number with respect to that ResultSetNode and we don't change
+		 * it.  The reason is that the reference could end up getting pushed
+		 * down further to that ResultSetNode, in which case we'll do another
+		 * scoping operation and, in order for that to be successful, the
+		 * reference to be scoped has to know what the target column number
+		 * is w.r.t to that ResultSetNode (i.e. it'll be playing the role of
+		 * "cr" as described here).
 		 */
 		if (rc.getExpression() instanceof ColumnReference)
 		{
@@ -1291,7 +1303,8 @@ public class BinaryRelationalOperatorNode
 			// correctly.  That remapping is done in the pushOptPredicate()
 			// method of ProjectRestrictNode.
 			ColumnReference cRef = (ColumnReference)rc.getExpression();
-			cRef.setColumnNumber(cr.getColumnNumber());
+			if (cRef.pointsToBaseTable())
+				cRef.setColumnNumber(cr.getColumnNumber());
 			return cRef;
 		}
 
@@ -1301,10 +1314,10 @@ public class BinaryRelationalOperatorNode
 		 *
 		 *   select 1, 1 from t1
 		 *
-		 * In this case we just return the column reference as it is
+		 * In this case we just return a clone of the column reference
 		 * because it's scoped as far as we can take it.
 		 */
-		return cr;
+		return (ValueNode)cr.getClone();
 	}
 
 }	

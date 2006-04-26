@@ -80,6 +80,183 @@ select * from
 where x1.i = x2.a;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
+-- Next set of queries tests pushdown of predicates whose
+-- column references do not reference base tables--ex. they
+-- reference literals, aggregates, or subqueries.  We don't
+-- check the query plans here, we're just checking to make
+-- sure pushdown doesn't cause problems during compilation/
+-- execution.  In the case of regressions, errors that might
+-- show up here include compile-time NPEs, execution-time
+-- NPEs, errors saying no predicate was found for a hash join,
+-- and/or type comparison errors caused by incorrect column
+-- numbers for scoped predicates.
+
+create table tc (c1 char, c2 char, c3 char, c int);
+
+create view vz (z1, z2, z3, z4) as
+  select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
+    (select c1, c, c2, c3 from tc) xx1
+      union select 'i','j','j',i from t2;
+
+create view vz2 (z1, z2, z3, z4) as
+  select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
+    (select c1, c, c2, c3 from tc) xx1;
+
+-- Both sides of predicate reference aggregates.
+select x1.c1 from
+  (select count(*) from t1 union select count(*) from t2) x1 (c1),
+  (select count(*) from t3 union select count(*) from t4) x2 (c2)
+where x1.c1 = x2.c2;
+
+-- Both sides of predicate reference aggregates, and
+-- predicate is pushed through to non-flattenable nested
+-- subquery.
+select x1.c1 from
+  (select count(*) from
+    (select distinct j from t1) xx1
+      union select count(*) from t2
+    ) x1 (c1),
+  (select count(*) from t3 union select count(*) from t4) x2 (c2)
+where x1.c1 = x2.c2;
+
+-- Both sides of predicate reference aggregates, and
+-- predicate is pushed through to non-flattenable nested
+-- subquery that is in turn part of a nested union.
+select x1.c1 from
+  (select count(*) from
+    (select distinct j from t1 union select distinct j from t2) xx1
+      union select count(*) from t2
+  ) x1 (c1),
+  (select count(*) from t3 union select count(*) from t4) x2 (c2)
+where x1.c1 = x2.c2;
+
+-- Left side of predicate references base column, right side
+-- references aggregate; predicate is pushed through to non-
+-- flattenable nested subquery.
+select x1.c1 from
+  (select xx1.c from
+    (select distinct c, c1 from tc) xx1
+      union select count(*) from t2
+    ) x1 (c1),
+  (select count(*) from t3 union select count(*) from t4) x2 (c2) 
+where x1.c1 = x2.c2;
+
+-- Left side of predicate references base column, right side
+-- references aggregate; predicate is pushed through to non-
+-- flattenable nested subquery.
+select x1.c1 from
+  (select xx1.c from
+    (select c, c1 from tc) xx1
+      union select count(*) from t2
+    ) x1 (c1),
+  (select count(*) from t3 union select count(*) from t4) x2 (c2)
+where x1.c1 = x2.c2;
+
+-- Left side of predicate references base column, right side
+-- side references aggregate; predicate is pushed through to
+-- a subquery in a nested union that has literals in its result
+-- column.
+select x1.z1 from
+  (select xx1.c1, xx1.c2, xx1.c, xx1.c3 from
+    (select c1, c2, c3, c from tc) xx1
+      union select 'i','j',j,'i' from t2
+  ) x1 (z1, z2, z3, z4),
+  (select count(*) from t3 union select count (*) from t4) x2 (c2)
+where x1.z3 = x2.c2;
+
+-- Both sides of predicate reference base columns; predicate
+-- predicate is pushed through to a subquery in a nested union
+-- that has literals in its result column.
+select x1.z1 from
+  (select xx1.c1, xx1.c2, xx1.c, xx1.c3 from
+    (select c1, c2, c3, c from tc) xx1
+      union select 'i','j',j,'i' from t2
+  ) x1 (z1, z2, z3, z4),
+  (select a from t3 union select count (*) from t4) x2 (c2)
+where x1.z3 = x2.c2;
+
+-- Same as previous query, but with aggregate/base column
+-- in x2 switched.
+select x1.z1 from
+  (select xx1.c1, xx1.c2, xx1.c, xx1.c3 from
+    (select c1, c2, c3, c from tc) xx1
+      union select 'i','j',j,'i' from t2
+  ) x1 (z1, z2, z3, z4),
+  (select count(*) from t3 union select a from t4) x2 (c2)
+where x1.z3 = x2.c2;
+
+-- Left side references aggregate, right side references base
+-- column; predicate is pushed to non-flattenable subquery
+-- that is part of a nested union for which one child references
+-- a base column and the other references an aggregate.
+select x1.c1 from
+  (select count(*) from
+    (select distinct j from t1) xx1
+      union select count(*) from t2
+  ) x1 (c1),
+  (select a from t3 union select a from t4) x2 (c2)
+where x1.c1 = x2.c2;
+
+-- Same as previous query, but both children of inner-most
+-- union reference base columns.
+select x1.c1 from
+  (select count(*) from
+    (select distinct j from t1) xx1
+      union select i from t2
+  ) x1 (c1),
+  (select a from t3 union select a from t4) x2 (c2)
+where x1.c1 = x2.c2;
+
+-- Left side references aggregate, right side references base
+-- column; predicate is pushed to non-flattenable subquery
+-- that is part of a nested union for which one child references
+-- a base column and the other references an aggregate.
+select x1.c1 from
+  (select count(*) from
+    (select distinct j from t1) xx1
+      union select count(*) from t2
+  ) x1 (c1),
+  (select i from t2 union select i from t1) x2 (c2)
+where x1.c1 = x2.c2;
+
+-- Same as previous query, but one child of x2 references
+-- a literal.
+select x1.c1 from
+  (select count(*) from
+    (select distinct j from t1) xx1
+      union select count(*) from t2
+  ) x1 (c1),
+  (select 1 from t2 union select i from t1) x2 (c2)
+where x1.c1 = x2.c2;
+
+-- Left side of predicate references a base column that is
+-- deeply nested inside a subquery, a union, and a view,
+-- the latter of which itself has a union between two
+-- nested subqueries (whew).  And finally, the position of
+-- the base column w.r.t the outer query (x1) is different
+-- than it is with respect to inner view (vz).
+select x1.z4 from
+  (select z1, z4, z3 from vz
+    union select '1', 4, '3' from t1
+  ) x1 (z1, z4, z3),
+  (select distinct j from t2 union select j from t1) x2 (c2)
+where x1.z4 = x2.c2;
+
+-- Same as previous query but with a different nested
+-- view (vz2) that is missing the nested union found
+-- in vz.
+select x1.z4 from
+  (select z1, z4, z3 from vz2
+    union select '1', 4, '3' from t1
+  ) x1 (z1, z4, z3),
+  (select distinct j from t2 union select j from t1) x2 (c2)
+where x1.z4 = x2.c2;
+
+-- Cleanup from this set of tests.
+drop view vz;
+drop view vz2;
+drop table tc;
+
 -- Now bump up the size of tables T3 and T4 to the point where
 -- use of indexes will cause optimizer to choose nested loop join
 -- (and push predicates) instead of hash join.  The following
