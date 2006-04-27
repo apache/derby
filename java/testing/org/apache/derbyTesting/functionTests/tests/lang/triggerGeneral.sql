@@ -579,3 +579,20 @@ select id, length(cl), l, nc, oc from t438_t order by 1,5,4;
 
 select id, cast (cl as clob(60)) from t438 order by 1;
 select id, cast (cl as clob(60)) from t438_t order by 1;
+
+drop table t438;
+drop table t438_t;
+
+-- Testcase showing DERBY-1258
+create table tsn (I integer, "i" integer);
+create table tsn_t (a integer, b integer);
+create trigger tr_sn after insert on tsn
+referencing new as n
+for each row mode db2sql
+insert into tsn_t(a, b) values (n.I, n."i");
+insert into tsn values (1, 234);
+select * from tsn;
+-- Should have 1,234 as data in tsn_t
+select * from tsn_t;
+drop table tsn;
+drop table tsn_t;

@@ -1045,4 +1045,33 @@ ID         |2
 0          |NULL                                                        
 1          |Italy's centre-left leader Romano Prodi insists his poll vic
 2          |free                                                        
+ij> drop table t438;
+0 rows inserted/updated/deleted
+ij> drop table t438_t;
+0 rows inserted/updated/deleted
+ij> -- Testcase showing DERBY-1258
+create table tsn (I integer, "i" integer);
+0 rows inserted/updated/deleted
+ij> create table tsn_t (a integer, b integer);
+0 rows inserted/updated/deleted
+ij> create trigger tr_sn after insert on tsn
+referencing new as n
+for each row mode db2sql
+insert into tsn_t(a, b) values (n.I, n."i");
+0 rows inserted/updated/deleted
+ij> insert into tsn values (1, 234);
+1 row inserted/updated/deleted
+ij> select * from tsn;
+I          |i          
+-----------------------
+1          |234        
+ij> -- Should have 1,234 as data in tsn_t
+select * from tsn_t;
+A          |B          
+-----------------------
+1          |1          
+ij> drop table tsn;
+0 rows inserted/updated/deleted
+ij> drop table tsn_t;
+0 rows inserted/updated/deleted
 ij> 
