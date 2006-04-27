@@ -30,6 +30,8 @@ import javax.transaction.xa.Xid;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Statement;
 
+import org.apache.derby.jdbc.ClientDriver;
+
 public class NetXAConnection {    
     private NetConnection netCon;
     //---------------------constructors/finalizer---------------------------------
@@ -228,7 +230,7 @@ public class NetXAConnection {
                            org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                            int rmId,
                            boolean isXAConn) throws SqlException {        
-        return new NetConnection (netLogWriter, user, password, 
-                dataSource, rmId, isXAConn);
+        return (NetConnection)ClientDriver.getFactory().newNetConnection
+            (netLogWriter, user, password,dataSource, rmId, isXAConn);
     }
 }

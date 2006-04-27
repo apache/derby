@@ -25,7 +25,6 @@ import javax.sql.StatementEventListener;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.net.NetXAConnection;
-import org.apache.derby.client.net.NetXAConnection40;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientXADataSource;
 
@@ -79,26 +78,4 @@ public class ClientXAConnection40 extends ClientXAConnection {
     public void addStatementEventListener(StatementEventListener listener) {
         throw new UnsupportedOperationException();
     }
-    
-        /**
-     * creates and returns NetXAConnection40.
-     * @param ds
-     * @param logWriter
-     * @param user
-     * @param password
-     * @param rmId
-     * @return NetXAConnection
-     */
-    protected NetXAConnection getNetXAConnection (ClientDataSource ds,
-                                  NetLogWriter logWriter,
-                                  String user,
-                                  String password,
-                                  int rmId) throws SqlException {
-        return new NetXAConnection40 (logWriter,
-                user,
-                password,
-                ds,
-                rmId,
-                true);
-    }    
 }
