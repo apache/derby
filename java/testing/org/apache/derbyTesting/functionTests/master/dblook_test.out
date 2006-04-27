@@ -5302,7 +5302,7 @@ Msg Test 3
  java org.apache.derby.tools.dblook -d <sourceDBUrl> [OPTIONS]
  	where the source URL is the full URL, including the connection protocol
  	and any connection attributes that might apply.  For example, use
- 	'jdbc:derby:myDB', or 'jdbc:derby:net://localhost:1527/myDB:user=usr;'. 
+ 	'jdbc:derby:myDB', or 'jdbc:derby://localhost:1527/myDB;user=usr;'. 
  	options include: 
  	-z <schemaName> to specify a schema to which the DDL generation
  	 should be limited.  Only database objects with that schema will have

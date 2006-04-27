@@ -28,7 +28,18 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.NoSuchElementException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
+import javax.sql.DataSource;
+
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.services.info.JVMInfo;
+
+
 
 
 /**
@@ -37,6 +48,19 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 
 */
 public class TestUtil {
+	
+	//Used for JSR169
+	public static boolean HAVE_DRIVER_CLASS;
+	static{
+		try{
+			Class.forName("java.sql.Driver");
+			HAVE_DRIVER_CLASS = true;
+		}
+		catch(ClassNotFoundException e){
+			//Used for JSR169
+			HAVE_DRIVER_CLASS = false;
+		}
+	}
 
 	public static final int UNKNOWN_FRAMEWORK = -1;
 
@@ -79,6 +103,7 @@ public class TestUtil {
 	private static String XA_DATASOURCE_STRING = "XA";
 	private static String CONNECTION_POOL_DATASOURCE_STRING = "ConnectionPool";
 	private static String REGULAR_DATASOURCE_STRING = "";
+	private static String JSR169_DATASOURCE_STRING = "Simple";
 	
 	// Methods for making framework dependent decisions in tests.
 
@@ -144,7 +169,13 @@ public class TestUtil {
 	{
 		if (framework != UNKNOWN_FRAMEWORK)
 			return framework;
-		String frameworkString = System.getProperty("framework");
+              String frameworkString = (String) AccessController.doPrivileged
+                  (new PrivilegedAction() {
+                          public Object run() {
+                              return System.getProperty("framework");
+                          }
+                      }
+                   );              
 		if (frameworkString == null || 
 		   frameworkString.toUpperCase(Locale.ENGLISH).equals("EMBEDDED"))
 			framework = EMBEDDED_FRAMEWORK;
@@ -162,14 +193,33 @@ public class TestUtil {
 	/**
 	    Get URL prefix for current framework.
 		
-		@return url, assume localhost and port 1527 for Network Tests
+		@return url, assume localhost - unless set differently in System property - 
+		             and assume port 1527 for Network Tests
 		@see getJdbcUrlPrefix(String server, int port)
 		
 	*/
-	public static String getJdbcUrlPrefix()
-	{
-		return getJdbcUrlPrefix("localhost", 1527);
-	}
+    public static String getJdbcUrlPrefix()
+    {
+        String hostName=getHostName();
+        return getJdbcUrlPrefix(hostName, 1527);
+    }
+
+    /** Get hostName as passed in - if not, set it to "localhost" 
+        @return hostName, as passed into system properties, or "localhost"
+    */
+    public static String getHostName()
+    {
+        String hostName = (String) AccessController.doPrivileged
+            (new PrivilegedAction() {
+                    public Object run() {
+                        return System.getProperty("hostName");
+                    }
+                }
+             );    
+        if (hostName == null)
+            hostName="localhost";
+        return hostName;
+    }
 
 	/** 
 		Get URL prefix for current framework		
@@ -209,7 +259,7 @@ public class TestUtil {
 	*/
 	public static void loadDriver() throws Exception
 	{
-		String driverName = null;
+              final String driverName;
 		framework = getFramework();
 		switch (framework)
 		{
@@ -224,9 +274,23 @@ public class TestUtil {
 			case DERBY_NET_CLIENT_FRAMEWORK:
 				driverName = "org.apache.derby.jdbc.ClientDriver";
 				break;
+                      default: 
+                            driverName=  "org.apache.derby.jdbc.EmbeddedDriver";
+                            break;
 		}
-		Class.forName(driverName).newInstance();
-	}
+                                
+              try {
+                  AccessController.doPrivileged
+                      (new PrivilegedExceptionAction() {
+                              public Object run() throws Exception {
+                                  return Class.forName(driverName).newInstance();
+                              }
+                          }
+                       );
+              } catch (PrivilegedActionException e) {
+                  throw e.getException();
+              }
+        }
 
 
 	/**
@@ -239,11 +303,23 @@ public class TestUtil {
 	 */
 	public static javax.sql.DataSource getDataSource(Properties attrs)
 	{
+		String classname;
+		if(HAVE_DRIVER_CLASS)
+		{
+			classname = getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource";
+			return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
+		}
+		else
+			return getSimpleDataSource(attrs);
 		
-		String classname = getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource";
-		return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
 	}
 
+	public static DataSource getSimpleDataSource(Properties attrs)
+	{
+		String classname = getDataSourcePrefix() + JSR169_DATASOURCE_STRING + "DataSource";
+		return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
+	}
+	
 	/**
 	 * Get an xa  data source for the appropriate framework
 	 * @param attrs  A set of attribute values to set on the datasource.
@@ -273,26 +349,27 @@ public class TestUtil {
 		String classname = getDataSourcePrefix() + CONNECTION_POOL_DATASOURCE_STRING + "DataSource";
 		return (javax.sql.ConnectionPoolDataSource) getDataSourceWithReflection(classname, attrs);
 	}
+        
 
 	public static String getDataSourcePrefix()
-		{
-			framework = getFramework();
-			switch(framework)
-			{
-				case OLD_NET_FRAMEWORK:
-				case DERBY_NET_FRAMEWORK:
-				case DB2JCC_FRAMEWORK:
-					return "com.ibm.db2.jcc.DB2";
-				case DERBY_NET_CLIENT_FRAMEWORK:
-					return "org.apache.derby.jdbc.Client";
-				case EMBEDDED_FRAMEWORK:
-					return "org.apache.derby.jdbc.Embedded";
-				default:
-					Exception e = new Exception("FAIL: No DataSource Prefix for framework: " + framework);
-					e.printStackTrace();
-			}
-			return null;
-		}
+    {
+        framework = getFramework();
+        switch(framework)
+        {
+            case OLD_NET_FRAMEWORK:
+            case DERBY_NET_FRAMEWORK:
+            case DB2JCC_FRAMEWORK:
+                return "com.ibm.db2.jcc.DB2";
+            case DERBY_NET_CLIENT_FRAMEWORK:
+                return "org.apache.derby.jdbc.Client";
+            case EMBEDDED_FRAMEWORK:
+                return "org.apache.derby.jdbc.Embedded";
+            default:
+                Exception e = new Exception("FAIL: No DataSource Prefix for framework: " + framework);
+                e.printStackTrace();
+        }
+        return null;
+    }
 
 
 
@@ -323,6 +400,12 @@ public class TestUtil {
 		
 		try {
 		ds  = Class.forName(classname).newInstance();
+
+		// for remote server testing, check whether the hostName is set for the test
+		// if so, and serverName is not yet set explicitly for the datasource, set it now
+		String hostName = getHostName();
+		if ( (!isEmbeddedFramework()) && (hostName != null ) && (attrs.getProperty("serverName") == null) )
+			attrs.setProperty("serverName", hostName);
 
 		for (Enumeration propNames = attrs.propertyNames(); 
 			 propNames.hasMoreElements();)
@@ -637,8 +720,160 @@ public class TestUtil {
 
 	}
 
+    /**
+        Drop the test objects passed in as a string identifying the
+        type of object (e.g. TABLE, PROCEDURE) and its name.
+        Thus, for example, a testObject array could be:
+        {"TABLE MYSCHEMA.MYTABLE", "PROCEDURE THISDUMMY"}
+        The statement passed in must be a 'live' statement in the test.
+    */
+    public static void cleanUpTest (Statement s, String[] testObjects)
+                                    throws SQLException {
+        /* drop each object named */
+        for (int i=0; i < testObjects.length; i++) {
+            try {
+                s.execute("drop " + testObjects[i]);
+                //System.out.println("now dropping " + testObjects[i]);
+            } catch (SQLException se) { // ignore...
+            }
+        }	
+    }
+
+    
+    /**
+     * Get connection to given database using the connection attributes. This
+     * method is used by tests to get a secondary connection with 
+     * different set of attributes. It does not use what is specified in 
+     * app_properties file or system properties. This method uses DataSource 
+     * class for CDC/Foundation Profile environments, which are based on 
+     * JSR169. Using DataSource will not work with other j9 profiles. So
+     * DriverManager is used for non-JSR169. The method is used as a wrapper to
+     * hide this difference in getting connections in different environments.
+     *  
+     * @param databaseName
+     * @param connAttrs
+     * @return Connection to database 
+     * @throws SQLException on failure to connect.
+     * @throws ClassNotFoundException on failure to load driver.
+     * @throws InstantiationException on failure to load driver.
+     * @throws IllegalAccessException on failure to load driver.
+     */
+    public static Connection getConnection(String databaseName, String connAttrs)
+    	throws SQLException {
+        try {
+            Connection conn;
+            if(TestUtil.HAVE_DRIVER_CLASS) {
+                // following is like loadDriver(), but
+                // that method throws Exception, we want finer granularity
+                String driverName;
+                int framework = getFramework();
+                switch (framework)
+                {
+                    case EMBEDDED_FRAMEWORK:
+                        driverName =  "org.apache.derby.jdbc.EmbeddedDriver";
+                        break;
+                    case DERBY_NET_FRAMEWORK:
+                    case OLD_NET_FRAMEWORK:				
+                    case DB2JCC_FRAMEWORK:				
+                        driverName = "com.ibm.db2.jcc.DB2Driver";
+                        break;
+                    case DERBY_NET_CLIENT_FRAMEWORK:
+                        driverName = "org.apache.derby.jdbc.ClientDriver";
+                        break;
+                    default:
+                        driverName =  "org.apache.derby.jdbc.EmbeddedDriver";
+                        break;
+                } 
+                // q: do we need a privileged action here, like in loadDriver?
+                Class.forName(driverName).newInstance();
+				
+                String url = getJdbcUrlPrefix() + databaseName;
+                if (connAttrs != null) url += ";" + connAttrs;
+                if (framework == DERBY_NET_FRAMEWORK)
+                {
+                    if (( connAttrs == null) || ((connAttrs != null) && (connAttrs.indexOf("user") < 0)))
+                        url += ":" + "user=APP;password=APP;retrieveMessagesFromServerOnGetMessage=true;";
+                }
+                conn = DriverManager.getConnection(url);
+    	    }
+    	    else {
+    		    //Use DataSource for JSR169
+	    	    Properties prop = new Properties();
+	            prop.setProperty("databaseName", databaseName);
+    		    if (connAttrs != null)
+	                prop.setProperty("connectionAttributes", connAttrs);
+	            conn = getDataSourceConnection(prop);
+    	    }
+            return conn;
+    	} catch (ClassNotFoundException cnfe) { 
+		    System.out.println("FAILure: Class not found!");
+		    cnfe.printStackTrace();
+		    return null;
+    	} catch (InstantiationException inste) {
+    		System.out.println("FAILure: Cannot instantiate class");
+    		inste.printStackTrace();
+    		return null;
+    	} catch (IllegalAccessException ille) {
+    		System.out.println("FAILure: Not allowed to use class");
+    		ille.printStackTrace();
+    		return null;
+    	}
+    }
+    
+    public static Connection getDataSourceConnection (Properties prop) throws SQLException {
+		DataSource ds = TestUtil.getDataSource(prop);
+		try {
+			Connection conn = ds.getConnection();
+			return conn;
+		}
+		catch (SQLException e) {
+			throw e;
+		}
+	}
+	
+	public static void shutdownUsingDataSource (String dbName) throws SQLException {
+		Properties prop = new Properties();
+		prop.setProperty("databaseName", dbName );
+		prop.setProperty("shutdownDatabase", "shutdown" );
+		DataSource ds = TestUtil.getDataSource(prop);
+		try {
+			Connection conn = ds.getConnection();
+		}
+		catch (SQLException e) {
+			throw e;
+		}
+	}
+	
+	//Used by metadata tests for DatabaseMetadata.getURL
+	public static boolean compareURL(String url) {
+			
+		if(isEmbeddedFramework()) {
+			if(url.compareTo("jdbc:derby:wombat") == 0)
+				return true;
+		} else if(isNetFramework()) {
+			try {
+				StringTokenizer urlTokenizer = new StringTokenizer(url, "/");
+				String urlStart = urlTokenizer.nextToken();
+				urlTokenizer.nextToken();
+				String urlEnd = urlTokenizer.nextToken();
+				
+				if(urlEnd.compareTo("wombat;create=true") != 0)
+					return false;
+				
+				if(isJCCFramework() && (urlStart.compareTo("jdbc:derby:net:") == 0))
+					return true;
+				
+				if(isDerbyNetClientFramework() && (urlStart.compareTo("jdbc:derby:") == 0))
+					return true;
+				
+			} catch (NoSuchElementException nsee) {
+				//Should not reach here.
+				return false;
+			}
+		}
+		
+		return false;
+	}
 
 }
-
-
 

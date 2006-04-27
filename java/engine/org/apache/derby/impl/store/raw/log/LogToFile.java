@@ -2438,6 +2438,36 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 	}
 
+
+
+    /**
+     * Create the directory where transaction log should go.
+     * @exception StandardException Standard Error Policy
+    */
+	private void createLogDirectory() throws StandardException
+	{
+		StorageFile logDir = 
+            logStorageFactory.newStorageFile(LogFactory.LOG_DIRECTORY_NAME);
+
+        if (privExists(logDir)) {
+            // make sure log directory is empty.
+            String[] logfiles = privList(logDir);
+            if (logfiles != null) {
+                if(logfiles.length != 0) {
+                    throw StandardException.newException(
+                        SQLState.LOG_SEGMENT_EXIST, logDir.getPath());
+                }
+            }
+            
+        }else {
+            // create the log directory.
+            if (!privMkdirs(logDir)) {
+                throw StandardException.newException(
+                    SQLState.LOG_SEGMENT_NOT_EXIST, logDir.getPath());
+            }
+        }
+	}
+
 	/*
 		Return the directory the log should go.
 
@@ -2450,7 +2480,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		logDir = logStorageFactory.newStorageFile( LogFactory.LOG_DIRECTORY_NAME);
 
-        if (!privExists(logDir) && !privMkdirs(logDir))
+        if (!privExists(logDir))
 		{
 			throw StandardException.newException(
                     SQLState.LOG_SEGMENT_NOT_EXIST, logDir.getPath());
@@ -2780,48 +2810,44 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				logDevice = logDeviceURL;
         }
 
-		//check whether we are restoring from backup
-		restoreLogs(startParams);
-		
+
+        if(create) {
+            getLogStorageFactory();
+            createLogDirectory();
+            
+        } else {
+            // check if the database is being restored from the backup,
+            // if it is then restore the logs.
+            if (!restoreLogs(startParams)) {
+                // set the log storage factory.
+                getLogStorageFactory();
+                if (logDevice != null)
+                {
+                    // Make sure we find the log, do not assume 
+                    // it is OK that the log is not there because 
+                    // it could be a user typo(like when users edit
+                    // service.properties to change the log device 
+                    // while restoring from backups using OS copy.
+                    StorageFile checklogDir =
+                        logStorageFactory.newStorageFile( 
+                                 LogFactory.LOG_DIRECTORY_NAME);
+                    if (!privExists(checklogDir))
+                    {
+                        throw
+                            StandardException.newException(
+                            SQLState.LOG_FILE_NOT_FOUND, checklogDir.getPath());
+
+                    }
+                }
+            }
+        }
+        		
 		//if user does not set the right value for the log buffer size,
 		//default value is used instead.
 		logBufferSize =  PropertyUtil.getSystemInt(org.apache.derby.iapi.reference.Property.LOG_BUFFER_SIZE, 
 												   LOG_BUFFER_SIZE_MIN, 
 												   LOG_BUFFER_SIZE_MAX, 
 												   DEFAULT_LOG_BUFFER_SIZE);
-
-        if( logStorageFactory == null)
-            getLogStorageFactory();
-		if (logDevice != null)
-		{
-			// in case the user specifies logDevice in URL form
-			String logDeviceURL = null;
-			try {
-				URL url = new URL(logDevice);
-				logDeviceURL = url.getFile();
-			} catch (MalformedURLException ex) {}
-			if (logDeviceURL != null)
-				logDevice = logDeviceURL;
-
-			// Make sure we find the log, do not assume it is OK that the log
-			// is not there because it could be a user typo.
-			if (!create)
-			{
-				StorageFile checklogDir =
-					logStorageFactory.newStorageFile( LogFactory.LOG_DIRECTORY_NAME);
-
-                if (!privExists(checklogDir))
-				{
-
-					throw
-                        StandardException.newException(
-                            SQLState.LOG_FILE_NOT_FOUND, checklogDir.getPath());
-
-				}
-			}
-		}
-
-
 		jbmsVersion = Monitor.getMonitor().getEngineVersion();
 
 		String dataEncryption = 
@@ -4489,11 +4515,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	 * This function restores logs based on the  following attributes
 	 * are specified on connection URL:
 	 * Attribute.CREATE_FROM (Create database from backup if it does not exist)
-	 * Attribute.RESTORE_FROM (Delete the whole database if it exists and then restore
-	 * it from backup)
+	 * Attribute.RESTORE_FROM (Delete the whole database if it exists and then 
+     * restore it from backup)
 	 * Attribute.ROLL_FORWARD_RECOVERY_FROM:(Perform Rollforward Recovery;
 	 * except for the log directory everthing else is replced  by the copy  from
-	 * backup. log files in the backup are copied to the existing online log directory.
+	 * backup. log files in the backup are copied to the existing online log 
+     * directory.
 	 *
 	 * In cases of RESTORE_FROM whole databases directoy is 
 	 * is removed in Directory.java while restoring service.properties
@@ -4503,57 +4530,54 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	 * In case ROLL_FORWARD_RECOVERY_FROM log directotry should not be removed.
 	 * So only thing that needs to be done here is create a
 	 * a log directory if it does not exists and copy the 
-	 * log files(including control files) that exists in the backup from which we are
-	 * are trying to restore the database to the onlie log directory.
+	 * log files(including control files) that exists in the backup from which 
+     * we are are trying to restore the database to the onlie log directory.
 	 */
-	private void restoreLogs(Properties properties) throws StandardException
+	private boolean restoreLogs(Properties properties) throws StandardException
 	{
 
 		String backupPath =null;
 		boolean isCreateFrom = false; 
 		boolean isRestoreFrom = false;
 
-		//check if the user request for restore/recovery/create from backup
+		//check if the user requested for restore/recovery/create from backup
 		backupPath = properties.getProperty(Attribute.CREATE_FROM);
-		if(backupPath == null)
+        if (backupPath != null) {
+            isCreateFrom = true;
+        } else {
 			backupPath = properties.getProperty(Attribute.RESTORE_FROM);
-		else
-			isCreateFrom = true;
-
-		if(backupPath == null)
-			backupPath =
-				properties.getProperty(Attribute.ROLL_FORWARD_RECOVERY_FROM);
-		else
-			isRestoreFrom = true;
-		
+            if (backupPath != null) {
+                isRestoreFrom = true;
+            } else {
+                backupPath = properties.getProperty(
+                                  Attribute.ROLL_FORWARD_RECOVERY_FROM);
+                // if the backup is not NULL then it is a rollforward recovery.
+            }
+        }
 
 		if(backupPath !=null)
 		{
 			if(!isCreateFrom){
 				if(logDevice == null){
 					/**
-					 * In  restoreFrom/rollForwardRecoveryFrom  mode when no logDevice on
-					 * URL then the log is restored to the same location where the log was 
-					 * when backup was taken.
-					 * In createFrom mode behaviour is same as when create=true , 
-					 * i.e unless user specifies the logDevice on URL, log will be copied to
-					 * the database home dir.
+					 * In restoreFrom/rollForwardRecoveryFrom mode when no 
+                     * logDevice on URL then the log is restored to the same 
+                     * location where the log was when backup was taken.
+					 * In createFrom mode behaviour is same as when create=true,
+					 * i.e unless user specifies the logDevice on URL, log will
+                     * be copied to the database home dir.
 					 * Note: LOG_DEVICE_AT_BACKUP will get set if log is not in
 					 * default location(db home). 
 					 */
-					logDevice = properties.getProperty(Property.LOG_DEVICE_AT_BACKUP);
+					logDevice = 
+                        properties.getProperty(Property.LOG_DEVICE_AT_BACKUP);
 				}
 			}	 
+        
             getLogStorageFactory();
-
 			StorageFile logDir;
-			logDir = logStorageFactory.newStorageFile( LogFactory.LOG_DIRECTORY_NAME);
-			if(isCreateFrom){
-				//log dir should not exist if we are doing create from
-				if(privExists(logDir))
-					throw StandardException.newException(SQLState.LOG_SEGMENT_EXIST, getLogDirPath( logDir));
-			}
-
+			logDir = logStorageFactory.newStorageFile( 
+                             LogFactory.LOG_DIRECTORY_NAME);
 				
 			//remove the log directory in case of restoreFrom 
 			//if it exist, this happens if the log device is on seperate
@@ -4564,13 +4588,20 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				{
 					//it may be just a file, try deleting it
 					if(!privDelete(logDir))
-						throw StandardException.newException(SQLState.UNABLE_TO_REMOVE_DATA_DIRECTORY,
-                                                             getLogDirPath( logDir));
+                    {
+						throw StandardException.newException(
+                            SQLState.UNABLE_TO_REMOVE_DATA_DIRECTORY,
+                            getLogDirPath( logDir));
+                    }
 				}
 			}
 
+            // if it is a create/restore from backup, 
+            // create the log directory.
+            if (isCreateFrom || isRestoreFrom) {
+                createLogDirectory();
+            }
 
-			logDir = getLogDirectory();
 			File backupLogDir = new File(backupPath, LogFactory.LOG_DIRECTORY_NAME);
 			String[] logfilelist = privList(backupLogDir);
 			if(logfilelist !=null)
@@ -4594,7 +4625,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			//be replacing updated log after a restore withe 
 			// a log in the backup on next restore.
 			logSwitchRequired = true;
-		}
+
+            // log is restored from backup.
+            return true;
+		} else {
+            // log is not restored from backup.
+            return false;
+        }
 	}
 
 	/*preallocate the given log File to the logSwitchInterval size;
