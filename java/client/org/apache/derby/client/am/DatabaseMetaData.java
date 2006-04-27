@@ -1241,7 +1241,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * @param parameterNamePattern limit search to parameters mathing
      * this pattern
      * @return a <code>ResultSet</code> listing the fucntions
-     * @excption SqlException if a database error occurs
+     * @exception SqlException if a database error occurs
      * @see #getFunctionParameters(String, String, String, String)
      */
     private ResultSet getFunctionParametersX(String catalog,

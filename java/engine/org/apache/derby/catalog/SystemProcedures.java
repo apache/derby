@@ -401,7 +401,7 @@ public class SystemProcedures  {
 	 * varchar(128),
 	 * @param funcName SYSIBM.SQLFunctionParameters FuncName
 	 * varchar(128),
-	 * @param funcName SYSIBM.SQLFunctionParameters ParamName
+	 * @param paramName SYSIBM.SQLFunctionParameters ParamName
 	 * varchar(128),
 	 * @param options SYSIBM.SQLFunctionParameters Options
 	 * varchar(4000))
