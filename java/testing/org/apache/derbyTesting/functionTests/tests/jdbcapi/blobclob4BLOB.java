@@ -40,6 +40,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.io.UnsupportedEncodingException;
 import java.sql.Statement;
 import java.sql.Types;
 
@@ -2669,12 +2670,12 @@ public class blobclob4BLOB {
                 "insert into testBlob (a, b) values(?,?)");
 
             // insert small strings
-			insertRow(ps,"".getBytes());
-            insertRow(ps,"you can lead a horse to water but you can't form it into beverage".getBytes());
-            insertRow(ps,"a stitch in time says ouch".getBytes());
-            insertRow(ps,"here is a string with a return \n character".getBytes());
+			insertRow(ps,"".getBytes("US-ASCII"));
+            insertRow(ps,"you can lead a horse to water but you can't form it into beverage".getBytes("US-ASCII"));
+            insertRow(ps,"a stitch in time says ouch".getBytes("US-ASCII"));
+            insertRow(ps,"here is a string with a return \n character".getBytes("US-ASCII"));
 
-            // insert larger strings using setAsciiStream
+            // insert larger strings using setBinaryStream
             for (int i = 0; i < numFiles; i++)
             {
                 // prepare an InputStream from the file
@@ -2738,10 +2739,10 @@ public class blobclob4BLOB {
                 "insert into testBinary values(?,?)");
 
             // insert small strings
-			insertRow(ps,"".getBytes());
-            insertRow(ps,"you can lead a horse to water but you can't form it into beverage".getBytes());
-            insertRow(ps,"a stitch in time says ouch".getBytes());
-            insertRow(ps,"here is a string with a return \n character".getBytes());
+			insertRow(ps,"".getBytes("US-ASCII"));
+            insertRow(ps,"you can lead a horse to water but you can't form it into beverage".getBytes("US-ASCII"));
+            insertRow(ps,"a stitch in time says ouch".getBytes("US-ASCII"));
+            insertRow(ps,"here is a string with a return \n character".getBytes("US-ASCII"));
 
             // insert a null
             // ps.setNull(1, Types.BINARY);
@@ -2780,14 +2781,14 @@ public class blobclob4BLOB {
 			stmt.execute("alter table searchBlob add column a blob(300k)");
             PreparedStatement ps = conn.prepareStatement(
                 "insert into searchBlob (a, b) values(?,?)");
-            insertRow(ps,"horse".getBytes());
-            insertRow(ps,"ouch".getBytes());
-            insertRow(ps,"\n".getBytes());
-            insertRow(ps,"".getBytes());
-            insertRow(ps,"Beginning".getBytes());
-            insertRow(ps,"position-69".getBytes());
-            insertRow(ps,"I-am-hiding-here-at-position-5910".getBytes());
-            insertRow(ps,"Position-9907".getBytes());
+            insertRow(ps,"horse".getBytes("US-ASCII"));
+            insertRow(ps,"ouch".getBytes("US-ASCII"));
+            insertRow(ps,"\n".getBytes("US-ASCII"));
+            insertRow(ps,"".getBytes("US-ASCII"));
+            insertRow(ps,"Beginning".getBytes("US-ASCII"));
+            insertRow(ps,"position-69".getBytes("US-ASCII"));
+            insertRow(ps,"I-am-hiding-here-at-position-5910".getBytes("US-ASCII"));
+            insertRow(ps,"Position-9907".getBytes("US-ASCII"));
 
             // insert larger blobs using setBinaryStream
             for (int i = 0; i < numFiles; i++)
@@ -2907,13 +2908,13 @@ public class blobclob4BLOB {
                 blobclob4BLOB.printInterval(blob, 1, 50, 5, i, blobLength);
                 blobclob4BLOB.printInterval(blob, 1, 1, 6, i, blobLength);
                 /*
-                System.out.println(i + "(0) " + new String(blob.getBytes(9905,50)));
-                System.out.println(i + "(1) " + new String(blob.getBytes(5910,150)));
-                System.out.println(i + "(2) " + new String(blob.getBytes(5910,50)));
-                System.out.println(i + "(3) " + new String(blob.getBytes(204,50)));
-                System.out.println(i + "(4) " + new String(blob.getBytes(68,50)));
-                System.out.println(i + "(5) " + new String(blob.getBytes(1,50)));
-                System.out.println(i + "(6) " + new String(blob.getBytes(1,1)));
+                System.out.println(i + "(0) " + new String(blob.getBytes(9905,50), "US-ASCII"));
+                System.out.println(i + "(1) " + new String(blob.getBytes(5910,150), "US-ASCII"));
+                System.out.println(i + "(2) " + new String(blob.getBytes(5910,50), "US-ASCII"));
+                System.out.println(i + "(3) " + new String(blob.getBytes(204,50), "US-ASCII"));
+                System.out.println(i + "(4) " + new String(blob.getBytes(68,50), "US-ASCII"));
+                System.out.println(i + "(5) " + new String(blob.getBytes(1,50), "US-ASCII"));
+                System.out.println(i + "(6) " + new String(blob.getBytes(1,1), "US-ASCII"));
                 */
                 if (blobLength > 100)
                 {
@@ -2923,7 +2924,7 @@ public class blobclob4BLOB {
                         System.out.println("FAIL : length of bytes is " +
                             res.length + " should be 100");
                     else
-                        System.out.println(new String(res));
+                        System.out.println(new String(res, "US-ASCII"));
                 }
             }
             System.out.println("blobTest2 finished");
@@ -3034,7 +3035,8 @@ public class blobclob4BLOB {
                         continue;
                     }
                     if (blobLength2 < 150)
-                        searchStr = new String(rs2.getBytes(1));
+                        // get string for printing from bytes in fixed format
+                        searchStr = new String(rs2.getBytes(1), "US-ASCII");
                     else
                         searchStr = null;
 
@@ -3104,7 +3106,7 @@ public class blobclob4BLOB {
             for (int i = 0; i < 10; i++)
             {
                 // insert a string
-                ps.setBytes(1, val.getBytes());
+                ps.setBytes(1, val.getBytes("US-ASCII"));
                 ps.executeUpdate();
                 val = val.trim() + "x";
             }
@@ -3671,7 +3673,7 @@ public class blobclob4BLOB {
 	    	}
             try
             {
-                blob.position("foo".getBytes(),2);
+                blob.position("foo".getBytes("US-ASCII"),2);
             }
             catch (SQLException e)
             {
@@ -3762,7 +3764,7 @@ public class blobclob4BLOB {
 	    	}
             try
             {
-                blob.position("foo".getBytes(),2);
+                blob.position("foo".getBytes("US-ASCII"),2);
             }
             catch (SQLException e)
             {
@@ -3940,13 +3942,15 @@ public class blobclob4BLOB {
         conn.setAutoCommit(false);
         PreparedStatement ps = conn.prepareStatement("insert into \"MAPS\" values(?,?,?,?,?,?)");
         for (int i = 0; i < 3; i++) {
-            FileReader fr = new FileReader(fileName[4]);
+            File file = new File(fileName[4]);
+            InputStream fileIS = new FileInputStream(file);
+            Reader fr = new InputStreamReader(fileIS, "US-ASCII");
             ps.setInt(1, i);
             ps.setString(2, "x" + i);
             ps.setString(3, "abc");
             ps.setString(4, "abc");
             ps.setString(5, "abc");
-            ps.setCharacterStream(6, new java.io.BufferedReader(fr),300000);
+            ps.setCharacterStream(6, fr, 300000);
             ps.executeUpdate();
             fr.close();
         }
@@ -4051,8 +4055,10 @@ public class blobclob4BLOB {
 			System.out.println("testing Blob.getBytes() with pos " + pos + " > " + blobLength);
         try
         {
+            // generate a new string out of the blob for comparison,
+            // ensure it's using fixed format.
             System.out.println(iteration + "(" + testNum + ") " +
-                new String(blob.getBytes(pos,length)));
+                new String(blob.getBytes(pos,length), "US-ASCII"));
 
 			long l1 = blob.length();
 			if (l1 != blobLength) {
@@ -4127,11 +4133,11 @@ public class blobclob4BLOB {
         int rowNum,
         String searchStr,
         long position,
-        Blob blob, int blobLength)
+        Blob blob, int blobLength) throws UnsupportedEncodingException
     {
         try
         {
-            long result = blob.position(searchStr.getBytes(),position);
+            long result = blob.position(searchStr.getBytes("US-ASCII"),position);
             if ((searchStr == "") && (result == 1))
                 return;
             if (result != -1)
