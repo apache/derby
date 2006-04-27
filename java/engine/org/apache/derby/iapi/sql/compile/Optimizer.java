@@ -251,6 +251,28 @@ public interface Optimizer {
 	public CostEstimate getOptimizedCost();
 
 	/**
+	 * Get the final estimated cost of the optimized query.  This
+	 * should be the cost that corresponds to the best overall join
+	 * order chosen by the optimizer, and thus this method should
+	 * only be called after optimization is complete (i.e. when
+	 * modifying access paths).
+	 */
+	public CostEstimate getFinalCost();
+
+	/**
+	 * Prepare for another round of optimization.
+	 *
+	 * This method is called before every "round" of optimization, where
+	 * we define a "round" to be the period between the last time a call to
+	 * getOptimizer() (on either a ResultSetNode or an OptimizerFactory)
+	 * returned _this_ Optimizer and the time a call to this Optimizer's
+	 * getNextPermutation() method returns FALSE.  Any re-initialization
+	 * of state that is required before each round should be done in this
+	 * method.
+	 */
+	public void prepForNextRound();
+
+	/**
 	 * Set the estimated number of outer rows - good for optimizing nested
 	 * optimizables like subqueries and join nodes.
 	 */

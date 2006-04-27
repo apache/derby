@@ -667,6 +667,9 @@ public class RowResultSetNode extends FromTable
 		if (SanityManager.DEBUG)
         SanityManager.ASSERT(resultColumns != null, "Tree structure bad");
 
+		// Get our final cost estimate.
+		costEstimate = getFinalCostEstimate();
+
 		/*
 		** Check and see if everything below us is a constant or not.
 		** If so, we'll let execution know that it can do some caching.

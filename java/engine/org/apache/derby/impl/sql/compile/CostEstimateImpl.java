@@ -113,7 +113,53 @@ public class CostEstimateImpl implements CostEstimate {
 			}
 		}
 
-		return this.cost - ((CostEstimateImpl) other).cost;
+		/* Note: if both CostEstimates are infinity, an attempt to
+		 * substract them will result in NaN, which tells us nothing
+		 * and thus makes it impossible to do a comparison.  So in
+		 * that case we fallback and check the row counts as a secondary
+		 * point of comparison, and the singleScanRowCounts as a
+		 * third comparison.  If all three values are infinity
+		 * for both CostEstimates then we just consider the two
+		 * costs to equal (equally as bad?) and so return 0.0d (instead
+		 * NaN).  RESOLVE: Ideally the optimizer could be updated
+		 * to give more reasonable estimates than infinity, but
+		 * until that happens we're forced to deal with such
+		 * comparisons.  Note that we're most likely to end up with
+		 * infinite cost estimates in situations where we have deeply
+		 * nested subqueries and/or FROM lists with a large number of
+		 * FromTables (such as 10 or more). The reason is that each
+		 * FromTable's cost estimate is (potentially) multiplied by
+		 * the row counts of all preceding FromTables, so if the
+		 * row counts for the preceding FromTables are large, we
+		 * can eventually end up going beyond Double.MAX_VALUE,
+		 * which then gives us infinity.
+		 */
+
+		// If at least one of costs is _not_ infinity, then just do
+		// a normal compare (the other side is less).
+		if ((this.cost != Double.POSITIVE_INFINITY) ||
+			(other.getEstimatedCost() != Double.POSITIVE_INFINITY))
+		{
+			return this.cost - ((CostEstimateImpl) other).cost;
+		}
+
+		// If both costs are infinity, then compare row counts.
+		if ((this.rowCount != Double.POSITIVE_INFINITY) ||
+			(other.rowCount() != Double.POSITIVE_INFINITY))
+		{
+			return this.rowCount - other.rowCount();
+		}
+
+		// If both row counts are infinity, try singleScan counts.
+		if ((this.singleScanRowCount != Double.POSITIVE_INFINITY) ||
+			(other.singleScanRowCount() != Double.POSITIVE_INFINITY))
+		{
+			return this.singleScanRowCount - other.singleScanRowCount();
+		}
+
+		// If we get here, all three parts of both cost estimates are
+		// Infinity; for lack of better choice, just say they're "equal".
+		return 0.0d;
 	}
 
 	/** @see CostEstimate#add */

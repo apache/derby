@@ -164,29 +164,36 @@ public abstract class TableOperatorNode extends FromTable
 	 * full plan mapped.
 	 */
 	public void addOrLoadBestPlanMapping(boolean doAdd,
-		Optimizer optimizer) throws StandardException
+		Object planKey) throws StandardException
 	{
-		super.addOrLoadBestPlanMapping(doAdd, optimizer);
+		super.addOrLoadBestPlanMapping(doAdd, planKey);
+
+		// Now walk the children.  Note that if either child is not
+		// an Optimizable and the call to child.getOptimizerImpl()
+		// returns null, then that means we haven't tried to optimize
+		// the child yet.  So in that case there's nothing to
+		// add/load.
+
 		if (leftResultSet instanceof Optimizable)
 		{
 			((Optimizable)leftResultSet).
-				addOrLoadBestPlanMapping(doAdd, optimizer);
+				addOrLoadBestPlanMapping(doAdd, planKey);
 		}
-		else
+		else if (leftResultSet.getOptimizerImpl() != null)
 		{
 			leftResultSet.getOptimizerImpl().
-				addOrLoadBestPlanMappings(doAdd, optimizer);
+				addOrLoadBestPlanMappings(doAdd, planKey);
 		}
 
 		if (rightResultSet instanceof Optimizable)
 		{
 			((Optimizable)rightResultSet).
-				addOrLoadBestPlanMapping(doAdd, optimizer);
+				addOrLoadBestPlanMapping(doAdd, planKey);
 		}
-		else
+		else if (rightResultSet.getOptimizerImpl() != null)
 		{
 			rightResultSet.getOptimizerImpl().
-				addOrLoadBestPlanMappings(doAdd, optimizer);
+				addOrLoadBestPlanMappings(doAdd, planKey);
 		}
 	}
 
@@ -714,14 +721,36 @@ public abstract class TableOperatorNode extends FromTable
 			if (leftOptimizer != null)
 				leftOptimizer.modifyAccessPaths();
 			else
-				leftResultSet = leftResultSet.modifyAccessPaths();
+			{
+				// If this is a SetOperatorNode then we may have pushed
+				// predicates down to the children.  If that's the case
+				// then we need to pass those predicates down as part
+				// of the modifyAccessPaths call so that they can be
+				// pushed one last time, in prep for generation.
+				if (this instanceof SetOperatorNode)
+				{
+					SetOperatorNode setOp = (SetOperatorNode)this;
+					leftResultSet = leftResultSet.modifyAccessPaths(
+						setOp.getLeftOptPredicateList());
+				}
+				else
+					leftResultSet = leftResultSet.modifyAccessPaths();
+			}
 		}
 		if (!rightModifyAccessPathsDone)
 		{
 			if (rightOptimizer != null)
 				rightOptimizer.modifyAccessPaths();
 			else
-				rightResultSet = rightResultSet.modifyAccessPaths();
+			{
+				if (this instanceof SetOperatorNode) {
+					SetOperatorNode setOp = (SetOperatorNode)this;
+					rightResultSet = rightResultSet.modifyAccessPaths(
+						setOp.getRightOptPredicateList());
+				}
+				else
+					rightResultSet = rightResultSet.modifyAccessPaths();
+			}
 		}
 		return this;
 	}
@@ -793,7 +822,7 @@ public abstract class TableOperatorNode extends FromTable
 													(RequiredRowOrdering) null,
 													getCompilerContext().getNumTables(),
 													  lcc);
-			((OptimizerImpl)optimizer).prepForNextRound();
+			optimizer.prepForNextRound();
 
 			if (sourceResultSet == leftResultSet)
 			{

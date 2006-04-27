@@ -864,8 +864,10 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * Determine whether or not this predicate is eligible for
 	 * push-down into subqueries.  Right now the only predicates
 	 * we consider to be eligible are those which 1) are Binary
-	 * Relational operator nodes, and 2) have a column reference
-	 * on BOTH sides.
+	 * Relational operator nodes, 2) have a column reference
+	 * on BOTH sides, and 3) have column references such that
+	 * each column reference has a reference to a base table
+	 * somewhere beneath it.
 	 *
 	 * @return Whether or not this predicate is eligible to be
 	 *  pushed into subqueries.
@@ -884,8 +886,35 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		BinaryRelationalOperatorNode opNode =
 			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
 
-		return ((opNode.getLeftOperand() instanceof ColumnReference) &&
-				(opNode.getRightOperand() instanceof ColumnReference));
+		// If either side is not a column reference, we don't push.
+		if (!((opNode.getLeftOperand() instanceof ColumnReference) &&
+			(opNode.getRightOperand() instanceof ColumnReference)))
+		{
+			return false;
+		}
+
+		// Make sure both column references ultimately point to base
+		// tables.  If, for example, either column reference points to a
+		// a literal or an aggregate, then we do not push the predicate.
+		// This is because pushing involves remapping the references--
+		// but if the reference doesn't have a base table beneath it,
+		// the notion of "remapping" it doesn't (seem to) apply.  RESOLVE:
+		// it might be okay to make the "remap" operation a no-op for
+		// such column references, but it's not clear whether that's
+		// always a safe option; further investigation required.
+
+		JBitSet tNums = new JBitSet(getReferencedSet().size());
+		BaseTableNumbersVisitor btnVis = new BaseTableNumbersVisitor(tNums);
+		opNode.getLeftOperand().accept(btnVis);
+		if (tNums.getFirstSetBit() == -1)
+			return false;
+
+		tNums.clearAll();
+		opNode.getRightOperand().accept(btnVis);
+		if (tNums.getFirstSetBit() == -1)
+			return false;
+
+		return true;
 	}
 
 	/**

@@ -152,6 +152,18 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 							RowOrdering rowOrdering)
 			throws StandardException
 	{
+		// It's possible that a call to optimize the left/right will cause
+		// a new "truly the best" plan to be stored in the underlying base
+		// tables.  If that happens and then we decide to skip that plan
+		// (which we might do if the call to "considerCost()" below decides
+		// the current path is infeasible or not the best) we need to be
+		// able to revert back to the "truly the best" plans that we had
+		// saved before we got here.  So with this next call we save the
+		// current plans using "this" node as the key.  If needed, we'll
+		// then make the call to revert the plans in OptimizerImpl's
+		// getNextDecoratedPermutation() method.
+		addOrLoadBestPlanMapping(true, this);
+
 		CostEstimate singleScanCost = estimateCost(predList,
 												(ConglomerateDescriptor) null,
 												outerCost,
@@ -502,25 +514,38 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 
 	/** @see Optimizable#addOrLoadBestPlanMapping */
 	public void addOrLoadBestPlanMapping(boolean doAdd,
-		Optimizer optimizer) throws StandardException
+		Object planKey) throws StandardException
 	{
+		AccessPath bestPath = getTrulyTheBestAccessPath();
 		AccessPathImpl ap = null;
 		if (doAdd)
 		{
+			// If we get to this method before ever optimizing this node, then
+			// there will be no best path--so there's nothing to do.
+			if (bestPath == null)
+				return;
+
 			// If the optimizerToBestPlanMap already exists, search for an
-			// AccessPath for the target optimizer and use that if we can.
+			// AccessPath for the received key and use that if we can.
 			if (optimizerToBestPlanMap == null)
 				optimizerToBestPlanMap = new HashMap();
 			else
-				ap = (AccessPathImpl)optimizerToBestPlanMap.get(optimizer);
+				ap = (AccessPathImpl)optimizerToBestPlanMap.get(planKey);
 
-			// If we don't already have an AccessPath for the optimizer,
-			// create a new one.
+			// If we don't already have an AccessPath for the key,
+			// create a new one.  If the key is an OptimizerImpl then
+			// we might as well pass it in to the AccessPath constructor;
+			// otherwise just pass null.
 			if (ap == null)
-				ap = new AccessPathImpl(optimizer);
+			{
+				if (planKey instanceof Optimizer)
+					ap = new AccessPathImpl((Optimizer)planKey);
+				else
+					ap = new AccessPathImpl((Optimizer)null);
+			}
 
-			ap.copy(getTrulyTheBestAccessPath());
-			optimizerToBestPlanMap.put(optimizer, ap);
+			ap.copy(bestPath);
+			optimizerToBestPlanMap.put(planKey, ap);
 			return;
 		}
 
@@ -528,22 +553,21 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		// into this Optimizable's trulyTheBestAccessPath field.
 
 		// If we don't have any plans saved, then there's nothing to load.
-		// This can happen if the optimizer tried some join order for which
-		// there was no valid plan.
+		// This can happen if the key is an OptimizerImpl that tried some
+		// join order for which there was no valid plan.
 		if (optimizerToBestPlanMap == null)
 			return;
 
-		ap = (AccessPathImpl)optimizerToBestPlanMap.get(optimizer);
+		ap = (AccessPathImpl)optimizerToBestPlanMap.get(planKey);
 
-		// Again, might be the case that there is no plan stored for
-		// the optimizer if no valid plans have been discovered for
-		// that optimizer's current join order.
-		if (ap == null)
+		// It might be the case that there is no plan stored for
+		// the key, in which case there's nothing to load.
+		if ((ap == null) || (ap.getCostEstimate() == null))
 			return;
 
 		// We found a best plan in our map, so load it into this Optimizable's
 		// trulyTheBestAccessPath field.
-		getTrulyTheBestAccessPath().copy(ap);
+		bestPath.copy(ap);
 		return;
 	}
 
@@ -577,7 +601,23 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		// join order of the received optimizer, take note of what
 		// that path is, in case we need to "revert" back to this
 		// path later.  See Optimizable.addOrLoadBestPlanMapping().
-		addOrLoadBestPlanMapping(true, optimizer);
+		// Note: Since this call descends all the way down to base
+		// tables, it can be relatively expensive when we have deeply
+		// nested subqueries.  So in an attempt to save some work, we
+		// skip the call if this node is a ProjectRestrictNode whose
+		// child is an Optimizable--in that case the ProjectRestrictNode
+		// will in turn call "rememberAsBest" on its child and so
+		// the required call to addOrLoadBestPlanMapping() will be
+		// made at that time.  If we did it here, too, then we would
+		// just end up duplicating the work.
+		if (!(this instanceof ProjectRestrictNode))
+			addOrLoadBestPlanMapping(true, optimizer);
+		else
+		{
+			ProjectRestrictNode prn = (ProjectRestrictNode)this;
+			if (!(prn.getChildResult() instanceof Optimizable))
+				addOrLoadBestPlanMapping(true, optimizer);
+		}
 		 
 		/* also store the name of the access path; i.e index name/constraint
 		 * name if we're using an index to access the base table.
@@ -655,6 +695,29 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		}	
 
 		return null;
+	}
+
+	/**
+	 * Get the final CostEstimate for this FromTable.
+	 *
+	 * @return	The final CostEstimate for this FromTable, which is
+	 *  the costEstimate of trulyTheBestAccessPath if there is one.
+	 *  If there's no trulyTheBestAccessPath for this node, then
+	 *  we just return the value stored in costEstimate as a default.
+	 */
+	public CostEstimate getFinalCostEstimate()
+		throws StandardException
+	{
+		// If we already found it, just return it.
+		if (finalCostEstimate != null)
+			return finalCostEstimate;
+
+		if (getTrulyTheBestAccessPath() == null)
+			finalCostEstimate = costEstimate;
+		else
+			finalCostEstimate = getTrulyTheBestAccessPath().getCostEstimate();
+
+		return finalCostEstimate;
 	}
 
 	/** @see Optimizable#isBaseTable */

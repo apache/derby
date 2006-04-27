@@ -97,6 +97,11 @@ public abstract class ResultSetNode extends QueryTreeNode
 	CostEstimate		scratchCostEstimate;
 	Optimizer			optimizer;
 
+	// Final cost estimate for this result set node, which is the estimate
+	// for this node with respect to the best join order for the top-level
+	// query. Subclasses will set this value where appropriate.
+	CostEstimate		finalCostEstimate;
+
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
@@ -182,17 +187,18 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @return	The final CostEstimate for this ResultSetNode.
 	 */
 	public CostEstimate getFinalCostEstimate()
+		throws StandardException
 	{
 		if (SanityManager.DEBUG)
 		{
-			if (costEstimate == null)
+			if (finalCostEstimate == null)
 			{
 				SanityManager.THROWASSERT(
-					"costEstimate is not expected to be null for " +
+					"finalCostEstimate is not expected to be null for " +
 					getClass().getName());
 			}
 		}
-		return costEstimate;
+		return finalCostEstimate;
 	}
 
 	/**
@@ -892,6 +898,23 @@ public abstract class ResultSetNode extends QueryTreeNode
 	{
 		/* Default behavior is to do nothing */
 		return this;
+	}
+
+	/**
+	 * Modify the access paths according to the decisions the optimizer
+	 * made.  This can include adding project/restrict nodes,
+	 * index-to-base-row nodes, etc.
+	 *
+	 * @param predList A list of optimizable predicates that should
+	 *  be pushed to this ResultSetNode, as determined by optimizer.
+	 * @return The modified query tree
+	 * @exception StandardException        Thrown on error
+	 */
+	public ResultSetNode modifyAccessPaths(PredicateList predList)
+		throws StandardException
+	{
+		// Default behavior is to call the no-arg version of this method.
+		return modifyAccessPaths();
 	}
 
 	ResultColumnDescriptor[] makeResultDescriptors(ExecutionContext ec)
@@ -1638,23 +1661,25 @@ public abstract class ResultSetNode extends QueryTreeNode
 								getLanguageConnectionContext());
 		}
 
-		((OptimizerImpl)optimizer).prepForNextRound();
+		optimizer.prepForNextRound();
 		return optimizer;
 	}
 
 	/**
-	 * Get the optimizer for this result set; assumption is that
-	 * this.optimizer has already been created by the getOptimizer()
-	 * method above.
+	 * Get the optimizer for this result set.
+	 * 
+	 * @return If this.optimizer has has already been created by the
+	 *  getOptimizer() method above, then return it; otherwise,
+	 *  return null.
 	 */
-	protected OptimizerImpl getOptimizerImpl() {
-
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(optimizer != null,
-				"Tried to retrieve optimizer for a result set, but no such " +
-				"optimizer existed.");
-		}
-
+	protected OptimizerImpl getOptimizerImpl()
+	{
+		// Note that the optimizer might be null because it's possible that
+		// we'll get here before any calls to getOptimizer() were made, which
+		// can happen if we're trying to save a "best path" but we haven't
+		// actually found one yet.  In that case we just return the "null"
+		// value; the caller must check for it and behave appropriately.
+		// Ex. see TableOperatorNode.addOrLoadBestPlanMapping().
 		return (OptimizerImpl)optimizer;
 	}
 

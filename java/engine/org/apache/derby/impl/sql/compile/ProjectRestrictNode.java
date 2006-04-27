@@ -293,6 +293,18 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		// if (childResultOptimized)
 		// 	return costEstimate;
 
+		// It's possible that a call to optimize the left/right will cause
+		// a new "truly the best" plan to be stored in the underlying base
+		// tables.  If that happens and then we decide to skip that plan
+		// (which we might do if the call to "considerCost()" below decides
+		// the current path is infeasible or not the best) we need to be
+		// able to revert back to the "truly the best" plans that we had
+		// saved before we got here.  So with this next call we save the
+		// current plans using "this" node as the key.  If needed, we'll
+		// then make the call to revert the plans in OptimizerImpl's
+		// getNextDecoratedPermutation() method.
+		addOrLoadBestPlanMapping(true, this);
+
 		/* If the childResult is instanceof Optimizable, then we optimizeIt.
 		 * Otherwise, we are going into a new query block.  If the new query
 		 * block has already had its access path modified, then there is
@@ -312,7 +324,16 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 							childCost.rowCount(),
 							childCost.singleScanRowCount());
 
-			optimizer.considerCost(this, restrictionList, getCostEstimate(), outerCost);
+
+			// Note: we don't call "optimizer.considerCost()" here because
+			// a) the child will make that call as part of its own
+			// "optimizeIt()" work above, and b) the child might have
+			// different criteria for "considering" (i.e. rejecting or
+			// accepting) a plan's cost than this ProjectRestrictNode does--
+			// and we don't want to override the child's decision.  So as
+			// with most operations in this class, if the child is an
+			// Optimizable, we just let it do its own work and make its
+			// own decisions.
 		}
 		else if ( ! accessPathModified)
 		{
@@ -379,7 +400,25 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		 */
 		if (childResult instanceof Optimizable)
 		{
-			return ((Optimizable) childResult).feasibleJoinStrategy(restrictionList, optimizer);
+			// With DERBY-805 it's possible that, when considering a nested
+			// loop join with this PRN, we pushed predicates down into the
+			// child if the child is a UNION node.  At this point, though, we
+			// may be considering doing a hash join with this PRN instead of a
+			// nested loop join, and if that's the case we need to pull any
+			// predicates back up so that they can be searched for equijoins
+			// that will in turn make the hash join possible.  So that's what
+			// the next call does.  Two things to note: 1) if no predicates
+			// were pushed, this call is a no-op; and 2) if we get here when
+			// considering a nested loop join, the predicates that we pull
+			// here (if any) will be re-pushed for subsequent costing/ 
+			// optimization as necessary (see OptimizerImpl.costPermutation(),
+			// which will call this class's optimizeIt() method and that's
+			// where the predicates are pushed down again).
+			if (childResult instanceof UnionNode)
+				((UnionNode)childResult).pullOptPredicates(restrictionList);
+
+			return ((Optimizable) childResult).
+				feasibleJoinStrategy(restrictionList, optimizer);
 		}
 		else
 		{
@@ -501,6 +540,11 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	{
 		if (restrictionList != null)
 		{
+			// Pull up any predicates that may have been pushed further
+			// down the tree during optimization.
+			if (childResult instanceof UnionNode)
+				((UnionNode)childResult).pullOptPredicates(restrictionList);
+
 			RemapCRsVisitor rcrv = new RemapCRsVisitor(false);
 			for (int i = restrictionList.size() - 1; i >= 0; i--)
 			{
@@ -539,6 +583,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		** Do nothing if the child result set is not optimizable, as there
 		** can be nothing to modify.
 		*/
+		boolean alreadyPushed = false;
 		if ( ! (childResult instanceof Optimizable))
 		{
 			// Remember that the original child was not Optimizable
@@ -588,12 +633,41 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			{
 				trulyTheBestAccessPath = (AccessPathImpl) ((Optimizable) childResult).getTrulyTheBestAccessPath();
 			}
-			childResult = 
-				(ResultSetNode)
-					((FromTable) childResult).modifyAccessPath(outerTables);
+
+			// If the childResult is a SetOperatorNode (esp. a UnionNode),
+			// then it's possible that predicates in our restrictionList are
+			// supposed to be pushed further down the tree (as of DERBY-805).
+			// We passed the restrictionList down when we optimized the child
+			// so that the relevant predicates could be pushed further as part
+			// of the optimization process; so now that we're finalizing the
+			// paths, we need to do the same thing: i.e. pass restrictionList
+			// down so that the predicates that need to be pushed further
+			// _can_ be pushed further.
+			if (childResult instanceof SetOperatorNode) {
+				childResult = (ResultSetNode)
+					((SetOperatorNode) childResult).modifyAccessPath(
+						outerTables, restrictionList);
+
+				// Take note of the fact that we already pushed predicates
+				// as part of the modifyAccessPaths call.  This is necessary
+				// because there may still be predicates in restrictionList
+				// that we intentionally decided not to push (ex. if we're
+				// going to do hash join then we chose to not push the join
+				// predicates).  Whatever the reason for not pushing the
+				// predicates, we have to make sure we don't inadvertenly
+				// push them later (esp. as part of the "pushUsefulPredicates"
+				// call below).
+				alreadyPushed = true;
+			}
+			else {
+				childResult = 
+					(ResultSetNode) ((FromTable) childResult).
+						modifyAccessPath(outerTables);
+			}
 		}
 
-		if (restrictionList != null)
+
+		if ((restrictionList != null) && !alreadyPushed)
 		{
 			restrictionList.pushUsefulPredicates((Optimizable) childResult);
 		}
@@ -1119,19 +1193,22 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * 			the final cost estimate for the child node.
 	 */
 	public CostEstimate getFinalCostEstimate()
+		throws StandardException
 	{
-		/*
-		** The cost estimate will be set here if either optimize() or
-		** optimizeIt() was called on this node.  It's also possible
-		** that optimization was done directly on the child node,
-		** in which case the cost estimate will be null here.
-		*/
-		if (costEstimate == null)
-			return childResult.getFinalCostEstimate();
+		if (finalCostEstimate != null)
+		// we already set it, so just return it.
+			return finalCostEstimate;
+
+		// If the child result set is an Optimizable, then this node's
+		// final cost is that of the child.  Otherwise, this node must
+		// hold "trulyTheBestAccessPath" for it's child so we pull
+		// the final cost from there.
+		if (childResult instanceof Optimizable)
+			finalCostEstimate = childResult.getFinalCostEstimate();
 		else
-		{
-			return costEstimate;
-		}
+			finalCostEstimate = getTrulyTheBestAccessPath().getCostEstimate();
+
+		return finalCostEstimate;
 	}
 
     /**
@@ -1312,11 +1389,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			restrictSubquerys.setPointOfAttachment(resultSetNumber);
 		}
 
-		/* Drop our cost estimate if it is uninitialized. */
-		if (costEstimate != null && costEstimate.isUninitialized())
-		{
-			costEstimate = childResult.getFinalCostEstimate();
-		}
+		// Load our final cost estimate.
+		costEstimate = getFinalCostEstimate();
 
 		acb.pushThisAsActivation(mb);
 
@@ -1423,8 +1497,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		mb.push(mapArrayItem);
 		mb.push(resultColumns.reusableResult());
 		mb.push(doesProjection);
-		mb.push(getFinalCostEstimate().rowCount());
-		mb.push(getFinalCostEstimate().getEstimatedCost());
+		mb.push(costEstimate.rowCount());
+		mb.push(costEstimate.getEstimatedCost());
 		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getProjectRestrictResultSet",

@@ -322,11 +322,8 @@ public class HashTableNode extends SingleChildResultSetNode
 			}
 		}
 
-		// Get the cost estimate from the child if we don't have one yet
-		if (costEstimate == null)
-		{
-			costEstimate = childResult.getCostEstimate();
-		}
+		// Get the final cost estimate based on child's cost.
+		costEstimate = childResult.getFinalCostEstimate();
 		acb.pushThisAsActivation(mb);
 
 		// if there is no searchClause, we just want to pass null.

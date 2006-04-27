@@ -215,17 +215,49 @@ public class UnionNode extends SetOperatorNode
 		*/
 
 		/* optimize() both resultSets */
-		/* RESOLVE - don't try to push predicates through for now */
+
+		// If we have predicates from an outer block, we want to try
+		// to push them down to this node's children.  However, we can't
+		// just push the predicates down as they are; instead, we
+		// need to scope them for the child result sets first, and
+		// then push the scoped versions.  This is all done in the
+		// call to pushOptPredicate() here; for more, see that method's
+		// definition in SetOperatorNode.  NOTE: If we're considering a
+		// hash join then we do not push the predicates because we'll
+		// need the predicates to be at this level in order to find
+		// out if one of them is an equijoin predicate that can be used
+		// for the hash join.
+		if ((predList != null) &&
+			!getCurrentAccessPath().getJoinStrategy().isHashJoin())
+		{
+			for (int i = predList.size() - 1; i >= 0; i--) {
+				if (pushOptPredicate(predList.getOptPredicate(i)))
+					predList.removeOptPredicate(i);
+			}
+		}
+
+		// It's possible that a call to optimize the left/right will cause
+		// a new "truly the best" plan to be stored in the underlying base
+		// tables.  If that happens and then we decide to skip that plan
+		// (which we might do if the call to "considerCost()" below decides
+		// the current path is infeasible or not the best) we need to be
+		// able to revert back to the "truly the best" plans that we had
+		// saved before we got here.  So with this next call we save the
+		// current plans using "this" node as the key.  If needed, we'll
+		// then make the call to revert the plans in OptimizerImpl's
+		// getNextDecoratedPermutation() method.
+		addOrLoadBestPlanMapping(true, this);
+
 		leftResultSet = optimizeSource(
 							optimizer,
 							leftResultSet,
-							(PredicateList) null,
+							getLeftOptPredicateList(),
 							outerCost);
 
 		rightResultSet = optimizeSource(
 							optimizer,
 							rightResultSet,
-							(PredicateList) null,
+							getRightOptPredicateList(),
 							outerCost);
 
 		CostEstimate costEstimate = getCostEstimate(optimizer);
@@ -551,6 +583,9 @@ public class UnionNode extends SetOperatorNode
 		 */
 		assignResultSetNumber();
 
+		// Get our final cost estimate based on the child estimates.
+		costEstimate = getFinalCostEstimate();
+
 		// build up the tree.
 
 		acb.pushGetResultSetFactoryExpression(mb); // instance for getUnionResultSet
@@ -601,6 +636,34 @@ public class UnionNode extends SetOperatorNode
 		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUnionResultSet", ClassName.NoPutResultSet, 7);
+	}
+
+	/**
+	 * @see ResultSetNode#getFinalCostEstimate
+	 *
+	 * Get the final CostEstimate for this UnionNode.
+	 *
+	 * @return	The final CostEstimate for this UnionNode, which is
+	 *  the sum of the two child costs.
+	 */
+	public CostEstimate getFinalCostEstimate()
+		throws StandardException
+	{
+		// If we already found it, just return it.
+		if (finalCostEstimate != null)
+			return finalCostEstimate;
+
+		CostEstimate leftCE = leftResultSet.getFinalCostEstimate();
+		CostEstimate rightCE = rightResultSet.getFinalCostEstimate();
+
+		finalCostEstimate = getNewCostEstimate();
+		finalCostEstimate.setCost(leftCE.getEstimatedCost(),
+							 leftCE.rowCount(),
+							 leftCE.singleScanRowCount() +
+							 rightCE.singleScanRowCount());
+
+		finalCostEstimate.add(rightCE, finalCostEstimate);
+		return finalCostEstimate;
 	}
 
     String getOperatorName()

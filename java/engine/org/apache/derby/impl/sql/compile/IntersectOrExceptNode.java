@@ -330,6 +330,9 @@ public class IntersectOrExceptNode extends SetOperatorNode
 		 */
 		assignResultSetNumber();
 
+		// Get our final cost estimate based on the child estimates.
+		costEstimate = getFinalCostEstimate();
+
 		// build up the tree.
 
         /* Generate the SetOpResultSet. Arguments:
@@ -367,6 +370,35 @@ public class IntersectOrExceptNode extends SetOperatorNode
                       ClassName.NoPutResultSet, 11);
 	} // end of generate
 
+	/**
+	 * @see ResultSetNode#getFinalCostEstimate
+	 *
+	 * Get the final CostEstimate for this IntersectOrExceptNode.
+	 *
+	 * @return	The final CostEstimate for this IntersectOrExceptNode,
+	 *  which is the sum of the two child costs.  The final number of
+	 *  rows depends on whether this is an INTERSECT or EXCEPT (see
+	 *  getRowCountEstimate() in this class for more).
+	 */
+	public CostEstimate getFinalCostEstimate()
+		throws StandardException
+	{
+		if (finalCostEstimate != null)
+			return finalCostEstimate;
+
+		CostEstimate leftCE = leftResultSet.getFinalCostEstimate();
+		CostEstimate rightCE = rightResultSet.getFinalCostEstimate();
+
+		finalCostEstimate = getNewCostEstimate();
+		finalCostEstimate.setCost(
+			leftCE.getEstimatedCost() + rightCE.getEstimatedCost(),
+			getRowCountEstimate(leftCE.rowCount(), rightCE.rowCount()),
+			getSingleScanRowCountEstimate(leftCE.singleScanRowCount(),
+				rightCE.singleScanRowCount()));
+
+		return finalCostEstimate;
+	}
+
     String getOperatorName()
     {
         switch( opType)
@@ -392,9 +424,10 @@ public class IntersectOrExceptNode extends SetOperatorNode
             return Math.min( leftRowCount, rightRowCount)/2;
 
         case EXCEPT_OP:
-            // The result has at most leftRowCount rows and at least min( 0, leftRowCount - rightRowCount) rows.
-            // Use the mean of those two as the estimate.
-            return (leftRowCount + Math.min( 0, leftRowCount - rightRowCount))/2;
+            // The result has at most leftRowCount rows and at least
+            // max(0, leftRowCount - rightRowCount) rows.  Use the mean
+            // of those two as the estimate.
+            return (leftRowCount + Math.max(0, leftRowCount - rightRowCount))/2;
         }
         if( SanityManager.DEBUG)
             SanityManager.THROWASSERT( "Invalid intersectOrExcept opType: " + opType);

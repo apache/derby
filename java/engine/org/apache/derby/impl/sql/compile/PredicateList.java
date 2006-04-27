@@ -376,6 +376,20 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			Predicate		predicate;
 			predicate = (Predicate) elementAt(index);
 
+			// This method is used by HashJoinStrategy to determine if
+			// there are any equality predicates that can be used to
+			// perform a hash join (see the findHashKeyColumns()
+			// method in HashJoinStrategy.java).  That said, if the
+			// predicate was scoped and pushed down from an outer query,
+			// then it's no longer possible to perform the hash join
+			// because one of the operands is in an outer query and
+			// the other (scoped) operand is down in a subquery. Thus
+			// we skip this predicate if it has been scoped.
+			if (predicate.isScopedForPush())
+			{
+				continue;
+			}
+
 			andNode = (AndNode) predicate.getAndNode();
 
 			ValueNode opNode = andNode.getLeftOperand();

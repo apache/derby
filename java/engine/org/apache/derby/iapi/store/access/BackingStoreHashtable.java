@@ -224,9 +224,36 @@ public class BackingStoreHashtable
         }
         else
         {
+            /* We want to create the hash table based on the estimated row
+             * count if a) we have an estimated row count (i.e. it's greater
+             * than zero) and b) we think we can create a hash table to
+             * hold the estimated row count without running out of memory.
+             * The check for "b" is required because, for deeply nested
+             * queries and/or queries with a high number of tables in
+             * their FROM lists, the optimizer can end up calculating
+             * some very high row count estimates--even up to the point of
+             * Double.POSITIVE_INFINITY.  In that case attempts to
+             * create a Hashtable of size estimated_rowcnt can cause
+             * OutOfMemory errors when we try to create the Hashtable.
+             * So as a "red flag" for that kind of situation, we check to
+             * see if the estimated row count is greater than the max
+             * in-memory size for this table.  Unit-wise this comparison
+             * is relatively meaningless: rows vs bytes.  But if our
+             * estimated row count is greater than the max number of
+             * in-memory bytes that we're allowed to consume, then
+             * it's very likely that creating a Hashtable with a capacity
+             * of estimated_rowcnt will lead to memory problems.  So in
+             * that particular case we leave hash_table null here and
+             * initialize it further below, using the estimated in-memory
+             * size of the first row to figure out what a reasonable size
+             * for the Hashtable might be.
+             */
             hash_table = 
-                ((estimated_rowcnt <= 0) ? 
-                     new Hashtable() : new Hashtable((int) estimated_rowcnt));
+                (((estimated_rowcnt <= 0) || (row_source == null)) ?
+                     new Hashtable() :
+                     (estimated_rowcnt < max_inmemory_size) ?
+                         new Hashtable((int) estimated_rowcnt) :
+                         null);
         }
 
         if (row_source != null)
@@ -235,6 +262,22 @@ public class BackingStoreHashtable
 
             while ((row = getNextRowFromRowSource()) != null)
             {
+                // If we haven't initialized the hash_table yet then that's
+                // because a Hashtable with capacity estimated_rowcnt would
+                // probably cause memory problems.  So look at the first row
+                // that we found and use that to create the hash table with
+                // an initial capacity such that, if it was completely full,
+                // it would still satisfy the max_inmemory condition.  Note
+                // that this isn't a hard limit--the hash table can grow if
+                // needed.
+                if (hash_table == null)
+                {
+					// Check to see how much memory we think the first row
+                    // is going to take, and then use that to set the initial
+                    // capacity of the Hashtable.
+                    double rowUsage = getEstimatedMemUsage(row);
+                    hash_table = new Hashtable((int)(max_inmemory_size / rowUsage));
+                }
 
                 if (needsToClone)
                 {
@@ -387,13 +430,7 @@ public class BackingStoreHashtable
         inmemory_rowcnt++;
         if( max_inmemory_rowcnt <= 0)
         {
-            for( int i = 0; i < row.length; i++)
-            {
-                if( row[i] instanceof DataValueDescriptor)
-                    max_inmemory_size -= ((DataValueDescriptor) row[i]).estimateMemoryUsage();
-                max_inmemory_size -= ClassSize.refSize;
-            }
-            max_inmemory_size -= ClassSize.refSize;
+            max_inmemory_size -= getEstimatedMemUsage(row);
             if( firstDuplicate)
                 max_inmemory_size -= vectorSize;
         }
@@ -464,6 +501,29 @@ public class BackingStoreHashtable
         diskHashtable.put( key, row);
         return true;
     } // end of spillToDisk
+
+    /**
+     * Take a row and return an estimate as to how much memory that
+     * row will consume.
+     * 
+     * @param row The row for which we want to know the memory usage.
+     * @return A guess as to how much memory the current row will
+     *  use.
+     */
+    private long getEstimatedMemUsage(Object [] row)
+    {
+        long rowMem = 0;
+        for( int i = 0; i < row.length; i++)
+        {
+            if (row[i] instanceof DataValueDescriptor)
+                rowMem += ((DataValueDescriptor) row[i]).estimateMemoryUsage();
+            rowMem += ClassSize.refSize;
+        }
+
+        rowMem += ClassSize.refSize;
+        return rowMem;
+    }
+
     /**************************************************************************
      * Public Methods of This class:
      **************************************************************************

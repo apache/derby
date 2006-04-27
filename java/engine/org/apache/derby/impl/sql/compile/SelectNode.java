@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -1580,7 +1581,84 @@ public class SelectNode extends ResultSetNode
 		SanityManager.ASSERT(selectSubquerys != null,
 			"selectSubquerys is expected to be non-null");
 
+		/* If this select node is the child of an outer node that is
+		 * being optimized, we can get here multiple times (once for
+		 * every permutation that is done for the outer node).  With
+		 * DERBY-805, we can add optimizable predicates to the WHERE
+		 * list as part of this method; thus, before proceeding we
+		 * need go through and remove any opt predicates that we added
+		 * to our WHERE list the last time we were here; if we don't
+		 * do that, we'll end up with the same predicates in our
+		 * WHERE list multiple times, which can lead to incorrect
+		 * optimization.
+		 */
+
+		if (wherePredicates != null)
+		{
+			// Iterate backwards because we might be deleting entries.
+			for (int i = wherePredicates.size() - 1; i >= 0; i--)
+			{
+				if (((Predicate)wherePredicates.elementAt(i)).isScopedForPush())
+					wherePredicates.removeOptPredicate(i);
+			}
+		}
+
 		/* Get a new optimizer */
+
+		/* With DERBY-805 we take any optimizable predicates that
+		 * were pushed into this node and we add them to the list of
+		 * predicates that we pass to the optimizer, thus allowing
+		 * the optimizer to use them when choosing an access path
+		 * for this SELECT node.  We do that by adding the predicates
+		 * to our WHERE list, since the WHERE predicate list is what
+		 * we pass to the optimizer for this select node (see below).
+		 * We have to pass the WHERE list directly (as opposed to
+		 * passing a copy) because the optimizer is only created one
+		 * time; it then uses the list we pass it for the rest of the
+		 * optimization phase and finally for "modifyAccessPaths()".
+		 * Since the optimizer can update/modify the list based on the
+		 * WHERE predicates (such as by adding internal predicates or
+		 * by modifying the actual predicates themselves), we need
+		 * those changes to be applied to the WHERE list directly for
+		 * subsequent processing (esp. for modification of the access
+		 * path).  Note that by adding outer opt predicates directly
+		 * to the WHERE list, we're changing the semantics of this
+		 * SELECT node.  This is only temporary, though--once the
+		 * optimizer is done with all of its work, any predicates
+		 * that were pushed here will have been pushed even further
+		 * down and thus will have been removed from the WHERE list
+		 * (if it's not possible to push them further down, then they
+		 * shouldn't have made it this far to begin with).
+		 */
+		if (predicateList != null)
+		{
+			if (wherePredicates == null) {
+				wherePredicates = (PredicateList) getNodeFactory().getNode(
+						C_NodeTypes.PREDICATE_LIST,
+						getContextManager());
+			}
+
+			Predicate pred = null;
+			int sz = predicateList.size();
+			for (int i = sz - 1; i >= 0; i--)
+			{
+				// We can tell if a predicate was pushed into this select
+				// node because it will have been "scoped" for this node;
+				// see Predicate.getScopedPredForResultSet() for more on
+				// what scoping is and how it's done.
+				pred = (Predicate)predicateList.getOptPredicate(i);
+				if (pred.isScopedForPush())
+				{
+					// If we're pushing the predicate down here, we have to
+					// remove it from the predicate list of the node above
+					// this select, in order to keep in line with established
+					// push 'protocol'.
+					wherePredicates.addOptPredicate(pred);
+					predicateList.removeOptPredicate(pred);
+				}
+			}
+		}
+
 		optimizer = getOptimizer(fromList,
 								wherePredicates,
 								dataDictionary,
@@ -1617,6 +1695,36 @@ public class SelectNode extends ResultSetNode
 	}
 
 	/**
+	 * Modify the access paths according to the decisions the optimizer
+	 * made.  This can include adding project/restrict nodes,
+	 * index-to-base-row nodes, etc.
+	 *
+	 * @param predList A list of optimizable predicates that should
+	 *  be pushed to this ResultSetNode, as determined by optimizer.
+	 * @return The modified query tree
+	 * @exception StandardException        Thrown on error
+	 */
+	public ResultSetNode modifyAccessPaths(PredicateList predList)
+		throws StandardException
+	{
+		// Take the received list of predicates and propagate them to the
+		// predicate list for this node's optimizer.  Then, when we call
+		// optimizer.modifyAccessPaths(), the optimizer will have the
+		// predicates and can push them down as necessary, according
+		// the join order that it has chosen.
+
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.ASSERT(optimizer != null,
+				"SelectNode's optimizer not expected to be null when " +
+				"modifying access paths.");
+		}
+
+		((OptimizerImpl)optimizer).addPredicatesToList(predList);
+		return modifyAccessPaths();
+	}
+
+	/**
 	 * Modify the access paths according to the choices the optimizer made.
 	 *
 	 * @return	A QueryTree with the necessary modifications made
@@ -1637,6 +1745,37 @@ public class SelectNode extends ResultSetNode
 		** This should be the same optimizer we got above.
 		*/
 		optimizer.modifyAccessPaths();
+
+		// Load the costEstimate for the final "best" join order.
+		costEstimate = optimizer.getFinalCost();
+
+		if (SanityManager.DEBUG)
+		{
+			// When we optimized this select node, we may have added pushable
+			// outer predicates to the wherePredicates list for this node
+			// (see the optimize() method above).  When we did so, we said
+			// that all such predicates should have been removed from the
+			// where list by the time optimization was completed.   So we
+			// check that here, just to be safe.  NOTE: We do this _after_
+			// calling optimizer.modifyAccessPaths(), because it's only in
+			// that call that the scoped predicates are officially pushed
+			// and thus removed from the list.
+			if (wherePredicates != null)
+			{
+				Predicate pred = null;
+				for (int i = wherePredicates.size() - 1; i >= 0; i--)
+				{
+					pred = (Predicate)wherePredicates.getOptPredicate(i);
+					if (pred.isScopedForPush())
+					{
+						SanityManager.THROWASSERT("Found scoped predicate " +
+							pred.binaryRelOpColRefsToString() +
+							" in WHERE list when no scoped predicates were" +
+							" expected.");
+					}
+				}
+			}
+		}
 
 		selectSubquerys.modifyAccessPaths();
 
@@ -1711,6 +1850,18 @@ public class SelectNode extends ResultSetNode
 		return genProjectRestrict(origFromListSize);
 	}
 
+	/**
+	 * Get the final CostEstimate for this SelectNode.
+	 *
+	 * @return	The final CostEstimate for this SelectNode, which is
+	 * 			the final cost estimate for the best join order of
+	 *          this SelectNode's optimizer.
+	 */
+	public CostEstimate getFinalCostEstimate()
+		throws StandardException
+	{
+		return optimizer.getFinalCost();
+	}
 
 	/**
 		Determine if this select is updatable or not, for a cursor.

@@ -1055,4 +1055,52 @@ public class ColumnReference extends ValueNode
         }
         return dtd;
     } // end of getTypeServices
+
+	/**
+	 * Determine whether or not this ColumnReference's source comes
+	 * from a FromBaseTable (as opposed to some other ResultSetNode).
+	 * We figure this out by walking the ResultColumn/VirtualColumnNode
+	 * chain until we get to last VirtualColumnNode in the chain
+	 * (if there is one), and then seeing what that VCN's source
+	 * result set is.  If there are no VCNs then we check to see
+	 * if the source is pointing to a BaseColumnNode.
+	 *
+	 * This is useful when scoping predicates for pushing; we
+	 * need to know if the predicate's column references are pointing
+	 * directly to base tables so that we can set the scoped references'
+	 * column numbers correctly.
+	 */
+	protected boolean pointsToBaseTable() throws StandardException
+	{
+		ResultColumn rc = getSource();
+
+		if (rc == null) {
+		// this can happen if column reference is pointing to a column
+		// that is not from a base table.  For example, if we have a
+		// VALUES clause like
+		//
+		//    (values (1, 2), (3, 4)) V1 (i, j)
+		//
+		// and then a column reference to VI.i, the column reference
+		// won't have a source.
+			return false;
+		}
+
+		// Walk the VirtualColumnNode->ResultColumn chain.
+		VirtualColumnNode vcn = null;
+		ValueNode rcExpr = rc.getExpression();
+		while (rcExpr instanceof VirtualColumnNode) {
+			vcn = (VirtualColumnNode)rcExpr;
+			rc = vcn.getSourceColumn();
+			rcExpr = rc.getExpression();
+		}
+
+		// If we've reached the bottom of the chain then see if
+		// the VCN is pointing to a FromBaseTable.
+		if (vcn != null)
+			return (vcn.getSourceResultSet() instanceof FromBaseTable);
+
+		// Else check our source's expression.
+		return (rc.getExpression() instanceof BaseColumnNode);
+	}
 }

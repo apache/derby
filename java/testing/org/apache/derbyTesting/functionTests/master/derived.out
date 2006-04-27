@@ -323,12 +323,12 @@ ij> select * from (select a.a, b.a from s a, s b) a (b, a),
 B          |A          |B          |A          
 -----------------------------------------------
 0          |0          |0          |0          
-0          |10         |0          |0          
 0          |0          |0          |10         
+0          |10         |0          |0          
 0          |10         |0          |10         
 10         |0          |10         |0          
-10         |10         |10         |0          
 10         |0          |10         |10         
+10         |10         |10         |0          
 10         |10         |10         |10         
 ij> select * from (select (select 1 from s where 1 = 0), b.a from s a, s b) a (b, a),
 			  (select (select 1 from s where 1 = 0), b.a from s a, s b) b (b, a) where a.b = b.b;

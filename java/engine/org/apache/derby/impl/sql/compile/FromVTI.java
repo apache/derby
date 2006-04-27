@@ -1193,6 +1193,9 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		int				erdNumber = -1;
 		int				numSet = 0;
 
+		// Get our final cost estimate.
+		costEstimate = getFinalCostEstimate();
+
 		for (int index = 0; index < rclSize; index++)
 		{
 			ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);

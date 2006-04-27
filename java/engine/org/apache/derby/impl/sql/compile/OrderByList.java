@@ -401,7 +401,7 @@ public class OrderByList extends OrderedColumnList
 
 		// Get the cost estimate for the child
 		// RESOLVE - we will eventually include the cost of the sort
-		CostEstimate costEstimate = child.getCostEstimate(); 
+		CostEstimate costEstimate = child.getFinalCostEstimate(); 
 
 		mb.push(costEstimate.rowCount());
 		mb.push(costEstimate.getEstimatedCost());

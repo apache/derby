@@ -155,6 +155,19 @@ public class OptimizerImpl implements Optimizer
 	// to keep track of them all.
 	private HashMap savedJoinOrders;
 
+	// Value used to figure out when/if we've timed out for this
+	// Optimizable.
+	protected double timeLimit;
+
+	// Cost estimate for the final "best join order" that we chose--i.e.
+	// the one that's actually going to be generated.
+	CostEstimate finalCostEstimate;
+
+	// Have we already delayed timeout for the current round of
+	// optimization?  We need this flag to make sure we don't
+	// infinitely delay the timeout for the current round.
+	private boolean alreadyDelayedTimeout;
+	
 	protected  OptimizerImpl(OptimizableList optimizableList, 
 				  OptimizablePredicateList predicateList,
 				  DataDictionary dDictionary,
@@ -232,6 +245,8 @@ public class OptimizerImpl implements Optimizer
 		timeOptimizationStarted = System.currentTimeMillis();
 		reloadBestPlan = false;
 		savedJoinOrders = null;
+		timeLimit = Double.MAX_VALUE;
+		alreadyDelayedTimeout = false;
 	}
 
 	/**
@@ -243,7 +258,7 @@ public class OptimizerImpl implements Optimizer
 	 * of state that is required before each round should be done in this
 	 * method.
 	 */
-	protected void prepForNextRound()
+	public void prepForNextRound()
 	{
 		// We initialize reloadBestPlan to false so that if we end up
 		// pulling an Optimizable before we find a best join order
@@ -251,6 +266,69 @@ public class OptimizerImpl implements Optimizer
 		// round) we won't inadvertently reload the best plans based
 		// on some previous round.
 		reloadBestPlan = false;
+
+		/* Since we're preparing for a new round, we have to clear
+		 * out the "bestCost" from the previous round to ensure that,
+		 * when this round of optimizing is done, bestCost will hold
+		 * the best cost estimate found _this_ round, if there was
+		 * one.  If there was no best cost found (which can happen if
+		 * there is no feasible join order) then bestCost will remain
+		 * at Double.MAX_VALUE.  Then when outer queries check the
+		 * cost and see that it is so high, they will reject whatever
+		 * outer join order they're trying in favor of something that's
+		 * actually valid (and therefore cheaper).
+		 *
+		 * Note that we do _not_ reset the "foundABestPlan" variable nor
+		 * the "bestJoinOrder" array.  This is because it's possible that
+		 * a "best join order" may not exist for the current round, in
+		 * which case this OptimizerImpl must know whether or not it found
+		 * a best join order in a previous round (foundABestPlan) and if
+		 * so what the corresponding join order was (bestJoinOrder).  This
+		 * information is required so that the correct query plan can be
+		 * generated after optimization is complete, even if that best
+		 * plan was not found in the most recent round.
+		 */
+		bestCost = getNewCostEstimate(
+			Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+
+		/* If we have predicates that were pushed down to this OptimizerImpl
+		 * from an outer query, then we reset the timeout state to prepare for
+		 * the next round of optimization.  Otherwise if we timed out during
+		 * a previous round and then we get here for another round, we'll
+		 * immediately "timeout" again before optimizing any of the Optimizables
+		 * in our list.  This is okay if we don't have any predicates from
+		 * outer queries because in that case the plan we find this round
+		 * will be the same one we found in the previous round, in which
+		 * case there's no point in resetting the timeout state and doing
+		 * the work a second time.  But if we have predicates from an outer
+		 * query, those predicates could help us find a much better plan
+		 * this round than we did in previous rounds--so we reset the timeout
+		 * state to ensure that we have a chance to consider plans that
+		 * can take advantage of the pushed predicates.
+		 */
+		boolean resetTimer = false;
+		if ((predicateList != null) && (predicateList.size() > 0))
+		{
+			for (int i = predicateList.size() - 1; i >= 0; i--)
+			{
+				// If the predicate is "scoped", then we know it was pushed
+				// here from an outer query.
+				if (((Predicate)predicateList.
+					getOptPredicate(i)).isScopedForPush())
+				{
+					resetTimer = true;
+					break;
+				}
+			}
+		}
+
+		if (resetTimer)
+		{
+			timeOptimizationStarted = System.currentTimeMillis();
+			timeExceeded = false;
+		}
+
+		alreadyDelayedTimeout = false;
 	}
 
     public int getMaxMemoryPerTable()
@@ -299,13 +377,82 @@ public class OptimizerImpl implements Optimizer
 			** the current best cost.
 			*/
 			currentTime = System.currentTimeMillis();
-			timeExceeded = (currentTime - timeOptimizationStarted) >
-									bestCost.getEstimatedCost();
+			timeExceeded = (currentTime - timeOptimizationStarted) > timeLimit;
 
 			if (optimizerTrace && timeExceeded)
 			{
 				trace(TIME_EXCEEDED, 0, 0, 0.0, null);
 			}
+		}
+
+		/*
+		 * It's possible that we can end up with an uninitialized cost after
+		 * this round of optimization if there's no feasible join order.  In
+		 * that case the following call to "isUninitialized()" will repeatedly
+		 * return true, which could cause us to delay the timeout indefinitely.
+		 * For this reason we have the "alreadyDelayedTimeout" flag, which we
+		 * set the first time through and then, if we get here again for a
+		 * complete join order in the same round, we skip the "delay" and just
+		 * allow the timeout to occur.  The check for "if we get here again"
+		 * is done via the alreadyDelayedTimeout flag, which is reset before
+		 * each round of optimization; the check for "a complete join order"
+		 * is done by looking to see if the current join position is the
+		 * final one.
+		 */
+		if (timeExceeded && bestCost.isUninitialized() &&
+			(!alreadyDelayedTimeout || (joinPosition < numOptimizables - 1)))
+		{
+			/* We can get here if this OptimizerImpl is for a subquery
+			 * that timed out for a previous permutation of the outer
+			 * query, but then the outer query itself did _not_ timeout.
+			 * In that case we'll end up back here for another round of
+			 * optimization, but our timeExceeded flag will be true.
+			 * We don't want to reset all of the timeout state here
+			 * because that could lead to redundant work (see comments
+			 * in prepForNextRound()), but we also don't want to return
+			 * without having a plan, because then we'd return an unfairly
+			 * high "bestCost" value--i.e. Double.MAX_VALUE.  Note that
+			 * we can't just revert back to whatever bestCost we had
+			 * prior to this because that cost is for some previous
+			 * permutation of the outer query--not the current permutation--
+			 * and thus would be incorrect.  So instead we have to delay
+			 * the timeout until we find a complete (and valid) join order,
+			 * so that we can return a valid cost estimate.  Once we have
+			 * a valid cost we'll then go through the timeout logic
+			 * and stop optimizing.
+			 * 
+			 * All of that said, instead of just trying the first possible
+			 * join order, we jump to the join order that gave us the best
+			 * cost in previous rounds.  We know that such a join order exists
+			 * because that's how our timeout value was set to begin with--so
+			 * if there was no best join order, we never would have timed out
+			 * and thus we wouldn't be here.
+			 */
+			if (permuteState != JUMPING)
+			{
+				// By setting firstLookOrder to our target join order
+				// and then setting our permuteState to JUMPING, we'll
+				// jump to the target join order and get the cost.  That
+				// cost will then be saved as bestCost, allowing us to
+				// proceed with normal timeout logic.
+				for (int i = 0; i < numOptimizables; i++)
+					firstLookOrder[i] = bestJoinOrder[i];
+				permuteState = JUMPING;
+
+				// If we were in the middle of a join order when this
+				// happened, then reset the join order before jumping.
+				if (joinPosition > 0)
+					rewindJoinOrder();
+			}
+
+			// Reset the timeExceeded flag so that we'll keep going
+			// until we find a complete join order.  NOTE: we intentionally
+			// do _not_ reset the timeOptimizationStarted value because we
+			// we want to go through this timeout logic for every
+			// permutation, to make sure we timeout as soon as we have
+			// our first complete join order.
+			timeExceeded = false;
+			alreadyDelayedTimeout = true;
 		}
 
 		/*
@@ -1069,6 +1216,38 @@ public class OptimizerImpl implements Optimizer
 										(OptimizablePredicateList) null,
 										currentRowOrdering);
 
+		// If the previous path that we considered for curOpt was _not_ the best
+		// path for this round, then we need to revert back to whatever the
+		// best plan for curOpt was this round.  Note that the cost estimate
+		// for bestAccessPath could be null here if the last path that we
+		// checked was the only one possible for this round.
+		if ((curOpt.getBestAccessPath().getCostEstimate() != null) &&
+			(curOpt.getCurrentAccessPath().getCostEstimate() != null))
+		{
+			// Note: we can't just check to see if bestCost is cheaper
+			// than currentCost because it's possible that currentCost
+			// is actually cheaper--but it may have been 'rejected' because
+			// it would have required too much memory.  So we just check
+			// to see if bestCost and currentCost are different.  If so
+			// then we know that the most recent access path (represented
+			// by "current" access path) was not the best.
+			if (curOpt.getBestAccessPath().getCostEstimate().compare(
+				curOpt.getCurrentAccessPath().getCostEstimate()) != 0)
+			{
+				curOpt.addOrLoadBestPlanMapping(false, curOpt);
+			}
+			else if (curOpt.getBestAccessPath().getCostEstimate().rowCount() <
+				curOpt.getCurrentAccessPath().getCostEstimate().rowCount())
+			{
+				// If currentCost and bestCost have the same cost estimate
+				// but currentCost has been rejected because of memory, we
+				// still need to revert the plans.  In this case the row
+				// count for currentCost will be greater than the row count
+				// for bestCost, so that's what we just checked.
+				curOpt.addOrLoadBestPlanMapping(false, curOpt);
+			}
+		}
+
 		/*
 		** When all the access paths have been looked at, we know what the
 		** cheapest one is, so remember it.  Only do this if a cost estimate
@@ -1213,8 +1392,24 @@ public class OptimizerImpl implements Optimizer
 				** NOTE: If the user has specified a join order, it will be the
 				** only join order the optimizer considers, so it is OK to use
 				** costing to decide that it is the "best" join order.
+				**
+				** For very deeply nested queries, it's possible that the optimizer
+				** will return an estimated cost of Double.INFINITY, which is
+				** greater than our uninitialized cost of Double.MAX_VALUE and
+				** thus the "compare" check below will return false.   So we have
+				** to check to see if bestCost is uninitialized and, if so, we
+				** save currentCost regardless of what value it is--because we
+				** haven't found anything better yet.
+				**
+				** That said, it's also possible for bestCost to be infinity
+				** AND for current cost to be infinity, as well.  In that case
+				** we can't really tell much by comparing the two, so for lack
+				** of better alternative we look at the row counts.  See
+				** CostEstimateImpl.compare() for more.
 				*/
-				if ((! foundABestPlan) || currentCost.compare(bestCost) < 0)
+				if ((! foundABestPlan) ||
+					(currentCost.compare(bestCost) < 0) ||
+					bestCost.isUninitialized())
 				{
 					rememberBestCost(currentCost, Optimizer.NORMAL_PLAN);
 
@@ -1259,7 +1454,8 @@ public class OptimizerImpl implements Optimizer
 							trace(CURRENT_PLAN_IS_SA_PLAN, 0, 0, 0.0, null);
 						}
 
-						if (currentSortAvoidanceCost.compare(bestCost) <= 0)
+						if ((currentSortAvoidanceCost.compare(bestCost) <= 0)
+							|| bestCost.isUninitialized())
 						{
 							rememberBestCost(currentSortAvoidanceCost,
 											Optimizer.SORT_AVOIDANCE_PLAN);
@@ -1295,6 +1491,15 @@ public class OptimizerImpl implements Optimizer
 
 		/* Remember the current cost as best */
 		bestCost.setCost(currentCost);
+
+		// Our time limit for optimizing this round is the time we think
+		// it will take us to execute the best join order that we've 
+		// found so far (across all rounds of optimizing).  In other words,
+		// don't spend more time optimizing this OptimizerImpl than we think
+		// it's going to take to execute the best plan.  So if we've just
+		// found a new "best" join order, use that to update our time limit.
+		if (bestCost.getEstimatedCost() < timeLimit)
+			timeLimit = bestCost.getEstimatedCost();
 
 		/*
 		** Remember the current join order and access path
@@ -1612,6 +1817,15 @@ public class OptimizerImpl implements Optimizer
 														outerCost,
 														optimizable);
 
+		// Before considering the cost, make sure we set the optimizable's
+		// "current" cost to be the one that we found.  Doing this allows
+		// us to compare "current" with "best" later on to find out if
+		// the "current" plan is also the "best" one this round--if it's
+		// not then we'll have to revert back to whatever the best plan is.
+		// That check is performed in getNextDecoratedPermutation() of
+		// this class.
+		optimizable.getCurrentAccessPath().setCostEstimate(estimatedCost);
+
 		/*
 		** Skip this access path if it takes too much memory.
 		**
@@ -1633,6 +1847,7 @@ public class OptimizerImpl implements Optimizer
 		CostEstimate bestCostEstimate = ap.getCostEstimate();
 
 		if ((bestCostEstimate == null) ||
+			bestCostEstimate.isUninitialized() ||
 			(estimatedCost.compare(bestCostEstimate) < 0))
 		{
 			ap.setConglomerateDescriptor(cd);
@@ -1680,6 +1895,7 @@ public class OptimizerImpl implements Optimizer
 
 					/* Is this the cheapest sort-avoidance path? */
 					if ((bestCostEstimate == null) ||
+						bestCostEstimate.isUninitialized() ||
 						(estimatedCost.compare(bestCostEstimate) < 0))
 					{
 						ap.setConglomerateDescriptor(cd);
@@ -1732,15 +1948,21 @@ public class OptimizerImpl implements Optimizer
 			return;
 		}
 
+		// Before considering the cost, make sure we set the optimizable's
+		// "current" cost to be the one that we received.  Doing this allows
+		// us to compare "current" with "best" later on to find out if
+		// the "current" plan is also the "best" one this round--if it's
+		// not then we'll have to revert back to whatever the best plan is.
+		// That check is performed in getNextDecoratedPermutation() of
+		// this class.
+		optimizable.getCurrentAccessPath().setCostEstimate(estimatedCost);
+
 		/*
 		** Skip this access path if it takes too much memory.
 		**
 		** NOTE: The default assumption here is that the number of rows in
 		** a single scan is the total number of rows divided by the number
 		** of outer rows.  The optimizable may over-ride this assumption.
-		**
-		** NOTE: This is probably not necessary here, because we should
-		** get here only for nested loop joins, which don't use memory.
 		*/
         if( ! optimizable.memoryUsageOK( estimatedCost.rowCount() / outerCost.rowCount(),
                                          maxMemoryPerTable))
@@ -1765,6 +1987,7 @@ public class OptimizerImpl implements Optimizer
 		CostEstimate bestCostEstimate = ap.getCostEstimate();
 
 		if ((bestCostEstimate == null) ||
+			bestCostEstimate.isUninitialized() ||
 			(estimatedCost.compare(bestCostEstimate) <= 0))
 		{
 			ap.setCostEstimate(estimatedCost);
@@ -1799,6 +2022,7 @@ public class OptimizerImpl implements Optimizer
 
 					/* Is this the cheapest sort-avoidance path? */
 					if ((bestCostEstimate == null) ||
+						bestCostEstimate.isUninitialized() ||
 						(estimatedCost.compare(bestCostEstimate) < 0))
 					{
 						ap.setCostEstimate(estimatedCost);
@@ -1882,6 +2106,39 @@ public class OptimizerImpl implements Optimizer
 	public CostEstimate getOptimizedCost()
 	{
 		return bestCost;
+	}
+
+	/**
+	 * @see Optimizer#getFinalCost
+	 *
+	 * Sum up the cost of all of the trulyTheBestAccessPaths
+	 * for the Optimizables in our list.  Assumption is that
+	 * we only get here after optimization has completed--i.e.
+	 * while modifying access paths.
+	 */
+	public CostEstimate getFinalCost()
+	{
+		// If we already did this once, just return the result.
+		if (finalCostEstimate != null)
+			return finalCostEstimate;
+
+		// The total cost is the sum of all the costs, but the total
+		// number of rows is the number of rows returned by the innermost
+		// optimizable.
+		finalCostEstimate = getNewCostEstimate(0.0d, 0.0d, 0.0d);
+		CostEstimate ce = null;
+		for (int i = 0; i < bestJoinOrder.length; i++)
+		{
+			ce = optimizableList.getOptimizable(bestJoinOrder[i])
+					.getTrulyTheBestAccessPath().getCostEstimate();
+
+			finalCostEstimate.setCost(
+				finalCostEstimate.getEstimatedCost() + ce.getEstimatedCost(),
+				ce.rowCount(),
+				ce.singleScanRowCount());
+		}
+
+		return finalCostEstimate;
 	}
 
 	/** @see Optimizer#setOuterRows */
@@ -2041,52 +2298,61 @@ public class OptimizerImpl implements Optimizer
 	 * necessary.
 	 *
 	 * @param doAdd True if we're adding a mapping, false if we're loading.
-	 * @param outerOptimizer OptimizerImpl corresponding to an outer
-	 *  query; we will use this as the key for the mapping.
+	 * @param planKey Object to use as the map key when adding/looking up
+	 *  a plan.  If this is an instance of OptimizerImpl then it corresponds
+	 *  to an outer query; otherwise it's some Optimizable above this
+	 *  OptimizerImpl that could potentially reject plans chosen by this
+	 *  OptimizerImpl.
 	 */
 	protected void addOrLoadBestPlanMappings(boolean doAdd,
-		Optimizer outerOptimizer) throws StandardException
+		Object planKey) throws StandardException
 	{
-		// First we save this OptimizerImpl's best join order.
-		int [] joinOrder = null;
-		if (doAdd)
+		// First we save this OptimizerImpl's best join order.  If there's
+		// only one optimizable in the list, then there's only one possible
+		// join order, so don't bother.
+		if (numOptimizables > 1)
 		{
-			// If the savedJoinOrder map already exists, search for the
-			// join order for the target optimizer and reuse that.
-			if (savedJoinOrders == null)
-				savedJoinOrders = new HashMap();
+			int [] joinOrder = null;
+			if (doAdd)
+			{
+				// If the savedJoinOrder map already exists, search for the
+				// join order for the target optimizer and reuse that.
+				if (savedJoinOrders == null)
+					savedJoinOrders = new HashMap();
+				else
+					joinOrder = (int[])savedJoinOrders.get(planKey);
+
+				// If we don't already have a join order array for the optimizer,
+				// create a new one.
+				if (joinOrder == null)
+					joinOrder = new int[numOptimizables];
+
+				// Now copy current bestJoinOrder and save it.
+				for (int i = 0; i < bestJoinOrder.length; i++)
+					joinOrder[i] = bestJoinOrder[i];
+
+				savedJoinOrders.put(planKey, joinOrder);
+			}
 			else
-				joinOrder = (int[])savedJoinOrders.get(outerOptimizer);
+			{
+				// If we get here, we want to load the best join order from our
+				// map into this OptimizerImpl's bestJoinOrder array.
 
-			// If we don't already have a join order array for the optimizer,
-			// create a new one.
-			if (joinOrder == null)
-				joinOrder = new int[numOptimizables];
-
-			// Now copy current bestJoinOrder and save it.
-			for (int i = 0; i < bestJoinOrder.length; i++)
-				joinOrder[i] = bestJoinOrder[i];
-
-			savedJoinOrders.put(outerOptimizer, joinOrder);
-		}
-		else
-		{
-			// If we get here, we want to load the best join order from our
-			// map into this OptimizerImpl's bestJoinOrder array.
-
-			// If we don't have any join orders saved, then there's nothing to
-			// load.  This can happen if the optimizer tried some join order
-			// for which there was no valid plan.
-			if (savedJoinOrders == null)
-				return;
-
-			joinOrder = (int[])savedJoinOrders.get(outerOptimizer);
-			if (joinOrder == null)
-				return;
-
-			// Load the join order we found into our bestJoinOrder array.
-			for (int i = 0; i < joinOrder.length; i++)
-				bestJoinOrder[i] = joinOrder[i];
+				// If we don't have any join orders saved, then there's nothing to
+				// load.  This can happen if the optimizer tried some join order
+				// for which there was no valid plan.
+				if (savedJoinOrders != null)
+				{
+					joinOrder = (int[])savedJoinOrders.get(planKey);
+					if (joinOrder != null)
+					{
+						// Load the join order we found into our
+						// bestJoinOrder array.
+						for (int i = 0; i < joinOrder.length; i++)
+							bestJoinOrder[i] = joinOrder[i];
+					}
+				}
+			}
 		}
 
 		// Now iterate through all Optimizables in this OptimizerImpl's list
@@ -2095,8 +2361,56 @@ public class OptimizerImpl implements Optimizer
 		for (int i = optimizableList.size() - 1; i >= 0; i--)
 		{
 			optimizableList.getOptimizable(i).
-				addOrLoadBestPlanMapping(doAdd, outerOptimizer);
+				addOrLoadBestPlanMapping(doAdd, planKey);
 		}
+	}
+
+	/**
+	 * Add predicates to this optimizer's predicateList. This method
+	 * is intended for use during the modifyAccessPath() phase of
+	 * compilation, as it allows nodes (esp. SelectNodes) to add to the
+	 * list of predicates available for the final "push" before code
+	 * generation.  Just as the constructor for this class allows a
+	 * caller to specify a predicate list to use during the optimization
+	 * phase, this method allows a caller to specify a predicate list to
+	 * use during the modify-access-paths phase.
+	 *
+	 * Before adding the received predicates, this method also
+	 * clears out any scoped predicates that might be sitting in
+	 * OptimizerImpl's list from the last round of optimizing.
+	 *
+	 * @param pList List of predicates to add to this OptimizerImpl's
+	 *  own list for pushing.
+	 */
+	protected void addPredicatesToList(PredicateList pList)
+		throws StandardException
+	{
+		if ((pList == null) || (pList == predicateList))
+		// nothing to do.
+			return;
+
+		if (predicateList == null)
+		// in this case, there is no 'original' predicateList, so we
+		// can just create one.
+			predicateList = new PredicateList();
+
+		// First, we need to go through and remove any predicates in this
+		// optimizer's list that may have been pushed here from outer queries
+		// during the previous round(s) of optimization.  We know if the
+		// predicate was pushed from an outer query because it will have
+		// been scoped to the node for which this OptimizerImpl was
+		// created.
+		Predicate pred = null;
+		for (int i = predicateList.size() - 1; i >= 0; i--) {
+			pred = (Predicate)predicateList.getOptPredicate(i);
+			if (pred.isScopedForPush())
+				predicateList.removeOptPredicate(i);
+		}
+
+		// Now transfer all of the received predicates into this
+		// OptimizerImpl's list.
+		pList.transferAllPredicates(predicateList);
+		return;
 	}
 
 }
