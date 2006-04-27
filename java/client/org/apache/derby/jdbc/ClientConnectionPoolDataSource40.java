@@ -27,7 +27,19 @@ import javax.sql.ConnectionPoolDataSource;
 import org.apache.derby.client.am.SQLExceptionFactory;
 
 /**
- * ConnectionPoolDataSource for jdbc4.0
+ * ClientConnectionPoolDataSource40 is a factory for PooledConnection objects.
+ * An object that implements this interface
+ * will typically be registered with a naming service that is based on the
+ * Java Naming and Directory Interface (JNDI). Use this factory
+ * if your application runs under JDBC4.0.
+ * Use
+ * ClientConnectionPoolDataSource, instead, if your application runs under
+ * JDBC3.0 or JDBC2.0, that is, on the following Java Virtual Machines:
+ * <p/>
+ * <UL>
+ * <LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
+ * <LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+ * </UL>
  */
 public class ClientConnectionPoolDataSource40
         extends ClientConnectionPoolDataSource {

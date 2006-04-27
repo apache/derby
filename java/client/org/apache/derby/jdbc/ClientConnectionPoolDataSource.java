@@ -28,8 +28,17 @@ import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
 
 /**
- * ClientConnectionPoolDataSource is a factory for PooledConnection objects. An object that implements this interface
- * will typically be registered with a naming service that is based on the Java Naming and Directory Interface (JNDI).
+ * ClientConnectionPoolDataSource is a factory for PooledConnection objects.
+ * An object that implements this interface
+ * will typically be registered with a naming service that is based on the
+ * Java Naming and Directory Interface (JNDI). Use
+ * ClientConnectionPoolDataSource if your application runs under
+ * JDBC3.0 or JDBC2.0, that is, on the following Java Virtual Machines:
+ * <p/>
+ * <UL>
+ * <LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
+ * <LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+ * </UL>
  */
 public class ClientConnectionPoolDataSource extends ClientBaseDataSource 
                                            implements ConnectionPoolDataSource {
