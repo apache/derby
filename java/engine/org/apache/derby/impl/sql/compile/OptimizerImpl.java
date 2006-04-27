@@ -1368,8 +1368,24 @@ public class OptimizerImpl implements Optimizer
 				** NOTE: If the user has specified a join order, it will be the
 				** only join order the optimizer considers, so it is OK to use
 				** costing to decide that it is the "best" join order.
+				**
+				** For very deeply nested queries, it's possible that the optimizer
+				** will return an estimated cost of Double.INFINITY, which is
+				** greater than our uninitialized cost of Double.MAX_VALUE and
+				** thus the "compare" check below will return false.   So we have
+				** to check to see if bestCost is uninitialized and, if so, we
+				** save currentCost regardless of what value it is--because we
+				** haven't found anything better yet.
+				**
+				** That said, it's also possible for bestCost to be infinity
+				** AND for current cost to be infinity, as well.  In that case
+				** we can't really tell much by comparing the two, so for lack
+				** of better alternative we look at the row counts.  See
+				** CostEstimateImpl.compare() for more.
 				*/
-				if ((! foundABestPlan) || currentCost.compare(bestCost) < 0)
+				if ((! foundABestPlan) ||
+					(currentCost.compare(bestCost) < 0) ||
+					bestCost.isUninitialized())
 				{
 					rememberBestCost(currentCost, Optimizer.NORMAL_PLAN);
 
@@ -1414,7 +1430,8 @@ public class OptimizerImpl implements Optimizer
 							trace(CURRENT_PLAN_IS_SA_PLAN, 0, 0, 0.0, null);
 						}
 
-						if (currentSortAvoidanceCost.compare(bestCost) <= 0)
+						if ((currentSortAvoidanceCost.compare(bestCost) <= 0)
+							|| bestCost.isUninitialized())
 						{
 							rememberBestCost(currentSortAvoidanceCost,
 											Optimizer.SORT_AVOIDANCE_PLAN);
@@ -1776,6 +1793,15 @@ public class OptimizerImpl implements Optimizer
 														outerCost,
 														optimizable);
 
+		// Before considering the cost, make sure we set the optimizable's
+		// "current" cost to be the one that we found.  Doing this allows
+		// us to compare "current" with "best" later on to find out if
+		// the "current" plan is also the "best" one this round--if it's
+		// not then we'll have to revert back to whatever the best plan is.
+		// That check is performed in getNextDecoratedPermutation() of
+		// this class.
+		optimizable.getCurrentAccessPath().setCostEstimate(estimatedCost);
+
 		/*
 		** Skip this access path if it takes too much memory.
 		**
@@ -1783,6 +1809,9 @@ public class OptimizerImpl implements Optimizer
 		** a single scan is the total number of rows divided by the number
 		** of outer rows.  The optimizable may over-ride this assumption.
 		*/
+		// RESOLVE: The following call to memoryUsageOK does not behave
+		// correctly if outerCost.rowCount() is POSITIVE_INFINITY; see
+		// DERBY-1259.
 		if( ! optimizable.memoryUsageOK( estimatedCost.rowCount() / outerCost.rowCount(), maxMemoryPerTable))
 		{
 			if (optimizerTrace)
@@ -1797,6 +1826,7 @@ public class OptimizerImpl implements Optimizer
 		CostEstimate bestCostEstimate = ap.getCostEstimate();
 
 		if ((bestCostEstimate == null) ||
+			bestCostEstimate.isUninitialized() ||
 			(estimatedCost.compare(bestCostEstimate) < 0))
 		{
 			ap.setConglomerateDescriptor(cd);
@@ -1844,6 +1874,7 @@ public class OptimizerImpl implements Optimizer
 
 					/* Is this the cheapest sort-avoidance path? */
 					if ((bestCostEstimate == null) ||
+						bestCostEstimate.isUninitialized() ||
 						(estimatedCost.compare(bestCostEstimate) < 0))
 					{
 						ap.setConglomerateDescriptor(cd);
@@ -1912,6 +1943,10 @@ public class OptimizerImpl implements Optimizer
 		** a single scan is the total number of rows divided by the number
 		** of outer rows.  The optimizable may over-ride this assumption.
 		*/
+
+        // RESOLVE: The following call to memoryUsageOK does not behave
+        // correctly if outerCost.rowCount() is POSITIVE_INFINITY; see
+        // DERBY-1259.
         if( ! optimizable.memoryUsageOK( estimatedCost.rowCount() / outerCost.rowCount(),
                                          maxMemoryPerTable))
 		{
@@ -1935,6 +1970,7 @@ public class OptimizerImpl implements Optimizer
 		CostEstimate bestCostEstimate = ap.getCostEstimate();
 
 		if ((bestCostEstimate == null) ||
+			bestCostEstimate.isUninitialized() ||
 			(estimatedCost.compare(bestCostEstimate) <= 0))
 		{
 			ap.setCostEstimate(estimatedCost);
@@ -1969,6 +2005,7 @@ public class OptimizerImpl implements Optimizer
 
 					/* Is this the cheapest sort-avoidance path? */
 					if ((bestCostEstimate == null) ||
+						bestCostEstimate.isUninitialized() ||
 						(estimatedCost.compare(bestCostEstimate) < 0))
 					{
 						ap.setCostEstimate(estimatedCost);

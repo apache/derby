@@ -533,7 +533,10 @@ public class FromBaseTable extends FromTable
 							predList,
 							outerCost);
 
-		return costEstimate;
+		// The cost that we found from the above call is now stored in the
+		// cost field of this FBT's current access path.  So that's the
+		// cost we want to return here.
+		return getCurrentAccessPath().getCostEstimate();
 	}
 
 	/** @see Optimizable#getTableDescriptor */

@@ -324,7 +324,16 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 							childCost.rowCount(),
 							childCost.singleScanRowCount());
 
-			optimizer.considerCost(this, restrictionList, getCostEstimate(), outerCost);
+
+			// Note: we don't call "optimizer.considerCost()" here because
+			// a) the child will make that call as part of its own
+			// "optimizeIt()" work above, and b) the child might have
+			// different criteria for "considering" (i.e. rejecting or
+			// accepting) a plan's cost than this ProjectRestrictNode does--
+			// and we don't want to override the child's decision.  So as
+			// with most operations in this class, if the child is an
+			// Optimizable, we just let it do its own work and make its
+			// own decisions.
 		}
 		else if ( ! accessPathModified)
 		{
