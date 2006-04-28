@@ -1387,6 +1387,11 @@ class DDMReader
 	 */
 	protected void skipDss() throws DRDAProtocolException
 	{
+		while (dssIsContinued)
+		{
+			skipBytes((int)dssLength);
+			readDSSContinuationHeader();
+		}
 		skipBytes((int)dssLength);
 		topDdmCollectionStack = EMPTY_STACK;
 		ddmScalarLen = 0;
@@ -1497,6 +1502,7 @@ class DDMReader
 	private void ensureBLayerDataInBuffer (int desiredDataSize, boolean adjustLen) 
 		throws DRDAProtocolException
 	{
+		ensureALayerDataInBuffer (desiredDataSize);
 		if (dssIsContinued) 
 		{
 			if (desiredDataSize > dssLength) 
@@ -1505,10 +1511,6 @@ class DDMReader
 					(((desiredDataSize - dssLength) / DssConstants.MAX_DSS_LENGTH) + 1);
 				compressBLayerData (continueDssHeaderCount);
 			}
-		}
-		else 
-		{
-			ensureALayerDataInBuffer (desiredDataSize);
 		}
 		if (adjustLen)
 			adjustLengths(desiredDataSize);
@@ -1749,8 +1751,11 @@ class DDMReader
 				                               "fill",
 				                               5);
 			}
-			count += actualBytesRead;
-			totalBytesRead += actualBytesRead;
+			if (actualBytesRead != -1)
+			{
+				count += actualBytesRead;
+				totalBytesRead += actualBytesRead;
+			}
 
 		}
 		while ((totalBytesRead < minimumBytesNeeded) && (actualBytesRead != -1));
