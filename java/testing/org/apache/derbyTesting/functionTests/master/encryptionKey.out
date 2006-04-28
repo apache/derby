@@ -13,11 +13,14 @@ ij> ----------------------------------------------------------------------------
 --	   with right key
 --	   with wrong key
 --	   with right key
--- 	   test restoreFrom 
+--	   test restoreFrom
+-- Case 4: use invalid key when trying to create
+--     key length not even
+--     key contains invalid character(s)
 --	   
 ------------------------------------------------------------------------------------
 -- case1:	give external encryptionKey instead of bootpassword
-connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61626364656667686961626364656568';
+connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 ij> create table t1(i1 int);
 0 rows inserted/updated/deleted
 ij> insert into t1 values(1);
@@ -30,7 +33,7 @@ ij> commit;
 ij> connect 'jdbc:derby:encdbcbc_key;shutdown=true';
 ERROR 08006: Database 'encdbcbc_key' shutdown.
 ij> -- case 1.1 - right key
-connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61626364656667686961626364656568';
+connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 WARNING 01J01: Database 'encdbcbc_key' not created, connection made to existing database instead.
 ij(CONNECTION1)> select * from t1;
 I1         
@@ -41,17 +44,17 @@ ERROR 08006: Database 'encdbcbc_key' shutdown.
 ij(CONNECTION1)> -- (-ve case) connect without the encryptionKey 
 --  connect with encryptionKey and keylength ( will ignore the keylength value)
 --  wrong length
-connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=616364656667686961626364656568';
+connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6163646566676868';
 ERROR XJ040: Failed to start database 'encdbcbc_key', see the next exception for details.
 ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij(CONNECTION1)> -- wrong key
-connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=68626364656667686961626364656568';
+connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6862636465666768';
 ERROR XJ040: Failed to start database 'encdbcbc_key', see the next exception for details.
 ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij(CONNECTION1)> select * from t1;
 ERROR 08003: No current connection.
 ij(CONNECTION1)> -- correct key
-connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61626364656667686961626364656568';
+connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 WARNING 01J01: Database 'encdbcbc_key' not created, connection made to existing database instead.
 ij(CONNECTION2)> select * from t1;
 I1         
@@ -63,14 +66,14 @@ CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/bkup1');
 ij(CONNECTION2)> connect 'jdbc:derby:encdbcbc_key;shutdown=true';
 ERROR 08006: Database 'encdbcbc_key' shutdown.
 ij(CONNECTION2)> -- connect to original db after backup
-connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61626364656667686961626364656568';
+connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 WARNING 01J01: Database 'encdbcbc_key' not created, connection made to existing database instead.
 ij(CONNECTION3)> select * from t1;
 I1         
 -----------
 1          
 ij(CONNECTION3)> -- case 3 :create db from backup using correct key
-connect 'jdbc:derby:encdbcbc_key2;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61626364656667686961626364656568';
+connect 'jdbc:derby:encdbcbc_key2;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 ij(CONNECTION4)> select * from t1;
 I1         
 -----------
@@ -78,7 +81,7 @@ I1
 ij(CONNECTION4)> connect 'jdbc:derby:encdbcbc_key2;shutdown=true';
 ERROR 08006: Database 'encdbcbc_key2' shutdown.
 ij(CONNECTION4)> -- create db from backup using wrong key
-connect 'jdbc:derby:encdbcbc_key3;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61226364656667686961626364656568';
+connect 'jdbc:derby:encdbcbc_key3;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6122636465666768';
 ERROR XJ040: Failed to start database 'encdbcbc_key3', see the next exception for details.
 ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij(CONNECTION4)> select * from t1;
@@ -86,14 +89,14 @@ ERROR 08003: No current connection.
 ij(CONNECTION4)> connect 'jdbc:derby:encdbcbc_key3;shutdown=true';
 ERROR XJ004: Database 'encdbcbc_key3' not found.
 ij(CONNECTION4)> -- create db from backup using correct key
-connect 'jdbc:derby:encdbcbc_12;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61626364656667686961626364656568';
+connect 'jdbc:derby:encdbcbc_12;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 ij(CONNECTION5)> select * from t1;
 I1         
 -----------
 1          
 ij(CONNECTION5)> connect 'jdbc:derby:encdbcbc_key12;shutdown=true';
 ERROR XJ004: Database 'encdbcbc_key12' not found.
-ij(CONNECTION5)> connect 'jdbc:derby:encdb;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61626364656667686961626364656568';
+ij(CONNECTION5)> connect 'jdbc:derby:encdb;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 ij(CONNECTION6)> create table t1(i1 int ,c2 char(20));
 0 rows inserted/updated/deleted
 ij(CONNECTION6)> insert into t1 values(1,'a');
@@ -107,10 +110,21 @@ ij(CONNECTION6)> call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup2');
 ij(CONNECTION6)> connect 'jdbc:derby:encdb;shutdown=true';
 ERROR 08006: Database 'encdb' shutdown.
 ij(CONNECTION6)> disconnect;
-ij> connect 'jdbc:derby:encdb;restoreFrom=extinout/mybackup2/encdb;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61626364656667686961626364656568';
+ij> connect 'jdbc:derby:encdb;restoreFrom=extinout/mybackup2/encdb;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 ij(CONNECTION6)> select * from t1;
 I1         |C2                  
 --------------------------------
 1          |a                   
 ij(CONNECTION6)> disconnect;
+ij> -- case 4 : invalid keys
+-- key length not even
+connect 'jdbc:derby:encddbdb_invkey;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=123456789';
+ERROR XJ041: Failed to create database 'encddbdb_invkey', see the next exception for details.
+ERROR XBM01: Startup failed due to an exception. See next exception for details. 
+ERROR XBCXM: The length of the external encryption key must be an even number.
+ij> -- key contains illegal character(s)
+connect 'jdbc:derby:encddbdb_invkey;create=true;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=61626364656667XY';
+ERROR XJ041: Failed to create database 'encddbdb_invkey', see the next exception for details.
+ERROR XBM01: Startup failed due to an exception. See next exception for details. 
+ERROR XBCXN: The external encryption key contains one or more illegal characters. Allowed characters for a hexadecimal number are 0-9, a-f and A-F.
 ij> 
