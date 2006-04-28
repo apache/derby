@@ -18,7 +18,7 @@
 
  */
 
-package org.apache.derby.iapi.reference;
+package org.apache.derby.shared.common.reference;
 
 /**
 	This class contains message identifiers for
