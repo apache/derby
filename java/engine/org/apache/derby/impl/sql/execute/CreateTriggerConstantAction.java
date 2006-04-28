@@ -191,6 +191,21 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 
 		SchemaDescriptor triggerSd = getSchemaDescriptorForCreate(dd, activation, triggerSchemaName);
 
+		if (spsCompSchemaId == null) {
+			SchemaDescriptor def = lcc.getDefaultSchema();
+			if (def.getUUID() == null) {
+				// Descriptor for default schema is stale,
+				// look it up in the dictionary
+				def = dd.getSchemaDescriptor(def.getDescriptorName(), tc, 
+											 false);
+			}
+			spsCompSchemaId = def.getUUID();
+		}
+		if (SanityManager.DEBUG) { 
+			SanityManager.ASSERT(spsCompSchemaId != null,
+								 "spsCompSchemaId is null"); 
+		}
+
 		String tabName;
 		if (triggerTable != null)
 		{

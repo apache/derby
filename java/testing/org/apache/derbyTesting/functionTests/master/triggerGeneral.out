@@ -1239,4 +1239,16 @@ call d388();
 Running DERBY-388 Test.
 DERBY-388 Test Passed.
 0 rows inserted/updated/deleted
-ij> 
+ij> -- Derby-85: It turns out that if a table t1 exists in a non-default schema 
+-- and the default schema (e.g., "SOMEUSER") doesn't exist yet (because no 
+-- objects have been created in that schema), then attempts to create a 
+-- trigger on t1 using its qualified name will lead to a null pointer 
+-- exception in the Derby engine. 
+connect 'wombat;user=someuser';
+ij(CONNECTION1)> autocommit off;
+ij(CONNECTION1)> create table myschema.mytable (i int);
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> create trigger mytrigger after update on myschema.mytable for each row mode db2sql select * from sys.systables;
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> rollback;
+ij(CONNECTION1)> 

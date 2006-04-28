@@ -33,7 +33,7 @@
       srcdir="${derby.build.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${compile.classpath};${java.home}/../lib/tools.jar"/>
+        <pathelement path="${java14compile.classpath};${java.home}/../lib/tools.jar"/>
       </classpath>
       <include name="org/apache/derbyBuild/**"/>
     </javac>
