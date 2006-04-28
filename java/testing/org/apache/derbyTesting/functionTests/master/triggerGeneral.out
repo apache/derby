@@ -1069,7 +1069,7 @@ ij> -- Should have 1,234 as data in tsn_t
 select * from tsn_t;
 A          |B          
 -----------------------
-1          |1          
+1          |234        
 ij> drop table tsn;
 0 rows inserted/updated/deleted
 ij> drop table tsn_t;

@@ -587,7 +587,11 @@ public class CreateTriggerNode extends DDLStatementNode
 		**
 		** 		cast (org.apache.derby.iapi.db.Factory::
 		**			getTriggerExecutionContext().getNewRow().
-		**				getObject('<colName>') AS DECIMAL(6,2))
+		**				getObject(<colPosition>) AS DECIMAL(6,2))
+        **
+        ** Column position is used to avoid the wrong column being
+        ** selected problem (DERBY-1258) caused by the case insensitive
+        ** JDBC rules for fetching a column by name.
 		**
 		** The cast back to the SQL Domain may seem redundant
 		** but we need it to make the column reference appear
@@ -599,9 +603,11 @@ public class CreateTriggerNode extends DDLStatementNode
 		**		CREATE TRIGGER ... INSERT INTO T length(Column), ...
 		*/
 		StringBuffer methodCall = new StringBuffer();
-		methodCall.append("cast (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
+		methodCall.append("CAST (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
 		methodCall.append(isOldTable ? "getOldRow()" : "getNewRow()");
-		methodCall.append(".getObject('"+colName+"') AS ");
+		methodCall.append(".getObject(");
+        methodCall.append(colDesc.getPosition());
+        methodCall.append(") AS ");
 		DataTypeDescriptor dts = colDesc.getType();
 		TypeId typeId = dts.getTypeId();
 
@@ -611,8 +617,9 @@ public class CreateTriggerNode extends DDLStatementNode
 		** case.
 		*/
 		methodCall.append(
-		  (typeId.userType() ? typeId.getSQLTypeName() : dts.getSQLstring())
-				 + ") ");
+		  (typeId.userType() ? typeId.getSQLTypeName() : dts.getSQLstring()));
+        
+        methodCall.append(") ");
 
 		return methodCall.toString();
 	}
