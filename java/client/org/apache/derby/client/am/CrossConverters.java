@@ -127,7 +127,7 @@ final class CrossConverters {
 
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "byte", Types.getTypeString(targetType));
         }
     }
@@ -165,7 +165,7 @@ final class CrossConverters {
 
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                     "int", Types.getTypeString(targetType));
         }
     }
@@ -259,7 +259,7 @@ final class CrossConverters {
 
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "long", Types.getTypeString(targetType));
         }
     }
@@ -334,7 +334,7 @@ final class CrossConverters {
 
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "float", Types.getTypeString(targetType));
         }
     }
@@ -397,7 +397,7 @@ final class CrossConverters {
 
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "double", Types.getTypeString(targetType));
         }
     }
@@ -451,7 +451,7 @@ final class CrossConverters {
 
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "java.Math.BigDecimal", Types.getTypeString(targetType));
         }
     }
@@ -474,7 +474,7 @@ final class CrossConverters {
 
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "java.sql.Date", Types.getTypeString(targetType));
         }
     }
@@ -494,7 +494,7 @@ final class CrossConverters {
 
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "java.sql.Time", Types.getTypeString(targetType));
         }
     }
@@ -520,7 +520,7 @@ final class CrossConverters {
 
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "java.sql.Timestamp", Types.getTypeString(targetType));
         }
     }
@@ -575,12 +575,12 @@ final class CrossConverters {
             case Types.BLOB:
             default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "String", Types.getTypeString(targetDriverType));
             }
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-                    new MessageId 
+                    new ClientMessageId 
                     (SQLState.LANG_FORMAT_EXCEPTION), 
                     Types.getTypeString(targetDriverType),
                     e);                    
@@ -624,7 +624,7 @@ final class CrossConverters {
             return new Blob(source, agent_, 0);
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "byte[]", Types.getTypeString(targetType));
         }
     }
@@ -647,7 +647,7 @@ final class CrossConverters {
         case Types.BLOB:
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "java.io.Reader", Types.getTypeString(targetType));
         }
     }
@@ -665,7 +665,7 @@ final class CrossConverters {
             }
             if (length != totalRead) {
                 throw new SqlException(agent_.logWriter_, 
-                		new MessageId (SQLState.READER_UNDER_RUN));
+                		new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
             return sw.toString();
         } catch (java.io.IOException e) {
@@ -690,7 +690,7 @@ final class CrossConverters {
         case Types.BLOB:
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "java.io.InputStream", Types.getTypeString(targetType));
         }
     }
@@ -715,13 +715,13 @@ final class CrossConverters {
 
             if (length != totalRead) {
                 throw new SqlException(agent_.logWriter_, 
-                		new MessageId (SQLState.READER_UNDER_RUN));
+                		new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
 
             return new String(baos.toByteArray(), encoding);
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                     "java.io.InputStream", "String", e);
         }
     }
@@ -742,7 +742,7 @@ final class CrossConverters {
             }
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "java.sql.Blob", Types.getTypeString(targetType));
         }
     }
@@ -759,7 +759,7 @@ final class CrossConverters {
             return new Blob(agent_, source, length);
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "java.io.InputStream", Types.getTypeString(targetType));
         }
     }
@@ -779,7 +779,7 @@ final class CrossConverters {
 
             if (length != totalRead) {
                 throw new SqlException(agent_.logWriter_,
-                		new MessageId (SQLState.READER_UNDER_RUN));
+                		new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
         } catch (java.io.IOException e) {
             throw new SqlException(agent_.logWriter_, e, null);
@@ -799,7 +799,7 @@ final class CrossConverters {
             return source.toString();
         default:
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 "java.sql.Clob", Types.getTypeString(targetType));
         }
     }
@@ -845,7 +845,7 @@ final class CrossConverters {
             return setObject(targetType, ((Byte) source).byteValue());
         } else {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
                 source.getClass().getName(), Types.getTypeString(targetType));
         }
     }
@@ -954,7 +954,7 @@ final class CrossConverters {
             return parseByte(source);
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new MessageId 
+            		new ClientMessageId 
             		(SQLState.LANG_FORMAT_EXCEPTION), "byte", e);
         }
     }
@@ -1014,7 +1014,7 @@ final class CrossConverters {
             return parseShort(source);
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new MessageId 
+            		new ClientMessageId 
             		(SQLState.LANG_FORMAT_EXCEPTION), 
             		"short", e);
         }
@@ -1066,7 +1066,7 @@ final class CrossConverters {
             return parseInt(source);
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new MessageId (SQLState.LANG_FORMAT_EXCEPTION),
+            		new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
             		"int", e);
         }
     }
@@ -1108,7 +1108,7 @@ final class CrossConverters {
             return parseLong(source);
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new MessageId (SQLState.LANG_FORMAT_EXCEPTION),
+            		new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
         			"long", e);
         }
     }
@@ -1141,7 +1141,7 @@ final class CrossConverters {
             return Float.parseFloat(source.trim());
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new MessageId (SQLState.LANG_FORMAT_EXCEPTION),
+            		new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "float", e);
         }
     }
@@ -1165,7 +1165,7 @@ final class CrossConverters {
             return Double.parseDouble(source.trim());
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new MessageId (SQLState.LANG_FORMAT_EXCEPTION),
+            		new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "double", e);
         }
     }
@@ -1183,7 +1183,7 @@ final class CrossConverters {
             return new java.math.BigDecimal(source.trim());
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_,
-            		new MessageId (SQLState.LANG_FORMAT_EXCEPTION),
+            		new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "java.math.BigDecimal", e);
         }
     }
@@ -1217,7 +1217,7 @@ final class CrossConverters {
             return date_valueOf(source);
         } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
-            		new MessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
+            		new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 
@@ -1236,7 +1236,7 @@ final class CrossConverters {
             return time_valueOf(source);
         } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
-            		new MessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
+            		new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 
@@ -1251,7 +1251,7 @@ final class CrossConverters {
             return timestamp_valueOf(source);
         } catch (java.lang.IllegalArgumentException e) {  // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
-            		new MessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
+            		new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 

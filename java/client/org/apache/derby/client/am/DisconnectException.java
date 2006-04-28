@@ -21,11 +21,11 @@
 package org.apache.derby.client.am;
 
 public class DisconnectException extends SqlException {
-    public DisconnectException(Agent agent, MessageId msgid, SqlCode sqlcode) {
+    public DisconnectException(Agent agent, ClientMessageId msgid, SqlCode sqlcode) {
         super(agent != null ? agent.logWriter_ : null, msgid, sqlcode);
     }
 
-    public DisconnectException(Agent agent, MessageId msgid) {
+    public DisconnectException(Agent agent, ClientMessageId msgid) {
         super(agent != null ? agent.logWriter_ : null, msgid, 
             SqlCode.disconnectError);
         

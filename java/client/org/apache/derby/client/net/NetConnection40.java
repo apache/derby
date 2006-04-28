@@ -35,7 +35,7 @@ import java.sql.SQLXML;
 import java.util.Properties;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
-import org.apache.derby.client.am.MessageId;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class  NetConnection40 extends org.apache.derby.client.net.NetConnection {
@@ -269,7 +269,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
         try { 
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw new SqlException(null,new MessageId(SQLState.UNABLE_TO_UNWRAP),
+            throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                     interfaces).getSQLException();
         }
     }

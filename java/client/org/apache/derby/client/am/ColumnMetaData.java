@@ -108,7 +108,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         // agent_.checkForDeferredExceptions();
         if (statementClosed_) {
             throw new SqlException(logWriter_, 
-            		new MessageId (SQLState.LANG_STATEMENT_CLOSED_NO_REASON));
+            		new ClientMessageId (SQLState.LANG_STATEMENT_CLOSED_NO_REASON));
         }
     }
 
@@ -311,7 +311,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return (int) (2 * sqlLength_[column - 1]); // eg. "FF" represents just one byte
             default:
                 throw new SqlException(logWriter_, 
-                		new MessageId (SQLState.UNSUPPORTED_TYPE));
+                		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -430,7 +430,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return 26;
             default:
                 throw new SqlException(logWriter_, 
-                		new MessageId (SQLState.UNSUPPORTED_TYPE));
+                		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -594,7 +594,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return "NUMERIC";
             default:
                 throw new SqlException(logWriter_, 
-                		new MessageId (SQLState.UNSUPPORTED_TYPE));
+                		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -706,7 +706,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return "java.sql.Ref";
             default:
                 throw new SqlException(logWriter_, 
-                		new MessageId (SQLState.UNSUPPORTED_TYPE));
+                		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -721,7 +721,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
     void checkForValidColumnIndex(int column) throws SqlException {
         if (column < 1 || column > columns_) {
             throw new SqlException(logWriter_, 
-            		new MessageId (SQLState.LANG_INVALID_COLUMN_POSITION),
+            		new ClientMessageId (SQLState.LANG_INVALID_COLUMN_POSITION),
             		new Integer (column), new Integer(columns_));
         }
     }
@@ -825,10 +825,10 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         case java.sql.Types.NULL:
         case java.sql.Types.OTHER:
             throw new SqlException(logWriter_, 
-            		new MessageId (SQLState.UNSUPPORTED_TYPE));
+            		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
         default:
             throw new SqlException(logWriter_, 
-            		new MessageId (SQLState.UNSUPPORTED_TYPE));
+            		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
         }
     }
 
@@ -901,7 +901,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             }
         }
         throw new SqlException(logWriter_, 
-        		new MessageId (SQLState.INVALID_COLUMN_NAME), columnName);
+        		new ClientMessageId (SQLState.INVALID_COLUMN_NAME), columnName);
     }
 
     // assign ordinal position as the column name if null.

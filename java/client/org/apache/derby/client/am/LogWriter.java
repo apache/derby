@@ -1218,7 +1218,7 @@ public class LogWriter {
             return printWriter;
         } catch (java.io.IOException e) {
             throw new SqlException(null, 
-                new MessageId(SQLState.UNABLE_TO_OPEN_FILE),
+                new ClientMessageId(SQLState.UNABLE_TO_OPEN_FILE),
                 new Object[] { fileName, e.getMessage() },
                 e);
         }

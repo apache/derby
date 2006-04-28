@@ -29,7 +29,7 @@ import java.sql.SQLXML;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.client.am.Cursor;
-import org.apache.derby.client.am.MessageId;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -174,7 +174,7 @@ public class NetResultSet40 extends NetResultSet{
         try { 
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw new SqlException(null,new MessageId(SQLState.UNABLE_TO_UNWRAP),
+            throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                     interfaces).getSQLException();
         }
     }

@@ -235,7 +235,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             statement_.accumulateWarning(
                 new SqlWarning(
                     agent_.logWriter_, 
-                    new MessageId(SQLState.INVALID_RESULTSET_TYPE),
+                    new ClientMessageId(SQLState.INVALID_RESULTSET_TYPE),
                         new Integer(statement_.resultSetType_),
                         new Integer(resultSetType_)));
         }
@@ -248,7 +248,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             accumulateWarning(
                 new SqlWarning(
                     agent_.logWriter_,
-                    new MessageId(
+                    new ClientMessageId(
                     SQLState.QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET)));
                 
         }
@@ -530,7 +530,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
             if (wasNull_ == ResultSet.WAS_NULL_UNSET) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.WASNULL_INVALID));
+                    new ClientMessageId(SQLState.WASNULL_INVALID));
             }
 
             if (agent_.loggingEnabled()) {
@@ -885,7 +885,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             if (calendar == null) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.CALENDAR_IS_NULL));
+                    new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
             java.sql.Date date = getDate(column);
             if (date != null) {
@@ -950,7 +950,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             if (calendar == null) {
                 throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.CALENDAR_IS_NULL));
+                    new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
             java.sql.Time time = getTime(column);
             if (time != null) {
@@ -1015,7 +1015,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             if (calendar == null) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.CALENDAR_IS_NULL));
+                    new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
             java.sql.Timestamp timestamp = getTimestamp(column);
             if (timestamp != null) {
@@ -1184,7 +1184,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                                     updatedColumns_[column - 1])).getBytes("UTF-8"));
                 } catch (java.io.UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                        new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                         "String", "java.io.ByteArrayInputStream(UTF-8)", e);
                 }
             } else {
@@ -1305,7 +1305,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             java.sql.Ref result = isNull(column) ? null : cursor_.getRef(column);
             if (true) {
                 throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
+                    new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
             }
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getRef", result);
@@ -1332,7 +1332,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             java.sql.Array result = isNull(column) ? null : cursor_.getArray(column);
             if (true) {
                 throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
+                    new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
             }
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getArray", result);
@@ -1398,7 +1398,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             if (true) {
                 throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
+                    new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
             }
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getObject", result);
@@ -2328,7 +2328,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
         if (row > Integer.MAX_VALUE) {
             this.accumulateWarning(new SqlWarning(agent_.logWriter_, 
-                new MessageId(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT),
+                new ClientMessageId(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT),
                 new Long(row)));
         }
         return (int) row;
@@ -2451,7 +2451,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // this method may not be called when the cursor on the insert row
         if (isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
+                new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
         }
 
         // If the resultset is empty, relative(n) is a null operation
@@ -2628,7 +2628,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     break;
                 default:
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_FETCH_DIRECTION),
+                        new ClientMessageId(SQLState.INVALID_FETCH_DIRECTION),
                         new Integer(direction));
                 }
             }
@@ -2664,7 +2664,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 checkForClosedResultSet();
                 if (rows < 0 || (maxRows_ != 0 && rows > maxRows_)) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_FETCH_SIZE),
+                        new ClientMessageId(SQLState.INVALID_FETCH_SIZE),
                         new Integer(rows)).getSQLException();
                 }
                 setFetchSize_(rows);
@@ -2789,7 +2789,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 checkUpdatePreconditions(column, "updateNull");
                 if (!resultSetMetaData_.nullable_[column - 1]) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.LANG_NULL_INTO_NON_NULL),
+                        new ClientMessageId(SQLState.LANG_NULL_INTO_NON_NULL),
                         new Integer(column));
                 }
                 updateColumn(column, null);
@@ -3410,13 +3410,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
 	checkForUpdatableResultSet("insertRow");
         if (isOnCurrentRow_) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
+                new ClientMessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
        }
  
         // if not on a valid row, then do not accept updateXXX calls
         if (!isValidCursorPosition_) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
+                new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
         }
 
         // User might not be updating all the updatable columns selected in the
@@ -3483,13 +3483,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
         
         if (isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
+                new ClientMessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
         }
 
         //if not on a valid row, then do not accept updateXXX calls
         if (!isValidCursorPosition_)
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
+                new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
 
         // If no updateXXX has been called on this ResultSet object, then
         // updatedColumns_ will be null and hence no action required
@@ -3609,7 +3609,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         if (isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
+                new ClientMessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
         }
 
         if (preparedStatementForDelete_ == null) {
@@ -3655,7 +3655,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 	checkForUpdatableResultSet("refreshRow");
         if (isBeforeFirstX() || isAfterLastX() || isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.CURSOR_CANNOT_INVOKE_ON_INSROW_OR_INVALIDROW_OR_READONLY));
+                new ClientMessageId(SQLState.CURSOR_CANNOT_INVOKE_ON_INSROW_OR_INVALIDROW_OR_READONLY));
         }
 	
         // this method does nothing if ResultSet is TYPE_SCROLL_INSENSITIVE
@@ -3683,13 +3683,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 checkForUpdatableResultSet("cancelRowUpdates");
                 if (isOnInsertRow_) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
+                        new ClientMessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
                 }
 
                 // if not on a valid row, then do not accept cancelRowUpdates call
                 if (!isValidCursorPosition_)
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
+                        new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
 
                 // if updateRow() has already been called, then cancelRowUpdates should have
                 // no effect.  updateRowCalled_ is reset to false as soon as the cursor moves to a new row.
@@ -4510,7 +4510,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         if (updateString == null) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_NO_UPDATE_CALLS_ON_CURRENT_ROW));
+                new ClientMessageId(SQLState.CURSOR_NO_UPDATE_CALLS_ON_CURRENT_ROW));
         }
         preparedStatementForUpdate_ =
                 statement_.connection_.preparePositionedUpdateStatement(updateString,
@@ -4577,24 +4577,24 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         if (!isOnCurrentRow_ && !isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_NOT_ON_CURRENT_OR_INSERT_ROW));
+                new ClientMessageId(SQLState.CURSOR_NOT_ON_CURRENT_OR_INSERT_ROW));
         }
 
         if (resultSetMetaData_.sqlxUpdatable_ == null || resultSetMetaData_.sqlxUpdatable_[column - 1] != 1) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_COLUMN_NOT_UPDATABLE));
+                new ClientMessageId(SQLState.CURSOR_COLUMN_NOT_UPDATABLE));
         }
 
         //if not on a valid row, then do not accept updateXXX calls
         if (!isValidCursorPosition_)
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
+                new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
     }
 
     final void checkForValidColumnIndex(int column) throws SqlException {
         if (column < 1 || column > resultSetMetaData_.columns_) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.LANG_INVALID_COLUMN_POSITION),
+                new ClientMessageId(SQLState.LANG_INVALID_COLUMN_POSITION),
                 new Integer(column), new Integer(resultSetMetaData_.columns_));
         }
     }
@@ -4603,7 +4603,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (!openOnClient_) {
             agent_.checkForDeferredExceptions();
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CLIENT_RESULT_SET_NOT_OPEN));
+                new ClientMessageId(SQLState.CLIENT_RESULT_SET_NOT_OPEN));
         } else {
             agent_.checkForDeferredExceptions();
         }
@@ -4613,7 +4613,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         throws SqlException {
         if (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
             throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.UPDATABLE_RESULTSET_API_DISALLOWED),
+                    new ClientMessageId(SQLState.UPDATABLE_RESULTSET_API_DISALLOWED),
                     operation);
         }
     }
@@ -4621,21 +4621,21 @@ public abstract class ResultSet implements java.sql.ResultSet,
     private final void checkForValidCursorPosition() throws SqlException {
         if (!isValidCursorPosition_) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
+                new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
         }
     }
 
     private final void checkThatResultSetTypeIsScrollable() throws SqlException {
         if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_MUST_BE_SCROLLABLE));
+                new ClientMessageId(SQLState.CURSOR_MUST_BE_SCROLLABLE));
         }
     }
 
     private final void checkThatResultSetIsNotDynamic() throws SqlException {
         if (sensitivity_ == sensitivity_sensitive_dynamic__) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CURSOR_INVALID_FOR_SENSITIVE_DYNAMIC));
+                new ClientMessageId(SQLState.CURSOR_INVALID_FOR_SENSITIVE_DYNAMIC));
         }
     }
 
@@ -5301,7 +5301,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 				
 			}catch(IOException e){				
 				throw new SqlException(agent_.logWriter_ ,
-                    new MessageId(SQLState.JAVA_EXCEPTION), 
+                    new ClientMessageId(SQLState.JAVA_EXCEPTION), 
                     "java.io.IOException", e.getMessage(), e);
 			}
 			
@@ -5315,7 +5315,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 	
 	if(streamUsedFlags_[columnIndex - 1]){
 	    throw new SqlException(agent_.logWriter_,
-            new MessageId(SQLState.LANG_STREAM_RETRIEVED_ALREADY));
+            new ClientMessageId(SQLState.LANG_STREAM_RETRIEVED_ALREADY));
 	}
 
 	streamUsedFlags_[columnIndex - 1] = true;

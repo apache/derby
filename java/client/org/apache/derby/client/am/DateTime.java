@@ -243,7 +243,7 @@ public class DateTime {
         int year = date.getYear() + 1900;
         if (year > 9999) {
             throw new SqlException(null,
-                new MessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
+                new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
                 new Integer(year), "9999");
         }
         int month = date.getMonth() + 1;
@@ -330,7 +330,7 @@ public class DateTime {
         int year = timestamp.getYear() + 1900;
         if (year > 9999) {
             throw new SqlException(null,
-                new MessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
+                new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
                 new Integer(year), "9999");
         }
         int month = timestamp.getMonth() + 1;
@@ -605,7 +605,7 @@ public class DateTime {
         int year = timestamp.getYear() + 1900;
         if (year > 9999) {
             throw new SqlException(null,
-                new MessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
+                new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
                 new Integer(year), "9999");
         }
         int month = timestamp.getMonth() + 1;
@@ -691,7 +691,7 @@ public class DateTime {
         int year = date.getYear() + 1900;
         if (year > 9999) {
             throw new SqlException(null,
-                new MessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
+                new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
                 new Integer(year), "9999");
         }
         int month = date.getMonth() + 1;

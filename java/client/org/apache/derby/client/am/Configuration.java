@@ -174,12 +174,12 @@ public class Configuration {
             dncResources__ = (java.util.ResourceBundle) java.security.AccessController.doPrivileged(new org.apache.derby.client.am.GetResourceBundleAction(classNameForResources));
         } catch (java.security.PrivilegedActionException e) {
             throw new SqlException(null, 
-                    new MessageId (SQLState.ERROR_PRIVILEGED_ACTION),
+                    new ClientMessageId (SQLState.ERROR_PRIVILEGED_ACTION),
                     e.getException());                    
         } catch (java.util.MissingResourceException e) {
             // A null log writer is passed, because jdbc 1 sql exceptions are automatically traced
             throw new SqlException(null,
-                    new MessageId (SQLState.MISSING_RESOURCE_BUNDLE),
+                    new ClientMessageId (SQLState.MISSING_RESOURCE_BUNDLE),
                     packageNameForDNC, Configuration.dncDriverName);
         }
     }
@@ -187,7 +187,7 @@ public class Configuration {
     public static void checkForExceptionsFromLoadConfiguration(LogWriter dncLogWriter) throws SqlException {
         if (dncResources__ == null) {
              throw new SqlException(null,
-                    new MessageId (SQLState.MISSING_RESOURCE_BUNDLE),
+                    new ClientMessageId (SQLState.MISSING_RESOURCE_BUNDLE),
                     Configuration.packageNameForDNC, 
                      Configuration.dncDriverName);            
         }
@@ -201,7 +201,7 @@ public class Configuration {
             dncProductVersionHolder__ = buildProductVersionHolder();
         } catch (java.security.PrivilegedActionException e) {
             throw new SqlException(null, 
-                    new MessageId (SQLState.ERROR_PRIVILEGED_ACTION),
+                    new ClientMessageId (SQLState.ERROR_PRIVILEGED_ACTION),
                     e.getException());                    
         } catch (java.io.IOException ioe) {
             throw new SqlException(null, ioe, null);

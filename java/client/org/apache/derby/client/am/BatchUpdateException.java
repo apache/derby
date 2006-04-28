@@ -35,7 +35,7 @@ public class BatchUpdateException extends java.sql.BatchUpdateException {
     private static MessageUtil msgutil_ = 
         new MessageUtil(SqlException.CLIENT_MESSAGE_RESOURCE_NAME);
 
-    public BatchUpdateException(LogWriter logWriter, MessageId msgid,
+    public BatchUpdateException(LogWriter logWriter, ClientMessageId msgid,
         Object[] args, int[] updateCounts)
     {
         super(
@@ -53,13 +53,13 @@ public class BatchUpdateException extends java.sql.BatchUpdateException {
     
     // Syntactic sugar constructors to make it easier to create
     // a BatchUpdateException with substitution parameters
-    public BatchUpdateException(LogWriter logWriter, MessageId msgid,
+    public BatchUpdateException(LogWriter logWriter, ClientMessageId msgid,
         int[] updateCounts)
     {
         this(logWriter, msgid, (Object [])null, updateCounts);
     }
     
-    public BatchUpdateException(LogWriter logWriter, MessageId msgid,
+    public BatchUpdateException(LogWriter logWriter, ClientMessageId msgid,
         Object arg1, int[] updateCounts)
     {
         this(logWriter, msgid, new Object[] {arg1}, updateCounts);

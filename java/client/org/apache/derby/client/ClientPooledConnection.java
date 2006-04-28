@@ -24,7 +24,7 @@ import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientDriver;
-import org.apache.derby.client.am.MessageId;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -199,7 +199,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     private void createLogicalConnection() throws SqlException {
         if (physicalConnection_ == null) {
             throw new SqlException(logWriter_,
-                new MessageId(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION));
+                new ClientMessageId(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION));
         }
         // Not the usual case, but if we have an existing logical connection, then we must close it by spec.
         // We close the logical connection without notifying the pool manager that this pooled connection is availabe for reuse.

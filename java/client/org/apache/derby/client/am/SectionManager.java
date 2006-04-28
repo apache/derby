@@ -119,7 +119,7 @@ public class SectionManager {
             return getSection(freeSectionsNonHold_, packageNameWithNoHold__, cursorNamePrefixWithNoHold__, resultSetHoldability);
         } else {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.UNSUPPORTED_HOLDABILITY_PROPERTY), 
+                new ClientMessageId(SQLState.UNSUPPORTED_HOLDABILITY_PROPERTY), 
                 new Integer(resultSetHoldability));
         }
     }
@@ -136,7 +136,7 @@ public class SectionManager {
         // unfortunately we have run out of sections
         {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.EXCEEDED_MAX_SECTIONS),
+                new ClientMessageId(SQLState.EXCEEDED_MAX_SECTIONS),
                 "32k");
         }
     }
@@ -190,7 +190,7 @@ public class SectionManager {
         ResultSet rs = (ResultSet) positionedUpdateCursorNameToResultSet_.get(cursorName);
         if (rs == null) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.CLIENT_RESULT_SET_NOT_OPEN));
+                new ClientMessageId(SQLState.CLIENT_RESULT_SET_NOT_OPEN));
         }
         return (rs.resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) ? null : rs;
     }

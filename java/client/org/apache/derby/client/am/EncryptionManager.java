@@ -106,7 +106,7 @@ public class EncryptionManager {
             keyAgreement_.init(keyPair_.getPrivate());
         } catch (java.security.GeneralSecurityException e) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
+                new ClientMessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
         }
     }
 
@@ -205,7 +205,7 @@ public class EncryptionManager {
         int changeParity;
         if (key.length != 8) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.DES_KEY_HAS_WRONG_LENGTH), 
+                new ClientMessageId(SQLState.DES_KEY_HAS_WRONG_LENGTH), 
                 new Integer(8), new Integer(key.length)); 
                         
         }
@@ -291,7 +291,7 @@ public class EncryptionManager {
                 }
             } else {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.SHARED_KEY_LENGTH_ERROR),
+                    new ClientMessageId(SQLState.SHARED_KEY_LENGTH_ERROR),
                     new Integer(sharedSecret.length)); 
             }
 
@@ -301,7 +301,7 @@ public class EncryptionManager {
         }
         catch (java.security.GeneralSecurityException e) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e);
+                new ClientMessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e);
         }
     }
 
@@ -359,16 +359,16 @@ public class EncryptionManager {
             cipherText = cipher.doFinal(plainText);
         } catch (javax.crypto.NoSuchPaddingException e) {
             throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.CRYPTO_NO_SUCH_PADDING)); 
+                        new ClientMessageId(SQLState.CRYPTO_NO_SUCH_PADDING)); 
         } catch (javax.crypto.BadPaddingException e) {
             throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.CRYPTO_BAD_PADDING)); 
+                        new ClientMessageId(SQLState.CRYPTO_BAD_PADDING)); 
         } catch (javax.crypto.IllegalBlockSizeException e) {
             throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.CRYPTO_ILLEGAL_BLOCK_SIZE)); 
+                        new ClientMessageId(SQLState.CRYPTO_ILLEGAL_BLOCK_SIZE)); 
         } catch (java.security.GeneralSecurityException e) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
+                new ClientMessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
         }
 
         return cipherText;
@@ -429,16 +429,16 @@ public class EncryptionManager {
             plainText = cipher.doFinal(cipherText);
         } catch (javax.crypto.NoSuchPaddingException e) {
             throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.CRYPTO_NO_SUCH_PADDING)); 
+                        new ClientMessageId(SQLState.CRYPTO_NO_SUCH_PADDING)); 
         } catch (javax.crypto.BadPaddingException e) {
             throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.CRYPTO_BAD_PADDING)); 
+                        new ClientMessageId(SQLState.CRYPTO_BAD_PADDING)); 
         } catch (javax.crypto.IllegalBlockSizeException e) {
             throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.CRYPTO_ILLEGAL_BLOCK_SIZE)); 
+                        new ClientMessageId(SQLState.CRYPTO_ILLEGAL_BLOCK_SIZE)); 
         } catch (java.security.GeneralSecurityException e) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
+                new ClientMessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
         }
         return plainText;
     }

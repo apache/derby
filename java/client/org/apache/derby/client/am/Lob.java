@@ -87,7 +87,7 @@ public abstract class Lob implements UnitOfWorkListener {
         if (agent_.connection_.isClosedX()) {
             agent_.checkForDeferredExceptions();
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.LOB_METHOD_ON_CLOSED_CONNECTION));
+                new ClientMessageId(SQLState.LOB_METHOD_ON_CLOSED_CONNECTION));
         } else {
             agent_.checkForDeferredExceptions();
         }

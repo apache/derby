@@ -1528,7 +1528,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         // check input params, table and columnNamePattern cannot be null
         if (table == null) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+                new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
 
         }
 
@@ -1626,7 +1626,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         // validate input table, which can not be null
         if (table == null) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+                new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
 
         }
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLSPECIALCOLUMNS(?,?,?,?,?,?,?)");
@@ -1672,7 +1672,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         // validate input table, which can not be null
         if (table == null) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+                new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
 
         }
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLSPECIALCOLUMNS(?,?,?,?,?,?,?)");
@@ -1722,7 +1722,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         // validate the input table name
         if (table == null) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+                new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
 
         }
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLPRIMARYKEYS(?,?,?,?)");
@@ -1883,13 +1883,13 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         // check input params, primaryTable and foreignTable cannot be null
         if (primaryTable == null) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.PRIMARY_TABLE_NAME_IS_NULL)); 
+                new ClientMessageId(SQLState.PRIMARY_TABLE_NAME_IS_NULL)); 
 
         }
 
         if (foreignTable == null) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.FOREIGN_TABLE_NAME_IS_NULL)); 
+                new ClientMessageId(SQLState.FOREIGN_TABLE_NAME_IS_NULL)); 
 
         }
 
@@ -1978,7 +1978,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         // validate the input table name
         if (table == null) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+                new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
         }
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLSTATISTICS(?,?,?,?,?,?)");
 
@@ -2071,12 +2071,12 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         } catch (SqlException e) {
             if (e.getErrorCode() == -440) {
                 SqlException newException = new SqlException(agent_.logWriter_,
-                        new MessageId(SQLState.STORED_PROC_NOT_INSTALLED));
+                        new ClientMessageId(SQLState.STORED_PROC_NOT_INSTALLED));
                 newException.setNextException(e);
                 throw newException;
             } else if (e.getErrorCode() == -444) {
                 SqlException newException = new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.STORED_PROC_LOAD_MODULE_NOT_FOUND));
+                    new ClientMessageId(SQLState.STORED_PROC_LOAD_MODULE_NOT_FOUND));
                 newException.setNextException(e);
                 throw newException;
             } else {
@@ -2656,7 +2656,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         if (connection_.isClosedX()) {
             agent_.checkForDeferredExceptions();
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.NO_CURRENT_CONNECTION)); 
+                new ClientMessageId(SQLState.NO_CURRENT_CONNECTION)); 
 
         } else {
             agent_.checkForDeferredExceptions();
@@ -2682,7 +2682,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             (serverJdbcMajorVersion == major &&
              serverJdbcMinorVersion < minor)) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.JDBC_METHOD_NOT_SUPPORTED_BY_SERVER), method);
+                new ClientMessageId(SQLState.JDBC_METHOD_NOT_SUPPORTED_BY_SERVER), method);
         }
     }
 }

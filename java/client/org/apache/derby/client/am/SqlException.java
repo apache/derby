@@ -116,7 +116,7 @@ public class SqlException extends Exception implements Diagnosable {
     // The message id is wrapped inside a class so that we can distinguish
     // between the signatures of the new constructors and the old constructors
     public SqlException(LogWriter logwriter, 
-        MessageId msgid, Object[] args, Throwable cause)
+        ClientMessageId msgid, Object[] args, Throwable cause)
     {
         this(
             logwriter,
@@ -135,66 +135,66 @@ public class SqlException extends Exception implements Diagnosable {
      * Use this to override the standard error code that is derived
      * from the message severity
      */
-    public SqlException(LogWriter logWriter, MessageId msgid, Object[] args,
+    public SqlException(LogWriter logWriter, ClientMessageId msgid, Object[] args,
         SqlCode sqlcode) {
         this(logWriter, msgid, args);
         this.errorcode_ = sqlcode.getCode();
     }
         
-    public SqlException(LogWriter logWriter, MessageId msgid, SqlCode sqlcode) {
+    public SqlException(LogWriter logWriter, ClientMessageId msgid, SqlCode sqlcode) {
         this(logWriter, msgid, (Object[])null, sqlcode);
     }
     
-    public SqlException(LogWriter logWriter, MessageId msgid, Object arg1,
+    public SqlException(LogWriter logWriter, ClientMessageId msgid, Object arg1,
         SqlCode sqlcode) {
         this(logWriter, msgid, new Object[] {arg1}, sqlcode);
     }
         
-    public SqlException(LogWriter logWriter, MessageId msgid, Object arg1,
+    public SqlException(LogWriter logWriter, ClientMessageId msgid, Object arg1,
         Object arg2, SqlCode sqlcode) {
         this(logWriter, msgid, new Object[] {arg1, arg2}, sqlcode);
     }
  
     public SqlException (LogWriter logwriter, 
-            MessageId msgid, Throwable cause) {
+            ClientMessageId msgid, Throwable cause) {
         this (logwriter, msgid, (Object[])null, cause);
     }
     
-    public SqlException(LogWriter logwriter, MessageId msgid, Object[] args)
+    public SqlException(LogWriter logwriter, ClientMessageId msgid, Object[] args)
     {
         this(logwriter, msgid, args, (Throwable)null);
     }
     
-    public SqlException (LogWriter logwriter, MessageId msgid)
+    public SqlException (LogWriter logwriter, ClientMessageId msgid)
     {
         this(logwriter, msgid, (Object[])null);
     }
     
-    public SqlException(LogWriter logwriter, MessageId msgid, Object arg1)
+    public SqlException(LogWriter logwriter, ClientMessageId msgid, Object arg1)
     {
         this(logwriter, msgid, new Object[] { arg1 });
     }
     
-    public SqlException(LogWriter logwriter, MessageId msgid, 
+    public SqlException(LogWriter logwriter, ClientMessageId msgid, 
             Object arg1, Throwable cause)
     {
         this(logwriter, msgid, new Object[] { arg1 }, cause);
     }
     
-    public SqlException(LogWriter logwriter, MessageId msgid,
+    public SqlException(LogWriter logwriter, ClientMessageId msgid,
         Object arg1, Object arg2, Throwable cause)
     {
         this(logwriter, msgid, new Object[] { arg1, arg2 }, cause);
     }
     
     public SqlException(LogWriter logwriter,
-        MessageId msgid, Object arg1, Object arg2)
+        ClientMessageId msgid, Object arg1, Object arg2)
     {
         this(logwriter, msgid, new Object[] { arg1, arg2 });
     }
     
     public SqlException(LogWriter logwriter,
-        MessageId msgid, Object arg1, Object arg2, Object arg3)
+        ClientMessageId msgid, Object arg1, Object arg2, Object arg3)
     {
         this(logwriter, msgid, new Object[] { arg1, arg2, arg3 });
     }
@@ -473,7 +473,7 @@ public class SqlException extends Exception implements Diagnosable {
      */
     public static SqlException javaException(LogWriter logWriter, Throwable e) {
         return new SqlException(logWriter, 
-            new MessageId (SQLState.JAVA_EXCEPTION), 
+            new ClientMessageId (SQLState.JAVA_EXCEPTION), 
             new Object[] {e.getClass().getName(), e.getMessage()}, e);
     }
     
@@ -504,7 +504,7 @@ class ColumnTypeConversionException extends SqlException {
     ColumnTypeConversionException(LogWriter logWriter, String sourceType,
         String targetType) {
         super(logWriter,
-            new MessageId(SQLState.LANG_DATA_TYPE_GET_MISMATCH),
+            new ClientMessageId(SQLState.LANG_DATA_TYPE_GET_MISMATCH),
             sourceType, targetType);
     }
 }
@@ -514,7 +514,7 @@ class ColumnTypeConversionException extends SqlException {
 
 class LossOfPrecisionConversionException extends SqlException {
     LossOfPrecisionConversionException(LogWriter logWriter, String instance) {
-        super(logWriter, new MessageId(SQLState.LOSS_OF_PRECISION_EXCEPTION), 
+        super(logWriter, new ClientMessageId(SQLState.LOSS_OF_PRECISION_EXCEPTION), 
             instance);
     }
 }

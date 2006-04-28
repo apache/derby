@@ -283,12 +283,12 @@ public abstract class Sqlca {
             current = current.copyAsUnchainedSQLException(agent_.logWriter_);
             if (current.getErrorCode() == -440) {
                 SqlWarning warningForStoredProcFailure = new SqlWarning(agent_.logWriter_,
-                    new MessageId(SQLState.UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER));
+                    new ClientMessageId(SQLState.UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER));
                 warningForStoredProcFailure.setNextException(current.getSQLException());
                 connection_.accumulate440WarningForMessageProcFailure(warningForStoredProcFailure);
             } else if (current.getErrorCode() == -444) {
                 SqlWarning warningForStoredProcFailure = new SqlWarning(agent_.logWriter_,
-                    new MessageId(SQLState.UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER));
+                    new ClientMessageId(SQLState.UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER));
                 warningForStoredProcFailure.setNextException(current.getSQLException());
                 connection_.accumulate444WarningForMessageProcFailure(warningForStoredProcFailure);
             } else {

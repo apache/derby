@@ -52,7 +52,7 @@ public class Savepoint implements java.sql.Savepoint {
             return savepointId_;
         } else {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.NO_ID_FOR_NAMED_SAVEPOINT)).getSQLException();
+                new ClientMessageId(SQLState.NO_ID_FOR_NAMED_SAVEPOINT)).getSQLException();
         }
     }
 
@@ -61,7 +61,7 @@ public class Savepoint implements java.sql.Savepoint {
             return savepointName_;
         } else {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.NO_NAME_FOR_UNNAMED_SAVEPOINT)).getSQLException();
+                new ClientMessageId(SQLState.NO_NAME_FOR_UNNAMED_SAVEPOINT)).getSQLException();
         }
     }
 }

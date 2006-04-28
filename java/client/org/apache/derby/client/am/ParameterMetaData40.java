@@ -63,7 +63,7 @@ public class ParameterMetaData40 extends ParameterMetaData {
         try { 
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw new SqlException(null,new MessageId(SQLState.UNABLE_TO_UNWRAP),
+            throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                     interfaces).getSQLException();
         }
     }

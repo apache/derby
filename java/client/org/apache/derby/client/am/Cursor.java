@@ -403,7 +403,7 @@ public abstract class Cursor {
                     getColumnScale(column - 1));
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.UNSUPPORTED_ENCODING),  
+                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING),  
                 "DECIMAL", "java.math.BigDecimal", e);
         }
     }
@@ -418,11 +418,11 @@ public abstract class Cursor {
                     getColumnScale(column - 1));
         } catch (java.lang.IllegalArgumentException e) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+                new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
                 "double", e);
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                 "DECIMAL", "double", e);
         }
     }
@@ -436,11 +436,11 @@ public abstract class Cursor {
                     getColumnScale(column - 1));
         } catch (java.lang.IllegalArgumentException e) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+                new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
                 "long", e);
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                 "DECIMAL", "long", e);
         }
     }
@@ -465,7 +465,7 @@ public abstract class Cursor {
             // byte ccsids.
             if (charsetName_[column - 1] == null) {
                 throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
+                    new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
             }
 
             tempString = new String(dataBuffer_,
@@ -476,7 +476,7 @@ public abstract class Cursor {
                     tempString.substring(0, java.lang.Math.min(maxFieldSize_, tempString.length()));
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+            		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
             		"VARCHAR", "String", e);
         }
     }
@@ -496,7 +496,7 @@ public abstract class Cursor {
             // byte ccsids.
             if (charsetName_[column - 1] == null) {
                 throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
+                    new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
             }
 
             tempString = new String(dataBuffer_,
@@ -507,7 +507,7 @@ public abstract class Cursor {
                     tempString.substring(0, java.lang.Math.min(maxFieldSize_, tempString.length()));
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId (SQLState.UNSUPPORTED_ENCODING),
+                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING),
                 "CHAR", "String", e);
         }
     }
@@ -521,7 +521,7 @@ public abstract class Cursor {
                 charsetName_[column - 1]);
         }catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
-                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                  "DATE", "java.sql.Date", e);
         }
 
@@ -537,7 +537,7 @@ public abstract class Cursor {
                     charsetName_[column - 1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
-                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                  "TIME", "java.sql.Time", e);
         }
     }
@@ -553,7 +553,7 @@ public abstract class Cursor {
                 charsetName_[column - 1]);
     } catch (java.io.UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
-                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                  "TIMESTAMP", "java.sql.Timestamp", e);
     }
     }
@@ -567,7 +567,7 @@ public abstract class Cursor {
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
-                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                  "DATE", "java.sql.Timestamp", e);
         }
     }
@@ -581,7 +581,7 @@ public abstract class Cursor {
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
-                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                  "TIME", "java.sql.Timestamp", e);
         }
     }
@@ -595,7 +595,7 @@ public abstract class Cursor {
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
-                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                  "TIMESTAMP", "java.sql.Date", e);
         }
     }
@@ -609,7 +609,7 @@ public abstract class Cursor {
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
-                 new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                  "TIMESTAMP", "java.sql.Time", e);
         }
     }
@@ -1056,7 +1056,7 @@ public abstract class Cursor {
                     return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("US-ASCII"));
                 } catch (java.io.UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
-                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                     		"CHAR", "java.io.InputStream", e);
                 }
             case java.sql.Types.VARCHAR:
@@ -1065,7 +1065,7 @@ public abstract class Cursor {
                     return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("US-ASCII"));
                 } catch (java.io.UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
-                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                     		"VARCHAR/LONGVARCHAR", "java.io.InputStream", e);
                 }
             case java.sql.Types.BINARY:
@@ -1097,7 +1097,7 @@ public abstract class Cursor {
                         return new java.io.ByteArrayInputStream(s.getBytes("UTF-8"));
                     } catch (java.io.UnsupportedEncodingException e) {
                         throw new SqlException(agent_.logWriter_, 
-                        		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                        		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                         		"CLOB", "UnicodeStream", e);
                     }
                 }
@@ -1107,7 +1107,7 @@ public abstract class Cursor {
                         return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("UTF-8"));
                     } catch (java.io.UnsupportedEncodingException e) {
                         throw new SqlException(agent_.logWriter_, 
-                        		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                        		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                         		"CHAR", "UnicodeStream", e);
                     }
                 }
@@ -1117,7 +1117,7 @@ public abstract class Cursor {
                     return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("UTF-8"));
                 } catch (java.io.UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
-                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                     		"VARCHAR/LONGVARCHAR", "UnicodeStream", e);
                 }
             case java.sql.Types.BINARY:
@@ -1153,7 +1153,7 @@ public abstract class Cursor {
                     return new java.io.InputStreamReader(new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column)), "UTF-16BE");
                 } catch (java.io.UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
-                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                     		"BINARY", "java.io.Reader", e);
                 }
             case java.sql.Types.VARBINARY:
@@ -1162,7 +1162,7 @@ public abstract class Cursor {
                     return new java.io.InputStreamReader(new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column)), "UTF-16BE");
                 } catch (java.io.UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
-                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                     		"VARBINARY/LONGVARBINARY", "java.io.Reader", e);
                 }
             case java.sql.Types.BLOB:
@@ -1171,7 +1171,7 @@ public abstract class Cursor {
                     return new java.io.InputStreamReader(b.getBinaryStream(), "UTF-16BE");
                 } catch (java.io.UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
-                    		new MessageId (SQLState.UNSUPPORTED_ENCODING), 
+                    		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                     		"BLOB", "java.io.Reader", e);
                 }
             default:
@@ -1205,13 +1205,13 @@ public abstract class Cursor {
 
     public final java.sql.Array getArray(int column) throws SqlException {
         throw new SqlException(agent_.logWriter_, 
-            new MessageId (SQLState.NOT_IMPLEMENTED),
+            new ClientMessageId (SQLState.NOT_IMPLEMENTED),
             "getArray(int)");
     }
 
     public final java.sql.Ref getRef(int column) throws SqlException {
         throw new SqlException(agent_.logWriter_, 
-            new MessageId (SQLState.NOT_IMPLEMENTED), "getRef(int)");
+            new ClientMessageId (SQLState.NOT_IMPLEMENTED), "getRef(int)");
     }
 
     public final Object getObject(int column) throws SqlException {

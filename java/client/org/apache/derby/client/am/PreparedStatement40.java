@@ -27,7 +27,7 @@ import java.sql.SQLXML;
 import java.io.Reader;
 import java.io.InputStream;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.MessageId;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedStatement{
@@ -106,7 +106,7 @@ public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedSt
         try { 
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw new SqlException(null,new MessageId(SQLState.UNABLE_TO_UNWRAP),
+            throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                     interfaces).getSQLException();
         }
     }

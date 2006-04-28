@@ -87,7 +87,7 @@ public class Statement40 extends Statement{
         try { 
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw new SqlException(null,new MessageId(SQLState.UNABLE_TO_UNWRAP),
+            throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                     interfaces).getSQLException();
         }
     }

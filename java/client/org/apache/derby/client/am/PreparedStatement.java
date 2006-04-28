@@ -182,7 +182,7 @@ public class PreparedStatement extends Statement
 
             if (section_ == null) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.CURSOR_INVALID_CURSOR_NAME), cursorName);
+                    new ClientMessageId(SQLState.CURSOR_INVALID_CURSOR_NAME), cursorName);
             }
 
             //scrollableRS_ = agent_.sectionManager_.getPositionedUpdateResultSet (cursorName);
@@ -254,7 +254,7 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "execute", sql);
         }
         throw new SqlException(agent_.logWriter_,
-            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            new ClientMessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
             "execute(String)").getSQLException();
     }
 
@@ -263,7 +263,7 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "executeQuery", sql);
         }
         throw new SqlException(agent_.logWriter_,
-            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            new ClientMessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
             "executeQuery(String)").getSQLException();
     }
 
@@ -272,7 +272,7 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "executeUpdate", sql);
         }
         throw new SqlException(agent_.logWriter_,
-            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            new ClientMessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
             "executeUpdate(String)").getSQLException();
     }
     // ---------------------------jdbc 1------------------------------------------
@@ -360,7 +360,7 @@ public class PreparedStatement extends Statement
 
         if (!parameterMetaData_.nullable_[parameterIndex - 1]) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.LANG_NULL_INTO_NON_NULL),
+                new ClientMessageId(SQLState.LANG_NULL_INTO_NON_NULL),
                 new Integer(parameterIndex));
         }
         setInput(parameterIndex, null);
@@ -577,7 +577,7 @@ public class PreparedStatement extends Statement
                 }
                 if (calendar == null) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_API_PARAMETER),
+                        new ClientMessageId(SQLState.INVALID_API_PARAMETER),
                         "null", "calendar", "setDate");
                 }
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
@@ -633,7 +633,7 @@ public class PreparedStatement extends Statement
                 }
                 if (calendar == null) {
                     throw new SqlException(agent_.logWriter_,
-                        new MessageId(SQLState.INVALID_API_PARAMETER),
+                        new ClientMessageId(SQLState.INVALID_API_PARAMETER),
                         "null", "calendar", "setTime()");
                 }
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
@@ -692,7 +692,7 @@ public class PreparedStatement extends Statement
                 }
                 if (calendar == null) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_API_PARAMETER),
+                        new ClientMessageId(SQLState.INVALID_API_PARAMETER),
                         "null", "calendar", "setTimestamp()");
                 }
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
@@ -938,7 +938,7 @@ public class PreparedStatement extends Statement
                 }
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
+                    new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
             }
         }
         catch ( SqlException se )
@@ -956,7 +956,7 @@ public class PreparedStatement extends Statement
                 }
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
+                    new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
             }
         }
         catch ( SqlException se )
@@ -1013,7 +1013,7 @@ public class PreparedStatement extends Statement
                 } else {
                     checkSetterPreconditions(parameterIndex);
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.UNSUPPORTED_TYPE));
+                        new ClientMessageId(SQLState.UNSUPPORTED_TYPE));
                 }
             }
         }
@@ -1086,7 +1086,7 @@ public class PreparedStatement extends Statement
             // Any problems with scale should have already been caught by
             // checkForvalidScale
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.JAVA_EXCEPTION),
+                new ClientMessageId(SQLState.JAVA_EXCEPTION),
                 new Object[] {ae.getClass().getName(), ae.getMessage()}, ae);
         }
         try { 
@@ -1239,7 +1239,7 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "execute", sql, autoGeneratedKeys);
         }
         throw new SqlException(agent_.logWriter_,
-            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            new ClientMessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
             "execute(String, int)").getSQLException();
     }
 
@@ -1248,7 +1248,7 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "execute", sql, columnNames);
         }
         throw new SqlException(agent_.logWriter_,
-            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            new ClientMessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
             "execute(String, String[])").getSQLException();
     }
 
@@ -1257,7 +1257,7 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "execute", sql, columnIndexes);
         }
         throw new SqlException(agent_.logWriter_,
-            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            new ClientMessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
             "execute(String, int[])").getSQLException();
     }
 
@@ -1266,7 +1266,7 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "executeUpdate", autoGeneratedKeys);
         }
         throw new SqlException(agent_.logWriter_,
-            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            new ClientMessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
             "executeUpdate(String, int)").getSQLException();
     }
 
@@ -1275,7 +1275,7 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "executeUpdate", columnNames);
         }
         throw new SqlException(agent_.logWriter_,
-            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            new ClientMessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
             "executeUpdate(String, String[])").getSQLException();
     }
 
@@ -1284,7 +1284,7 @@ public class PreparedStatement extends Statement
             agent_.logWriter_.traceEntry(this, "executeUpdate", columnIndexes);
         }
         throw new SqlException(agent_.logWriter_,
-            new MessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            new ClientMessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
             "execute(String, int[])").getSQLException();
     }
 
@@ -1725,7 +1725,7 @@ public class PreparedStatement extends Statement
             // Throw an exception if holdability returned by the server is different from requested.
             if (resultSet_ != null && resultSet_.resultSetHoldability_ != resultSetHoldability_ && sqlMode_ != isCall__) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.UNABLE_TO_OPEN_RESULTSET_WITH_REQUESTED_HOLDABILTY),
+                    new ClientMessageId(SQLState.UNABLE_TO_OPEN_RESULTSET_WITH_REQUESTED_HOLDABILTY),
                         new Integer(resultSetHoldability_));
             }
     }
@@ -1763,7 +1763,7 @@ public class PreparedStatement extends Statement
 		// that imposes an upper limit on the batch size we can support:
 		if (batchSize > 65534)
             throw new BatchUpdateException(agent_.logWriter_, 
-                new MessageId(SQLState.TOO_MANY_COMMANDS_FOR_BATCH), 
+                new ClientMessageId(SQLState.TOO_MANY_COMMANDS_FOR_BATCH), 
                 new Integer(65534), updateCounts);
 
         // Initialize all the updateCounts to indicate failure
@@ -1775,11 +1775,11 @@ public class PreparedStatement extends Statement
 
         if (!supportsQueryBatchRequest && sqlMode_ == isQuery__) {
             throw new BatchUpdateException(agent_.logWriter_, 
-                new MessageId(SQLState.CANNOT_BATCH_QUERIES), updateCounts);
+                new ClientMessageId(SQLState.CANNOT_BATCH_QUERIES), updateCounts);
         }
         if (supportsQueryBatchRequest && sqlMode_ != isQuery__) {
             throw new BatchUpdateException(agent_.logWriter_, 
-                new MessageId(SQLState.QUERY_BATCH_ON_NON_QUERY_STATEMENT), 
+                new ClientMessageId(SQLState.QUERY_BATCH_ON_NON_QUERY_STATEMENT), 
                 updateCounts);
         }
 
@@ -1825,7 +1825,7 @@ public class PreparedStatement extends Statement
             } else if (outputRegistered_) // make sure no output parameters are registered
             {
                 throw new BatchUpdateException(agent_.logWriter_, 
-                    new MessageId(SQLState.OUTPUT_PARAMS_NOT_ALLOWED),
+                    new ClientMessageId(SQLState.OUTPUT_PARAMS_NOT_ALLOWED),
                     updateCounts);
             } else {
                 writeExecuteCall(false, // no output expected for batched CALLs
@@ -1945,7 +1945,7 @@ public class PreparedStatement extends Statement
     void checkForValidParameterIndex(int parameterIndex) throws SqlException {
         if (parameterMetaData_ == null || parameterIndex < 1 || parameterIndex > parameterMetaData_.columns_) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.LANG_INVALID_PARAM_POSITION),
+                new ClientMessageId(SQLState.LANG_INVALID_PARAM_POSITION),
                 new Integer(parameterIndex), 
                 new Integer(parameterMetaData_.columns_));
         }
@@ -1956,7 +1956,7 @@ public class PreparedStatement extends Statement
             for (int i = 0; i < parameterMetaData_.columns_; i++) {
                 if (!parameterSet_[i] && !parameterRegistered_[i]) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.LANG_MISSING_PARMS));
+                        new ClientMessageId(SQLState.LANG_MISSING_PARMS));
                 }
             }
         }
@@ -1967,7 +1967,7 @@ public class PreparedStatement extends Statement
         if (escapedProcedureCallWithResult_) {
             if (parameterIndex == 1) {
                 throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.LANG_RETURN_OUTPUT_PARAM_CANNOT_BE_SET));
+                    new ClientMessageId(SQLState.LANG_RETURN_OUTPUT_PARAM_CANNOT_BE_SET));
             } else {
                 parameterIndex--;
             }
@@ -1978,7 +1978,7 @@ public class PreparedStatement extends Statement
     void checkForValidScale(int scale) throws SqlException {
         if (scale < 0 || scale > 31) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.BAD_SCALE_VALUE),
+                new ClientMessageId(SQLState.BAD_SCALE_VALUE),
                 new Integer(scale));
         }
     }
@@ -1999,7 +1999,7 @@ public class PreparedStatement extends Statement
             if ((32 - scaleDifference) < inputLength) {
                 // TODO - FINISH THIS
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.REGOUTPARAM_SCALE_DOESNT_MATCH_SETTER));
+                    new ClientMessageId(SQLState.REGOUTPARAM_SCALE_DOESNT_MATCH_SETTER));
             }
             // if the new Decimal (with bigger scale) can fit
             else {
@@ -2017,7 +2017,7 @@ public class PreparedStatement extends Statement
             } catch (ArithmeticException e) {
                 // if the new Decimal (with smaller scale) cannot fit into the DA
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.REGOUTPARAM_SCALE_DOESNT_MATCH_SETTER));
+                    new ClientMessageId(SQLState.REGOUTPARAM_SCALE_DOESNT_MATCH_SETTER));
             }
         }
     }
@@ -2068,7 +2068,7 @@ public class PreparedStatement extends Statement
             }
             if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
+                    new ClientMessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
                     new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
             else
                 setInput(parameterIndex, new Clob(agent_, reader, (int)length));
@@ -2099,7 +2099,7 @@ public class PreparedStatement extends Statement
             }
             if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
+                    new ClientMessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
                     new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
             else {
                 try {

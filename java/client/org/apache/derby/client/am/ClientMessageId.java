@@ -26,12 +26,12 @@ package org.apache.derby.client.am;
  * Once all messages have been internationalized, we could conceivably
  * get rid of this class.
  */
-public class MessageId
+public class ClientMessageId
 {
     public String msgid;
     
     /** Creates a new instance of MessageId */
-    public MessageId(String msgid)
+    public ClientMessageId(String msgid)
     {
         this.msgid = msgid;
     }

@@ -267,7 +267,7 @@ public abstract class Agent {
         }
         if (accumulatedExceptions != null) {
             BatchUpdateException bue = new BatchUpdateException(logWriter_,
-                new MessageId(SQLState.BATCH_NON_ATOMIC_FAILURE),
+                new ClientMessageId(SQLState.BATCH_NON_ATOMIC_FAILURE),
                 updateCounts);
             bue.setNextException(accumulatedExceptions.getSQLException());
             throw bue;

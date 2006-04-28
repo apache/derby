@@ -31,7 +31,7 @@ public class SQLExceptionFactory {
      
     public static SQLException notImplemented (String feature) {
         SqlException sqlException = new SqlException (null, 
-                new MessageId (SQLState.NOT_IMPLEMENTED), feature);
+                new ClientMessageId (SQLState.NOT_IMPLEMENTED), feature);
         return sqlException.getSQLException();
     }
     

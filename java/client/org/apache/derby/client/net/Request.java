@@ -21,7 +21,7 @@ package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.EncryptionManager;
-import org.apache.derby.client.am.MessageId;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -1534,7 +1534,7 @@ public class Request {
             offset_ += 10;
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(netAgent_.logWriter_, 
-                    new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                    new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                     "java.sql.Date", "DATE", e);
         }
     }
@@ -1546,7 +1546,7 @@ public class Request {
             offset_ += 8;
         } catch(UnsupportedEncodingException e) {
             throw new SqlException(netAgent_.logWriter_, 
-                    new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                    new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                     "java.sql.Time", "TIME", e);
       }
     }
@@ -1558,7 +1558,7 @@ public class Request {
             offset_ += 26;
         }catch(UnsupportedEncodingException e) {
             throw new SqlException(netAgent_.logWriter_,  
-                    new MessageId(SQLState.UNSUPPORTED_ENCODING),
+                    new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                     "java.sql.Timestamp", "TIMESTAMP", e);
         }
     }

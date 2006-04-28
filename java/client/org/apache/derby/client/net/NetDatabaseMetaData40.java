@@ -23,7 +23,7 @@ package org.apache.derby.client.net;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
-import org.apache.derby.client.am.MessageId;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -76,7 +76,7 @@ public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDataba
         try { 
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw new SqlException(null,new MessageId(SQLState.UNABLE_TO_UNWRAP),
+            throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                     interfaces).getSQLException();
         }
     }

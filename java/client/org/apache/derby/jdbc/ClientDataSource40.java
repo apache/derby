@@ -24,7 +24,7 @@ import java.sql.BaseQuery;
 import java.sql.QueryObjectFactory;
 import java.sql.QueryObjectGenerator;
 import java.sql.SQLException;
-import org.apache.derby.client.am.MessageId;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -155,7 +155,7 @@ public class ClientDataSource40 extends ClientDataSource {
         try { 
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw new SqlException(null,new MessageId(SQLState.UNABLE_TO_UNWRAP),
+            throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                     interfaces).getSQLException();
         }
     }

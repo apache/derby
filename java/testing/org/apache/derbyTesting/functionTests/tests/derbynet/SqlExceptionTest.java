@@ -20,7 +20,7 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import org.apache.derbyTesting.functionTests.util.BaseTestCase;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.MessageId;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 import java.sql.SQLException;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class SqlExceptionTest extends BaseTestCase
     public void testChainedException() {
         IOException ioe = new IOException("Test exception");
         SqlException sqle = new SqlException(null,
-            new MessageId(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION),
+            new ClientMessageId(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION),
             ioe);
         SQLException javae = sqle.getSQLException();
         
@@ -62,7 +62,7 @@ public class SqlExceptionTest extends BaseTestCase
     public void testNextException() {
         SQLException nexte = new SQLException("test");
         SqlException sqle = new SqlException(null,
-            new MessageId(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION),
+            new ClientMessageId(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION),
             nexte);
         SQLException javae = sqle.getSQLException();
         
@@ -74,10 +74,10 @@ public class SqlExceptionTest extends BaseTestCase
         // just as well as java.sql.SQLException
         SqlException internalException = 
             new SqlException(null, 
-                new MessageId("08000"));
+                new ClientMessageId("08000"));
         
         javae = new SqlException(null, 
-            new MessageId(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION),
+            new ClientMessageId(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION),
             internalException).getSQLException();
         
         assertNotNull(javae.getNextException());

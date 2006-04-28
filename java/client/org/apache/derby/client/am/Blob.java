@@ -92,12 +92,12 @@ public class Blob extends Lob implements java.sql.Blob {
                 }
                 if (pos <= 0) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.BLOB_BAD_POSITION), 
+                        new ClientMessageId(SQLState.BLOB_BAD_POSITION), 
                         new Long(pos));
                 }
                 if (length < 0) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
+                        new ClientMessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
                         new Integer(length));
                 }
                 byte[] retVal = getBytesX(pos, length);
@@ -170,7 +170,7 @@ public class Blob extends Lob implements java.sql.Blob {
                 }
                 if (pattern == null) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
+                        new ClientMessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
                 }
                 long pos = positionX(pattern, start);
                 if (agent_.loggingEnabled()) {
@@ -200,7 +200,7 @@ public class Blob extends Lob implements java.sql.Blob {
                 }
                 if (pattern == null) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
+                        new ClientMessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
                 }
                 long pos = positionX(pattern, start);
                 if (agent_.loggingEnabled()) {
@@ -278,7 +278,7 @@ public class Blob extends Lob implements java.sql.Blob {
         
         if (pos <= 0L) {
             throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.BLOB_BAD_POSITION), new Long(pos));
+                    new ClientMessageId(SQLState.BLOB_BAD_POSITION), new Long(pos));
         }
         
         /*
@@ -289,23 +289,23 @@ public class Blob extends Lob implements java.sql.Blob {
         
         if (pos  >= Integer.MAX_VALUE) {
             throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.BLOB_POSITION_TOO_LARGE), new Long(pos));
+                    new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE), new Long(pos));
         }
         
         if (pos - 1 > binaryString_.length - dataOffset_) {
             throw new SqlException(agent_.logWriter_,
-                    new MessageId(SQLState.BLOB_POSITION_TOO_LARGE), new Long(pos));
+                    new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE), new Long(pos));
         }
         
         if ((offset < 0) || offset > bytes.length )
         {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.BLOB_INVALID_OFFSET), 
+                new ClientMessageId(SQLState.BLOB_INVALID_OFFSET), 
                 new Integer(offset));
         }
         if ( len < 0 ) {
             throw new SqlException(agent_.logWriter_,
-                new MessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
+                new ClientMessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
                 new Integer(length));
         }
         if (len == 0) {
@@ -347,7 +347,7 @@ public class Blob extends Lob implements java.sql.Blob {
                 }
                 if (len < 0 || len > this.length()) {
                     throw new SqlException(agent_.logWriter_,
-                        new MessageId(SQLState.INVALID_API_PARAMETER),
+                        new ClientMessageId(SQLState.INVALID_API_PARAMETER),
                         new Long(len), "len", "Blob.truncate()");
                 }
                 if (len == this.length()) {

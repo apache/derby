@@ -29,7 +29,7 @@ import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.MessageId;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 
@@ -201,7 +201,7 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
         try { 
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw new SqlException(null, new MessageId(SQLState.UNABLE_TO_UNWRAP),
+            throw new SqlException(null, new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                     interfaces).getSQLException();
         }
     }

@@ -294,7 +294,7 @@ public class CallableStatement extends PreparedStatement
         super.checkForClosedStatement();
         if (wasNull_ == WAS_NULL_UNSET) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.WASNULL_INVALID));
+                new ClientMessageId(SQLState.WASNULL_INVALID));
         }
         return wasNull_ == WAS_NULL;
     }
@@ -613,7 +613,7 @@ public class CallableStatement extends PreparedStatement
                 parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
                 }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
@@ -637,7 +637,7 @@ public class CallableStatement extends PreparedStatement
             }
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
+                    new ClientMessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
             }
             java.sql.Date result = getDate(parameterIndex);
             if (result != null) {
@@ -671,7 +671,7 @@ public class CallableStatement extends PreparedStatement
                 parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
                 }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
@@ -695,7 +695,7 @@ public class CallableStatement extends PreparedStatement
             }
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
+                    new ClientMessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
             }
             java.sql.Time result = getTime(parameterIndex);
             if (result != null) {
@@ -728,7 +728,7 @@ public class CallableStatement extends PreparedStatement
                 parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
                 }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
@@ -752,7 +752,7 @@ public class CallableStatement extends PreparedStatement
             }
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
+                    new ClientMessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
             }
             java.sql.Timestamp result = getTimestamp(parameterIndex);
             if (result != null) {
@@ -820,7 +820,7 @@ public class CallableStatement extends PreparedStatement
                 parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
                 }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
@@ -848,7 +848,7 @@ public class CallableStatement extends PreparedStatement
                 parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
                 }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
@@ -873,7 +873,7 @@ public class CallableStatement extends PreparedStatement
                 parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
                 }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
@@ -901,14 +901,14 @@ public class CallableStatement extends PreparedStatement
                 parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));                    
+                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));                    
                 }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 java.sql.Array result = wasNullX() ? null : singletonRowData_.getArray(parameterIndex);
                 if (true) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
+                        new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
                 }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getArray", result);
@@ -933,14 +933,14 @@ public class CallableStatement extends PreparedStatement
                 parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.INVALID_PARAM_USE_GETINT));
+                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
                 }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 java.sql.Ref result = wasNullX() ? null : singletonRowData_.getRef(parameterIndex);
                 if (true) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
+                        new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
                 }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getRef", result);
@@ -1000,7 +1000,7 @@ public class CallableStatement extends PreparedStatement
                 checkGetterPreconditions(parameterIndex);
                 if (true) {
                     throw new SqlException(agent_.logWriter_, 
-                        new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
+                        new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
                 }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getObject", result);
@@ -1420,7 +1420,7 @@ public class CallableStatement extends PreparedStatement
         if (escapedProcedureCallWithResult_) {
             if (parameterIndex == 1 && jdbcType != java.sql.Types.INTEGER) {
                 throw new SqlException(agent_.logWriter_, 
-                    new MessageId(SQLState.RETURN_PARAM_MUST_BE_INT));
+                    new ClientMessageId(SQLState.RETURN_PARAM_MUST_BE_INT));
             } else {
                 parameterIndex--;
             }
@@ -1436,7 +1436,7 @@ public class CallableStatement extends PreparedStatement
     private void checkForValidOutParameter(int parameterIndex) throws SqlException {
         if (parameterMetaData_ == null || parameterMetaData_.sqlxParmmode_[parameterIndex - 1] < java.sql.ParameterMetaData.parameterModeInOut) {
             throw new SqlException(agent_.logWriter_, 
-                new MessageId(SQLState.PARAM_NOT_OUT_OR_INOUT), 
+                new ClientMessageId(SQLState.PARAM_NOT_OUT_OR_INOUT), 
                 new Integer(parameterIndex));
         }
     }
@@ -1460,7 +1460,7 @@ public class CallableStatement extends PreparedStatement
             throw se.getSQLException();
         }
         return new SqlException(agent_.logWriter_, 
-            new MessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED)).getSQLException();
+            new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED)).getSQLException();
     }
 }
 

@@ -374,7 +374,7 @@ public class Decimal {
         // packed decimal may only be up to 31 digits.
         if (declaredPrecision > 31) {
             throw new SqlException(null,
-                new MessageId(SQLState.DECIMAL_TOO_MANY_DIGITS));
+                new ClientMessageId(SQLState.DECIMAL_TOO_MANY_DIGITS));
         }
 
         // get absolute unscaled value of the BigDecimal as a String.
@@ -385,7 +385,7 @@ public class Decimal {
 
         if (bigPrecision > 31) {
             throw new SqlException(null,
-                new MessageId(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+                new ClientMessageId(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
                 "packed decimal", new SqlCode(-405));
         }
 
@@ -396,7 +396,7 @@ public class Decimal {
             int declaredWholeIntegerLength = declaredPrecision - declaredScale;
             if (bigWholeIntegerLength > declaredWholeIntegerLength) {
                 throw new SqlException(null,
-                    new MessageId(SQLState.NUMERIC_OVERFLOW),
+                    new ClientMessageId(SQLState.NUMERIC_OVERFLOW),
                     b.toString(), "packed decimal", new SqlCode(-413));
             }
         }
