@@ -187,7 +187,7 @@ create table sqlAnywhere1 (
 
 call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'SQLANYWHERE1' ,
                                   null , '1,2,3,4,5,7,8,9,10,11,12,13,14', 
-	 		          'extin/sqlAnywhere1.txt' , 
+	 		          'extin/sqlAnywhere1.utf' , 
 				  '|', '''', 'ASCII', 0) ;
 
 	
@@ -202,7 +202,7 @@ create table sqlAnywhere2 (
 
 call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'SQLANYWHERE2' , 
 		                  null , '3, 4, 7, 5',
-			          'extin/sqlAnywhere2.txt' , 
+			          'extin/sqlAnywhere2.utf' , 
 				  '|', '''', 'ASCII', 0) ;
 select count(*) from sqlAnywhere2;
 
