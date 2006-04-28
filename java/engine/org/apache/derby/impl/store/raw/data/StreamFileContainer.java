@@ -57,6 +57,7 @@ import org.apache.derby.iapi.services.io.CompressedNumber;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.util.Properties;
 import java.io.InputStream;
@@ -66,6 +67,10 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.io.InvalidClassException;
 import java.io.Externalizable;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
+import java.io.FileNotFoundException;
 
 /**
 
@@ -84,7 +89,7 @@ import java.io.Externalizable;
 **/
 
 
-public class StreamFileContainer implements TypedFormat
+public class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction
 {
 
     /**************************************************************************
@@ -138,6 +143,17 @@ public class StreamFileContainer implements TypedFormat
 	private byte[]                          zeroBytes;	// in case encryption
                                                         // stream needs pad.
 
+
+    /* privileged actions */
+    private static final int STORAGE_FILE_EXISTS_ACTION = 1;
+    private static final int STORAGE_FILE_DELETE_ACTION = 2;
+    private static final int STORAGE_FILE_MKDIRS_ACTION = 3;
+    private static final int STORAGE_FILE_GET_OUTPUT_STREAM_ACTION = 4;
+    private static final int STORAGE_FILE_GET_INPUT_STREAM_ACTION = 5;
+    private int actionCode;
+    private StorageFile actionStorageFile;
+
+
     /**************************************************************************
      * Constructors for This class:
      **************************************************************************
@@ -179,7 +195,7 @@ public class StreamFileContainer implements TypedFormat
         {
 			file = getFileName(identity, true, false);
 
-            if (file.exists()) 
+            if (privExists(file)) 
             {
 				// note I'm left in the no-identity state as fillInIdentity()
                 // hasn't been called.
@@ -226,14 +242,14 @@ public class StreamFileContainer implements TypedFormat
     {
 
 		file = getFileName(this.identity, false, true);
-        if (!file.exists())
+        if (!privExists(file))
 			return null;
 
 		try 
         {
 			if (!forUpdate) 
             {
-				fileIn = file.getInputStream();
+				fileIn = privGetInputStream(file);
 
 				if (dataFactory.databaseEncrypted()) 
                 {
@@ -459,7 +475,7 @@ public class StreamFileContainer implements TypedFormat
 
 		try 
         {
-			fileOut = file.getOutputStream();
+			fileOut = privGetOutputStream(file);
 
 			FormatableBitSet validColumns = rowSource.getValidColumns();
 
@@ -966,9 +982,9 @@ public class StreamFileContainer implements TypedFormat
     {
 		close();
 
-        if (file.exists())
+        if (privExists(file))
         {
-            return file.delete();
+            return privDelete(file);
         }
         else
         {
@@ -1005,7 +1021,7 @@ public class StreamFileContainer implements TypedFormat
 
 			StorageFile container = dataFactory.getContainerPath( identity, false);
 
-			if (!container.exists()) 
+			if (!privExists(container)) 
             {
 
 				if (!forCreate)
@@ -1013,14 +1029,14 @@ public class StreamFileContainer implements TypedFormat
 
 				StorageFile directory = container.getParentDir();
 
-				if (!directory.exists()) 
+				if (!privExists(directory)) 
                 {
 					// make sure only 1 thread can create a segment at one time
 					synchronized(dataFactory) 
                     {
-						if (!directory.exists()) 
+						if (!privExists(directory)) 
                         {
-							if (!directory.mkdirs()) 
+							if (!privMkdirs(directory)) 
                             {
 								if (errorOK)
 									return null;
@@ -1036,4 +1052,132 @@ public class StreamFileContainer implements TypedFormat
 			return container;
 		}
 	}
+
+
+
+    
+    private synchronized boolean privExists(StorageFile file)
+    {
+        actionCode = STORAGE_FILE_EXISTS_ACTION;
+        actionStorageFile = file;
+
+        try
+        {
+            Object ret = AccessController.doPrivileged( this);
+            return ((Boolean) ret).booleanValue();
+        }catch( PrivilegedActionException pae) 
+        { 
+            // method executed under this priveleged block 
+            // does not throw an exception
+            return false;
+        } 
+        finally
+        {
+            actionStorageFile = null;
+        }
+    }
+
+    private synchronized boolean privMkdirs(StorageFile file)
+    {
+        actionCode = STORAGE_FILE_MKDIRS_ACTION;
+        actionStorageFile = file;
+
+        try
+        {
+            Object ret = AccessController.doPrivileged( this);
+            return ((Boolean) ret).booleanValue();
+        }catch( PrivilegedActionException pae) 
+        {
+            // method executed under this priveleged block 
+            // does not throw an exception
+            return false;
+        } 
+        finally
+        {
+            actionStorageFile = null;
+        }
+    }
+
+    
+    private synchronized boolean privDelete(StorageFile file)
+    {
+        actionCode = STORAGE_FILE_DELETE_ACTION;
+        actionStorageFile = file;
+
+        try
+        {
+            Object ret = AccessController.doPrivileged( this);
+            return ((Boolean) ret).booleanValue();
+        }catch( PrivilegedActionException pae) 
+        { 
+            // method executed under this priveleged block 
+            // does not throw an exception
+            return false;
+        } 
+        finally
+        {
+            actionStorageFile = null;
+        }
+    }
+
+    private synchronized OutputStream privGetOutputStream(StorageFile file)
+        throws FileNotFoundException
+    {
+        actionCode = STORAGE_FILE_GET_OUTPUT_STREAM_ACTION;
+        actionStorageFile = file;
+
+        try
+        {
+            return (OutputStream) AccessController.doPrivileged( this);
+        }catch( PrivilegedActionException pae) 
+        { 
+            throw (FileNotFoundException)pae.getException();
+        } 
+        finally
+        {
+            actionStorageFile = null;
+        }
+    }
+
+
+    private synchronized InputStream privGetInputStream(StorageFile file)
+        throws FileNotFoundException
+    {
+        actionCode = STORAGE_FILE_GET_INPUT_STREAM_ACTION;
+        actionStorageFile = file;
+
+        try
+        {
+            return (InputStream) AccessController.doPrivileged( this);
+        }catch( PrivilegedActionException pae) 
+        { 
+            throw (FileNotFoundException)pae.getException();
+        } 
+        finally
+        {
+            actionStorageFile = null;
+        }
+    }
+
+
+    // PrivilegedAction method
+    public Object run() throws FileNotFoundException
+    {
+        switch(actionCode)
+        {
+        case STORAGE_FILE_EXISTS_ACTION:
+            return ReuseFactory.getBoolean(actionStorageFile.exists());
+        case STORAGE_FILE_DELETE_ACTION:
+            return ReuseFactory.getBoolean(actionStorageFile.delete());
+        case STORAGE_FILE_MKDIRS_ACTION:
+            return ReuseFactory.getBoolean(actionStorageFile.mkdirs());
+        case STORAGE_FILE_GET_OUTPUT_STREAM_ACTION:
+            return actionStorageFile.getOutputStream();
+        case STORAGE_FILE_GET_INPUT_STREAM_ACTION:
+            return actionStorageFile.getInputStream();
+        }
+
+        return null;
+    }
+
 }

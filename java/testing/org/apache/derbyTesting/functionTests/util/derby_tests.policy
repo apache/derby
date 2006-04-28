@@ -56,9 +56,6 @@ grant codeBase "${csinfo.codejar}derbynet.jar" {
   // BUG DERBY-622 derbynet/sysinfo.java
   permission java.io.FilePermission "${csinfo.codedir}${/}*", "read";
   
-  // BUG DERBY-616 lang/wisconsin.sql & jdbcapi/maxfieldsize.java
-  permission java.io.FilePermission "${derby.system.home}${/}wombat${/}tmp${/}-", "read, write, delete";
-  
   // BUG DERBY-623 - sane=true
   permission java.util.PropertyPermission "derby.monitor.verbose", "read";
   permission java.util.PropertyPermission "derby.debug.*", "read";
