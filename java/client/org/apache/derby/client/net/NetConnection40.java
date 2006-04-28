@@ -130,6 +130,14 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      * The validity is checked by running a simple query against the 
      * database.
      *
+     * The timeout specified by the caller is implemented as follows:
+     * On the server: uses the queryTimeout functionality to make the
+     * query time out on the server in case the server has problems or
+     * is highly loaded.
+     * On the client: uses a timeout on the socket to make sure that 
+     * the client is not blocked forever in the cases where the server
+     * is "hanging" or not sending the reply.
+     *
      * @param timeout The time in seconds to wait for the database
      * operation used to validate the connection to complete. If the 
      * timeout period expires before the operation completes, this 
@@ -155,6 +163,12 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
         // Do a simple query against the database
         synchronized(this) {
             try {
+                // Save the current network timeout value
+                int oldTimeout = netAgent_.getTimeout();
+
+                // Set the required timeout value on the network connection
+                netAgent_.setTimeout(timeout);
+
                 // If this is the first time this method is called on this 
                 // connection we prepare the query 
                 if (isValidStmt == null) {
@@ -167,6 +181,9 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
                 // Run the query against the database
                 ResultSet rs = isValidStmt.executeQuery();
                 rs.close();
+
+                // Restore the previous timeout value
+                netAgent_.setTimeout(oldTimeout);
             } catch(SQLException e) {
                 // If an SQL exception is thrown the connection is not valid,
                 // we ignore the exception and return false.

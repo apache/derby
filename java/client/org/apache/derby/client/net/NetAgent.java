@@ -20,10 +20,13 @@
 
 package org.apache.derby.client.net;
 
+import java.net.SocketException;
+
 import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 public class NetAgent extends Agent {
     //---------------------navigational members-----------------------------------
@@ -323,6 +326,60 @@ public class NetAgent extends Agent {
         }
     }
 
+    /**
+     * Specifies the maximum blocking time that should be used when sending
+     * and receiving messages. The timeout is implemented by using the the 
+     * underlying socket implementation's timeout support. 
+     * 
+     * Note that the support for timeout on sockets is dependent on the OS 
+     * implementation. For the same reason we ignore any exceptions thrown
+     * by the call to the socket layer.
+     * 
+     * @param timeout The timeout value in seconds. A value of 0 corresponds to 
+     * infinite timeout.
+     */
+    protected void setTimeout(int timeout) {
+        try {
+            // Sets a timeout on the socket
+            socket_.setSoTimeout(timeout * 1000); // convert to milliseconds
+        } catch (SocketException se) {
+            // Silently ignore any exceptions from the socket layer
+            if (SanityManager.DEBUG) {
+                System.out.println("NetAgent.setTimeout: ignoring exception: " + 
+                                   se);
+            }
+        }
+    }
+
+    /**
+     * Returns the current timeout value that is set on the socket.
+     * 
+     * Note that the support for timeout on sockets is dependent on the OS 
+     * implementation. For the same reason we ignore any exceptions thrown
+     * by the call to the socket layer.
+     * 
+     * @return The timeout value in seconds. A value of 0 corresponds to
+     * that no timeout is specified on the socket.
+     */
+    protected int getTimeout() {
+        int timeout = 0; // 0 is default timeout for sockets
+
+        // Read the timeout currently set on the socket
+        try {
+            timeout = socket_.getSoTimeout();
+        } catch (SocketException se) {
+            // Silently ignore any exceptions from the socket layer
+            if (SanityManager.DEBUG) {
+                System.out.println("NetAgent.getTimeout: ignoring exception: " + 
+                                   se);
+            }
+        }
+
+        // Convert from milliseconds to seconds (note that this truncates
+        // the results towards zero but that should not be a problem).
+        timeout = timeout / 1000;
+        return timeout;
+    }
 
     protected void sendRequest() throws DisconnectException {
         try {
