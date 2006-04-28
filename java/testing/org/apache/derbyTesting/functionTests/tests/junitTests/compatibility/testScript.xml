@@ -81,10 +81,12 @@
   <property name="properties.dir" value="tools/ant/properties"/>
   <property file="${properties.dir}/dirs.properties"/>
   <property file="${properties.dir}/extrapath.properties"/>
+  <property file="${properties.dir}/compilepath.properties"/>
   <property name="summaryFile" value="${outDir}/SUMMARY_COMPAT.txt"/>
   <property name="databaseName" value="compatDB"/>
 
-  <property name="TEST_JARS" value="${trunk_lib}/derbyTesting.jar;${junit}"/>
+  <property name="JCE_JAR" value="${jce1_2_1}"/>
+  <property name="TEST_JARS" value="${trunk_lib}/derbyTesting.jar;${junit};${JCE_JAR}"/>
 
   <!-- legal values of serverVM and clientVM -->
   <property name="VM_1.3" value="${j13lib}/../bin/java"/>
@@ -105,7 +107,7 @@
 
   <property name="FULL_TRUNK" value="${SERVER_TRUNK};${CLIENT_TRUNK}"/>
 
-  <property name="CLASSPATH_TRUNK" value="${basedir}/classes;${compile.classpath}"/>
+  <property name="CLASSPATH_TRUNK" value="${basedir}/classes;${compile.classpath};${jce1_2_1}"/>
 
   <property name="VM_DEFAULT" value="${VM_1.4}"/>
 
