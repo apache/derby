@@ -82,6 +82,7 @@ public class procedure
 			testSQLControl(conn);
 
 				testLiterals(conn);
+                        jira_491_492(conn);
 		} catch (SQLException sqle) {
 			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
 			sqle.printStackTrace(System.out);
@@ -406,6 +407,129 @@ public class procedure
 
 		s.close();
 	}
+    // This test case provides tests for bugs DERBY-491 and DERBY-492. These
+    // two bug reports describe different symptoms, but the underlying bug
+    // is identical: the network server's implementation of LMTBLKPRC was
+    // incorrectly manipulating DDMWriter's bytes buffer. Depending on the
+    // details, the symptom of this bug was generally a hang, because the
+    // server mistakenly truncated the unsent data in its network buffer and
+    // hence sent only a partial transmission, causing the client to hang,
+    // waiting for data that would never arrive. A more detailed analysis
+    // of some other possible symptoms that could arise from these tests is
+    // available in the bug notes for bug 491 in JIRA at:
+    // http://issues.apache.org/jira/browse/DERBY-491
+    //
+    private static void jira_491_492(Connection conn)
+        throws SQLException
+    {
+        Statement st = conn.createStatement();
+        PreparedStatement pSt = null;
+
+        // JIRA-491: Result set has a row that is approx 32K long.
+        // When originally filed, this bug script caused  a protocol
+        // exception and connection deallocation, but that was because the
+        // bug script provoked both JIRA-614 *and* JIRA-491. If you have
+        // the fix for JIRA-614, but JIRA-491 has regressed, you will hang.
+
+        try {
+            st.execute("drop table testtable1");
+        } catch (SQLException se) {}
+
+        // Create an array of chars to be used as the input parameter.
+        // Note that the array should roughly 32K or larger.
+        char [] cData = new char[32500];
+        for (int i = 0; i < cData.length; i++)
+            cData[i] = Character.forDigit(i%10, 10);
+
+        try {
+            st.execute("create table jira491 (int1 integer, varchar32k varchar(32500))");
+            pSt=conn.prepareStatement("insert into jira491 values (?,?)");
+            for (int i = 1; i <= 5; i++) {
+                pSt.setInt(1, i);
+                pSt.setString(2, new String(cData));
+                pSt.execute();
+            }
+        } catch (SQLException se) {
+            System.out.println("JIRA-491: FAILURE in data generation:");
+            se.printStackTrace(System.out);
+        }
+
+        try {
+            st.execute("drop procedure TEST_PROC_JIRA_491");
+        } catch (SQLException se) {} // Ignore "proc does not exist" errors
+	
+        try {
+            st.execute("create procedure TEST_PROC_JIRA_491(in i int) " +
+						"language java parameter style java external name " +
+						"'org.apache.derbyTesting.functionTests.util.ProcedureTest.BIG_COL_491' result sets 2");
+        } catch (SQLException se) {
+            System.out.println("JIRA-491: FAILURE in procedure creation:");
+            se.printStackTrace(System.out);
+        }
+
+        CallableStatement cSt = conn.prepareCall("call TEST_PROC_JIRA_491(?)");
+        cSt.setInt(1, 3);
+        try {
+            cSt.execute();
+            do {
+                ResultSet rs = cSt.getResultSet();
+                while (rs.next()) {
+                    String s = rs.getString(2);
+                }
+            } while (cSt.getMoreResults());
+            System.out.println("JIRA-491 Successful.");
+        }
+        catch (Exception e)
+        {
+            System.out.println("JIRA-491 FAILURE: Caught Exception:");
+            e.printStackTrace(System.out);
+        }
+	
+        // JIRA-492: Result set has hundreds of columns.
+        // This test case, when originally filed, exposed several problems:
+        // - first, this test case causes the server to respond with a very
+        // long response message which gets handled using DRDA Layer B DSS
+        // segmentation. This long message was corrupted due to bug DERBY-125.
+        // - then, the test case causes the server to perform LMTBLKPRC
+        // message truncation in a situation in which there are multiple
+        // chained messages in the DDMWriter buffer. Due to bug DERBY-491/2,
+        // the message truncation logic truncated not only the last DSS block,
+        // but also the multi-segment long message which was still sitting
+        // unsent in the buffer.This then caused a HANG in the client, which
+        // waited forever for the never-to-be-sent truncated data.
+
+        try {
+            st.execute("drop table jira492");
+        } catch (SQLException se) {}
+
+        try {
+            st.execute("create table jira492 (id integer, nsi smallint, " +
+                "ni integer, nbi DECIMAL(19,0), nd decimal(7,2), nr real, " +
+                "ndo double)");
+            st.execute("insert into jira492 values (" +
+						"1, 2, 3, 4.5, 6.7, 8.9, 10.11)");
+        } catch (SQLException se) {
+            System.out.println("JIRA-492: FAILURE in data setup:");
+            se.printStackTrace(System.out);
+        }
+	
+        try {
+            st.execute("drop procedure TEST_PROC_JIRA_492");
+        } catch (SQLException se) {}
+	
+        try {
+            st.execute("create procedure TEST_PROC_JIRA_492() " +
+                    "language java parameter style java external name " +
+                    "'org.apache.derbyTesting.functionTests.util.ProcedureTest.LOTS_O_COLS_492' result sets 1");
+        } catch (SQLException se) {
+            System.out.println("JIRA-492: FAILURE in procedure creation:");
+            se.printStackTrace(System.out);
+        }
+	
+        cSt = conn.prepareCall("call TEST_PROC_JIRA_492()");
+        cSt.execute();
+        System.out.println("JIRA-492 successful -- no hang!");
+    }
 
 	private static void executeProcedure(Statement s, String sql) throws SQLException {
 		boolean firstResultIsAResultSet = s.execute(sql);

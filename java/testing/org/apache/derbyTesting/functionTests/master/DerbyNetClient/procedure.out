@@ -933,3 +933,5 @@ CALL LITT.TY_DOUBLE ('12.34', ?) (42821) Columns of type 'DOUBLE' cannot hold va
 CALL LITT.TY_DECIMAL ('12.34', ?) (42821) Columns of type 'DECIMAL' cannot hold values of type 'CHAR'. 
 CALL LITT.TY_CHAR ('12.34', ?)=>12.34     <
 CALL LITT.TY_VARCHAR ('12.34', ?)=>12.34<
+JIRA-491 Successful.
+JIRA-492 successful -- no hang!
