@@ -968,7 +968,7 @@ public class streamingColumn {
             CallableStatement cs = conn.prepareCall(
                 "CALL SYSCS_UTIL.SYSCS_COMPRESS_TABLE(?, ?, ?)");
             cs.setString(1, "APP");
-            cs.setString(2, "testLongVarChar");
+            cs.setString(2, "TESTLONGVARCHAR");
             cs.setInt(3, 0);
             cs.execute();
 

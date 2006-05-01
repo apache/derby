@@ -644,9 +644,10 @@ public class SystemProcedures  {
     int     sequential)
         throws SQLException
     {
+
         String query = 
-            "alter table " + schema + "." + tablename + " compress" + 
-            (sequential != 0 ? " sequential" : "");
+            "alter table " + "\"" + schema + "\"" + "." + "\"" +  tablename + "\"" + 
+			" compress" +  (sequential != 0 ? " sequential" : "");
 
 		Connection conn = getDefaultConn();
 
