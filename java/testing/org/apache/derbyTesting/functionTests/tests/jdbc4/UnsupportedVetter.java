@@ -1,4 +1,4 @@
-/*
+/**
  * Derby - org.apache.derbyTesting.functionTests.tests.jdbc4.UnsupportedVetter
  *
  * Copyright 2006 The Apache Software Foundation or its licensors, as
@@ -235,21 +235,23 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
             conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");
         ParameterMetaData	csmd = cs.getParameterMetaData();
 
-		vetObject( conn, unsupportedList, notUnderstoodList );
+		//
+		// The vetObject() method calls all of the methods in these objects
+		// in a deterministic order, calling the close() method last.
+		// Inspect these objects in an order which respects the fact that
+		// the objects are closed as a result of calling vetObject().
+		//
 		vetObject( dbmd, unsupportedList, notUnderstoodList );
-		vetObject( ps, unsupportedList, notUnderstoodList );
-		vetObject( parameterMetaData, unsupportedList, notUnderstoodList );
-		vetObject( rs, unsupportedList, notUnderstoodList );
-		vetObject( rsmd, unsupportedList, notUnderstoodList );
 		vetObject( stmt, unsupportedList, notUnderstoodList );
-		vetObject( cs, unsupportedList, notUnderstoodList );
 		vetObject( csmd, unsupportedList, notUnderstoodList );
+		vetObject( cs, unsupportedList, notUnderstoodList );
+		vetObject( rsmd, unsupportedList, notUnderstoodList );
+		vetObject( rs, unsupportedList, notUnderstoodList );
+		vetObject( parameterMetaData, unsupportedList, notUnderstoodList );
+		vetObject( ps, unsupportedList, notUnderstoodList );
+		vetObject( conn, unsupportedList, notUnderstoodList );
 
-        cs.close();
-        stmt.close();
-		rs.close();
-		ps.close();
-		// conn.close();
+		// No need to close the objects. They were closed by vetObject().
 	}
 	
 	//
@@ -366,6 +368,11 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		if ( superClass != null )
 		{ vetInterfaces( candidate, superClass, unsupportedList, notUnderstoodList ); }
 
+		//
+		// The contract for Class.getInterfaces() states that the interfaces
+		// come back in a deterministic order, namely, in the order that
+		// they were declared in the "extends" clause.
+		//
 		Class<?>[]	interfaces = myClass.getInterfaces();
 		int			interfaceCount = interfaces.length;
 
@@ -391,7 +398,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		  HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
-		Method[]	methods = iface.getMethods();
+		Method[]	methods = sortMethods( iface );
 		int			methodCount = methods.length;
 
 		for ( int i = 0; i < methodCount; i++ )
@@ -400,6 +407,27 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 
 			vetMethod( candidate, iface, method, unsupportedList, notUnderstoodList );
 		}
+	}
+
+	//
+	// Return the methods of an interface in a deterministic
+	// order. Class.getMethods() does not do us this favor.
+	//
+	private	Method[]	sortMethods( Class iface )
+		throws Exception
+	{
+		Method[]			raw = iface.getMethods();
+		int					count = raw.length;
+		Method[]			cooked = new Method[ count ];
+		MethodSortable[]	sortables = new MethodSortable[ count ];
+
+		for ( int i = 0; i < count; i++ ) { sortables[ i ] = new MethodSortable( raw[ i ] ); }
+
+		Arrays.sort( sortables );
+
+		for ( int i = 0; i < count; i++ ) { cooked[ i ] = sortables[ i ].getMethod(); }
+
+		return cooked;
 	}
 
 	//
@@ -525,10 +553,13 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	// debug print the list of methods which throw SQLFeatureNotSupportedException
 	private	void	printUnsupportedList( HashSet<String> unsupportedList )
 	{
+		int			count = unsupportedList.size();
+
+		if ( count == 0 ) { return; }
+
 		println( "--------------- UNSUPPORTED METHODS ------------------" );
 		println( "--" );
 
-		int			count = unsupportedList.size();
 		String[]	result = new String[ count ];
 
 		unsupportedList.toArray( result );
@@ -543,11 +574,14 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	// Debug print the list of method failures which we don't understand
 	private	void	printNotUnderstoodList( HashSet<String> notUnderstoodList )
 	{
+		int			count = notUnderstoodList.size();
+
+		if ( count == 0 ) { return; }
+
 		println( "\n\n" );
 		println( "--------------- NOT UNDERSTOOD METHODS ------------------" );
 		println( "--" );
 
-		int			count = notUnderstoodList.size();
 		String[]	result = new String[ count ];
 
 		notUnderstoodList.toArray( result );
@@ -615,6 +649,69 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		/** Get descriptors for the methods which may raise
 			SQLFeatureNotSupportedException. */
 		public	MD[]	getExcludedMethods() { return _excludedMethods; }
+	}
+
+	/**
+	 * <p>
+	 * Used for sorting methods, which don't come back from Class.getMethods()
+	 * in a deterministic order. For extra credit, we put the close() method at
+	 * the end of the sort order so that, when we invoke the sorted methods, we
+	 * don't accidentally invalidate the receiver.
+	 * </p>
+	 */
+	public	static	final	class	MethodSortable	implements	Comparable
+	{
+		private	Method	_method;
+
+		/** Conjure out of a Method */
+		public	MethodSortable( Method method ) { _method = method; }
+
+		/** Get the wrapped Method */
+		public	Method	getMethod() { return _method; }
+
+		//////////////////////////////////////////////////
+		//
+		//	Comparable BEHAVIOR
+		//
+		//////////////////////////////////////////////////
+
+		public	int	compareTo( Object other )
+		{
+			MethodSortable	that = (MethodSortable) other;
+			boolean			thisIsClose = this.isCloseMethod();
+			boolean			thatIsClose = that.isCloseMethod();
+
+			// throw the close() method to the end of the sort order
+			if ( thisIsClose )
+			{
+				if ( thatIsClose ) { return 0; }
+				else { return 1; }
+			}
+			else if ( thatIsClose ) { return -1; }
+
+			return this.toString().compareTo( that.toString() );
+		}
+
+		//////////////////////////////////////////////////
+		//
+		//	Object OVERRIDES
+		//
+		//////////////////////////////////////////////////
+
+		public	String	toString() { return _method.toString(); }
+		
+		//////////////////////////////////////////////////
+		//
+		//	MINIONS
+		//
+		//////////////////////////////////////////////////
+
+		// Returns true if the wrapped method is close().
+		private	boolean	isCloseMethod()
+		{
+			return ( toString().startsWith( "close()" ) );
+		}
+		
 	}
 	
 }
