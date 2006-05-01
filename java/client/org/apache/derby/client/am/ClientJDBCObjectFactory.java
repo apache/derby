@@ -63,6 +63,15 @@ public interface ClientJDBCObjectFactory {
             int type,int concurrency,int holdability) throws SqlException;
     
     /**
+     * This method returns an instance of LogicalConnection
+     * (or LogicalConnection40) which implements java.sql.Connection.
+     */
+    LogicalConnection newLogicalConnection(
+                    org.apache.derby.client.am.Connection physicalConnection,
+                    ClientPooledConnection pooledConnection)
+        throws SqlException;
+    
+    /**
      * This method returns an instance of PreparedStatement
      * (or PreparedStatement40) which implements java.sql.PreparedStatement
      */

@@ -30,14 +30,10 @@ import java.net.InetAddress;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.CallableStatement;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.NClob;
 import java.sql.SQLException;
-import java.sql.SQLXML;
 import java.sql.Statement;
-import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.tools.ij;
@@ -61,33 +57,6 @@ public class TestConnectionMethods {
         conn = connIn;
     }
     
-    void t_createClob() {
-        Clob clob;
-        try {
-            clob = conn.createClob();
-            System.out.println("unimplemented exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-            
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught in function"+e);
-        }
-    }
-    void t_createBlob() {
-        Blob blob;
-        try {
-            blob = conn.createBlob();
-            System.out.println("unimplemented exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught in function"+e);
-        }
-    }
     /**
      * Test the createClob method implementation in the Connection interface 
      * in the Network Client
@@ -157,34 +126,6 @@ public class TestConnectionMethods {
         }
     }
     
-    void t_createNClob() {
-        NClob nclob;
-        try {
-            nclob = conn.createNClob();
-            System.out.println("unimplemented exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught in function"+e);
-        }
-    }
-    void t_createSQLXML() {
-        SQLXML sqlXML;
-        try {
-            sqlXML = conn.createSQLXML();
-            System.out.println("unimplemented exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught in function"+e);
-        }
-        
-    }
-
     /**
      * Test the Connection.isValid method
      */
@@ -343,140 +284,14 @@ public class TestConnectionMethods {
         }
     }
 
-    void t_setClientInfo1(){
-        try {
-            conn.setClientInfo("prop1","value1");
-            System.out.println("unimplemented exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught in function"+e);
-        }
-    }
-    
-    void t_setClientInfo2(){
-        try {
-            Properties p = new Properties();
-            conn.setClientInfo(p);
-            System.out.println("unimplemented exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught in function"+e);
-        }
-    }
-    
-    void t_getClientInfo1(){
-        String info;
-        try {
-            info = conn.getClientInfo("prop1");
-            System.out.println("unimplemented exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught in function"+e);
-        }
-        
-    }
-    
-    void t_getClientInfo2(){
-        Properties p=null;
-        try {
-            p = conn.getClientInfo();
-            System.out.println("unimplemented exception not thrown in code");
-        } catch(SQLException e) {
-            if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {
-                System.out.println("Unexpected SQLException"+e);
-            }
-        } catch(Exception e) {
-            System.out.println("Unexpected exception caught in function"+e);
-        }
-    }
-    
-    /**
-     * Tests the wrapper methods isWrapperFor and unwrap. There are two cases
-     * to be tested
-     * Case 1: isWrapperFor returns true and we call unwrap
-     * Case 2: isWrapperFor returns false and we call unwrap
-     */
-    void t_wrapper() {
-        //test for the case when isWrapper returns true
-        //Begin test for Case1:
-        Class<Connection> wrap_class = Connection.class;
-        
-        //The if method succeeds enabling us to call the unwrap method without 
-        //throwing an exception
-        try {
-            if(conn.isWrapperFor(wrap_class)) {
-                Connection conn1 = 
-                        (Connection)conn.unwrap(wrap_class);
-            }
-            else {
-                System.out.println("isWrapperFor wrongly returns false");
-            }
-        }
-        catch(SQLException sqle) {
-            sqle.printStackTrace();
-        }
-        
-        //Begin test for case2
-        //test for the case when isWrapper returns false
-        //using some class that will return false when 
-        //passed to isWrapperFor
-        Class<CallableStatement> wrap_class1 = CallableStatement.class;
-
-        try {
-            //returning false is the correct behaviour in this case
-            //Generate a message if it returns true
-            if(conn.isWrapperFor(wrap_class1)) {
-                System.out.println("isWrapperFor wrongly returns true");
-            }
-            else {
-                CallableStatement stmt1 = (CallableStatement)
-                                           conn.unwrap(wrap_class1);
-                System.out.println("unwrap does not throw the expected " +
-                                   "exception");
-            }
-        }
-        catch (SQLException sqle) {
-            //calling unwrap in this case throws an SQLException 
-            //ensure that this SQLException has the correct SQLState
-            if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
-                sqle.printStackTrace();
-            }
-        }
-    }
-    
     public void startTestConnectionMethods_Client() {
         t_createClob_Client();
         t_createBlob_Client();
-        t_createNClob();
-        t_createSQLXML();
         t_isValid();
-        t_setClientInfo1();
-        t_setClientInfo2();
-        t_getClientInfo1();
-        t_getClientInfo2();
-        t_wrapper();
     }
     
     public void startTestConnectionMethods_Embedded() {
-        t_createClob();
-        t_createBlob();
-        t_createNClob();
-        t_createSQLXML();
         t_isValid();
-        t_setClientInfo1();
-        t_setClientInfo2();
-        t_getClientInfo1();
-        t_getClientInfo2();
-        t_wrapper();
     }
 
     /**

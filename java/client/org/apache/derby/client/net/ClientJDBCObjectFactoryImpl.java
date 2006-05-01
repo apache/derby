@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.CallableStatement;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
+import org.apache.derby.client.am.LogicalConnection;
 import org.apache.derby.client.am.ParameterMetaData;
 import org.apache.derby.client.am.PreparedStatement;
 import org.apache.derby.client.am.Configuration;
@@ -71,6 +72,16 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
             int holdability) throws SqlException {
         return new CallableStatement(agent,connection,sql,type,
                 concurrency,holdability);
+    }
+   
+    /**
+     * Returns an instance of org.apache.derby.client.am.LogicalConnection
+     */
+    public LogicalConnection newLogicalConnection(
+                    org.apache.derby.client.am.Connection physicalConnection,
+                    ClientPooledConnection pooledConnection)
+        throws SqlException {
+        return new LogicalConnection(physicalConnection, pooledConnection);
     }
     
     /**

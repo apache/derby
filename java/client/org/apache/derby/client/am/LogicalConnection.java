@@ -33,7 +33,7 @@ import java.sql.SQLException;
 // only the Pooled Connection instance will maintain a handle to the physical connection.
 
 public class LogicalConnection implements java.sql.Connection {
-    private Connection physicalConnection_ = null; // reset to null when the logical connection is closed.
+    protected Connection physicalConnection_ = null; // reset to null when the logical connection is closed.
     private org.apache.derby.client.ClientPooledConnection pooledConnection_ = null;
 
     public LogicalConnection(Connection physicalConnection,
@@ -119,7 +119,7 @@ public class LogicalConnection implements java.sql.Connection {
     // this method doesn't wrap in the standard way, because it went out without a throws clause.
     // Unlike all other LogicalConnection methods, if the physical connection is null, it won't throw an exception, but will return false.
 
-    private void checkForNullPhysicalConnection() throws SQLException {
+    protected void checkForNullPhysicalConnection() throws SQLException {
         if (physicalConnection_ == null) {
             SqlException se = new SqlException(null, 
                 new ClientMessageId(SQLState.NO_CURRENT_CONNECTION));

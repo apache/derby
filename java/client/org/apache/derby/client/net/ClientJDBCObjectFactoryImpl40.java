@@ -27,6 +27,8 @@ import org.apache.derby.client.am.CallableStatement40;
 import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.ColumnMetaData40;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
+import org.apache.derby.client.am.LogicalConnection;
+import org.apache.derby.client.am.LogicalConnection40;
 import org.apache.derby.client.am.PreparedStatement;
 import org.apache.derby.client.am.PreparedStatement40;
 import org.apache.derby.client.am.ParameterMetaData;
@@ -82,6 +84,17 @@ public class ClientJDBCObjectFactoryImpl40 implements ClientJDBCObjectFactory{
         return new CallableStatement40(agent,connection,sql,type,concurrency,
                 holdability);
     }
+
+    /**
+     * Returns an instance of org.apache.derby.client.am.LogicalConnection40
+     */
+    public LogicalConnection newLogicalConnection(
+                    org.apache.derby.client.am.Connection physicalConnection,
+                    ClientPooledConnection pooledConnection)
+        throws SqlException {
+        return new LogicalConnection40(physicalConnection, pooledConnection);
+    }
+    
     /**
      * Returns an instance of org.apache.derby.client.am.CallableStatement40
      */

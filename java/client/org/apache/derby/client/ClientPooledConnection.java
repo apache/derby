@@ -206,7 +206,9 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         if (logicalConnection_ != null) {
             logicalConnection_.closeWithoutRecyclingToPool();
         }
-        logicalConnection_ = new org.apache.derby.client.am.LogicalConnection(physicalConnection_, this);
+        logicalConnection_ = ClientDriver.getFactory().newLogicalConnection(
+                                                        physicalConnection_,
+                                                        this);
     }
 
     public synchronized void addConnectionEventListener(javax.sql.ConnectionEventListener listener) {
