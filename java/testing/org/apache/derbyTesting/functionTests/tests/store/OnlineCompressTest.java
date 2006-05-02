@@ -74,89 +74,6 @@ public class OnlineCompressTest extends BaseTest
     }
 
     /**
-     * call the space table vti.
-     * <p>
-     * Utility test function to call the space table vti to get information
-     * about allocated and free pages.  Information is passed back in an
-     * int array as follows:
-     *   is_index                 = ret_info[0];
-     *   num_alloc                = ret_info[1];
-     *   num_free                 = ret_info[2];
-     *   page_size                = ret_info[3];
-     *   estimate_space_savings   = ret_info[4];
-     * <p>
-     *
-	 * @return the space information about the table.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    private static final int SPACE_INFO_IS_INDEX        = 0;
-    private static final int SPACE_INFO_NUM_ALLOC       = 1;
-    private static final int SPACE_INFO_NUM_FREE        = 2;
-    private static final int SPACE_INFO_PAGE_SIZE       = 3;
-    private static final int SPACE_INFO_ESTIMSPACESAVING = 4;
-    private int[] getSpaceInfo(
-    Connection  conn,
-    String      schemaName,
-    String      tableName,
-    boolean     commit_xact)
-		throws SQLException
-    {
-        String stmt_str = 
-            "select conglomeratename, isindex, numallocatedpages, numfreepages, pagesize, estimspacesaving from new org.apache.derby.diag.SpaceTable('" +
-            tableName + "') t where isindex = 0";
-        PreparedStatement space_stmt = conn.prepareStatement(stmt_str);
-        ResultSet rs = space_stmt.executeQuery();
-
-        if (!rs.next())
-        {
-            if (SanityManager.DEBUG)
-            {
-                SanityManager.THROWASSERT(
-                    "No rows returned from space table query on table: " +
-                    schemaName + "." + tableName);
-            }
-        }
-
-        int[] ret_info = new int[5];
-        String conglomerate_name        = rs.getString(1);
-        for (int i = 0; i < 5; i++)
-        {
-            ret_info[i] = rs.getInt(i + 2);
-        }
-
-        if (rs.next())
-        {
-            if (SanityManager.DEBUG)
-            {
-                SanityManager.THROWASSERT(
-                    "More than one row returned from space query on table: " +
-                    schemaName + "." + tableName);
-            }
-        }
-
-        if (verbose)
-        {
-            System.out.println(
-                "Space information for " + schemaName + "." + tableName + ":");
-            System.out.println("isindex = " + ret_info[SPACE_INFO_IS_INDEX]);
-            System.out.println("num_alloc = " + ret_info[SPACE_INFO_NUM_ALLOC]);
-            System.out.println("num_free = " + ret_info[SPACE_INFO_NUM_FREE]);
-            System.out.println("page_size = " + ret_info[SPACE_INFO_PAGE_SIZE]);
-            System.out.println(
-                "estimspacesaving = " + ret_info[SPACE_INFO_ESTIMSPACESAVING]);
-        }
-
-        rs.close();
-
-        if (commit_xact)
-            conn.commit();
-
-        return(ret_info);
-    }
-
-
-    /**
      * Create and load a table.
      * <p>
      * If create_table is set creates a test data table with indexes.
@@ -401,13 +318,15 @@ public class OnlineCompressTest extends BaseTest
         "    IS_INDEX         =" + before_info[SPACE_INFO_IS_INDEX]     + 
         "\n    NUM_ALLOC        =" + before_info[SPACE_INFO_NUM_ALLOC]    +
         "\n    NUM_FREE         =" + before_info[SPACE_INFO_NUM_FREE]     +
+        "\n    NUM_UNFILLED     =" + before_info[SPACE_INFO_NUM_UNFILLED] +
         "\n    PAGE_SIZE        =" + before_info[SPACE_INFO_PAGE_SIZE]    +
         "\n    ESTIMSPACESAVING =" + before_info[SPACE_INFO_ESTIMSPACESAVING]);
         System.out.println("after_info:");
         System.out.println(
-        "    IS_INDEX         =" + after_info[SPACE_INFO_IS_INDEX]     + 
+        "    IS_INDEX         =" + after_info[SPACE_INFO_IS_INDEX]       + 
         "\n    NUM_ALLOC        =" + after_info[SPACE_INFO_NUM_ALLOC]    +
         "\n    NUM_FREE         =" + after_info[SPACE_INFO_NUM_FREE]     +
+        "\n    NUM_UNFILLED     =" + after_info[SPACE_INFO_NUM_UNFILLED] +
         "\n    PAGE_SIZE        =" + after_info[SPACE_INFO_PAGE_SIZE]    +
         "\n    ESTIMSPACESAVING =" + after_info[SPACE_INFO_ESTIMSPACESAVING]);
     }
@@ -994,6 +913,311 @@ public class OnlineCompressTest extends BaseTest
         endTest(conn, test_name);
     }
 
+    /**
+     * Create and load table for test5.
+     * <p>
+     * schema of table:
+     *     keycol   int, 
+     *     onehalf  int, 
+     *     onethird int, 
+     *     c        varchar(300)
+     *
+     * @param conn          Connection to use for sql execution.
+     * @param create_table  If true, create new table - otherwise load into
+     *                      existing table.
+     * @param tblname       table to use.
+     * @param num_rows      number of rows to add to the table.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    private void test5_load(
+    Connection  conn,
+    String      schemaName,
+    String      table_name,
+    int         num_rows)
+        throws SQLException
+    {
+        Statement s = conn.createStatement();
+
+        s.execute(
+            "create table " + table_name + 
+            " (keycol integer primary key, onehalf integer, onethird integer, c varchar(300))");
+        s.close();
+
+        PreparedStatement insert_stmt = 
+            conn.prepareStatement(
+                "insert into " + table_name + " values(?, ?, ?, ?)");
+
+        char[]  data1_data = new char[200];
+
+        for (int i = 0; i < data1_data.length; i++)
+        {
+            data1_data[i] = 'b';
+        }
+        String  data1_str = new String(data1_data);
+
+        for (int i = 0; i < num_rows; i++)
+        {
+            insert_stmt.setInt(1, i);               // keycol
+            insert_stmt.setInt(2, i % 2);           // onehalf:  0 or 1 
+            insert_stmt.setInt(3, i % 3);           // onethird: 0, 1, or 3
+            insert_stmt.setString(4, data1_str);    // c
+            insert_stmt.execute();
+        }
+
+        conn.commit();
+    }
+    
+    /**
+     * Execute test5, simple defragement test. 
+     * <p>
+     * o delete every other row, defragment
+     * o delete every third row, defragment
+     * o delete last 1000 rows, defragment
+     * o delete first 512 rows, defragment.
+     * <p>
+     * run test with at least 2000 rows.
+     **/
+    private void test5_run(
+    Connection  conn,
+    String      schemaName,
+    String      table_name,
+    int         num_rows)
+        throws SQLException
+    {
+        testProgress("begin test5: " + num_rows + " row test.");
+
+        if (verbose)
+            testProgress("Calling compress.");
+
+        // compress with no deletes should not affect size
+        int[] ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        int[] ret_after  = getSpaceInfo(conn, "APP", table_name, true);
+
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
+        {
+            log_wrong_count(
+                "Expected no alloc page change.", 
+                table_name, num_rows, 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        if (verbose)
+            testProgress("calling consistency checker.");
+
+        if (!checkConsistency(conn, schemaName, table_name))
+        {
+            logError("conistency check failed.");
+        }
+
+        // DELETE EVERY OTHER ROW, COMPRESS, CHECK
+        //
+        //
+
+        // delete all the rows every other row.
+        ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        executeQuery(
+            conn, "delete from " + table_name + " where onehalf = 0", true);
+
+        if (verbose)
+            testProgress("deleted every other row, now calling compress.");
+
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, true);
+
+        if (total_pages(ret_after) != total_pages(ret_before))
+        {
+            // currently deleting every other row does not add free or unfilled
+            // pages to the container so defragment has nowhere to put the rows.
+
+            log_wrong_count(
+                "Expected no truncation.",
+                table_name, num_rows, 1, ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        if (verbose)
+            testProgress("calling consistency checker.");
+
+        if (!checkConsistency(conn, schemaName, table_name))
+        {
+            logError("conistency check failed.");
+        }
+
+        // DELETE EVERY THIRD ROW in original dataset, COMPRESS, CHECK
+        //
+        //
+
+        // delete every third row
+        ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        executeQuery(
+            conn, "delete from " + table_name + " where onethird = 0", true);
+
+        if (verbose)
+            testProgress("deleted every third row, now calling compress.");
+
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, true);
+
+        if (total_pages(ret_after) != total_pages(ret_before))
+        {
+            // currently deleting every third row does not create any free 
+            // or unfilled pages so defragment has no place to move rows.
+            log_wrong_count(
+                "Expected no truncation.",
+                table_name, num_rows, 1, ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        if (verbose)
+            testProgress("calling consistency checker.");
+
+        if (!checkConsistency(conn, schemaName, table_name))
+        {
+            logError("conistency check failed.");
+        }
+
+        // DELETE top "half" of rows in original dataset, COMPRESS, CHECK
+        //
+        //
+
+        // delete top "half" of the rows in the original dataset.
+        ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        executeQuery(
+            conn, "delete from " + table_name + " where keycol > " + 
+            (num_rows / 2), true);
+
+        if (verbose)
+            testProgress("deleted top half of the rows, now calling compress.");
+
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, true);
+
+        // compress should be able to clean up about 1/2 of the pages.
+        if (verbose)
+        {
+            log_wrong_count(
+                "deleted top half keys, spaceinfo:",
+                table_name, num_rows, 
+                ((total_pages(ret_before) / 2) + 2),
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        if (total_pages(ret_after) > ((total_pages(ret_before) / 2) + 2))
+        {
+            log_wrong_count(
+                "Expected at least " + 
+                (ret_before[SPACE_INFO_NUM_ALLOC] / 2 + 2) +
+                " pages to be truncated.",
+                table_name, num_rows, 1, ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        if (verbose)
+            testProgress("calling consistency checker.");
+
+        if (!checkConsistency(conn, schemaName, table_name))
+        {
+            logError("conistency check failed.");
+        }
+
+        // DELETE 1st 500 rows in original dataset, COMPRESS, CHECK
+        //
+        //
+
+        // delete keys less than 500
+        ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        executeQuery(
+            conn, "delete from " + table_name + " where keycol < 500 ", true);
+
+        if (verbose)
+            testProgress("deleted keys < 500, now calling compress.");
+
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, true);
+
+        if (verbose)
+        {
+            log_wrong_count(
+                "deleted bottom 500 keys, spaceinfo:",
+                table_name, num_rows, 
+                (total_pages(ret_before) - 33),
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        // The bottom 500 keys, assuming 4k pages, takes about 33 pages
+        if (total_pages(ret_after) > (total_pages(ret_before) - 33))
+        {
+            log_wrong_count(
+                "Expected at least 33 pages reclaimed.",
+                table_name, num_rows, 1, ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        if (verbose)
+            testProgress("calling consistency checker.");
+
+        if (!checkConsistency(conn, schemaName, table_name))
+        {
+            logError("conistency check failed.");
+        }
+
+
+        conn.commit();
+
+        testProgress("end test5: " + num_rows + " row test.");
+    }
+
+    /**
+     * Cleanup after test5_run
+     **/
+    private void test5_cleanup(
+    Connection  conn,
+    String      schemaName,
+    String      table_name,
+    int         num_rows)
+        throws SQLException
+    {
+        executeQuery(conn, "drop table " + table_name, true);
+    }
+
+    /**
+     * Test 5 - simple defragment test.
+     * <p>
+     * Create dataset and then:
+     * o delete every other row, defragment
+     * o delete every third row, defragment
+     * o delete last 1000 rows, defragment
+     * o delete first 512 rows, defragment.
+     * <p>
+     * run test with at least 2000 rows.
+     *
+     **/
+    private void test5(
+    Connection  conn,
+    String      test_name,
+    String      table_name)
+        throws SQLException 
+    {
+        beginTest(conn, test_name);
+
+        int[] test_cases = {2000, 10000};
+
+        for (int i = 0; i < test_cases.length; i++)
+        {
+            test5_load(conn, "APP", table_name, test_cases[i]);
+            test5_run(conn, "APP", table_name, test_cases[i]);
+            test5_cleanup(conn, "APP", table_name, test_cases[i]);
+        }
+
+        endTest(conn, test_name);
+    }
+
 
 
     public void testList(Connection conn)
@@ -1002,7 +1226,8 @@ public class OnlineCompressTest extends BaseTest
         test1(conn, "test1", "TEST1");
         // test2(conn, "test2", "TEST2");
         test3(conn, "test3", "TEST3");
-        // test4(conn, "test2", "TEST2");
+        // test4(conn, "test4", "TEST4");
+        test5(conn, "test5", "TEST5");
     }
 
     public static void main(String[] argv) 
