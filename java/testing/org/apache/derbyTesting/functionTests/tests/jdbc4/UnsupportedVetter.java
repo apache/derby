@@ -1,4 +1,4 @@
-/**
+ /**
  * Derby - org.apache.derbyTesting.functionTests.tests.jdbc4.UnsupportedVetter
  *
  * Copyright 2006 The Apache Software Foundation or its licensors, as
@@ -26,6 +26,8 @@ import javax.sql.*;
 import java.lang.reflect.*;
 import java.util.*;
 import junit.framework.*;
+
+import java.net.URL;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
@@ -55,6 +57,50 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	//
 	private	static	Exclusions[]	rawExcludables = new Exclusions[]
 		{
+		    new Exclusions
+		    (
+				java.sql.Connection.class,
+				new MD[]
+				{
+				    new MD( "createBlob", new Class[] { } ),
+						new MD( "createArray", new Class[] { String.class, Object[].class } ),
+						new MD( "createClob", new Class[] { } ),
+						new MD( "createNClob", new Class[] { } ),
+						new MD( "createSQLXML", new Class[] { } ),
+						new MD( "createStruct", new Class[] { String.class, Object[].class } ),
+						new MD( "getTypeMap", new Class[] { } ),
+						new MD( "prepareStatement", new Class[] { String.class, int[].class } ),
+						new MD( "prepareStatement", new Class[] { String.class, String[].class } )
+						} ),
+		    new Exclusions
+		    (
+				java.sql.Statement.class,
+				new MD[]
+				{
+				    new MD( "execute", new Class[] { String.class, int[].class } ),
+						new MD( "execute", new Class[] { String.class, String[].class } ),
+						new MD( "executeUpdate", new Class[] { String.class, int[].class } ),
+						new MD( "executeUpdate", new Class[] { String.class, String[].class } )
+						} )
+		    ,
+
+		    new Exclusions 
+			(
+				java.sql.PreparedStatement.class,
+				new MD[]
+				{
+					new MD( "setArray", new Class[] { int.class, java.sql.Array.class } ),
+						new MD( "setBlob", new Class[] { int.class, java.io.InputStream.class, long.class } ),
+						new MD( "setClob", new Class[] { int.class, java.io.Reader.class, long.class } ),
+						new MD( "setNCharacterStream", new Class[] { int.class, java.io.Reader.class, long.class } ),
+						new MD( "setNClob", new Class[] { int.class, NClob.class } ),
+						new MD( "setNClob", new Class[] { int.class, java.io.Reader.class, long.class } ),
+						new MD( "setNString", new Class[] { int.class, String.class } ),
+						new MD( "setRef", new Class[] { int.class, Ref.class } ),
+						new MD( "setRowId", new Class[] { int.class, RowId.class } ),
+						new MD( "setSQLXML", new Class[] { int.class, SQLXML.class } ),
+						new MD( "setURL", new Class[] { int.class, URL.class } )
+						} ),
 			new Exclusions
 			(
 			    java.sql.CallableStatement.class,
@@ -65,12 +111,15 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 					new MD( "getBigDecimal", new Class[] { String.class } ),
 					new MD( "getBoolean", new Class[] { String.class } ),
 					new MD( "getBlob", new Class[] { String.class } ),
+					new MD( "getBlob", new Class[] { int.class } ),
 					new MD( "getBoolean", new Class[] { String.class } ),
 					new MD( "getByte", new Class[] { String.class } ),
 					new MD( "getBytes", new Class[] { String.class } ),
 					new MD( "getCharacterStream", new Class[] { String.class } ),
 					new MD( "getClob", new Class[] { String.class } ),
+					new MD( "getClob", new Class[] { int.class } ),
 					new MD( "getDate", new Class[] { String.class } ),
+					new MD( "getDate", new Class[] { String.class, Calendar.class } ),
 					new MD( "getDouble", new Class[] { String.class } ),
 					new MD( "getFloat", new Class[] { String.class } ),
 					new MD( "getInt", new Class[] { String.class } ),
@@ -96,10 +145,120 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 					new MD( "getTimestamp", new Class[] { String.class, java.util.Calendar.class } ),
 					new MD( "getURL", new Class[] { int.class } ),
 					new MD( "getURL", new Class[] { String.class } ),
+						new MD( "registerOutParameter", new Class[] { String.class, int.class } ),
+						new MD( "registerOutParameter", new Class[] { String.class, int.class, int.class } ),
+						new MD( "registerOutParameter", new Class[] { String.class, int.class, String.class } ),
+						new MD( "setArray", new Class[] { int.class, java.sql.Array.class } ),
+						new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class, int.class } ),
+						new MD( "setBigDecimal", new Class[] { String.class, java.math.BigDecimal.class } ),
+						new MD( "setBinaryStream", new Class[] { String.class, java.io.InputStream.class, int.class } ),
+						new MD( "setBlob", new Class[] { String.class, java.io.InputStream.class, long.class } ),
+						new MD( "setBlob", new Class[] { String.class, Blob.class } ),
+						new MD( "setBoolean", new Class[] { String.class, boolean.class } ),
+						new MD( "setByte", new Class[] { String.class, byte.class } ),
+						new MD( "setBytes", new Class[] { String.class, byte[].class } ),
+						new MD( "setCharacterStream", new Class[] { String.class, java.io.Reader.class, int.class } ),
+						new MD( "setClob", new Class[] { String.class, java.io.Reader.class, long.class } ),
+						new MD( "setClob", new Class[] { String.class, Clob.class } ),
+						new MD( "setDate", new Class[] { String.class, java.sql.Date.class } ),
+						new MD( "setDate", new Class[] { String.class, java.sql.Date.class, Calendar.class } ),
+						new MD( "setDouble", new Class[] { String.class, double.class} ),
+						new MD( "setFloat", new Class[] { String.class, float.class } ),
+						new MD( "setInt", new Class[] { String.class, int.class } ),
+						new MD( "setLong", new Class[] { String.class, long.class } ),
+						new MD( "setNCharacterStream", new Class[] { int.class, java.io.Reader.class, long.class } ),
+						new MD( "setNCharacterStream", new Class[] { String.class, java.io.Reader.class, long.class } ),
+						new MD( "setNClob", new Class[] { int.class, java.io.Reader.class, long.class } ),
+						new MD( "setNClob", new Class[] { int.class, NClob.class } ),
+						new MD( "setNClob", new Class[] { String.class, java.io.Reader.class, long.class } ),
+						new MD( "setNClob", new Class[] { String.class, NClob.class } ),
+						new MD( "setNString", new Class[] { int.class, String.class } ),
+						new MD( "setNString", new Class[] { String.class, String.class } ),
+						new MD( "setNull", new Class[] { String.class, int.class } ),
+						new MD( "setNull", new Class[] { String.class, int.class, String.class } ),
+						new MD( "setObject", new Class[] { String.class, Object.class } ),
+						new MD( "setObject", new Class[] { String.class, Object.class, int.class } ),
+						new MD( "setObject", new Class[] { String.class, Object.class, int.class, int.class } ),
+						new MD( "setRef", new Class[] { int.class, Ref.class } ),
+						new MD( "setRowId", new Class[] { int.class, RowId.class } ),
+						new MD( "setRowId", new Class[] { String.class, RowId.class } ),
+						new MD( "setSQLXML", new Class[] { int.class, SQLXML.class } ),
+						new MD( "setSQLXML", new Class[] { String.class, SQLXML.class } ),
+						new MD( "setShort", new Class[] { String.class, short.class } ),
+						new MD( "setString", new Class[] { String.class, String.class } ),
+						new MD( "setTime", new Class[] { String.class, Time.class } ),
+						new MD( "setTime", new Class[] { String.class, Time.class, Calendar.class } ),
+						new MD( "setTimestamp", new Class[] { String.class, Timestamp.class } ),
+						new MD( "setTimestamp", new Class[] { String.class, Timestamp.class, Calendar.class } ),
+						new MD( "setURL", new Class[] { int.class, URL.class } ),
+						new MD( "setURL", new Class[] { String.class, URL.class } )
 				}
 			),
-
-
+		    new Exclusions
+		    (
+				java.sql.ResultSet.class,
+				new MD[]
+				{
+				    new MD( "getNCharacterStream", new Class[] { int.class } ),
+						new MD( "getNCharacterStream", new Class[] { String.class } ),
+						new MD( "getNString", new Class[] { int.class } ),
+						new MD( "getNString", new Class[] { String.class } ),
+						new MD( "getURL", new Class[] { int.class } ),
+						new MD( "getURL", new Class[] { String.class } ),
+						new MD( "getArray", new Class[] { int.class } ),
+						new MD( "getArray", new Class[] { String.class } ),
+						new MD( "getNClob", new Class[] { int.class } ),
+						new MD( "getNClob", new Class[] { String.class } ),
+						new MD( "getRef", new Class[] { int.class } ),
+						new MD( "getRef", new Class[] { String.class } ),
+						new MD( "getRowId", new Class[] { int.class } ),
+						new MD( "getRowId", new Class[] { String.class } ),
+						new MD( "getSQLXML", new Class[] { int.class } ),
+						new MD( "getSQLXML", new Class[] { String.class } ),
+						new MD( "refreshRow", new Class[] { } ),
+						new MD( "updateArray", new Class[] { int.class, java.sql.Array.class } ),
+						new MD( "updateArray", new Class[] { String.class, java.sql.Array.class } ),
+						new MD( "updateNCharacterStream", new Class[] { int.class, java.io.Reader.class, int.class } ),
+						new MD( "updateNCharacterStream", new Class[] { String.class, java.io.Reader.class, int.class } ),
+						new MD( "updateNClob", new Class[] { int.class, NClob.class } ),
+						new MD( "updateNClob", new Class[] { String.class, NClob.class } ),
+						new MD( "updateNString", new Class[] { int.class, String.class } ),
+						new MD( "updateNString", new Class[] { String.class, String.class } ),
+						new MD( "updateRef", new Class[] { int.class, Ref.class } ),
+						new MD( "updateRef", new Class[] { String.class, Ref.class } ),
+						new MD( "updateRowId", new Class[] { int.class, RowId.class } ),
+						new MD( "updateRowId", new Class[] { String.class, RowId.class } ),
+						new MD( "updateSQLXML", new Class[] { int.class, SQLXML.class } ),
+						new MD( "updateSQLXML", new Class[] { String.class, SQLXML.class } )
+						} ),
+			//
+			// Lance Andersen, spec lead for JDBC4, says:
+			// If you support a datatype, then you have to implement
+			// all of its methods.
+			//
+			//		    new Exclusions
+			//		    (
+			//				java.sql.Blob.class,
+			//				new MD[]
+			//				{
+			//				    new MD( "getBinaryStream", new Class[] { long.class, long.class } ),
+			//						new MD( "setBinaryStream", new Class[] { long.class } ),
+			//						new MD( "setBytes", new Class[] { long.class, byte[].class } ),
+			//						new MD( "setBytes", new Class[] { long.class, byte[].class, int.class, int.class } ),
+			//						new MD( "truncate", new Class[] { long.class } )
+			//						} ),
+			//		    new Exclusions
+			//		    (
+			//				java.sql.Clob.class,
+			//				new MD[]
+			//				{
+			//				    new MD( "getCharacterStream", new Class[] { long.class, long.class } ),
+			//						new MD( "setAsciiStream", new Class[] { long.class } ),
+			//						new MD( "setCharacterStream", new Class[] { long.class } ),
+			//						new MD( "setString", new Class[] { long.class, String.class } ),
+			//						new MD( "setString", new Class[] { long.class, String.class, int.class, int.class } ),
+			//						new MD( "truncate", new Class[] { long.class } )
+			//						} )
 		};
 
 	//
@@ -455,7 +614,24 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 
 					if ( !isExcludable )
 					{
-						unsupportedList.add( candidate.getClass().getName() + ": " + method );
+					    StackTraceElement[] stack = 
+						cause.getStackTrace();
+						int i = 0;
+						while(i < stack.length && !stack[i].getMethodName().
+							  equals("notImplemented")){
+								++i;
+							}
+							while(i < stack.length && stack[i].getMethodName().
+								  equals("notImplemented")){
+								++i;
+							}
+							if (i == stack.length) {
+								//cause.printStackTrace();
+							}
+				     
+							unsupportedList.add( candidate.getClass().getName() + ": " + method + "@" + (i==stack.length?"no source":cause.getStackTrace()[i]));
+					} else {
+
 					}
 				}
 				else if ( cause instanceof SQLException )
