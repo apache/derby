@@ -28,6 +28,7 @@ import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.SqlState;
 import org.apache.derby.client.am.Sqlca;
+import java.io.UnsupportedEncodingException;
 
 public class NetConnectionReply extends Reply
         implements ConnectionReplyInterface {
@@ -3122,35 +3123,42 @@ public class NetConnectionReply extends Reply
     // SQLDCXGRP; PROTOCOL TYPE N-GDA; ENVLID 0xD3; Length Override 1
     private int parseSQLDCGRP(Sqlca[] rowsetSqlca, int lastRow) throws DisconnectException {
         int sqldcCode = readFastInt(); // SQLCODE
-        String sqldcState = readFastString(5, netAgent_.targetTypdef_.getCcsidSbcEncoding()); // SQLSTATE
+        String sqldcState = readFastString(5, Typdef.UTF8ENCODING); // SQLSTATE
         int sqldcReason = readFastInt();  // REASON_CODE
         int sqldcLinen = readFastInt(); // LINE_NUMBER
         int sqldcRown = (int) readFastLong(); // ROW_NUMBER
 
-        // save +20237 in the 0th entry of the rowsetSqlca's.
-        // this info is going to be used when a subsequent fetch prior is issued, and if already
-        // received a +20237 then we've gone beyond the first row and there is no need to
-        // flow another fetch to the server.
-        if (sqldcCode == 20237) {
-            rowsetSqlca[0] = new NetSqlca(netAgent_.netConnection_,
-                    sqldcCode,
-                    sqldcState.getBytes(),
-                    null,
-                    netAgent_.targetTypdef_.getCcsidSbc());
-        } else {
-            if (rowsetSqlca[sqldcRown] != null) {
-                rowsetSqlca[sqldcRown].resetRowsetSqlca(netAgent_.netConnection_,
+        try
+        {
+            // save +20237 in the 0th entry of the rowsetSqlca's.
+            // this info is going to be used when a subsequent fetch prior is issued, and if already
+            // received a +20237 then we've gone beyond the first row and there is no need to
+            // flow another fetch to the server.
+            if (sqldcCode == 20237) {
+                rowsetSqlca[0] = new NetSqlca(netAgent_.netConnection_,
                         sqldcCode,
-                        sqldcState.getBytes(),
+                        sqldcState.getBytes(Typdef.UTF8ENCODING),
                         null,
                         netAgent_.targetTypdef_.getCcsidSbc());
             } else {
-                rowsetSqlca[sqldcRown] = new NetSqlca(netAgent_.netConnection_,
-                        sqldcCode,
-                        sqldcState.getBytes(),
-                        null,
-                        netAgent_.targetTypdef_.getCcsidSbc());
+                if (rowsetSqlca[sqldcRown] != null) {
+                    rowsetSqlca[sqldcRown].resetRowsetSqlca(netAgent_.netConnection_,
+                            sqldcCode,
+                            sqldcState.getBytes(Typdef.UTF8ENCODING),
+                            null,
+                            netAgent_.targetTypdef_.getCcsidSbc());
+                } else {
+                    rowsetSqlca[sqldcRown] = new NetSqlca(netAgent_.netConnection_,
+                            sqldcCode,
+                            sqldcState.getBytes(Typdef.UTF8ENCODING),
+                            null,
+                            netAgent_.targetTypdef_.getCcsidSbc());
+                }
             }
+        }
+        catch(UnsupportedEncodingException uee)
+        {
+            throw new DisconnectException(uee,netAgent_); 
         }
 
         // reset all entries between lastRow and sqldcRown to null
