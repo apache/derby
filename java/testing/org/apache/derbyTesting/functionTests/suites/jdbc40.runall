@@ -1,18 +1,21 @@
+# Old Java style tests
 jdbc4/TestConnectionMethods.java
-jdbc4/TestPreparedStatementMethods.java
-jdbc4/TestResultSetMethods.java
-jdbc4/TestQueryObject.java
 jdbc4/TestDbMetaData.java
 jdbc4/TestJDBC40Exception.java
-jdbc4/StatementEventsTest.junit
+jdbc4/TestQueryObject.java
+jdbc4/TestPreparedStatementMethods.java
+jdbc4/TestResultSetMethods.java
+
+# JUnit tests
+jdbc4/AutoloadTest.junit
 jdbc4/BlobTest.junit
 jdbc4/CallableStatementTest.junit
 jdbc4/ClobTest.junit
+jdbc4/DataSourceTest.junit
+jdbc4/ParameterMetaDataWrapperTest.junit
+jdbc4/ResultSetMetaDataTest.junit
 jdbc4/ResultSetTest.junit
 jdbc4/RowIdNotImplementedTest.junit
+jdbc4/StatementEventsTest.junit
 jdbc4/StatementTest.junit
-jdbc4/DataSourceTest.junit
-jdbc4/ResultSetMetaDataTest.junit
-jdbc4/ParameterMetaDataWrapperTest.junit
-jdbc4/AutoloadTest.junit
 jdbc4/XA40Test.junit
