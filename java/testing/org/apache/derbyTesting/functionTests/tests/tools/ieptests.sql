@@ -386,7 +386,7 @@ select * from parent;
 
 ---test with a file which has a differen records seperators (\n, \r , \r\n)
 create table nt1( a int , b char(30));
-CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'NT1', 'extin/mixednl.del',null, null, null,0);
+CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'NT1', 'extin/mixednl.del',null, null, 'UTF-8',0);
 select * from nt1;
 drop table nt1 ;
 
@@ -401,7 +401,7 @@ create table position_info
        web_flag varchar(1)
     );
 CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE ('APP', 'POSITION_INFO', 'extin/position_info.del',
-                                    null, null, null, 1);
+                                    null, null, 'US-ASCII', 1);
 select count(*) from position_info ;
 select detail_description from position_info where position_code='AG1000';
 CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP', 'POSITION_INFO', 'extinout/pinfo.del',

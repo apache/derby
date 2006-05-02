@@ -76,11 +76,11 @@ public class blobclob4BLOB {
 		fileName = new String[numFiles];
 		fileLength = new long[numFiles];
 
-		fileName[0] = "extin/short.txt";	// set up a short (fit in one page) blob/clob
-		fileName[1] = "extin/littleclob.txt"; // set up a long (longer than a page) blob/clob
-		fileName[2] = "extin/empty.txt"; // set up a blob/clob with nothing in it
-		fileName[3] = "extin/searchclob.txt"; // set up a blob/clob to search with
-		fileName[4] = "extin/aclob.txt"; // set up a really long (over 300K) blob/clob
+		fileName[0] = "extin/short.utf";	// set up a short (fit in one page) blob/clob
+		fileName[1] = "extin/littleclob.utf"; // set up a long (longer than a page) blob/clob
+		fileName[2] = "extin/empty.utf"; // set up a blob/clob with nothing in it
+		fileName[3] = "extin/searchclob.utf"; // set up a blob/clob to search with
+		fileName[4] = "extin/aclob.utf"; // set up a really long (over 300K) blob/clob
 
         numRows = 10;
 
@@ -2924,7 +2924,7 @@ public class blobclob4BLOB {
                         System.out.println("FAIL : length of bytes is " +
                             res.length + " should be 100");
                     else
-                        System.out.println(new String(res, "US-ASCII"));
+                        System.out.println(new String(res, "US-ASCII")); // ensure fixed string
                 }
             }
             System.out.println("blobTest2 finished");
@@ -4034,17 +4034,21 @@ public class blobclob4BLOB {
 			TestUtil.dumpSQLExceptions(e,expected);
 		}
 		
-		catch (Exception e)
+		catch (StringIndexOutOfBoundsException obe)
 		{
 			// Known bug.  JCC 5914.  
-			if ((pos > clobLength) && isDerbyNet && (e.getMessage() != null &&
-													e.getMessage().indexOf("String index out of range") >= 0))
+			if ((pos > clobLength) && isDerbyNet)
 				System.out.println("EXPECTED Out of bounds exception");
 			else
 			{
-				System.out.println("FAIL -- unexpected exception:" + e.toString());
-	            if (debug) e.printStackTrace();
+				System.out.println("FAIL -- unexpected exception:" + obe.toString());
+				if (debug) obe.printStackTrace();
 			}
+		}
+		catch (Exception e)
+		{
+			System.out.println("FAIL -- unexpected exception:" + e.toString());
+	            if (debug) e.printStackTrace();
 		}
     }
 

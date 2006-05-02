@@ -1,16 +1,16 @@
 Test blobclob starting
 START: prepareCLOBMAIN
-===> inserting extin/short.txt length = 56
-===> inserting extin/littleclob.txt length = 10000
-===> inserting extin/empty.txt length = 0
-===> inserting extin/searchclob.txt length = 5000
-===> inserting extin/aclob.txt length = 300000
+===> inserting extin/short.utf length = 56
+===> inserting extin/littleclob.utf length = 10000
+===> inserting extin/empty.utf length = 0
+===> inserting extin/searchclob.utf length = 5000
+===> inserting extin/aclob.utf length = 300000
 START: prepareSearchClobTable
-===> inserting extin/short.txt length = 56
-===> inserting extin/littleclob.txt length = 10000
-===> inserting extin/empty.txt length = 0
-===> inserting extin/searchclob.txt length = 5000
-===> inserting extin/aclob.txt length = 300000
+===> inserting extin/short.utf length = 56
+===> inserting extin/littleclob.utf length = 10000
+===> inserting extin/empty.utf length = 0
+===> inserting extin/searchclob.utf length = 5000
+===> inserting extin/aclob.utf length = 300000
 prepareSearchClobTable finished
 START: prepareUnicodeTable
 START: prepareUnicodeFile
@@ -545,17 +545,17 @@ clobTest95 finished
 START: clobTest96
 clobTest96 finished
 START: prepareBlobTable
-===> inserting extin/short.txt length = 56
-===> inserting extin/littleclob.txt length = 10000
-===> inserting extin/empty.txt length = 0
-===> inserting extin/searchclob.txt length = 5000
-===> inserting extin/aclob.txt length = 300000
+===> inserting extin/short.utf length = 56
+===> inserting extin/littleclob.utf length = 10000
+===> inserting extin/empty.utf length = 0
+===> inserting extin/searchclob.utf length = 5000
+===> inserting extin/aclob.utf length = 300000
 START: prepareSearchBlobTable
-===> inserting extin/short.txt length = 56
-===> inserting extin/littleclob.txt length = 10000
-===> inserting extin/empty.txt length = 0
-===> inserting extin/searchclob.txt length = 5000
-===> inserting extin/aclob.txt length = 300000
+===> inserting extin/short.utf length = 56
+===> inserting extin/littleclob.utf length = 10000
+===> inserting extin/empty.utf length = 0
+===> inserting extin/searchclob.utf length = 5000
+===> inserting extin/aclob.utf length = 300000
 START: blobTest0
 blobTest0 finished
 START: blobTest2
