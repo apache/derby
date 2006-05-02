@@ -20,6 +20,7 @@
 
 package org.apache.derby.impl.jdbc;
 
+import java.sql.Array;
 import java.sql.BaseQuery;
 import java.sql.Blob;
 import java.sql.ClientInfoException;
@@ -28,6 +29,7 @@ import java.sql.NClob;
 import java.sql.QueryObjectFactory;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Struct;
 import java.util.Properties;
 import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.iapi.reference.SQLState;
@@ -53,6 +55,10 @@ public class EmbedConnection40 extends EmbedConnection30 {
      *-------------------------------------------------------
      */
     
+    public Array createArray(String typeName, Object[] elements)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
     
     public Clob createClob() throws SQLException {
         throw Util.notImplemented();
@@ -67,6 +73,11 @@ public class EmbedConnection40 extends EmbedConnection30 {
     }
     
     public SQLXML createSQLXML() throws SQLException {
+        throw Util.notImplemented();
+    }
+    
+    public Struct createStruct(String typeName, Object[] attributes)
+        throws SQLException {
         throw Util.notImplemented();
     }
     

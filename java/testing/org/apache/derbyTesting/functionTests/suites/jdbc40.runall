@@ -18,4 +18,5 @@ jdbc4/ResultSetTest.junit
 jdbc4/RowIdNotImplementedTest.junit
 jdbc4/StatementEventsTest.junit
 jdbc4/StatementTest.junit
+jdbc4/VerifySignatures.junit
 jdbc4/XA40Test.junit

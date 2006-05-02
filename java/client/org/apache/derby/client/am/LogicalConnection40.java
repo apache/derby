@@ -20,6 +20,7 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.Array;
 import java.sql.BaseQuery;
 import java.sql.Blob;
 import java.sql.ClientInfoException;
@@ -27,6 +28,7 @@ import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.SQLXML;
 import java.sql.SQLException;
+import java.sql.Struct;
 import java.sql.Wrapper;
 import java.util.Properties;
 
@@ -49,6 +51,11 @@ public class LogicalConnection40
         super(physicalConnection, pooledConnection);
     }
 
+    public Array createArray(String typeName, Object[] elements)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("createArray(String,Object[])");
+    }
+    
     public Blob createBlob()
         throws SQLException {
         throw SQLExceptionFactory.notImplemented("createBlob()");
@@ -72,6 +79,11 @@ public class LogicalConnection40
     public SQLXML createSQLXML()
         throws SQLException {
         throw SQLExceptionFactory.notImplemented("createSQLXML()");
+    }
+
+    public Struct createStruct(String typeName, Object[] attributes)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented("createStruct(String,Object[])");
     }
 
     public Properties getClientInfo()

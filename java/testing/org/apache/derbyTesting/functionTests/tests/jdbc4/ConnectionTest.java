@@ -101,6 +101,16 @@ public class ConnectionTest
         }
     }
 
+    public void testCreateArrayNotImplemented()
+        throws SQLException {
+        try {
+            con.createArray(null, null);
+            fail("createArray(String,Object[]) should not be implemented");
+        } catch (SQLFeatureNotSupportedException sfnse) {
+            // Do nothing, we are fine
+        }
+    }
+
     public void testCreateNClobNotImplemented()
         throws SQLException {
         try {
@@ -131,6 +141,16 @@ public class ConnectionTest
         }
     }
 
+    public void testCreateStructNotImplemented()
+        throws SQLException {
+        try {
+            con.createStruct(null, null);
+            fail("createStruct(String,Object[]) should not be implemented");
+        } catch (SQLFeatureNotSupportedException sfnse) {
+            // Do nothing, we are fine
+        }
+    }
+    
     public void testGetClientInfoNotImplemented()
         throws SQLException {
         try {
@@ -224,6 +244,14 @@ public class ConnectionTest
     
     /**
      * Create a test suite containing tests for various connection types.
+     * Three subsuites are created:
+     * <ol><li>ConnectionTest suite</li>
+     *     <li>PooledConnectionTest suite</li>
+     *     <li>XAConnectionTest suite</li>
+     *  </ol>
+     *
+     *  In addition, separate suites for embedded- and client-only are added
+     *  to the subsuites when appropriate.
      */
     public static Test suite() {
         TestSuite topSuite = new TestSuite("ConnectionTest top suite");

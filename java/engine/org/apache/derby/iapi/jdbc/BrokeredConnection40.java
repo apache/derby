@@ -20,6 +20,7 @@
 
 package org.apache.derby.iapi.jdbc;
 
+import java.sql.Array;
 import java.sql.BaseQuery;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -27,6 +28,7 @@ import java.sql.ClientInfoException;
 import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Struct;
 import java.util.Properties;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.iapi.reference.SQLState;
@@ -37,6 +39,11 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
     /** Creates a new instance of BrokeredConnection40 */
     public BrokeredConnection40(BrokeredConnectionControl control) {
         super(control);
+    }
+    
+    public Array createArray(String typeName, Object[] elements)
+        throws SQLException {
+        throw Util.notImplemented();
     }
     
     public Blob createBlob() throws SQLException {
@@ -56,7 +63,11 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
         throw Util.notImplemented();
     }
     
-    
+    public Struct createStruct(String typeName, Object[] attributes)
+        throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public boolean isValid(int timeout) throws SQLException{
         throw Util.notImplemented();
     }

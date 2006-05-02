@@ -20,6 +20,7 @@
 
 package org.apache.derby.client.net;
 
+import java.sql.Array;
 import java.sql.BaseQuery;
 import java.sql.QueryObjectFactory;
 import org.apache.derby.client.am.SQLExceptionFactory;
@@ -32,6 +33,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Struct;
 import java.util.Properties;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
@@ -89,6 +91,11 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     
 
     
+    public Array createArray(String typeName, Object[] elements)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented ("createArray(String,Object[])");
+    }
+
     /**
      * Constructs an object that implements the Clob interface. The object
      * returned initially contains no data.
@@ -123,6 +130,11 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 
     public SQLXML createSQLXML() throws SQLException {
         throw SQLExceptionFactory.notImplemented ("createSQLXML ()");
+    }
+
+    public Struct createStruct(String typeName, Object[] attributes)
+        throws SQLException {
+        throw SQLExceptionFactory.notImplemented ("createStruct(String,Object[])");
     }
 
     /**
