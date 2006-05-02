@@ -21,20 +21,55 @@
 package org.apache.derby.client.am;
 
 public class DisconnectException extends SqlException {
-    public DisconnectException(Agent agent, ClientMessageId msgid, SqlCode sqlcode) {
-        super(agent != null ? agent.logWriter_ : null, msgid, sqlcode);
-    }
-
-    public DisconnectException(Agent agent, ClientMessageId msgid) {
-        super(agent != null ? agent.logWriter_ : null, msgid, 
-            SqlCode.disconnectError);
+    public DisconnectException(Agent agent, ClientMessageId msgid,
+        Object[] args, SqlCode sqlcode, Throwable t)  {
+        super(agent != null ? agent.logWriter_ : null, msgid,
+            args, sqlcode, t);
         
         // make the call to close the streams and socket.
         if (agent != null) {
             agent.disconnectEvent();
         }
     }
+    
+    public DisconnectException(Agent agent, ClientMessageId msgid,
+        Object[] args, SqlCode sqlcode) {
+        this(agent, msgid, args, sqlcode, (Throwable)null);
+    }
+
+    public DisconnectException(Agent agent, ClientMessageId msgid, SqlCode sqlcode) {
+        this(agent, msgid, (Object[]) null, sqlcode);
+    }
+
         
+    public DisconnectException(Agent agent, ClientMessageId msgid,
+        Object[] args) {
+        this(agent, msgid, args, SqlCode.disconnectError);
+    }
+    
+    public DisconnectException(Agent agent, ClientMessageId msgid,
+        Object[] args, Throwable t) {
+        this(agent, msgid, args, SqlCode.disconnectError, (Throwable)t);
+    }
+    
+    public DisconnectException(Agent agent, ClientMessageId msgid,
+        Object arg1, Throwable t) {
+        this(agent, msgid, new Object[] { arg1 }, t);
+    }
+
+    public DisconnectException(Agent agent, ClientMessageId msgid) {
+        this(agent, msgid, (Object[])null);
+    }
+    
+    public DisconnectException(Agent agent, ClientMessageId msgid, Object arg1) {
+        this(agent, msgid, new Object[] { arg1 });
+    }
+        
+    public DisconnectException(Agent agent, ClientMessageId msgid, Object arg1,
+        Object arg2) {
+        this(agent, msgid, new Object[] { arg1, arg2 });
+    }
+    
     // Old constructors for backward compatibility until all classes
     // have been internationalized
     public DisconnectException(Agent agent, String reason, SqlState sqlstate, SqlCode sqlcode) {
@@ -58,7 +93,7 @@ public class DisconnectException extends SqlException {
     }
 
     public DisconnectException(Agent agent) {
-        this(agent, null, SqlState.undefined);
+        this(agent, (String)null, SqlState.undefined);
     }
 
     public DisconnectException(java.lang.Throwable throwable, Agent agent) {
@@ -78,5 +113,3 @@ public class DisconnectException extends SqlException {
         setNextException(e);
     }
 }
-
-

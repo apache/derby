@@ -3,13 +3,13 @@ passed SQLException all the way to client, then thrown by client...
 SQLState is: 08004
 vendorCode is: -4499
 nextException is: null
-reason is: The application server rejected establishment of the connection.  An attempt was made to access a database, testbase, which was not found.
+reason is: The connection was refused because the database testbase was not found.
 Database not Found  (RDBNFNRM)
 passed SQLException all the way to client, then thrown by client...
 SQLState is: 08004
 vendorCode is: -4499
 nextException is: null
-reason is: The application server rejected establishment of the connection.  An attempt was made to access a database, notthere, which was not found.
+reason is: The connection was refused because the database notthere was not found.
 Invalid Attribute  value (RDBAFLRM)
 passed SQLException all the way to client, then thrown by client...
 SQLState is: XJ05B

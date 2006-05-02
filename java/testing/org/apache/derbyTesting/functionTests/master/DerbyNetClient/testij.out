@@ -24,9 +24,9 @@ ij> -- examples from the docs
 connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/wombat;create=true;user=judy;password=judy';
 ij(CONNECTION1)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/./wombat;user=judy;password=judy';
 ij(CONNECTION2)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/toursDB';
-ERROR 08004: The application server rejected establishment of the connection.  An attempt was made to access a database, toursDB, which was not found.
+ERROR 08004: The connection was refused because the database toursDB was not found.
 ij(CONNECTION2)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/toursDB' USER 'dbadmin' PASSWORD 'dbadbmin';
-ERROR 08004: The application server rejected establishment of the connection.  An attempt was made to access a database, toursDB, which was not found.
+ERROR 08004: The connection was refused because the database toursDB was not found.
 ij(CONNECTION2)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/wombat' USER 'APP' PASSWORD 'APP';
 ij(CONNECTION3)> connect  'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/my-db-name;create=true;user=usr;password=pwd';
 ij(CONNECTION4)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/my-db-name;upgrade=true;user=usr;password=pwd';
@@ -35,7 +35,7 @@ ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database '
 ij(CONNECTION5)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/./my-dbname;create=true;user=usr;password=pwd';
 ij(CONNECTION6)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/./my-dbname;create=true;user=usr;password=pwd';
 ij(CONNECTION7)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/toursDB' USER 'dbadmin' PASSWORD 'dbadbmin';
-ERROR 08004: The application server rejected establishment of the connection.  An attempt was made to access a database, toursDB, which was not found.
+ERROR 08004: The connection was refused because the database toursDB was not found.
 ij(CONNECTION7)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/wombat' USER 'APP' PASSWORD 'APP';
 ij(CONNECTION8)> connect  'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/my-db-name;create=true;user=usr;password=pwd';
 ij(CONNECTION9)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/my-db-name;upgrade=true;user=usr;password=pwd';

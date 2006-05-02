@@ -339,10 +339,7 @@ public class Request {
                 try {
                     sendBytes(netAgent_.getOutputStream());
                 } catch (java.io.IOException ioe) {
-                    netAgent_.throwCommunicationsFailure("Request.writeScalarStream(...,InputStream)",
-                            "OutputStream.flush()",
-                            ioe.getMessage(),
-                            "*");
+                    netAgent_.throwCommunicationsFailure(ioe);
                 }
             } else {
                 System.arraycopy(encryptedBytes, 0, bytes_, offset_, encryptedBytesLength);
@@ -364,10 +361,7 @@ public class Request {
                     try {
                         sendBytes(netAgent_.getOutputStream());
                     } catch (java.io.IOException ioe) {
-                        netAgent_.throwCommunicationsFailure("Request.writeScalarStream(...,InputStream)",
-                                "OutputStream.flush()",
-                                ioe.getMessage(),
-                                "*");
+                        netAgent_.throwCommunicationsFailure(ioe);
                     }
                 } else {
                     int leftlength = encryptedBytesLength + 2;
@@ -661,10 +655,7 @@ public class Request {
                 try {
                     sendBytes(netAgent_.getOutputStream());
                 } catch (java.io.IOException ioe) {
-                    netAgent_.throwCommunicationsFailure("Request.writeScalarStream(...,InputStream)",
-                            "OutputStream.flush()",
-                            ioe.getMessage(),
-                            "*");
+                    netAgent_.throwCommunicationsFailure(ioe);
                 }
             } else {
                 System.arraycopy(encryptedBytes, 0, bytes_, offset_, encryptedBytesLength);
@@ -685,10 +676,7 @@ public class Request {
                     try {
                         sendBytes(netAgent_.getOutputStream());
                     } catch (java.io.IOException ioe) {
-                        netAgent_.throwCommunicationsFailure("Request.writeScalarStream(...,InputStream)",
-                                "OutputStream.flush()",
-                                ioe.getMessage(),
-                                "*");
+                        netAgent_.throwCommunicationsFailure(ioe);
                     }
                 } else {
                     int leftlength = encryptedBytesLength + 2;
@@ -739,10 +727,7 @@ public class Request {
                 }
                 sendBytes(netAgent_.getOutputStream());
             } catch (java.io.IOException e) {
-                netAgent_.throwCommunicationsFailure("Request.writeScalarStream(...,InputStream)",
-                        "OutputStream.flush()",
-                        e.getMessage(),
-                        "*");
+                netAgent_.throwCommunicationsFailure(e);
             }
         }
 
@@ -782,10 +767,7 @@ public class Request {
                 try {
                     sendBytes(netAgent_.getOutputStream());
                 } catch (java.io.IOException ioe) {
-                    netAgent_.throwCommunicationsFailure("Request.writeScalarStream(...,InputStream)",
-                            "OutputStream.flush()",
-                            ioe.getMessage(),
-                            "*");
+                    netAgent_.throwCommunicationsFailure(ioe);
                 }
             }
             dssLengthLocation_ = offset_;

@@ -136,9 +136,14 @@ public class SqlException extends Exception implements Diagnosable {
      * from the message severity
      */
     public SqlException(LogWriter logWriter, ClientMessageId msgid, Object[] args,
-        SqlCode sqlcode) {
-        this(logWriter, msgid, args);
+        SqlCode sqlcode, Throwable t) {
+        this(logWriter, msgid, args, t);
         this.errorcode_ = sqlcode.getCode();
+    }
+    
+    public SqlException(LogWriter logWriter, ClientMessageId msgid, Object[] args,
+        SqlCode sqlcode) {
+        this(logWriter, msgid, args, sqlcode, (Throwable)null);
     }
         
     public SqlException(LogWriter logWriter, ClientMessageId msgid, SqlCode sqlcode) {

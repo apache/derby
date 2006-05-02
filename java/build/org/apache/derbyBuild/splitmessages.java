@@ -101,6 +101,8 @@ public class splitmessages {
         clientMessageIds.add(SQLState.LANG_INVALID_SQL_IN_BATCH);
         clientMessageIds.add(SQLState.CLIENT_RESULT_SET_NOT_OPEN);
         clientMessageIds.add(SQLState.CANT_CONVERT_UNICODE_TO_EBCDIC);
+        clientMessageIds.add(SQLState.SECMECH_NOT_SUPPORTED);
+        clientMessageIds.add(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED);
     }
 
 	public static void main(String[] args) throws Exception {
@@ -203,17 +205,20 @@ public class splitmessages {
     /**
      * Determine if this is a message that the client is using
      *
-     * We assume all message ids starting with "XJ" or "J" are client messages
-     * (even though many of them may not be, it saves the coder the effort
-     * of explicitly adding each XJ or J shared message, and covers 90% of the
-     * shared messages
+     * There are some classes of ids that we assume are client messages
+     * (see code below for the definitive list).
      *
      * All other shared message ids should be added to the static array
      * clientMessageIds, defined at the top of this class
      */
     static boolean isClientMessage(String messageId)
     {
-        if ( messageId.startsWith("XJ") || messageId.startsWith("J") )
+        // Look for message ids that we assume are likely to be used
+        // on the client.  These ones don't need to be explicitly added
+        // to clientMessageIds
+        if ( messageId.startsWith("XJ") || messageId.startsWith("J")  ||
+             messageId.startsWith("XN") || messageId.startsWith("58") ||
+             messageId.startsWith("57") || messageId.startsWith("08"))
         {
             return true;
         }

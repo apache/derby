@@ -76,8 +76,9 @@ public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDataba
         try { 
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
-                    interfaces).getSQLException();
+            throw new SqlException(null,
+                new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
+                interfaces).getSQLException();
         }
     }
 }

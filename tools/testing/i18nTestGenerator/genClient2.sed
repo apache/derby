@@ -1,6 +1,6 @@
-# For those expressions that start with "new MessageId", pre-append
+# For those expressions that start with "new ClientMessageId", pre-append
 # a try block and create a SqlException to complete the expression
-/^[[:space:]]*new MessageId/i\
+/^[[:space:]]*new ClientMessageId/i\
     try { \
        testException = new SqlException(null,
 
@@ -66,6 +66,20 @@ s/[[:space:]]jdbcInterfaceName/ "jdbcInterfaceName"/g
 s/[[:space:]]jdbcStatementInterfaceName/ "jdbcInterfaceName"/g
 s/[[:space:]]name)/ "name")/g
 s/[[:space:]]sql)/ "sql")/g
+s/cause.getMessage()/testException.getMessage()/g
+s/cause));/testException);/g
+s/netConnection.databaseName_));/"netcondbname");/g
+s/value));/"value");/g
+s/GGRP"));/GGRP");/g
+s/[[:space:]]e));/ testException);/g
+s/[[:space:]]server/ "server"/
+s/codpnt/"codpnt"/g
+s/[[:space:]]codePoint/ "codePoint"/g
+s/conversationProtocolErrorCode/"conerr"/g
+s/[[:space:]]rdbnam/ "rdbnam"/g
+s/[[:space:]]manager/ "manager"/g
+s/[[:space:]]level));/ "level");/g
+s/[[:space:]]operation/ "operation"/g
 
 # 
 # Deal with extra updateCounts argument to BatchUpdateExceptoins.
@@ -80,6 +94,7 @@ s/updateCounts/(Throwable)null/g
 #
 s/new Long[[:space:]]*([^)]*/new Long(0/g
 s/new Integer[[:space:]]*([^)]*/new Integer(0/g
+s/Integer.toHexString[[:space:]]*([^)]*/Integer.toHexString(0/g
 
 # Get rid of logWriter
 s/new SqlException[[:space:]]*(.*,/new SqlException(null,/g

@@ -26,7 +26,11 @@ import java.util.Arrays;
 
 import org.apache.derby.client.am.SignedBinary;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SqlState;
+import org.apache.derby.client.am.ClientMessageId;
+
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class Reply {
     protected org.apache.derby.client.am.Agent agent_;
@@ -167,10 +171,7 @@ public class Reply {
                 // oops, we shouldn't expose the agent's input stream here, collapse this into a read method on the agent
                 actualBytesRead = netAgent_.getInputStream().read(buffer_, count_, buffer_.length - count_);
             } catch (java.io.IOException ioe) {
-                netAgent_.throwCommunicationsFailure("Reply.fill()",
-                        "InputStream.read()",
-                        ioe.getMessage(),
-                        "*");
+                netAgent_.throwCommunicationsFailure(ioe);
             } finally {
                 if (agent_.loggingEnabled()) {
                     ((NetLogWriter) netAgent_.logWriter_).traceProtocolFlow(buffer_,
@@ -189,10 +190,11 @@ public class Reply {
 
         if (actualBytesRead == -1) {
             if (totalBytesRead < minimumBytesNeeded) {
-                netAgent_.throwCommunicationsFailure("Reply.fill()",
-                        "InputStream.read()",
-                        "insufficient data",
-                        "*");
+                netAgent_.accumulateChainBreakingReadExceptionAndThrow(
+                    new DisconnectException(netAgent_,
+                        new ClientMessageId(SQLState.NET_INSUFFICIENT_DATA),
+                        new Integer(minimumBytesNeeded),
+                        new Integer(totalBytesRead)));
             }
         }
         return totalBytesRead;

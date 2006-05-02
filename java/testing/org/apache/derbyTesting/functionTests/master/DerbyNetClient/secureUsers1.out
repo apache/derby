@@ -31,7 +31,7 @@ ij> connect 'ldapSchemeDB;user=system;password=manager;shutdown=true';
 ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'ldapSchemeDB' shutdown.
 ij> disconnect all;
 ij> connect 'ldapSchemeDB;user=mamta;password=yeeHaLdap';
-ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ERROR 08004: Connection authentication failure occurred.  Reason: userid or password invalid.
 ij> show connections;
 No connections available.
 ij> disconnect all;

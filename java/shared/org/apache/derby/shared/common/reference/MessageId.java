@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.reference.MessageId
+   Derby - Class org.apache.derby.shared.common.reference.MessageId
 
    Copyright 2000, 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -125,6 +125,22 @@ public interface MessageId {
     String CONN_NETWORK_SERVER_CLASS_LOAD   = "J101"; // Cannot load the network server constructor
     String CONN_NETWORK_SERVER_START_EXCEPTION = "J102";
     String CONN_NETWORK_SERVER_SHUTDOWN_EXCEPTION = "J103";
+    String CONN_SECMECH_NOT_SUPPORTED       = "J110";
+    String CONN_PASSWORD_MISSING            = "J111";
+    String CONN_USERID_MISSING              = "J112";
+    String CONN_USERID_OR_PASSWORD_INVALID  = "J113";
+    String CONN_USERID_REVOKED              = "J114";
+    String CONN_NEW_PASSWORD_INVALID        = "J115";
+    String CONN_SECSVC_NONRETRYABLE_ERR     = "J116";
+    String CONN_SECTKN_MISSING_OR_INVALID   = "J117";
+    String CONN_PASSWORD_EXPIRED            = "J118";
+    String CONN_NOT_SPECIFIED               = "J120";
+    String CONN_USER_NOT_AUTHORIZED_TO_DB   = "J121";
+    String CONN_DRDA_RDBNACRM               = "J122";
+    String CONN_DRDA_CMDCHKRM               = "J123";
+    String CONN_DRDA_RDBACCRM               = "J124";
+    String CONN_DRDA_DTARMCHRM              = "J125";
+    String CONN_DRDA_PRCCNVRM               = "J126";
 
 	/*
 	** Authentication

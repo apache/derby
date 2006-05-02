@@ -26,11 +26,14 @@ import org.apache.derby.client.am.Clob;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SignedBinary;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlWarning;
 import org.apache.derby.client.am.Types;
 import org.apache.derby.client.am.SqlCode;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
+
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetCursor extends org.apache.derby.client.am.Cursor {
 
@@ -797,7 +800,8 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         }
 
         netAgent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(netAgent_,
-                "parseSQLDIAGGRP not yet implemented"));
+                new ClientMessageId(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED),
+                "parseSQLDIAGGRP"));
     }
 
     private String parseVCS(Typdef typdefInEffect) throws DisconnectException, SqlException {
@@ -830,9 +834,11 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         try {
             s = new String(dataBuffer_, position_, length, encoding);
         } catch (java.io.UnsupportedEncodingException e) {
-            netAgent_.accumulateChainBreakingReadExceptionAndThrow(new org.apache.derby.client.am.DisconnectException(e,
-                    netAgent_,
-                    "encoding not supported!!"));
+            netAgent_.accumulateChainBreakingReadExceptionAndThrow(
+                new org.apache.derby.client.am.DisconnectException(
+                    netAgent_, 
+                    new ClientMessageId(SQLState.NET_ENCODING_NOT_SUPPORTED), 
+                    e));
         }
 
         position_ += length;
@@ -1038,7 +1044,8 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             if (sqlcode < 0) {
                 sqlException = new SqlException(agent_.logWriter_, netResultSet_.queryTerminatingSqlca_);
             } else {
-                sqlException = new SqlException(agent_.logWriter_, "Query processing has been terminated due to error on the server.");
+                sqlException = new SqlException(agent_.logWriter_, 
+                    new ClientMessageId(SQLState.NET_QUERY_PROCESSING_TERMINATED));
             }
             try {
                 netResultSet_.closeX(); // the auto commit logic is in closeX()

@@ -25,8 +25,13 @@ import java.net.SocketException;
 import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.sanity.SanityManager;
+
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.reference.MessageId;
+import org.apache.derby.shared.common.i18n.MessageUtil;
 
 public class NetAgent extends Agent {
     //---------------------navigational members-----------------------------------
@@ -107,14 +112,19 @@ public class NetAgent extends Agent {
         port_ = port;
         netConnection_ = netConnection;
         if (server_ == null) {
-            throw new DisconnectException(this, "Required property \"serverName\" not set");
+            throw new DisconnectException(this, 
+                new ClientMessageId(SQLState.CONNECT_REQUIRED_PROPERTY_NOT_SET),
+                "serverName");
         }
 
         try {
             socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port));
         } catch (java.security.PrivilegedActionException e) {
             throw new DisconnectException(this,
-                    e.getClass().getName() + " : Error opening socket to server " + server + " on port " + port + " with message : " + e.getException().getMessage());
+                new ClientMessageId(SQLState.CONNECT_UNABLE_TO_CONNECT_TO_SERVER),
+                new Object[] { e.getClass().getName(), server, new Integer(port), 
+                    e.getException().getMessage() },
+                e.getException());
         }
 
         // Set TCP/IP Socket Properties
@@ -130,7 +140,8 @@ public class NetAgent extends Agent {
             } catch (java.io.IOException doNothing) {
             }
             exceptionOpeningSocket_ = new DisconnectException(this,
-                    "SocketException '" + e.getMessage() + "'");
+                new ClientMessageId(SQLState.CONNECT_SOCKET_EXCEPTION),
+                e.getMessage(), e);
         }
 
         try {
@@ -143,7 +154,9 @@ public class NetAgent extends Agent {
                 socket_.close();
             } catch (java.io.IOException doNothing) {
             }
-            exceptionOpeningSocket_ = new DisconnectException(this, "unable to open stream on socket '"+e.getMessage() + "'");
+            exceptionOpeningSocket_ = new DisconnectException(this, 
+                new ClientMessageId(SQLState.CONNECT_UNABLE_TO_OPEN_SOCKET_STREAM),
+                e.getMessage(), e);
         }
 
         sourceCcsidManager_ = new EbcdicCcsidManager(); // delete these
@@ -221,7 +234,9 @@ public class NetAgent extends Agent {
                 socket_.close();
             } catch (java.io.IOException doNothing) {
             }
-            throw new SqlException(logWriter_, e, "SocketException '" + e.getMessage() + "'");
+            throw new SqlException(logWriter_, 
+                new ClientMessageId(SQLState.SOCKET_EXCEPTION),
+                e.getMessage(), e);
         }
     }
 
@@ -257,17 +272,9 @@ public class NetAgent extends Agent {
                 // this should be ok since we are going to go an close the socket
                 // immediately following this call.
                 // changing {4} to e.getMessage() may require pub changes
-                accumulatedExceptions =
-                        new SqlException(logWriter_, e, "A communication error has been detected. " +
-                        "Communication protocol being used: {0}. " +
-                        "Communication API being used: {1}. " +
-                        "Location where the error was detected: {2}. " +
-                        "Communication function detecting the error: {3}. " +
-                        "Protocol specific error codes(s) {4}, {5}, {6}. " +
-                        "TCP/IP " + "SOCKETS " + "Agent.close() " +
-                        "InputStream.close() " + e.getMessage() + " " + "* " + "0");
-                //"08001",
-                //-30081);
+                accumulatedExceptions = new SqlException(logWriter_,
+                    new ClientMessageId(SQLState.COMMUNICATION_ERROR),
+                    e.getMessage(), e);
             } finally {
                 rawSocketInputStream_ = null;
             }
@@ -282,15 +289,8 @@ public class NetAgent extends Agent {
                 // immediately following this call.
                 // changing {4} to e.getMessage() may require pub changes
                 SqlException latestException = new SqlException(logWriter_,
-                        e,
-                        "A communication error has been detected. " +
-                        "Communication protocol being used: {0}. " +
-                        "Communication API being used: {1}. " +
-                        "Location where the error was detected: {2}. " +
-                        "Communication function detecting the error: {3}. " +
-                        "Protocol specific error codes(s) {4}, {5}, {6}. " +
-                        "TCP/IP " + "SOCKETS " + "Agent.close() " +
-                        "OutputStream.close() " + e.getMessage() + " " + "* " + "0");
+                    new ClientMessageId(SQLState.COMMUNICATION_ERROR),
+                    e.getMessage(), e);
                 accumulatedExceptions = Utils.accumulateSQLException(latestException, accumulatedExceptions);
             } finally {
                 rawSocketOutputStream_ = null;
@@ -306,15 +306,8 @@ public class NetAgent extends Agent {
                 // do this for now and but may need to modify or
                 // add this to the message pubs.
                 SqlException latestException = new SqlException(logWriter_,
-                        e,
-                        "A communication error has been detected. " +
-                        "Communication protocol being used: {0}. " +
-                        "Communication API being used: {1}. " +
-                        "Location where the error was detected: {2}. " +
-                        "Communication function detecting the error: {3}. " +
-                        "Protocol specific error codes(s) {4}, {5}, {6}. " +
-                        "TCP/IP " + "SOCKETS " + "Agent.close() " +
-                        "Socket.close() " + e.getMessage() + " " + "* " + "0");
+                    new ClientMessageId(SQLState.COMMUNICATION_ERROR),
+                        e.getMessage(), e);
                 accumulatedExceptions = Utils.accumulateSQLException(latestException, accumulatedExceptions);
             } finally {
                 socket_ = null;
@@ -385,10 +378,7 @@ public class NetAgent extends Agent {
         try {
             request_.flush(rawSocketOutputStream_);
         } catch (java.io.IOException e) {
-            throwCommunicationsFailure("NetAgent.sendRequest()",
-                    "OutputStream.flush()",
-                    e.getMessage(),
-                    "*");
+            throwCommunicationsFailure(e);
         }
     }
 
@@ -408,25 +398,18 @@ public class NetAgent extends Agent {
         rawSocketOutputStream_ = outputStream;
     }
 
-    public void throwCommunicationsFailure(String location,
-                                           String function,
-                                           String rc1,
-                                           String rc2) throws org.apache.derby.client.am.DisconnectException {
+    public void throwCommunicationsFailure(Throwable cause) 
+        throws org.apache.derby.client.am.DisconnectException {
         //org.apache.derby.client.am.DisconnectException
         //accumulateReadExceptionAndDisconnect
         // note when {6} = 0 it indicates the socket was closed.
         // need to still validate any token values against message publications.
-        accumulateChainBreakingReadExceptionAndThrow(new org.apache.derby.client.am.DisconnectException(this,
-                "A communication error has been detected. " +
-                "Communication protocol being used: " + location + ". " +
-                "Communication API being used: " + function + ". " +
-                "Location where the error was detected: " + rc1 + ". " +
-                "Communication function detecting the error: " + rc2 + ". " +
-                "Protocol specific error codes(s) " +
-                "TCP/IP SOCKETS "));  // hardcode tokens 0 and 1
-        //"08001"));  //derby code -30081, don't send 08001 now either
+        accumulateChainBreakingReadExceptionAndThrow(
+            new org.apache.derby.client.am.DisconnectException(this,
+                new ClientMessageId(SQLState.COMMUNICATION_ERROR),
+                cause.getMessage(), cause));
     }
-
+        
     // ----------------------- call-down methods ---------------------------------
 
     public org.apache.derby.client.am.LogWriter newLogWriter_(java.io.PrintWriter printWriter,
@@ -454,7 +437,8 @@ public class NetAgent extends Agent {
         try {
             netConnection_.writeDeferredReset();
         } catch (SqlException sqle) {
-            DisconnectException de = new DisconnectException(this, "An error occurred during a deferred connect reset and the connection has been terminated.  See chained exceptions for details.");
+            DisconnectException de = new DisconnectException(this, 
+                new ClientMessageId(SQLState.CONNECTION_FAILED_ON_DEFERRED_RESET));
             de.setNextException(sqle);
             throw de;
         }
@@ -484,7 +468,8 @@ public class NetAgent extends Agent {
             netConnection_.readDeferredReset();
             checkForExceptions();
         } catch (SqlException sqle) {
-            DisconnectException de = new DisconnectException(this, "An error occurred during a deferred connect reset and the connection has been terminated.  See chained exceptions for details.");
+            DisconnectException de = new DisconnectException(this, 
+                new ClientMessageId(SQLState.CONNECTION_FAILED_ON_DEFERRED_RESET));
             de.setNextException(sqle);
             throw de;
         }

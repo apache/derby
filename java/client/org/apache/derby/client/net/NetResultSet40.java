@@ -174,8 +174,9 @@ public class NetResultSet40 extends NetResultSet{
         try { 
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
-                    interfaces).getSQLException();
+            throw new SqlException(null,
+                new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
+                interfaces).getSQLException();
         }
     }
     

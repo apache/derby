@@ -24,7 +24,9 @@ package org.apache.derby.client.net;
 import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Utils;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetConnectionRequest extends Request implements ConnectionRequestInterface {
     NetConnectionRequest(NetAgent netAgent, CcsidManager ccsidManager, int bufferSize) {
@@ -477,9 +479,8 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
             if (rdbnamLength <= NetConfiguration.PKG_IDENTIFIER_MAX_LEN) {
                 writeScalarString(CodePoint.RDBNAM, rdbnam);
             } else {
-                throw new SqlException(netAgent_.logWriter_, "Length of the Relational Database Name, " +
-                        rdbnam +
-                        ", exceeds maximum size allowed for PROTOCOL Connection.");// +
+                throw new SqlException(netAgent_.logWriter_, 
+                    new ClientMessageId(SQLState.NET_DBNAME_TOO_LONG), rdbnam);
             }
             //"at SQLAM level " + netAgent_.targetSqlam_);
         }
@@ -487,7 +488,8 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
 
     private void buildSECTKN(byte[] sectkn) throws SqlException {
         if (sectkn.length > NetConfiguration.SECTKN_MAXSIZE) {
-            throw new SqlException(netAgent_.logWriter_, "bug check: sectkn too long");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.NET_SECTKN_TOO_LONG));
         }
         writeScalarBytes(CodePoint.SECTKN, sectkn);
     }
@@ -495,7 +497,8 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
     private void buildUSRID(String usrid) throws SqlException {
         int usridLength = usrid.length();
         if ((usridLength == 0) || (usridLength > NetConfiguration.USRID_MAXSIZE)) {
-            throw new SqlException(netAgent_.logWriter_, "userid length, " + usridLength + ", is not allowed.");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.NET_USERID_TOO_LONG));
         }
 
         writeScalarString(CodePoint.USRID, usrid);
@@ -504,7 +507,8 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
     private void buildPASSWORD(String password) throws SqlException {
         int passwordLength = password.length();
         if ((passwordLength == 0) || (passwordLength > NetConfiguration.PASSWORD_MAXSIZE)) {
-            throw new SqlException(netAgent_.logWriter_, "password length, " + passwordLength + ", is not allowed.");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.NET_PASSWORD_TOO_LONG));
         }
         if (netAgent_.logWriter_ != null) {
             // remember the position of password in order to

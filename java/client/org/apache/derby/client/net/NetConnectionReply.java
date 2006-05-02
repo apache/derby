@@ -26,12 +26,20 @@ import org.apache.derby.client.am.Connection;
 import org.apache.derby.client.am.ConnectionCallbackInterface;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.SqlState;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Sqlca;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.reference.MessageId;
+import org.apache.derby.shared.common.i18n.MessageUtil;
+
+
 public class NetConnectionReply extends Reply
         implements ConnectionReplyInterface {
+    private static MessageUtil msgutil_
+        = new MessageUtil(SqlException.CLIENT_MESSAGE_RESOURCE_NAME);
+    
     NetConnectionReply(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
     }
@@ -831,11 +839,8 @@ public class NetConnectionReply extends Reply
 
         netAgent_.setSvrcod(svrcod);
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "Execution failed due to a distribution protocol error that caused " +
-                "deallocation of the conversation.  " +
-                "The requested command encountered an unarchitected and implementation " +
-                "specific condition for which there was no architected message.",
-                SqlState._58009));
+            new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+            msgutil_.getTextMessage(MessageId.CONN_DRDA_CMDCHKRM)));
     }
 
 
@@ -907,12 +912,10 @@ public class NetConnectionReply extends Reply
         checkRequiredObjects(svrcodReceived, rdbnamReceived);
 
         netAgent_.setSvrcod(svrcod);
-        agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "Execution failed due to a distribution protocol error that caused " +
-                "deallocation of the conversation.  " +
-                "The access relational database command was not issued prior to " +
-                "a command requesting RDB services.  ",
-                SqlState._58009));
+        agent_.accumulateChainBreakingReadExceptionAndThrow(
+            new DisconnectException(agent_,
+                new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+                msgutil_.getTextMessage(MessageId.CONN_DRDA_RDBNACRM)));            
     }
 
     // RDB Not Found Reply Message indicates that the target
@@ -970,10 +973,8 @@ public class NetConnectionReply extends Reply
 
         netAgent_.setSvrcod(svrcod);
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "The application server rejected establishment of the connection.  " +
-                "An attempt was made to access a database, " +
-                netConnection.databaseName_ + ", which was not found.",
-                SqlState._08004));
+            new ClientMessageId(SQLState.NET_DATABASE_NOT_FOUND),
+            netConnection.databaseName_));
     }
 
 
@@ -1032,9 +1033,8 @@ public class NetConnectionReply extends Reply
 
         netAgent_.setSvrcod(svrcod);
         netAgent_.accumulateReadException(new SqlException(agent_.logWriter_,
-                "The application server rejected establishment of the connection.  " +
-                "The user is not authorized to access the database.",
-                SqlState._08004));
+            new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+            msgutil_.getTextMessage(MessageId.CONN_USER_NOT_AUTHORIZED_TO_DB)));
     }
 
     // Data Stream Syntax Error Reply Message indicates that the data
@@ -1198,11 +1198,8 @@ public class NetConnectionReply extends Reply
 
         netAgent_.setSvrcod(svrcod);
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "Execution failed due to a distribution protocol error that caused " +
-                "deallocation of the conversation.  " +
-                "The access relational database command cannot be issued because an " +
-                "RDB is already currently accessed.",
-                SqlState._58009));
+            new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+            msgutil_.getTextMessage(MessageId.CONN_DRDA_RDBACCRM)));
     }
 
     // RDB Access Failed Reply Message specifies that the relational
@@ -1697,10 +1694,8 @@ public class NetConnectionReply extends Reply
 
         netAgent_.setSvrcod(svrcod);
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "The DDM command is not supported.  " +
-                "Unsupported DDM command code point: " +
-                "0x" + Integer.toHexString(codpnt),
-                SqlState._58014));
+            new ClientMessageId(SQLState.DRDA_DDM_COMMAND_NOT_SUPPORTED),
+                Integer.toHexString(codpnt)));
     }
 
     // Abnormal End Unit of Work Condition Reply Message indicates
@@ -2785,17 +2780,15 @@ public class NetConnectionReply extends Reply
 
     protected void doObjnsprmSemantics(int codePoint) throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "The DDM object is not supported.  " +
-                "Unsupported DDM object code point: 0x" + Integer.toHexString(codePoint),
-                SqlState._58015));
+            new ClientMessageId(SQLState.DRDA_DDM_OBJECT_NOT_SUPPORTED),
+            Integer.toHexString(codePoint)));
     }
 
     // Also called by NetStatementReply.
     protected void doPrmnsprmSemantics(int codePoint) throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "The DDM parameter is not supported.  " +
-                "Unsupported DDM parameter code point: 0x" + Integer.toHexString(codePoint),
-                SqlState._58016));
+            new ClientMessageId(SQLState.DRDA_DDM_PARAM_NOT_SUPPORTED),
+            Integer.toHexString(codePoint)));
     }
 
     // Also called by NetStatementReply
@@ -2808,10 +2801,8 @@ public class NetConnectionReply extends Reply
         // special case the FDODTA codepoint not to disconnect.
         if (codePoint == CodePoint.FDODTA) {
             agent_.accumulateReadException(new SqlException(agent_.logWriter_,
-                    "The DDM parameter value is not supported.  " +
-                    "DDM parameter code point having unsupported value : 0x" + Integer.toHexString(codePoint) +
-                    ".  An input host variable may not be within the range the server supports.",
-                    SqlState._58017));
+                new ClientMessageId(SQLState.DRDA_DDM_PARAMVAL_NOT_SUPPORTED),
+                Integer.toHexString(codePoint)));
             return;
         }
 
@@ -2841,9 +2832,8 @@ public class NetConnectionReply extends Reply
                 break;
             }
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                    "There is no available conversion for the source code page, " + cpValue +
-                    ", to the target code page, " + value + "."));
-            //"57017", -332));
+                new ClientMessageId(SQLState.DRDA_NO_AVAIL_CODEPAGE_CONVERSION),
+                new Integer(cpValue), value));
             return;
         }
         // the problem isn't with one of the ccsid values so...
@@ -2851,18 +2841,14 @@ public class NetConnectionReply extends Reply
         // Returning more information would
         // require rearranging this code a little.
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "The DDM parameter value is not supported.  " +
-                "DDM parameter code point having unsupported value : 0x" + Integer.toHexString(codePoint),
-                SqlState._58017));
-
+            new ClientMessageId(SQLState.DRDA_DDM_PARAMVAL_NOT_SUPPORTED),
+            Integer.toHexString(codePoint)));
     }
 
     void doDtamchrmSemantics() throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "Execution failed due to a distribution protocol error that caused " +
-                "deallocation of the conversation.  " +
-                "A Data Descriptor Mismatch Error was detected.",
-                SqlState._58009));
+            new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+                msgutil_.getTextMessage(MessageId.CONN_DRDA_DTARMCHRM)));
     }
 
     // Messages
@@ -2881,12 +2867,8 @@ public class NetConnectionReply extends Reply
     //       is producted for SQL CONNECT statement.
     private void doMgrlvlrmSemantics(String manager, String level) throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "Execution failed due to a distribution protocol error that will " +
-                "affect the successful execution of subsequent DDM commands or SQL statements.  " +
-                "A connection could not be established to the database because " +
-                "manager " + manager + " at level " + level + " is not supported.",
-                SqlState._58010));
-
+            new ClientMessageId(SQLState.DRDA_MGRLVLRM),
+            manager, level));
     }
 
     private void doMgrlvlrmSemantics(int manager, int level) throws DisconnectException {
@@ -2963,11 +2945,9 @@ public class NetConnectionReply extends Reply
         // we may need to map the conversation protocol error code, prccnvcd, to some kind
         // of reason code.  For now just return the prccnvcd as the reason code
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "Execution failed due to a distribution protocol error that caused " +
-                "deallocation of the conversation.  " +
-                "A PROTOCOL Conversational Protocol Error was detected.  " +
-                "Reason: 0x" + Integer.toHexString(conversationProtocolErrorCode),
-                SqlState._58009));
+            new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+                msgutil_.getTextMessage(MessageId.CONN_DRDA_PRCCNVRM, 
+                    Integer.toHexString(conversationProtocolErrorCode))));
     }
 
     // SQL Diagnostics Condition Token Array - Identity 0xF7

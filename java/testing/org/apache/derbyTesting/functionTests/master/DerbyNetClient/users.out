@@ -97,17 +97,17 @@ ij> --
 -----
 ----- Invalid login's
 connect 'wombat';
-ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ERROR 08004: Connection authentication failure occurred.  Reason: userid or password invalid.
 ij> connect 'wombat;user=badUser1;password=YeeHa!';
-ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ERROR 08004: Connection authentication failure occurred.  Reason: userid or password invalid.
 ij> connect 'wombat;user=badUser2;password=YeeHa!';
-ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ERROR 08004: Connection authentication failure occurred.  Reason: userid or password invalid.
 ij> connect 'myDB;user=dan;password=MakeItSlower';
-ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ERROR 08004: Connection authentication failure occurred.  Reason: userid or password invalid.
 ij> connect 'myDB;user=jamie;password=LetMeIn';
-ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ERROR 08004: Connection authentication failure occurred.  Reason: userid or password invalid.
 ij> connect 'wombat;user=francois;password=Corsica';
-ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ERROR 08004: Connection authentication failure occurred.  Reason: userid or password invalid.
 ij> -- Invalid database users
 connect 'myDB;user=howardR;password=IamBetterAtTennis';
 ERROR 04501: DERBY SQL error: SQLCODE: -1, SQLSTATE: 04501, SQLERRMC: Database connection refused.
@@ -121,9 +121,9 @@ ij> connect 'wombat;user=francois;password=paceesalute';
 ij> connect 'myDB;user=jerry;password=SacreBleu';
 ij(CONNECTION1)> -- Database shutdown - check user - should fail
 connect 'myDB;shutdown=true';
-ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ERROR 08004: Connection authentication failure occurred.  Reason: userid or password invalid.
 ij(CONNECTION1)> connect 'myDB;user=jamie;password=LetMeIn;shutdown=true';
-ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ERROR 08004: Connection authentication failure occurred.  Reason: userid or password invalid.
 ij(CONNECTION1)> connect 'wombat;user=jerry;password=SacreBleu;shutdown=true';
 ERROR 04501: DERBY SQL error: SQLCODE: -1, SQLSTATE: 04501, SQLERRMC: Database connection refused.
 ij(CONNECTION1)> show connections;
@@ -142,7 +142,7 @@ CONNECTION1* - 	jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/myDB
 * = current connection
 ij(CONNECTION1)> -- JBMS System shutdown - check user - should fail
 connect ';user=jamie;password=LetMeIn;shutdown=true';
-ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ERROR 08004: Connection authentication failure occurred.  Reason: userid or password invalid.
 ij(CONNECTION1)> disconnect all;
 ij> -- JBMS System shutdown - check user - should succeed
 connect ';user=francois;password=paceesalute;shutdown=true';

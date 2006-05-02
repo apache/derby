@@ -1354,6 +1354,9 @@ public interface SQLState {
     String JDBC_METHOD_NOT_SUPPORTED_BY_SERVER                      = "0A000.S.2";
     String UNSUPPORTED_HOLDABILITY_PROPERTY                         = "0A000.S.3";
     String CANCEL_NOT_SUPPORTED_BY_SERVER                           = "0A000.S.4";
+    String SECMECH_NOT_SUPPORTED                                    = "0A000.S.5";
+    String DRDA_COMMAND_NOT_IMPLEMENTED                             = "0A000.C.6";
+
 
 
 	
@@ -1508,6 +1511,16 @@ public interface SQLState {
     String STORED_PROC_LOAD_MODULE_NOT_FOUND = "XJ210.S";
     String BATCH_CHAIN_BREAKING_EXCEPTION = "XJ211.S";
     
+    //XN - Network-level messages
+    String NET_CONNECTION_RESET_NOT_ALLOWED_IN_UNIT_OF_WORK         = "XN001.S";
+    String NET_SECKTKN_NOT_RETURNED                                 = "XN002.U";
+    String NET_DBNAME_TOO_LONG                                      = "XN003.C";
+    String NET_SECTKN_TOO_LONG                                      = "XN004.C";
+    String NET_USERID_TOO_LONG                                      = "XN005.C";
+    String NET_PASSWORD_TOO_LONG                                    = "XN006.C";
+    String NET_ENCODING_NOT_SUPPORTED                               = "XN007.C";
+    String NET_QUERY_PROCESSING_TERMINATED                          = "XN008.S";
+    
     // Used by server for scrollable updatable insensitive result sets
     // to transmit updated state to client. Internal, not seen by user.
     // Has no message in messages.properties as it is never printed.
@@ -1537,7 +1550,12 @@ public interface SQLState {
     // Connection exceptions - SQL State class 08
     //following are database severity
     String NO_CURRENT_CONNECTION = "08003";
+    
+    // 08004 SQL State means the server rejected the connection request
     String LOGIN_FAILED = "08004";
+    String NET_CONNECT_AUTH_FAILED                          = "08004.C.1";
+    String NET_DATABASE_NOT_FOUND                           = "08004.C.2";
+        
     // There can be multiple causes for 08003, which according
     // to SQL2003 spec means "connection does not exist"
     // We use a suffix to distinguish them.  Because of the suffix
@@ -1546,7 +1564,32 @@ public interface SQLState {
     String LOB_METHOD_ON_CLOSED_CONNECTION = "08003.C.2";
     
     // 08006 means connection exception - connection failure
-    String CONNECTION_FAILED_ON_RESET = "08006.C.1";
+    String CONNECTION_FAILED_ON_RESET                           = "08006.C.1";
+    // Use this version of SOCKET_EXCEPTION any time *except* when trying to
+    // establish a connection, as the SQLState is different.  When trying
+    // to establish a connection, use CONNECT_SOCKET_EXCEPTION.
+    String SOCKET_EXCEPTION                                     = "08006.C.2";
+    String COMMUNICATION_ERROR                                  = "08006.C.3";
+    String CONNECTION_FAILED_ON_DEFERRED_RESET                  = "08006.C.4";
+    String NET_INSUFFICIENT_DATA                                = "08006.C.5";
+    
+    // 08001 is specifically about the SQL client not being able to establish
+    // a connection with the server.  Should only be used for errors that
+    // occur upon attempting to open a connection.
+    // NOTE that if the server *rejects* the connection, that's a different
+    // SQLState- 08004'
+    String CONNECT_REQUIRED_PROPERTY_NOT_SET                    = "08001.C.1";
+    String CONNECT_UNABLE_TO_CONNECT_TO_SERVER                  = "08001.C.2";
+    // Use this version of socket exception occurs when trying to establish
+    // a connection to the server, as the SQL State 08001 indicates failure
+    // to establish a connection.  If you aren't trying to connect, just
+    // use SOCKET_EXCEPTION
+    String CONNECT_SOCKET_EXCEPTION                             = "08001.C.3";
+    String CONNECT_UNABLE_TO_OPEN_SOCKET_STREAM                 = "08001.C.4";
+    String CONNECT_USERID_LENGTH_OUT_OF_RANGE                   = "08001.C.5";
+    String CONNECT_PASSWORD_LENGTH_OUT_OF_RANGE                 = "08001.C.6";
+    String CONNECT_USERID_ISNULL                                = "08001.C.7";
+    String CONNECT_PASSWORD_ISNULL                              = "08001.C.8";
         
     // system severity
     String SHUTDOWN_DATABASE = "08006.D";  
@@ -1589,8 +1632,15 @@ public interface SQLState {
     /*
      ** Messages whose SQL states are proscribed by DRDA
      */
-    String DRDA_NO_AUTOCOMMIT_UNDER_XA                            = "2D521.S.1";
-    String DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK            = "2D521.S.2";
+    String DRDA_NO_AUTOCOMMIT_UNDER_XA                              = "2D521.S.1";
+    String DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK              = "2D521.S.2"; 
+    String DRDA_CONNECTION_TERMINATED                               = "58009.C";
+    String DRDA_MGRLVLRM                                            = "58010.C";
+    String DRDA_DDM_COMMAND_NOT_SUPPORTED                           = "58014.C";
+    String DRDA_DDM_OBJECT_NOT_SUPPORTED                            = "58015.C";
+    String DRDA_DDM_PARAM_NOT_SUPPORTED                             = "58016.C";
+    String DRDA_DDM_PARAMVAL_NOT_SUPPORTED                          = "58017.C";
+    String DRDA_NO_AVAIL_CODEPAGE_CONVERSION                        = "57017.C";
     
 	/*
 	** org.apache.derby.database.UserUtility

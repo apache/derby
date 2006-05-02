@@ -27,13 +27,22 @@ import org.apache.derby.client.am.EncryptionManager;
 import org.apache.derby.client.am.PreparedStatement;
 import org.apache.derby.client.am.ProductLevel;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.shared.common.reference.MessageId;
+import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientDriver;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 public class NetConnection extends org.apache.derby.client.am.Connection {
+    
+    // Use this to get internationalized strings...
+    protected static MessageUtil msgutil = 
+        new MessageUtil(SqlException.CLIENT_MESSAGE_RESOURCE_NAME);
 
     protected NetAgent netAgent_;
 
@@ -332,7 +341,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                                            String password,
                                            ClientBaseDataSource ds) throws SqlException {
         if (inUnitOfWork_) {
-            throw new SqlException(logWriter, "Connection reset is not allowed when inside a unit of work.");
+            throw new SqlException(logWriter, 
+                new ClientMessageId(SQLState.NET_CONNECTION_RESET_NOT_ALLOWED_IN_UNIT_OF_WORK));
         }
     }
 
@@ -398,7 +408,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 break;
 
             default:
-                throw new SqlException(agent_.logWriter_, "security mechanism '" + securityMechanism + "' not supported");
+                throw new SqlException(agent_.logWriter_, 
+                    new ClientMessageId(SQLState.SECMECH_NOT_SUPPORTED),
+                    new Integer(securityMechanism));
             }
         } catch (java.lang.Throwable e) { // if *anything* goes wrong, make sure the connection is destroyed
             // always mark the connection closed in case of an error.
@@ -428,7 +440,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             throw exceptionToBeThrown;
         }
     }
-
+    
     protected void flowSimpleConnect() throws SqlException {
         netAgent_ = (NetAgent) super.agent_;
         constructExtnam();
@@ -457,7 +469,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 exceptionToBeThrown = (SqlException) e;
             } else // any other exceptions will be wrapped by an SqlException first
             {
-                exceptionToBeThrown = new SqlException(agent_.logWriter_, e, "Unexpected throwable caught " + e.toString());
+                exceptionToBeThrown = new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.JAVA_EXCEPTION),
+                    e.getClass().getName(), e.getMessage(), e);
             }
 
             try {
@@ -510,7 +524,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 setDeferredResetPassword(password);
                 return true;
             default:
-                throw new SqlException(agent_.logWriter_, "security mechanism '" + securityMechanism + "' not supported");
+                throw new SqlException(agent_.logWriter_, 
+                    new ClientMessageId(SQLState.SECMECH_NOT_SUPPORTED),
+                    new Integer(securityMechanism));
             }
         } catch (SqlException sqle) {            // this may not be needed because on method up the stack
             open_ = false;                       // all reset exceptions are caught and wrapped in disconnect exceptions
@@ -887,7 +903,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 // will be surfaced by endReadChain
                 // agent_.accumulateChainBreakingReadExceptionAndThrow (
                 //   new DisconnectException (agent_,"secmec not supported ","0000", -999));
-                agent_.accumulateReadException(new SqlException(agent_.logWriter_, "secmec not supported"));
+                agent_.accumulateReadException(new SqlException(agent_.logWriter_, 
+                    new ClientMessageId(SQLState.NET_SECKTKN_NOT_RETURNED)));
             }
         }
     }
@@ -975,27 +992,36 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     private void checkDatabaseName() throws SqlException {
         // netAgent_.logWriter may not be initialized yet
         if (databaseName_ == null) {
-            throw new SqlException(agent_.logWriter_, "Required property \"databaseName\" not set");
+            throw new SqlException(agent_.logWriter_, 
+                new ClientMessageId(SQLState.CONNECT_REQUIRED_PROPERTY_NOT_SET),
+                "databaseName");
         }
     }
 
     private void checkUserLength(String user) throws SqlException {
         int usridLength = user.length();
         if ((usridLength == 0) || (usridLength > NetConfiguration.USRID_MAXSIZE)) {
-            throw new SqlException(netAgent_.logWriter_, "userid length, " + usridLength + ", is not allowed.");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.CONNECT_USERID_LENGTH_OUT_OF_RANGE),
+                new Integer(usridLength), 
+                new Integer(NetConfiguration.USRID_MAXSIZE));
         }
     }
 
     private void checkPasswordLength(String password) throws SqlException {
         int passwordLength = password.length();
         if ((passwordLength == 0) || (passwordLength > NetConfiguration.PASSWORD_MAXSIZE)) {
-            throw new SqlException(netAgent_.logWriter_, "password length, " + passwordLength + ", is not allowed.");
+            throw new SqlException(netAgent_.logWriter_,
+                new ClientMessageId(SQLState.CONNECT_PASSWORD_LENGTH_OUT_OF_RANGE),
+                new Integer(passwordLength),
+                new Integer(NetConfiguration.PASSWORD_MAXSIZE));
         }
     }
 
     private void checkUser(String user) throws SqlException {
         if (user == null) {
-            throw new SqlException(netAgent_.logWriter_, "null userid not supported");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.CONNECT_USERID_ISNULL));
         }
         checkUserLength(user);
     }
@@ -1003,7 +1029,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     private void checkUserPassword(String user, String password) throws SqlException {
         checkUser(user);
         if (password == null) {
-            throw new SqlException(netAgent_.logWriter_, "null password not supported");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.CONNECT_PASSWORD_ISNULL));
         }
         checkPasswordLength(password);
     }
@@ -1029,7 +1056,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
         // throw an exception if not supported (not on list).
         if (!secmecSupported) {
-            throw new SqlException(agent_.logWriter_, "Security mechananism specified by app not supported by connection");
+            throw new SqlException(agent_.logWriter_, 
+                new ClientMessageId(SQLState.SECMECH_NOT_SUPPORTED),
+                new Integer(securityMechanism));
         }
     }
 
@@ -1047,37 +1076,48 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         switch (secchkcd) {
         case CodePoint.SECCHKCD_01:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: security mechanism not supported"); //"08001", -30082);
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_SECMECH_NOT_SUPPORTED));
         case CodePoint.SECCHKCD_10:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: password missing.");
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_PASSWORD_MISSING));
         case CodePoint.SECCHKCD_12:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: userid missing.");
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_USERID_MISSING));
         case CodePoint.SECCHKCD_13:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: userid invalid.");
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_USERID_OR_PASSWORD_INVALID));
         case CodePoint.SECCHKCD_14:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: userid revoked.");
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_USERID_REVOKED));
         case CodePoint.SECCHKCD_15:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: new password invalid.");
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_NEW_PASSWORD_INVALID));
         case CodePoint.SECCHKCD_0A:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: local security service non-retryable error.");
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_SECSVC_NONRETRYABLE_ERR));
         case CodePoint.SECCHKCD_0B:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: SECTKN missing on ACCSEC when it is required or it is invalid");
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_SECTKN_MISSING_OR_INVALID));
         case CodePoint.SECCHKCD_0E:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: password expired.");
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_PASSWORD_EXPIRED));
         case CodePoint.SECCHKCD_0F:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: password invalid.");
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_USERID_OR_PASSWORD_INVALID));
         default:  // ERROR SVRCOD
             return new SqlException(agent_.logWriter_,
-                    "Connection authorization failure occurred.  Reason: not specified.");
+                new ClientMessageId(SQLState.NET_CONNECT_AUTH_FAILED),
+                msgutil.getTextMessage(MessageId.CONN_NOT_SPECIFIED));
         }
     }
 
