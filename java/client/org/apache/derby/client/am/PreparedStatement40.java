@@ -31,9 +31,6 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedStatement{
-    
-    // By default a PreparedStatement is poolable when it is created
-    private boolean isPoolable = true;
 
     public PreparedStatement40(Agent agent,
         Connection connection,

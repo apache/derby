@@ -74,4 +74,22 @@ public class BrokeredStatement40 extends BrokeredStatement {
                     interfaces);
         }
     }
+
+    /** 
+     * Forwards to the real Statement.
+     * @return true if the underlying Statement is poolable, false otherwise.
+     * @throws SQLException if the forwarding call fails.
+     */
+    public boolean isPoolable() throws SQLException {
+        return getStatement().isPoolable();
+    }
+
+    /** 
+     * Forwards to the real Statement.
+     * @param poolable the new value for the poolable hint.
+     * @throws SQLException if the forwarding call fails.
+     */
+    public void setPoolable(boolean poolable) throws SQLException {
+        getStatement().setPoolable(poolable);
+    }
 }

@@ -279,7 +279,20 @@ public class StatementTest
             }
         }
     }
-    
+
+    /**
+     * Tests isPoolable, setPoolable, and the default poolability.
+     */
+    public void testPoolable() throws SQLException {
+        assertFalse("Statement cannot be poolable by default", 
+                    stmt.isPoolable()); 
+        stmt.setPoolable(true);
+        assertTrue("Statement must be poolable", stmt.isPoolable());
+
+        stmt.setPoolable(false);
+        assertFalse("Statement cannot be poolable", stmt.isPoolable());
+    }
+
     /**
      * Create test suite for StatementTest.
      */

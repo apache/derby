@@ -98,10 +98,6 @@ public abstract class EmbedPreparedStatement
         
         private BrokeredConnectionControl bcc=null;
 
-    // By default a PreparedStatement is poolable when it is created
-    //required for jdbc4.0 methods        
-    private boolean isPoolable = true;
-
 	/*
 		Constructor assumes caller will setup context stack
 		and restore it.
@@ -115,6 +111,8 @@ public abstract class EmbedPreparedStatement
 		throws SQLException {
 
 		super(conn, forMetaData, resultSetType, resultSetConcurrency, resultSetHoldability);
+		// PreparedStatement is poolable by default
+		isPoolable = true;
 
 		// if the sql string is null, raise an error
 		if (sql == null)
@@ -1570,35 +1568,4 @@ public abstract class EmbedPreparedStatement
             setBinaryStreamInternal(parameterIndex,inputStream,length);
         }
     }        
-    /**
-     * Requests that a PreparedStatement be pooled or not.
-     *
-     * @param poolable requests that the statement be pooled if true and that the
-     *                 statement not be pooled if false
-     * @throws SQLException if the PreparedStatement has been closed.
-     */
-     
-    public void setPoolable(boolean poolable)
-    throws SQLException {
-        // Assert the statement is still active (not closed)
-        checkStatus();
-
-        isPoolable = poolable;
-    }
-    
-    /**
-     * Returns the value of the statements poolable hint, indicating whether
-     * pooling of the statement is requested.
-     *
-     * @return The value of the statement's poolable hint.
-     * @throws SQLException if the PreparedStatement has been closed.
-     */
-
-    public boolean isPoolable()
-    throws SQLException {
-        // Assert the statement is still active (not closed)
-        checkStatus();
-
-        return isPoolable;
-    }                
 }

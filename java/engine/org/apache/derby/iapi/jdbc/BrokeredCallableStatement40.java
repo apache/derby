@@ -175,16 +175,6 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
         getPreparedStatement().setSQLXML(parameterIndex,xmlObject);
     }
     
-    public void setPoolable(boolean poolable)
-    throws SQLException{
-        getPreparedStatement().setPoolable(poolable);
-    }
-    
-    public boolean isPoolable()
-    throws SQLException{
-        return getPreparedStatement().isPoolable();
-    }
-    
     /**
      * Returns false unless <code>interfaces</code> is implemented 
      * 
@@ -219,5 +209,22 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
                     interfaces);
         }
     }
-    
+    /** 
+     * Forwards to the real CallableStatement.
+     * @return true if the underlying CallableStatement is poolable,
+     * false otherwise.
+     * @throws SQLException if the forwarding call fails.
+     */
+    public boolean isPoolable() throws SQLException {
+        return getStatement().isPoolable();
+    }
+
+    /** 
+     * Forwards to the real CallableStatement.
+     * @param poolable new value for the poolable hint.
+     * @throws SQLException if the forwarding call fails.
+     */
+    public void setPoolable(boolean poolable) throws SQLException {
+        getStatement().setPoolable(poolable);
+    }    
 }

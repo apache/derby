@@ -109,6 +109,10 @@ public class EmbedStatement extends ConnectionChild
 
 	private ParameterValueSet pvs;
 
+	// An EmbedStatement is NOT poolable by default. The constructor for
+	// PreparedStatement overrides this.
+	protected boolean isPoolable = false;
+
 	//
 	// constructor
 	//
@@ -1566,5 +1570,35 @@ public class EmbedStatement extends ConnectionChild
         return applicationStatement.getResultSetHoldability() ==
             JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
     }
+
+	/**
+	 * Returns the value of the EmbedStatement's poolable hint,
+	 * indicating whether pooling is requested.
+	 *
+	 * @return The value of the poolable hint.
+	 * @throws SQLException if the Statement has been closed.
+	 */
+
+	public boolean isPoolable() throws SQLException {
+		// Assert the statement is still active (not closed)
+		checkStatus();
+
+		return isPoolable;
+	}                
+
+	/**
+	 * Requests that an EmbedStatement be pooled or not.
+	 *
+	 * @param poolable requests that the EmbedStatement be pooled if true
+	 * and not be pooled if false.
+	 * @throws SQLException if the EmbedStatement has been closed.
+	 */
+     
+	public void setPoolable(boolean poolable) throws SQLException {
+		// Assert the statement is still active (not closed)
+		checkStatus();
+
+		isPoolable = poolable;
+	}
 }
 

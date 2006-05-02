@@ -69,16 +69,6 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
         throw Util.notImplemented();
     }
     
-    public void setPoolable(boolean poolable)
-    throws SQLException{
-        throw Util.notImplemented();
-    }
-    
-    public boolean isPoolable()
-    throws SQLException{
-        throw Util.notImplemented();
-    }
-    
     /**
      * Returns false unless <code>interfaces</code> is implemented 
      * 
@@ -113,5 +103,23 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
                     interfaces);
         }
     }
-    
+
+    /** 
+     * Forwards to the real PreparedStatement.
+     * @return true if the underlying PreparedStatement is poolable,
+     * false otherwise.
+     * @throws SQLException if the forwarding call fails.
+     */
+    public boolean isPoolable() throws SQLException {
+        return getStatement().isPoolable();
+    }
+
+    /** 
+     * Forwards to the real PreparedStatement.
+     * @param poolable the new value for the poolable hint.
+     * @throws SQLException if the forwarding call fails.
+     */
+    public void setPoolable(boolean poolable) throws SQLException {
+        getStatement().setPoolable(poolable);
+    }    
 }

@@ -191,6 +191,9 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
     private SqlWarning warnings_ = null;
 
+    // A Statement is NOT poolable by default. The constructor for
+    // PreparedStatement overrides this.
+    protected boolean isPoolable = false;    
 
     //---------------------constructors/finalizer/accessors--------------------
 
@@ -550,6 +553,54 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
+    /**
+     * Returns the value of the poolable hint, indicating whether
+     * pooling is requested.
+     *
+     * @return The value of the poolable hint.
+     * @throws SQLException if the Statement has been closed.
+     */
+    public boolean isPoolable() throws SQLException {
+        try {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "isPoolable");
+                }
+                // Assert the statement has not been closed
+                checkForClosedStatement();
+                
+                return isPoolable;
+            }
+        }
+        catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }    
+    
+    /**
+     * Requests that a Statement be pooled or not.
+     *
+     * @param poolable requests that the Statement be pooled if true 
+     * and not be pooled if false.
+     * @throws SQLException if the Statement has been closed.
+     */
+    public void setPoolable(boolean poolable) throws SQLException {
+        try {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setPoolable", poolable);
+                }
+                // Assert the statement has not been closed
+                checkForClosedStatement();
+                
+                isPoolable = poolable;        
+            }
+        }
+        catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }    
+    
     public int getMaxFieldSize() throws SQLException {
         try
         {
