@@ -106,7 +106,7 @@ public class EmbedResultSet20
 
 		public final BigDecimal getBigDecimal(int columnIndex)
 			throws SQLException {
-
+			checkIfClosed("getBigDecimal");
 			try {
 
 				DataValueDescriptor dvd = getColumn(columnIndex);
@@ -131,6 +131,7 @@ public class EmbedResultSet20
 		 */
 		public final BigDecimal getBigDecimal(String columnName, int scale)
 			throws SQLException {
+			checkIfClosed("getBigDecimal");
 			return (getBigDecimal(findColumnName(columnName), scale));
 		}
 
@@ -161,8 +162,9 @@ public class EmbedResultSet20
          * @exception SQLException Feature not implemented for now.
      */
     public final BigDecimal getBigDecimal(String columnName) throws SQLException {
-                        return getBigDecimal(findColumnName(columnName));
-        }
+        checkIfClosed("getBigDecimal");
+        return getBigDecimal(findColumnName(columnName));
+    }
 
     public void updateBigDecimal(int columnIndex, BigDecimal x)
     throws SQLException {
@@ -220,6 +222,7 @@ public class EmbedResultSet20
      */
     public void updateBigDecimal(String columnName, BigDecimal x)
     throws SQLException {
+            checkIfClosed("updateBigDecimal");
             updateBigDecimal(findColumnName(columnName), x);
         }
 
@@ -236,6 +239,7 @@ public class EmbedResultSet20
          * @exception SQLException Feature not implemented for now.
      */
     public Object getObject(int columnIndex, java.util.Map map) throws SQLException {
+        checkIfClosed("getObject");
         if( map == null)
             throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
                                               "java.sql.ResultSet.getObject");
@@ -285,6 +289,7 @@ public class EmbedResultSet20
      */
     public Object getObject(String colName, java.util.Map map)
     throws SQLException {
+        checkIfClosed("getObject");
         return getObject(findColumn(colName),map);
         }
 

@@ -636,6 +636,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final String getString(int columnIndex) throws SQLException {
+        checkIfClosed("getString");
 
 			try {
 
@@ -670,7 +671,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final boolean getBoolean(int columnIndex) throws SQLException {
-
+		checkIfClosed("getBoolean");
 
 		try {
 
@@ -694,7 +695,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final byte getByte(int columnIndex) throws SQLException {
-
+		checkIfClosed("getByte");
 		try {
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
@@ -717,7 +718,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final short getShort(int columnIndex) throws SQLException {
-
+		checkIfClosed("getShort");
 
 		try {
 
@@ -741,7 +742,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final int getInt(int columnIndex) throws SQLException	{
-
+		checkIfClosed("getInt");
 		try {
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
@@ -764,7 +765,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final long getLong(int columnIndex) throws SQLException {
-
+		checkIfClosed("getLong");
 		try {
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
@@ -787,7 +788,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final float getFloat(int columnIndex) throws SQLException {
-
+		checkIfClosed("getFloat");
 		try {
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
@@ -810,7 +811,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final double getDouble(int columnIndex) throws SQLException {
-
+		checkIfClosed("getDouble");
 		try {
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
@@ -834,7 +835,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final byte[] getBytes(int columnIndex) throws SQLException	{
-
+		checkIfClosed("getBytes");
 		try {
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
@@ -912,6 +913,7 @@ public abstract class EmbedResultSet extends ConnectionChild
     public java.sql.Date getDate(int columnIndex, Calendar cal)
         throws SQLException 
     {
+		checkIfClosed("getDate");
 		try {
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
@@ -945,6 +947,7 @@ public abstract class EmbedResultSet extends ConnectionChild
     public java.sql.Date getDate(String columnName, Calendar cal) 
                 throws SQLException 
         {
+                checkIfClosed("getDate");
                 return getDate( findColumnName(columnName), cal);
         }
 
@@ -964,6 +967,7 @@ public abstract class EmbedResultSet extends ConnectionChild
     public java.sql.Time getTime(int columnIndex, Calendar cal)
         throws SQLException 
     {
+		checkIfClosed("getTime");
 		try {
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
@@ -996,6 +1000,7 @@ public abstract class EmbedResultSet extends ConnectionChild
     public java.sql.Time getTime(String columnName, Calendar cal)
            throws SQLException 
         {
+                checkIfClosed("getTime");
                 return getTime( findColumnName( columnName), cal);
         }
 
@@ -1015,6 +1020,7 @@ public abstract class EmbedResultSet extends ConnectionChild
     public java.sql.Timestamp getTimestamp(String columnName, Calendar cal)     
       throws SQLException 
         {
+                checkIfClosed("getTimestamp");
                 return getTimestamp(findColumnName(columnName), cal);
         }
 
@@ -1034,6 +1040,7 @@ public abstract class EmbedResultSet extends ConnectionChild
     public java.sql.Timestamp getTimestamp(int columnIndex, Calendar cal) 
         throws SQLException 
     {
+		checkIfClosed("getTimestamp");
 		try {
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
@@ -1060,6 +1067,7 @@ public abstract class EmbedResultSet extends ConnectionChild
     public final java.io.Reader getCharacterStream(int columnIndex)
 		throws SQLException
 	{
+		checkIfClosed("getCharacterStream");
 		int lmfs;
 		int colType = getColumnType(columnIndex);
 		switch (colType) {
@@ -1146,7 +1154,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final InputStream getAsciiStream(int columnIndex) throws SQLException {
-
+		checkIfClosed("getAsciiStream");
 		int colType = getColumnType(columnIndex);
 		switch (colType) {
 		case Types.CHAR:
@@ -1185,7 +1193,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final InputStream getBinaryStream(int columnIndex) throws SQLException {
-
+		checkIfClosed("getBinaryStream");
 		int lmfs;
 		int colType = getColumnType(columnIndex);
 		switch (colType) {
@@ -1261,6 +1269,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final String getString(String columnName) throws SQLException {
+        checkIfClosed("getString");
     	return (getString(findColumnName(columnName)));
 	}
 
@@ -1272,6 +1281,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final boolean getBoolean(String columnName) throws SQLException {
+        checkIfClosed("getBoolean");
     	return (getBoolean(findColumnName(columnName)));
 	}
 
@@ -1283,6 +1293,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final byte getByte(String columnName) throws SQLException	{
+        checkIfClosed("getByte");
     	return (getByte(findColumnName(columnName)));
 	}
 
@@ -1294,6 +1305,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final short getShort(String columnName) throws SQLException {
+        checkIfClosed("getShort");
     	return (getShort(findColumnName(columnName)));
 	}
 
@@ -1305,6 +1317,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final int getInt(String columnName) throws SQLException {
+        checkIfClosed("getInt");
     	return (getInt(findColumnName(columnName)));
 	}
 
@@ -1316,6 +1329,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final long getLong(String columnName) throws SQLException {
+        checkIfClosed("getLong");
     	return (getLong(findColumnName(columnName)));
 	}
 
@@ -1327,6 +1341,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final float getFloat(String columnName) throws SQLException {
+        checkIfClosed("getFloat");
     	return (getFloat(findColumnName(columnName)));
 	}
 
@@ -1338,6 +1353,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final double getDouble(String columnName) throws SQLException {
+        checkIfClosed("getDouble");
     	return (getDouble(findColumnName(columnName)));
 	}
 
@@ -1350,6 +1366,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final byte[] getBytes(String columnName) throws SQLException {
+        checkIfClosed("getBytes");
     	return (getBytes(findColumnName(columnName)));
 	}
 
@@ -1361,6 +1378,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final Date getDate(String columnName) throws SQLException {
+        checkIfClosed("getDate");
     	return (getDate(findColumnName(columnName)));
 	}
 
@@ -1372,6 +1390,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final Time getTime(String columnName) throws SQLException {
+        checkIfClosed("getTime");
     	return (getTime(findColumnName(columnName)));
 	}
 
@@ -1383,6 +1402,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final Timestamp getTimestamp(String columnName) throws SQLException {
+        checkIfClosed("getTimestamp");
     	return (getTimestamp(findColumnName(columnName)));
 	}
 
@@ -1395,6 +1415,7 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     public final java.io.Reader getCharacterStream(String columnName)
     throws SQLException {
+        checkIfClosed("getCharacterStream");
     	return (getCharacterStream(findColumnName(columnName)));
     }
 
@@ -1415,6 +1436,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final InputStream getAsciiStream(String columnName) throws SQLException {
+        checkIfClosed("getAsciiStream");
     	return (getAsciiStream(findColumnName(columnName)));
 	}
 
@@ -1434,6 +1456,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final InputStream getBinaryStream(String columnName) throws SQLException {
+        checkIfClosed("getBinaryStream");
     	return (getBinaryStream(findColumnName(columnName)));
 	}
 
@@ -1606,7 +1629,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final Object getObject(int columnIndex) throws SQLException {
-
+        checkIfClosed("getObject");
 
 		// need special handling for some types.
 		int colType = getColumnType(columnIndex);
@@ -1671,6 +1694,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
     public final Object getObject(String columnName) throws SQLException {
+        checkIfClosed("getObject");
     	return (getObject(findColumnName(columnName)));
 	}
 
@@ -1871,8 +1895,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs.
 	 */
 	public int getRow() throws SQLException {
-		checkIfClosed("getRow");
-
 		// getRow() is only allowed on scroll cursors
 		checkScrollCursor("getRow()");
 
@@ -1982,7 +2004,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                is TYPE_FORWARD_ONLY and direction is not FETCH_FORWARD.
 	 */
 	public void setFetchDirection(int direction) throws SQLException {
-		checkIfClosed("setFetchDirection");
 		checkScrollCursor("setFetchDirection()");
 		/*
 		 * FetchDirection is meaningless to us. We just save it off and return
@@ -2961,6 +2982,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateNull(String columnName) throws SQLException {
+		checkIfClosed("updateNull");
 		updateNull(findColumnName(columnName));
 	}
 
@@ -2982,6 +3004,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateBoolean(String columnName, boolean x) throws SQLException {
+		checkIfClosed("updateBoolean");
 		updateBoolean(findColumnName(columnName), x);
 	}
 
@@ -3003,6 +3026,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateByte(String columnName, byte x) throws SQLException {
+		checkIfClosed("updateByte");
 		updateByte(findColumnName(columnName), x);
 	}
 
@@ -3024,6 +3048,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateShort(String columnName, short x) throws SQLException {
+		checkIfClosed("updateShort");
 		updateShort(findColumnName(columnName), x);
 	}
 
@@ -3045,6 +3070,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateInt(String columnName, int x) throws SQLException {
+		checkIfClosed("updateInt");
 		updateInt(findColumnName(columnName), x);
 	}
 
@@ -3066,6 +3092,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateLong(String columnName, long x) throws SQLException {
+		checkIfClosed("updateLong");
 		updateLong(findColumnName(columnName), x);
 	}
 
@@ -3087,6 +3114,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateFloat(String columnName, float x) throws SQLException {
+		checkIfClosed("updateFloat");
 		updateFloat(findColumnName(columnName), x);
 	}
 
@@ -3108,6 +3136,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateDouble(String columnName, double x) throws SQLException {
+		checkIfClosed("updateDouble");
 		updateDouble(findColumnName(columnName), x);
 	}
 
@@ -3129,6 +3158,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateString(String columnName, String x) throws SQLException {
+		checkIfClosed("updateString");
 		updateString(findColumnName(columnName), x);
 	}
 
@@ -3150,6 +3180,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateBytes(String columnName, byte x[]) throws SQLException {
+		checkIfClosed("updateBytes");
 		updateBytes(findColumnName(columnName), x);
 	}
 
@@ -3172,6 +3203,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateDate(String columnName, java.sql.Date x)
 			throws SQLException {
+		checkIfClosed("updateDate");
 		updateDate(findColumnName(columnName), x);
 	}
 
@@ -3194,6 +3226,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateTime(String columnName, java.sql.Time x)
 			throws SQLException {
+		checkIfClosed("updateTime");
 		updateTime(findColumnName(columnName), x);
 	}
 
@@ -3216,6 +3249,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateTimestamp(String columnName, java.sql.Timestamp x)
 			throws SQLException {
+		checkIfClosed("updateTimestamp");
 		updateTimestamp(findColumnName(columnName), x);
 	}
 
@@ -3240,6 +3274,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateAsciiStream(String columnName, java.io.InputStream x,
 			int length) throws SQLException {
+		checkIfClosed("updateAsciiStream");
 		updateAsciiStream(findColumnName(columnName), x, length);
 	}
 
@@ -3264,6 +3299,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateBinaryStream(String columnName, java.io.InputStream x,
 			int length) throws SQLException {
+		checkIfClosed("updateBinaryStream");
 		updateBinaryStream(findColumnName(columnName), x, length);
 	}
 
@@ -3288,6 +3324,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateCharacterStream(String columnName, java.io.Reader reader,
 			int length) throws SQLException {
+		checkIfClosed("updateCharacterStream");
 		updateCharacterStream(findColumnName(columnName), reader, length);
 	}
 
@@ -3310,6 +3347,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateObject(String columnName, Object x, int scale)
       throws SQLException {
+		checkIfClosed("updateObject");
 		updateObject(findColumnName(columnName), x, scale);
 	}
 
@@ -3331,6 +3369,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateObject(String columnName, Object x) throws SQLException {
+		checkIfClosed("updateObject");
 		updateObject(findColumnName(columnName), x);
 	}
 
@@ -3849,6 +3888,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @return an object representing a BLOB
 	 */
 	public final Blob getBlob(String columnName) throws SQLException {
+		checkIfClosed("getBlob");
 		return (getBlob(findColumnName(columnName)));
 	}
 
@@ -3863,6 +3903,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                Feature not implemented for now.
 	 */
 	public final Clob getClob(String columnName) throws SQLException {
+		checkIfClosed("getClob");
 		return (getClob(findColumnName(columnName)));
 	}	
 
@@ -3912,6 +3953,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                Feature not implemented for now.
 	 */
 	public void updateBlob(String columnName, Blob x) throws SQLException {
+		checkIfClosed("updateBlob");
 		updateBlob(findColumnName(columnName), x);
 	}
 
@@ -3966,6 +4008,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                Feature not implemented for now.
 	 */
 	public void updateClob(String columnName, Clob x) throws SQLException {
+		checkIfClosed("updateClob");
 		updateClob(findColumnName(columnName), x);
 	}
 	
@@ -4219,8 +4262,15 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	}
 	
+    /**
+     * Checks if the result set has a scrollable cursor.
+     *
+     * @param methodName name of the method which requests the check
+     * @exception SQLException if the result set is closed or its type
+     * is <code>TYPE_FORWARD_ONLY</code>
+     */
     private void checkScrollCursor(String methodName) throws SQLException {
-
+		checkIfClosed(methodName);
 		if (stmt.getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY)
 			throw Util
 					.newEmbedSQLException(
@@ -4243,11 +4293,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 			throws SQLException {
 		// beforeFirst is only allowed on scroll cursors
 		checkScrollCursor(positionText);
-
-		checkIfClosed(positionText); // checking result set closure does not
-									 // depend
-		// on the underlying connection. Do this
-		// outside of the connection synchronization.
 
 		synchronized (getConnectionSynchronization()) {
 			setupContextStack();

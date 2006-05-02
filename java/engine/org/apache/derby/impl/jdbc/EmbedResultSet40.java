@@ -142,6 +142,7 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
      *                                with the given interface.
      */
     public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        checkIfClosed("isWrapperFor");
         return interfaces.isInstance(this);
     }
     
@@ -155,6 +156,7 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
      */
     public <T> T unwrap(java.lang.Class<T> interfaces) 
                             throws SQLException{
+        checkIfClosed("unwrap");
         //Derby does not implement non-standard methods on 
         //JDBC objects
         //hence return this if this class implements the interface 
