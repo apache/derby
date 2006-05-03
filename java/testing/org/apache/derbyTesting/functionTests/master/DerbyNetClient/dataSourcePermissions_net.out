@@ -1,19 +1,19 @@
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 Checking authentication with DriverManager
-EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
-EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
+EXPECTED CONNFAIL Connection authentication failure occurred.  Reason: userid or password invalid.
+EXPECTED CONNFAIL Connection authentication failure occurred.  Reason: userid or password invalid.
 DS connected as EDWARD
 DS connected as FRANCES
 Checking connections with DataSource
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 data source with no default user
-EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
-EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
+EXPECTED CONNFAIL Connection authentication failure occurred.  Reason: userid or password invalid.
+EXPECTED CONNFAIL Connection authentication failure occurred.  Reason: userid or password invalid.
 DS connected as EDWARD
 DS connected as FRANCES
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 data source with invalid default user
-EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
+EXPECTED CONNFAIL Connection authentication failure occurred.  Reason: userid or password invalid.
 DS connected as FRANCES
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 data source with valid default user
@@ -22,13 +22,13 @@ DS connected as FRANCES
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 Checking connections with ConnectionPoolDataSource
 ConnectionPoolDataSource with no default user
-EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
-EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
+EXPECTED CONNFAIL Connection authentication failure occurred.  Reason: userid or password invalid.
+EXPECTED CONNFAIL Connection authentication failure occurred.  Reason: userid or password invalid.
 CP connected as EDWARD
 CP connected as FRANCES
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 ConnectionPoolDataSource with invalid default user
-EXPECTED CONNFAIL Connection authorization failure occurred.  Reason: userid invalid.
+EXPECTED CONNFAIL Connection authentication failure occurred.  Reason: userid or password invalid.
 CP connected as FRANCES
 EXPECTED SHUTDOWN DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
 ConnectionPoolDataSource with valid default user
