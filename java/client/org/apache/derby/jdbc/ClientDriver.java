@@ -29,9 +29,11 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.client.am.Version;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.net.ClientJDBCObjectFactoryImpl;
 import org.apache.derby.client.resources.ResourceKeys;
 import org.apache.derby.shared.common.reference.Attribute;
+import org.apache.derby.shared.common.reference.SQLState;
 
 
 public class ClientDriver implements java.sql.Driver {
@@ -60,7 +62,8 @@ public class ClientDriver implements java.sql.Driver {
         } catch (java.sql.SQLException e) {
             // A null log writer is passed, because jdbc 1 sql exceptions are automatically traced
             exceptionsOnLoadDriver__ =
-                    new SqlException(null, "Error occurred while trying to register Dnc driver with JDBC 1 Driver Manager").getSQLException();
+                    new SqlException(null, 
+                        new ClientMessageId(SQLState.JDBC_DRIVER_REGISTER)).getSQLException();
             exceptionsOnLoadDriver__.setNextException(e);
         }
     }
@@ -94,7 +97,9 @@ public class ClientDriver implements java.sql.Driver {
                     slashOrNull = urlTokenizer.nextToken(":/");
                 } catch (java.util.NoSuchElementException e) {
                     // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
-                    throw new SqlException(null, e, "Invalid database url syntax: " + url);
+                    throw new SqlException(null, 
+                        new ClientMessageId(SQLState.MALFORMED_URL),
+                        url, e);
                 }
             }
             String server = tokenizeServerName(urlTokenizer, url);    // "/server"
@@ -114,7 +119,8 @@ public class ClientDriver implements java.sql.Driver {
                 traceLevel = ClientDataSource.getTraceLevel(augmentedProperties);
             } catch (java.lang.NumberFormatException e) {
                 // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
-                throw new SqlException(null, e, "trouble reading traceLevel connection property");
+                throw new SqlException(null, 
+                    new ClientMessageId(SQLState.TRACELEVEL_FORMAT_INVALID), e);
             }
 
             // Jdbc 1 connections will write driver trace info on a
@@ -280,12 +286,14 @@ public class ClientDriver implements java.sql.Driver {
             if (!urlTokenizer.nextToken("/").equals("/"))
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
             {
-                throw new SqlException(null, "Invalid database url syntax: " + url);
+                throw new SqlException(null, 
+                    new ClientMessageId(SQLState.MALFORMED_URL), url);
             }
             return urlTokenizer.nextToken("/:");
         } catch (java.util.NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
-            throw new SqlException(null, e, "Invalid database url syntax: " + url);
+                throw new SqlException(null, 
+                    new ClientMessageId(SQLState.MALFORMED_URL), url);
         }
     }
 
@@ -299,18 +307,21 @@ public class ClientDriver implements java.sql.Driver {
                 String port = urlTokenizer.nextToken("/");
                 if (!urlTokenizer.nextToken("/").equals("/")) {
                     // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
-                    throw new SqlException(null, "Invalid database url syntax: " + url);
+                    throw new SqlException(null, 
+                        new ClientMessageId(SQLState.MALFORMED_URL), url);
                 }
                 return Integer.parseInt(port);
             } else if (firstToken.equals("/")) {
                 return 0;
             } else {
                 // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
-                throw new SqlException(null, "Invalid database url syntax: " + url);
+                throw new SqlException(null, 
+                    new ClientMessageId(SQLState.MALFORMED_URL), url);
             }
         } catch (java.util.NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
-            throw new SqlException(null, e, "Invalid database url syntax: " + url);
+            throw new SqlException(null, 
+                new ClientMessageId(SQLState.MALFORMED_URL), url, e);
         }
     }
 
@@ -323,7 +334,8 @@ public class ClientDriver implements java.sql.Driver {
             return databaseName;
         } catch (java.util.NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
-            throw new SqlException(null, e, "Invalid database url syntax: " + url);
+            throw new SqlException(null, 
+                new ClientMessageId(SQLState.MALFORMED_URL), url, e);
         }
     }
 

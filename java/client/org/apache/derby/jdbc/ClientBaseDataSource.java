@@ -41,10 +41,12 @@ import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.net.NetConfiguration;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.ClientDataSourceFactory;
 import org.apache.derby.shared.common.reference.Attribute;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * Base class for client-side DataSource implementations.
@@ -593,14 +595,18 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
                 int eqPos = v.indexOf('=');
                 if (eqPos == -1) {
-                    throw new SqlException(null, "Invalid attribute syntax: " + attributeString);
+                    throw new SqlException(null, 
+                        new ClientMessageId(SQLState.INVALID_ATTRIBUTE_SYNTAX),
+                        attributeString);
                 }
 
                 augmentedProperties.setProperty((v.substring(0, eqPos)).trim(), (v.substring(eqPos + 1)).trim());
             }
         } catch (NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
-            throw new SqlException(null, e, "Invalid attribute syntax: " + attributeString);
+            throw new SqlException(null, 
+                new ClientMessageId(SQLState.INVALID_ATTRIBUTE_SYNTAX),
+                attributeString, e);
         }
         checkBoolean(augmentedProperties, Attribute.CLIENT_RETIEVE_MESSAGE_TEXT);
         return augmentedProperties;
@@ -635,9 +641,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
             choicesStr += choices[i];
         }
 
-        throw new SqlException(null, "JDBC attribute " + attribute +
-                "has an invalid value " + value +
-                " Valid values are " + choicesStr);
+        throw new SqlException(null, 
+            new ClientMessageId(SQLState.INVALID_ATTRIBUTE),
+            attribute, value, choicesStr);
     }
 
     /*

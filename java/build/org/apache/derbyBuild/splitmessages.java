@@ -103,6 +103,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.CANT_CONVERT_UNICODE_TO_EBCDIC);
         clientMessageIds.add(SQLState.SECMECH_NOT_SUPPORTED);
         clientMessageIds.add(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED);
+        clientMessageIds.add(SQLState.JDBC_DRIVER_REGISTER);
     }
 
 	public static void main(String[] args) throws Exception {
