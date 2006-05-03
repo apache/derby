@@ -108,7 +108,6 @@
       <include name="${this.dir}/checkDataSource30.java"/>
       <include name="${this.dir}/savepointJdbc30_JSR169.java"/>
       <include name="${this.dir}/savepointJdbc30_XA.java"/>
-      <include name="${this.dir}/dataSourcePermissions.java"/>
       <include name="${this.dir}/parameterMetaDataJdbc30.java"/>
       <include name="${this.dir}/resultsetJdbc30.java"/>
       <include name="${this.dir}/statementJdbc30.java"/>
@@ -138,6 +137,7 @@
       </classpath>
       <!--exclude name=""/-->
       <include name="${this.dir}/checkDataSource.java"/>
+      <include name="${this.dir}/dataSourcePermissions.java"/>
       <include name="${this.dir}/xaJNDI.java"/>
     </javac>
   </target>
