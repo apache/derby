@@ -18,12 +18,16 @@
 
  */
 
-import java.sql.*;
-import java.lang.reflect.*;
-import javax.sql.DataSource;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+
+import javax.sql.DataSource;
 
 /**
  * The primary purpose of this program is to demonstrate how to obtain
@@ -51,7 +55,7 @@ public class SimpleNetworkClientSample
 	 * The database is located in the same directory where this program is being
 	 * run. Alternately one can specify the absolute path of the database location
 	 */
-	private static String DBNAME="NSSimpleDB";
+	private static String DBNAME="NSSampleDB";
 
 	/**
 	 * Derby network server port ; default is 1527
@@ -78,7 +82,7 @@ public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDr
 	private static final String CS_NS_DBURL= "jdbc:derby:net://localhost:"+NETWORKSERVER_PORT+"/"+DBNAME+";retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
 
         // URL for the Derby client JDBC driver.
-        private static final String DERBY_CLIENT_URL= "jdbc:derby://localhost:"+ NETWORKSERVER_PORT+"/NSSampledb;create=true";
+        private static final String DERBY_CLIENT_URL= "jdbc:derby://localhost:"+ NETWORKSERVER_PORT+"/"+DBNAME+";create=true";
 
         // Default to using the Derby Client JDBC Driver for database connections
         String url = DERBY_CLIENT_URL;
