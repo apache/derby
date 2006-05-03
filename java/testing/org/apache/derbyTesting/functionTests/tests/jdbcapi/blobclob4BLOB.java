@@ -4077,7 +4077,7 @@ public class blobclob4BLOB {
         	String sqlstate = sqle.getSQLState();
         	boolean expected = (sqlstate != null && 
         				(sqlstate.equals("XJ073") || sqlstate.equals("XCL30")));
-            	TestUtil.dumpSQLExceptions(sqle,expected);            	
+			if ( !expected ) { TestUtil.dumpSQLExceptions(sqle,expected); }         	
         }
         finally {
             rs2.close();
@@ -4147,7 +4147,7 @@ public class blobclob4BLOB {
         	String sqlstate = sqle.getSQLState();
         	boolean expected = (sqlstate != null && 
         				(sqlstate.equals("XJ073") || sqlstate.equals("XCL30")));
-            	TestUtil.dumpSQLExceptions(sqle,expected);
+			if ( !expected ) { TestUtil.dumpSQLExceptions(sqle,expected); }
         }	
         finally {
             rs2.close();

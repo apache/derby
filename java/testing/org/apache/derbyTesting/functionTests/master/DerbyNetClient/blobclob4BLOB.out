@@ -770,9 +770,7 @@ Expect to get an IOException, container has been closed
 clobTestSelfDestructive2 finished
 START: clobNegativeTest_Derby265
 -----
-EXPECTED SQLSTATE(XCL30): An IOException was thrown when reading a 'java.sql.String' from an InputStream. SQLSTATE: XJ001: Java exception: 'ERROR 40XD0: Container has been closed: java.io.IOException'.
 START: blobTestNegativeTest_Derby265
 -----
-EXPECTED SQLSTATE(XCL30): An IOException was thrown when reading a 'BLOB' from an InputStream. SQLSTATE: XJ001: Java exception: 'ERROR 40XD0: Container has been closed: java.io.IOException'.
 FINISHED TEST blobclob :-)
 Test blobclob finished

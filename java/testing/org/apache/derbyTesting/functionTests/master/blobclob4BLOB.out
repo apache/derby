@@ -836,9 +836,7 @@ Expect to get an IOException, container has been closed
 EXPECTED IO Exception:ERROR 40XD0: Container has been closed
 START: clobNegativeTest_Derby265
 -----------------------------
-EXPECTED SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 START: blobTestNegativeTest_Derby265
 -----------------------------
-EXPECTED SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
 FINISHED TEST blobclob :-)
 Test blobclob finished
