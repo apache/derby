@@ -62,15 +62,14 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				java.sql.Connection.class,
 				new MD[]
 				{
-				    new MD( "createBlob", new Class[] { } ),
 						new MD( "createArray", new Class[] { String.class, Object[].class } ),
-						new MD( "createClob", new Class[] { } ),
 						new MD( "createNClob", new Class[] { } ),
 						new MD( "createSQLXML", new Class[] { } ),
 						new MD( "createStruct", new Class[] { String.class, Object[].class } ),
 						new MD( "getTypeMap", new Class[] { } ),
 						new MD( "prepareStatement", new Class[] { String.class, int[].class } ),
-						new MD( "prepareStatement", new Class[] { String.class, String[].class } )
+						new MD( "prepareStatement", new Class[] { String.class, String[].class } ),
+						new MD( "setTypeMap", new Class[] { Map.class } ),
 						} ),
 		    new Exclusions
 		    (
@@ -90,8 +89,6 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				new MD[]
 				{
 					new MD( "setArray", new Class[] { int.class, java.sql.Array.class } ),
-						new MD( "setBlob", new Class[] { int.class, java.io.InputStream.class, long.class } ),
-						new MD( "setClob", new Class[] { int.class, java.io.Reader.class, long.class } ),
 						new MD( "setNCharacterStream", new Class[] { int.class, java.io.Reader.class, long.class } ),
 						new MD( "setNClob", new Class[] { int.class, NClob.class } ),
 						new MD( "setNClob", new Class[] { int.class, java.io.Reader.class, long.class } ),
@@ -99,7 +96,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "setRef", new Class[] { int.class, Ref.class } ),
 						new MD( "setRowId", new Class[] { int.class, RowId.class } ),
 						new MD( "setSQLXML", new Class[] { int.class, SQLXML.class } ),
-						new MD( "setURL", new Class[] { int.class, URL.class } )
+					    new MD( "setURL", new Class[] { int.class, URL.class } ),
+						new MD( "setNull", new Class[] { int.class, int.class, String.class } )
 						} ),
 			new Exclusions
 			(
@@ -111,13 +109,11 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 					new MD( "getBigDecimal", new Class[] { String.class } ),
 					new MD( "getBoolean", new Class[] { String.class } ),
 					new MD( "getBlob", new Class[] { String.class } ),
-					new MD( "getBlob", new Class[] { int.class } ),
 					new MD( "getBoolean", new Class[] { String.class } ),
 					new MD( "getByte", new Class[] { String.class } ),
 					new MD( "getBytes", new Class[] { String.class } ),
 					new MD( "getCharacterStream", new Class[] { String.class } ),
 					new MD( "getClob", new Class[] { String.class } ),
-					new MD( "getClob", new Class[] { int.class } ),
 					new MD( "getDate", new Class[] { String.class } ),
 					new MD( "getDate", new Class[] { String.class, Calendar.class } ),
 					new MD( "getDouble", new Class[] { String.class } ),
@@ -148,6 +144,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "registerOutParameter", new Class[] { String.class, int.class } ),
 						new MD( "registerOutParameter", new Class[] { String.class, int.class, int.class } ),
 						new MD( "registerOutParameter", new Class[] { String.class, int.class, String.class } ),
+						new MD( "registerOutParameter", new Class[] { int.class, int.class, String.class } ),
 						new MD( "setArray", new Class[] { int.class, java.sql.Array.class } ),
 						new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class, int.class } ),
 						new MD( "setBigDecimal", new Class[] { String.class, java.math.BigDecimal.class } ),
@@ -610,7 +607,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				
 				if ( cause instanceof SQLFeatureNotSupportedException )
 				{
-					boolean	isExcludable = isExcludable( iface, method );
+					boolean	isExcludable = isExcludable( method );
 
 					if ( !isExcludable )
 					{
@@ -657,13 +654,18 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	}
 
 	//
-	// Returns true if this method of this class is allowed to raise SQLFeatureNotSupportedException.
+	// Returns true if this method is allowed to raise SQLFeatureNotSupportedException.
 	//
-	private	boolean	isExcludable( Class iface, Method method )
+	private	boolean	isExcludable(Method method )
+		throws Exception
 	{
+		Class				iface = method.getDeclaringClass();
 		HashSet<Method>		excludableMethods = excludableMap.get( iface );
 
-		if ( excludableMethods == null ) { return false; }
+		if ( excludableMethods == null )
+		{
+			return false;
+		}
 
 		return excludableMethods.contains( method );
 	}
