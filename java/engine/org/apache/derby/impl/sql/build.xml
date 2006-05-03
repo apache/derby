@@ -26,6 +26,7 @@
       <property name="rmfiles" value="implparser_rm.files"/>
       <property name="jjfile" value="sqlgrammar.jj"/>
       <property name="chkfile" value="SQLParser.java"/>
+      <property name="chkfile" value="SQLParserConstants"/>
     </ant>
   </target>
 
