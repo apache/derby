@@ -21,7 +21,7 @@
 
 <!-- Targets -->
 
-  <target name="compile" depends="compile_iapi_jdbc_jdbc3"/>
+  <target name="compile" depends="compile_iapi_jdbc_jdbc3, compile_jdbc4"/>
 
   <target name="compile_iapi_jdbc_jsr169">
 	    <javac
