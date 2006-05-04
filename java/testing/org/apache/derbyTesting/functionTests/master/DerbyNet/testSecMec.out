@@ -3,6 +3,7 @@ T4: jdbc:derby:net://localhost:20000/wombat;create=true:user=neelima;password=le
 T1: jdbc:derby:net://localhost:20000/wombat - EXCEPTION null userid not supported
 T2: jdbc:derby:net://localhost:20000/wombat:user=max; - EXCEPTION null password not supported
 T3: jdbc:derby:net://localhost:20000/wombat:user=neelima;password=lee;
+T5: jdbc:derby:net://localhost:20000/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.lang.ClassNotFoundException is caught when initializing EncryptionManager 'IBMJCE'
 T6: jdbc:derby:net://localhost:20000/wombat:user=neelima;securityMechanism=4;
 T8: jdbc:derby:net://localhost:20000/wombat:user=neelima;password=lee;securityMechanism=4;
 SECMEC_USRIDPWD: OK

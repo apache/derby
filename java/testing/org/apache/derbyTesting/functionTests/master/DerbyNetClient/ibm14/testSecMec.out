@@ -1,0 +1,11 @@
+Checking security mechanism authentication with DriverManager
+T4: jdbc:derby://localhost:20000/wombat;create=true;user=neelima;password=lee;securityMechanism=3
+T1: jdbc:derby://localhost:20000/wombat
+T2: jdbc:derby://localhost:20000/wombat;user=max
+T3: jdbc:derby://localhost:20000/wombat;user=neelima;password=lee
+T5: jdbc:derby://localhost:20000/wombat;user=neelima;password=lee;securityMechanism=9
+T6: jdbc:derby://localhost:20000/wombat;user=neelima;securityMechanism=4
+T8: jdbc:derby://localhost:20000/wombat;user=neelima;password=lee;securityMechanism=4
+SECMEC_USRIDPWD: OK
+SECMEC_EUSRIDPWD: OK
+Completed testSecMec

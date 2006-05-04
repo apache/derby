@@ -3,9 +3,9 @@ T4: jdbc:derby://localhost:20000/wombat;create=true;user=neelima;password=lee;se
 T1: jdbc:derby://localhost:20000/wombat
 T2: jdbc:derby://localhost:20000/wombat;user=max
 T3: jdbc:derby://localhost:20000/wombat;user=neelima;password=lee
-T5: jdbc:derby://localhost:20000/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION java.security.NoSuchProviderException is caught when initializing EncryptionManager 'null'
+T5: jdbc:derby://localhost:20000/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 T6: jdbc:derby://localhost:20000/wombat;user=neelima;securityMechanism=4
 T8: jdbc:derby://localhost:20000/wombat;user=neelima;password=lee;securityMechanism=4
 SECMEC_USRIDPWD: OK
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  java.security.NoSuchProviderException is caught when initializing EncryptionManager 'null'
+SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 Completed testSecMec
