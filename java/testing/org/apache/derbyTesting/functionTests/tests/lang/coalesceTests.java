@@ -149,11 +149,6 @@ public class coalesceTests
 
 	public static void main (String[] argv) throws Throwable
 	{
-		boolean isDB2=false;
-		String framework = System.getProperty("framework");
-		if (framework != null && framework.toUpperCase().equals("DB2JCC"))
-			isDB2 = true;
-
 		ij.getPropertyArg(argv);
 		Connection conn = ij.startJBMS();
 

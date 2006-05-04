@@ -1035,4 +1035,962 @@ Table name of first column is T1
 Schema name of first column is APP1
 Table name of second column is T1
 Schema name of second column is APP2
+Tests to check metadata information of nullif column
+Set up by creating table for testing all datatypes combinations
+create table AllDataTypesTable (SMALLINTCOL SMALLINT,INTEGERCOL INTEGER,BIGINTCOL BIGINT,DECIMALCOL DECIMAL(10,5),REALCOL REAL,DOUBLECOL DOUBLE,CHARCOL CHAR(60),VARCHARCOL VARCHAR(60),LONGVARCHARCOL LONG VARCHAR,CHARFORBITCOL CHAR(60) FOR BIT DATA,VARCHARFORBITCOL VARCHAR(60) FOR BIT DATA,LVARCHARFORBITCOL LONG VARCHAR FOR BIT DATA,CLOBCOL CLOB(1k),DATECOL DATE,TIMECOL TIME,TIMESTAMPCOL TIMESTAMP,BLOBCOL BLOB(1k))
+insert into AllDataTypesTable values(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)
+insert into AllDataTypesTable values(0,0,0,0.0,0.0,0.0,'0','0','0',X'10aa',X'10aa',X'10aa','13','2000-01-01','15:30:20','xxxxxxFILTERED-TIMESTAMPxxxxx,NULL)
+insert into AllDataTypesTable values(1,1,1,1.0,1.0,1.0,'aa','aa','aa',NULL,NULL,NULL,'14','2000-01-01','15:30:20','xxxxxxFILTERED-TIMESTAMPxxxxx,NULL)
+insert into AllDataTypesTable values(2,21,22,23.0,24.0,25.0,'2.0','15:30:20','xxxxxxFILTERED-TIMESTAMPxxxxx,X'10aaaa',X'10aaba',X'10aaca',NULL,NULL,'15:30:20','xxxxxxFILTERED-TIMESTAMPxxxxx,NULL)
+Start testing all datatypes combinations in NULLIF function
+SELECT NULLIF(SMALLINTCOL,SMALLINTCOL) from AllDataTypesTable
+	 COL1(datatype : SMALLINT, precision : 5, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(SMALLINTCOL,INTEGERCOL) from AllDataTypesTable
+	 COL1(datatype : SMALLINT, precision : 5, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{2}
+SELECT NULLIF(SMALLINTCOL,BIGINTCOL) from AllDataTypesTable
+	 COL1(datatype : SMALLINT, precision : 5, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{2}
+SELECT NULLIF(SMALLINTCOL,DECIMALCOL) from AllDataTypesTable
+	 COL1(datatype : SMALLINT, precision : 5, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{2}
+SELECT NULLIF(SMALLINTCOL,REALCOL) from AllDataTypesTable
+	 COL1(datatype : SMALLINT, precision : 5, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{2}
+SELECT NULLIF(SMALLINTCOL,DOUBLECOL) from AllDataTypesTable
+	 COL1(datatype : SMALLINT, precision : 5, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{2}
+SELECT NULLIF(SMALLINTCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'CHAR' are not supported.
+SELECT NULLIF(SMALLINTCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'VARCHAR' are not supported.
+SELECT NULLIF(SMALLINTCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(SMALLINTCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(SMALLINTCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(SMALLINTCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(SMALLINTCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'CLOB' are not supported.
+SELECT NULLIF(SMALLINTCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'DATE' are not supported.
+SELECT NULLIF(SMALLINTCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'TIME' are not supported.
+SELECT NULLIF(SMALLINTCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(SMALLINTCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'SMALLINT' and 'BLOB' are not supported.
+SELECT NULLIF(INTEGERCOL,SMALLINTCOL) from AllDataTypesTable
+	 COL1(datatype : INTEGER, precision : 10, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{21}
+SELECT NULLIF(INTEGERCOL,INTEGERCOL) from AllDataTypesTable
+	 COL1(datatype : INTEGER, precision : 10, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(INTEGERCOL,BIGINTCOL) from AllDataTypesTable
+	 COL1(datatype : INTEGER, precision : 10, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{21}
+SELECT NULLIF(INTEGERCOL,DECIMALCOL) from AllDataTypesTable
+	 COL1(datatype : INTEGER, precision : 10, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{21}
+SELECT NULLIF(INTEGERCOL,REALCOL) from AllDataTypesTable
+	 COL1(datatype : INTEGER, precision : 10, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{21}
+SELECT NULLIF(INTEGERCOL,DOUBLECOL) from AllDataTypesTable
+	 COL1(datatype : INTEGER, precision : 10, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{21}
+SELECT NULLIF(INTEGERCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'CHAR' are not supported.
+SELECT NULLIF(INTEGERCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'VARCHAR' are not supported.
+SELECT NULLIF(INTEGERCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(INTEGERCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(INTEGERCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(INTEGERCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(INTEGERCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'CLOB' are not supported.
+SELECT NULLIF(INTEGERCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'DATE' are not supported.
+SELECT NULLIF(INTEGERCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'TIME' are not supported.
+SELECT NULLIF(INTEGERCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(INTEGERCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'INTEGER' and 'BLOB' are not supported.
+SELECT NULLIF(BIGINTCOL,SMALLINTCOL) from AllDataTypesTable
+	 COL1(datatype : BIGINT, precision : 19, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{22}
+SELECT NULLIF(BIGINTCOL,INTEGERCOL) from AllDataTypesTable
+	 COL1(datatype : BIGINT, precision : 19, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{22}
+SELECT NULLIF(BIGINTCOL,BIGINTCOL) from AllDataTypesTable
+	 COL1(datatype : BIGINT, precision : 19, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(BIGINTCOL,DECIMALCOL) from AllDataTypesTable
+	 COL1(datatype : BIGINT, precision : 19, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{22}
+SELECT NULLIF(BIGINTCOL,REALCOL) from AllDataTypesTable
+	 COL1(datatype : BIGINT, precision : 19, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{22}
+SELECT NULLIF(BIGINTCOL,DOUBLECOL) from AllDataTypesTable
+	 COL1(datatype : BIGINT, precision : 19, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{22}
+SELECT NULLIF(BIGINTCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'CHAR' are not supported.
+SELECT NULLIF(BIGINTCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'VARCHAR' are not supported.
+SELECT NULLIF(BIGINTCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(BIGINTCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(BIGINTCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(BIGINTCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(BIGINTCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'CLOB' are not supported.
+SELECT NULLIF(BIGINTCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'DATE' are not supported.
+SELECT NULLIF(BIGINTCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'TIME' are not supported.
+SELECT NULLIF(BIGINTCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(BIGINTCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BIGINT' and 'BLOB' are not supported.
+SELECT NULLIF(DECIMALCOL,SMALLINTCOL) from AllDataTypesTable
+	 COL1(datatype : DECIMAL, precision : 10, scale : 5)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{23.00000}
+SELECT NULLIF(DECIMALCOL,INTEGERCOL) from AllDataTypesTable
+	 COL1(datatype : DECIMAL, precision : 10, scale : 5)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{23.00000}
+SELECT NULLIF(DECIMALCOL,BIGINTCOL) from AllDataTypesTable
+	 COL1(datatype : DECIMAL, precision : 10, scale : 5)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{23.00000}
+SELECT NULLIF(DECIMALCOL,DECIMALCOL) from AllDataTypesTable
+	 COL1(datatype : DECIMAL, precision : 10, scale : 5)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(DECIMALCOL,REALCOL) from AllDataTypesTable
+	 COL1(datatype : DECIMAL, precision : 10, scale : 5)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{23.00000}
+SELECT NULLIF(DECIMALCOL,DOUBLECOL) from AllDataTypesTable
+	 COL1(datatype : DECIMAL, precision : 10, scale : 5)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{23.00000}
+SELECT NULLIF(DECIMALCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'CHAR' are not supported.
+SELECT NULLIF(DECIMALCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'VARCHAR' are not supported.
+SELECT NULLIF(DECIMALCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(DECIMALCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(DECIMALCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(DECIMALCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(DECIMALCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'CLOB' are not supported.
+SELECT NULLIF(DECIMALCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'DATE' are not supported.
+SELECT NULLIF(DECIMALCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'TIME' are not supported.
+SELECT NULLIF(DECIMALCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(DECIMALCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DECIMAL' and 'BLOB' are not supported.
+SELECT NULLIF(REALCOL,SMALLINTCOL) from AllDataTypesTable
+	 COL1(datatype : REAL, precision : 7, scale : 0)
+	 -----------------------------------------------
+	{null}
+	{null}
+	{null}
+	{24.0}
+SELECT NULLIF(REALCOL,INTEGERCOL) from AllDataTypesTable
+	 COL1(datatype : REAL, precision : 7, scale : 0)
+	 -----------------------------------------------
+	{null}
+	{null}
+	{null}
+	{24.0}
+SELECT NULLIF(REALCOL,BIGINTCOL) from AllDataTypesTable
+	 COL1(datatype : REAL, precision : 7, scale : 0)
+	 -----------------------------------------------
+	{null}
+	{null}
+	{null}
+	{24.0}
+SELECT NULLIF(REALCOL,DECIMALCOL) from AllDataTypesTable
+	 COL1(datatype : REAL, precision : 7, scale : 0)
+	 -----------------------------------------------
+	{null}
+	{null}
+	{null}
+	{24.0}
+SELECT NULLIF(REALCOL,REALCOL) from AllDataTypesTable
+	 COL1(datatype : REAL, precision : 7, scale : 0)
+	 -----------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(REALCOL,DOUBLECOL) from AllDataTypesTable
+	 COL1(datatype : REAL, precision : 7, scale : 0)
+	 -----------------------------------------------
+	{null}
+	{null}
+	{null}
+	{24.0}
+SELECT NULLIF(REALCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'CHAR' are not supported.
+SELECT NULLIF(REALCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'VARCHAR' are not supported.
+SELECT NULLIF(REALCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(REALCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(REALCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(REALCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(REALCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'CLOB' are not supported.
+SELECT NULLIF(REALCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'DATE' are not supported.
+SELECT NULLIF(REALCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'TIME' are not supported.
+SELECT NULLIF(REALCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(REALCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'REAL' and 'BLOB' are not supported.
+SELECT NULLIF(DOUBLECOL,SMALLINTCOL) from AllDataTypesTable
+	 COL1(datatype : DOUBLE, precision : 15, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{25.0}
+SELECT NULLIF(DOUBLECOL,INTEGERCOL) from AllDataTypesTable
+	 COL1(datatype : DOUBLE, precision : 15, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{25.0}
+SELECT NULLIF(DOUBLECOL,BIGINTCOL) from AllDataTypesTable
+	 COL1(datatype : DOUBLE, precision : 15, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{25.0}
+SELECT NULLIF(DOUBLECOL,DECIMALCOL) from AllDataTypesTable
+	 COL1(datatype : DOUBLE, precision : 15, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{25.0}
+SELECT NULLIF(DOUBLECOL,REALCOL) from AllDataTypesTable
+	 COL1(datatype : DOUBLE, precision : 15, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{25.0}
+SELECT NULLIF(DOUBLECOL,DOUBLECOL) from AllDataTypesTable
+	 COL1(datatype : DOUBLE, precision : 15, scale : 0)
+	 --------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(DOUBLECOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'CHAR' are not supported.
+SELECT NULLIF(DOUBLECOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'VARCHAR' are not supported.
+SELECT NULLIF(DOUBLECOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(DOUBLECOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(DOUBLECOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(DOUBLECOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(DOUBLECOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'CLOB' are not supported.
+SELECT NULLIF(DOUBLECOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'DATE' are not supported.
+SELECT NULLIF(DOUBLECOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'TIME' are not supported.
+SELECT NULLIF(DOUBLECOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(DOUBLECOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DOUBLE' and 'BLOB' are not supported.
+SELECT NULLIF(CHARCOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'SMALLINT' are not supported.
+SELECT NULLIF(CHARCOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'INTEGER' are not supported.
+SELECT NULLIF(CHARCOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'BIGINT' are not supported.
+SELECT NULLIF(CHARCOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'DECIMAL' are not supported.
+SELECT NULLIF(CHARCOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'REAL' are not supported.
+SELECT NULLIF(CHARCOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'DOUBLE' are not supported.
+SELECT NULLIF(CHARCOL,CHARCOL) from AllDataTypesTable
+	 COL1(datatype : CHAR, precision : 60, scale : 0)
+	 ------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(CHARCOL,VARCHARCOL) from AllDataTypesTable
+	 COL1(datatype : CHAR, precision : 60, scale : 0)
+	 ------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{2.0                                                         }
+SELECT NULLIF(CHARCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(CHARCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(CHARCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(CHARCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(CHARCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'CLOB' are not supported.
+SELECT NULLIF(CHARCOL,DATECOL) from AllDataTypesTable
+	 COL1(datatype : CHAR, precision : 60, scale : 0)
+	 ------------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(CHARCOL,TIMECOL) from AllDataTypesTable
+	 COL1(datatype : CHAR, precision : 60, scale : 0)
+	 ------------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(CHARCOL,TIMESTAMPCOL) from AllDataTypesTable
+	 COL1(datatype : CHAR, precision : 60, scale : 0)
+	 ------------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(CHARCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR' and 'BLOB' are not supported.
+SELECT NULLIF(VARCHARCOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'SMALLINT' are not supported.
+SELECT NULLIF(VARCHARCOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'INTEGER' are not supported.
+SELECT NULLIF(VARCHARCOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'BIGINT' are not supported.
+SELECT NULLIF(VARCHARCOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'DECIMAL' are not supported.
+SELECT NULLIF(VARCHARCOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'REAL' are not supported.
+SELECT NULLIF(VARCHARCOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'DOUBLE' are not supported.
+SELECT NULLIF(VARCHARCOL,CHARCOL) from AllDataTypesTable
+	 COL1(datatype : VARCHAR, precision : 60, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{15:30:20}
+SELECT NULLIF(VARCHARCOL,VARCHARCOL) from AllDataTypesTable
+	 COL1(datatype : VARCHAR, precision : 60, scale : 0)
+	 ---------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(VARCHARCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(VARCHARCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(VARCHARCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(VARCHARCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(VARCHARCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'CLOB' are not supported.
+SELECT NULLIF(VARCHARCOL,DATECOL) from AllDataTypesTable
+	 COL1(datatype : VARCHAR, precision : 60, scale : 0)
+	 ---------------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(VARCHARCOL,TIMECOL) from AllDataTypesTable
+	 COL1(datatype : VARCHAR, precision : 60, scale : 0)
+	 ---------------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(VARCHARCOL,TIMESTAMPCOL) from AllDataTypesTable
+	 COL1(datatype : VARCHAR, precision : 60, scale : 0)
+	 ---------------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(VARCHARCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR' and 'BLOB' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'SMALLINT' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'INTEGER' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'BIGINT' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'DECIMAL' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'REAL' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'DOUBLE' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'CHAR' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'VARCHAR' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'CLOB' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'DATE' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'TIME' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(LONGVARCHARCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'BLOB' are not supported.
+SELECT NULLIF(CHARFORBITCOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'SMALLINT' are not supported.
+SELECT NULLIF(CHARFORBITCOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'INTEGER' are not supported.
+SELECT NULLIF(CHARFORBITCOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BIGINT' are not supported.
+SELECT NULLIF(CHARFORBITCOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'DECIMAL' are not supported.
+SELECT NULLIF(CHARFORBITCOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'REAL' are not supported.
+SELECT NULLIF(CHARFORBITCOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'DOUBLE' are not supported.
+SELECT NULLIF(CHARFORBITCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'CHAR' are not supported.
+SELECT NULLIF(CHARFORBITCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'VARCHAR' are not supported.
+SELECT NULLIF(CHARFORBITCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(CHARFORBITCOL,CHARFORBITCOL) from AllDataTypesTable
+	 COL1(datatype : CHAR () FOR BIT DATA, precision : 60, scale : 0)
+	 ----------------------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(CHARFORBITCOL,VARCHARFORBITCOL) from AllDataTypesTable
+	 COL1(datatype : CHAR () FOR BIT DATA, precision : 60, scale : 0)
+	 ----------------------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{10aaaa202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020}
+SELECT NULLIF(CHARFORBITCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(CHARFORBITCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'CLOB' are not supported.
+SELECT NULLIF(CHARFORBITCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'DATE' are not supported.
+SELECT NULLIF(CHARFORBITCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'TIME' are not supported.
+SELECT NULLIF(CHARFORBITCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(CHARFORBITCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'SMALLINT' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'INTEGER' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'BIGINT' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'DECIMAL' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'REAL' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'DOUBLE' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'CHAR' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'VARCHAR' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,CHARFORBITCOL) from AllDataTypesTable
+	 COL1(datatype : VARCHAR () FOR BIT DATA, precision : 60, scale : 0)
+	 -------------------------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{10aaba}
+SELECT NULLIF(VARCHARFORBITCOL,VARCHARFORBITCOL) from AllDataTypesTable
+	 COL1(datatype : VARCHAR () FOR BIT DATA, precision : 60, scale : 0)
+	 -------------------------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(VARCHARFORBITCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'CLOB' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'DATE' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'TIME' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(VARCHARFORBITCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'VARCHAR () FOR BIT DATA' and 'BLOB' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'SMALLINT' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'INTEGER' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'BIGINT' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'DECIMAL' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'REAL' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'DOUBLE' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'CHAR' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'VARCHAR' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'CLOB' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'DATE' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'TIME' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(LVARCHARFORBITCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'BLOB' are not supported.
+SELECT NULLIF(CLOBCOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'SMALLINT' are not supported.
+SELECT NULLIF(CLOBCOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+SELECT NULLIF(CLOBCOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'BIGINT' are not supported.
+SELECT NULLIF(CLOBCOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'DECIMAL' are not supported.
+SELECT NULLIF(CLOBCOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'REAL' are not supported.
+SELECT NULLIF(CLOBCOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'DOUBLE' are not supported.
+SELECT NULLIF(CLOBCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+SELECT NULLIF(CLOBCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'VARCHAR' are not supported.
+SELECT NULLIF(CLOBCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(CLOBCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(CLOBCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(CLOBCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(CLOBCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+SELECT NULLIF(CLOBCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'DATE' are not supported.
+SELECT NULLIF(CLOBCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'TIME' are not supported.
+SELECT NULLIF(CLOBCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(CLOBCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'CLOB' and 'BLOB' are not supported.
+SELECT NULLIF(DATECOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'SMALLINT' are not supported.
+SELECT NULLIF(DATECOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'INTEGER' are not supported.
+SELECT NULLIF(DATECOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'BIGINT' are not supported.
+SELECT NULLIF(DATECOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'DECIMAL' are not supported.
+SELECT NULLIF(DATECOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'REAL' are not supported.
+SELECT NULLIF(DATECOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'DOUBLE' are not supported.
+SELECT NULLIF(DATECOL,CHARCOL) from AllDataTypesTable
+	 COL1(datatype : DATE, precision : 10, scale : 0)
+	 ------------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(DATECOL,VARCHARCOL) from AllDataTypesTable
+	 COL1(datatype : DATE, precision : 10, scale : 0)
+	 ------------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(DATECOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(DATECOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(DATECOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(DATECOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(DATECOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'CLOB' are not supported.
+SELECT NULLIF(DATECOL,DATECOL) from AllDataTypesTable
+	 COL1(datatype : DATE, precision : 10, scale : 0)
+	 ------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(DATECOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'TIME' are not supported.
+SELECT NULLIF(DATECOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(DATECOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'DATE' and 'BLOB' are not supported.
+SELECT NULLIF(TIMECOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'SMALLINT' are not supported.
+SELECT NULLIF(TIMECOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'INTEGER' are not supported.
+SELECT NULLIF(TIMECOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'BIGINT' are not supported.
+SELECT NULLIF(TIMECOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'DECIMAL' are not supported.
+SELECT NULLIF(TIMECOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'REAL' are not supported.
+SELECT NULLIF(TIMECOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'DOUBLE' are not supported.
+SELECT NULLIF(TIMECOL,CHARCOL) from AllDataTypesTable
+	 COL1(datatype : TIME, precision : 8, scale : 0)
+	 -----------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(TIMECOL,VARCHARCOL) from AllDataTypesTable
+	 COL1(datatype : TIME, precision : 8, scale : 0)
+	 -----------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(TIMECOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(TIMECOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(TIMECOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(TIMECOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(TIMECOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'CLOB' are not supported.
+SELECT NULLIF(TIMECOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'DATE' are not supported.
+SELECT NULLIF(TIMECOL,TIMECOL) from AllDataTypesTable
+	 COL1(datatype : TIME, precision : 8, scale : 0)
+	 -----------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(TIMECOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(TIMECOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIME' and 'BLOB' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'SMALLINT' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'INTEGER' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'BIGINT' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'DECIMAL' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'REAL' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'DOUBLE' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,CHARCOL) from AllDataTypesTable
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(TIMESTAMPCOL,VARCHARCOL) from AllDataTypesTable
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
+Data Conversion SQLException
+SELECT NULLIF(TIMESTAMPCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'CLOB' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'DATE' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'TIME' are not supported.
+SELECT NULLIF(TIMESTAMPCOL,TIMESTAMPCOL) from AllDataTypesTable
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+SELECT NULLIF(TIMESTAMPCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'BLOB' are not supported.
+SELECT NULLIF(BLOBCOL,SMALLINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'SMALLINT' are not supported.
+SELECT NULLIF(BLOBCOL,INTEGERCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported.
+SELECT NULLIF(BLOBCOL,BIGINTCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'BIGINT' are not supported.
+SELECT NULLIF(BLOBCOL,DECIMALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'DECIMAL' are not supported.
+SELECT NULLIF(BLOBCOL,REALCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'REAL' are not supported.
+SELECT NULLIF(BLOBCOL,DOUBLECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'DOUBLE' are not supported.
+SELECT NULLIF(BLOBCOL,CHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR' are not supported.
+SELECT NULLIF(BLOBCOL,VARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'VARCHAR' are not supported.
+SELECT NULLIF(BLOBCOL,LONGVARCHARCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'LONG VARCHAR' are not supported.
+SELECT NULLIF(BLOBCOL,CHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(BLOBCOL,VARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'VARCHAR () FOR BIT DATA' are not supported.
+SELECT NULLIF(BLOBCOL,LVARCHARFORBITCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+SELECT NULLIF(BLOBCOL,CLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'CLOB' are not supported.
+SELECT NULLIF(BLOBCOL,DATECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'DATE' are not supported.
+SELECT NULLIF(BLOBCOL,TIMECOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'TIME' are not supported.
+SELECT NULLIF(BLOBCOL,TIMESTAMPCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'TIMESTAMP' are not supported.
+SELECT NULLIF(BLOBCOL,BLOBCOL) from AllDataTypesTable
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+Start testing first operand as parameter to nullif
+Testing nullif(?,SMALLINT)
+Testing nullif(?,SMALLINT) with setBoolean
+	 COL1(datatype : SMALLINT, precision : 5, scale : 0)
+	 ---------------------------------------------------
+	{1}
+	{1}
+	{null}
+	{1}
+Testing nullif(?,INTEGER)
+Testing nullif(?,INTEGER) with setBoolean
+	 COL1(datatype : INTEGER, precision : 10, scale : 0)
+	 ---------------------------------------------------
+	{1}
+	{1}
+	{null}
+	{1}
+Testing nullif(?,BIGINT)
+Testing nullif(?,BIGINT) with setBoolean
+	 COL1(datatype : BIGINT, precision : 19, scale : 0)
+	 --------------------------------------------------
+	{1}
+	{1}
+	{null}
+	{1}
+Testing nullif(?,DECIMAL(10,5))
+Testing nullif(?,DECIMAL(10,5)) with setBoolean
+	 COL1(datatype : DECIMAL, precision : 10, scale : 5)
+	 ---------------------------------------------------
+	{1}
+	{1}
+	{null}
+	{1}
+Testing nullif(?,REAL)
+Testing nullif(?,REAL) with setBoolean
+	 COL1(datatype : REAL, precision : 7, scale : 0)
+	 -----------------------------------------------
+	{1.0}
+	{1.0}
+	{null}
+	{1.0}
+Testing nullif(?,DOUBLE)
+Testing nullif(?,DOUBLE) with setBoolean
+	 COL1(datatype : DOUBLE, precision : 15, scale : 0)
+	 --------------------------------------------------
+	{1.0}
+	{1.0}
+	{null}
+	{1.0}
+Testing nullif(?,CHAR(60))
+Testing nullif(?,CHAR(60)) with setBoolean
+	 COL1(datatype : CHAR, precision : 60, scale : 0)
+	 ------------------------------------------------
+	{1}
+	{1}
+	{1}
+	{1}
+Testing nullif(?,VARCHAR(60))
+Testing nullif(?,VARCHAR(60)) with setBoolean
+	 COL1(datatype : VARCHAR, precision : 60, scale : 0)
+	 ---------------------------------------------------
+	{1}
+	{1}
+	{1}
+	{1}
+Testing nullif(?,LONG VARCHAR)
+ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR' are not supported.
+Testing nullif(?,CHAR(60) FOR BIT DATA)
+Testing nullif(?,CHAR(60) FOR BIT DATA) with setBinaryStream
+	 COL1(datatype : CHAR () FOR BIT DATA, precision : 60, scale : 0)
+	 ----------------------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+Testing nullif(?,VARCHAR(60) FOR BIT DATA)
+Testing nullif(?,VARCHAR(60) FOR BIT DATA) with setBinaryStream
+	 COL1(datatype : VARCHAR () FOR BIT DATA, precision : 60, scale : 0)
+	 -------------------------------------------------------------------
+	{null}
+	{null}
+	{null}
+	{null}
+Testing nullif(?,LONG VARCHAR FOR BIT DATA)
+ERROR 42818: Comparisons between 'LONG VARCHAR FOR BIT DATA' and 'LONG VARCHAR FOR BIT DATA' are not supported.
+Testing nullif(?,CLOB(1k))
+ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+Testing nullif(?,DATE)
+Testing nullif(?,DATE) with setDate
+	 COL1(datatype : DATE, precision : 10, scale : 0)
+	 ------------------------------------------------
+	{2000-01-01}
+	{null}
+	{null}
+	{2000-01-01}
+Testing nullif(?,TIME)
+Testing nullif(?,TIME) with setTime
+	 COL1(datatype : TIME, precision : 8, scale : 0)
+	 -----------------------------------------------
+	{15:30:20}
+	{null}
+	{null}
+	{null}
+Testing nullif(?,TIMESTAMP)
+Testing nullif(?,TIMESTAMP) with setTimestamp
+	 COL1(datatype : TIMESTAMP, precision : 26, scale : 6)
+	 -----------------------------------------------------
+	{xxxxxxFILTERED-TIMESTAMPxxxxx}
+	{null}
+	{null}
+	{null}
+Testing nullif(?,BLOB(1k))
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
 Test resultset finished

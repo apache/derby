@@ -68,6 +68,9 @@ public class ConditionalNode extends ValueNode
 {
 	ValueNode		testCondition;
 	ValueNodeList	thenElseList;
+	//true means we are here for NULLIF(V1,V2), false means we are here for following
+	//CASE WHEN BooleanExpression THEN thenExpression ELSE elseExpression END
+	boolean	thisIsNullIfNode;
 
 	/**
 	 * Initializer for a ConditionalNode
@@ -76,10 +79,11 @@ public class ConditionalNode extends ValueNode
 	 * @param thenElseList		ValueNodeList with then and else expressions
 	 */
 
-	public void init(Object testCondition, Object thenElseList)
+	public void init(Object testCondition, Object thenElseList, Object thisIsNullIfNode)
 	{
 		this.testCondition = (ValueNode) testCondition;
 		this.thenElseList = (ValueNodeList) thenElseList;
+		this.thisIsNullIfNode = ((Boolean) thisIsNullIfNode).booleanValue();
 	}
 
 	/**
@@ -143,10 +147,23 @@ public class ConditionalNode extends ValueNode
 		Vector	aggregateVector) 
 			throws StandardException
 	{
-		testCondition = testCondition.bindExpression(fromList, 
+		testCondition = testCondition.bindExpression(fromList,
 			subqueryList,
 			aggregateVector);
-		thenElseList.bindExpression(fromList, 
+
+		if (thisIsNullIfNode) {
+			//for NULLIF(V1,V2), parser binds thenElseList.elementAt(0) to untyped NULL
+			//At bind phase, we should bind it to the type of V1 since now we know the
+			//type of V1  
+			BinaryComparisonOperatorNode bcon = (BinaryComparisonOperatorNode)testCondition;
+			QueryTreeNode cast = getNodeFactory().getNode(
+						C_NodeTypes.CAST_NODE,
+						thenElseList.elementAt(0), 
+						bcon.getLeftOperand().getTypeServices(),
+						getContextManager());
+			thenElseList.setElementAt(cast,0);
+		}
+		thenElseList.bindExpression(fromList,
 			subqueryList,
 			aggregateVector);
 
