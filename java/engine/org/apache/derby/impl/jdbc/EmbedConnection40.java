@@ -30,6 +30,8 @@ import java.sql.QueryObjectFactory;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Struct;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.iapi.reference.SQLState;
@@ -128,6 +130,27 @@ public class EmbedConnection40 extends EmbedConnection30 {
     throws SQLException{
         throw Util.notImplemented();
     }
+
+    /**
+     * Returns the type map for this connection.
+     *
+     * @return type map for this connection
+     * @exception SQLException if a database access error occurs
+     */
+    public final Map<String, Class<?>> getTypeMap() throws SQLException {
+        // This method is already implemented with a non-generic
+        // signature in EmbedConnection. We could just use that method
+        // directly, but then we get a compiler warning (unchecked
+        // cast/conversion). Copy the map to avoid the compiler
+        // warning.
+        Map typeMap = super.getTypeMap();
+        if (typeMap == null) return null;
+        Map<String, Class<?>> genericTypeMap = new HashMap<String, Class<?>>();
+        for (Object key : typeMap.keySet()) {
+            genericTypeMap.put((String) key, (Class) typeMap.get(key));
+        }
+        return genericTypeMap;
+    }
     
     /**
      * This method forwards all the calls to default query object provided by 
@@ -137,6 +160,7 @@ public class EmbedConnection40 extends EmbedConnection30 {
      */
     public <T extends BaseQuery> T createQueryObject(Class<T> ifc) 
                                                     throws SQLException {
+        checkIfClosed();
         return QueryObjectFactory.createDefaultQueryObject (ifc, this);
     } 
     
@@ -152,6 +176,7 @@ public class EmbedConnection40 extends EmbedConnection30 {
      *                                with the given interface.
      */
     public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        checkIfClosed();
         return interfaces.isInstance(this);
     }
     
@@ -165,6 +190,7 @@ public class EmbedConnection40 extends EmbedConnection30 {
      */
     public <T> T unwrap(java.lang.Class<T> interfaces) 
                             throws SQLException{
+        checkIfClosed();
         //Derby does not implement non-standard methods on 
         //JDBC objects
         //hence return this if this class implements the interface 

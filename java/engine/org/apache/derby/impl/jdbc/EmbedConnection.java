@@ -517,8 +517,7 @@ public class EmbedConnection implements EngineConnection
     								 int resultSetHoldability)
 						throws SQLException
 	{
-		if (isClosed())
-			throw Util.noCurrentConnection();
+		checkIfClosed();
 
 		return factory.newEmbedStatement(this, false,
 			setResultSetType(resultSetType), resultSetConcurrency,
@@ -795,8 +794,7 @@ public class EmbedConnection implements EngineConnection
 				 int resultSetConcurrency, int resultSetHoldability)
 		throws SQLException 
 	{
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(!isClosed(), "connection is closed");
+		checkIfClosed();
 
 		synchronized (getConnectionSynchronization())
 		{
@@ -824,7 +822,8 @@ public class EmbedConnection implements EngineConnection
      * parameter placeholders
      * @return the native form of this statement
      */
-    public String nativeSQL(String sql) {
+    public String nativeSQL(String sql) throws SQLException {
+        checkIfClosed();
 		// we don't massage the strings at all, so this is easy:
 		return sql;
 	}
@@ -851,6 +850,7 @@ public class EmbedConnection implements EngineConnection
      * @exception SQLException if a database-access error occurs.
      */
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
+		checkIfClosed();
 
 		// Is this a nested connection
 		if (rootConnection != this) {
@@ -870,7 +870,8 @@ public class EmbedConnection implements EngineConnection
      * @return Current state of auto-commit mode.
      * @see #setAutoCommit 
      */
-    public boolean getAutoCommit() {
+    public boolean getAutoCommit() throws SQLException {
+        checkIfClosed();
 		return autoCommit;
 	}
 
@@ -1043,8 +1044,7 @@ public class EmbedConnection implements EngineConnection
      * @exception SQLException if a database-access error occurs.
      */
     public DatabaseMetaData getMetaData() throws SQLException {
-		if (isClosed())
-			throw Util.noCurrentConnection();
+        checkIfClosed();
 
 		if (dbMetadata == null) {
 
@@ -1068,8 +1068,8 @@ public class EmbedConnection implements EngineConnection
 	 * or ResultSet.CLOSE_CURSORS_AT_COMMIT
 	 *
 	 */
-	public final int getHoldability()
-	{
+	public final int getHoldability() throws SQLException {
+		checkIfClosed();
 		return connectionHoldAbility;
 	}
 
@@ -1083,8 +1083,8 @@ public class EmbedConnection implements EngineConnection
 	 * or ResultSet.CLOSE_CURSORS_AT_COMMIT
 	 *
 	 */
-	public final void setHoldability(int holdability)
-	{
+	public final void setHoldability(int holdability) throws SQLException {
+		checkIfClosed();
 		connectionHoldAbility = holdability;
 	}
 
@@ -1122,6 +1122,7 @@ public class EmbedConnection implements EngineConnection
      */
     public final boolean isReadOnly() throws SQLException
 	{
+		checkIfClosed();
 		return getLanguageConnection().isReadOnly();
 	}
 
@@ -1133,6 +1134,7 @@ public class EmbedConnection implements EngineConnection
      * @exception SQLException if a database-access error occurs.
      */
     public void setCatalog(String catalog) throws SQLException {
+        checkIfClosed();
 		// silently ignoring this request like the javadoc said.
 		return;
 	}
@@ -1144,6 +1146,7 @@ public class EmbedConnection implements EngineConnection
      * @exception SQLException if a database-access error occurs.
      */
 	public String getCatalog() throws SQLException {
+		checkIfClosed();
 		// we do not have support for Catalog, just return null as
 		// the JDBC specs mentions then.
 		return null;
@@ -1211,7 +1214,7 @@ public class EmbedConnection implements EngineConnection
      * @exception SQLException if a database-access error occurs.
      */
     public final int getTransactionIsolation() throws SQLException {
-
+        checkIfClosed();
 		return ExecutionContext.CS_TO_JDBC_ISOLATION_LEVEL_MAP[getLanguageConnection().getCurrentIsolationLevel()];
 	}
 
@@ -1227,7 +1230,8 @@ public class EmbedConnection implements EngineConnection
 	 * Synchronization note: Warnings are synchronized 
 	 * on nesting level
      */
-	public final synchronized SQLWarning getWarnings() {
+	public final synchronized SQLWarning getWarnings() throws SQLException {
+		checkIfClosed();
    		return topWarning;
 	}
 
@@ -1238,7 +1242,8 @@ public class EmbedConnection implements EngineConnection
 	 * Synchronization node: Warnings are synchonized 
 	 * on nesting level
      */
-    public final synchronized void clearWarnings() {
+    public final synchronized void clearWarnings() throws SQLException {
+        checkIfClosed();
 		topWarning = null;
 	}
 
@@ -1255,7 +1260,8 @@ public class EmbedConnection implements EngineConnection
 	 * JDBC 2.0 - java.util.Map requires JDK 1
      *
      */
-    public java.util.Map getTypeMap() {
+    public java.util.Map getTypeMap() throws SQLException {
+        checkIfClosed();
 		// just return an immuntable empty map
 		return java.util.Collections.EMPTY_MAP;
     }
@@ -1268,7 +1274,7 @@ public class EmbedConnection implements EngineConnection
      * @exception SQLException Feature not implemented for now.
 	 */
     public final void setTypeMap(java.util.Map map) throws SQLException {
-
+        checkIfClosed();
         if( map == null)
             throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
                                               "java.sql.Connection.setTypeMap");
@@ -1318,6 +1324,17 @@ public class EmbedConnection implements EngineConnection
 
 		return getTR().getLcc();
 	}
+
+    /**
+     * Raises an exception if the connection is closed.
+     *
+     * @exception SQLException if the connection is closed
+     */
+    protected final void checkIfClosed() throws SQLException {
+        if (isClosed()) {
+            throw Util.noCurrentConnection();
+        }
+    }
 
 	//EmbedConnection30 overrides this method so it can release the savepoints array if
 	//the exception severity is transaction level
@@ -1493,8 +1510,7 @@ public class EmbedConnection implements EngineConnection
 			is in a finally block.
 		 */
 
-		if (isClosed())
-			throw Util.noCurrentConnection();
+		checkIfClosed();
 
 		getTR().setupContextStack();
 

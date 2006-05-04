@@ -295,16 +295,22 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         /**
          * Checks whether a method expects an exception to be thrown
          * when the object is closed. Currently, only
-         * <code>close()</code> and <code>isClosed()</code> don't
-         * expect exceptions.
+         * <code>close()</code>, <code>isClosed()</code> and
+         * <code>isValid()</code> don't expect exceptions.
          *
          * @param method a method
          * @return <code>true</code> if an exception is expected
          */
         public boolean expectsException(Method method) {
-            return
-                !(method.getName().equals("close") ||
-                  method.getName().equals("isClosed"));
+            final String[] exceptionLessMethods = {
+                "close",
+                "isClosed",
+                "isValid",
+            };
+            for (String name : exceptionLessMethods) {
+                if (name.equals(method.getName())) return false;
+            }
+            return true;
         }
 
         /**

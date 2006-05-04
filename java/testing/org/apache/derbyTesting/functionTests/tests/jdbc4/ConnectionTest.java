@@ -171,6 +171,15 @@ public class ConnectionTest
         }
     }
 
+    /**
+     * Tests that <code>getTypeMap()</code> returns an empty map when
+     * no type map has been installed.
+     * @exception SQLException if an error occurs
+     */
+    public void testGetTypeMapReturnsEmptyMap() throws SQLException {
+        assertTrue(con.getTypeMap().isEmpty());
+    }
+
     public void testIsWrapperReturnsFalse()
         throws SQLException {
         assertFalse(con.isWrapperFor(ResultSet.class));
