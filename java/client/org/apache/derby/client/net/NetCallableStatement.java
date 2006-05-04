@@ -26,6 +26,7 @@ import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
+import org.apache.derby.client.ClientPooledConnection;
 
 public class NetCallableStatement extends NetPreparedStatement
         implements MaterialPreparedStatement {
@@ -71,9 +72,10 @@ public class NetCallableStatement extends NetPreparedStatement
                          String sql,
                          int type,
                          int concurrency,
-                         int holdability) throws SqlException {
+                         int holdability,
+                         ClientPooledConnection cpc) throws SqlException {
         this(ClientDriver.getFactory().newCallableStatement(netAgent,
-                netConnection, sql, type, concurrency, holdability),
+                netConnection, sql, type, concurrency, holdability,cpc),
                 netAgent,
                 netConnection);
     }

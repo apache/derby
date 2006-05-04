@@ -20,6 +20,7 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.io.Reader;
@@ -63,13 +64,30 @@ public class CallableStatement extends PreparedStatement
         wasNull_ = WAS_NULL_UNSET;
     }
 
-    // Common constructor for jdbc 2 callable statements with scroll attributes.
-    // Called by material statement constructor.
+    /**
+     * Common constructor for jdbc 2 callable statements with scroll attributes.
+     * Called by material statement constructor.
+     *
+     * @param agent       The instance of NetAgent associated with this
+     *                    CallableStatement object.
+     * @param connection  The connection object associated with this
+     *                    PreparedStatement Object.
+     * @param sql         A String object that is the SQL statement to be sent 
+     *                    to the database.
+     * @param type        One of the ResultSet type constants
+     * @param concurrency One of the ResultSet concurrency constants
+     * @param holdability One of the ResultSet holdability constants
+     * @param cpc         The PooledConnection object that will be used to 
+     *                    notify the PooledConnection reference of the Error 
+     *                    Occurred and the Close events.
+     * @throws SqlException
+     */
     public CallableStatement(Agent agent,
                              Connection connection,
                              String sql,
-                             int type, int concurrency, int holdability) throws SqlException {
-        super(agent, connection, sql, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, null);
+                             int type, int concurrency, int holdability,
+                             ClientPooledConnection cpc) throws SqlException {
+        super(agent, connection, sql, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, null,cpc);
         initCallableStatement();
     }
 

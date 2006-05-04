@@ -19,6 +19,7 @@
 */
 package org.apache.derby.client;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.jdbc.ClientBaseDataSource;
@@ -63,6 +64,13 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             password_ = password;
             listeners_ = new java.util.Vector();
             
+            //pass the client pooled connection instance to this
+            //instance of the NetConnection object 
+            //this object is then used to pass the close and the error events 
+            //that occur in the PreparedStatement object back to the 
+            //PooledConnection which will then raise the events
+            //on the listeners
+            
             netPhysicalConnection_ = (org.apache.derby.client.net.NetConnection)
             ClientDriver.getFactory().newNetConnection(
                     (NetLogWriter) logWriter_,
@@ -70,7 +78,8 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                     password,
                     ds,
                     -1,
-                    false);
+                    false,
+                    this);
         
         physicalConnection_ = netPhysicalConnection_;
         }
@@ -253,6 +262,43 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         logicalConnection_ = null;
     }
     
+    /*-----------------------------------------------------------------*/
+    /*
+     * These methods are needed to provide StatementEvent support for 
+     * derby. 
+     * They are actually implemented in EmbedPooledConnection40 but have
+     * a dummy implementation here
+     */
+    
+    /**
+     *
+     * The onStatementClose contains the logic for raising the Statement Closed
+     * events. This method has a dummy implementation here to avoid error when
+     * this class is compiled with jdk1.4. The class the actual implementation 
+     * in ClientPooledConnection40.
+     *
+     * @param statement The PreparedStatement that was closed
+     *
+     */
+    public void onStatementClose(PreparedStatement statement) {
+        
+    }
+    
+    /**
+     * The method contains the logic for raising the Statement error occurred
+     * events. This method has a dummy implementation here to avoid error when
+     * this class is compiled with jdk1.4. The class the actual implementation 
+     * in ClientPooledConnection40.
+     *
+     * @param statement The PreparedStatement that was closed
+     * @param sqle      The SQLException associated with the error that caused
+     *                  the invalidation of this PreparedStatement
+     */
+    public void onStatementErrorOccurred(PreparedStatement statement,
+                    SQLException sqle) {
+        
+    }
+    
     /**
      * creates and returns NetXAConnection. 
      * Overwrite this method to create different version of NetXAConnection
@@ -273,7 +319,8 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                     password,
                     ds,
                     rmId,
-                    true);
+                    true,
+                    this);
         
     }
 }

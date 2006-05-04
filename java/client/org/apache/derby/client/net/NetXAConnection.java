@@ -30,20 +30,46 @@ import javax.transaction.xa.Xid;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Statement;
 
+import org.apache.derby.client.ClientPooledConnection;
+
 import org.apache.derby.jdbc.ClientDriver;
 
 public class NetXAConnection {    
     private NetConnection netCon;
     //---------------------constructors/finalizer---------------------------------
     // For XA Connections    
+    /**
+     *
+     * The construcor for the NetXAConnection. The parameter 
+     * is set to <code>this</code> from ClientXAConnection when
+     * it creates an instance of NetXAConnection. This is then
+     * passed on the underlying NetConnection constructor and is 
+     * used to raise StatementEvents from any PreparedStatement that
+     * would be created from that NetConnection.
+     *
+     * @param netLogWriter NetLogWriter object associated with this connection
+     * @param user         user id for this connection
+     * @param password     password for this connection
+     * @param dataSource   The DataSource object passed from the ClientXAConnection 
+     *                     object from which this constructor was called
+     * @param rmId         The Resource manager ID for XA Connections
+     * @param isXAConn     true if this is a XA connection
+     * @param cpc          The ClientPooledConnection object from which this 
+     *                     NetConnection constructor was called. This is used
+     *                     to pass StatementEvents back to the pooledConnection
+     *                     object
+     * @throws SqlException
+     * 
+     */
     public NetXAConnection(NetLogWriter netLogWriter,
                            String user,
                            String password,
                            org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                            int rmId,
-                           boolean isXAConn) throws SqlException {
+                           boolean isXAConn,
+                           ClientPooledConnection cpc) throws SqlException {
         netCon = createNetConnection (netLogWriter, user, password, 
-                dataSource, rmId, isXAConn);
+                dataSource, rmId, isXAConn,cpc);
         checkPlatformVersion();
     }
 
@@ -213,24 +239,32 @@ public class NetXAConnection {
     }
     
     /**
+     *
      * Creates NetConnection for the supported version of jdbc.
      * This method can be overwritten to return NetConnection
      * of the supported jdbc version.
-     * @param netLogWriter 
-     * @param user 
-     * @param password 
-     * @param dataSource 
-     * @param rmId 
-     * @param isXAConn 
+     * @param netLogWriter NetLogWriter object associated with this connection
+     * @param user         user id for this connection
+     * @param password     password for this connection
+     * @param dataSource   The DataSource object passed from the ClientXAConnection 
+     *                     object from which this constructor was called
+     * @param rmId         The Resource manager ID for XA Connections
+     * @param isXAConn     true if this is a XA connection
+     * @param cpc          The ClientPooledConnection object from which this 
+     *                     NetConnection constructor was called. This is used
+     *                     to pass StatementEvents back to the pooledConnection
+     *                     object
      * @return NetConnection
+     *
      */
     protected NetConnection createNetConnection (NetLogWriter netLogWriter,
                            String user,
                            String password,
                            org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                            int rmId,
-                           boolean isXAConn) throws SqlException {        
+                           boolean isXAConn,
+                           ClientPooledConnection cpc) throws SqlException {        
         return (NetConnection)ClientDriver.getFactory().newNetConnection
-            (netLogWriter, user, password,dataSource, rmId, isXAConn);
+            (netLogWriter, user, password,dataSource, rmId, isXAConn,cpc);
     }
 }

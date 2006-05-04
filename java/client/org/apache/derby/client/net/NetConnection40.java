@@ -37,6 +37,7 @@ import java.sql.Struct;
 import java.util.Properties;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -87,6 +88,39 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
                          org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                          boolean isXAConn) throws SqlException{
         super(netLogWriter,ipaddr,portNumber,dataSource,isXAConn);
+    }
+    
+    
+    /**
+     * The constructor for the NetConnection40 class which contains 
+     * implementations of JDBC 4.0 specific methods in the java.sql.Connection
+     * interface. This constructor is called from the ClientPooledConnection object 
+     * to enable the NetConnection to pass <code>this</code> on to the associated 
+     * prepared statement object thus enabling the prepared statement object 
+     * to inturn  raise the statement events to the ClientPooledConnection object.
+     *
+     * @param netLogWriter NetLogWriter object associated with this connection.
+     * @param user         user id for this connection.
+     * @param password     password for this connection.
+     * @param dataSource   The DataSource object passed from the PooledConnection 
+     *                     object from which this constructor was called.
+     * @param rmId         The Resource manager ID for XA Connections
+     * @param isXAConn     true if this is a XA connection.
+     * @param cpc          The ClientPooledConnection object from which this 
+     *                     NetConnection constructor was called. This is used
+     *                     to pass StatementEvents back to the pooledConnection
+     *                     object.
+     * @throws             SqlException
+     */
+    
+    public NetConnection40(NetLogWriter netLogWriter,
+                         String user,
+                         String password,
+                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
+                         int rmId,
+                         boolean isXAConn,
+                         ClientPooledConnection cpc) throws SqlException{
+	super(netLogWriter,user,password,dataSource,rmId,isXAConn,cpc);
     }
     
 

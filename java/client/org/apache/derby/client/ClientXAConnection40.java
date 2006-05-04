@@ -20,7 +20,11 @@
 
 package org.apache.derby.client;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.Vector;
+import javax.sql.StatementEvent;
 import javax.sql.StatementEventListener;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
@@ -32,6 +36,11 @@ import org.apache.derby.jdbc.ClientXADataSource;
  * jdbc4.0 implementation of XAConnection
  */ 
 public class ClientXAConnection40 extends ClientXAConnection {
+    
+    //using generics to avoid casting problems
+     protected final Vector<StatementEventListener> statementEventListeners = 
+             new Vector<StatementEventListener>();
+
     
     /**
      * Constructor for ClientXAConnection40.
@@ -60,7 +69,10 @@ public class ClientXAConnection40 extends ClientXAConnection {
      * <p>
      */
     public void removeStatementEventListener(StatementEventListener listener) {
-        throw new UnsupportedOperationException();
+        if (logWriter_ != null) {
+            logWriter_.traceEntry(this, "removeConnectionEventListener", listener);
+        }
+        statementEventListeners.removeElement(listener);
     }
     
     /**
@@ -76,6 +88,51 @@ public class ClientXAConnection40 extends ClientXAConnection {
      * <p>
      */
     public void addStatementEventListener(StatementEventListener listener) {
-        throw new UnsupportedOperationException();
+        if (logWriter_ != null) {
+            logWriter_.traceEntry(this, "addStatementEventListener", listener);
+        }
+        statementEventListeners.addElement(listener);
     }
+    
+    /**
+     * Raise the statementClosed event for all the listeners when the 
+     * corresponding events occurs
+     * @param statement The PreparedStatement that was closed
+     */
+    public void onStatementClose(PreparedStatement statement) {
+        if (!statementEventListeners.isEmpty()) {
+            StatementEvent event = new StatementEvent(this,statement);
+            //synchronized block on statementEventListeners to make it thread
+            //safe
+            synchronized(statementEventListeners) {
+                for (StatementEventListener l : statementEventListeners) {
+                    l.statementClosed(event);
+                }
+            }
+        }
+    }
+    
+    /**
+     *
+     * Raise the statementErrorOccurred event for all the listeners when the 
+     * corresponding events occurs.
+     *
+     * @param statement The PreparedStatement on which error occurred
+     * @param sqle      The SQLException associated with the error that
+     *                  caused the invalidation of the PreparedStatements
+     *
+     */
+    public void onStatementErrorOccurred(PreparedStatement statement,
+                    SQLException sqle) {
+        if (!statementEventListeners.isEmpty()) {
+            StatementEvent event = new StatementEvent(this,statement,sqle);
+            //synchronized block on statementEventListeners to make it thread
+            //safe
+            synchronized(statementEventListeners) {
+                for (StatementEventListener l : statementEventListeners) {
+                    l.statementErrorOccurred(event);
+                }
+            }
+        }
+    }   
 }

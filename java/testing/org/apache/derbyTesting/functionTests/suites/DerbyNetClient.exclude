@@ -29,6 +29,3 @@ jdbc4/TestJDBC40Exception.java
 #failing (hanging?)  on jdk 1.5/jdk 1.6
 jdbcapi/checkDataSource.java
 jdbcapi/checkDataSource30.java
-#exclude the statement events test until the feature is added on the 
-#client side
-jdbc4/StatementEventsTest.junit

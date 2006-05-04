@@ -43,6 +43,14 @@ public class StatementEventsTest extends BaseJDBCTestCase
     boolean statementCloseEventOccurred=false;
     boolean statementErrorEventOccurred=false;
     
+    //In the case of the client driver when the connection is closed then 
+    //the prepared statements associated with the connection are also closed
+    //this would raise closed events for corresponding prepared statements
+    
+    //using a flag to identify the occurrence of the error event in the
+    //network client which can also cause the close event to be raised
+    boolean client_ErrorEvent=false;
+    
     
     /**
      * Create a test with the given name.
@@ -100,6 +108,11 @@ public class StatementEventsTest extends BaseJDBCTestCase
     */
     void raiseErrorEvent() {
         try {
+            //mark the falg to indicate that we are raising a error event 
+            //on the client framework
+            if(usingDerbyNetClient())            
+                client_ErrorEvent = true;
+            
             ps_error = conn.prepareStatement("values 1");
             
             //close the connection associated with this prepared statement
@@ -129,8 +142,28 @@ public class StatementEventsTest extends BaseJDBCTestCase
     
     public void statementClosed(StatementEvent event) {
         statementCloseEventOccurred = true;
-        if(ps_close==null || !event.getStatement().equals(ps_close)) {
-            System.out.println("The statement event has the wrong reference +  of PreparedStatement");
+        //If the event was caused by ps_close and not
+        //by ps_error. In this case client_ErrorEvent
+        //will be false.
+        //In this case check if the StatementEvent
+        //has a proper reference to ps_close
+        //which is the actual prepared statement
+        //that caused the error event.
+        if(!client_ErrorEvent && (ps_close==null || 
+            !event.getStatement().equals(ps_close))) {
+            System.out.println("The statement event has the wrong reference " +
+                "of PreparedStatement");
+        }
+        
+        //If it is caused by the error occurred event on the 
+        //Network client side. upon doing a Connection.close()
+        //the Prepared Statements associated with the 
+        //Connection are automatically marked closed
+        //check if the StatementEvent has a proper reference to ps_error
+        if(client_ErrorEvent && (ps_error==null || 
+            !event.getStatement().equals(ps_error))) {
+            System.out.println("The statement event has the wrong reference" +
+                " of PreparedStatement");
         }
     }
 
