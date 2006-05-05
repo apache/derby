@@ -4201,8 +4201,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	  closeCurrentStream();
 
-	  checkIfClosed("getXXX");
-
 	   DataValueDescriptor[] theCurrentRow = checkOnRow(); // first make sure there's a row
 		
 	   try {

@@ -969,7 +969,6 @@ public class EmbedCallableStatement20
 	public Object getObject(String parameterName)
     throws SQLException
 	{
-		checkStatus();
 		throw Util.notImplemented();
 	}
 
