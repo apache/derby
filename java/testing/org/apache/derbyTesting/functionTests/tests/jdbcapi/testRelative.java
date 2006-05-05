@@ -5,11 +5,14 @@ import java.sql.*;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class testRelative {
+	
+	static final String NO_CURRENT_ROW_SQL_STATE = 
+		(TestUtil.isNetFramework() ? 
+		 "XJ121" : "24000");
    
-   static final String NO_CURRENT_ROW_SQL_STATE = "24000";
-  
    public static void main(String[] args) {
 	   System.out.println("Test testRelative starting");
 	   Connection con = null;
@@ -59,45 +62,50 @@ public class testRelative {
 		
 			pStmt.executeBatch();
 			con.commit();
+		} catch(SQLException se) {
+			unexpectedSQLException(se);
+		} catch(Throwable t) {
+			System.out.println("FAIL--unexpected exception: "+t.getMessage());
+			t.printStackTrace(System.out);
+		}
+		try {
+			testScrolling(ResultSet.CONCUR_READ_ONLY, con);
+			testScrolling(ResultSet.CONCUR_UPDATABLE, con);
+		} catch(Throwable e) {
+			System.out.println("FAIL -- unexpected exception: "+e.getMessage());
+			e.printStackTrace(System.out);
+			
+		}
+	}
 
-			stmt1 = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-		        rs = stmt1.executeQuery("select * from testRelative");						
-
-   			rs.next(); // First Record
-   			returnValue = rs.getString("name");
-   			System.out.println("Value="+returnValue);
-
-   			rs.relative(2);
-   			System.out.println("isFirst=" + rs.isFirst() + " isLast=" + rs.isLast() + " isAfterLast=" + rs.isAfterLast());
-   			returnValue = rs.getString("name");
-   			System.out.println("Value="+returnValue);
-
-   			rs.relative(-2);
-   			returnValue = rs.getString("name");
-   			System.out.println("Value="+returnValue);
-                 } catch(SQLException se) {
-		    unexpectedSQLException(se);
-                 } catch(Throwable t) {
-		    System.out.println("FAIL--unexpected exception: "+t.getMessage());
-		    t.printStackTrace(System.out);
-                 }
-
-                 try {
-
-   			rs.relative(10);
-   			System.out.println("isFirst=" + rs.isFirst() + " isLast=" + rs.isLast() + " isAfterLast=" + rs.isAfterLast());
-
-   			returnValue = rs.getString("name");
-   			System.out.println("Value="+returnValue);
-
- 		} catch(SQLException sqle) {
- 		   expectedException(sqle, NO_CURRENT_ROW_SQL_STATE);
- 		} catch(Throwable e) {
- 		   System.out.println("FAIL -- unexpected exception: "+e.getMessage());
-                   e.printStackTrace(System.out);
-
- 		}
-      }
+	private static void testScrolling(int concurrency, Connection con) 
+		throws SQLException
+	{
+		Statement stmt1 = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, concurrency);
+		ResultSet rs = stmt1.executeQuery("select * from testRelative");
+		
+		rs.next(); // First Record
+		System.out.println("Value = " + rs.getString("name"));
+		
+		rs.relative(2);
+		System.out.println("Value = " + rs.getString("name"));
+		System.out.println("isFirst = " + rs.isFirst() + 
+						   " isLast = " + rs.isLast() + 
+						   " isAfterLast = " + rs.isAfterLast());
+		rs.relative(-2);
+		System.out.println("Value = " + rs.getString("name"));
+		
+		try {
+			rs.relative(10);
+			System.out.println("Value = " + rs.getString("name"));
+			System.out.println("isFirst = " + rs.isFirst() + 
+							   " isLast = " + rs.isLast() + 
+							   " isAfterLast = " + rs.isAfterLast());
+		} catch(SQLException sqle) {
+			
+			expectedException(sqle, NO_CURRENT_ROW_SQL_STATE);
+		} 
+	}
      
       /**
 	   *  Print the expected Exception's details if the SQLException SQLState
@@ -109,16 +117,17 @@ public class testRelative {
 	   **/
 	static private void expectedException (SQLException se, String expectedSQLState) {
            if( se.getSQLState() != null && (se.getSQLState().equals(expectedSQLState))) { 
-                System.out.println("PASS -- expected exception");
-                while (se != null) {
-                    System.out.println("SQLSTATE("+se.getSQLState()+"): "+se.getMessage());
-                    se = se.getNextException();
-                }
+                System.out.println("PASS -- expected exception");               
             } else {
 	        System.out.println("FAIL--Unexpected SQLException: " +
 							   "SQLSTATE(" +se.getSQLState() + ")" +
 							   se.getMessage());
-	        se.printStackTrace(System.out);
+			while (se != null) {
+				System.out.println("SQLSTATE("+se.getSQLState()+"): "+se.getMessage());
+				se.printStackTrace(System.out);
+				se = se.getNextException();
+			}
+			 
 	    }
 	}
 

@@ -345,6 +345,9 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 					break;
 				}
 			}
+			if (result != null) {
+				result = getRowFromHashTable(row);
+			}
 			currentRow = result;
 			return result;
 		}
@@ -515,6 +518,9 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			 * Get row from the source.
 			 */
 			result = getNextRowFromSource();
+			if (result !=null) {
+				result = getRowFromHashTable(currentPosition);
+			}
 		}
 		else if (currentPosition < positionInSource)
 		{
@@ -616,44 +622,37 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow	getLastRow()
 		throws StandardException
-	{
-		ExecRow result;
-
+	{		
 	    if ( ! isOpen ) 
 		{
 			throw StandardException.newException(SQLState.LANG_RESULT_SET_NOT_OPEN, "next");
 		}
-
-		/* Have we already seen the last row? */
-		if (seenLast)
+		
+		if (!seenLast) 
 		{
-			// Return null if the set was empty
-			if (lastPosition == 0)
+			attachStatementContext();
+
+			if (SanityManager.DEBUG)
 			{
-				currentRow = null;
-				return null;
+				if (!isTopResultSet)
+				{
+					SanityManager.THROWASSERT(
+											  this + "expected to be the top ResultSet");
+				}
 			}
-			else
-			{
-				return getRowFromHashTable(lastPosition);
-			}
+			
+			/* Scroll to the end, filling the hash table as
+			 * we scroll, and return the last row that we find.
+			 */
+			ExecRow result = null;
+			while ((result = getNextRowFromSource()) != null);
 		}
-
-		attachStatementContext();
-
-		if (SanityManager.DEBUG)
+		
+		if (SanityManager.DEBUG && !seenLast)
 		{
-			if (!isTopResultSet)
-			{
-				SanityManager.THROWASSERT(
-					this + "expected to be the top ResultSet");
-			}
+			SanityManager.THROWASSERT(this + "expected to have seen last");
 		}
-
-		/* Scroll to the end, filling the hash table as
-		 * we scroll, and return the last row that we find.
-		 */
-		while ((result = getNextRowFromSource()) != null);
+		
 		beforeFirst = false;
 		afterLast = false;
 

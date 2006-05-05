@@ -1,8 +1,11 @@
 Test testRelative starting
-Value=work1
-isFirst=false isLast=false isAfterLast=false
-Value=work3
-Value=work1
-isFirst=false isLast=false isAfterLast=true
+Value = work1
+Value = work3
+isFirst = false isLast = false isAfterLast = false
+Value = work1
 PASS -- expected exception
-SQLSTATE(24000): Invalid cursor state - no current row.
+Value = work1
+Value = work3
+isFirst = false isLast = false isAfterLast = false
+Value = work1
+PASS -- expected exception
