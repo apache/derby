@@ -196,6 +196,9 @@ public class Sed
 			searchStrings.addElement("No suitable driver found for [0-9A-Za-z:]*");			
 			searchStrings.addElement("No suitable driver;[0-9A-Za-z:=]*");			
 			searchStrings.addElement("SQL Exception: No suitable driver");			
+
+			// Timestamp diagnostic looks a little different under jdk16
+			searchStrings.addElement("\\[\\.fffffffff\\]");			
 		}
 		
         Vector subStrings = new Vector();
@@ -257,6 +260,8 @@ public class Sed
 			subStrings.addElement("No suitable driver");
 			subStrings.addElement("No suitable driver");
 			subStrings.addElement("java.sql.SQLException: No suitable driver");
+
+			subStrings.addElement(".fffffffff");
 		}
 
 		doWork(srcFile, dstFile, null, deleteLines, searchStrings, subStrings, isSed, isI18N);

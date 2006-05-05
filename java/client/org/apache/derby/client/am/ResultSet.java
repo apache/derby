@@ -5343,8 +5343,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     private SQLException jdbc3MethodNotSupported()
     {
         // This will get internationalized in another patch
-        return new SqlException(agent_.logWriter_, 
-            "JDBC 3 method called - not yet supported").getSQLException();
+        return SQLExceptionFactory.notImplemented( "JDBC 3 method called - not yet supported");
     }
     
     // -------------------------- JDBC 4.0 --------------------------

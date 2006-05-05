@@ -20,6 +20,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import java.io.*;
 import java.sql.*;
 import javax.sql.*;
 
@@ -76,6 +77,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				java.sql.Statement.class,
 				new MD[]
 				{
+						new MD( "cancel", new Class[] { } ),
 				    new MD( "execute", new Class[] { String.class, int[].class } ),
 						new MD( "execute", new Class[] { String.class, String[].class } ),
 						new MD( "executeUpdate", new Class[] { String.class, int[].class } ),
@@ -97,7 +99,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "setRowId", new Class[] { int.class, RowId.class } ),
 						new MD( "setSQLXML", new Class[] { int.class, SQLXML.class } ),
 					    new MD( "setURL", new Class[] { int.class, URL.class } ),
-						new MD( "setNull", new Class[] { int.class, int.class, String.class } )
+					    new MD( "setNull", new Class[] { int.class, int.class, String.class } ),
+					    new MD( "setUnicodeStream", new Class[] { int.class, InputStream.class, int.class } ),
 						} ),
 			new Exclusions
 			(
@@ -212,6 +215,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "getRowId", new Class[] { String.class } ),
 						new MD( "getSQLXML", new Class[] { int.class } ),
 						new MD( "getSQLXML", new Class[] { String.class } ),
+						new MD( "getUnicodeStream", new Class[] { int.class } ),
+						new MD( "getUnicodeStream", new Class[] { String.class } ),
 						new MD( "refreshRow", new Class[] { } ),
 						new MD( "updateArray", new Class[] { int.class, java.sql.Array.class } ),
 						new MD( "updateArray", new Class[] { String.class, java.sql.Array.class } ),

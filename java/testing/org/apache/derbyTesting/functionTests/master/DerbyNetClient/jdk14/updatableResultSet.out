@@ -572,9 +572,9 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : 'updateBinaryStream' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateClob on a readonly resultset
   Using column position as first parameter to updateClob
-  Got expected exception : JDBC 3 method called - not yet supported
+  Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Using column name as first parameter to updateClob
-  Got expected exception : JDBC 3 method called - not yet supported
+  Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Test updateDate on a readonly resultset
   Using column position as first parameter to updateDate
   Got expected exception : 'updateDate' not allowed because the ResultSet is not an updatable ResultSet. 
@@ -592,9 +592,9 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : 'updateTimestamp' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateBlob on a readonly resultset
   Using column position as first parameter to updateBlob
-  Got expected exception : JDBC 3 method called - not yet supported
+  Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Using column name as first parameter to updateBlob
-  Got expected exception : JDBC 3 method called - not yet supported
+  Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Test updateBoolean on a readonly resultset
   Using column position as first parameter to updateBoolean
   Got expected exception : 'updateBoolean' not allowed because the ResultSet is not an updatable ResultSet. 
@@ -607,14 +607,14 @@ Positive Test20 - Test updateXXX methods as the first updatable ResultSet api on
   Got expected exception : 'updateNull' not allowed because the ResultSet is not an updatable ResultSet. 
   Test updateArray on a readonly resultset
   Using column position as first parameter to updateArray
-  Got expected exception : JDBC 3 method called - not yet supported
+  Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Using column name as first parameter to updateArray
-  Got expected exception : JDBC 3 method called - not yet supported
+  Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Test updateRef on a readonly resultset
   Using column position as first parameter to updateRef
-  Got expected exception : JDBC 3 method called - not yet supported
+  Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Using column name as first parameter to updateRef
-  Got expected exception : JDBC 3 method called - not yet supported
+  Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Positive Test21 - Test all updateXXX(excluding updateObject) methods on all the supported sql datatypes
 Next datatype to test is SMALLINT
   Testing updateShort on SQL type SMALLINT
@@ -665,9 +665,9 @@ Next datatype to test is SMALLINT
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'SMALLINT'.
   Testing updateClob on SQL type SMALLINT
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type SMALLINT
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'SMALLINT'.
@@ -685,9 +685,9 @@ Next datatype to test is SMALLINT
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'SMALLINT'.
   Testing updateBlob on SQL type SMALLINT
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type SMALLINT
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -696,14 +696,14 @@ Next datatype to test is SMALLINT
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type SMALLINT
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type SMALLINT
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is INTEGER
   Testing updateShort on SQL type INTEGER
     Using column position as first parameter to updateShort
@@ -753,9 +753,9 @@ Next datatype to test is INTEGER
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'INTEGER'.
   Testing updateClob on SQL type INTEGER
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type INTEGER
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'INTEGER'.
@@ -773,9 +773,9 @@ Next datatype to test is INTEGER
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'INTEGER'.
   Testing updateBlob on SQL type INTEGER
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type INTEGER
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -784,14 +784,14 @@ Next datatype to test is INTEGER
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type INTEGER
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type INTEGER
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is BIGINT
   Testing updateShort on SQL type BIGINT
     Using column position as first parameter to updateShort
@@ -841,9 +841,9 @@ Next datatype to test is BIGINT
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'BIGINT'.
   Testing updateClob on SQL type BIGINT
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type BIGINT
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BIGINT'.
@@ -861,9 +861,9 @@ Next datatype to test is BIGINT
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BIGINT'.
   Testing updateBlob on SQL type BIGINT
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type BIGINT
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -872,14 +872,14 @@ Next datatype to test is BIGINT
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type BIGINT
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type BIGINT
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is DECIMAL(10,5)
   Testing updateShort on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateShort
@@ -929,9 +929,9 @@ Next datatype to test is DECIMAL(10,5)
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'DECIMAL'.
   Testing updateClob on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DECIMAL'.
@@ -949,9 +949,9 @@ Next datatype to test is DECIMAL(10,5)
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DECIMAL'.
   Testing updateBlob on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -960,14 +960,14 @@ Next datatype to test is DECIMAL(10,5)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is REAL
   Testing updateShort on SQL type REAL
     Using column position as first parameter to updateShort
@@ -1015,9 +1015,9 @@ Next datatype to test is REAL
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'REAL'.
   Testing updateClob on SQL type REAL
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type REAL
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'REAL'.
@@ -1035,9 +1035,9 @@ Next datatype to test is REAL
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'REAL'.
   Testing updateBlob on SQL type REAL
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type REAL
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1046,14 +1046,14 @@ Next datatype to test is REAL
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type REAL
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type REAL
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is DOUBLE
   Testing updateShort on SQL type DOUBLE
     Using column position as first parameter to updateShort
@@ -1101,9 +1101,9 @@ Next datatype to test is DOUBLE
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'DOUBLE'.
   Testing updateClob on SQL type DOUBLE
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type DOUBLE
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DOUBLE'.
@@ -1121,9 +1121,9 @@ Next datatype to test is DOUBLE
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DOUBLE'.
   Testing updateBlob on SQL type DOUBLE
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type DOUBLE
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1132,14 +1132,14 @@ Next datatype to test is DOUBLE
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DOUBLE
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type DOUBLE
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is CHAR(60)
   Testing updateShort on SQL type CHAR(60)
     Using column position as first parameter to updateShort
@@ -1183,9 +1183,9 @@ Next datatype to test is CHAR(60)
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'CHAR'.
   Testing updateClob on SQL type CHAR(60)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type CHAR(60)
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1197,9 +1197,9 @@ Next datatype to test is CHAR(60)
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type CHAR(60)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type CHAR(60)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1208,14 +1208,14 @@ Next datatype to test is CHAR(60)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CHAR(60)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type CHAR(60)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is VARCHAR(60)
   Testing updateShort on SQL type VARCHAR(60)
     Using column position as first parameter to updateShort
@@ -1259,9 +1259,9 @@ Next datatype to test is VARCHAR(60)
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'VARCHAR'.
   Testing updateClob on SQL type VARCHAR(60)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type VARCHAR(60)
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1273,9 +1273,9 @@ Next datatype to test is VARCHAR(60)
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type VARCHAR(60)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type VARCHAR(60)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1284,14 +1284,14 @@ Next datatype to test is VARCHAR(60)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type VARCHAR(60)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type VARCHAR(60)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is LONG VARCHAR
   Testing updateShort on SQL type LONG VARCHAR
     Using column position as first parameter to updateShort
@@ -1335,9 +1335,9 @@ Next datatype to test is LONG VARCHAR
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'LONGVARCHAR'.
   Testing updateClob on SQL type LONG VARCHAR
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type LONG VARCHAR
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1349,9 +1349,9 @@ Next datatype to test is LONG VARCHAR
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type LONG VARCHAR
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type LONG VARCHAR
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -1360,14 +1360,14 @@ Next datatype to test is LONG VARCHAR
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type LONG VARCHAR
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type LONG VARCHAR
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is CHAR(2) FOR BIT DATA
   Testing updateShort on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -1427,9 +1427,9 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BINARY'.
@@ -1447,9 +1447,9 @@ Next datatype to test is CHAR(2) FOR BIT DATA
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BINARY'.
   Testing updateBlob on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BINARY'.
@@ -1460,14 +1460,14 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is VARCHAR(2) FOR BIT DATA
   Testing updateShort on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -1527,9 +1527,9 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'VARBINARY'.
@@ -1547,9 +1547,9 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'VARBINARY'.
   Testing updateBlob on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'VARBINARY'.
@@ -1560,14 +1560,14 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is LONG VARCHAR FOR BIT DATA
   Testing updateShort on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -1627,9 +1627,9 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'LONGVARBINARY'.
@@ -1647,9 +1647,9 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'LONGVARBINARY'.
   Testing updateBlob on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'LONGVARBINARY'.
@@ -1660,14 +1660,14 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is CLOB(1k)
   Testing updateShort on SQL type CLOB(1k)
     Using column position as first parameter to updateShort
@@ -1725,9 +1725,9 @@ Next datatype to test is CLOB(1k)
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'CLOB'.
   Testing updateClob on SQL type CLOB(1k)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type CLOB(1k)
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'CLOB'.
@@ -1745,9 +1745,9 @@ Next datatype to test is CLOB(1k)
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CLOB'.
   Testing updateBlob on SQL type CLOB(1k)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type CLOB(1k)
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'CLOB'.
@@ -1758,14 +1758,14 @@ Next datatype to test is CLOB(1k)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CLOB(1k)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type CLOB(1k)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is DATE
   Testing updateShort on SQL type DATE
     Using column position as first parameter to updateShort
@@ -1829,9 +1829,9 @@ Next datatype to test is DATE
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'DATE'.
   Testing updateClob on SQL type DATE
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type DATE
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -1845,9 +1845,9 @@ Next datatype to test is DATE
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type DATE
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type DATE
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'DATE'.
@@ -1858,14 +1858,14 @@ Next datatype to test is DATE
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DATE
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type DATE
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is TIME
   Testing updateShort on SQL type TIME
     Using column position as first parameter to updateShort
@@ -1929,9 +1929,9 @@ Next datatype to test is TIME
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'TIME'.
   Testing updateClob on SQL type TIME
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type TIME
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'TIME'.
@@ -1945,9 +1945,9 @@ Next datatype to test is TIME
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type TIME
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type TIME
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIME'.
@@ -1958,14 +1958,14 @@ Next datatype to test is TIME
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type TIME
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type TIME
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is TIMESTAMP
   Testing updateShort on SQL type TIMESTAMP
     Using column position as first parameter to updateShort
@@ -2029,9 +2029,9 @@ Next datatype to test is TIMESTAMP
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'TIMESTAMP'.
   Testing updateClob on SQL type TIMESTAMP
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type TIMESTAMP
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -2045,9 +2045,9 @@ Next datatype to test is TIMESTAMP
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type TIMESTAMP
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type TIMESTAMP
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIMESTAMP'.
@@ -2058,14 +2058,14 @@ Next datatype to test is TIMESTAMP
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type TIMESTAMP
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type TIMESTAMP
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is BLOB(1k)
   Testing updateShort on SQL type BLOB(1k)
     Using column position as first parameter to updateShort
@@ -2125,9 +2125,9 @@ Next datatype to test is BLOB(1k)
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type BLOB(1k)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type BLOB(1k)
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BLOB'.
@@ -2145,9 +2145,9 @@ Next datatype to test is BLOB(1k)
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BLOB'.
   Testing updateBlob on SQL type BLOB(1k)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type BLOB(1k)
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BLOB'.
@@ -2158,14 +2158,14 @@ Next datatype to test is BLOB(1k)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type BLOB(1k)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type BLOB(1k)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Positive Test22 - Test updateObject method
 Next datatype to test is SMALLINT
   updateObject with column position & Short object as parameters
@@ -3257,9 +3257,9 @@ Next datatype to test is SMALLINT
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'SMALLINT'.
   Testing updateClob on SQL type SMALLINT
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type SMALLINT
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'SMALLINT'.
@@ -3277,9 +3277,9 @@ Next datatype to test is SMALLINT
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'SMALLINT'.
   Testing updateBlob on SQL type SMALLINT
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type SMALLINT
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -3288,14 +3288,14 @@ Next datatype to test is SMALLINT
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type SMALLINT
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type SMALLINT
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is INTEGER
   Testing updateShort on SQL type INTEGER
     Using column position as first parameter to updateShort
@@ -3345,9 +3345,9 @@ Next datatype to test is INTEGER
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'INTEGER'.
   Testing updateClob on SQL type INTEGER
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type INTEGER
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'INTEGER'.
@@ -3365,9 +3365,9 @@ Next datatype to test is INTEGER
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'INTEGER'.
   Testing updateBlob on SQL type INTEGER
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type INTEGER
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -3376,14 +3376,14 @@ Next datatype to test is INTEGER
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type INTEGER
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type INTEGER
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is BIGINT
   Testing updateShort on SQL type BIGINT
     Using column position as first parameter to updateShort
@@ -3433,9 +3433,9 @@ Next datatype to test is BIGINT
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'BIGINT'.
   Testing updateClob on SQL type BIGINT
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type BIGINT
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BIGINT'.
@@ -3453,9 +3453,9 @@ Next datatype to test is BIGINT
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BIGINT'.
   Testing updateBlob on SQL type BIGINT
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type BIGINT
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -3464,14 +3464,14 @@ Next datatype to test is BIGINT
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type BIGINT
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type BIGINT
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is DECIMAL(10,5)
   Testing updateShort on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateShort
@@ -3521,9 +3521,9 @@ Next datatype to test is DECIMAL(10,5)
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'DECIMAL'.
   Testing updateClob on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DECIMAL'.
@@ -3541,9 +3541,9 @@ Next datatype to test is DECIMAL(10,5)
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DECIMAL'.
   Testing updateBlob on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -3552,14 +3552,14 @@ Next datatype to test is DECIMAL(10,5)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type DECIMAL(10,5)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is REAL
   Testing updateShort on SQL type REAL
     Using column position as first parameter to updateShort
@@ -3607,9 +3607,9 @@ Next datatype to test is REAL
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'REAL'.
   Testing updateClob on SQL type REAL
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type REAL
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'REAL'.
@@ -3627,9 +3627,9 @@ Next datatype to test is REAL
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'REAL'.
   Testing updateBlob on SQL type REAL
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type REAL
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -3638,14 +3638,14 @@ Next datatype to test is REAL
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type REAL
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type REAL
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is DOUBLE
   Testing updateShort on SQL type DOUBLE
     Using column position as first parameter to updateShort
@@ -3693,9 +3693,9 @@ Next datatype to test is DOUBLE
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'DOUBLE'.
   Testing updateClob on SQL type DOUBLE
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type DOUBLE
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'DOUBLE'.
@@ -3713,9 +3713,9 @@ Next datatype to test is DOUBLE
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'DOUBLE'.
   Testing updateBlob on SQL type DOUBLE
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type DOUBLE
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -3724,14 +3724,14 @@ Next datatype to test is DOUBLE
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DOUBLE
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type DOUBLE
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is CHAR(60)
   Testing updateShort on SQL type CHAR(60)
     Using column position as first parameter to updateShort
@@ -3775,9 +3775,9 @@ Next datatype to test is CHAR(60)
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'CHAR'.
   Testing updateClob on SQL type CHAR(60)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type CHAR(60)
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -3789,9 +3789,9 @@ Next datatype to test is CHAR(60)
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type CHAR(60)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type CHAR(60)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -3800,14 +3800,14 @@ Next datatype to test is CHAR(60)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CHAR(60)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type CHAR(60)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is VARCHAR(60)
   Testing updateShort on SQL type VARCHAR(60)
     Using column position as first parameter to updateShort
@@ -3851,9 +3851,9 @@ Next datatype to test is VARCHAR(60)
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'VARCHAR'.
   Testing updateClob on SQL type VARCHAR(60)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type VARCHAR(60)
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -3865,9 +3865,9 @@ Next datatype to test is VARCHAR(60)
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type VARCHAR(60)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type VARCHAR(60)
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -3876,14 +3876,14 @@ Next datatype to test is VARCHAR(60)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type VARCHAR(60)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type VARCHAR(60)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is LONG VARCHAR
   Testing updateShort on SQL type LONG VARCHAR
     Using column position as first parameter to updateShort
@@ -3927,9 +3927,9 @@ Next datatype to test is LONG VARCHAR
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'LONGVARCHAR'.
   Testing updateClob on SQL type LONG VARCHAR
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type LONG VARCHAR
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -3941,9 +3941,9 @@ Next datatype to test is LONG VARCHAR
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type LONG VARCHAR
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type LONG VARCHAR
     Using column position as first parameter to updateBoolean
     Using column name as first parameter to updateBoolean
@@ -3952,14 +3952,14 @@ Next datatype to test is LONG VARCHAR
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type LONG VARCHAR
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type LONG VARCHAR
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is CHAR(2) FOR BIT DATA
   Testing updateShort on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -4019,9 +4019,9 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BINARY'.
@@ -4039,9 +4039,9 @@ Next datatype to test is CHAR(2) FOR BIT DATA
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BINARY'.
   Testing updateBlob on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BINARY'.
@@ -4052,14 +4052,14 @@ Next datatype to test is CHAR(2) FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type CHAR(2) FOR BIT DATA
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is VARCHAR(2) FOR BIT DATA
   Testing updateShort on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -4119,9 +4119,9 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'VARBINARY'.
@@ -4139,9 +4139,9 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'VARBINARY'.
   Testing updateBlob on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'VARBINARY'.
@@ -4152,14 +4152,14 @@ Next datatype to test is VARCHAR(2) FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type VARCHAR(2) FOR BIT DATA
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is LONG VARCHAR FOR BIT DATA
   Testing updateShort on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateShort
@@ -4219,9 +4219,9 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'LONGVARBINARY'.
@@ -4239,9 +4239,9 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'LONGVARBINARY'.
   Testing updateBlob on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'LONGVARBINARY'.
@@ -4252,14 +4252,14 @@ Next datatype to test is LONG VARCHAR FOR BIT DATA
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type LONG VARCHAR FOR BIT DATA
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is CLOB(1k)
   Testing updateShort on SQL type CLOB(1k)
     Using column position as first parameter to updateShort
@@ -4317,9 +4317,9 @@ Next datatype to test is CLOB(1k)
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'CLOB'.
   Testing updateClob on SQL type CLOB(1k)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type CLOB(1k)
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'CLOB'.
@@ -4337,9 +4337,9 @@ Next datatype to test is CLOB(1k)
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'CLOB'.
   Testing updateBlob on SQL type CLOB(1k)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type CLOB(1k)
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'CLOB'.
@@ -4350,14 +4350,14 @@ Next datatype to test is CLOB(1k)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type CLOB(1k)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type CLOB(1k)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is DATE
   Testing updateShort on SQL type DATE
     Using column position as first parameter to updateShort
@@ -4421,9 +4421,9 @@ Next datatype to test is DATE
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'DATE'.
   Testing updateClob on SQL type DATE
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type DATE
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -4437,9 +4437,9 @@ Next datatype to test is DATE
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type DATE
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type DATE
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'DATE'.
@@ -4450,14 +4450,14 @@ Next datatype to test is DATE
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type DATE
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type DATE
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is TIME
   Testing updateShort on SQL type TIME
     Using column position as first parameter to updateShort
@@ -4521,9 +4521,9 @@ Next datatype to test is TIME
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'TIME'.
   Testing updateClob on SQL type TIME
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type TIME
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'TIME'.
@@ -4537,9 +4537,9 @@ Next datatype to test is TIME
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type TIME
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type TIME
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIME'.
@@ -4550,14 +4550,14 @@ Next datatype to test is TIME
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type TIME
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type TIME
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is TIMESTAMP
   Testing updateShort on SQL type TIMESTAMP
     Using column position as first parameter to updateShort
@@ -4621,9 +4621,9 @@ Next datatype to test is TIMESTAMP
       Got expected exception : An attempt was made to put a data value of type 'java.io.InputStream' into a data value of type 'TIMESTAMP'.
   Testing updateClob on SQL type TIMESTAMP
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type TIMESTAMP
     Using column position as first parameter to updateDate
     Using column name as first parameter to updateDate
@@ -4637,9 +4637,9 @@ Next datatype to test is TIMESTAMP
     Using column name as first parameter to updateTimestamp
   Testing updateBlob on SQL type TIMESTAMP
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type TIMESTAMP
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'TIMESTAMP'.
@@ -4650,14 +4650,14 @@ Next datatype to test is TIMESTAMP
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type TIMESTAMP
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type TIMESTAMP
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 Next datatype to test is BLOB(1k)
   Testing updateShort on SQL type BLOB(1k)
     Using column position as first parameter to updateShort
@@ -4717,9 +4717,9 @@ Next datatype to test is BLOB(1k)
     Using column name as first parameter to updateBinaryStream
   Testing updateClob on SQL type BLOB(1k)
     Using column position as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateClob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateDate on SQL type BLOB(1k)
     Using column position as first parameter to updateDate
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Date' into a data value of type 'BLOB'.
@@ -4737,9 +4737,9 @@ Next datatype to test is BLOB(1k)
       Got expected exception : An attempt was made to put a data value of type 'java.sql.Timestamp' into a data value of type 'BLOB'.
   Testing updateBlob on SQL type BLOB(1k)
     Using column position as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateBlob
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateBoolean on SQL type BLOB(1k)
     Using column position as first parameter to updateBoolean
       Got expected exception : An attempt was made to put a data value of type 'byte' into a data value of type 'BLOB'.
@@ -4750,14 +4750,14 @@ Next datatype to test is BLOB(1k)
     Using column name as first parameter to updateNull
   Testing updateArray on SQL type BLOB(1k)
     Using column position as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateArray
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
   Testing updateRef on SQL type BLOB(1k)
     Using column position as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
     Using column name as first parameter to updateRef
-      Got expected exception : JDBC 3 method called - not yet supported
+      Got expected exception : Feature not implemented: JDBC 3 method called - not yet supported.
 	 C41,C42
 	 --- ---
 	{1,1}
