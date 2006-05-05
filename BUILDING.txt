@@ -1,4 +1,4 @@
-
+ 
                      Building Derby
 ================================================================
 
@@ -473,14 +473,39 @@ to specify your environment and options:
       to point to the location of jar files from a previous release from 
       which we need to test upgrade. This property needs to be set only if 
       the source files will not be available when running tests. In this case,
-       the jars can be copied to any location with the following relative path 
+      the jars can be copied to any location with the following relative path 
       ${jar_location}/{majorversion.minorversion}. The property should be set 
       as follows:
       
       derbyTesting.jar.path=${jar_location}
       
-      If the test is run on the machine where the svn source files are available, 
-      it is not required to set this property. The jars checked into svn will be used.
+      If the test is run on the machine where the source files from svn have
+      been built, then it is not required to set this property. The jars checked
+      into svn will be used. If the tests are being run in a location where the
+      jars from the previous release are available in a different location
+      than where the source files for the upgrade tests have been built, the 
+      following property needs to be set on the command line for RunSuite or
+      RunTest where the tests are being run:
+
+      -Djvmflags=-DderbyTesting.jar.path={path_to_derby_jars}
+
+      where {path_to_derby_jars} points to a directory where the jars for the
+      previous Derby release being tested for upgrade reside in a subdirectory
+      named according to the major.minor version. For example:
+
+      If the Derby 10.1 jars for upgrade testing reside in
+      /opt/testing/derby/10.1 then the command line needed for the upgrade
+      tests to complete would include the following:
+
+      java -Djvmflags=-DderbyTesting.jar.path=/opt/testing/derby \
+           org.apache.derbyTesting.functionTests.harness.RunSuite upgrade
+
+      Please note that if you change the value of derbyTesting.jar.path
+      you will need to remove the file org/apache/derbyTesting/functionTests/tests/upgradeTests/Upgrade_10_1_10_2.properties
+      from your build output directory and run 'ant all' for the updated value 
+      of the property to be written into that generated file.
+
+      
       
 3.3   Run Derby build
 

@@ -731,37 +731,4 @@ public class UpgradeTester {
 				"derbyTesting.jar.path property in ant.properties");
 		e.printStackTrace();
 	}
-
-	// The main method is only used for testing on command-line. This class is
-	// not intended to be used for adding to the harness. For harness tests, 
-	// create individual tests for each old/new combination. 
-	// e.g: Upgrade_10_1_10_2 
-	public static void main(String[] args) {
-		
-		if(args.length != 4) {
-			System.out.println("USAGE: java UpgradeTester <old major version> <old minor version> <new major version> <new minor version>");
-			System.out.println("e.g: java UpgradeTester 10 1 10 2");
-			return;
-		}
-		
-		int oldMajorVersion = Integer.valueOf(args[2]).intValue();
-		int oldMinorVersion = Integer.valueOf(args[3]).intValue();
-		int newMajorVersion = Integer.valueOf(args[4]).intValue();
-		int newMinorVersion = Integer.valueOf(args[5]).intValue();
-		boolean allowPreReleaseUpgrade = true;
-		
-		try {
-			UpgradeTester upgradeTester = new UpgradeTester(oldMajorVersion, oldMinorVersion, newMajorVersion, newMinorVersion, allowPreReleaseUpgrade);
-			upgradeTester.runUpgradeTests();
-		} catch(MalformedURLException mue) {
-			System.out.println("MalformedURLException: " + mue.getMessage());
-			mue.printStackTrace();
-		} catch (SQLException sqle) {
-			System.out.println("SQLException:");
-			dumpSQLExceptions(sqle);
-		} catch (Exception e) {
-			System.out.println("Exception: " + e.getMessage());
-			e.printStackTrace();
-		}
-	}
 }

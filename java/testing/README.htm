@@ -1552,67 +1552,89 @@ class: </p>
  cellspacing="3">
   <col width="994"> <tbody>
     <tr>
-      <td width="994"> &lt;&gt;runwith&lt;jvm&gt;<br>
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; See above section <a
- href="#skipping">4.10</a><br>
-framework<br>
-&nbsp;&nbsp;&nbsp; specifies which framework to run with. For example:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; java
--Dframework=DerbyNetClient
-org.apache.derbyTesting.functionTests.RunTest <br>
+      <td width="994"> <ul><li>runwith&lt;jvm&gt; - See above section <a
+ href="#skipping">4.10</a><br><br>
+<li>framework - specifies which framework to run with. For example:<br>
+java -Dframework=DerbyNetClient
+org.apache.derbyTesting.functionTests.RunTest <br><br>
 lang/supersimple.sql<br>
-verbose<br>
-&nbsp;&nbsp;&nbsp; Shows more detailed output. For example:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; java -Dverbose=true
-org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql<br>
-keepfiles<br>
-&nbsp; &nbsp; Indicates to not clean up any of the files if the test
-passed.<br>
-&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; java -Dkeepfiles=true
-org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql<br>
-testSpecialProps<br>
-&nbsp;&nbsp;&nbsp; sets additional properties. Several can be set using
+<li>verbose - Shows more detailed output if set to "true". For example:<br>
+<small>java -Dverbose=true
+org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql</small><br><br>
+<li>keepfiles - Indicates to not clean up any of the files if the test
+passed if set to "true".<br><br>
+<li>testSpecialProps - sets additional properties. Several can be set using
 '^' as separator: <br>
-&nbsp;&nbsp;&nbsp; -DtestSpecialProps=&lt;prop-1&gt;=&lt;value-1&gt;^
-... ^&lt;prop-n&gt;=&lt;value-n&gt;<br>
-&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java
--DTestSpecialProps=derby.infolog.append=true
-org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql <br>
-jvmflags<br>
-&nbsp;&nbsp;&nbsp; sets specific jvm properties for the jvm used in the
+ -DtestSpecialProps=&lt;prop-1&gt;=&lt;value-1&gt;^
+... ^&lt;prop-n&gt;=&lt;value-n&gt;. For example:<br>
+<small>java -DTestSpecialProps=derby.infolog.append=true
+org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql</small>
+<br><br>
+<li>jvmflags - sets specific jvm properties for the jvm used in the
 test harness, for instance initial memory, and heap size, or properties
-      <br>
-&nbsp;&nbsp;&nbsp; normally passed on with a -D. For instance: <br>
-&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; java -Djvmflags=ms32M -mx128M
-org.apache.derbyTesting.functionTests.RunTest lang/streamingColumn.java
-      <br>
-excludeJCC<br>
-&nbsp;&nbsp;&nbsp; See above section <a href="#skipping">4.10</a><br>
-useprocess<br>
-&nbsp;&nbsp;&nbsp; (default=true) Controls
-whether RunTest runs the test in a separate VM or in a thread in
-harness VM. Also does not create&nbsp; <br>
-&nbsp;&nbsp;&nbsp;&nbsp; subdirectories for each test and thus will
+normally passed on with a -D. For instance: <br>
+<small>java -Djvmflags=ms32M -mx128M
+org.apache.derbyTesting.functionTests.RunTest lang/streamingColumn.java</small <br><br>
+<li>excludeJCC -
+&nbsp;&nbsp;&nbsp; See above section <a href="#skipping">4.10</a><br><br>
+<li>useprocess - (default=true) Controls whether RunTest runs the test in a 
+separate VM or in a thread in harness VM. Also does not create
+subdirectories for each test and thus will
 attempt to reuse databases with the same name. It is
-potentially useful for debugging<br>
-&nbsp; &nbsp;&nbsp; tests. Unit tests are not
-(yet) runnable with
-"useprocess=false". <br>
-startServer - allows for Network Server tests to start and shutdown
-Network Server from the test itself. Default is true - i.e. the <br>
-&nbsp;&nbsp;&nbsp;&nbsp; test harness will start Network Server.<br>
-noSecurityManager – disable the client JVM from installing a
-SecurityManager. See section 4.13<br>
-hostName - allows for running Network Server on a remote host. See
-section <a href="#hostName">4.14</a>.<br>
-derbyTesting.encoding - allows for running the harness with a different
-encoding. Only supported with jdk15. Example: <br>
+potentially useful for debugging tests. Unit tests are not (yet) runnable with
+"useprocess=false". <br><br>
+<li>startServer - allows for Network Server tests to start and shutdown
+Network Server from the test itself. Default is true - i.e. the
+&nbsp;&nbsp;&nbsp;&nbsp; test harness will start Network Server.<br><br>
+<li>noSecurityManager – disable the client JVM from installing a
+SecurityManager. See section 4.13<br><br>
+<li>hostName - allows for running Network Server on a remote host. See
+section <a href="#hostName">4.14</a>.<br><br>
+<li>derbyTesting.encoding - allows for running the harness with a different
+encoding. Only supported with jdk15. Example: <br><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small> java
 -DderbyTesting.encoding=UTF-16
 org.apache.derbyTesting.functionTests.harness.RunTest
-jdbcapi/resultset.java</small><br>
-generateUTF8Out - copies the test .out into UTF-8 encoding. See section
-      <a href="#4.15_Encoding_issues">4.15</a>.<br>
+jdbcapi/resultset.java</small><br><br>
+<li>generateUTF8Out - copies the test .out into UTF-8 encoding. See section
+      <a href="#4.15_Encoding_issues">4.15</a>.<br><br>
+<li>derbyTesting.jar.path -
+
+      This property is required to run upgrade tests. Set this property
+      to point to the location of jar files from a previous release from
+      which we need to test upgrade. This property needs to be set only if
+      the source files will not be available when running tests. In this case,
+      the jars can be copied to any location with the following relative path
+      ${jar_location}/{majorversion.minorversion}. The property should be set
+      as follows:<br>
+<br>
+      derbyTesting.jar.path=${jar_location}<br>
+<br>
+      If the test is run on the machine where the source files from svn have
+      been built, then it is not required to set this property. The jars checked
+      into svn will be used. If the tests are being run in a location where the
+      jars from the previous release are available in a different location
+      than where the source files for the upgrade tests have been built, the
+      following property needs to be set on the command line for RunSuite or
+      RunTest where the tests are being run:<br>
+<br>
+      -Djvmflags=-DderbyTesting.jar.path={path_to_derby_jars}<br>
+<br>
+      where {path_to_derby_jars} points to a directory where the jars for the
+      previous Derby release being tested for upgrade reside in a subdirectory
+      named according to the major.minor version. For example:<br>
+<br>
+      If the Derby 10.1 jars for upgrade testing reside in
+      /opt/testing/derby/10.1 then the command line needed for the upgrade
+      tests to complete would include the following:<br>
+<br>
+      <small>java -Djvmflags=-DderbyTesting.jar.path=/opt/testing/derby org.apache.derbyTesting.functionTests.harness.RunSuite upgrade</small><br>
+<br> 
+      Please note that if you change the value of derbyTesting.jar.path
+      you will need to remove the file <small>org/apache/derbyTesting/functionTests/tests/upgradeTests/Upgrade_10_1_10_2.properties</small>
+      from your output directory and run 'ant all' for the updated value of
+      the property to be written into that generated file.<br>
+</ul>
       </td>
     </tr>
   </tbody>

@@ -42,7 +42,7 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compilet1,copyfiles,setpropertydefault,setproperty"/>
+  <target name="FTOtestsubdir" depends="compilet1,copyfiles,checkUpgradeAppProps,updateProperty"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
@@ -77,16 +77,29 @@
         includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/upgradeTests/copyfiles.ant"/>  
     </copy>
   </target> 
-
+	
+  <target name="checkUpgradeAppProps">		
+  	<available file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_2_app.properties" property="haveUpgradeProps"/>
+  </target>
+ 
+  <target name="updateProperty" unless="haveUpgradeProps">
+  	<antcall target="setpropertydefault" />
+  	<antcall target="setproperty" />  	
+  </target>
+	
   <target name="setpropertydefault" unless="derbyTesting.jar.path">
-  	<propertyfile file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_2_app.properties">
-		<entry key="jvmflags" value="-DderbyTesting.jar.path=${src.dir}/tools/testing/derby" />
+  	<propertyfile file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_2_app.properties"
+                      comment="Need to find out the set of permissions required by upgrade test - DERBY-1135">
+		<entry key="jvmflags" value="-DderbyTesting.jar.path=${src.dir}/tools/testing/derby"/>
+		<entry key="noSecurityManager" value="true"/>
 	</propertyfile>
   </target>
 	
   <target name="setproperty" if="derbyTesting.jar.path">
-  	<propertyfile file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_2_app.properties">
+  	<propertyfile file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_2_app.properties"
+                      comment="Need to find out the set of permissions required by upgrade test - DERBY-1135">
   		<entry key="jvmflags" value="-DderbyTesting.jar.path=${derbyTesting.jar.path}" />
+		<entry key="noSecurityManager" value="true"/>
   	</propertyfile>
   </target> 	
 
