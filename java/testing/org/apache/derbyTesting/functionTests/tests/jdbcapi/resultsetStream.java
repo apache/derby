@@ -68,14 +68,14 @@ public class resultsetStream {
 			stmt.execute("create table t2 (len int, data LONG VARCHAR FOR BIT DATA)");
 			PreparedStatement ppw = con.prepareStatement(
 				"insert into t2 (len, data) values (?, ?)");
-			File file = new File("extin/littleclob.txt");
+			File file = new File("extin/littleclob.utf");
 			int fileSize = (int) file.length();
 			BufferedInputStream fileData = new BufferedInputStream(new FileInputStream(file));
 			ppw.setInt(1, fileSize);
 			ppw.setBinaryStream(2, fileData, fileSize);
 			ppw.executeUpdate();
 
-			file = new File("extin/short.txt");
+			file = new File("extin/short.utf");
 			fileSize = (int) file.length();
 			fileData = new BufferedInputStream(new FileInputStream(file));
 			ppw.setInt(1, fileSize);
