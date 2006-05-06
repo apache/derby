@@ -753,7 +753,16 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 				Vector v = new Vector();
 				for (int i = 0; i < cp.length; i++)
 				{
-					ZipInfoProperties zip = checkForInfo(cp[i]);
+					ZipInfoProperties zip = null;
+					try {
+						zip = checkForInfo(cp[i]);
+					}
+					catch (SecurityException se)
+					{
+						zip = new ZipInfoProperties(null);
+						zip.setLocation(
+							Main.getTextMessage ("SIF03.C", se.getMessage()));
+					}
 					if (zip != null)
 					{
 						v.addElement(zip);
@@ -773,7 +782,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
         {
             ZipInfoProperties zip[] = new ZipInfoProperties[1];
             zip[0] = new ZipInfoProperties(null);
-            zip[0].setLocation (Main.getTextMessage ("SIF03.C"));
+            zip[0].setLocation(
+					Main.getTextMessage ("SIF03.C", se.getMessage()));
             return zip;
         }
     }
