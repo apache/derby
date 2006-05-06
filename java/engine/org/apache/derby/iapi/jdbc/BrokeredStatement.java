@@ -540,12 +540,53 @@ public class BrokeredStatement implements EngineStatement
 		return control;
 	}
 
-    public boolean isClosed()
-        throws SQLException {
-        // NOTE 1: Depending on implementation, this method may have to be
-        //  duplicated in the 3 *Statement40 classes.
-        // NOTE 2: This is the only method using the Util class. Remove
-        //  import when method is implemented.
+    /**
+     * Returns false unless <code>iface</code> is implemented 
+     * 
+     * @param  iface                  a Class defining an interface.
+     * @return true                   if this implements the interface or 
+     *                                directly or indirectly wraps an object 
+     *                                that does.
+     * @throws java.sql.SQLException  if an error occurs while determining 
+     *                                whether this is a wrapper for an object 
+     *                                with the given interface.
+     */
+    public boolean isWrapperFor(Class iface) throws SQLException {
+        checkIfClosed();
+        return iface.isInstance(this);
+    }
+
+    /**
+     * Checks if the statement is closed. Not implemented for this
+     * class since <code>isClosed()</code> is a new method in JDBC
+     * 4.0. The JDBC 4.0 sub-classes should override this method.
+     *
+     * @return <code>true</code> if the statement is closed,
+     * <code>false</code> otherwise
+     * @exception SQLException not-implemented exception
+     */
+    protected boolean isClosed() throws SQLException {
+        // Not implemented since we cannot forward the call to a JDBC
+        // 4.0 method from this class. This dummy implementation is
+        // provided here so that checkIfClosed() can be implemented
+        // once in this class instead of once in each of the
+        // Brokered*Statement40 classes.
         throw Util.notImplemented();
+    }
+
+    /**
+     * Checks if the statement is closed and throws an exception if it
+     * is. This method relies on the <code>isClosed()</code> method
+     * and therefore only works with JDBC 4.0.
+     *
+     * @exception SQLException if the statement is closed
+     */
+    protected final void checkIfClosed()
+        throws SQLException
+    {
+        if (isClosed()) {
+            throw Util.generateCsSQLException(SQLState.ALREADY_CLOSED,
+                                              "Statement");
+        }
     }
 }

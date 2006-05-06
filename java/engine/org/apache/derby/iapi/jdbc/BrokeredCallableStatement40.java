@@ -176,18 +176,14 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
     }
     
     /**
-     * Returns false unless <code>interfaces</code> is implemented 
-     * 
-     * @param  interfaces             a Class defining an interface.
-     * @return true                   if this implements the interface or 
-     *                                directly or indirectly wraps an object 
-     *                                that does.
-     * @throws java.sql.SQLException  if an error occurs while determining 
-     *                                whether this is a wrapper for an object 
-     *                                with the given interface.
+     * Checks if the statement is closed.
+     *
+     * @return <code>true</code> if the statement is closed,
+     * <code>false</code> otherwise
+     * @exception SQLException if an error occurs
      */
-    public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
-        return interfaces.isInstance(this);
+    public final boolean isClosed() throws SQLException {
+        return getCallableStatement().isClosed();
     }
     
     /**
@@ -200,6 +196,7 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
      */
     public <T> T unwrap(java.lang.Class<T> interfaces) 
                             throws SQLException{
+        checkIfClosed();
         //Derby does not implement non-standard methods on 
         //JDBC objects
         try {

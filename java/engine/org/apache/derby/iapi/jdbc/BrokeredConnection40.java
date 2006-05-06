@@ -118,8 +118,19 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
         return new BrokeredCallableStatement40(statementControl, getJDBCLevel(), sql);
     }
     
+    /**
+     * Returns the type map for this connection.
+     *
+     * @return type map for this connection
+     * @exception SQLException if a database access error occurs
+     */
     public java.util.Map<String,Class<?>> getTypeMap() throws SQLException {
-        throw Util.notImplemented();
+        try {
+            return getRealConnection().getTypeMap();
+        } catch (SQLException se) {
+            notifyException(se);
+            throw se;
+        }
     }
     
     int getJDBCLevel() { return 4;}
@@ -136,6 +147,7 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      *                                with the given interface.
      */
     public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        checkIfClosed();
         return interfaces.isInstance(this);
     }
     
@@ -149,6 +161,7 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      */
     public <T> T unwrap(java.lang.Class<T> interfaces) 
                             throws SQLException{
+        checkIfClosed();
         //Derby does not implement non-standard methods on 
         //JDBC objects
         try {

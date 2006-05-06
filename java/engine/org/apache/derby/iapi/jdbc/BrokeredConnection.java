@@ -508,6 +508,18 @@ public class BrokeredConnection implements EngineConnection
     }
             
     /**
+     * Checks if the connection is closed and throws an exception if
+     * it is.
+     *
+     * @exception SQLException if the connection is closed
+     */
+    protected final void checkIfClosed() throws SQLException {
+        if (isClosed()) {
+            throw Util.noCurrentConnection();
+        }
+    }
+
+    /**
      * Get the string representation for this connection.  Return
      * the class name/hash code and various debug information.
      * 
