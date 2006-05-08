@@ -21,12 +21,19 @@
 package org.apache.derby.impl.drda;
 
 import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import java.sql.SQLException;
 import java.sql.DataTruncation;
 import java.math.BigDecimal;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import java.util.Arrays;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+
+import java.io.IOException;
 
 /**
 	The DDMWriter is used to write DRDA protocol.   The DRDA Protocol is
@@ -662,67 +669,76 @@ class DDMWriter
 	}
 
 
-	// TODO: Rewrite writeScalarStream to avoid passing a length.
-	// The length is never written and not required by the DRDA spec.
-	// Also looks like on IOException we just pad out the stream instead
-	// of actually sending an exception.  Similar code is in client, so 
-	// should be fixed in both places.
-	protected int  writeScalarStream (boolean chainedWithSameCorrelator,
+    
+    protected void writeScalarStream (boolean chainedWithSameCorrelator,
 									  int codePoint,
-									  int length,
-									  java.io.InputStream in,
+				      EXTDTAInputStream in,
 									  boolean writeNullByte) 
 		throws DRDAProtocolException
 	{
 
+	    
+
 		// Stream equivalent of "beginDss"...
-		int leftToRead = length;
-		int bytesToRead = prepScalarStream (chainedWithSameCorrelator,
+	    int spareDssLength = prepScalarStream( chainedWithSameCorrelator,
 											codePoint,
-											writeNullByte,
-											leftToRead);
-
-		if (length == 0)
-			return 0;
-
+											writeNullByte);
+	    
 		// write the data
 		int bytesRead = 0;
 		int totalBytesRead = 0;
-		do {
-			do {
-				try {
-					bytesRead = in.read (bytes, offset, bytesToRead);
-					totalBytesRead += bytesRead;
-				}
-				catch (java.io.IOException e) {
-					padScalarStreamForError (leftToRead, bytesToRead);
-					return totalBytesRead;
-				}
-				if (bytesRead == -1) {
-					padScalarStreamForError (leftToRead, bytesToRead);
-					return totalBytesRead;
-				}
-				else {
-					bytesToRead -= bytesRead;
-					offset += bytesRead;
-					leftToRead -= bytesRead;
-				}
-			} while (bytesToRead > 0);
 
-			bytesToRead = flushScalarStreamSegment (leftToRead, bytesToRead);
-		} while (leftToRead > 0);
-		// check to make sure that the specified length wasn't too small
-		try {
-			if (in.read() != -1) {
-				totalBytesRead += 1;
+				try {
+				    
+		OutputStream out = 
+		    placeLayerBStreamingBuffer( agent.getOutputStream() );
+		
+		boolean isLastSegment = false;
+		
+		while( !isLastSegment ){
+		    
+		    int spareBufferLength = bytes.length - offset;
+		    
+		    if( SanityManager.DEBUG ){
+		
+			if( PropertyUtil.getSystemProperty("derby.debug.suicideOfLayerBStreaming") != null )
+			    throw new IOException();
+				}
+		    
+		    bytesRead = in.read(bytes,
+					offset,
+					Math.min(spareDssLength,
+						 spareBufferLength));
+		    
+					totalBytesRead += bytesRead;
+					offset += bytesRead;
+		    spareDssLength -= bytesRead;
+		    spareBufferLength -= bytesRead;
+
+		    isLastSegment = peekStream(in) < 0;
+		    
+		    if(isLastSegment || 
+		       spareDssLength == 0){
+			
+			flushScalarStreamSegment (isLastSegment, 
+						  out);
+			
+			if( ! isLastSegment )
+			    spareDssLength = DssConstants.MAX_DSS_LENGTH - 2;
+
 			}
+		    
 		}
-		catch (java.io.IOException e) {
-			// Encountered error in stream length verification for 
-			// InputStream, parameter #" + parameterIndex + ".  
-			// Don't think we need to error for this condition
+		
+		out.flush();
+		
+	    }catch(IOException e){
+		agent.markCommunicationsFailure ("DDMWriter.writeScalarStream()",
+						 "",
+						 e.getMessage(),
+						 "*");
 		}
-		return totalBytesRead;
+				
 	}
 	
 	/**
@@ -749,24 +765,31 @@ class DDMWriter
 	}
 
 
-  // prepScalarStream does the following prep for writing stream data:
-  // 1.  Flushes an existing DSS segment, if necessary
-  // 2.  Determines if extended length bytes are needed
-  // 3.  Creates a new DSS/DDM header and a null byte indicator, if applicable
-  protected int prepScalarStream  (boolean chainedWithSameCorrelator,
+    /**
+     * prepScalarStream does the following prep for writing stream data:
+     * 1.  Flushes an existing DSS segment, if necessary
+     * 2.  Determines if extended length bytes are needed
+     * 3.  Creates a new DSS/DDM header and a null byte indicator, if applicable
+     *
+     * If value of length was less than 0, this method processes streaming as Layer B Streaming.
+     * cf. page 315 of specification of DRDA, Version 3, Volume 3 
+     *
+     */
+  private int prepScalarStream( boolean chainedWithSameCorrelator,
                                    int codePoint,
-                                   boolean writeNullByte,
-                                   int leftToRead) throws DRDAProtocolException
+                                   boolean writeNullByte) throws DRDAProtocolException
   {
-    int extendedLengthByteCount;
 
-    int nullIndicatorSize = 0;
-    if (writeNullByte) 
-		nullIndicatorSize = 1;
-	extendedLengthByteCount = calculateExtendedLengthByteCount (leftToRead + 4 + nullIndicatorSize);
+      ensureLength( DEFAULT_BUFFER_SIZE - offset );
+      
+      final int nullIndicatorSize = writeNullByte ? 1:0;
 
-    // flush the existing DSS segment if this stream will not fit in the send buffer
-    if (10 + extendedLengthByteCount + nullIndicatorSize + leftToRead + offset > DssConstants.MAX_DSS_LENGTH) {
+    
+      // flush the existing DSS segment ,
+      // if this stream will not fit in the send buffer or 
+      // length of this stream is unknown.
+      // Here, 10 stands for sum of headers of layer A and B.
+
       try {
 	    // The existing DSS segment was finalized by endDss; all
 	    // we have to do is send it across the wire.
@@ -777,39 +800,22 @@ class DDMWriter
                                               "OutputStream.flush()",
                                               e.getMessage(),"*");
       }
-    }
 
     // buildStreamDss should not call ensure length.
 	beginDss(chainedWithSameCorrelator, DssConstants.GDSFMT_OBJDSS);
 
-    if (extendedLengthByteCount > 0) {
-      // method should never ensure length
-      writeLengthCodePoint (0x8004 + extendedLengthByteCount, codePoint);
+      writeLengthCodePoint(0x8004,codePoint);
 
-      if (writeNullByte)
-        writeExtendedLengthBytes (extendedLengthByteCount, leftToRead + 1);
-      else
-        writeExtendedLengthBytes (extendedLengthByteCount, leftToRead);
-    }
-    else {
-      if (writeNullByte)
-        writeLengthCodePoint (leftToRead + 4 + 1, codePoint);
-      else
-        writeLengthCodePoint (leftToRead + 4, codePoint);
-    }
 
     // write the null byte, if necessary
     if (writeNullByte)
       writeByte(0x0);
 
-    int bytesToRead;
+      //Here, 6 stands for header of layer A and 
+      //4 stands for header of layer B.
+      return DssConstants.MAX_DSS_LENGTH - 6 - 4 - nullIndicatorSize;
 
-    if (writeNullByte)
-      bytesToRead = Math.min (leftToRead, DssConstants.MAX_DSS_LENGTH - 6 - 4 - 1 - extendedLengthByteCount);
-    else
-      bytesToRead = Math.min (leftToRead, DssConstants.MAX_DSS_LENGTH - 6 - 4 - extendedLengthByteCount);
 
-    return bytesToRead;
   }
 
 
@@ -823,67 +829,42 @@ class DDMWriter
 
 	// Writes out a scalar stream DSS segment, along with DSS continuation
 	// headers if necessary.
-	protected int flushScalarStreamSegment (int leftToRead,
-											int bytesToRead)
+	private void flushScalarStreamSegment ( boolean lastSegment,
+					        OutputStream out)
 		throws DRDAProtocolException
 	{
-		int newBytesToRead = bytesToRead;
 
 		// either at end of data, end of dss segment, or both.
-		if (leftToRead != 0) {
-		// 32k segment filled and not at end of data.
+	    if (! lastSegment) {
 
-			if ((Math.min (2 + leftToRead, 32767)) > (bytes.length - offset)) {
+		// 32k segment filled and not at end of data.
 				try {
 				// Mark current DSS as continued, set its chaining state,
 				// then send the data across.
 					markDssAsContinued(true); 	// true => for lobs
-					sendBytes (agent.getOutputStream());
-				}
-				catch (java.io.IOException ioe) {
+					sendBytes (out,
+						   false);
+			    
+			}catch (java.io.IOException ioe) {
 					agent.markCommunicationsFailure ("DDMWriter.flushScalarStreamSegment()",
                                                "",
                                                ioe.getMessage(),
                                                "*");
 				}
-			}
-			else {
-			// DSS is full, but we still have space in the buffer.  So
-			// end the DSS, then start the next DSS right after it.
-				endDss(false);		// false => don't finalize length.
-			}
+
 
 			// Prepare a DSS continuation header for next DSS.
 			dssLengthLocation = offset;
 			bytes[offset++] = (byte) (0xff);
 			bytes[offset++] = (byte) (0xff);
-			newBytesToRead = Math.min (leftToRead,32765);
 			isContinuationDss = true;
-  		}
-		else {
+	    }else{
 		// we're done writing the data, so end the DSS.
 			endDss();
-		}
-
-		return newBytesToRead;
 
 	}
 
-  // the offset must not be updated when an error is encountered
-  // note valid data may be overwritten
-  protected void padScalarStreamForError (int leftToRead, int bytesToRead) throws DRDAProtocolException
-  {
-    do {
-      do {
-        bytes[offset++] = (byte)(0x0); // use 0x0 as the padding byte
-        bytesToRead--;
-        leftToRead--;
-      } while (bytesToRead > 0);
-
-      bytesToRead = flushScalarStreamSegment (leftToRead, bytesToRead);
-    } while(leftToRead > 0);
   }
-
 
 
 	private void writeExtendedLengthBytes (int extendedLengthByteCount, long length)
@@ -1787,14 +1768,25 @@ class DDMWriter
 
 	}
 
+    
+    private void sendBytes (java.io.OutputStream socketOutputStream) 
+	throws java.io.IOException{
+	
+	sendBytes(socketOutputStream,
+		  true);
+	
+    }
+    
 
-
-  private void sendBytes (java.io.OutputStream socketOutputStream) throws java.io.IOException
+  private void sendBytes (java.io.OutputStream socketOutputStream,
+			  boolean flashStream ) 
+      throws java.io.IOException
   {
 	resetChainState();
     try {
       socketOutputStream.write (bytes, 0, offset);
-      socketOutputStream.flush();
+      if(flashStream)
+	  socketOutputStream.flush();
     }
     finally {
 		if ((dssTrace != null) && dssTrace.isComBufferTraceOn()) {
@@ -1965,5 +1957,36 @@ class DDMWriter
 
 	}
 
+	
+    private static int peekStream(InputStream in) throws IOException{
+	    
+	in.mark(1);
+
+	try{
+	    return in.read();
+	    
+	}finally{
+	    in.reset();
+	    
+	}
+    }
+
+    
+    private static int getLayerBStreamingBufferSize(){
+	return PropertyUtil.getSystemInt( Property.DRDA_PROP_STREAMOUTBUFFERSIZE , 0 );
+    }
+    
+    
+    private static OutputStream placeLayerBStreamingBuffer(OutputStream original){
+	
+	int size = getLayerBStreamingBufferSize();
+	
+	if(size < 1)
+	    return original;
+	else
+	    return new BufferedOutputStream( original, size );
+
+    }
+    
 }
 

@@ -22,8 +22,13 @@ package org.apache.derby.impl.drda;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.BufferedInputStream;
 import java.sql.ResultSet;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.SQLException;
+
+import java.io.UnsupportedEncodingException;
 
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -42,28 +47,35 @@ import org.apache.derby.impl.jdbc.Util;
  */
 class EXTDTAInputStream extends InputStream {
 
-	long dataLength = 0; // length of the stream;
+    private InputStream binaryInputStream = null;
 
-	InputStream binaryInputStream = null;
-
-	int columnNumber;
-
-	ResultSet dataResultSet = null;
+    private boolean isEmptyStream;
 	
+    private ResultSet dataResultSet = null;
+    private Blob blob = null;
+    private Clob clob = null;
 	
 	/**
-	 * @param dataLength
 	 * @param binaryInputStream
 	 */
-	private EXTDTAInputStream( int dataLength, InputStream binaryInputStream) {
+	private EXTDTAInputStream(ResultSet rs,
+				  int columnNumber,
+				  int ndrdaType) 
+	    throws SQLException, IOException
+    {
+	
+	    this.dataResultSet = rs;
+	    this.isEmptyStream = ! initInputStream(rs,
+						   columnNumber,
+						   ndrdaType);
 		
-		this.dataLength = dataLength;
-		this.binaryInputStream = binaryInputStream;
 	}
 
+    
+    
 	/**
 	 * Retrieve stream from the ResultSet and column specified.  Create an
-	 * input stream and length for the large object being retrieved. Do not hold
+	 * input stream for the large object being retrieved. Do not hold
 	 * locks until end of transaction. DERBY-255.
 	 * 
 	 * 
@@ -87,52 +99,17 @@ class EXTDTAInputStream extends InputStream {
 	 */
 	public static EXTDTAInputStream getEXTDTAStream(ResultSet rs, int column, int drdaType) 
 			throws SQLException {
-		
-		EXTDTAInputStream extdtaStream = null;
-		int length = 0;
-		byte[] bytes = null;
-		
+ 	    try{
 		int ndrdaType = drdaType | 1; //nullable drdaType
-		// BLOBS
-		if (ndrdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) 
-		{
-			//TODO: Change to just use rs.getBinaryStream() by 
-			// eliminating the need for a length parameter in
-			//DDMWriter.writeScalarStream and therefore eliminating the need for dataLength in this class
-			bytes = rs.getBytes(column);
 			
-		}
-		// CLOBS
-		else if (ndrdaType ==  DRDAConstants.DRDA_TYPE_NLOBCMIXED)
-		{	
-			//TODO: Change to use getCharacterStream and change the read method
-			// to stream the data after length is no longer needed in DDMWRiter.writeScalarStream
-			String s  = rs.getString(column);
-			try {
-				if (s != null)
-					bytes = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
-			}
-			catch (java.io.UnsupportedEncodingException e) {
-				throw new SQLException (e.getMessage());
-			}
-		}
-		else
-		{
-			if (SanityManager.DEBUG)
-			{
-			SanityManager.THROWASSERT("DRDAType: " + drdaType +
-						" not valid EXTDTA object type");
-			}
+		return new EXTDTAInputStream(rs,
+					     column,
+					     ndrdaType);
+		
+ 	    }catch(IOException e){
+ 		throw new SQLException(e.getMessage());
 		}
 		
-		if (bytes != null)
-		{
-			length = bytes.length;
-			InputStream is = new ByteArrayInputStream(bytes);
-			extdtaStream =  new EXTDTAInputStream(length, is);
-		}
-		
-		return extdtaStream;
 	}
 
 	
@@ -170,18 +147,6 @@ class EXTDTAInputStream extends InputStream {
 	}
 	
 	
-	
-	/**
-	 * Return the length of the binary stream which was calculated when
-	 * EXTDTAObject was created.
-	 * 
-	 * @return the length of the stream once converted to an InputStream
-	 */
-	public long length() throws SQLException {
-		return dataLength;
-		
-	}
-
 	/**
 	 * 
 	 * 
@@ -206,8 +171,19 @@ class EXTDTAInputStream extends InputStream {
 	 * @see java.io.InputStream#close()
 	 */
 	public void close() throws IOException {
+	    
+	    try{
 		if (binaryInputStream != null)
 			binaryInputStream.close();	
+		binaryInputStream = null;
+
+	    }finally{
+		
+		blob = null;
+		clob = null;
+		dataResultSet = null;
+	    }
+	    
 	}
 
 	/**
@@ -280,6 +256,142 @@ class EXTDTAInputStream extends InputStream {
 	 */
 	public long skip(long arg0) throws IOException {
 		return binaryInputStream.skip(arg0);
+	}
+
+
+    protected boolean isEmptyStream(){
+	return isEmptyStream;
+    }
+    
+    
+    /**
+     * This method takes information of ResultSet and 
+     * initialize binaryInputStream variable of this object with not empty stream and return true.
+     * If the stream was empty, this method remain binaryInputStream null and return false.
+     *
+     * @param rs        ResultSet object to get stream from.
+     * @param column    index number of column in ResultSet to get stream.
+     * @param ndrdaType describe type column to get stream.
+     *
+     * @return          true if the stream was not empty, false if the stream was empty.
+     *
+     */
+    private boolean initInputStream(ResultSet rs,
+				    int column,
+				    int ndrdaType)
+	throws SQLException,
+	       IOException
+    {
+
+	InputStream is = null;
+	try{
+	    // BLOBS
+	    if (ndrdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) 
+		{
+		    blob = rs.getBlob(column);
+		    if(blob == null){
+			return false;
+		    }
+		    
+		    is = blob.getBinaryStream();
+		    
+		}
+	    // CLOBS
+	    else if (ndrdaType ==  DRDAConstants.DRDA_TYPE_NLOBCMIXED)
+		{	
+		    try {
+			clob = rs.getClob(column);
+			
+			if(clob == null){
+			    return false;
+			}
+
+			is = new ReEncodedInputStream(clob.getCharacterStream());
+			
+		    }catch (java.io.UnsupportedEncodingException e) {
+			throw new SQLException (e.getMessage());
+			
+		    }catch (IOException e){
+			throw new SQLException (e.getMessage());
+			
+		    }
+		    
+		}
+	    else
+		{
+		    if (SanityManager.DEBUG)
+			{
+			    SanityManager.THROWASSERT("NDRDAType: " + ndrdaType +
+						      " not valid EXTDTA object type");
+			}
+		}
+	    
+	    boolean exist = is.read() > -1;
+	    
+	    is.close();
+	    is = null;
+	    
+	    if(exist){
+		openInputStreamAgain();
+	    }
+
+	    return exist;
+	    
+	}catch(IllegalStateException e){
+	    throw Util.javaException(e);
+
+	}finally{
+	    if(is != null)
+		is.close();
+	    
+	}
+	
+    }
+    
+    
+    /**
+     *
+     * This method is called from initInputStream and 
+     * opens inputstream again to stream actually.
+     *
+     */
+    private void openInputStreamAgain() throws IllegalStateException,SQLException {
+	
+	if(this.binaryInputStream != null){
+	    return;
+	}
+		
+	InputStream is = null;
+	try{
+	    
+	    if(SanityManager.DEBUG){
+		SanityManager.ASSERT( ( blob != null && clob == null ) ||
+				      ( clob != null && blob == null ),
+				      "One of blob or clob must be non-null.");
+	    }
+
+	    if(blob != null){
+		is = blob.getBinaryStream();
+		
+	    }else if(clob != null){
+		is = new ReEncodedInputStream(clob.getCharacterStream());
+	    }
+	    
+	}catch(IOException e){
+	    throw new IllegalStateException(e.getMessage());
+	}
+	
+	if(! is.markSupported() ){
+	    is = new BufferedInputStream(is);
+	}
+
+	this.binaryInputStream = is;
+
+    }
+    
+    
+    protected void finalize() throws Throwable{
+	close();
 	}
 
 

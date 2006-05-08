@@ -608,21 +608,7 @@ public class dataSourcePermissions_net extends org.apache.derbyTesting.functionT
 }
 
 
-class SwitchablePrintStream extends PrintStream {
-    
-    public SwitchablePrintStream( OutputStream firstStream ){
-	super( firstStream );
-    }
-    
-    
-    public void switchOutput( OutputStream newStream ) throws IOException{
-	
-	out.flush();
-	out = newStream ;
-	
-    }
-    
-}
+
 
 
 

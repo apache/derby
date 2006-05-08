@@ -1,0 +1,3 @@
+java.sql.SQLException: Insufficient data while reading from the network - expected a minimum of 6 bytes and received only -1 bytes.  The connection has been terminated.
+Caused by: org.apache.derby.client.am.DisconnectException: Insufficient data while reading from the network - expected a minimum of 6 bytes and received only -1 bytes.  The connection has been terminated.
+	... 2 more

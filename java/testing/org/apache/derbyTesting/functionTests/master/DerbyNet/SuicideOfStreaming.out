@@ -1,0 +1,1 @@
+com.ibm.db2.jcc.c.DisconnectException: A communication error has been detected. Communication protocol being used: Reply.fill(). Communication API being used: InputStream.read(). Location where the error was detected: insufficient data. Communication function detecting the error: *. Protocol specific error codes(s) TCP/IP SOCKETS 

@@ -805,6 +805,14 @@ public interface Property {
 	 */
 	public final static String DRDA_PROP_KEEPALIVE = "derby.drda.keepAlive";
 	
+
+    /**
+     * derby.drda.streamOutBufferSize
+     * size of buffer used when stream out for client.
+     *
+     */
+    public final static String DRDA_PROP_STREAMOUTBUFFERSIZE = "derby.drda.streamOutBufferSize";
+
 	/*
 	** Internal properties, mainly used by Monitor.
 	*/

@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
@@ -6958,12 +6959,21 @@ class DRDAConnThread extends Thread {
 					break;
 				case DRDAConstants.DRDA_TYPE_NLOBBYTES:
 				case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
+				    
 					// do not send EXTDTA for lob of length 0, beetle 5967
-					valLength = ((EXTDTAInputStream) val).length();
-					if (valLength > 0)
+				    if( ! ((EXTDTAInputStream) val).isEmptyStream() ){
 						stmt.addExtDtaObject(val, index);
-					writer.writeExtendedLength (valLength);
+				    
+					//indicate externalized and size is unknown.
+					writer.writeExtendedLength(0x8000);
+					
+				    }else{
+					writer.writeExtendedLength(0);
+					
+				    }
+				    
 					break;
+				    
 				case  DRDAConstants.DRDA_TYPE_NFIXBYTE:
 					writer.writeBytes((byte[]) val);
 					break;
@@ -7539,29 +7549,17 @@ class DRDAConnThread extends Thread {
 		Object o  = extdtaValues.get(i);
         if (o instanceof EXTDTAInputStream) {
 			EXTDTAInputStream stream = (EXTDTAInputStream) o;
-			long lobLength = stream.length();
+			try{
 			writer.writeScalarStream (chainedWithSameCorrelator,
 									  CodePoint.EXTDTA,
-									  (int) Math.min(lobLength,
-													 Integer.MAX_VALUE),
 									  stream,
 									  writeNullByte);
 			
-			try {
+			}finally{
 				// close the stream when done
-				if (stream != null)
-					stream.close();
-			} catch (IOException e) {
-				Util.javaException(e);
-			}
+			    closeStream(stream);
         }
-		else if (o instanceof  byte[]) {
-			byte[] b = (byte []) o;
-			writer.writeScalarStream (chainedWithSameCorrelator,
-									  CodePoint.EXTDTA,
-									  (int) b.length,
-									  new ByteArrayInputStream(b),
-									  writeNullByte);
+			
 		}
 	}
 	// reset extdtaValues after sending
@@ -7659,4 +7657,33 @@ class DRDAConnThread extends Thread {
 
 	}
 
+    
+    private static int peekStream(EXTDTAInputStream is) throws IOException{
+	
+	is.mark(1);
+
+	try{
+	    return is.read();
+	    
+	}finally{
+	    is.reset();
+	}
+	
+    }
+    
+    
+    private static void closeStream(InputStream stream){
+	
+	try{
+	    if (stream != null)
+		stream.close();
+	    
+	} catch (IOException e) {
+	    Util.javaException(e);
+	    
+	}
+	
+    }
+    
+    
 }
