@@ -3483,7 +3483,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         
         if (isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
+                new ClientMessageId(SQLState.NO_CURRENT_ROW));
         }
 
         //if not on a valid row, then do not accept updateXXX calls
@@ -3609,7 +3609,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         if (isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
+                new ClientMessageId(SQLState.NO_CURRENT_ROW));
         }
 
         if (preparedStatementForDelete_ == null) {
@@ -3655,7 +3655,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 	checkForUpdatableResultSet("refreshRow");
         if (isBeforeFirstX() || isAfterLastX() || isOnInsertRow_) {
             throw new SqlException(agent_.logWriter_,
-                new ClientMessageId(SQLState.CURSOR_CANNOT_INVOKE_ON_INSROW_OR_INVALIDROW_OR_READONLY));
+                new ClientMessageId(SQLState.NO_CURRENT_ROW));
         }
 	
         // this method does nothing if ResultSet is TYPE_SCROLL_INSENSITIVE

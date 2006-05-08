@@ -2899,11 +2899,11 @@ SQL State: 23502
 Got expected exception: Column 'C41'  cannot accept a NULL value.
 Negative Test 39 - run updateRow and deleterow when positioned at insertRow
 Negative Test 39.a - run updateRow on insertRow
-SQL State: XJ086
-Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State: 24000
+Got expected exception: Invalid cursor state - no current row.
 Negative Test 39.a - run deleteRow on insertRow
-SQL State: XJ086
-Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
+SQL State: 24000
+Got expected exception: Invalid cursor state - no current row.
 Negative test 40 - Try to insert row from currentRow
 SQL State: XJ086
 Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
