@@ -65,9 +65,9 @@ public class NetPreparedStatement extends NetStatement
      * this is used to raise the Statement Events when the prepared
      * statement is closed.
      *
-     * @param agent The instance of NetAgent associated with this
+     * @param netAgent The instance of NetAgent associated with this
      *              CallableStatement object.
-     * @param netNonnection The connection object associated with this
+     * @param netConnection The connection object associated with this
      *                      PreparedStatement Object.
      * @param sql         A String object that is the SQL statement
      *                    to be sent to the database.
@@ -84,7 +84,6 @@ public class NetPreparedStatement extends NetStatement
      *            it is used to pass the Statement closed and the Statement
      *            error occurred events that occur back to the
      *            ClientPooledConnection.
-     * @returns a PreparedStatement object
      * @throws SqlException
      *
      */
@@ -109,13 +108,13 @@ public class NetPreparedStatement extends NetStatement
      * its parameters this is used to raise the Statement Events when the 
      * prepared statement is closed.
      *
-     * @param agent The instance of NetAgent associated with this
+     * @param netAgent The instance of NetAgent associated with this
      *              CallableStatement object.
-     * @param netNonnection The connection object associated with this 
+     * @param netConnection The connection object associated with this 
      *                      PreparedStatement Object. 
      * @param sql           A String object that is the SQL statement to be 
      *                      sent to the database.
-     * @param section Section
+     * @param section
      * @param cpc The ClientPooledConnection wraps the underlying physical 
      *            connection associated with this prepared statement 
      *            it is used to pass the Statement closed and the Statement 

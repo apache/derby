@@ -78,7 +78,7 @@ public interface ClientJDBCObjectFactory {
             ClientPooledConnection cpc) throws SqlException;
     
     /**
-     * Returns an instance of PreparedStatement
+     * Returns an instance of LogicalConnection.
      * This method returns an instance of LogicalConnection
      * (or LogicalConnection40) which implements java.sql.Connection.
      */
@@ -221,7 +221,6 @@ public interface ClientJDBCObjectFactory {
      *                     NetConnection constructor was called. This is used
      *                     to pass StatementEvents back to the pooledConnection
      *                     object
-     * @return                        
      * @throws             SqlException
      */
     org.apache.derby.client.am.Connection newNetConnection(

@@ -55,9 +55,6 @@ class EXTDTAInputStream extends InputStream {
     private Blob blob = null;
     private Clob clob = null;
 	
-	/**
-	 * @param binaryInputStream
-	 */
 	private EXTDTAInputStream(ResultSet rs,
 				  int columnNumber,
 				  int ndrdaType) 

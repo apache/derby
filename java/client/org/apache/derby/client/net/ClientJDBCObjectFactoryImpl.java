@@ -118,7 +118,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *            It is used to pass the Statement closed and the Statement
      *            error occurred events that occur back to the
      *            ClientPooledConnection.
-     * @returns a PreparedStatement object
+     * @return a PreparedStatement object
      * @throws SqlException
      */
     public PreparedStatement newPreparedStatement(Agent agent,
@@ -154,7 +154,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *            it is used to pass the Statement closed and the Statement
      *            error occurred events that occur back to the
      *            ClientPooledConnection.
-     * @returns a PreparedStatement object
+     * @return a PreparedStatement object
      * @throws SqlException
      *
      */
@@ -239,7 +239,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *                     NetConnection constructor was called. This is used to
      *                     pass StatementEvents back to the pooledConnection
      *                     object.
-     * @returns a org.apache.derby.client.am.Connection object
+     * @return a org.apache.derby.client.am.Connection object
      * @throws             SqlException
      */
     public org.apache.derby.client.am.Connection newNetConnection(
