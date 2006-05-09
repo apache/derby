@@ -543,9 +543,12 @@
 
   <!-- javadoc specific properties -->
 
+  <property name="public.api.dir" value="${out.javadoc.dir}/publishedapi"/>
   <property name="javadoc.temp.dir" value="${out.javadoc.dir}/temp"/>
   <property name="javadoc.exclusions" value="${javadoc.temp.dir}/javadoc_exclusions"/>
   <property name="javadoc.inclusions" value="${javadoc.temp.dir}/javadoc_inclusions"/>
+  <property name="javadoc.tool.jdk14" value="${java.home}/../bin/javadoc"/>
+  <property name="javadoc.tool.jdk16" value="${jdk16}/bin/javadoc"/>
 
   <target name="javadoc"
     depends="init-javadoc-tool,init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs"/>
@@ -553,11 +556,11 @@
   <target name="init-javadoc-tool" depends="init-javadoc-not-jdk16,init-javadoc-jdk16"/>
 
   <target name="init-javadoc-not-jdk16" unless="jdk16">
-    <property name="javadoc.tool" value="${java.home}/../bin/javadoc"/>
+    <property name="javadoc.tool" value="${javadoc.tool.jdk14}"/>
   </target>
 
   <target name="init-javadoc-jdk16" if="jdk16">
-    <property name="javadoc.tool" value="${jdk16}/bin/javadoc"/>
+    <property name="javadoc.tool" value="${javadoc.tool.jdk16}"/>
   </target>
 
   <target name="publishedapi" depends="init-javadoc-tool,initjars">
@@ -572,21 +575,82 @@
         name="javadoc.Footer" 
         value="Built on ${javadoc.ts}, from revision ${changenumber}"/>
   
-    <delete dir="${out.javadoc.dir}/publishedapi"/>
-    <mkdir dir="${out.javadoc.dir}/publishedapi"/>
+    <delete dir="${public.api.dir}"/>
+    <mkdir dir="${public.api.dir}"/>
 
+    <antcall target="public-jdbc3-api"/>
+    <antcall target="public-jdbc4-api"/>
+
+
+  </target>
+
+  <!--
+    Build the jdbc3 public api. Called by publishedapi target.
+  -->
+  <target name="public-jdbc3-api">
+ 
+    <antcall target="publishedapi-workhorse">
+      <param name="javadocTool" value="${javadoc.tool.jdk14}"/>
+      <param name="extraApi" value="publishedapi_jdbc3.ant"/>
+    </antcall>
+
+  </target>
+
+  <!--
+    Build the jdbc4 public api. Called by publishedapi target.
+  -->
+  <target name="public-jdbc4-api" if="jdk16">
+
+    <move todir="${out.javadoc.dir}/jdbc3">
+      <fileset dir="${public.api.dir}"/>
+    </move>
+
+    <mkdir dir="${public.api.dir}"/>
+
+    <antcall target="publishedapi-workhorse">
+      <param name="javadocTool" value="${javadoc.tool.jdk16}"/>
+      <param name="extraApi" value="publishedapi_jdbc4.ant"/>
+    </antcall>
+
+    <move todir="${out.javadoc.dir}/jdbc4">
+      <fileset dir="${public.api.dir}"/>
+    </move>
+
+    <mkdir dir="${public.api.dir}"/>
+
+    <move todir="${public.api.dir}/jdbc3">
+      <fileset dir="${out.javadoc.dir}/jdbc3"/>
+    </move>
+
+    <move todir="${public.api.dir}/jdbc4">
+      <fileset dir="${out.javadoc.dir}/jdbc4"/>
+    </move>
+
+  </target>
+
+  <!--
+    This target is called twice, once to build the JDBC3 public api
+    and then a second time to build the JDBC4 api.
+
+    javadocTool  Which javadoc tool to use: jdk14 or jdk16 tool
+    extraApi     Extra files to include in the public api.
+  -->
+  <target name="publishedapi-workhorse" depends="initjars">
+ 
     <!--  Only include the files we want customers to see.  -->
     <mkdir dir="${javadoc.temp.dir}"/>
     <antcall target="include-in-javadoc">
       <param name="more_inclusions" value="publishedapi.ant"/>
     </antcall>
-    <antcall target="publishedapi-jdk16-includes"/>
+    <antcall target="include-in-javadoc">
+      <param name="more_inclusions" value="${extraApi}"/>
+    </antcall>
 
     <javadoc sourcepath="${out.javadoc.dir}/sourcedir"
-             executable="${javadoc.tool}"
+             executable="${javadocTool}"
              classpath="${compile.classpath};${osgi};${servlet24};${out.dir}"
              breakiterator="true"
-             destdir="${out.javadoc.dir}/publishedapi"
+             destdir="${public.api.dir}"
     	     Overview="${basedir}/published_api_overview.html"
              Windowtitle="Apache Derby ${major}.${minor} API Documentation"
              Doctitle="Apache Derby ${major}.${minor} API Documentation"
@@ -606,6 +670,7 @@
     <delete dir="${javadoc.temp.dir}"/>
 
   </target>
+
 
   <target name="derbydocs" depends="init-javadoc-tool,initjars">
 

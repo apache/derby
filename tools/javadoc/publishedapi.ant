@@ -1,6 +1,6 @@
 # This file contains a list of the files that constitute the public
-# API. This includes the whole public API for Derby's JDBC3
-# implementation.
+# API. This includes the classes which are common to Derby's JDBC3
+# and JDBC4 versions of the public api.
 # 
 # IMPORTANT: all names should be like package names, but with slashes
 #            instead of dots.
@@ -27,15 +27,8 @@ org/apache/derby/drda/NetworkServerControl.java
 # package: org.apache.derby.jdbc
 
 org/apache/derby/jdbc/ClientBaseDataSource.java
-org/apache/derby/jdbc/ClientConnectionPoolDataSource.java
-org/apache/derby/jdbc/ClientDataSource.java
 org/apache/derby/jdbc/ClientDriver.java
-org/apache/derby/jdbc/ClientXADataSource.java
-org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource.java
-org/apache/derby/jdbc/EmbeddedDataSource.java
-org/apache/derby/jdbc/EmbeddedSimpleDataSource.java
 org/apache/derby/jdbc/EmbeddedDriver.java
-org/apache/derby/jdbc/EmbeddedXADataSource.java
 
 # package: org.apache.derby.tools
 

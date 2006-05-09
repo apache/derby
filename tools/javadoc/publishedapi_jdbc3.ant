@@ -1,5 +1,5 @@
 # This file contains the extra list of the files to be included
-# with Derby's public JDBC4 api but not with the public JDBC3 api.
+# with Derby's public JDBC3 api but not with the public JDBC4 api.
 # This list supplements the common list found in
 # publishedapi.ant.
 # 
@@ -18,10 +18,10 @@
 
 # package: org.apache.derby.jdbc
 
-org/apache/derby/jdbc/ClientConnectionPoolDataSource40.java
-org/apache/derby/jdbc/ClientDataSource40.java
-org/apache/derby/jdbc/ClientXADataSource40.java
-org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource40.java
-org/apache/derby/jdbc/EmbeddedDataSource40.java
-org/apache/derby/jdbc/EmbeddedXADataSource40.java
-
+org/apache/derby/jdbc/ClientConnectionPoolDataSource.java
+org/apache/derby/jdbc/ClientDataSource.java
+org/apache/derby/jdbc/ClientXADataSource.java
+org/apache/derby/jdbc/EmbeddedSimpleDataSource.java
+org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource.java
+org/apache/derby/jdbc/EmbeddedDataSource.java
+org/apache/derby/jdbc/EmbeddedXADataSource.java
