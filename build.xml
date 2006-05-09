@@ -1296,14 +1296,31 @@
       <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}/java" includes="demo/**"/>
     </tar>
 
+    <!-- debug archives - DERBY-178 --> 
+    <zip destfile="${basedir}/snapshot/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
+      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
+      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,CHANGES,README,frameworks/**,javadoc/publishedapi/**"/>
+      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}/java" includes="demo/**"/>
+    </zip>
+    <tar destfile="${basedir}/snapshot/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
+         compression="gzip">
+      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
+      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}/java" includes="demo/**"/>
+    </tar>
+
     <copy file="${basedir}/jars/insane/derby_core_plugin_${major}.${minor}.${interim}.zip"
           tofile="${basedir}/snapshot/derby_core_plugin_${major}.${minor}.${interim}.${changenumber}.zip"/>
   </target>
 
   <target name="snapshotError" if="is.sane">
-    <echo message="Please generate the snapshot using an insane build."/>
+    <echo message="Please run the snapshot using an insane build,"/>
+    <echo message="but don't forget to generate a sane build into jars/sane also."/>
     <echo message="Either run &quot;ant -Dsane=false snapshot&quot;, or run"/>
     <echo message="the insane target before running the snapshot target."/>
+    <echo message="For more information, see:"/>
+    <echo message="http://wiki.apache.org/db-derby/DerbySnapshotOrRelease"/>
+
     <echo message=""/>
     <fail message="Exiting snapshot build..."/>
   </target>
