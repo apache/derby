@@ -61,7 +61,7 @@ public class dblook_test {
 	protected static final String dbCreationScript_2 = "dblook_makeDB_2.sql";
 	private static final char TEST_DELIMITER='#';
 
-	protected static String testDirectory = "dblook_test/";
+	protected static String testDirectory = "dblook_test";
 	protected static final String testDBName = "wombat";
 	protected static String separator;
 
@@ -150,7 +150,8 @@ public class dblook_test {
 		createDBFromDDL(testDBName, scriptName);
 
 		// Figure out where our database directory is (abs path).
-		dbPath = (new File(testDirectory)).getAbsolutePath();
+		String systemhome = System.getProperty("derby.system.home");
+		dbPath = systemhome + File.separatorChar;
 		return;
 
 	}

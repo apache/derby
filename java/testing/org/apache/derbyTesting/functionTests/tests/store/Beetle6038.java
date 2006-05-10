@@ -46,8 +46,9 @@ public class Beetle6038  {
 
 		// read in the properties in the service.properties file of the db
 		Properties serviceProperties = new Properties();
-		File f = new File("Beetle6038/Beetle6038Db/service.properties");
-		serviceProperties.load(new FileInputStream(f.getAbsolutePath()));
+		String systemhome =  System.getProperty("derby.system.home");
+		File f = new File(systemhome + File.separatorChar + "Beetle6038Db" + File.separatorChar + "service.properties");
+		serviceProperties.load(new FileInputStream(f.getCanonicalPath()));
 
 		// check if the properties are set
 		checkProperty("data_encrypt_algorithm_version",serviceProperties);

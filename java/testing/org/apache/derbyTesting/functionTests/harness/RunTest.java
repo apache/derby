@@ -2047,7 +2047,6 @@ clp.list(System.out);
 		// Why is this being done here
 		//if (jvm != null)
 		    //testJvmProps.addElement("jvm="+jvm.getName());
-		testJvmProps.addElement("user.dir="+userDirName);
 	}
 	
 	private static String[] buildTestCommand(String propString,
@@ -2308,7 +2307,6 @@ clp.list(System.out);
         throws Exception
     {
         // For platforms where executing a process is failing
-        String olduserdir = (String)sysProp.get("user.dir");
         Properties ptmp = System.getProperties();
         ptmp.put("derby.system.home", systemHome);
         ptmp.put("derby.infolog.append", "true");
@@ -2383,7 +2381,6 @@ clp.list(System.out);
         }
         else if (testType.equals("java"))
         {
-            sysProp.put("user.dir", outDir.getCanonicalPath());
 	    if (javaPath == null)
 	            javaPath = "org.apache.derbyTesting.functionTests.tests." + testDirName;
 	    
@@ -2426,7 +2423,6 @@ clp.list(System.out);
 			{
 				// ignore the errors, they are expected.
 			}
-    		sysProp.put("user.dir", olduserdir);
         }
         else if (testType.equals("multi"))
         {
@@ -2437,7 +2433,6 @@ clp.list(System.out);
             // And using a Thread.join() to start the tests doesn't resolve
             // this. So this support is here simply to allow running
             // something like stressmulti just by itself for debugging
-            //sysProp.put("user.dir", outDir.getCanonicalPath());
             //javaPath = "org.apache.derbyTesting.functionTests.harness.MultiTest";
             String[] args = new String[5];
             args[0] = scriptFileName;
