@@ -22,7 +22,7 @@
 
 <!-- Targets -->
 
-  <target name="release" depends="clean,bin,lib,src"/>
+  <target name="release" depends="clean,bin,lib,lib-debug,src"/>
 
   <target name="init">
 
@@ -36,6 +36,7 @@
     <property name="derby.basename" value="db-derby-${major}.${minor}.${interim}.${point}"/>
     <property name="derby.bin" value="${derby.basename}-bin"/>
     <property name="derby.lib" value="${derby.basename}-lib"/>
+    <property name="derby.lib-debug" value="${derby.basename}-lib-debug"/>
     <property name="derby.src" value="${derby.basename}-src"/> 
 
     <property name="crlf.dir" value="${basedir}/tools/release/crlf"/>
@@ -138,6 +139,27 @@
       <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
       			  prefix="${derby.lib}/"/>
       <tarfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
+	              excludes="derby_core_plugin*"/>
+    </tar>
+  </target>
+
+  <!-- lib-debug distribution -->
+  <target name="lib-debug" depends="lib-debug.zip,lib-debug.tgz"/>
+  <target name="lib-debug.zip" depends="init">
+    <zip destfile="${release.dir}/${derby.lib-debug}.zip"
+	     compress="true">
+      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+      			  prefix="${derby.lib-debug}/"/>
+      <zipfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
+	              excludes="derby_core_plugin*"/>
+    </zip>
+  </target>
+  <target name="lib-debug.tgz">
+    <tar destfile="${release.dir}/${derby.lib-debug}.tar.gz"
+	     compression="gzip">
+      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+      			  prefix="${derby.lib-debug}/"/>
+      <tarfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*"/>
     </tar>
   </target>
