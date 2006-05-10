@@ -1,5 +1,5 @@
 Test dbMetaDataJdbc30 starting
-JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.1 (10.1.2.4)
+JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.1 (10.1.2.5)
 The URL is: jdbc:derby:wombat
 supportsSavepoints() : true
 supportsNamedParameters() : false

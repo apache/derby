@@ -1,5 +1,5 @@
 Test metadataJdbc20 starting
-JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.1 (10.1.2.4)
+JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.1 (10.1.2.5)
 DatabaseMetaData.getURL not present - correct for JSR169
 getUDTs() with user-named types null :
 TYPE_CAT,TYPE_SCHEM,TYPE_NAME,CLASS_NAME,DATA_TYPE,REMARKS
