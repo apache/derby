@@ -698,7 +698,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         int sqlcode = readFdocaInt();
         byte[] sqlstate = readFdocaBytes(5);
         byte[] sqlerrproc = readFdocaBytes(8);
-        NetSqlca netSqlca = new NetSqlca(netAgent_.netConnection_, sqlcode, sqlstate, sqlerrproc, typdef.getCcsidSbc());
+        NetSqlca netSqlca = new NetSqlca(netAgent_.netConnection_, sqlcode, sqlstate, sqlerrproc);
 
         parseSQLCAXGRP(typdef, netSqlca);
 

@@ -2580,12 +2580,19 @@ public class NetConnectionReply extends Reply
         int sqlcode = readFastInt();
         byte[] sqlstate = readFastBytes(5);
         byte[] sqlerrproc = readFastBytes(8);
-        NetSqlca netSqlca = new NetSqlca(netAgent_.netConnection_,
-                sqlcode,
-                sqlstate,
-                sqlerrproc,
-                netAgent_.targetTypdef_.getCcsidSbc());
-
+        NetSqlca netSqlca = null;
+        
+        try
+        {
+            netSqlca = new NetSqlca(netAgent_.netConnection_,
+                    sqlcode,
+                    sqlstate,
+                    sqlerrproc);
+        }
+        catch(SqlException sqle)
+        {
+            throw new DisconnectException(netAgent_,sqle);
+        }
         parseSQLCAXGRP(netSqlca);
 
         if (netAgent_.targetSqlam_ >= NetConfiguration.MGRLVL_7) {
@@ -3108,37 +3115,27 @@ public class NetConnectionReply extends Reply
         int sqldcLinen = readFastInt(); // LINE_NUMBER
         int sqldcRown = (int) readFastLong(); // ROW_NUMBER
 
-        try
-        {
-            // save +20237 in the 0th entry of the rowsetSqlca's.
-            // this info is going to be used when a subsequent fetch prior is issued, and if already
-            // received a +20237 then we've gone beyond the first row and there is no need to
-            // flow another fetch to the server.
-            if (sqldcCode == 20237) {
-                rowsetSqlca[0] = new NetSqlca(netAgent_.netConnection_,
+        // save +20237 in the 0th entry of the rowsetSqlca's.
+        // this info is going to be used when a subsequent fetch prior is issued, and if already
+        // received a +20237 then we've gone beyond the first row and there is no need to
+        // flow another fetch to the server.
+        if (sqldcCode == 20237) {
+            rowsetSqlca[0] = new NetSqlca(netAgent_.netConnection_,
+                    sqldcCode,
+                    sqldcState,
+                    null);
+        } else {
+            if (rowsetSqlca[sqldcRown] != null) {
+                rowsetSqlca[sqldcRown].resetRowsetSqlca(netAgent_.netConnection_,
                         sqldcCode,
-                        sqldcState.getBytes(Typdef.UTF8ENCODING),
-                        null,
-                        netAgent_.targetTypdef_.getCcsidSbc());
+                        sqldcState,
+                        null);
             } else {
-                if (rowsetSqlca[sqldcRown] != null) {
-                    rowsetSqlca[sqldcRown].resetRowsetSqlca(netAgent_.netConnection_,
-                            sqldcCode,
-                            sqldcState.getBytes(Typdef.UTF8ENCODING),
-                            null,
-                            netAgent_.targetTypdef_.getCcsidSbc());
-                } else {
-                    rowsetSqlca[sqldcRown] = new NetSqlca(netAgent_.netConnection_,
-                            sqldcCode,
-                            sqldcState.getBytes(Typdef.UTF8ENCODING),
-                            null,
-                            netAgent_.targetTypdef_.getCcsidSbc());
-                }
+                rowsetSqlca[sqldcRown] = new NetSqlca(netAgent_.netConnection_,
+                        sqldcCode,
+                        sqldcState,
+                        null);
             }
-        }
-        catch(UnsupportedEncodingException uee)
-        {
-            throw new DisconnectException(uee,netAgent_); 
         }
 
         // reset all entries between lastRow and sqldcRown to null

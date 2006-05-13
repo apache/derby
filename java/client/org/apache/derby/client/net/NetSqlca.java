@@ -21,6 +21,10 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.Sqlca;
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.SqlException;
+import java.io.UnsupportedEncodingException;
 
 public class NetSqlca extends Sqlca {
     // these are the same variables that are in the Sqlca except ccsids
@@ -28,16 +32,31 @@ public class NetSqlca extends Sqlca {
 
     NetSqlca(org.apache.derby.client.am.Connection connection,
              int sqlCode,
-             byte[] sqlStateBytes,
-             byte[] sqlErrpBytes,
-             int ccsid) {
+             String sqlState,
+             byte[] sqlErrpBytes) {
         super(connection);
         sqlCode_ = sqlCode;
-        sqlStateBytes_ = sqlStateBytes;
+        sqlState_ = sqlState;
         sqlErrpBytes_ = sqlErrpBytes;
-        ccsid_ = ccsid;
     }
 
+    NetSqlca(org.apache.derby.client.am.Connection connection,
+            int sqlCode,
+            byte[] sqlState,
+            byte[] sqlErrpBytes) throws SqlException {
+       super(connection);
+       sqlCode_ = sqlCode;
+       try
+       {
+           sqlState_ = bytes2String(sqlState,0,sqlState.length);
+       }catch(UnsupportedEncodingException uee)
+       {
+            throw new SqlException(null, 
+                  new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
+                       "sqlstate bytes", "SQLSTATE",uee);
+       }
+       sqlErrpBytes_ = sqlErrpBytes;
+   }
     protected void setSqlerrd(int[] sqlErrd) {
         sqlErrd_ = sqlErrd;
     }

@@ -42,9 +42,7 @@ public abstract class Sqlca {
     protected byte[] sqlErrmcBytes_;
     protected byte[] sqlErrpBytes_;
     protected byte[] sqlWarnBytes_;
-    protected byte[] sqlStateBytes_;
-
-    protected int ccsid_;
+    
     protected int sqlErrmcCcsid_;
     protected boolean containsSqlcax_ = true;
     protected long rowsetRowCount_;
@@ -167,23 +165,7 @@ public abstract class Sqlca {
     }
 
     synchronized public String getSqlState() {
-        if (sqlState_ != null) {
-            return sqlState_;
-        }
-
-        if (sqlStateBytes_ == null) {
-            return null;
-        }
-
-        try {
-            sqlState_ = bytes2String(sqlStateBytes_,
-                    0,
-                    sqlStateBytes_.length);
-            return sqlState_;
-        } catch (java.io.UnsupportedEncodingException e) {
-            // leave sqlState as null.
-            return null;
-        }
+        return sqlState_;
     }
 
     // Gets the formatted message, can throw an exception.
@@ -373,7 +355,7 @@ public abstract class Sqlca {
         }
     }
 
-    private String bytes2String(byte[] bytes, int offset, int length)
+    protected String bytes2String(byte[] bytes, int offset, int length)
             throws java.io.UnsupportedEncodingException {
         // Network server uses utf8 encoding
         return new String(bytes, offset, length, Typdef.UTF8ENCODING);
@@ -400,14 +382,12 @@ public abstract class Sqlca {
 
     public void resetRowsetSqlca(org.apache.derby.client.am.Connection connection,
                                  int sqlCode,
-                                 byte[] sqlStateBytes,
-                                 byte[] sqlErrpBytes,
-                                 int ccsid) {
+                                 String sqlState,
+                                 byte[] sqlErrpBytes) {
         connection_ = connection;
         sqlCode_ = sqlCode;
-        sqlStateBytes_ = sqlStateBytes;
+        sqlState_ = sqlState;
         sqlErrpBytes_ = sqlErrpBytes;
-        ccsid_ = ccsid;
     }
 
     public void setRowsetRowCount(long rowCount) {
