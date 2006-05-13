@@ -68,8 +68,34 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
         throw Util.notImplemented();
     }
 
-    public boolean isValid(int timeout) throws SQLException{
-        throw Util.notImplemented();
+
+    /**
+     * Checks if the connection has not been closed and is still valid. 
+     * The validity is checked by running a simple query against the 
+     * database.
+     *
+     * @param timeout The time in seconds to wait for the database
+     * operation used to validate the connection to complete. If the 
+     * timeout period expires before the operation completes, this 
+     * method returns false. A value of 0 indicates a timeout is not 
+     * applied to the database operation.
+     * @return true if the connection is valid, false otherwise
+     * @throws SQLException if the call on the physical connection throws an
+     * exception.
+     */
+    public final boolean isValid(int timeout) throws SQLException{
+        // Check first if the Brokered connection is closed
+        if (isClosed()) {
+            return false;
+        }
+
+        // Forward the isValid call to the physical connection
+        try {
+            return getRealConnection().isValid(timeout);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
     }
     
     

@@ -96,11 +96,30 @@ public class LogicalConnection40
         throw SQLExceptionFactory.notImplemented("getClientInfo(String)");
     }
 
-    public boolean isValid(int timeout)
-        throws SQLException {
-        throw SQLExceptionFactory.notImplemented("isValid(int)");
+
+    /**
+     * Checks if the connection has not been closed and is still valid. 
+     * The validity is checked by running a simple query against the 
+     * database.
+     *
+     * @param timeout The time in seconds to wait for the database
+     * operation used to validate the connection to complete. If the 
+     * timeout period expires before the operation completes, this 
+     * method returns false. A value of 0 indicates a timeout is not 
+     * applied to the database operation.
+     * @return true if the connection is valid, false otherwise
+     * @throws SQLException if the call on the physical connection throws an
+     * exception.
+     */
+    synchronized public boolean isValid(int timeout) throws SQLException {
+        // Check if we have a underlying physical connection
+        if (physicalConnection_ == null) {
+            return false;
+        }
+        return physicalConnection_.isValid(timeout);
     }
    
+
     public boolean isWrapperFor(Class<?> interfaces)
         throws SQLException {
         checkForNullPhysicalConnection();

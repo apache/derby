@@ -172,6 +172,29 @@ public class ConnectionTest
     }
 
     /**
+     * Tests that <code>isValid</code> is implemented and returns true
+     * for the connection. This test is very limited but is tested
+     * for all connection types. A more complete test of isValid is
+     * found in the TestConnectionMethods.java test that is run for
+     * for embedded and network client connections.
+     */
+    public void testIsValidImplemented() throws SQLException {
+        // Test with an infinite (0) timeout
+        assertTrue(con.isValid(0));
+
+        // Test with a 1 second timeout
+        assertTrue(con.isValid(1));
+
+        // Test with an illegal timeout
+        try {
+            con.isValid(-1);
+        } catch (SQLException sqle) {
+            assertSQLState("Incorrect SQL state when calling isValid(-1)",
+                           "XJ081", sqle);
+        }
+    }
+
+    /**
      * Tests that <code>getTypeMap()</code> returns an empty map when
      * no type map has been installed.
      * @exception SQLException if an error occurs
