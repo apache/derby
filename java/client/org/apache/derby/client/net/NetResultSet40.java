@@ -158,6 +158,11 @@ public class NetResultSet40 extends NetResultSet{
      *                                with the given interface.
      */
     public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        try {
+            checkForClosedResultSet();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
         return interfaces.isInstance(this);
     }
     
@@ -172,11 +177,14 @@ public class NetResultSet40 extends NetResultSet{
     public <T> T unwrap(java.lang.Class<T> interfaces)
                                    throws SQLException {
         try { 
+            checkForClosedResultSet();
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                 interfaces).getSQLException();
+        } catch (SqlException se) {
+            throw se.getSQLException();
         }
     }
     

@@ -34,9 +34,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Struct;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -140,6 +141,11 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      */
     
     public Clob createClob() throws SQLException {
+        try {
+            checkForClosedConnection();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
         org.apache.derby.client.am.Clob clob = new org.apache.derby.client.am.Clob(this.agent_,"");
         return clob;
     }
@@ -154,6 +160,11 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      */
     
     public Blob createBlob() throws SQLException {
+        try {
+            checkForClosedConnection();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
         org.apache.derby.client.am.Blob blob = new org.apache.derby.client.am.Blob(new byte[0],this.agent_, 0);
         return blob;
     }
@@ -277,6 +288,27 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     }
     
     /**
+     * Returns the type map for this connection.
+     *
+     * @return type map for this connection
+     * @exception SQLException if a database access error occurs
+     */
+    public final Map<String, Class<?>> getTypeMap() throws SQLException {
+        // This method is already implemented with a non-generic
+        // signature in am/Connection. We could just use that method
+        // directly, but then we get a compiler warning (unchecked
+        // cast/conversion). Copy the map to avoid the compiler
+        // warning.
+        Map typeMap = super.getTypeMap();
+        if (typeMap == null) return null;
+        Map<String, Class<?>> genericTypeMap = new HashMap<String, Class<?>>();
+        for (Object key : typeMap.keySet()) {
+            genericTypeMap.put((String) key, (Class) typeMap.get(key));
+        }
+        return genericTypeMap;
+    }
+
+    /**
      * This method forwards all the calls to default query object provided by 
      * the jdk.
      * @param ifc interface to generated concreate class
@@ -284,6 +316,11 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      */
     public <T extends BaseQuery> T createQueryObject(Class<T> ifc) 
                                                     throws SQLException {
+        try {
+            checkForClosedConnection();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
         return QueryObjectFactory.createDefaultQueryObject (ifc, this);
     } 
     
@@ -299,6 +336,11 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      *                                with the given interface.
      */
     public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        try {
+            checkForClosedConnection();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
         return interfaces.isInstance(this);
     }
     
@@ -307,17 +349,20 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      *
      * @param  interfaces a Class defining an interface
      * @return an object that implements the interface
-     * @throws java.sql.SQLExption if no object if found that implements the 
+     * @throws java.sql.SQLException if no object if found that implements the 
      * interface
      */
     public <T> T unwrap(java.lang.Class<T> interfaces)
                                    throws SQLException {
         try { 
+            checkForClosedConnection();
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                 interfaces).getSQLException();
+        } catch (SqlException se) {
+            throw se.getSQLException();
         }
     }
     

@@ -881,11 +881,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDate", column, calendar);
             }
+            java.sql.Date date = getDate(column);
             if (calendar == null) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
-            java.sql.Date date = getDate(column);
             if (date != null) {
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
                 targetCalendar.clear();
@@ -946,11 +946,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTime", column, calendar);
             }
+            java.sql.Time time = getTime(column);
             if (calendar == null) {
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
-            java.sql.Time time = getTime(column);
             if (time != null) {
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
                 targetCalendar.clear();
@@ -1011,11 +1011,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTimestamp", column, calendar);
             }
+            java.sql.Timestamp timestamp = getTimestamp(column);
             if (calendar == null) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
-            java.sql.Timestamp timestamp = getTimestamp(column);
             if (timestamp != null) {
                 int nano = timestamp.getNanos();
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());

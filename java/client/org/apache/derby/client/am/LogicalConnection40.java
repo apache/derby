@@ -34,6 +34,7 @@ import java.util.Properties;
 
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.shared.common.reference.SQLState;
+import java.util.Map;
 
 /**
  * A simple delegation wrapper handle for a physical connection.
@@ -96,6 +97,16 @@ public class LogicalConnection40
         throw SQLExceptionFactory.notImplemented("getClientInfo(String)");
     }
 
+    /**
+     * Returns the type map for this connection.
+     *
+     * @return type map for this connection
+     * @exception SQLException if a database access error occurs
+     */
+    public Map<String, Class<?>> getTypeMap() throws SQLException {
+        checkForNullPhysicalConnection();
+        return ((java.sql.Connection) physicalConnection_).getTypeMap();
+    }
 
     /**
      * Checks if the connection has not been closed and is still valid. 
@@ -132,6 +143,7 @@ public class LogicalConnection40
             SQLExceptionFactory.notImplemented("setClientInfo(Properties)");
         throw new ClientInfoException(sqle.getMessage(), 
                                       sqle.getSQLState(), 
+                                      properties == null ? null :
                                       (Properties)properties.clone());
     }
     

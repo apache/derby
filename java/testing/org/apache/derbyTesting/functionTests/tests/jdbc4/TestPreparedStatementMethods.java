@@ -37,7 +37,6 @@ import java.sql.NClob;
 import java.sql.ResultSet;
 import java.sql.SQLXML;
 import java.sql.Statement;
-import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.tools.ij;
 import org.apache.derby.iapi.error.StandardException;
@@ -51,7 +50,6 @@ public class TestPreparedStatementMethods {
     
     static Connection conn = null;
     PreparedStatement ps = null;
-    boolean stmtIsClosed = false;
     
     String filepath;
     String sep;
@@ -452,12 +450,9 @@ public class TestPreparedStatementMethods {
         } catch(SQLException sqle) {
             // Check which SQLException state we've got and if it is
             // expected, do not print a stackTrace
-            // FIXME: Note that the test for stmtIsClosed boolean can
-            // be removed _once_ the client driver reports the same
-            // SQLState as the embedded driver does - See JIRA-254.
-            if (ExceptionUtil.getSQLStateFromIdentifier(
-                        SQLState.ALREADY_CLOSED).equals(sqle.getSQLState()) ||
-                stmtIsClosed) {
+            // Embedded uses XJ012, client uses XCL31.
+            if (sqle.getSQLState().equals("XJ012") ||
+                sqle.getSQLState().equals("XCL31")) {
                 // All is good and is expected
             } else {
                 System.out.println("Unexpected SQLException " + sqle);
@@ -476,12 +471,9 @@ public class TestPreparedStatementMethods {
         } catch(SQLException sqle) {
             // Check which SQLException state we've got and if it is
             // expected, do not print a stackTrace
-            // FIXME: Note that the test for stmtIsClosed boolean can
-            // be removed _once_ the client driver reports the same
-            // SQLState as the embedded driver does - See JIRA-254.
-            if (ExceptionUtil.getSQLStateFromIdentifier(
-                        SQLState.ALREADY_CLOSED).equals(sqle.getSQLState()) ||
-                stmtIsClosed) {
+            // Embedded uses XJ012, client uses XCL31.
+            if (sqle.getSQLState().equals("XJ012") ||
+                sqle.getSQLState().equals("XCL31")) {
                 // All is good and is expected
             } else {
                 System.out.println("Unexpected SQLException " + sqle);
@@ -549,7 +541,6 @@ public class TestPreparedStatementMethods {
      */
     void startClientTestMethods( Connection conn_main ) {
         PreparedStatement ps_main = null;
-        stmtIsClosed = false;
         
         try {
             ps_main = conn_main.prepareStatement("select count(*) from " +
@@ -565,15 +556,12 @@ public class TestPreparedStatementMethods {
             t_setSQLXML();
             t_isPoolable();
             t_setPoolable();
+            t_wrapper();
             // Close the prepared statement and verify the poolable hint
             // cannot be set or retrieved
             ps.close();
-            stmtIsClosed = true; // This until JIRA-953 is addressed then
-                                 // stmt.isClosed() can be called in the
-                                 // poolable hint set/get test methods below
             t_isPoolable();
             t_setPoolable();
-            t_wrapper();
         } catch(SQLException sqle) {
             sqle.printStackTrace();
         } finally {
@@ -589,7 +577,6 @@ public class TestPreparedStatementMethods {
      */
     void startEmbeddedTestMethods( Connection conn_main ) {
         PreparedStatement ps_main = null;
-        stmtIsClosed = false;
         
         try {            
             Statement s = conn_main.createStatement();
@@ -635,9 +622,6 @@ public class TestPreparedStatementMethods {
             // Close the prepared statement and verify the poolable hint
             // cannot be set or retrieved
             ps.close();
-            stmtIsClosed = true; // This until JIRA-953 is addressed then
-                                 // stmt.isClosed() can be called in the
-                                 // poolable hint set/get test methods below
             t_isPoolable();
             t_setPoolable();
         }

@@ -611,6 +611,7 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x);
                 }
+                checkForClosedStatement();
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DATE;
                 if (x == null) {
@@ -635,6 +636,7 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x, calendar);
                 }
+                checkForClosedStatement();
                 if (calendar == null) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.INVALID_API_PARAMETER),
@@ -691,6 +693,7 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setTime", parameterIndex, x, calendar);
                 }
+                checkForClosedStatement();
                 if (calendar == null) {
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.INVALID_API_PARAMETER),
@@ -750,6 +753,7 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setTimestamp", parameterIndex, x, calendar);
                 }
+                checkForClosedStatement();
                 if (calendar == null) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.INVALID_API_PARAMETER),
@@ -2127,6 +2131,11 @@ public class PreparedStatement extends Statement
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "setClob",
                         parameterIndex, reader, new Long(length));
+            }
+            try {
+                checkForClosedStatement();
+            } catch (SqlException se) {
+                throw se.getSQLException();
             }
             if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,

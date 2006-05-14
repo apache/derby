@@ -11,6 +11,7 @@ jdbc4/AutoloadTest.junit
 jdbc4/BlobTest.junit
 jdbc4/CallableStatementTest.junit
 jdbc4/ClobTest.junit
+jdbc4/ClosedObjectTest.junit
 jdbc4/DataSourceTest.junit
 jdbc4/ParameterMetaDataWrapperTest.junit
 jdbc4/ResultSetMetaDataTest.junit

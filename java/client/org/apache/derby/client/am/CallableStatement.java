@@ -653,11 +653,11 @@ public class CallableStatement extends PreparedStatement
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDate", parameterIndex, cal);
             }
+            java.sql.Date result = getDate(parameterIndex);
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
             }
-            java.sql.Date result = getDate(parameterIndex);
             if (result != null) {
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(cal.getTimeZone());
                 targetCalendar.clear();
@@ -711,11 +711,11 @@ public class CallableStatement extends PreparedStatement
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTime", parameterIndex, cal);
             }
+            java.sql.Time result = getTime(parameterIndex);
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
             }
-            java.sql.Time result = getTime(parameterIndex);
             if (result != null) {
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(cal.getTimeZone());
                 targetCalendar.clear();
@@ -768,11 +768,11 @@ public class CallableStatement extends PreparedStatement
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTimestamp", parameterIndex, cal);
             }
+            java.sql.Timestamp result = getTimestamp(parameterIndex);
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
             }
-            java.sql.Timestamp result = getTimestamp(parameterIndex);
             if (result != null) {
                 int nano = result.getNanos();
                 java.util.Calendar targetCalendar = java.util.Calendar.getInstance(cal.getTimeZone());
@@ -1150,6 +1150,7 @@ public class CallableStatement extends PreparedStatement
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setDate", parameterName, x);
         }
+        throw jdbcMethodNotImplemented();
     }
 
     public void setTime(String parameterName, java.sql.Time x) throws SQLException {

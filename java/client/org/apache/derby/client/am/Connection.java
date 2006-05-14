@@ -535,6 +535,7 @@ public abstract class Connection implements java.sql.Connection,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "commit");
             }
+            checkForClosedConnection();
 
             // the following XA State check must be in commit instead of commitX since
             // external application call commit, the SqlException should be thrown
@@ -542,7 +543,6 @@ public abstract class Connection implements java.sql.Connection,
             // internal code will call commitX which will ignore the commit request
             // while in a Global transaction
             checkForInvalidXAStateOnCommitOrRollback();
-            checkForClosedConnection();
             flowCommit();
         }
         catch ( SqlException se )
@@ -642,9 +642,9 @@ public abstract class Connection implements java.sql.Connection,
                 agent_.logWriter_.traceEntry(this, "rollback");
             }
             
+            checkForClosedConnection();
             checkForInvalidXAStateOnCommitOrRollback();
 
-            checkForClosedConnection();
             flowRollback();
         }
         catch ( SqlException se )
@@ -951,9 +951,14 @@ public abstract class Connection implements java.sql.Connection,
         }
     }
 
-    public java.sql.SQLWarning getWarnings() {
+    public java.sql.SQLWarning getWarnings() throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getWarnings", warnings_);
+        }
+        try {
+            checkForClosedConnection();
+        } catch (SqlException se) {
+            throw se.getSQLException();
         }
         return warnings_ == null ? null : warnings_.getSQLWarning();
     }
@@ -964,6 +969,7 @@ public abstract class Connection implements java.sql.Connection,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "clearWarnings");
             }
+            checkForClosedConnection();
             clearWarningsX();
         }
         catch ( SqlException se )

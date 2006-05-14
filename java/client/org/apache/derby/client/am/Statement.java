@@ -481,6 +481,26 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
     /**
+     * Returns false unless <code>iface</code> is implemented 
+     * 
+     * @param  iface                  a Class defining an interface.
+     * @return true                   if this implements the interface or 
+     *                                directly or indirectly wraps an object 
+     *                                that does.
+     * @throws java.sql.SQLException  if an error occurs while determining 
+     *                                whether this is a wrapper for an object 
+     *                                with the given interface.
+     */
+    public boolean isWrapperFor(Class iface) throws SQLException {
+        try {
+            checkForClosedStatement();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+        return iface.isInstance(this);
+    }
+
+    /**
      * Tell whether the statement has been closed or not.
      *
      * @return <code>true</code> if closed, <code>false</code> otherwise.
@@ -751,6 +771,11 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getWarnings", warnings_);
         }
+        try {
+            checkForClosedStatement();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
         return warnings_ == null ? null : warnings_.getSQLWarning();
     }
 
@@ -758,6 +783,11 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "clearWarnings");
+            }
+            try {
+                checkForClosedStatement();
+            } catch (SqlException se) {
+                throw se.getSQLException();
             }
             clearWarningsX();
         }

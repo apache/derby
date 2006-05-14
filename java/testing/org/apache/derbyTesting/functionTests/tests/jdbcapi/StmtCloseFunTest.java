@@ -57,7 +57,8 @@ public class StmtCloseFunTest {
     public static void main(String[] args) {
 
 		System.out.println("Statement Close Fun Test starting ");
-		isDerbyNet= TestUtil.isNetFramework();
+		isDerbyNet = TestUtil.isJCCFramework();
+
 
 
 		try {
@@ -166,7 +167,7 @@ public class StmtCloseFunTest {
 
 			if (! isDerbyNet)
 			{
-				// DerbyNet and DerbyNetClient don't throw exception
+				// DerbyNet doesn't throw exception
 				try {
 					s.getQueryTimeout();
 					System.out.println("Statement Test failed (9)");
@@ -420,7 +421,7 @@ public class StmtCloseFunTest {
 
 			if (! isDerbyNet)
 			{
-				// DerbyNet and DerbyNetClient don't throw exception
+				// DerbyNet doesn't throw exception
 				try {
 					ps.getQueryTimeout();
 					System.out.println("Prepared Statement Test failed");
@@ -702,7 +703,7 @@ public class StmtCloseFunTest {
 
 			if (! isDerbyNet)
 			{
-				// DerbyNet and DerbyNetClient don't throw exception
+				// DerbyNet doesn't throw exception
 				try {
 					cs.getQueryTimeout();
 					System.out.println("Callable Statement Test failed");
