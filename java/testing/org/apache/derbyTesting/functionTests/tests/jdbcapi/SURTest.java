@@ -242,6 +242,219 @@ public class SURTest extends SURBaseTest {
         verifyTuple(rs);
         assertFailOnUpdate(rs);
     }
+
+    /**
+     * Test that you can correctly run multiple updateXXX() + updateRow() 
+     * combined with cancelRowUpdates().
+     */
+    public void testMultiUpdateRow1() 
+        throws SQLException 
+    {
+        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                          ResultSet.CONCUR_UPDATABLE);
+        s.setCursorName(getNextCursorName());
+        ResultSet rs = s.executeQuery("select * from t1");
+        rs.absolute(5);
+        final int oldCol2 = rs.getInt(2);
+        final int newCol2 = -2222;
+        final int oldCol3 = rs.getInt(3);
+        final int newCol3 = -3333;
+                
+        rs.updateInt(2, newCol2);
+        assertEquals("Expected the resultset to be updated after updateInt",
+                     newCol2, rs.getInt(2));
+        rs.cancelRowUpdates();
+        assertEquals("Expected updateXXX to have no effect after cancelRowUpdated",
+                     oldCol2, rs.getInt(2));
+        rs.updateInt(2, newCol2);
+        assertEquals("Expected the resultset to be updated after updateInt", 
+                     newCol2, rs.getInt(2));
+        assertTrue("Expected rs.rowUpdated() to be false before updateRow", 
+                   !rs.rowUpdated());
+        rs.updateRow();
+        
+        assertTrue("Expected rs.rowUpdated() to be true after updateRow", 
+                   rs.rowUpdated());
+        assertEquals("Expected the resultset detect the updates of previous " + 
+                     "updateRow", newCol2, rs.getInt(2));
+        
+        rs.updateInt(3, newCol3);
+        
+        assertEquals("Expected the resultset to be updated after updateInt", 
+                     newCol3, rs.getInt(3));
+        assertEquals("Expected the resultset detect the updates of previous " + 
+                     "updateRow", newCol2, rs.getInt(2));
+        
+        rs.cancelRowUpdates();
+        
+        assertEquals("Expected updateXXX to have no effect after " +
+                     "cancelRowUpdated", oldCol3, rs.getInt(3));
+        assertEquals("Expected the resultset detect the updates of previous " +
+                     "updateRow after cancelRowUpdated", newCol2, rs.getInt(2));
+        rs.updateInt(3, newCol3);
+        rs.updateRow();
+        assertEquals("Expected the resultset to be updated after updateInt", 
+                     newCol3, rs.getInt(3));
+        rs.cancelRowUpdates();
+        
+        assertEquals("Expected the resultset detect the updates of previous" + 
+                     "updateRow after cancelRowUpdates", newCol2, rs.getInt(2));
+        assertEquals("Expected the resultset detect the updates of previous" + 
+                     "updateRow after cancelRowUpdates", newCol3, rs.getInt(3));
+        assertTrue("Expected rs.rowUpdated() to be true after " + 
+                   "updateRow and cancelRowUpdates", rs.rowUpdated());
+        
+        rs.close();
+    }
+
+    /**
+     * Test that you can correctly run multiple updateNull() + updateRow() 
+     * combined with cancelRowUpdates().
+     */
+    public void testMultiUpdateRow2() 
+        throws SQLException 
+    {
+        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                          ResultSet.CONCUR_UPDATABLE);
+        s.setCursorName(getNextCursorName());
+        ResultSet rs = s.executeQuery("select * from t1");
+        rs.absolute(5);
+        final int oldCol2 = rs.getInt(2);
+        final int oldCol3 = rs.getInt(3);
+        
+        rs.updateNull(2);
+        assertEquals("Expected the resultset to be updated after updateNull",
+                     0, rs.getInt(2));
+        assertTrue("Expected wasNull to be true after updateNull", rs.wasNull());
+        rs.cancelRowUpdates();
+        assertEquals("Expected updateXXX to have no effect after cancelRowUpdated",
+                     oldCol2, rs.getInt(2));
+        rs.updateNull(2);
+        assertEquals("Expected the resultset to be updated after updateNull", 
+                     0, rs.getInt(2));
+        assertTrue("Expected wasNull to be true after updateNull", rs.wasNull());
+        assertTrue("Expected rs.rowUpdated() to be false before updateRow", 
+                   !rs.rowUpdated());
+        rs.updateRow();
+        
+        assertTrue("Expected rs.rowUpdated() to be true after updateRow", 
+                   rs.rowUpdated());
+        assertEquals("Expected the resultset detect the updates of previous " + 
+                     "updateRow", 0, rs.getInt(2));
+        
+        rs.updateNull(3);
+        
+        assertEquals("Expected the resultset to be updated after updateNull", 
+                     0, rs.getInt(3));
+        assertTrue("Expected wasNull to be true after updateNull", rs.wasNull());
+        assertEquals("Expected the resultset detect the updates of previous " + 
+                     "updateRow", 0, rs.getInt(2));
+        
+        rs.cancelRowUpdates();
+        
+        assertEquals("Expected updateXXX to have no effect after " +
+                     "cancelRowUpdated", oldCol3, rs.getInt(3));
+        assertEquals("Expected the resultset detect the updates of previous " +
+                     "updateRow after cancelRowUpdated", 0, rs.getInt(2));
+        rs.updateNull(3);
+        rs.updateRow();
+        assertEquals("Expected the resultset to be updated after updateNull", 
+                     0, rs.getInt(3));
+        rs.cancelRowUpdates();
+        
+        assertEquals("Expected the resultset detect the updates of previous" + 
+                     "updateRow after cancelRowUpdates", 0, rs.getInt(2));
+        assertEquals("Expected the resultset detect the updates of previous" + 
+                     "updateRow after cancelRowUpdates", 0, rs.getInt(3));
+        assertTrue("Expected rs.rowUpdated() to be true after " + 
+                   "updateRow and cancelRowUpdates", rs.rowUpdated());
+        
+        rs.close();
+    }
+
+    /**
+     * Test that you get cursor operation conflict warning if updating 
+     * a row which has been deleted from the table.
+     */
+    public void testCursorOperationConflictWarning1() 
+        throws SQLException 
+    {
+        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                          ResultSet.CONCUR_UPDATABLE);
+        s.setCursorName(getNextCursorName());
+        ResultSet rs = s.executeQuery("select * from t1");
+        rs.next();
+        con.createStatement().executeUpdate("delete from t1 where id=" +
+                                            rs.getString("ID"));
+        final int newValue = -3333;
+        final int oldValue = rs.getInt(2);
+        rs.updateInt(2, newValue);
+        rs.updateRow();
+        
+        SQLWarning warn = rs.getWarnings();
+        assertWarning(warn, CURSOR_OPERATION_CONFLICT);
+        assertEquals("Did not expect the resultset to be updated", oldValue, rs.getInt(2));
+        assertTrue("Expected rs.rowDeleted() to be false", !rs.rowDeleted());
+        assertTrue("Expected rs.rowUpdated() to be false", !rs.rowUpdated());
+        
+        rs.clearWarnings();
+        rs.deleteRow();
+        warn = rs.getWarnings();
+        assertWarning(warn, CURSOR_OPERATION_CONFLICT);
+        rs.relative(0);
+        assertTrue("Expected rs.rowUpdated() to be false", !rs.rowUpdated());
+        assertTrue("Expected rs.rowDeleted() to be false", !rs.rowDeleted());
+        assertEquals("Did not expect the resultset to be updated", oldValue, rs.getInt(2));
+        
+        rs.close();
+    }
+
+    /**
+     * Test that you get cursor operation conflict warning if updating 
+     * a row which has been deleted from the table, now using 
+     * positioned updates / deletes.
+     */
+    public void testCursorOperationConflictWarning2() 
+        throws SQLException 
+    {
+        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                          ResultSet.CONCUR_UPDATABLE);
+        s.setCursorName(getNextCursorName());
+        ResultSet rs = s.executeQuery("select * from t1");
+        rs.next();
+        con.createStatement().executeUpdate ("delete from t1 where id=" +
+                                             rs.getString("ID"));
+        
+        final int newValue = -3333;
+        final int oldValue = rs.getInt(2);
+        
+        Statement s3 = con.createStatement();
+        int updateCount = s3.executeUpdate
+            ("update t1 set A=" + newValue + 
+             " where current of " + rs.getCursorName());
+        
+        rs.relative(0);
+        SQLWarning warn = s3.getWarnings();
+        assertWarning(warn, CURSOR_OPERATION_CONFLICT);
+        assertTrue("Expected rs.rowUpdated() to be false", !rs.rowUpdated());
+        assertTrue("Expected rs.rowDeleted() to be false", !rs.rowDeleted());
+        assertEquals("Did not expect the resultset to be updated", oldValue, rs.getInt(2));
+        assertEquals("Expected update count to be 0", 0, updateCount);
+        
+        Statement s4 = con.createStatement();
+        updateCount = s4.executeUpdate("delete from t1 where current of " +
+                                       rs.getCursorName());
+        
+        rs.relative(0);
+        warn = s4.getWarnings();
+        assertWarning(warn, CURSOR_OPERATION_CONFLICT);
+        assertTrue("Expected rs.rowUpdated() to be false", !rs.rowUpdated());
+        assertTrue("Expected rs.rowDeleted() to be false", !rs.rowDeleted());
+        assertEquals("Did not expect the resultset to be updated", oldValue, rs.getInt(2));
+        assertEquals("Expected update count to be 0", 0, updateCount);
+        
+        rs.close();
+    }
     
     /**
      * Test that you can scroll forward and update indexed records in

@@ -29,6 +29,7 @@ import org.apache.derby.iapi.sql.conn.StatementContext;
 
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.ParameterValueSet;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
@@ -97,10 +98,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 	protected static final int ABSOLUTE = 7;
 	protected static final int RELATIVE = 8;
 
-	// mutable state
-	protected ExecRow currentRow;
-	//deleteRow & updateRow make rowData null so that ResultSet is not positioned on deleted/updated row.
-	private DataValueDescriptor[] rowData;
+	/** 
+	 * The currentRow contains the data of the current row of the resultset.
+	 * If the containing row array is null, the cursor is not postioned on a 
+	 * row 
+	 */
+	private final ExecRow currentRow;	
 	protected boolean wasNull;
     
     /**
@@ -114,8 +117,6 @@ public abstract class EmbedResultSet extends ConnectionChild
     boolean isClosed;
     
 	private boolean isOnInsertRow;
-	private ExecRow currentRowBeforeInsert;
-	private ExecRow insertRow = null;
 	private Object	currentStream;
 
 	// immutable state
@@ -180,10 +181,15 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	private final int concurrencyOfThisResultSet;
 
-	//copyOfDatabaseRow will keep the original contents of the columns of the current row which got updated.
-	//These will be used if user decides to cancel the changes made to the row using cancelRowUpdates.
-	private DataValueDescriptor[] copyOfDatabaseRow;
-	private boolean[] columnGotUpdated; //these are the columns which have been updated so far. Used to build UPDATE...WHERE CURRENT OF sql
+	/* updateRow is used to keep the values which are updated with updateXXX() 
+	 * calls. It is used by both insertRow() and updateRow(). 
+	 * It is initialized to null if the resultset is not updatable. 
+	 */
+	private final ExecRow updateRow;
+	
+	/* These are the columns which have been updated so far. 
+	 */
+	private boolean[] columnGotUpdated; 
 	private boolean currentRowHasBeenUpdated; //Gets set to true after first updateXXX on a row. Gets reset to false when the cursor moves off the row
 
     private int fetchDirection;
@@ -240,14 +246,26 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		// Fill in the column types
 		resultDescription = theResults.getResultDescription();
+		final ExecutionFactory factory = conn.getLanguageConnection().
+			getLanguageConnectionFactory().getExecutionFactory();
+		final int columnCount = getMetaData().getColumnCount();
+		this.currentRow = factory.getValueRow(columnCount);
+		currentRow.setRowArray(null);
 
 		// Only incur the cost of allocating and maintaining
 		// updated column information if the columns can be updated.
 		if (concurrencyOfThisResultSet == JDBC20Translation.CONCUR_UPDATABLE)
 		{
-		    //initialize arrays related to updateRow implementation
-		    columnGotUpdated = new boolean[getMetaData().getColumnCount()];
-		    copyOfDatabaseRow = new DataValueDescriptor[columnGotUpdated.length];
+			//initialize arrays related to updateRow implementation
+			columnGotUpdated = new boolean[columnCount];
+			updateRow = factory.getValueRow(columnCount);
+			for (int i = 1; i <= columnCount; i++) {
+				updateRow.setColumn(i, resultDescription.getColumnDescriptor(i).
+									getType().getNull());
+			}
+			initializeUpdateRowModifiers();
+		} else {
+			updateRow = null;
 		}
 
         // assign the max rows and maxfiled size limit for this result set
@@ -286,17 +304,22 @@ public abstract class EmbedResultSet extends ConnectionChild
 		}
 	}
 
-	// onRow protects us from making requests of
+	// checkOnRow protects us from making requests of
 	// resultSet that would fail with NullPointerExceptions
 	// or milder problems due to not having a row.
-	protected final DataValueDescriptor[] checkOnRow() throws SQLException	{
-
-		DataValueDescriptor[] theCurrentRow = rowData;
-
-		if (theCurrentRow == null)
+	protected final void checkOnRow() throws SQLException 
+	{
+		if (currentRow.getRowArray() == null) {
 			throw newSQLException(SQLState.NO_CURRENT_ROW);
+		} 
+	}
 
-		return theCurrentRow;
+	/**
+	 * Initializes the currentRowHasBeenUpdated and columnGotUpdated fields
+	 */
+	private void initializeUpdateRowModifiers() {
+		currentRowHasBeenUpdated = false;
+		Arrays.fill(columnGotUpdated, false);
 	}
 
 	/**
@@ -305,7 +328,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		@exception SQLException ResultSet is not on a row or columnIndex is out of range.
 	*/
 	final int getColumnType(int columnIndex) throws SQLException {
-		checkOnRow(); // first make sure there's a row
+		if (!isOnInsertRow) checkOnRow(); // first make sure there's a row
 		
 		if (columnIndex < 1 ||
 		    columnIndex > resultDescription.getColumnCount())
@@ -346,14 +369,6 @@ public abstract class EmbedResultSet extends ConnectionChild
                 return false;
             }
         }
-
-        if (columnGotUpdated != null)
-        {
-	        //since we are moving off of the current row, need to initialize state corresponding to updateRow implementation
-	        Arrays.fill(columnGotUpdated, false);
-	        currentRowHasBeenUpdated = false;
-        }
-
 	    return movePosition(NEXT, 0, "next");
 	}
 
@@ -384,6 +399,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 					setupContextStack();
 		    try {
 				LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
+				final ExecRow newRow;
 		    try {
 
 				/* Push and pop a StatementContext around a next call
@@ -401,38 +417,39 @@ public abstract class EmbedResultSet extends ConnectionChild
 				switch (position)
 				{
 					case BEFOREFIRST:
-						currentRow = theResults.setBeforeFirstRow();
+						newRow = theResults.setBeforeFirstRow();
 						break;
 
 					case FIRST:
-						currentRow = theResults.getFirstRow();
+						newRow = theResults.getFirstRow();
 						break;
 
 					case NEXT:
-						currentRow = theResults.getNextRow();
+						newRow = theResults.getNextRow();
 						break;
 
 					case LAST:
-						currentRow = theResults.getLastRow();
+						newRow = theResults.getLastRow();
 						break;
 
 					case AFTERLAST:
-						currentRow = theResults.setAfterLastRow();
+						newRow = theResults.setAfterLastRow();
 						break;
 
 					case PREVIOUS:
-						currentRow = theResults.getPreviousRow();
+						newRow = theResults.getPreviousRow();
 						break;
 
 					case ABSOLUTE:
-						currentRow = theResults.getAbsoluteRow(row);
+						newRow = theResults.getAbsoluteRow(row);
 						break;
 
 					case RELATIVE:
-						currentRow = theResults.getRelativeRow(row);
+						newRow = theResults.getRelativeRow(row);
 						break;
 
 					default:
+						newRow = null;
 						if (SanityManager.DEBUG)
 						{
 							SanityManager.THROWASSERT(
@@ -458,8 +475,14 @@ public abstract class EmbedResultSet extends ConnectionChild
 				else
 					topWarning.setNextWarning(w);
 			}
-
-		    boolean onRow = (currentRow!=null);
+			
+			boolean onRow = (newRow!=null);
+			if (onRow) {
+				currentRow.setRowArray(newRow.getRowArray());
+			} else {
+				currentRow.setRowArray(null);
+			}
+			
 
 			//if (onRow && !(currentRow instanceof org.apache.derby.impl.sql.execute.ValueRow))
 			//	System.out.println(currentRow.getClass());
@@ -496,11 +519,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 		     	owningStmt.resultSetClosing(this);
 		    }
 
-			rowData = onRow ? currentRow.getRowArray() : null;
-			
 			// Clear the indication of which columns were fetched as streams.
 			if (streamUsedFlags != null)
 			    Arrays.fill(streamUsedFlags, false);
+			if (columnGotUpdated != null && currentRowHasBeenUpdated) {
+				initializeUpdateRowModifiers();
+			}
 			
 			return onRow;
 			} finally {
@@ -595,8 +619,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 			}
 
 			// the idea is to release resources, so:
-			currentRow = null;
-			rowData = null;
+			currentRow.setRowArray(null);
 			rMetaData = null; // let it go, we can make a new one
 
 			// we hang on to theResults and messenger
@@ -2227,7 +2250,7 @@ public abstract class EmbedResultSet extends ConnectionChild
       checkUpdatableCursor(methodName);
 
       //3)Make sure JDBC ResultSet is positioned on a row
-      checkOnRow(); // first make sure there's a current row
+      if (!isOnInsertRow) checkOnRow(); // make sure there's a current row
       //in case of autocommit on, if there was an exception which caused runtime rollback in this transaction prior to this call,
       //the rollback code will mark the language resultset closed (it doesn't mark the JDBC ResultSet closed).
       //That is why alongwith the earlier checkIfClosed call in this method, there is a check for language resultset close as well.
@@ -2240,14 +2263,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 	//mark the column as updated and return DataValueDescriptor for it. It will be used by updateXXX methods to put new values
 	protected DataValueDescriptor getDVDforColumnToBeUpdated(int columnIndex, String updateMethodName) throws StandardException, SQLException {
       checksBeforeUpdateXXX(updateMethodName, columnIndex);
-      if (columnGotUpdated[columnIndex-1] == false) {//this is the first updateXXX call on this column
-        //this is the first updateXXX method call on this column. Save the original content of the column into copyOfDatabaseRow
-        //The saved copy of the column will be needed if cancelRowUpdates is issued
-        copyOfDatabaseRow[columnIndex - 1] = currentRow.getColumn(columnIndex).getClone();
-      }
       columnGotUpdated[columnIndex-1] = true;
-	    currentRowHasBeenUpdated = true;
-      return currentRow.getColumn(columnIndex);
+      currentRowHasBeenUpdated = true;
+      
+      return updateRow.getColumn(columnIndex);
 	}
 
     /* do following few checks before accepting insertRow
@@ -2850,7 +2869,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 				throw newSQLException(SQLState.BAD_SCALE_VALUE, new Integer(scale));
 
 			try {
-				DataValueDescriptor value = currentRow.getColumn(columnIndex);
+				DataValueDescriptor value = updateRow.getColumn(columnIndex);
 
 				int origvaluelen = value.getLength();
 				((VariableSizeDataValue)
@@ -3456,7 +3475,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                     if (columnGotUpdated[i-1]) {  
                         act.getParameterValueSet().
                                 getParameterForSet(paramPosition++).
-                                setValue(currentRow.getColumn(i));
+                                setValue(updateRow.getColumn(i));
                     }
                 }
                 // Don't see any timeout when inserting rows (use 0)
@@ -3530,7 +3549,7 @@ public abstract class EmbedResultSet extends ConnectionChild
             //in this for loop we are assigning values for parameters in sql constructed earlier with columnname=?,... 
             for (int i=1, paramPosition=0; i<=rd.getColumnCount(); i++) { 
                 if (columnGotUpdated[i-1])  //if the column got updated, do following
-                    act.getParameterValueSet().getParameterForSet(paramPosition++).setValue(currentRow.getColumn(i));
+                    act.getParameterValueSet().getParameterForSet(paramPosition++).setValue(updateRow.getColumn(i));
             }
             // Don't set any timeout when updating rows (use 0)
             org.apache.derby.iapi.sql.ResultSet rs = ps.execute(act, false, true, true, 0L); //execute the update where current of sql
@@ -3542,8 +3561,9 @@ public abstract class EmbedResultSet extends ConnectionChild
             rs.finish();
             //For forward only resultsets, after a update, the ResultSet will be positioned right before the next row.
             if (getType() == TYPE_FORWARD_ONLY) {
-                rowData = null;
-                currentRow = null;
+                currentRow.setRowArray(null);
+            } else {
+                movePosition(RELATIVE, 0, "relative");
             }
             lcc.popStatementContext(statementContext, null);
         } catch (StandardException t) {
@@ -3552,6 +3572,7 @@ public abstract class EmbedResultSet extends ConnectionChild
             if (statementContext != null)
                 lcc.popStatementContext(statementContext, null);
             restoreContextStack();
+            initializeUpdateRowModifiers();
         }
 			}
     }
@@ -3600,13 +3621,13 @@ public abstract class EmbedResultSet extends ConnectionChild
                 rs.finish();
                 //After a delete, the ResultSet will be positioned right before 
                 //the next row.
-                rowData = null;
-                currentRow = null;
+                currentRow.setRowArray(null);
                 lcc.popStatementContext(statementContext, null);
             } catch (StandardException t) {
                     throw closeOnTransactionError(t);
             } finally {
                 restoreContextStack();
+                initializeUpdateRowModifiers();
             }
         }
     }
@@ -3663,17 +3684,9 @@ public abstract class EmbedResultSet extends ConnectionChild
         checksBeforeUpdateOrDelete("cancelRowUpdates", -1);
         
         checkNotOnInsertRow();
-        
-        if (currentRowHasBeenUpdated == false) return; //nothing got updated on this row so cancelRowUpdates is a no-op in this case.
 
-        for (int i=0; i < columnGotUpdated.length; i++){
-            if (columnGotUpdated[i] == true) currentRow.setColumn(i+1, copyOfDatabaseRow[i]);//if column got updated, resotre the original data
-            columnGotUpdated[i] = false;
-        }
-        currentRowHasBeenUpdated = false;
-        //rowData needs to be refreshed with the currentRow otherwise it will continue to have changes made by updateXXX methods
-        rowData = currentRow.getRowArray();
-        }
+        initializeUpdateRowModifiers();        
+    }
 
 	/**
 	 * JDBC 2.0
@@ -3703,30 +3716,13 @@ public abstract class EmbedResultSet extends ConnectionChild
 		synchronized (getConnectionSynchronization()) {
 			try {
 				// initialize state corresponding to insertRow/updateRow impl.
-				for (int i=0; i < columnGotUpdated.length; i++) {
-					columnGotUpdated[i] = false;
-				}
-				currentRowHasBeenUpdated = false;
-
-				// Remember position
-				if (!isOnInsertRow) {
-					currentRowBeforeInsert = currentRow;
-				}
-
-				isOnInsertRow = true;
-
-				// If insertRow has not been allocated yet, get new insertRow
-				if (insertRow == null) {
-					insertRow = stmt.lcc.getExecutionContext().
-						getExecutionFactory().getValueRow(columnGotUpdated.length);
-				}
+				initializeUpdateRowModifiers();
+ 				isOnInsertRow = true;
+				
 				for (int i=1; i <= columnGotUpdated.length; i++) {
-					insertRow.setColumn(i, 
+					updateRow.setColumn(i, 
 						resultDescription.getColumnDescriptor(i).getType().getNull());
 				}
-				// Set currentRow to insertRow
-				currentRow = insertRow;
-				rowData = currentRow.getRowArray();
 			} catch (Throwable ex) {
 				handleException(ex);
 			}
@@ -3753,20 +3749,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 			try {
 
 				if (isOnInsertRow) {
-					// Get position previous to moveToInsertRow
-					currentRow = currentRowBeforeInsert;
-					currentRowBeforeInsert = null;
-
 					// initialize state corresponding to insertRow/updateRow impl.
-					for (int i=0; i < columnGotUpdated.length; i++) {
-						columnGotUpdated[i] = false;
-					}
-					currentRowHasBeenUpdated = false;
-
-					// Get rowData
-					if (currentRow != null) {
-						rowData = currentRow.getRowArray();
-					}
+					initializeUpdateRowModifiers();
 
 					isOnInsertRow = false;
 				}
@@ -3803,7 +3787,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 			boolean pushStack = false;
 			try {
-				DataValueDescriptor dvd = currentRow.getColumn(columnIndex);
+				DataValueDescriptor dvd = getColumn(columnIndex);
 
 				if (wasNull = dvd.isNull())
 					return null;
@@ -3855,7 +3839,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 			boolean pushStack = false;
 			try {
 
-				DataValueDescriptor dvd = currentRow.getColumn(columnIndex);
+				DataValueDescriptor dvd = getColumn(columnIndex);
 
 				if (wasNull = dvd.isNull())
 					return null;
@@ -4201,16 +4185,16 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	  closeCurrentStream();
 
-	   DataValueDescriptor[] theCurrentRow = checkOnRow(); // first make sure there's a row
-		
-	   try {
-		   return theCurrentRow[columnIndex - 1];
-	   } catch (ArrayIndexOutOfBoundsException aoobe) {
-			throw newSQLException(SQLState.COLUMN_NOT_FOUND, 
-				                new Integer(columnIndex));
-	   }
-
-	   // return theCurrentRow.getColumn(columnIndex);
+	  if (columnIndex < 1 || columnIndex > currentRow.nColumns()) {
+		  throw newSQLException(SQLState.COLUMN_NOT_FOUND, 
+								new Integer(columnIndex));
+	  }
+	  if (isOnInsertRow || currentRowHasBeenUpdated && columnGotUpdated[columnIndex -1]) {
+		  return updateRow.getColumn(columnIndex);
+	  } else {
+		  checkOnRow(); // make sure there's a row
+		  return currentRow.getColumn(columnIndex);
+	  }
 	}
 
 

@@ -160,8 +160,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     protected long absoluteRowNumberForTheIntendedRow_;
 
-    // This variable helps keep track of whether cancelRowUpdates() should have any effect.
-    protected boolean updateRowCalled_ = false;
     private boolean isOnInsertRow_ = false;  // reserved for later
     protected boolean isOnCurrentRow_ = true;
     public int rowsReceivedInCurrentRowset_ = 0;  // keep track of the number of rows received in the
@@ -3552,7 +3550,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
         // need to cancel updates if the actual update was not successful at the server.
         // alternative is to check for updateCount_ in "positionToCurrentRowAndUpdate".
-        // cancelRowUpdates if updateCount_ != 1, else set updateRowCalled_ to true.
+        // cancelRowUpdates if updateCount_ != 1
         try {
             if (isRowsetCursor_ || 
                     sensitivity_ == sensitivity_sensitive_dynamic__ ||
@@ -3561,19 +3559,16 @@ public abstract class ResultSet implements java.sql.ResultSet,
             } else {
                 positionToCurrentRowAndUpdate();
             }
-            updateRowCalled_ = true;
-        } catch (SqlException e) {
-            try {
-                cancelRowUpdates();
-            } catch ( SQLException se ) {
-                throw new SqlException(se);
-            }
-            throw e;
+        } finally {
+            resetUpdatedColumns();
         }
 
-        // other result set types don't implement detectability
+        // Ensure the data is reset
         if (resultSetType_ == ResultSet.TYPE_SCROLL_INSENSITIVE) {
-            cursor_.setIsRowUpdated(true);
+            if (preparedStatementForUpdate_.updateCount_ > 0) {
+                // This causes a round-trip
+                getAbsoluteRowset(absolutePosition_);
+            }
         }
 
         return true;
@@ -3624,12 +3619,17 @@ public abstract class ResultSet implements java.sql.ResultSet,
             positionToCurrentRowAndDelete();
         }
 
-        Boolean nullIndicator = Cursor.ROW_IS_NULL;
         if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) {
             cursor_.isUpdateDeleteHole_ = true;
         } else {
-            cursor_.isUpdateDeleteHoleCache_.set((int) currentRowInRowset_, nullIndicator);
-            cursor_.isUpdateDeleteHole_ = ((Boolean) cursor_.isUpdateDeleteHoleCache_.get((int) currentRowInRowset_)).booleanValue();
+            if (preparedStatementForDelete_.updateCount_ > 0) {
+                
+                cursor_.isUpdateDeleteHoleCache_.set((int) currentRowInRowset_,
+                                                     Cursor.ROW_IS_NULL);
+                cursor_.isUpdateDeleteHole_ = 
+                    ((Boolean) cursor_.isUpdateDeleteHoleCache_.
+                     get((int) currentRowInRowset_)).booleanValue();
+            }
         }
     }
 
@@ -3690,12 +3690,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (!isValidCursorPosition_)
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
-
-                // if updateRow() has already been called, then cancelRowUpdates should have
-                // no effect.  updateRowCalled_ is reset to false as soon as the cursor moves to a new row.
-                if (!updateRowCalled_) {
-                    resetUpdatedColumns();
-                }
+                // Reset updated columns
+                resetUpdatedColumns();
             }
         }
         catch ( SqlException se )
@@ -4554,7 +4550,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 columnUpdated_[i] = false;
             }
         }
-        updateRowCalled_ = false;
     }
 
     private final long getRowUncast() {
