@@ -94,6 +94,11 @@ public class checkDataSource
 	
 	// DERBY-1183 getCursorName not correct after first statement execution
 	private static boolean hasGetCursorNameBug = TestUtil.isDerbyNetClientFramework();
+	
+    // DERBY-1326 - Network server may abandon sessions when Derby system is shutdown
+    // and this causes intermittent hangs in the client
+	private static boolean hangAfterSystemShutdown = TestUtil.isDerbyNetClientFramework();
+
 	/**
      * A hashtable of opened connections.  This is used when checking to
      * make sure connection strings are unique; we need to make sure all
@@ -293,11 +298,13 @@ public class checkDataSource
 		testPoolReset("XADataSource", dsx.getXAConnection());
 
 
-
-		try {
-			TestUtil.getConnection("","shutdown=true");
-		} catch (SQLException sqle) {
-			JDBCDisplayUtil.ShowSQLException(System.out, sqle);
+		// DERBY-1326 - hang in client after Derby system shutdown
+		if(! hangAfterSystemShutdown) {
+			try {
+				TestUtil.getConnection("","shutdown=true");
+			} catch (SQLException sqle) {
+				JDBCDisplayUtil.ShowSQLException(System.out, sqle);
+			}
 		}
 
 		dmc = ij.startJBMS();

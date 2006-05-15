@@ -8,7 +8,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 method calls on a closed connection
 DriverManager  <closedconn>.close() no error
 DriverManager  <closedconn>.createStatement() 08003 - No current connection.
-DriverManager  <closedstmt>.execute() null - Invalid operation: statement closed
+DriverManager  <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on DataSource
   isolation level 2
   auto commit     true
@@ -20,7 +20,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 method calls on a closed connection
 DataSource <closedconn>.close() no error
 DataSource <closedconn>.createStatement() 08003 - No current connection.
-DataSource <closedstmt>.execute() null - Invalid operation: statement closed
+DataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on ConnectionPoolDataSource
   isolation level 2
   auto commit     true
@@ -36,7 +36,7 @@ EVENT(1):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
 ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-ConnectionPoolDataSource <closedstmt>.execute() null - Invalid operation: statement closed
+ConnectionPoolDataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on ConnectionPoolDataSource
   isolation level 2
   auto commit     true
@@ -52,11 +52,11 @@ EVENT(1):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
 ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-ConnectionPoolDataSource <closedstmt>.execute() null - Invalid operation: statement closed
+ConnectionPoolDataSource <closedstmt>.execute() 08003 - No current connection.
 Changes rolled back OK in auto closed pooled connection
 EVENT(1):connectionClosed
-expected java.sql.SQLException: 'ResultSet' already closed.
-expected java.sql.SQLException: Invalid operation: statement closed
+expected java.sql.SQLException: ResultSet not open.  Verify that autocommit is OFF.
+expected java.sql.SQLException: No current connection.
 Start testPoolReset ConnectionPoolDataSource
 IDENTITY_VAL_LOCAL=1
 IDENTITY_VAL_LOCAL=2
@@ -77,7 +77,7 @@ EVENT(3):connectionClosed
 method calls on a closed connection
 XADataSource <closedconn>.close() no error
 XADataSource <closedconn>.createStatement() 08003 - No current connection.
-XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+XADataSource <closedstmt>.execute() 08003 - No current connection.
 Changes rolled back OK in auto closed local XAConnection
 EVENT(3):connectionClosed
 Start testPoolReset XADataSource
@@ -85,7 +85,6 @@ IDENTITY_VAL_LOCAL=1
 IDENTITY_VAL_LOCAL=2
 IDENTITY_VAL_LOCAL=3
 End testPoolReset XADataSource
-ERROR XJ015: DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ015, SQLERRMC: Derby system shutdown.
 Running connection checks on DriverManager 
   isolation level 2
   auto commit     true
@@ -96,7 +95,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 method calls on a closed connection
 DriverManager  <closedconn>.close() no error
 DriverManager  <closedconn>.createStatement() 08003 - No current connection.
-DriverManager  <closedstmt>.execute() null - Invalid operation: statement closed
+DriverManager  <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on DataSource
   isolation level 2
   auto commit     true
@@ -108,7 +107,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: setTypeMap.
 method calls on a closed connection
 DataSource <closedconn>.close() no error
 DataSource <closedconn>.createStatement() 08003 - No current connection.
-DataSource <closedstmt>.execute() null - Invalid operation: statement closed
+DataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on ConnectionPoolDataSource
   isolation level 2
   auto commit     true
@@ -124,7 +123,7 @@ EVENT(2):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
 ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-ConnectionPoolDataSource <closedstmt>.execute() null - Invalid operation: statement closed
+ConnectionPoolDataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on ConnectionPoolDataSource
   isolation level 2
   auto commit     true
@@ -140,7 +139,7 @@ EVENT(2):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
 ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-ConnectionPoolDataSource <closedstmt>.execute() null - Invalid operation: statement closed
+ConnectionPoolDataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on XADataSource
   isolation level 2
   auto commit     true
@@ -156,7 +155,7 @@ EVENT(4):connectionClosed
 method calls on a closed connection
 XADataSource <closedconn>.close() no error
 XADataSource <closedconn>.createStatement() 08003 - No current connection.
-XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on XADataSource
   isolation level 2
   auto commit     true
@@ -172,7 +171,7 @@ EVENT(4):connectionClosed
 method calls on a closed connection
 XADataSource <closedconn>.close() no error
 XADataSource <closedconn>.createStatement() 08003 - No current connection.
-XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+XADataSource <closedstmt>.execute() 08003 - No current connection.
 EVENT(5):connectionClosed
 Running connection checks on Global XADataSource
   isolation level 2
@@ -188,7 +187,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Global XADataSource <closedconn>.close() no error
 Global XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Global XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Global XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on Global XADataSource
   isolation level 2
   auto commit     false
@@ -203,7 +202,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Global XADataSource <closedconn>.close() no error
 Global XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Global XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Global XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on Switch to local XADataSource
   isolation level 2
   auto commit     true
@@ -219,7 +218,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to local XADataSource <closedconn>.close() no error
 Switch to local XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to local XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Switch to local XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on Switch to local XADataSource
   isolation level 2
   auto commit     true
@@ -235,7 +234,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to local XADataSource <closedconn>.close() no error
 Switch to local XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to local XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Switch to local XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on Switch to global XADataSource
   isolation level 2
   auto commit     false
@@ -251,7 +250,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to global XADataSource <closedconn>.close() no error
 Switch to global XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to global XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Switch to global XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running connection checks on Switch to global XADataSource
   isolation level 2
   auto commit     false
@@ -267,7 +266,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to global XADataSource <closedconn>.close() no error
 Switch to global XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to global XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
+Switch to global XADataSource <closedstmt>.execute() 08003 - No current connection.
 initial local
   isolation level READ_COMMITTED
   auto commit     true
@@ -457,7 +456,7 @@ Patricio update count 1
 conn4 autcommit true
 acxs 1
 acxs 2
-autocommitxastart expected 'ResultSet' already closed.
+autocommitxastart expected ResultSet not open.  Verify that autocommit is OFF.
 acxs 1
 acxs 2
 autocommitxastart expected  : XAException - XAER_OUTSIDE : Error executing a XAResource.start(), Server returned XAER_OUTSIDE

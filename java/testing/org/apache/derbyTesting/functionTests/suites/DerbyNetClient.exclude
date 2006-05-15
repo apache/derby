@@ -23,7 +23,3 @@ jdbcapi/dataSourceReference.java
 largedata/LobLimits.java
 jdbc4/TestDbMetaData.java
 jdbc4/TestJDBC40Exception.java
-#temporarily disable checkDataSourceTests with client
-#failing (hanging?)  on jdk 1.5/jdk 1.6
-jdbcapi/checkDataSource.java
-jdbcapi/checkDataSource30.java
