@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.harness;
 
 import java.io.IOException;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -157,6 +158,21 @@ public class MultiTest
 		log.println("test ran "+duration+" ms");
 		log.println("total memory is "+Runtime.getRuntime().totalMemory());
 		log.println("free memory  is "+Runtime.getRuntime().freeMemory());
+		// Delete the .out files for Testers that did not report errors.
+		for (i = 0; i < max; i++)
+		{
+			if ( testers[i].noFailure() )
+			{
+				log.println("Deleting " + "Tester" + (i+1) + ".out" + "(" + outputDir + ")");
+				File out = new File(outputDir, "Tester" + (i+1) + ".out");
+				out.delete();
+			}
+			else
+			{
+				log.println("Tester" + (i+1) + " failed.");
+			}
+		}
+        
 		System.exit(0);
 	}
 
