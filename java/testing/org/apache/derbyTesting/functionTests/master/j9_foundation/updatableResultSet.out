@@ -1,29 +1,13 @@
 Start testing delete and update using JDBC2.0 updateable resultset apis
 Negative Testl - request for scroll insensitive updatable resultset will give a read only scroll insensitive resultset
-WARNING 01J03: Scroll sensitive and scroll insensitive updatable ResultSets are not currently implemented.
-requested TYPE_SCROLL_INSENSITIVE, CONCUR_UPDATABLE but that is not supported
-Make sure that we got TYPE_SCROLL_INSENSITIVE? true
-Make sure that we got CONCUR_READ_ONLY? true
-ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
-othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
-deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
-JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
-SQL State : XJ083
-Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
-SQL State : XJ083
-Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
-Negative Test2 - request for scroll sensitive updatable resultset will give a read only scroll insensitive resultset
+This test has been removed because scrollable insensitive updatable result sets have been implemented.
+Negative Test2 - request for scroll sensitive updatable resultset will give an updatable scroll insensitive resultset
 WARNING 01J02: Scroll sensitive cursors are not currently implemented.
-WARNING 01J03: Scroll sensitive and scroll insensitive updatable ResultSets are not currently implemented.
 requested TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE but that is not supported
 Jira issue Derby-154 : When client connects to Network Server using JCC, it incorrectly shows support for scroll sensitive updatable resultsets
 Make sure that we got TYPE_SCROLL_INSENSITIVE? true
-Make sure that we got CONCUR_READ_ONLY? true
-JDBC 2.0 updatable resultset api will fail on this resultset because this is not an updatable resultset
-SQL State : XJ083
-Got expected exception 'deleteRow' not allowed because the ResultSet is not an updatable ResultSet. 
-SQL State : XJ083
-Got expected exception 'updateRow' not allowed because the ResultSet is not an updatable ResultSet. 
+Make sure that we got CONCUR_UPDATABLE? true
+Rest of the test removed because scrollable insensitive updatable result sets have been implemented.
 Negative Test3 - request a read only resultset and attempt deleteRow and updateRow on it
 Make sure that we got CONCUR_READ_ONLY? true
 Now attempting to send a deleteRow on a read only resultset.
@@ -51,7 +35,6 @@ Got expected exception 'updateRow' not allowed because the ResultSet is not an u
 Negative Test6 - request updatable resultset for sql with FOR READ ONLY clause
 Make sure that we got CONCUR_READ_ONLY? true
 Jira issue Derby-159 : Warnings raised by Derby are not getting passed to the Client in Network Server Mode
-Will see the warnings in embedded mode only
 WARNING 01J06: ResultSet not updatable. Query does not qualify to generate an updatable ResultSet.
 Now attempting to send a delete on a sql with FOR READ ONLY clause.
 SQL State : XJ083
@@ -2771,7 +2754,7 @@ SQL State: 24000
 Got expected exception: Invalid cursor state - no current row.
 Negative test 40 - Try to insert row from currentRow
 SQL State: XJ086
-Got expected exception: This method cannot be invoked unless the cursor is positioned on the insert row.
+Got expected exception: This method cannot be invoked while the cursor is not on the insert row or if the concurrency of this ResultSet object is CONCUR_READ_ONLY.
 Positive test 41 - try to insertRow from all posible positions
 Positive test 42 - InsertRow leaving a nullable columns = NULL
 Positive and negative tests 43 - Commit while on insertRow
