@@ -24,3 +24,4 @@ jdbcapi/Stream.java
 jdbcapi/UpdateXXXTest.junit
 jdbcapi/SURQueryMixTest.junit
 jdbcapi/SURTest.junit
+jdbcapi/URCoveringIndexTest.junit

@@ -1332,12 +1332,6 @@ StoredPreparedStatement
 Conglomerate
 -----
 <systemid>
-<StoredPreparedStatement>APP.<sysname> -> <Conglomerate>BAR.<sysname>
-StoredPreparedStatement
-<systemid>
-Conglomerate
------
-<systemid>
 <StoredPreparedStatement>APP.<sysname> -> <Conglomerate>BAR.IX3
 StoredPreparedStatement
 <systemid>
@@ -1480,6 +1474,18 @@ V1
 View
 T6
 ColumnsInTable
+-----
+<systemid>
+<StoredPreparedStatement>APP.<sysname> -> <Conglomerate>BAR.<sysname>
+StoredPreparedStatement
+<systemid>
+Conglomerate
+-----
+<systemid>
+<StoredPreparedStatement>APP.<sysname> -> <Conglomerate>BAR.<sysname>
+StoredPreparedStatement
+<systemid>
+Conglomerate
 -----
 ========== SYSFILES ==========
 <systemid>

@@ -2721,7 +2721,8 @@ public class FromBaseTable extends FromTable
 		}
 		
 		/* No need to go to the data page if this is a covering index */
-		if (ap.getCoveringIndexScan())
+		/* Derby-1087: use data page when returning an updatable resultset */
+		if (ap.getCoveringIndexScan() && (!cursorTargetTable()))
 		{
 			/* Massage resultColumns so that it matches the index. */
 			resultColumns = newResultColumns(resultColumns,

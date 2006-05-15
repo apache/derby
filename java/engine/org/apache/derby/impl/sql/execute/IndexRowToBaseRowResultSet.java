@@ -105,17 +105,6 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	protected boolean currentRowPrescanned;
 	private boolean sourceIsForUpdateIndexScan;
 
-	// for scrollable insensitive updatable result sets, the rowLocation of each
-	// row is stored in a hash table, and used to position the scan by calling 
-	// the method positionScanAtRowLocation. When this method is called, the 
-	// baseRowLocation will be set to the value of the cached rowLocation, and
-	// it will not be necessary to read the row from the B-tree in order to get
-	// the rowLocation of the current row.
-	// If positionFromRowLocation is true, then baseRowLocation can be used for
-	// fetching the currentRow, and it is not necessary to read the rowLocation
-	// from the B-tree, otherwise, the rowLocation must be read from the B-tree.
-	private boolean positionFromRowLocation;
-
     //
     // class interface
     //
@@ -223,7 +212,6 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		}
 
 		constructorTime += getElapsedMillis(beginTime);
-		this.positionFromRowLocation = false;
 
     }
 
@@ -614,7 +602,6 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		throws StandardException 
 	{
 		baseRowLocation = rl;
-		positionFromRowLocation = true;
 		source.positionScanAtRowLocation(rl);
 	}
 
@@ -645,84 +632,22 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 			return null;
 		}
 
-		// If positionFromRowLocation is true, we can use the baseRowLocation
-		// directly and do not need to read the rowLocation from the b-tree
-		// before fetching the row.
-		if (positionFromRowLocation) {
-			sourceRow = activation.getExecutionFactory().
-					getValueRow(indexCols.length);
-			sourceRow.setRowArray(rowArray);
-			// Fetch the columns coming from the heap
-			boolean row_exists = 
-				baseCC.fetch(
-					baseRowLocation, rowArray, (FormatableBitSet) null);
-			if (row_exists) {
-				setCurrentRow(sourceRow);
-			} else {
-				clearCurrentRow();
-				currentRow = null;
-			}
-			return currentRow;
-		}
-		
-		/* Call the child result set to get it's current row.
-		 * If no row exists, then return null, else requalify it
-		 * before returning.
-		 */
-		sourceRow = ((CursorResultSet) source).getCurrentRow();
-		if (sourceRow != null)
-		{
-			/*
-			** Presumably, if the index row is still there, the RowLocation
-			** it contains is still valid.  This means we don't have to
-			** check whether the row is still there.
-			*/
-			if (SanityManager.DEBUG) {
-				SanityManager.ASSERT(
-					sourceRow.getColumn(sourceRow.nColumns())
-														instanceof RowLocation,
-					"Last column of source row is not a RowLocation"
-						);
-			}
-
-			baseRowLocation = (RowLocation)
-						sourceRow.getColumn(sourceRow.nColumns());
-
-			// Fetch the columns coming from the heap
-			boolean row_exists = 
-                baseCC.fetch(
-                    baseRowLocation, rowArray, (FormatableBitSet) null);
-
-            if (row_exists)
-            {
-				// Copy the columns coming from the index into resultRow
-				for (int index = 0; index < indexCols.length; index++)
-				{
-					if (indexCols[index] != -1)
-					{
-						compactRow.setColumn(
-										index + 1,
-										sourceRow.getColumn(indexCols[index] + 1));
-					}
-				}
-
-                setCurrentRow(compactRow);
-
-                currentRow = compactRow;
-            }
-            else
-            {
-                clearCurrentRow();
-
-                currentRow = null;
-            }
-
-        } else {
+		// We do not need to read the row from the index first, since we already 
+		// have the rowLocation of the current row and can read it directly from 
+		// the heap.
+		sourceRow = activation.getExecutionFactory().
+				getValueRow(indexCols.length);
+		sourceRow.setRowArray(rowArray);
+		// Fetch the columns coming from the heap
+		boolean row_exists = 
+			baseCC.fetch(
+				baseRowLocation, rowArray, (FormatableBitSet) null);
+		if (row_exists) {
+			setCurrentRow(sourceRow);
+		} else {
 			clearCurrentRow();
-
 			currentRow = null;
 		}
-		
 		return currentRow;
 	}
 
