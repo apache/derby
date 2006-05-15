@@ -27,10 +27,10 @@ Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin
 TEST_DS(user=calvin) OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=4
 TEST_DS (user=calvin,securityMechanism=4) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=3 - EXCEPTION null password not supported
-TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=9 - EXCEPTION null password not supported
-TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=3 - EXCEPTION Password can not be null.
+TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  Password can not be null.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=9 - EXCEPTION Password can not be null.
+TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  Password can not be null.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes
 TEST_DS(password=hobbes) OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=4
@@ -43,117 +43,117 @@ Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;
 TEST_DS() OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=4
 TEST_DS (,securityMechanism=4) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=3 - EXCEPTION null password not supported
-TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=9 - EXCEPTION null password not supported
-TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=3 - EXCEPTION Password can not be null.
+TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  Password can not be null.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=9 - EXCEPTION Password can not be null.
+TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  Password can not be null.
 -----
 Testing with derby.drda.securityMechanism=USER_ONLY_SECURITY
 Checking security mechanism authentication with DriverManager
-T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=3 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=3 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat
 T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max
-T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4
 T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4
-SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  Connection authorization failure occurred.  Reason: security mechanism not supported
+DERBY-1080  EXCEPTION ()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 ******testAllCombinationsOfUserPasswordsSecMecInput***
-Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
+Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=4
 TEST_DS (user=calvin;password=hobbes,securityMechanism=4) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=3 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=3 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin
 TEST_DS(user=calvin) OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=4
 TEST_DS (user=calvin,securityMechanism=4) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=3 - EXCEPTION null password not supported
-TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=9 - EXCEPTION null password not supported
-TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
-Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=3 - EXCEPTION Password can not be null.
+TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  Password can not be null.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=9 - EXCEPTION Password can not be null.
+TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  Password can not be null.
+Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=4
 TEST_DS (password=hobbes,securityMechanism=4) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=3 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=3 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;
 TEST_DS() OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=4
 TEST_DS (,securityMechanism=4) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=3 - EXCEPTION null password not supported
-TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=9 - EXCEPTION null password not supported
-TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=3 - EXCEPTION Password can not be null.
+TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  Password can not be null.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=9 - EXCEPTION Password can not be null.
+TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  Password can not be null.
 -----
 Testing with derby.drda.securityMechanism=CLEAR_TEXT_PASSWORD_SECURITY
 Checking security mechanism authentication with DriverManager
 T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=3
-T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 SECMEC_USRIDPWD: OK
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  Connection authorization failure occurred.  Reason: security mechanism not supported
+DERBY-1080  EXCEPTION ()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 ******testAllCombinationsOfUserPasswordsSecMecInput***
-Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=3
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (user=calvin,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=3 - EXCEPTION null password not supported
-TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=9 - EXCEPTION null password not supported
-TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
-Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (user=calvin,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=3 - EXCEPTION Password can not be null.
+TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  Password can not be null.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=9 - EXCEPTION Password can not be null.
+TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  Password can not be null.
+Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=3
 TEST_DS (password=hobbes,securityMechanism=3) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS()EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=3 - EXCEPTION null password not supported
-TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=9 - EXCEPTION null password not supported
-TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat; - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS()EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=3 - EXCEPTION Password can not be null.
+TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  Password can not be null.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=9 - EXCEPTION Password can not be null.
+TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  Password can not be null.
 -----
 Testing with derby.drda.securityMechanism=ENCRYPTED_USER_AND_PASSWORD_SECURITY
 Checking security mechanism authentication with DriverManager
-T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=3 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=3 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee
 T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9
-T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 SECMEC_EUSRIDPWD: OK
 Test DERBY-1080
 withConnectionPooling
@@ -162,36 +162,36 @@ OK
 ******testAllCombinationsOfUserPasswordsSecMecInput***
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes
 TEST_DS(user=calvin;password=hobbes) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=3 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=3 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9
 TEST_DS (user=calvin;password=hobbes,securityMechanism=9) OK
-Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (user=calvin,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=3 - EXCEPTION null password not supported
-TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=9 - EXCEPTION null password not supported
-TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (user=calvin,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=3 - EXCEPTION Password can not be null.
+TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  Password can not be null.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=9 - EXCEPTION Password can not be null.
+TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  Password can not be null.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes
 TEST_DS(password=hobbes) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=3 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=3 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9
 TEST_DS (password=hobbes,securityMechanism=9) OK
-Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS()EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=4 - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-TEST_DS (,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=3 - EXCEPTION null password not supported
-TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=9 - EXCEPTION null password not supported
-TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat; - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS()EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
+TEST_DS (,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=3 - EXCEPTION Password can not be null.
+TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  Password can not be null.
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=9 - EXCEPTION Password can not be null.
+TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  Password can not be null.
 -----
 Testing with derby.drda.securityMechanism=INVALID_VALUE
 EXPECTED EXCEPTION DRDA_InvalidValue.U:Invalid value, INVALID_VALUE, for derby.drda.securityMechanism.

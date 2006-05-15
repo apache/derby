@@ -5,14 +5,14 @@ T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;create=true;u
 T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat
 T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max
 T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee
-T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
 T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4
 T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4
 SECMEC_USRIDPWD: OK
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+DERBY-1080  EXCEPTION ()  Security exception encountered, see next exception for details.
 ******testAllCombinationsOfUserPasswordsSecMecInput***
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes
 TEST_DS(user=calvin;password=hobbes) OK
@@ -20,8 +20,8 @@ TEST_DS(user=calvin;password=hobbes) OK
 TEST_DS (user=calvin;password=hobbes,securityMechanism=4) OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=3
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin
 TEST_DS(user=calvin) OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=4
@@ -36,8 +36,8 @@ TEST_DS(password=hobbes) OK
 TEST_DS (password=hobbes,securityMechanism=4) OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=3
 TEST_DS (password=hobbes,securityMechanism=3) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
-TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;
 TEST_DS() OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=4
@@ -53,14 +53,14 @@ T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;
 T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat
 T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max
 T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
-T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
 T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4
 T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+DERBY-1080  EXCEPTION ()  Security exception encountered, see next exception for details.
 ******testAllCombinationsOfUserPasswordsSecMecInput***
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
@@ -68,8 +68,8 @@ TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connect
 TEST_DS (user=calvin;password=hobbes,securityMechanism=4) OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=3 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin
 TEST_DS(user=calvin) OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=4
@@ -84,8 +84,8 @@ TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  Connection authenti
 TEST_DS (password=hobbes,securityMechanism=4) OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=3 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
-TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;
 TEST_DS() OK
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=4
@@ -101,14 +101,14 @@ T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;
 T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee
-T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
 T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 SECMEC_USRIDPWD: OK
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+DERBY-1080  EXCEPTION ()  Security exception encountered, see next exception for details.
 ******testAllCombinationsOfUserPasswordsSecMecInput***
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes
 TEST_DS(user=calvin;password=hobbes) OK
@@ -116,8 +116,8 @@ TEST_DS(user=calvin;password=hobbes) OK
 TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=3
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
@@ -132,8 +132,8 @@ TEST_DS(password=hobbes) OK
 TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=3
 TEST_DS (password=hobbes,securityMechanism=3) OK
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
-TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat; - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 TEST_DS()EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
@@ -149,14 +149,14 @@ T4: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;
 T1: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 T2: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=max - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 T3: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
-T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+T5: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
 T6: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 T8: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=neelima;password=lee;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
-SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+SECMEC_EUSRIDPWD:EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+DERBY-1080  EXCEPTION ()  Security exception encountered, see next exception for details.
 ******testAllCombinationsOfUserPasswordsSecMecInput***
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
@@ -164,8 +164,8 @@ TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connect
 TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=3 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;user=calvin;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
@@ -180,8 +180,8 @@ TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  Connection authenti
 TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=3 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authentication failure occurred.  Reason: security mechanism not supported.
-# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
-TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details. Caused by exception class java.security.NoSuchProviderException: null
+# jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;password=hobbes;securityMechanism=9 - EXCEPTION Security exception encountered, see next exception for details.
+TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Security exception encountered, see next exception for details.
 Test: jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat; - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
 TEST_DS()EXCEPTION getDataSourceConnection()  Connection authentication failure occurred.  Reason: security mechanism not supported.
 # jdbc:derby://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;;securityMechanism=4 - EXCEPTION Connection authentication failure occurred.  Reason: security mechanism not supported.
