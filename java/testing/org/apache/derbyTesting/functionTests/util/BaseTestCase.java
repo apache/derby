@@ -22,6 +22,10 @@ package org.apache.derbyTesting.functionTests.util;
 import junit.framework.TestCase;
 import java.io.PrintStream;
 import java.sql.SQLException;
+import java.security.AccessController;
+
+import java.security.PrivilegedActionException;
+
 /**
  * Base class for JUnit tests.
  */
@@ -91,5 +95,30 @@ public class BaseTestCase
     }
 
     private final static PrintStream out = System.out;
+    
+    /**
+     * Set system property
+     *
+     * @param name name of the property
+     * @param value value of the property
+     */
+    protected static void setSystemProperty(final String name, 
+					    final String value)
+	throws PrivilegedActionException {
+	
+	AccessController.doPrivileged
+	    (new java.security.PrivilegedAction(){
+		    
+		    public Object run(){
+			System.setProperty( name, value);
+			return null;
+			
+		    }
+		    
+		}
+	     );
+	
+    }
+    
     
 } // End class BaseTestCase

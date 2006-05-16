@@ -36,8 +36,9 @@ import java.sql.SQLException;
 
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.tools.ij;
+import org.apache.derby.client.am.SqlCode;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-
+import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 
 /**
  *
@@ -47,7 +48,7 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  * See SuicideOfStreaming_app.properties also.
  *
  */
-public class SuicideOfStreaming {
+public class SuicideOfStreaming extends BaseJDBCTestCase {
     
     private static NetworkServerControl networkServer = null;
     
@@ -55,7 +56,7 @@ public class SuicideOfStreaming {
 	
 	try{
 	    
-	    ij.getPropertyArg(args);
+	    setSystemProperty("derby.debug.suicideOfLayerBStreaming","true");
 	    
 	    startServer();
 	    
@@ -64,8 +65,10 @@ public class SuicideOfStreaming {
 	    
 	    shutdownServer();
 	    
+	    fail("Streaming was not encountered exception. Suicide of streaming seems to be failed.");
+
 	}catch(Throwable t){
-	    t.printStackTrace();
+	    examineThrowable(t);
 	    
 	}
     }
@@ -78,7 +81,7 @@ public class SuicideOfStreaming {
 	       InstantiationException
     {
 
-	Connection conn = getConnection();
+	Connection conn = connectServer();
 	
 	Statement createTableSt = conn.createStatement();
 	createTableSt.execute("create table TEST_TABLE( TEST_COL blob( 65536 ))");
@@ -99,7 +102,7 @@ public class SuicideOfStreaming {
     {
 	
 	Connection conn = 
-	    getConnection();
+	    connectServer();
 	
 	conn.setAutoCommit(false);
 	
@@ -202,7 +205,7 @@ public class SuicideOfStreaming {
     }
     
     
-    private static Connection getConnection()
+    private static Connection connectServer()
 	throws SQLException {
 	
 	return DriverManager.getConnection(TestUtil.getJdbcUrlPrefix("localhost",
@@ -214,4 +217,61 @@ public class SuicideOfStreaming {
     }
 
     
+    
+    private static void examineThrowable( Throwable t ) {
+	
+	if(t instanceof SQLException){
+	    examineSQLException( ( SQLException ) t );
+	    
+	}else{
+	    t.printStackTrace();
+	    fail( t.getMessage() );
+	    
+	}
+
+    }
+    
+
+    private static void examineSQLException( SQLException sqlex ) {
+	
+	if( ( usingDerbyNetClient() && 
+	      examineExpectedInDerbyNetClient(sqlex) ) || 
+	    ( usingDerbyNet() && 
+	      examineExpectedInDerbyNet(sqlex) ) ){
+	    
+	    return;
+
+	}
+	    
+	fail(sqlex.getMessage() + "," +
+	     "SqlState: " + sqlex.getSQLState() + "," + 
+	     "SqlCode: " + sqlex.getErrorCode() );
+	
+    }
+
+
+    private static boolean examineExpectedInDerbyNetClient( SQLException sqlex ) {
+	return 
+	    sqlex.getSQLState().equals("08006") && 
+	    sqlex.getErrorCode() == SqlCode.disconnectError.getCode();
+    }
+
+
+    private static boolean examineExpectedInDerbyNet( SQLException sqlex ) {
+	return sqlex.getErrorCode() == SqlCode.disconnectError.getCode();
+    }
+    
+    
+    //JUnit test support.
+    //
+    public SuicideOfStreaming(){
+	super("testSuicideOfStreaming");
+    }
+    
+    
+    public void testSuicideOfStreaming(){
+	main(new String[0]);
+    }
+    
 }
+
