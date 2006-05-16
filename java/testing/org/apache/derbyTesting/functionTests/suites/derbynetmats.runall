@@ -28,7 +28,6 @@ jdbcapi/parameterMetaDataJdbc30.java
 jdbcapi/savepointJdbc30.java
 lang/big.sql
 lang/bug5054.java
-lang/ConcurrentImplicitCreateSchema.java
 lang/forupdate.sql
 lang/holdCursorIJ.sql
 lang/holdCursorJavaReflection.java
