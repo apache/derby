@@ -36,9 +36,7 @@ import java.sql.SQLException;
   * <P>
   * This class can only be used within an SQL-J statement.  Using the methods
   * in application-side Java code results in Exceptions being thrown.
-  * <P>
-  * <I>IBM Corp reserves the right to change, rename, or
-  * remove this interface at any time.</I>
+  *
   * @see org.apache.derby.vti.VTIEnvironment
  */
 public interface VTICosting

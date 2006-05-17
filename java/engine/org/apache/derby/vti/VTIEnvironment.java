@@ -26,8 +26,7 @@ package org.apache.derby.vti;
   * 
   * The interface is
   * passed as a parameter to various methods in the Virtual Table interface.
-  * <I>IBM Corp. reserves the right to change, rename, or
-  * remove this interface at any time.</I>
+  *
   * @see org.apache.derby.vti.VTICosting
   */
 public interface VTIEnvironment
