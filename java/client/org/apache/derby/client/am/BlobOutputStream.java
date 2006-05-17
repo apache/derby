@@ -41,6 +41,7 @@ public class BlobOutputStream extends java.io.OutputStream {
         blob_.binaryString_[(int) offset_ + blob_.dataOffset_ - 1] = (byte) b;
         blob_.binaryStream_ = new java.io.ByteArrayInputStream(blob_.binaryString_);
         blob_.sqlLength_ = blob_.binaryString_.length - blob_.dataOffset_;
+        offset_++;
     }
 
     public void write(byte b[], int off, int len) throws java.io.IOException {
@@ -55,8 +56,8 @@ public class BlobOutputStream extends java.io.OutputStream {
         byte[] newbuf = new byte[(int) offset_ - 1 + len + blob_.dataOffset_];
         System.arraycopy(blob_.binaryString_, 0, newbuf, 0, (int) offset_ - 1 + blob_.dataOffset_);
         blob_.binaryString_ = newbuf;
-        for (int i = 0; i < len; i++) {
-            blob_.binaryString_[(int) offset_ + i + blob_.dataOffset_ - 1] = b[off + i];
+        for (int i = 0; i < len; i++, offset_++) {
+            blob_.binaryString_[(int) offset_ + blob_.dataOffset_ - 1] = b[off + i];
         }
         blob_.binaryStream_ = new java.io.ByteArrayInputStream(blob_.binaryString_);
         blob_.sqlLength_ = blob_.binaryString_.length - blob_.dataOffset_;

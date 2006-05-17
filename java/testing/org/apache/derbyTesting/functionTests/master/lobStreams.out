@@ -1,0 +1,11 @@
+Test lob stream with multiple writes starting
+START: testBlobWrite3Param
+testBlobWrite3Param finished
+START: testBlobWrite1Param
+testBlobWrite1Param finished
+START: testClobWrite3Param
+testClobWrite3Param finished
+START: testClobWrite1Param
+testClobWrite1Param finished
+FINISHED TEST blobSetBinaryStream :-)
+Test lob stream with multiple writes finished
