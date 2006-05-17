@@ -777,5 +777,5 @@ ${j14lib}/jce.jar:
 ${j14lib}/charsets.jar
 
 compile.classpath=${java13compile.classpath}
-javadoc.tool=${java.home}/bin/javadoc
+javadoc.tool.jdk14=${java.home}/bin/javadoc
 
