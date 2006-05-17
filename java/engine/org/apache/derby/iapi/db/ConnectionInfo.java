@@ -36,9 +36,6 @@ import java.sql.SQLException;
  * <p>
  * Use the methods of this class only within an SQL-J statement; do not call 
  * them directly. 
- * <p>
- * <i>IBM Corp. reserves the right to change, rename or remove this class or
- * any of the methods in the class at any time.</i>
  */
  
 public abstract class ConnectionInfo

@@ -66,10 +66,6 @@ import java.sql.SQLException;
  *
    <p>This class can only be used within an SQL-J statement, a Java procedure or a server side Java method.
    <p>This class can be accessed using the class alias <code> CONSISTENCYCHECKER </code> in SQL-J statements.
- * <p>
- * <I>IBM Corp. reserves the right to change, rename, or
- * remove this class or any of the the methods on the
- * class at any time.</I>
  */
 public class ConsistencyChecker
 {

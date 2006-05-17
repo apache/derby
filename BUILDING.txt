@@ -214,6 +214,7 @@ The downloaded file should be copied to directory
 Note: After following the steps in sections 2.2.4-2.2.8 of this
 document, you should have the following:
 
+${derby.source}/tools/java/empty.jar
 ${derby.source}/tools/java/javacc.jar
 ${derby.source}/tools/java/jakarta-oro-2.0.8.jar
 ${derby.source}/tools/java/jce1_2_2.jar 

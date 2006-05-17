@@ -43,11 +43,7 @@ import java.io.File;
  * operations on the database such as  backup and recovery,
  * and all other things that are associated with the database itself.
  * 
- * <P>
- * <I>IBM Corp. reserves the right to change, rename, or
- * remove this interface at any time.</I>
-
-   @see Factory
+ *  @see org.apache.derby.iapi.db.Factory
  */
 public interface Database
 {
