@@ -73,6 +73,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
     // blob is either bytes or stream
     private boolean         isBytes;
     private InputStream     myStream;
+    
     /*
      * Length of the BLOB if known. Set to -1 if
      * the current length of the BLOB is not known.
@@ -89,6 +90,10 @@ final class EmbedBlob extends ConnectionChild implements Blob
     // and trashing them (to set the position of the stream etc.)
     private static int BLOB_BUF_SIZE = 4096;
     private byte buf[];
+    
+    //This boolean variable indicates whether the Blob object has
+    //been invalidated by calling free() on it
+    private boolean isValid = true;
 
     /*
       This constructor should only be called by EmbedResultSet.getBlob
@@ -215,6 +220,10 @@ final class EmbedBlob extends ConnectionChild implements Blob
     public long length()
         throws SQLException
     {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
+        
         if (myLength != -1)
             return myLength;
         
@@ -284,6 +293,10 @@ final class EmbedBlob extends ConnectionChild implements Blob
     public byte[] getBytes(long startPos, int length)
         throws SQLException
     {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
+        
         boolean pushStack = false;
         try
         {
@@ -369,6 +382,10 @@ final class EmbedBlob extends ConnectionChild implements Blob
     public java.io.InputStream getBinaryStream()
         throws SQLException
     {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
+        
         boolean pushStack = false;
         try
         {
@@ -420,6 +437,10 @@ final class EmbedBlob extends ConnectionChild implements Blob
     public long position(byte[] pattern, long start)
         throws SQLException
     {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
+        
         boolean pushStack = false;
         try
         {
@@ -515,6 +536,10 @@ final class EmbedBlob extends ConnectionChild implements Blob
     public long position(Blob pattern, long start)
         throws SQLException
     {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
+        
         boolean pushStack = false;
         try
         {
@@ -744,10 +769,34 @@ final class EmbedBlob extends ConnectionChild implements Blob
     //	JDBC 4.0	-	New public methods
     //
     /////////////////////////////////////////////////////////////////////////
-
+    /**
+     * This method frees the <code>Blob</code> object and releases the resources that 
+     * it holds. The object is invalid once the <code>free</code>
+     * method is called. If <code>free</code> is called multiple times, the subsequent
+     * calls to <code>free</code> are treated as a no-op.
+     * 
+     * @throws SQLException if an error occurs releasing
+     * the Blob's resources
+     */
     public void free()
         throws SQLException {
-        throw Util.notImplemented();
+        //calling free() on a already freed object is treated as a no-op
+        if (!isValid) return;
+        
+        //now that free has been called the Blob object is no longer
+        //valid
+        isValid = false;
+        
+        //initialialize length to default value -1
+        myLength = -1;
+        
+        //if it is a stream then close it.
+        //if a array of bytes then initialize it to null
+        //to free up space
+        if (!isBytes)
+            ((Resetable)myStream).closeStream();
+        else
+            myBytes = null;
     }
     
     /**
@@ -767,5 +816,17 @@ final class EmbedBlob extends ConnectionChild implements Blob
     public InputStream getBinaryStream(long pos, long length)
         throws SQLException {
         throw Util.notImplemented();
+    }
+    
+    /*
+     * Checks is isValid is true. If it is not true throws 
+     * a SQLException stating that a method has been called on
+     * an invalid LOB object
+     *
+     * throws SQLException if isvalid is not true.
+     */
+    private void checkValidity() throws SQLException{
+        if(!isValid)
+            throw newSQLException(SQLState.LOB_OBJECT_INVALID);
     }
 }

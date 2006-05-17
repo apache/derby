@@ -20,9 +20,9 @@
 
 package org.apache.derby.client.am;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.sql.SQLException;
-
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Clob extends Lob implements java.sql.Clob {
@@ -47,6 +47,10 @@ public class Clob extends Lob implements java.sql.Clob {
     private PreparedStatement internalLengthStmt_ = null;
 
     protected String encoding_ = "UNICODE";
+    
+    //This boolean variable indicates whether the Clob object has
+    //been invalidated by calling free() on it
+    private boolean isValid = true;
 
     //---------------------constructors/finalizer---------------------------------
     public Clob(Agent agent, String string) {
@@ -144,6 +148,11 @@ public class Clob extends Lob implements java.sql.Clob {
     // ---------------------------jdbc 2------------------------------------------
     // Create another method lengthX for internal calls
     public long length() throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -170,6 +179,11 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     public String getSubString(long pos, int length) throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -221,6 +235,11 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     public java.io.Reader getCharacterStream() throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -253,6 +272,11 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     public java.io.InputStream getAsciiStream() throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -285,6 +309,11 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     public long position(String searchstr, long start) throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -330,6 +359,11 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     public long position(java.sql.Clob searchstr, long start) throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -385,6 +419,11 @@ public class Clob extends Lob implements java.sql.Clob {
     //---------------------------- jdbc 3.0 -----------------------------------
 
     public int setString(long pos, String str) throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -405,6 +444,11 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     public int setString(long pos, String str, int offset, int len) throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -463,6 +507,11 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     public java.io.OutputStream setAsciiStream(long pos) throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -484,6 +533,11 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     public java.io.Writer setCharacterStream(long pos) throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -505,6 +559,11 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     public void truncate(long len) throws SQLException {
+        
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         try
         {
             synchronized (agent_.connection_) {
@@ -541,10 +600,64 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     //---------------------------- jdbc 4.0 -------------------------------------
-
+    /**
+     * This method frees the <code>Clob</code> object and releases the resources the resources
+     * that it holds.  The object is invalid once the <code>free</code> method
+     * is called. If <code>free</code> is called multiple times, the
+     * subsequent calls to <code>free</code> are treated as a no-op.
+     *
+     * @throws SQLException if an error occurs releasing
+     * the Clob's resources
+     */
     public void free()
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("free()");
+        
+        //calling free() on a already freed object is treated as a no-op
+        if (!isValid) return;
+        
+        //now that free has been called the Blob object is no longer
+        //valid
+        isValid = false;
+        
+        if(isString()) {
+            string_ = null;
+            utf8String_ = null;
+        }
+        if(isAsciiStream()) {
+            try {
+                asciiStream_.close();
+            }
+            catch(IOException ioe) {
+                throw new SqlException(null, new ClientMessageId(SQLState.IO_ERROR_UPON_LOB_FREE)).getSQLException();
+            }
+        }
+        if(isUnicodeStream()) {
+            try {
+                unicodeStream_.close();
+            }
+            catch(IOException ioe) {
+                throw new SqlException(null, new ClientMessageId(SQLState.IO_ERROR_UPON_LOB_FREE)).getSQLException();
+            }
+        }
+        if(isCharacterStream()) {
+            try {
+                characterStream_.close();
+            }
+            catch(IOException ioe) {
+                throw new SqlException(null, new ClientMessageId(SQLState.IO_ERROR_UPON_LOB_FREE)).getSQLException();
+            }
+        }
+        
+        lengthInBytes_ = 0;
+        
+        if (internalLengthStmt_ != null) {
+            try {
+                internalLengthStmt_.closeX();
+            }
+            catch(SqlException sqle) {
+                throw sqle.getSQLException();
+            }
+        }
     }
 
     public Reader getCharacterStream(long pos, long length)
@@ -647,5 +760,18 @@ public class Clob extends Lob implements java.sql.Clob {
 
             length();
             return lengthInBytes_;
+    }
+    
+    /*
+     * Checks is isValid is true. If it is not true throws 
+     * a SQLException stating that a method has been called on
+     * an invalid LOB object
+     *
+     * throws SQLException if isvalid is not true.
+     */
+    private void checkValidity() throws SQLException{
+        if(!isValid)
+            throw new SqlException(null,new ClientMessageId(SQLState.LOB_OBJECT_INVALID))
+                                                  .getSQLException();
     }
 }

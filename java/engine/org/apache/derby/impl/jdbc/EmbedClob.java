@@ -74,6 +74,10 @@ final class EmbedClob extends ConnectionChild implements Clob
     private boolean         isString;
     private InputStream     myStream;
     private String          myString;
+    
+    //This boolean variable indicates whether the Clob object has
+    //been invalidated by calling free() on it
+    private boolean isValid = true;
 
     /*
     This constructor should only be called by EmbedResultSet.getClob
@@ -136,6 +140,9 @@ final class EmbedClob extends ConnectionChild implements Clob
 
     public long length() throws SQLException
     {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
         // if we have a string, not a stream
         if (isString)
             return myString.length();
@@ -199,6 +206,10 @@ final class EmbedClob extends ConnectionChild implements Clob
 
     public String getSubString(long pos, int length) throws SQLException
     {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         if (pos < 1)
             throw Util.generateCsSQLException(
                 SQLState.BLOB_BAD_POSITION, new Long(pos));
@@ -268,6 +279,9 @@ final class EmbedClob extends ConnectionChild implements Clob
 
     public java.io.Reader getCharacterStream() throws SQLException
     {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
 
         // if we have a string, not a stream
         if (isString)
@@ -306,6 +320,9 @@ final class EmbedClob extends ConnectionChild implements Clob
 
     public java.io.InputStream getAsciiStream() throws SQLException
     {
+                //call checkValidity to exit by throwing a SQLException if
+                //the Clob object has been freed by calling free() on it
+                checkValidity();
 		return new ReaderToAscii(getCharacterStream());
     }
 
@@ -344,6 +361,10 @@ final class EmbedClob extends ConnectionChild implements Clob
     public long position(String searchStr, long start)
         throws SQLException
     {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         boolean pushStack = false;
         try
         {
@@ -583,6 +604,10 @@ compareArrays:
     public long position(Clob searchClob, long start)
         throws SQLException
     {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
         boolean pushStack = false;
         try
         {
@@ -745,7 +770,7 @@ restartScan:
 	public java.io.OutputStream setAsciiStream(long pos)
     throws SQLException
 	{
-		throw Util.notImplemented();
+                throw Util.notImplemented();
 	}
 
 	/**
@@ -784,10 +809,28 @@ restartScan:
     //	JDBC 4.0	-	New public methods
     //
     /////////////////////////////////////////////////////////////////////////
-	
+    /**
+     * This method frees the <code>Clob</code> object and releases the resources the resources
+     * that it holds.  The object is invalid once the <code>free</code> method
+     * is called. If <code>free</code> is called multiple times, the
+     * subsequent calls to <code>free</code> are treated as a no-op.
+     *
+     * @throws SQLException if an error occurs releasing
+     * the Clob's resources
+     */
     public void free()
         throws SQLException {
-        throw Util.notImplemented();
+        //calling free() on a already freed object is treated as a no-op
+        if (!isValid) return;
+        
+        //now that free has been called the Clob object is no longer
+        //valid
+        isValid = false;
+        
+        if (!isString)
+            ((Resetable)myStream).closeStream();
+        else
+            myString = null;
     }
 
     public java.io.Reader getCharacterStream(long pos, long length)
@@ -810,5 +853,16 @@ restartScan:
         }
 		return org.apache.derby.impl.jdbc.EmbedResultSet.noStateChangeException(t);
 	}
-
+        
+        /*
+         * Checks is isValid is true. If it is not true throws 
+         * a SQLException stating that a method has been called on
+         * an invalid LOB object
+         *
+         * throws SQLException if isValid is not true.
+         */
+        private void checkValidity() throws SQLException{
+            if(!isValid)
+                throw newSQLException(SQLState.LOB_OBJECT_INVALID);
+        }
 }

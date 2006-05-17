@@ -20,12 +20,17 @@
 
 package org.apache.derby.client.am;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Blob extends Lob implements java.sql.Blob {
+    
+    //This boolean variable indicates whether the Blob object has
+    //been invalidated by calling free() on it
+    private boolean isValid = true;
+    
     //-----------------------------state------------------------------------------
 
     byte[] binaryString_ = null;
@@ -62,6 +67,9 @@ public class Blob extends Lob implements java.sql.Blob {
     // ---------------------------jdbc 2------------------------------------------
 
     public long length() throws SQLException {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
         try
         {
             synchronized (agent_.connection_) {
@@ -84,6 +92,9 @@ public class Blob extends Lob implements java.sql.Blob {
     // can return an array that may be have a length shorter than the supplied
     // length (no padding occurs)
     public byte[] getBytes(long pos, int length) throws SQLException {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
         try
         {
             synchronized (agent_.connection_) {
@@ -131,6 +142,9 @@ public class Blob extends Lob implements java.sql.Blob {
 
 
     public java.io.InputStream getBinaryStream() throws SQLException {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
         try
         {
             synchronized (agent_.connection_) {
@@ -162,6 +176,9 @@ public class Blob extends Lob implements java.sql.Blob {
     }
 
     public long position(byte[] pattern, long start) throws SQLException {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
         try
         {
             synchronized (agent_.connection_) {
@@ -192,6 +209,9 @@ public class Blob extends Lob implements java.sql.Blob {
     }
 
     public long position(java.sql.Blob pattern, long start) throws SQLException {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
         try
         {
             synchronized (agent_.connection_) {
@@ -229,6 +249,9 @@ public class Blob extends Lob implements java.sql.Blob {
 
 
     public int setBytes(long pos, byte[] bytes) throws SQLException {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
         try
         {
             synchronized (agent_.connection_) {
@@ -249,6 +272,9 @@ public class Blob extends Lob implements java.sql.Blob {
     }
 
     public int setBytes(long pos, byte[] bytes, int offset, int len) throws SQLException {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
         try
         {
             synchronized (agent_.connection_) {
@@ -325,6 +351,9 @@ public class Blob extends Lob implements java.sql.Blob {
     }
 
     public java.io.OutputStream setBinaryStream(long pos) throws SQLException {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
         synchronized (agent_.connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "setBinaryStream", (int) pos);
@@ -339,6 +368,9 @@ public class Blob extends Lob implements java.sql.Blob {
     }
 
     public void truncate(long len) throws SQLException {
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
         try
         {
             synchronized (agent_.connection_) {
@@ -368,10 +400,37 @@ public class Blob extends Lob implements java.sql.Blob {
     }
 
     // -------------------------- JDBC 4.0 -----------------------------------
-
+    
+    /**
+     * This method frees the <code>Blob</code> object and releases the resources that 
+     * it holds. The object is invalid once the <code>free</code>
+     * method is called. If <code>free</code> is called multiple times, the subsequent
+     * calls to <code>free</code> are treated as a no-op.
+     * 
+     * @throws SQLException if an error occurs releasing
+     * the Blob's resources
+     */
     public void free()
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("free()");
+        
+        //calling free() on a already freed object is treated as a no-op
+        if (!isValid) return;
+        
+        //now that free has been called the Blob object is no longer
+        //valid
+        isValid = false;
+        
+        if(isBinaryStream()) {
+            try {
+                binaryStream_.close();
+            }
+            catch(IOException ioe) {
+                throw new SqlException(null, new ClientMessageId(SQLState.IO_ERROR_UPON_LOB_FREE)).getSQLException();
+            }
+        }
+        else {
+            binaryString_ = null;
+        }
     }
 
     public InputStream getBinaryStream(long pos, long length)
@@ -417,5 +476,18 @@ public class Blob extends Lob implements java.sql.Blob {
         }
 
         return true;
+    }
+    
+    /*
+     * Checks is isValid is true. If it is not true throws 
+     * a SQLException stating that a method has been called on
+     * an invalid LOB object
+     *
+     * throws SQLException if isvalid is not true.
+     */
+    private void checkValidity() throws SQLException{
+        if(!isValid)
+            throw new SqlException(null,new ClientMessageId(SQLState.LOB_OBJECT_INVALID))
+                                                  .getSQLException();
     }
 }
