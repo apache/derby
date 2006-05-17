@@ -1,3 +1,4 @@
 store/aes.sql
 store/encryptParams.sql
 store/encryptionKey.sql
+store/encryptDatabaseTest1.sql

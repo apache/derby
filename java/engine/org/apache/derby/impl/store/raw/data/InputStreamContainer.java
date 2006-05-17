@@ -250,4 +250,19 @@ final class InputStreamContainer extends FileContainer  {
                 SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
 	}
 
+
+    /**
+     * Encrypt the container.  There is no support to encrypt 
+     * this type of containers. 
+     * 
+     * @exception StandardException Standard Derby error policy 
+     */
+	protected void encryptContainer(BaseContainerHandle handle, 
+                                    String newFilePath)
+	    throws StandardException
+	{
+        throw StandardException.newException(
+                SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
+	}
+
 }

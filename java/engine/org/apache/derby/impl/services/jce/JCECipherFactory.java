@@ -37,7 +37,7 @@ import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.util.StringUtil;
 
 import java.util.Properties;
-
+import java.util.Enumeration;
 import java.security.Key;
 import java.security.Provider;
 import java.security.SecureRandom;
@@ -98,6 +98,11 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 
 	private SecretKey mainSecretKey;
 	private byte[] mainIV;
+
+    // properties that needs to be stored in the
+    // in the service.properties file.
+    private Properties persistentProperties;
+
 
 	/**
 	    Amount of data that is used for verification of external encryption key
@@ -378,6 +383,7 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 
         boolean provider_or_algo_specified = false;
 		boolean storeProperties = create;
+        persistentProperties = new Properties();
 
 		String externalKey = properties.getProperty(Attribute.CRYPTO_EXTERNAL_KEY);
 		if (externalKey != null) {
@@ -435,7 +441,8 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 		// explictly putting the properties back into the properties
 		// saves then in service.properties at create time.
         if (storeProperties)
-			properties.put(Attribute.CRYPTO_ALGORITHM, cryptoAlgorithm);
+			persistentProperties.put(Attribute.CRYPTO_ALGORITHM, 
+                                     cryptoAlgorithm);
 
         int firstSlashPos = cryptoAlgorithm.indexOf('/');
         int lastSlashPos = cryptoAlgorithm.lastIndexOf('/');
@@ -559,7 +566,8 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 
 				generatedKey = handleBootPassword(create, properties);
 				if(create)
-				   properties.put(Attribute.CRYPTO_KEY_LENGTH,keyLengthBits+"-"+generatedKey.length);
+				   persistentProperties.put(Attribute.CRYPTO_KEY_LENGTH,
+                                            keyLengthBits+"-"+generatedKey.length);
 			}
 
 			// Make a key and IV object out of the generated key
@@ -568,12 +576,14 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 
 			if (create)
 			{
-				properties.put(Attribute.DATA_ENCRYPTION, "true");
+				persistentProperties.put(Attribute.DATA_ENCRYPTION, "true");
 
 				// Set two new properties to allow for future changes to the log and data encryption
 				// schemes. This property is introduced in version 10 , value starts at 1.
-				properties.put(RawStoreFactory.DATA_ENCRYPT_ALGORITHM_VERSION,String.valueOf(1));
-				properties.put(RawStoreFactory.LOG_ENCRYPT_ALGORITHM_VERSION,String.valueOf(1));
+				persistentProperties.put(RawStoreFactory.DATA_ENCRYPT_ALGORITHM_VERSION,
+                                               String.valueOf(1));
+				persistentProperties.put(RawStoreFactory.LOG_ENCRYPT_ALGORITHM_VERSION,
+                                               String.valueOf(1));
 			}
 
 			return;
@@ -633,7 +643,8 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 			//
 			generatedKey = generateUniqueBytes();
 
-			properties.put(RawStoreFactory.ENCRYPTED_KEY, saveSecretKey(generatedKey, bootPassword));
+			persistentProperties.put(RawStoreFactory.ENCRYPTED_KEY, 
+                                           saveSecretKey(generatedKey, bootPassword));
 
 		}
 		else
@@ -648,6 +659,27 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 	{
 
 	}
+
+    /* 
+     * put all the encyrpion cipger related properties that has to 
+     * be made peristent into the database service properties list.
+     * @param  properties  properties object that is used to store 
+     *                     cipher properties persistently. 
+     */
+    public void saveProperties(Properties properties) 
+    {
+        // put the cipher properties to be persistent into the 
+        // system perisistent properties. 
+        for (Enumeration e = persistentProperties.keys(); 
+             e.hasMoreElements(); ) 
+        {
+            String key = (String) e.nextElement();
+            properties.put(key, persistentProperties.get(key));
+		}
+
+        // clear the cipher properties to be persistent. 
+        persistentProperties = null;
+    }
 
 
 	/**

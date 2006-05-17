@@ -1,0 +1,96 @@
+ij> -- This script tests configuring an un-enctypted database for encryption. 
+disconnect;
+ij> ---test configure the database for encrypion with encryption key.
+connect 'wombat_key;create=true';
+ij> create table t1(a int ) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(2) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(3) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(4) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(5) ;
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'wombat_key;shutdown=true';
+ERROR 08006: Database 'wombat_key' shutdown.
+ij> -- configure the database for encrypion with external encryption key.
+connect 'jdbc:derby:wombat_key;dataEncryption=true;encryptionKey=61626364656667686961626364656568';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> insert into t1 values(6);
+1 row inserted/updated/deleted
+ij> insert into t1 values(7);
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'wombat_key;shutdown=true';
+ERROR 08006: Database 'wombat_key' shutdown.
+ij> connect 'jdbc:derby:wombat_key;encryptionKey=61626364656667686961626364656568';
+ij> select * from t1 ;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+ij> disconnect;
+ij> connect 'wombat_key;shutdown=true';
+ERROR 08006: Database 'wombat_key' shutdown.
+ij> -- test confugring the database for encrypion with a boot password. 
+connect 'wombat_pwd;create=true';
+ij> create table t2(a int ) ;
+0 rows inserted/updated/deleted
+ij> insert into t2 values(1) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values(2) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values(3) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values(4) ;
+1 row inserted/updated/deleted
+ij> insert into t2 values(5) ;
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'wombat_pwd;shutdown=true';
+ERROR 08006: Database 'wombat_pwd' shutdown.
+ij> ---configure the database for encrypion with a boot password.
+connect 'jdbc:derby:wombat_pwd;dataEncryption=true;bootPassword=xyz1234abc';
+ij> select * from t2;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+ij> insert into t2 values(6);
+1 row inserted/updated/deleted
+ij> insert into t2 values(7);
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'wombat_pwd;shutdown=true';
+ERROR 08006: Database 'wombat_pwd' shutdown.
+ij> connect 'jdbc:derby:wombat_pwd;bootPassword=xyz1234abc';
+ij> select * from t2 ;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+ij> 

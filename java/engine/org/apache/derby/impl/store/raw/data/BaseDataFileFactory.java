@@ -324,12 +324,6 @@ public final class BaseDataFileFactory
 		if (!isReadOnly())		// read only db, not interested in filelock
 			getJBMSLockOnDB(identifier, uf, dataDirectory);
 
-		// restoreFrom and createFrom operations also need to know if database 
-        // is encrypted
-		String dataEncryption = 
-            startParams.getProperty(Attribute.DATA_ENCRYPTION);
-
-		databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue();
 
 		//If the database is being restored/created from backup
 		//the restore the data directory(seg*) from backup
@@ -344,6 +338,11 @@ public final class BaseDataFileFactory
 		{
 			try
             {
+                // restoreFrom and createFrom operations also need to know if database 
+                // is encrypted
+                String dataEncryption = 
+                    startParams.getProperty(Attribute.DATA_ENCRYPTION);
+                databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue();
 				restoreDataDirectory(restoreFrom);
 			}
             catch(StandardException se)
@@ -2102,16 +2101,24 @@ public final class BaseDataFileFactory
 		return databaseEncrypted;
 	}
 
+    public void setDatabaseEncrypted()
+	{
+		databaseEncrypted = true;
+	}
+
 	public int encrypt(
     byte[]  cleartext, 
     int     offset, 
     int     length, 
     byte[]  ciphertext, 
-    int     outputOffset)
+    int     outputOffset,
+    boolean newEngine)
 		 throws StandardException
 	{
 		return rawStoreFactory.encrypt(
-                    cleartext, offset, length, ciphertext, outputOffset);
+                    cleartext, offset, length, 
+                    ciphertext, outputOffset, 
+                    newEngine);
 	}
 
 	public int decrypt(
@@ -2125,6 +2132,13 @@ public final class BaseDataFileFactory
 		return rawStoreFactory.decrypt(
                 ciphertext, offset, length, cleartext, outputOffset);
 	}
+
+    public void encryptAllContainers(RawTransaction t) throws StandardException
+    {
+        EncryptData ed = new EncryptData(this);
+        // encrypt all the conatiners in the databse
+        ed.encryptAllContainers(t);
+    }
 
 	/**
 		Returns the encryption block size used by the algorithm at time of
@@ -2422,7 +2436,7 @@ public final class BaseDataFileFactory
      * with other privileged actions execution in this class.
      * @return An array of all the file names in seg0.
      **/
-	private synchronized String[] getContainerNames()
+    synchronized String[] getContainerNames()
 	{
         actionCode = GET_CONTAINER_NAMES_ACTION;
         try{

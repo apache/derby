@@ -1707,6 +1707,13 @@ public interface StoredFormatIds {
         public static final int LOGOP_COMPRESS_SPACE =
                 (MIN_ID_2 + 454);
 
+   		/* org.apache.derby.impl.store.raw.data.EncryptContainerOperation */
+        public static final int LOGOP_ENCRYPT_CONTAINER =
+                (MIN_ID_2 + 459);
+
+  		/* org.apache.derby.impl.store.raw.data.EncryptContainerUndoOperation */
+        public static final int LOGOP_ENCRYPT_CONTAINER_UNDO =
+                (MIN_ID_2 + 460);
 
         /*******************************************************************
         **
@@ -1827,7 +1834,7 @@ public interface StoredFormatIds {
          * Make sure this is updated when a new module is added
          */
         public static final int MAX_ID_2 =
-                (MIN_ID_2 + 458);
+                (MIN_ID_2 + 460);
 
         // DO NOT USE 4 BYTE IDS ANYMORE
         static public final int MAX_ID_4 =

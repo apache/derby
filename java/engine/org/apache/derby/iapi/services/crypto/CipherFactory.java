@@ -89,6 +89,8 @@ public interface CipherFactory
 	public void verifyKey(boolean create, StorageFactory storageFactory,Properties properties)
 		throws StandardException;
 
+    public void saveProperties(Properties properties);
+
 }
 
 

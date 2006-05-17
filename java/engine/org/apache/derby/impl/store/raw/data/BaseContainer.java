@@ -873,6 +873,19 @@ abstract class BaseContainer implements Lockable {
 											 String backupContainerPath) throws StandardException ;
 
 
+    /**
+     * Create encrypted version of the  container with the 
+     * user specified encryption properties. 
+     *
+     * @param handle the container handle.
+     * @param newFilePath file to store the new encrypted version of the container
+     * @exception StandardException Standard Derby error policy 
+     */
+	protected abstract void  encryptContainer(BaseContainerHandle handle, 
+                                              String newFilePath) 
+        throws StandardException ;
+
+
 	/*
 	** Methods to be used by sub-classes.
 	*/

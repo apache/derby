@@ -2876,11 +2876,6 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 												   DEFAULT_LOG_BUFFER_SIZE);
 		jbmsVersion = Monitor.getMonitor().getEngineVersion();
 
-		String dataEncryption = 
-            startParams.getProperty(Attribute.DATA_ENCRYPTION);
-
-		databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue();
-
 		
 		String logArchiveMode = 
             startParams.getProperty(Property.LOG_ARCHIVE_MODE);
@@ -3959,6 +3954,27 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		return databaseEncrypted;
 	}
 
+
+    /*
+     * Set that the database is encrypted, all the data in the 
+     * transaction log  should be encrypted. 
+     */
+    public  void setDatabaseEncrypted() 
+    {
+        databaseEncrypted = true;
+    }
+
+    /*
+     * setup log for encryption. 
+     */
+    public  void setupLogEncryption() throws StandardException
+    {
+        // switch the database to a new log file, so that 
+        // new encrytion will start on new log file. 
+        switchLogFile();
+    }
+
+
 	/**
 		@see RawStoreFactory#encrypt
 		@exception StandardException Standard Cloudscape Error Policy
@@ -3967,7 +3983,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						  byte[] ciphertext, int outputOffset)
 		 throws StandardException
 	{
-		return rawStoreFactory.encrypt(cleartext, offset, length, ciphertext, outputOffset);
+        return rawStoreFactory.encrypt(cleartext, offset, length, 
+                                       ciphertext, outputOffset, false);
 	}
 
 	/**

@@ -269,7 +269,8 @@ public interface DataFactory extends Corruptable {
 		@exception StandardException Standard Cloudscape Error Policy
 	 */
 	public int encrypt(byte[] cleartext, int offset, int length,
-					   byte[] ciphertext, int outputOffset)
+					   byte[] ciphertext, int outputOffset, 
+                       boolean newEngine)
 		 throws StandardException ;
 
 	/**
@@ -281,6 +282,19 @@ public interface DataFactory extends Corruptable {
 	public int decrypt(byte[] ciphertext, int offset, int length,
 					   byte[] cleartext, int outputOffset)
 		 throws StandardException ;
+
+    /**
+	 * Encrypt all the containers in the data segment.
+     * @param t the transaction that is encrypting the containers.
+     * @exception StandardException Standard Derby Error Policy
+	 */
+	public void encryptAllContainers(RawTransaction t) 
+        throws StandardException;
+
+    /*
+     * Set that the database is encrypted.
+     */
+    public void setDatabaseEncrypted();
 
 	/**
 		Return the encryption block size used by the algorithm at time of

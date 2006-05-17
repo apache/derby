@@ -798,7 +798,8 @@ public interface RawStoreFactory extends Corruptable {
 		@exception StandardException Standard Cloudscape Error Policy
 	 */
 	public int encrypt(byte[] cleartext, int offset, int length, 
-					   byte[] ciphertext, int outputOffset) 
+					   byte[] ciphertext, int outputOffset,
+                       boolean newEngine) 
 		 throws StandardException ;
 
 	/**

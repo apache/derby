@@ -1023,6 +1023,20 @@ public class BaseContainerHandle extends Observable
 		container.backupContainer(this, backupContainerPath);
 	}
 
+
+
+    /**
+     * Create encrypted version of the  container with the 
+     * user specified encryption properties.        
+     * @param newFilePath file to store the new encrypted version of the container
+     * @exception StandardException	Standard Derby error policy
+     */
+    public void encryptContainer(String newFilePath) throws StandardException 
+    {
+        checkOpen();
+        container.encryptContainer(this, newFilePath);
+    }
+
     
     public String toString()
     {

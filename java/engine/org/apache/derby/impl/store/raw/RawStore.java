@@ -108,8 +108,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 	private SecureRandom random;
 	private boolean databaseEncrypted;
+    private boolean encryptDatabase;
 	private CipherProvider encryptionEngine;
 	private CipherProvider decryptionEngine;
+    private CipherProvider newEncryptionEngine;
+	private CipherProvider newDecryptionEngine;
 	private CipherFactory cipherFactory;
 	private int counter_encrypt;
 	private int counter_decrypt;
@@ -163,7 +166,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		throws StandardException
 	{
 		dataDirectory = properties.getProperty(PersistentService.ROOT);
-
 		DaemonFactory daemonFactory =
 			(DaemonFactory)Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.DaemonFactory);
 		rawStoreDaemon = daemonFactory.createNewDaemon("rawStoreDaemon");
@@ -176,68 +178,140 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 					  create, this, getDataFactoryModule(), properties);
 		storageFactory = dataFactory.getStorageFactory();
 
+        String restoreFromBackup = null;
+
 		if (properties != null)
 		{
+            // check if this is a restore from a backup copy. 
+            restoreFromBackup = properties.getProperty(Attribute.CREATE_FROM);
+            if(restoreFromBackup == null)
+                restoreFromBackup = properties.getProperty(Attribute.RESTORE_FROM);
+            if(restoreFromBackup == null)
+                restoreFromBackup =
+                    properties.getProperty(Attribute.ROLL_FORWARD_RECOVERY_FROM);
+
 
 			/***********************************************
 			 * encryption
 			 **********************************************/
+            
+            // check if user has requested to encrypt the database or it is an
+            // encrypted database.
 
-			String dataEncryption = properties.getProperty(Attribute.DATA_ENCRYPTION);
-			databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue();
+            String dataEncryption = 
+                properties.getProperty(Attribute.DATA_ENCRYPTION);
+            databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue(); 
 
-			if (databaseEncrypted)
+            if (!create && restoreFromBackup == null) {
+                // check if database is already encrypted, by directly peeking at the
+                // database service propertes instead of the properties passed 
+                // to this method. By looking at properties to the boot method ,
+                // one can not differentiate if user is requesting for database
+                // encryption or the database is already encrypted because 
+                // Attribute.DATA_ENCRYPTION is used  to store in the 
+                // service properties to indicate that database
+                // is encrypted and also users can specify it as URL attribute 
+                // to encrypt and existing database. 
+                               
+                String name = Monitor.getMonitor().getServiceName(this);
+                PersistentService ps = Monitor.getMonitor().getServiceType(this);
+                String canonicalName = ps.getCanonicalServiceName(name);
+                Properties serviceprops = ps.getServiceProperties(canonicalName, 
+                                                                  (Properties)null);
+                dataEncryption = serviceprops.getProperty(Attribute.DATA_ENCRYPTION);
+                boolean encryptedDatabase = Boolean.valueOf(dataEncryption).booleanValue();
+
+                if (!encryptedDatabase  && databaseEncrypted) {
+                    // it it not an encrypted database, user is asking to 
+                    // encrypt an un-encrypted database. 
+                    encryptDatabase = true;
+                    // set database as un-encrypted, we will set it as encrypted 
+                    // after encrypting the existing data. 
+                    databaseEncrypted = false;
+                }
+                
+                // NOTE: if user specifies Attribute.DATA_ENCRYPTION on the
+                // connection URL by mistake on an already encrypted database, 
+                // it is ignored.
+            }
+
+            // setup encryption engines. 
+			if (databaseEncrypted || encryptDatabase)
 			{
-					cipherFactory =
-                        (CipherFactory)Monitor.bootServiceModule(create, this,
+                // check if database is configured for encryption, during
+                // configuration  some of the properties database; so that
+                // user does not have to specify them on the URL everytime.
+                boolean setupEncryption = create || encryptDatabase; 
+
+                cipherFactory =
+                    (CipherFactory)Monitor.bootServiceModule(setupEncryption, this,
 						org.apache.derby.iapi.reference.Module.CipherFactory, properties);
 
-					// The database can be encrypted using an encryption key that is given at
-					// connection url. For security reasons, this key is not made persistent
-					// in the database. But it is necessary to verify the encryption key 
-					// whenever booting the database if it is similar to the key that was used
-					// during creation time. This needs to happen before we access the data/logs to 
-					// avoid the risk of corrupting the database because of a wrong encryption key.
-
-					// Please note this verification process does not provide any added security
-				        // but is intended to allow to fail gracefully if a wrong encryption key 
-					// is used during boot time
+                // The database can be encrypted using an encryption key that is given at
+                // connection url. For security reasons, this key is not made persistent
+                // in the database. But it is necessary to verify the encryption key 
+                // whenever booting the database if it is similar to the key that was used
+                // during creation time. This needs to happen before we access the data/logs to 
+                // avoid the risk of corrupting the database because of a wrong encryption key.
+                
+                // Please note this verification process does not provide any added security
+                // but is intended to allow to fail gracefully if a wrong encryption key 
+                // is used during boot time
   
-					cipherFactory.verifyKey(create,storageFactory,properties);
 
-					// Initializes the encryption and decryption engines
-					encryptionEngine = cipherFactory.
-						createNewCipher(CipherFactory.ENCRYPT);
+                cipherFactory.verifyKey(setupEncryption,storageFactory,properties);
 
-	                                // At creation time of an encrypted database, store the encryption block size
-					// for the algorithm. Store this value as property given by  
-	                                // RawStoreFactory.ENCRYPTION_BLOCKSIZE. This value
-	                                // is made persistent by storing it in service.properties
-	                                // To connect to an existing database, retrieve the value and use it for
-	                                // appropriate padding.
-	                                // The  default value of encryption block size is 8,
-					// to allow for downgrade issues
-					// Before support for AES (beetle6023), default encryption block size supported
-					// was 8
+                // Initializes the encryption and decryption engines
+                encryptionEngine = cipherFactory.
+                    createNewCipher(CipherFactory.ENCRYPT);
+                
+                // At creation time of an encrypted database, store the encryption block size
+                // for the algorithm. Store this value as property given by  
+                // RawStoreFactory.ENCRYPTION_BLOCKSIZE. This value
+                // is made persistent by storing it in service.properties
+                // To connect to an existing database, retrieve the value and use it for
+                // appropriate padding.
+                // The  default value of encryption block size is 8,
+                // to allow for downgrade issues
+                // Before support for AES (beetle6023), default encryption block size supported
+                // was 8
 
-					if(create)
-					{
-						encryptionBlockSize = encryptionEngine.getEncryptionBlockSize();
-						properties.put(RawStoreFactory.ENCRYPTION_BLOCKSIZE,
-								String.valueOf(encryptionBlockSize));
-					}
-					else
-					{
-						if(properties.getProperty(RawStoreFactory.ENCRYPTION_BLOCKSIZE) != null)
-						    encryptionBlockSize = Integer.parseInt(properties.getProperty
-										(RawStoreFactory.ENCRYPTION_BLOCKSIZE));
-					}
+                if(setupEncryption) 
+                {
+                    encryptionBlockSize = encryptionEngine.getEncryptionBlockSize();
+                    // in case of database create, store the encryption block
+                    // size. Incase of reconfiguring the existing datbase, this
+                    // will be saved after encrypting the exisiting data. 
+                    if (create)
+                        properties.put(RawStoreFactory.ENCRYPTION_BLOCKSIZE,
+                                       String.valueOf(encryptionBlockSize));
+                }
+                else
+                {
+                    if(properties.getProperty(RawStoreFactory.ENCRYPTION_BLOCKSIZE) != null)
+                        encryptionBlockSize = Integer.parseInt(properties.getProperty
+                                                               (RawStoreFactory.ENCRYPTION_BLOCKSIZE));
+                    else
+                        encryptionBlockSize = encryptionEngine.getEncryptionBlockSize();
+                }   
 
-					decryptionEngine = cipherFactory.
-						createNewCipher(CipherFactory.DECRYPT);
+                decryptionEngine = cipherFactory.
+                    createNewCipher(CipherFactory.DECRYPT);
 
-					random = cipherFactory.getSecureRandom();
+                random = cipherFactory.getSecureRandom();
+                    
+                if (encryptDatabase) {
+                    // for now there is only one encryption engine, 
+                    // configuring an unencrypted database for encryption 
+                    // is supported at this moment.
+                    newDecryptionEngine = decryptionEngine;   
+                    newEncryptionEngine = encryptionEngine;
+                }
 
+                // save the encryption properties if encryption is enabled 
+                // at database creation time. 
+                if(create)
+                    cipherFactory.saveProperties(properties) ;
 			}
 		}
 
@@ -259,13 +333,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		// log factory is booted by the data factory
 		logFactory =(LogFactory) Monitor.findServiceModule(this, getLogFactoryModule());
 
-		String restoreFromBackup =null;
-		restoreFromBackup = properties.getProperty(Attribute.CREATE_FROM);
-		if(restoreFromBackup == null)
-			restoreFromBackup = properties.getProperty(Attribute.RESTORE_FROM);
-		if(restoreFromBackup == null)
-			restoreFromBackup =
-				properties.getProperty(Attribute.ROLL_FORWARD_RECOVERY_FROM);
+        if (databaseEncrypted) {
+            // let log factory know if the database is encrypted . 
+            logFactory.setDatabaseEncrypted();
+            // let data factory know if the database is encrypted. 
+            dataFactory.setDatabaseEncrypted();
+        }
 
 
 		//save the service properties to a file if we are doing a restore from
@@ -320,6 +393,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		}
 
 
+
 		/**
 		 * Note: service.properties file acts as flags to indicate
 		 * that the copy from backup is successful.
@@ -335,6 +409,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		// after the factories are loaded, recover the database
 		logFactory.recover(this, dataFactory, xactFactory);
 
+        // if user requested to encrpty an unecrypted database or encrypt with
+        // new alogorithm then do that now.  
+        if (encryptDatabase) {
+            configureDatabaseForEncryption(properties);
+        }
 	}
 
 	public void	stop() {
@@ -1069,6 +1148,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	** data encryption/decryption support
 	*/
 
+
 	/**
 		Encrypt cleartext into ciphertext.
 
@@ -1077,10 +1157,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		@exception StandardException Standard Cloudscape Error Policy
 	 */
 	public int encrypt(byte[] cleartext, int offset, int length,
-					   byte[] ciphertext, int outputOffset)
+					   byte[] ciphertext, int outputOffset, 
+                       boolean newEngine)
 		 throws StandardException
 	{
-		if (databaseEncrypted == false || encryptionEngine == null)
+		if (databaseEncrypted == false && encryptDatabase == false || 
+            encryptionEngine == null && newEncryptionEngine == null)
         {
             throw StandardException.newException(
                         SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
@@ -1088,8 +1170,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 		counter_encrypt++;
 
-		return encryptionEngine.encrypt(cleartext, offset, length,
-										ciphertext, outputOffset);
+        if (newEngine) {
+            return newEncryptionEngine.encrypt(cleartext, offset, length,
+                                            ciphertext, outputOffset);
+        } else {
+            return encryptionEngine.encrypt(cleartext, offset, length,
+                                            ciphertext, outputOffset);
+        }
 	}
 
 	/**
@@ -1100,7 +1187,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		@exception StandardException Standard Cloudscape Error Policy
 	 */
 	public int decrypt(byte[] ciphertext, int offset, int length,
-					   byte[] cleartext, int outputOffset)
+					   byte[] cleartext, int outputOffset) 
 		 throws StandardException
 	{
 		if (databaseEncrypted == false || decryptionEngine == null)
@@ -1110,9 +1197,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
 
 		counter_decrypt++;
-
-		return decryptionEngine.decrypt(ciphertext, offset, length,
-										cleartext, outputOffset);
+        return decryptionEngine.decrypt(ciphertext, offset, length,
+                                            cleartext, outputOffset);
 	}
 
 	/**
@@ -1152,6 +1238,91 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		return cipherFactory.changeBootPassword((String)changePassword, properties, encryptionEngine);
 
 	}
+
+
+
+    /*
+     * Configure the database for encryption, with the  specified 
+     * encryption  properties.
+     *
+     * Basic idea is to encrypt all the containers with new password/key 
+     * specified by the user and keep old versions of the data to 
+     * rollback the database to the state before the configuration of database 
+     * with new encryption attributes. Users can configure the database with 
+     * new encryption  attributes at boot time only; advantage of this approach
+     * is that there will not be any concurrency issues to handle because
+     * no users will be modifying the data. 
+
+     * First step is to encrypt the existing data with new encryption 
+     * attributes  and then update the encryption properties for 
+     * the database. Configuring  an un-encrypted database for 
+     * encryption problem is a minor variation of  re-encrypting an 
+     * encrypted database with new encryption key. The database 
+     * reconfiguration with new encryption attributes is done under one
+     * transaction, if there is a crash/error before it is committed, 
+     * then it  is rolled back and the database will be brought back to the
+     * state it was before the encryption.  
+     * @param properties  properties related to this database.
+     * @exception StandardException Standard Cloudscape Error Policy
+     */
+    public void configureDatabaseForEncryption(Properties properties) 
+        throws StandardException 
+    {
+
+        // check point the datase, so that encryption does not have
+        // to encrypt the existing transactions logs. 
+ 
+        logFactory.checkpoint(this, dataFactory, xactFactory, true);
+
+        // start a transaction that is to be used for encryting the database
+        RawTransaction transaction =
+            xactFactory.startTransaction(
+                   this,
+                    ContextService.getFactory().getCurrentContextManager(),
+                    AccessFactoryGlobals.USER_TRANS_NAME);
+        boolean error = true;
+        try {
+            dataFactory.encryptAllContainers(transaction);
+            error = false;
+        }finally {
+            
+            // encryption is finished. close the transaction.
+            if (error) { 
+                transaction.abort();
+            }
+            else {
+                transaction.commit();
+
+                // TODO : handle the case where if engine crashes
+                // after the commit but before the new database
+                // encryption properties are made persistent. 
+                
+                // let log factory and data factory know that 
+                // database is encrypted.
+                logFactory.setDatabaseEncrypted();
+                logFactory.setupLogEncryption();
+                dataFactory.setDatabaseEncrypted();
+                
+                // mark in the raw store that the database is 
+                // encrypted. 
+                databaseEncrypted = true;
+                encryptDatabase = false;
+                //switch the encryption/decryption engine to the new ones.
+                decryptionEngine = newDecryptionEngine;  
+                encryptionEngine = newEncryptionEngine;
+                //force a checkpoint with new encryption algorithm
+                logFactory.checkpoint(this, dataFactory, xactFactory, true);
+                // store the encryption block size;
+                properties.put(RawStoreFactory.ENCRYPTION_BLOCKSIZE,
+                               String.valueOf(encryptionBlockSize));
+                // save the encryption properties.
+                cipherFactory.saveProperties(properties) ;
+            }                
+            newDecryptionEngine = null;   
+            newEncryptionEngine = null;
+            transaction.close(); 
+        }
+    }
 
 
 	/*

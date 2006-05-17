@@ -281,6 +281,17 @@ public interface LogFactory extends Corruptable {
 	 **/
 	public void abortLogBackup();
 
+    /*
+     * Set that the database is encrypted , all the transaction log has 
+     * to be encrypted.
+     */
+    public void setDatabaseEncrypted();
+    
+    /*
+     * setup transaction log for encryption. 
+     */
+    public  void setupLogEncryption() throws StandardException;
+
 
 }
 

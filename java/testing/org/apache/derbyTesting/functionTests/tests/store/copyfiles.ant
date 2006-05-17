@@ -56,6 +56,8 @@ default_app.properties
 default_derby.properties
 encryptDatabase.sql
 encryptDatabase_app.properties
+encryptDatabaseTest1.sql
+encryptDatabaseTest1_app.properties
 encryptParams.sql
 encryptParams_app.properties
 encryptionKey.sql

@@ -633,7 +633,7 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
 				}
 
 				dataFactory.encrypt(
-                    out.getByteArray(), startByte, encryptedLen, ciphertext, 0);
+                    out.getByteArray(), startByte, encryptedLen, ciphertext, 0, false);
 
 				// write out the actual length, then the encrypted bytes.
 				CompressedNumber.writeInt(fileOut, realLen);

@@ -518,6 +518,8 @@ String[] TwoByte = {
 		/* 455 */   "org.apache.derby.catalog.types.SynonymAliasInfo",
         /* 456 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter, XML_TYPE_ID
         /* 457 */   "org.apache.derby.catalog.types.TypesImplInstanceGetter", // XML_TYPE_ID_IMPL
-        /* 458 */   "org.apache.derby.iapi.types.DTSClassInfo" //InstanceGetter, XML_ID
+        /* 458 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter, XML_ID
+        /* 459 */   "org.apache.derby.impl.store.raw.data.EncryptContainerOperation",
+        /* 460 */   "org.apache.derby.impl.store.raw.data.EncryptContainerUndoOperation",
 };
 }

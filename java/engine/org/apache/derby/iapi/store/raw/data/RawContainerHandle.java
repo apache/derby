@@ -120,4 +120,13 @@ public interface RawContainerHandle extends ContainerHandle {
 	 */
 	public void preDirty(boolean preDirtyOn) throws StandardException;
 
+
+    /**
+     * Create encrypted version of the container with the 
+     * user specified encryption properties.  
+     * @param newFilePath file to store the new encrypted version of the container
+	 * @exception StandardException	Standard Cloudscape error policy
+     */
+	public void encryptContainer(String newFilePath) throws StandardException;
+
 }

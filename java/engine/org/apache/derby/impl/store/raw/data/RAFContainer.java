@@ -394,7 +394,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 				byte[] dataToWrite = updatePageArray(pageNumber, 
                                                      pageData, 
-                                                     encryptionBuf);
+                                                     encryptionBuf, 
+                                                     false);
 
 				dataFactory.writeInProgress();
 				try
@@ -466,7 +467,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
      */
     private byte[] updatePageArray(long pageNumber, 
                                    byte[] pageData, 
-                                   byte[] encryptionBuf) 
+                                   byte[] encryptionBuf, 
+                                   boolean encryptWithNewEngine) 
         throws StandardException, IOException
     {
         if (pageNumber == FIRST_ALLOC_PAGE_NUMBER)
@@ -489,9 +491,12 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
         } else 
         {
-            if (dataFactory.databaseEncrypted()) 
+            if (dataFactory.databaseEncrypted() || encryptWithNewEngine) 
            {
-                return encryptPage(pageData, pageSize, encryptionBuf);
+                return encryptPage(pageData, 
+                                   pageSize, 
+                                   encryptionBuf, 
+                                   encryptWithNewEngine);
             } else
                 return pageData;
         }
@@ -1159,7 +1164,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                     // to the backup location by reading through the page cache.
                     for (long pageNumber = FIRST_ALLOC_PAGE_NUMBER; 
                          pageNumber <= lastPageNumber; pageNumber++) {
-                        page = getPageForBackup(handle, pageNumber);
+                        page = getLatchedPage(handle, pageNumber);
                         
                         // update the page array before writing to the disk 
                         // with container header and encrypt it if the database 
@@ -1167,7 +1172,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                         
                         byte[] dataToWrite = updatePageArray(pageNumber, 
                                                              page.getPageArray(), 
-                                                             encryptionBuf);
+                                                             encryptionBuf, false);
                         backupRaf.write(dataToWrite, 0, pageSize);
 
                         // unlatch releases page from cache, see 
@@ -1245,6 +1250,77 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
             }
         }
     }
+
+
+
+
+    /**
+     * Create encrypted version of the  container with the 
+     * user specified encryption properties. 
+     * 
+     * Read all the pages of the container from the original container 
+     * through the page cache, encrypt each page data with new encryption 
+     * mechanism and  write to the specified container file.
+     *
+     * @param handle the container handle.
+     * @param newFilePath file to store the new encrypted version of 
+     *                    the container
+     * @exception StandardException Derby Standard error policy
+     *
+     */
+    protected void encryptContainer(BaseContainerHandle handle, 
+                                    String newFilePath)	
+        throws StandardException 
+    {
+        BasePage page = null; 
+        StorageFile newFile = 
+            dataFactory.getStorageFactory().newStorageFile(newFilePath);
+        try {
+            long lastPageNumber= getLastPageNumber(handle);
+ 
+            StorageRandomAccessFile newRaf = newFile.getRandomAccessFile("rw");
+
+            byte[] encryptionBuf = null;
+            encryptionBuf = new byte[pageSize];
+
+            // copy all the pages from the current container to the 
+            // new container file after encryting the pages. 
+            for (long pageNumber = FIRST_ALLOC_PAGE_NUMBER; 
+                 pageNumber <= lastPageNumber; pageNumber++) 
+            {
+
+                page = getLatchedPage(handle, pageNumber);
+                        
+                // update the page array before writing to the disk 
+                // with container header and encrypt it.
+                        
+                byte[] dataToWrite = updatePageArray(pageNumber, 
+                                                     page.getPageArray(), 
+                                                     encryptionBuf, 
+                                                     true);
+                newRaf.write(dataToWrite, 0, pageSize);
+
+                // unlatch releases page from cache.
+                page.unlatch();
+                page = null;
+            }
+
+            newRaf.close();
+            
+        }catch (IOException ioe) {
+            throw StandardException.newException(
+                                    SQLState.FILE_CONTAINER_EXCEPTION, 
+                                    ioe, 
+                                    newFile);
+        } finally {
+
+            if (page != null) {
+                page.unlatch();
+                page = null;
+            }
+        }
+    }
+
 
 
      // PrivilegedExceptionAction method

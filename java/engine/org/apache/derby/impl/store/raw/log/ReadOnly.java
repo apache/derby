@@ -354,4 +354,21 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 	{
 		// nothing to do for read only databases.
 	}
+
+    /*
+     * Set that the database is encrypted. Read-only database can not 
+     * be reencrypted, nothing to do in this case. 
+     */
+    public void setDatabaseEncrypted() {
+
+        // nothing to do for a read-only database.
+    }
+
+    /*
+     * setup log for encryption. Read-only database can not 
+     * be reencrypted, nothing to do in this case. 
+     */
+    public void setupLogEncryption() throws StandardException {
+        // nothing to do for a read-only database. 
+    }
 }

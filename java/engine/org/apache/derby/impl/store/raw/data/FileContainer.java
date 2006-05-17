@@ -2983,7 +2983,7 @@ abstract class FileContainer
 
 
 	/** 
-	 *  Get a latched page to write to the backup. Page Latch is necessary to 
+	 *  Get a latched page. Incase of backup page Latch is necessary to 
 	 *  prevent modification to the page when it is being written to the backup.
 	 *  Backup process relies on latches to get consistent snap
 	 *  shot of the page , user level table/page/row locks are NOT 
@@ -2994,7 +2994,7 @@ abstract class FileContainer
      *  @return the latched page
 	 *	@exception StandardException Standard Derby error policy
 	 */
-	protected BasePage getPageForBackup(BaseContainerHandle handle, 
+	protected BasePage getLatchedPage(BaseContainerHandle handle, 
                                         long pageNumber) 
 		throws StandardException 
 	{
@@ -3173,7 +3173,8 @@ abstract class FileContainer
 	 */
 	protected byte[] encryptPage(byte[] pageData, 
                                  int pageSize, 
-                                 byte[] encryptionBuffer)
+                                 byte[] encryptionBuffer,
+                                 boolean newEngine)
         throws StandardException
 	{
 		// because all our page header looks identical, move the
@@ -3184,7 +3185,7 @@ abstract class FileContainer
 		System.arraycopy(pageData, 0, encryptionBuffer, 8, pageSize-8);
 
 		int len = dataFactory.encrypt(encryptionBuffer, 0, pageSize,
-									  encryptionBuffer, 0);
+									  encryptionBuffer, 0, newEngine);
 
         if (SanityManager.DEBUG)
     		SanityManager.ASSERT(len == pageSize,
