@@ -139,6 +139,10 @@ public class UpgradeTester {
 	// Test jar
 	private String testJar = "derbyTesting.jar";
 	
+	// Boolean to indicate if the test is run using jars or classes folder 
+	// in classpath
+	private boolean[] isJar = new boolean[1];
+	
 	/**
 	 * Constructor
 	 * 
@@ -198,19 +202,25 @@ public class UpgradeTester {
 	 * @return location of jars of new release
 	 */
 	private String getNewJarLocation() {
-		boolean[] isJar = new boolean[1];
 		return jvm.findCodeBase(isJar);
 	}
 	
 	/**
 	 * This method creates two class loaders - one for old release and
-	 * other for new release.
+	 * other for new release. It calls the appropriate create methods
+	 * depending on what is used in the user's classpath - jars or 
+	 * classes folder
 	 *  
 	 * @throws MalformedURLException
 	 */
 	private void createClassLoaders() throws MalformedURLException{
-		oldClassLoader = createClassLoader(oldJarLoc);
-		newClassLoader = createClassLoader(newJarLoc);
+		if(isJar[0]){
+			oldClassLoader = createClassLoader(oldJarLoc);
+			newClassLoader = createClassLoader(newJarLoc);
+		} else {
+		  // classes folder in classpath
+		  createLoadersUsingClasses();	
+		}
 	}
 	
 	/**
@@ -236,7 +246,33 @@ public class UpgradeTester {
 		// jars specified in the system classpath
 		return new URLClassLoader(url, null);		
 	}
-	                                                                                         
+	
+	/**
+	 * Create old and new class loader. This method is used when classes folder
+	 *  is specified in the user's classpath.
+	 * 
+	 * @throws MalformedURLException
+	 */
+	private void createLoadersUsingClasses() 
+							throws MalformedURLException {
+		URL[] oldUrl = new URL[jarFiles.length + 1];
+
+		for(int i=0; i < jarFiles.length; i++) {
+			oldUrl[i] = new File(oldJarLoc + File.separator + jarFiles[i]).toURL();
+		}
+
+		// Use derby testing classes from newer release. To get the
+		// testing classes from newer release, we need to add the whole 
+		// classes folder. So the oldClassLoader may contain extra classes
+		// from the newer version
+		oldUrl[jarFiles.length] = new File(newJarLoc).toURL();
+
+		oldClassLoader = new URLClassLoader(oldUrl, null);
+		
+		URL[] newUrl = new URL[] {new File(newJarLoc).toURL()};
+		newClassLoader = new URLClassLoader(newUrl, null);
+	}
+	
 	/**
 	 * Set the context class loader
 	 * @param classLoader class loader
