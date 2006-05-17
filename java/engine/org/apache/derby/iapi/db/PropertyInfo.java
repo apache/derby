@@ -51,9 +51,6 @@ import java.sql.SQLException;
   * <P>
   This class can only be used within an SQL-J statement, a Java procedure or a server side Java method.
   <p>This class can be accessed using the class alias <code> PROPERTYINFO </code> in SQL-J statements.
-  * <P>
-  * <I>IBM Corp. reserves the right to change, rename, or
-  * remove this interface at any time.</I>
   */
 public final class PropertyInfo
 {

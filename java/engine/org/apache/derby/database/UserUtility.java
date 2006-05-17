@@ -36,11 +36,6 @@ import org.apache.derby.iapi.error.PublicAPI;
   
    <p>This class can only be used within an SQL-J statement, a Java procedure or a server side Java method.
    <p>This class can be accessed using the class alias <code> USERUTILITY </code> in SQL-J statements.
-  <P>
-  <i>
-  IBM Corp. reserves the right 
-  to change, rename, or remove this interface
-  at any time. </i>
   */
 public abstract class UserUtility
 {

@@ -27,10 +27,6 @@ import org.apache.derby.catalog.UUID;
 /**
  * A trigger execution context holds information that is
  * available from the context of a trigger invocation.
- * 
- * <P>
- * <I>IBM Corp. reserves the right to change, rename, or
- * remove this interface at any time.</I>
  */
 public interface TriggerExecutionContext
 {
