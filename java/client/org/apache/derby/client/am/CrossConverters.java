@@ -1074,7 +1074,7 @@ final class CrossConverters {
 
     final float getFloatFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > Float.MAX_VALUE || source < -Float.MAX_VALUE)) {
+                Float.isInfinite((float)source)) {
             throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
         }
 
