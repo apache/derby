@@ -53,6 +53,7 @@
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredCallableStatement40.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredStatement.java"/>
           <exclude name="${derby.dir}/${cur.dir}/BrokeredStatement40.java"/>
+          <exclude name="${derby.dir}/${cur.dir}/FailedProperties40.java"/>
     </javac>
   </target>
 
@@ -147,6 +148,7 @@
           <include name="${derby.dir}/${cur.dir}/BrokeredStatement40.java"/>
           <include name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement40.java"/>
           <include name="${derby.dir}/${cur.dir}/BrokeredCallableStatement40.java"/>
+          <include name="${derby.dir}/${cur.dir}/FailedProperties40.java"/>
       </javac>
   </target> 
 

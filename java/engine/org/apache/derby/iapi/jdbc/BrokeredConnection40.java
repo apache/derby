@@ -31,6 +31,7 @@ import java.sql.SQLXML;
 import java.sql.Struct;
 import java.util.Properties;
 import org.apache.derby.impl.jdbc.Util;
+//import org.apache.derby.impl.jdbc.EmbedConnection40;
 import org.apache.derby.iapi.reference.SQLState;
 
 
@@ -143,27 +144,82 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
     }
     
     
+    /**
+     * <code>setClientInfo</code> forwards to the real connection.
+     *
+     * @param name the property key <code>String</code>
+     * @param value the property value <code>String</code>
+     * @exception SQLException if the property is not supported or the 
+     * real connection could not be obtained.
+     */
     public void setClientInfo(String name, String value)
-    throws SQLException{
-        throw Util.notImplemented();
+    throws SQLException{        
+        try {
+            getRealConnection().setClientInfo(name, value);
+        } catch (SQLException se) {
+            notifyException(se);
+            throw se;
+        }
     }
-    
+
+    /**
+     * <code>setClientInfo</code> forwards to the real connection.  If
+     * the call to <code>getRealConnection</code> fails the resulting
+     * <code>SQLException</code> is wrapped in a
+     * <code>ClientInfoException</code> to satisfy the specified
+     * signature.
+     * @param properties a <code>Properties</code> object with the
+     * properties to set.
+     * @exception ClientInfoException if the properties are not
+     * supported or the real connection could not be obtained.
+     */    
     public void setClientInfo(Properties properties)
     throws ClientInfoException{
-        SQLException temp= Util.notImplemented();
-        ClientInfoException clientInfoException = new ClientInfoException
-            (temp.getMessage(),temp.getSQLState(),(Properties) null);
-        throw clientInfoException;
+        try {
+            getRealConnection().setClientInfo(properties);
+        } catch (ClientInfoException cie) {
+            notifyException(cie);
+            throw cie;
+        }
+        catch (SQLException se) {
+            throw new ClientInfoException
+                (se.getMessage(), se.getSQLState(), 
+  		 (new FailedProperties40(properties)).getProperties());
+        }
     }
     
+    /**
+     * <code>getClientInfo</code> forwards to the real connection.
+     *
+     * @param name a <code>String</code> that is the property key to get.
+     * @return a <code>String</code> that is returned from the real connection.
+     * @exception SQLException if a database access error occurs.
+     */
     public String getClientInfo(String name)
     throws SQLException{
-        throw Util.notImplemented();
+        try {
+            return getRealConnection().getClientInfo(name);
+        } catch (SQLException se) {
+            notifyException(se);
+            throw se;
+        }
     }
     
+    /**
+     * <code>getClientInfo</code> forwards to the real connection.
+     *
+     * @return a <code>Properties</code> object
+     * from the real connection.
+     * @exception SQLException if a database access error occurs.
+     */
     public Properties getClientInfo()
     throws SQLException{
-        throw Util.notImplemented();
+        try {
+            return getRealConnection().getClientInfo();
+        } catch (SQLException se) {
+            notifyException(se);
+            throw se;
+        }
     }
     
     /**

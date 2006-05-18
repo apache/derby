@@ -87,14 +87,36 @@ public class LogicalConnection40
         throw SQLExceptionFactory.notImplemented("createStruct(String,Object[])");
     }
 
+    /**
+     * <code>getClientInfo</code> forwards to
+     * <code>physicalConnection_</code>.
+     * <code>getClientInfo</code> always returns an empty
+     * <code>Properties</code> object since Derby doesn't support
+     * ClientInfoProperties.
+     *
+     * @return an empty <code>Properties</code> object
+     * @exception SQLException if an error occurs
+     */
     public Properties getClientInfo()
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("getClientInfo()");
+	checkForNullPhysicalConnection();
+	return physicalConnection_.getClientInfo();
     }
     
+    /**
+     * <code>getClientInfo</code> forwards to
+     * <code>physicalConnection_</code>. Always returns a <code>null
+     * String</code> since Derby does not support
+     * ClientInfoProperties.
+     *
+     * @param name a property key to get <code>String</code>
+     * @return a property value <code>String</code>
+     * @exception SQLException if an error occurs
+     */
     public String getClientInfo(String name)
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("getClientInfo(String)");
+	checkForNullPhysicalConnection();
+	return physicalConnection_.getClientInfo(name);
     }
 
     /**
@@ -137,19 +159,37 @@ public class LogicalConnection40
         return interfaces.isInstance(this);
     }
 
+    /**
+     * <code>setClientInfo</code> forwards to
+     * <code>physicalConnection_</code>.
+     *
+     * @param properties a <code>Properties</code> object with the
+     * properties to set
+     * @exception ClientInfoException if an error occurs
+     */
     public void setClientInfo(Properties properties)
         throws ClientInfoException {
-        SQLException sqle = 
-            SQLExceptionFactory.notImplemented("setClientInfo(Properties)");
-        throw new ClientInfoException(sqle.getMessage(), 
-                                      sqle.getSQLState(), 
-                                      properties == null ? null :
-                                      (Properties)properties.clone());
+	try { checkForNullPhysicalConnection(); }
+	catch (SQLException se) { 
+	    throw new ClientInfoException
+		(se.getMessage(), se.getSQLState(), 
+		 (new FailedProperties40(properties)).getProperties());
+	}
+	physicalConnection_.setClientInfo(properties);
     }
     
+    /**
+     * <code>setClientInfo</code> forwards to
+     * <code>physicalConnection_</code>.
+     *
+     * @param name a property key <code>String</code>
+     * @param value a property value <code>String</code>
+     * @exception SQLException if an error occurs
+     */
     public void setClientInfo(String name, String value)
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("setClientInfo(String,String)");
+	checkForNullPhysicalConnection();
+	physicalConnection_.setClientInfo(name, value);
     }
     
     public <T>T unwrap(Class<T> interfaces)

@@ -173,24 +173,18 @@ public class ConnectionTest
         }
     }
     
-    public void testGetClientInfoNotImplemented()
+    public void testGetClientInfo()
         throws SQLException {
-        try {
-            con.getClientInfo();
-            fail("getClientInfo() should not be implemented");
-        } catch (SQLFeatureNotSupportedException sfnse) {
-            // Do nothing, we are fine
-        }
+        assertTrue("getClientInfo() must return an empty Properties object", 
+                   con.getClientInfo().isEmpty());
     }
     
-    public void testGetClientInfoStringNotImplemented()
+    public void testGetClientInfoString()
         throws SQLException {
-        try {
-            con.getClientInfo(null);
-            fail("getClientInfo(String) should not be implemented");
-        } catch (SQLFeatureNotSupportedException sfnse) {
-            // Do nothing, we are fine
-        }
+        assertNull("getClientInfo(null) must return null",
+                   con.getClientInfo(null));
+        assertNull("getClientInfo(\"someProperty\") must return null",
+                   con.getClientInfo("someProperty"));
     }
 
     /**
@@ -235,25 +229,55 @@ public class ConnectionTest
         assertTrue(con.isWrapperFor(Connection.class));
     }
 
-    public void testSetClientInfoPropertiesNotImplemented()
+    public void testSetClientInfoProperties()
         throws SQLException {
+        con.setClientInfo(null);
+        Properties p = new Properties();
+        con.setClientInfo(p);
+
+        p.setProperty("prop1", "val1");
+        p.setProperty("prop2", "val2");
         try {
-            con.setClientInfo(new Properties());
-            fail("setClientInfo(Properties) should not be implemented");
+            con.setClientInfo(p);
+            fail("setClientInfo(String,String) should throw "+
+                 "ClientInfoException");
         } catch (ClientInfoException cie) {
-            assertSQLState("Invalid SQL state for unimplemented method",
-                           "0A000", // Can this be added to SQLStateConstants?
-                           cie); 
+            assertSQLState("SQLStates must match", "XCY02", cie);
+            assertTrue("Setting property 'prop1' must fail with "+
+                       "REASON_UNKNOWN_PROPERTY",
+                       cie.getFailedProperties().
+                       getProperty("prop1").
+                       equals(""+ClientInfoException.REASON_UNKNOWN_PROPERTY));
+            assertTrue("Setting property 'prop2' must fail with "+
+                       "REASON_UNKNOWN_PROPERTY",
+                       cie.getFailedProperties().
+                       getProperty("prop2").
+                       equals(""+ClientInfoException.REASON_UNKNOWN_PROPERTY));
         }
     }
 
-    public void testSetClientInfoStringNotImplemented()
+    public void testSetClientInfoString()
         throws SQLException {
+        con.setClientInfo(null, null);
+
+        try {
+            con.setClientInfo("foo", null);
+            fail("setClientInfo(String, null) should throw "+
+                 "NullPointerException");
+        } catch (NullPointerException npe) {}
+
         try {
             con.setClientInfo("name", "value");
-            fail("setClientInfo(String,String) should not be implemented");
-        } catch (SQLFeatureNotSupportedException sfnse) {
-            // Do nothing, we are fine
+            fail("setClientInfo(String,String) should throw "+
+                 "ClientInfoException");
+        } catch (ClientInfoException cie) {
+            assertSQLState("SQLState must match 'unsupported'",
+                           "XCY02", cie);
+            assertTrue("Setting property 'name' must fail with "+
+                       "REASON_UNKNOWN_PROPERTY",
+                       cie.getFailedProperties().
+                       getProperty("name").
+                       equals(""+ClientInfoException.REASON_UNKNOWN_PROPERTY));
         }
     }
     

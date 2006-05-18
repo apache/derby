@@ -37,9 +37,11 @@ import java.sql.Struct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Enumeration;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.FailedProperties40;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class  NetConnection40 extends org.apache.derby.client.net.NetConnection {
@@ -263,29 +265,99 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
         }
         super.close();
     }
-   
+
+    /**
+     * <code>setClientInfo</code> will always throw a
+     * <code>ClientInfoException</code> since Derby does not support
+     * any properties.
+     *
+     * @param name a property key <code>String</code>
+     * @param value a property value <code>String</code>
+     * @exception SQLException always.
+     */
     public void setClientInfo(String name, String value)
-		throws SQLException{
-	throw SQLExceptionFactory.notImplemented ("setClientInfo (String, String)");
+    throws SQLException{
+	try { checkForClosedConnection(); }
+	catch (SqlException se) { throw se.getSQLException(); }
+
+        if (name == null && value == null) {
+            return;
+        }
+        Properties p = new Properties();
+        p.setProperty(name, value);
+        setClientInfo(p);
     }
-	
+
+    /**
+     * <code>setClientInfo</code> will throw a
+     * <code>ClientInfoException</code> uless the <code>properties</code>
+     * paramenter is empty, since Derby does not support any
+     * properties. All the property keys in the
+     * <code>properties</code> parameter are added to failedProperties
+     * of the exception thrown, with REASON_UNKNOWN_PROPERTY as the
+     * value. 
+     *
+     * @param properties a <code>Properties</code> object with the
+     * properties to set.
+     * @exception ClientInfoException always.
+     */
     public void setClientInfo(Properties properties)
-		throws ClientInfoException {
-	SQLException temp= SQLExceptionFactory.notImplemented ("setClientInfo ()");
-	ClientInfoException clientInfoException = new ClientInfoException
-	(temp.getMessage(),temp.getSQLState(),(Properties) null);
-	throw clientInfoException; 
-    }
+    throws ClientInfoException {
+	FailedProperties40 fp = new FailedProperties40(properties);
+	try { checkForClosedConnection(); } 
+	catch (SqlException se) {
+	    throw new ClientInfoException(se.getMessage(), se.getSQLState(),
+					  fp.getProperties());
+	}
 	
+	if (properties == null || properties.isEmpty()) {
+            return;
+        }
+
+	SqlException se = 
+	    new SqlException(agent_.logWriter_,
+			     new ClientMessageId
+			     (SQLState.PROPERTY_UNSUPPORTED_CHANGE), 
+			     fp.getFirstKey(), fp.getFirstValue());
+        throw new ClientInfoException(se.getMessage(),
+				      se.getSQLState(), fp.getProperties());
+    }
+
+    /**
+     * <code>getClientInfo</code> always returns a
+     * <code>null String</code> since Derby doesn't support
+     * ClientInfoProperties.
+     *
+     * @param name a <code>String</code> value
+     * @return a <code>null String</code> value
+     * @exception SQLException if the connection is closed.
+     */
     public String getClientInfo(String name)
-		throws SQLException{
-	throw SQLExceptionFactory.notImplemented ("getClientInfo (String)");
+    throws SQLException{
+	try { 
+	    checkForClosedConnection(); 
+	    return null;
+	}
+	catch (SqlException se) { throw se.getSQLException(); }
     }
-	
+    
+    /**
+     * <code>getClientInfo</code> always returns an empty
+     * <code>Properties</code> object since Derby doesn't support
+     * ClientInfoProperties.
+     *
+     * @return an empty <code>Properties</code> object.
+     * @exception SQLException if the connection is closed.
+     */
     public Properties getClientInfo()
-		throws SQLException{
-	throw SQLExceptionFactory.notImplemented ("getClientInfo (Properties)");
+    throws SQLException{
+	try {
+	    checkForClosedConnection();
+	    return new Properties();
+	} 
+	catch (SqlException se) { throw se.getSQLException(); }
     }
+
     
     /**
      * Returns the type map for this connection.

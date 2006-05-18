@@ -33,8 +33,11 @@ import java.sql.Struct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Enumeration;
 import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.FailedProperties40;
 
 public class EmbedConnection40 extends EmbedConnection30 {
     
@@ -136,27 +139,96 @@ public class EmbedConnection40 extends EmbedConnection30 {
         return !isClosed();
     }
 
+    /**
+     * <code>setClientInfo</code> will always throw a
+     * <code>ClientInfoException</code> since Derby does not support
+     * any properties.
+     *
+     * @param name a property key <code>String</code>
+     * @param value a property value <code>String</code>
+     * @exception SQLException always.
+     */
     public void setClientInfo(String name, String value)
     throws SQLException{
-        throw Util.notImplemented();
+        checkIfClosed();
+        // Allow null to simplify compliance testing through
+        // reflection, (test all methods in an interface with null
+        // arguments)
+        if (name == null && value == null) {
+            return;
+        }
+        Properties p = new Properties();
+        p.setProperty(name, value);
+        setClientInfo(p);
     }
     
+    /**
+     * <code>setClientInfo</code> will throw a
+     * <code>ClientInfoException</code> uless the <code>properties</code>
+     * paramenter is empty, since Derby does not support any
+     * properties. All the property keys in the
+     * <code>properties</code> parameter are added to failedProperties
+     * of the exception thrown, with REASON_UNKNOWN_PROPERTY as the
+     * value. 
+     *
+     * @param properties a <code>Properties</code> object with the
+     * properties to set
+     * @exception ClientInfoException always
+     */
     public void setClientInfo(Properties properties)
     throws ClientInfoException {
-        SQLException temp= Util.notImplemented();
-        ClientInfoException clientInfoException = new ClientInfoException
-            (temp.getMessage(),temp.getSQLState(),(Properties) null);
-        throw clientInfoException;
+        FailedProperties40 fp = new FailedProperties40(properties);
+        
+        try { checkIfClosed(); }
+        catch (SQLException se) {
+            throw new ClientInfoException(se.getMessage(), se.getSQLState(),
+                                          fp.getProperties());
+        }
+
+        // Allow null to simplify compliance testing through
+        // reflection, (test all methods in an interface with null
+        // arguments)
+        // An empty properties object is meaningless, but allowed
+        if (properties == null || properties.isEmpty()) {
+            return;
+        }
+
+        StandardException se = 
+            StandardException.newException
+            (SQLState.PROPERTY_UNSUPPORTED_CHANGE, 
+             fp.getFirstKey(), 
+             fp.getFirstValue());
+        throw new ClientInfoException(se.getMessage(),
+                                      se.getSQLState(), fp.getProperties());
     }
     
+    /**
+     * <code>getClientInfo</code> always returns a
+     * <code>null String</code> since Derby doesn't support
+     * ClientInfoProperties.
+     *
+     * @param name a <code>String</code> value
+     * @return a <code>null String</code> value
+     * @exception SQLException if the connection is closed.
+     */
     public String getClientInfo(String name)
     throws SQLException{
-        throw Util.notImplemented();
+        checkIfClosed();
+        return null;
     }
     
+    /**
+     * <code>getClientInfo</code> always returns an empty
+     * <code>Properties</code> object since Derby doesn't support
+     * ClientInfoProperties.
+     *
+     * @return an empty <code>Properties</code> object
+     * @exception SQLException if the connection is closed.
+     */
     public Properties getClientInfo()
     throws SQLException{
-        throw Util.notImplemented();
+        checkIfClosed();
+        return new Properties();
     }
 
     /**
