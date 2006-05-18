@@ -275,8 +275,12 @@ public class RunTest
 	    sb.append(startTime + " ***");
 	    System.out.println(sb.toString());
 	    pwDiff.println(sb.toString());
-	    
-        // Run the Server if needed
+
+ 	    // before going further, get the policy file copied and if
+ 	    // needed, modify it with the test's policy file
+ 	    composePolicyFile();
+     
+            // Run the Server if needed
 	    if ((driverName != null) && (!skiptest) )
 	    {
             System.out.println("Initialize for framework: "+ framework );
@@ -2229,7 +2233,7 @@ clp.list(System.out);
                         +"="+encryptionAlgorithm+"\"");
         }
         jvm.setD(jvmProps);
-        
+       
         // set security properties
         if (!runWithoutSecurityManager)
             jvm.setSecurityProps();
@@ -2310,9 +2314,43 @@ clp.list(System.out);
         return sCmd;
     }
 
+    public static void composePolicyFile() throws ClassNotFoundException
+    {
+        try{
+            //DERBY-892: allow for test-specific policy additions
+
+            // first get the default policy file
+            String default_policy = "util/derby_tests.policy";
+            File userDirHandle = new File(userdir);
+            CopySuppFiles.copyFiles(userDirHandle, default_policy);
+
+            // now get the test specific policy file and append
+            InputStream newpolicy =
+                loadTestResource("tests/" + testDirName + "/" + testBase + ".policy");
+            if (newpolicy != null)
+            {
+                File oldpolicy = new File(runDir,"derby_tests.policy");
+                //if (oldpolicy.exists()) System.out.println("Appending to derby_tests.policy");
+                BufferedReader policyadd = new BufferedReader(new InputStreamReader(newpolicy, "UTF-8"));
+                FileWriter policyfw = new FileWriter(oldpolicy.getPath(), true);
+                PrintWriter policypw = new PrintWriter( new BufferedWriter(policyfw, 10000), true );
+                String str = "";
+                while ( (str = policyadd.readLine()) != null ) { policypw.println(str); }
+                policypw.close();
+                policyadd.close();
+                policypw= null;
+                newpolicy = null;
+            }
+        } catch (IOException ie) {
+            System.out.println("Exception trying to create policy file: ");
+            ie.printStackTrace(); 
+        }
+    }
+
     private static void execTestProcess(String[] testCmd)
         throws Exception
     {
+    	composePolicyFile();
         
         // Execute the process and handle the results
     	Process pr = null;
@@ -2435,6 +2473,7 @@ clp.list(System.out);
     	
     	// Install a security manager within this JVM for this test.
     	boolean installedSecurityManager = installSecurityManager();
+    	composePolicyFile();
     	if (testType.equals("sql"))
     	{
     	    String[] ijarg = new String[3];

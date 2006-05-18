@@ -1,0 +1,21 @@
+//
+// test specific permissions for test:
+// jdbcapi/secureUsers1.sql
+//
+grant codeBase "${derbyTesting.codeclasses}" {
+  // sane=true
+  permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
+};
+
+grant codeBase "${derbyTesting.codejar}/derby.jar" {
+  permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
+};
+  
+grant codeBase "${derbyTesting.codejar}/derbynet.jar" {
+  permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
+};
+  
+grant codeBase "${derbyTesting.codejar}/derbytools.jar" {
+  permission java.io.FilePermission "${user.dir}${/}CloudLDAP.out", "write"; 
+};
+

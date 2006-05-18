@@ -99,7 +99,7 @@
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/derbynet">
       <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/derbynet" 
-        includes="*.inc,*.properties,*.sql,*.tests"/>
+        includes="*.inc,*.policy,*.properties,*.sql,*.tests"/>
     </copy>
   </target> 
 

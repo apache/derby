@@ -1,0 +1,13 @@
+//
+// test specific permissions for test:
+// lang/testSecMec.java
+//
+grant codeBase "${derbyTesting.codejar}derbyTesting.jar" {
+  permission java.lang.RuntimePermission "setIO";
+  
+};
+
+grant codeBase "${derbyTesting.codeclasses}" {
+  permission java.lang.RuntimePermission "setIO";
+  
+};

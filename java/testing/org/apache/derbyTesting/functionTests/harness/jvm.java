@@ -340,8 +340,6 @@ public abstract class jvm {
 		String policyFile = System.getProperty("serverPolicyFile");
 		if (policyFile == null)
 		{
-				File userDirHandle = new File(userDir);
-				CopySuppFiles.copyFiles(userDirHandle,DEFAULT_POLICY);
 				policyFile = userDir + baseName(DEFAULT_POLICY);
 		}
 

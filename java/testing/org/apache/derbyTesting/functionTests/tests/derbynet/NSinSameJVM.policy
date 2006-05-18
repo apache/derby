@@ -1,0 +1,14 @@
+//
+// test specific permissions for test:
+// derbynet/NSinSameJVM.java
+//
+grant codeBase "${derbyTesting.codeclasses}" {
+  // this test uses port 2000
+  permission java.net.SocketPermission "0.0.0.0:20000", "connect";
+};
+
+grant codeBase "${derbyTesting.codejar}/derbynet.jar" {
+  // this test uses port 2000
+  permission java.net.SocketPermission "0.0.0.0:20000", "connect";
+};
+
