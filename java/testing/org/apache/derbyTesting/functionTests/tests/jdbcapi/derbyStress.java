@@ -132,6 +132,7 @@ public class derbyStress {
 			// How silly! I forgot to close the result set.
 		}
 		TestUtil.cleanUpTest(stmt, testObjects);
+		conn.commit();
 		stmt.close();
 		conn.close();
 		System.out.println("PASSED");

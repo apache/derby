@@ -55,6 +55,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.net.URL;
 
+import junit.framework.TestSuite;
 
 public class RunTest
 {
@@ -73,7 +74,7 @@ public class RunTest
 				       "DerbyNet","DerbyNetClient", "DB2jcc",
 				       "DB2app"};
     static NetServer ns;
-    static boolean frameworkInitialized = false;
+    static boolean serverNeedsStopping = false; // used in controlling network server when useprocess=false:
     static boolean jvmnet = false; // switch to see if we need have client & server in a different jvm
     static String jvmnetjvm; // string for class name of server jvm if different from client jvm
     static String driverName;
@@ -92,7 +93,7 @@ public class RunTest
 	static boolean isjdk12test = false;
 	static String classpath = "";
 	static String classpathServer = "";
-    static String framework = "embedded";
+    public static String framework = "embedded";
     public static String J9_STATEMENTCACHESIZE = "20";
 
     static String usesystem = "";
@@ -213,7 +214,8 @@ public class RunTest
 		    System.out.println("Null or blank test script name.");
 		    System.exit(1);
 		}
-		if (args.length == 6)
+		// If useprocess=false RunList calls this main method with 7 arguments...
+		if (args.length == 7)
 		{
 		    defaultPackageName = args[1];
 		    usesystem = args[2];
@@ -222,6 +224,10 @@ public class RunTest
 		    isSuiteRun = true;
 		    suiteName = args[5];
 		    //System.out.println("suiteName: " + suiteName);
+		    framework=args[6];		    
+		    // initializing startServer to true (which it would be if we'd
+		    // run with useprocess=true) or network server will not get started
+		    startServer=true;		    
 		}
 		
 		testType = scriptName.substring(scriptName.lastIndexOf(".") + 1);
@@ -253,7 +259,6 @@ public class RunTest
         // Check for properties files, including derby.properties
         // and if needed, build the -p string to pass to the test
         String propString = createPropString();
-
         if ( (isSuiteRun == false) && (useprocess) )
         {
             SysInfoLog sysLog = new SysInfoLog();
@@ -270,7 +275,7 @@ public class RunTest
 	    sb.append(startTime + " ***");
 	    System.out.println(sb.toString());
 	    pwDiff.println(sb.toString());
-        
+	    
         // Run the Server if needed
 	    if ((driverName != null) && (!skiptest) )
 	    {
@@ -291,9 +296,41 @@ public class RunTest
             else
                 ns = new NetServer(baseDir, jvmName, classpathServer, 
                                      javaCmd, jvmflags,framework, startServer);
-		    ns.start();
-		    frameworkInitialized = true;
-	    }
+
+            //  With useprocess=true, we have a new dir for each test, and all files for
+            // the test, including a clean database, go in that directory. So, network server
+            // for each test runs in that dir, and stops when done. If the test's properties
+            // file has startServer=false the test will handle start/stop, otherwise the harness
+            // needs to start and stop the server.
+            //  But with useprocess=false we're using the same directory and thus the same
+            // database, so there's little point in bouncing the server for each test in a suite,
+            // and it would slow the suite run.
+            //  So, with useprocess=true, or if we're just running 1 test with useprocess=false,
+            // start network server and set serverNeedsStopping=true to have it stopped later; 
+            // if useprocess=false and we're in a suite, start network server if it's not running 
+            // and leave serverNeedsStopping=false, unless startServer=false, then, 
+            // if network server is running, stop it.
+            if ((!useprocess) && (isSuiteRun))
+            {            	   
+                boolean started = false;
+                try 
+                {
+                    started = ns.testNetworkServerConnection();
+                }
+                catch (Exception e) {} // ignore
+                if (!started && startServer)
+                    ns.start(); // start but don't stop, so not setting serverNeedsStopping
+                if (started && !startServer)
+                    ns.stop();
+            }
+            else
+            {
+                ns.start(); 
+                serverNeedsStopping = true;
+            }
+        }
+
+
 		
         // If the test has a jar file (such as upgrade) unjar it
         if (jarfile != null)
@@ -318,7 +355,7 @@ public class RunTest
         }
             
         // Stop the Network server if necessary
-		if (frameworkInitialized)
+		if (serverNeedsStopping)
 		{
 		    ns.stop();
 		}
@@ -443,7 +480,6 @@ public class RunTest
             String[] testCmd = 
         		buildTestCommand(propString, systemHome, scriptPath);
             execTestProcess(testCmd);
-        
 		}
         else
 		{
@@ -462,10 +498,10 @@ public class RunTest
         userdir = sp.getProperty("user.dir");
         
         // reset defaultPackageName (for useprocess=false)
-        //if (useprocess == false)
-        //defaultPackageName = "/org/apache/derbyTesting/";
+        if (useprocess == false)
+          defaultPackageName = "/org/apache/derbyTesting/";
             
-        // reset defaultPackageName (for useprocess=false)
+        // reset defaultPackageName (for useCommonDB=true)
         if (useCommonDB == true)
         {
             defaultPackageName = "/org/apache/derbyTesting/";
@@ -536,9 +572,10 @@ public class RunTest
         // Define the outDir if not already defined from properties
         File tmpoutDir;
         String userdirWin = null;
+            
         if ( (outputdir == null) || (outputdir.length()==0) )
         {
-            if (File.separatorChar == '\\')
+        	if (File.separatorChar == '\\')
             {
                 //need to replace / in path with \ for windows
                 userdirWin = convertPathForWin(userdir);
@@ -549,7 +586,7 @@ public class RunTest
                 tmpoutDir =
 		        new File((new File(userdir)).getCanonicalPath());
             }
-        }
+        }       
         else
         {
             if (File.separatorChar == '\\')
@@ -699,6 +736,19 @@ public class RunTest
     		baseDir = new File(userdir, commonDBHome);
             }
         }
+        else if ( (!useprocess) && isSuiteRun && ((usesystem==null) || (usesystem.length()<=0)) )
+        {
+            String suite = (suiteName.substring(0,suiteName.indexOf(':')));
+            if (File.separatorChar == '\\')
+            {
+                String useprWin = convertPathForWin(suite);
+                baseDir = new File(outDir, useprWin);
+            }
+            else
+            {
+                baseDir = new File(outDir, suite);
+            }
+        }
         else if ( (usesystem != null) && (usesystem.length()>0) )
         {
             if (File.separatorChar == '\\')
@@ -840,7 +890,9 @@ public class RunTest
     {
         // Get any properties specified on the command line
         searchCP = sp.getProperty("ij.searchClassPath");
-		framework = sp.getProperty("framework");
+		String frameworkp = sp.getProperty("framework");
+		if (frameworkp != null)
+			framework = frameworkp;
 		if (framework == null)
 			framework = "embedded";
 		if (!verifyFramework(framework))
@@ -1076,6 +1128,7 @@ public class RunTest
 		else
 		    useprocess = true;
 		
+        
 		// if the hostName is something other than localhost, we must
 		// be trying to connect to a remote server, and so, 
 		// startServer should be false.
@@ -1143,16 +1196,43 @@ public class RunTest
 		    }
 		    usesystem = sp.getProperty("usesystem");
 		}
+
+		// Some tests will not run well in a suite with use process false 
+		// with some frameworks, so skip
+		if (!useprocess && !skiptest )
+		{
+		    String tsuiteName = null;
+		    if (suiteName != null) 
+		        tsuiteName = suiteName; 
+		    else
+		        tsuiteName = sp.getProperty("suitename");
+		    if ( (tsuiteName != null) && (tsuiteName.length()>0) )
+		    {	                
+		        skipFile = framework + "Useprocess.exclude";
+		        if (!framework.equals(""))
+		        {
+		            skiptest = (SkipTest.skipIt(skipFile, scriptName));
+		            if (skiptest) 
+		            {
+		                skiptest=true;
+		                addSkiptestReason("Test " + scriptName + " skipped, " +
+                   		   "listed in " + framework + "Useprocess.exclude file.");  				      
+		            }
+		        }
+		    }	                
+		}
 		
 		if ( (useprocess) || (suiteName == null) )
 		{
-		    suiteName = sp.getProperty("suitename");
+		    if (useprocess)
+		    	suiteName = sp.getProperty("suitename");
 		    if ( (suiteName != null) && (suiteName.length()>0) )
 		    {
 		        // This is a suite run
-		        isSuiteRun = true;
-		        // If a suite, it could be part of a top suite
-		        topsuiteName = sp.getProperty("topsuitename");
+		        isSuiteRun = true;		        
+		        if (useprocess) 
+		            // If a suite, it could be part of a top suite
+		            topsuiteName = sp.getProperty("topsuitename");
 		        topsuitedir = sp.getProperty("topsuitedir");
 		        topreportdir = sp.getProperty("topreportdir");
 		    }
@@ -1627,7 +1707,14 @@ clp.list(System.out);
 				if(copySupportFiles)
 				   CopySuppFiles.copyFiles(copyOutDir, suppFiles);
     		}
-			
+    		else
+    		{
+				// for useprocess false, set ext* (back) to null, or it
+				// later tries to delete files even though they don't exist
+				extInDir = null;
+				extOutDir = null;
+				extInOutDir = null;
+    		}
     	}
         return propString;
     }
@@ -1886,7 +1973,7 @@ clp.list(System.out);
                 // were created
                 if (extInDir!=null) deleteFile(extInDir);
                 if (extOutDir!=null) deleteFile(extOutDir);
-                if (extInDir!=null) deleteFile(extInOutDir);
+                if (extInOutDir!=null) deleteFile(extInOutDir);
             }
         }
 	    // reset for next test
@@ -1914,6 +2001,12 @@ clp.list(System.out);
             System.out.println(f.getName() + " is null");
             return;
         }
+        if (!f.exists())
+        {
+            System.out.println(f.getName() + " does not exist; harness error");
+            return;
+        }
+
         //System.out.println("Trying to delete: " + f.getPath());
 	    status = f.delete();
 
@@ -1922,6 +2015,11 @@ clp.list(System.out);
 	    else
 	    {
 	        // Could not delete; this could be a non-empty directory
+	        if (!f.isDirectory())
+	        { 
+	            System.out.println("Could not delete file " + f.getName() + ", going on");
+	            return;
+	        } 
 	        //System.out.println("Recursively delete...");
 	        String[] files = f.list();
 	        for (int i = 0; i < files.length; i++)
@@ -1942,6 +2040,7 @@ clp.list(System.out);
 	                    status = sub.delete();
 	                    //System.out.println("Recurse delete status: " + status);
 	                }
+	                //else
 	                // The file delete failed
 	                //System.out.println("Failed to clean up file: " + sub.getPath());
 	            }
@@ -2315,8 +2414,6 @@ clp.list(System.out);
         if (framework.startsWith("DerbyNet"))
         	ptmp.put("hostName=", hostName);
         System.setProperties(ptmp);
-    	PrintStream stdout = System.out;
-    	PrintStream stderr = System.err;
 
 	    String pathStr = "";
 
@@ -2335,8 +2432,6 @@ clp.list(System.out);
 	    
 
     	PrintStream ps = new PrintStream(new FileOutputStream(pathStr), true);
-    	System.setOut(ps);
-    	System.setErr(ps);
     	
     	// Install a security manager within this JVM for this test.
     	boolean installedSecurityManager = installSecurityManager();
@@ -2346,6 +2441,11 @@ clp.list(System.out);
             ijarg[0] = "-p";
             ijarg[1] = propString;
             ijarg[2] = scriptPath;
+            // direct the standard output and error to the print stream for the .tmp file
+            PrintStream stdout = System.out;
+            PrintStream stderr = System.err;
+            System.setOut(ps);
+            System.setErr(ps);
 			RunIJ ij = new RunIJ(ijarg);
 			Thread ijThread = new Thread(ij);
 			try
@@ -2378,6 +2478,9 @@ clp.list(System.out);
                         ptmp.put("ij.defaultResourcePackage", "/org/apache/derbyTesting/");
 			ptmp.put("usesystem", "");
 			System.setProperties(ptmp);
+			// Reset System.out and System.err
+			System.setOut(stdout);
+			System.setErr(stderr);
         }
         else if (testType.equals("java"))
         {
@@ -2391,6 +2494,10 @@ clp.list(System.out);
             classArray[0] = args.getClass();
             String testName = javaPath + "." + testBase;
             Class JavaTest = Class.forName(testName);
+            PrintStream stdout = System.out;
+            PrintStream stderr = System.err;
+            System.setOut(ps);
+            System.setErr(ps);
             // Get the tests's main method and invoke it
             Method testMain = JavaTest.getMethod("main", classArray);
             Object[] argObj = new Object[1];
@@ -2423,6 +2530,9 @@ clp.list(System.out);
 			{
 				// ignore the errors, they are expected.
 			}
+	        // Reset System.out and System.err
+	        System.setOut(stdout);
+	        System.setErr(stderr);
         }
         else if (testType.equals("multi"))
         {
@@ -2448,8 +2558,18 @@ clp.list(System.out);
         }
         else if (testType.equals("unit"))
         {
+            // direct the standard output and error to the print stream for the .tmp file
+            PrintStream stdout = System.out;
+            PrintStream stderr = System.err;
+            System.setOut(ps);
+            System.setErr(ps);
             System.out.println("Unit tests not implemented yet with useprocess=false");
-            System.exit(1);
+            // Reset System.out and System.err
+            System.setOut(stdout);
+            System.setErr(stderr);
+	        // repeat to stdout...
+	        System.out.println("Unit tests not implemented yet with useprocess=false");
+            //System.exit(1);
             /*
             String[] args = new String[2];
             args[0] = "-p";
@@ -2459,18 +2579,71 @@ clp.list(System.out);
         }
         else if (testType.equals("junit"))
         {
-            System.out.println("JUnit tests not implemented yet with useprocess=false");
-            System.exit(1);
+            PrintStream stdout = System.out;
+            PrintStream stderr = System.err;
+            System.setOut(ps);
+            System.setErr(ps);            
+            if (javaPath == null) {
+                javaPath = "org.apache.derbyTesting.functionTests.tests." + testDirName;
+            }
+            String testName = javaPath + "." + testBase;
+            
+            // NOTE: This is most likely a temporary solution that will be 
+            //       replaced once we get our own TestRunner.
+            
+            // Cannot use junit.textui.TestRunner.main() since it will exit 
+            // the JVM when done.
+            
+            // Extract/create a TestSuite object, which is either
+            //      a) retreived from a static suite() method in the test class
+            //
+            // or, if a) fails
+            //
+            //      b) containing all methods starting with "test" in the junit 
+            //         test class.
+            // This corresponds to what the junit.textui.TestRunner would
+            // do if invoked in a separate process (useprocess=true).
+           
+            // Load the test class
+            Class testClass = Class.forName(testName);
+            
+            TestSuite junitTestSuite = null;
+            
+            try{
+                // Get the static suite() method if it exists.
+                Method suiteMethod = testClass.getMethod("suite", null);
+                // Get the TestSuite object returned by the suite() method
+                // by invoking it.
+                // Method is static, hence param1 is null
+                // Method has no formal parameters, hence param2 is null
+                junitTestSuite = (TestSuite) suiteMethod.invoke(null, null);
+            } catch(Exception ex){
+                // Not able to access static suite() method (with no params)
+                // returning a TestSuite object.
+                // Use JUnit to create a TestSuite with all methods in the test
+                // class starting with "test"
+                junitTestSuite = new TestSuite(testClass);
+            }
+            
+            if(junitTestSuite != null){
+                // Now run the test suite
+                junit.textui.TestRunner.run(junitTestSuite);    
+            }
+            else{
+                System.out.println("Not able to extract JUnit TestSuite from " +
+                        "test class " + testName);
+            }
+        
+            // Reset System.out and System.err
+            System.setOut(stdout);
+            System.setErr(stderr);
         }        
         ps.close();
          if (installedSecurityManager)
         {
         	System.setSecurityManager(null);
         	
-        }
-        // Reset System.out and System.err
-        System.setOut(stdout);
-        System.setErr(stderr);
+        }        
     }
 
     static void addSkiptestReason(String reason) {

@@ -60,6 +60,14 @@ public class nullSQLText {
 			con.setAutoCommit(true); // make sure it is true
 			s = con.createStatement();
 
+			// Clean-up in case anything was left from previous tests.
+			try {
+				s.execute("drop table t1");
+			} catch (SQLException se) {}
+			try {
+				s.execute("drop procedure za");
+			} catch (SQLException se) {}
+
 			try
 			{
 				// test null String in prepared statement

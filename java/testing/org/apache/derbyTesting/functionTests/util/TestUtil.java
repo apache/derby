@@ -38,6 +38,7 @@ import javax.sql.DataSource;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derbyTesting.functionTests.harness.RunTest;
 
 
 
@@ -176,6 +177,14 @@ public class TestUtil {
                           }
                       }
                    );              
+		// last attempt to get useprocess to do networkserver stuff.
+		// If a suite has useprocess, it's possible there was no property set.
+		if (frameworkString == null)
+		{
+		   String useprocessFramework = RunTest.framework;
+		   if (useprocessFramework != null)
+			frameworkString = useprocessFramework;
+		}
 		if (frameworkString == null || 
 		   frameworkString.toUpperCase(Locale.ENGLISH).equals("EMBEDDED"))
 			framework = EMBEDDED_FRAMEWORK;

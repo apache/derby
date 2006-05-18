@@ -535,7 +535,20 @@ public class RunList
             }
             else
             {
-                String[] args = new String[6];
+                // if useprocess=false, we cannot pass properties on a commandline,
+                // instead we pass absolutely necessary properties directly to RunTest.
+                // At the very minimum, we need to know:
+                // 0. the test 
+                // 1. resourcepackage - the base for loading functionTests Resources
+                // 2. whether or not to use a specific system & the usesystem flag (like for nist)
+                // 3. useprocess flag
+                // 4. shutdown url 
+                // 5. name of the suite
+                // 6. the framework, or subsuites might default back to embedded
+                // if a test needs a jvm process started with more/other properties than these, 
+                // it will not run well with useprocess=false or not in the same way as with
+                // useprocess=true
+                String[] args = new String[7];
                 args[0] = str; // the test name
                 if ( ijdefaultResourcePackage != null )
                     args[1] = ijdefaultResourcePackage;
@@ -551,6 +564,7 @@ public class RunList
                 else
                     args[4] = "";
                 args[5] = suite;
+                args[6] = framework;
                 org.apache.derbyTesting.functionTests.harness.RunTest.main(args);
                 // Write any diff to the suite's output
                 String tmp = str.substring(str.indexOf("/") + 1, str.lastIndexOf("."));
@@ -572,6 +586,22 @@ public class RunList
 	    // when running with java threads
 	    ManageSysProps.resetSysProps();
 	    lastTest = str;
+        }
+
+        // If useprocess is false, and this is a networkserver test,
+        // we can speed up the test run by not starting and stopping networkserver
+        // for every test (and waiting for it to be up), as we're using the same 
+        // directory for all test files (instead of creating each test's files in a new dir). 
+        // NetworkServer will get started through RunTest if it's not running, but
+        // at the end of a suite run, we need to make sure we shutdown network server
+        if ((!useprocess) && ((framework !=null) && (framework.startsWith("DerbyNet"))))
+        {
+            try 
+            { 
+                String stopCmd = javaCmd + 
+                   " org.apache.derby.drda.NetworkServerControl shutdown";
+                Process prstop = Runtime.getRuntime().exec(stopCmd);
+            } catch (Exception e) {} // ignore
         }
     }
 
