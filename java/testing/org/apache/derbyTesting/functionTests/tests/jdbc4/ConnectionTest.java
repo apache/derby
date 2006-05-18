@@ -81,24 +81,46 @@ public class ConnectionTest
    
     //------------------------- T E S T  M E T H O D S ------------------------
     
-    public void embeddedCreateBlobNotImplemented()
+    /**
+     *
+     * Tests the Embedded implementation for the createBlob method. The Embedded
+     * server does'nt currently have the set methods implemented. Hence the 
+     * create methods cannot be tested by inserting data into the empty LOB 
+     * object. Here we do a simple test of checking that the length of the 
+     * LOB object is 0.
+     *
+     * @throws SQLException upon failure in the createBlob or the length 
+     *         methods.
+     *
+     */
+    public void embeddedCreateBlob()
         throws SQLException {
-        try {
-            con.createBlob();
-            fail("createBlob() should not be implemented");
-        } catch (SQLFeatureNotSupportedException sfnse) {
-            // Do nothing, we are fine
-        }
+            Blob blob = con.createBlob();
+            //Check if the blob is empty
+            if(blob.length() > 0)
+                fail("The new Blob should not have more than zero bytes " +
+                        "contained in it");
     }
     
-    public void embeddedCreateClobNotImplemented()
+    /**
+     *
+     * Tests the Embedded implementation for the createClob method. The Embedded
+     * server does'nt currently have the set methods implemented. Hence the 
+     * create methods cannot be tested by inserting data into the empty LOB 
+     * object. Here we do a simple test of checking that the length of the 
+     * LOB object is 0.
+     *
+     * @throws SQLException upon failure in the createClob or the length 
+     *         methods.
+     *
+     */
+    public void embeddedCreateClob()
         throws SQLException {
-        try {
-            con.createClob();
-            fail("createClob() should not be implemented");
-        } catch (SQLFeatureNotSupportedException sfnse) {
-            // Do nothing, we are fine
-        }
+            Clob clob = con.createClob();
+            //check if the Clob is empty
+            if(clob.length() > 0)
+                fail("The new Clob should not have a length of greater than " +
+                        "zero");
     }
 
     public void testCreateArrayNotImplemented()
@@ -268,9 +290,9 @@ public class ConnectionTest
     private static TestSuite embeddedSuite() {
         TestSuite embeddedSuite = new TestSuite();
         embeddedSuite.addTest(new ConnectionTest(
-                    "embeddedCreateBlobNotImplemented"));
+                    "embeddedCreateBlob"));
         embeddedSuite.addTest(new ConnectionTest(
-                    "embeddedCreateClobNotImplemented"));
+                    "embeddedCreateClob"));
         return embeddedSuite;
     }
     

@@ -62,12 +62,40 @@ public class EmbedConnection40 extends EmbedConnection30 {
         throw Util.notImplemented();
     }
     
+    /**
+     *
+     * Constructs an object that implements the <code>Clob</code> interface. The object
+     * returned initially contains no data.  The <code>setAsciiStream</code>,
+     * <code>setCharacterStream</code> and <code>setString</code> methods of 
+     * the <code>Clob</code> interface may be used to add data to the <code>Clob</code>.
+     *
+     * @return An object that implements the <code>Clob</code> interface
+     * @throws SQLException if an object that implements the
+     * <code>Clob</code> interface can not be constructed, this method is 
+     * called on a closed connection or a database access error occurs.
+     *
+     */
     public Clob createClob() throws SQLException {
-        throw Util.notImplemented();
+        checkIfClosed();
+        return new EmbedClob("",this);
     }
     
+    /**
+     *
+     * Constructs an object that implements the <code>Blob</code> interface. The object
+     * returned initially contains no data.  The <code>setBinaryStream</code> and
+     * <code>setBytes</code> methods of the <code>Blob</code> interface may be used to add data to
+     * the <code>Blob</code>.
+     *
+     * @return  An object that implements the <code>Blob</code> interface
+     * @throws SQLException if an object that implements the
+     * <code>Blob</code> interface can not be constructed, this method is 
+     * called on a closed connection or a database access error occurs.
+     *
+     */
     public Blob createBlob() throws SQLException {
-        throw Util.notImplemented();
+        checkIfClosed();
+        return new EmbedBlob(new byte[0],this);
     }
     
     public NClob createNClob() throws SQLException {

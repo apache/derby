@@ -95,6 +95,24 @@ final class EmbedBlob extends ConnectionChild implements Blob
     //been invalidated by calling free() on it
     private boolean isValid = true;
 
+     /**
+     * This constructor is used to create a empty Blob object. It is used by the
+     * Connection interface method createBlob().
+     * 
+     * @param blobBytes A byte array containing the data to be stores in the 
+     *        Blob.
+     *
+     * @param con The EmbedConnection object associated with this Blob object.
+     *
+     */
+    
+     EmbedBlob(byte [] blobBytes,EmbedConnection con) {
+         super(con);
+         myBytes = blobBytes;
+         isBytes = true;
+         myLength = myBytes.length;
+     }
+     
     /*
       This constructor should only be called by EmbedResultSet.getBlob
     */

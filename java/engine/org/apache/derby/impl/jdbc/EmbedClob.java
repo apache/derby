@@ -79,6 +79,23 @@ final class EmbedClob extends ConnectionChild implements Clob
     //been invalidated by calling free() on it
     private boolean isValid = true;
 
+    /**
+     * This constructor is used to create a empty Clob object. It is used by the
+     * Connection interface method createClob().
+     * 
+     * @param clobString A String object containing the data to be stores in the 
+     *        Clob.
+     *
+     * @param con The Connection object associated with this EmbedClob object.
+     *
+     */
+    
+    EmbedClob(String clobString,EmbedConnection con) {
+        super(con);
+        myString = clobString;
+        isString = true;
+    }
+    
     /*
     This constructor should only be called by EmbedResultSet.getClob
     */
