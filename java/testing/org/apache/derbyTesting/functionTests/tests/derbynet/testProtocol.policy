@@ -1,0 +1,9 @@
+//
+// test specific permissions for test:
+// derbynet/testProtocol.java
+//
+grant codeBase "${derbyTesting.codejar}/derbynet.jar" {
+  // tracing files default to derby.system.home, need write permission
+  permission java.io.FilePermission "${derby.system.home}${/}*", "write";  
+};
+
