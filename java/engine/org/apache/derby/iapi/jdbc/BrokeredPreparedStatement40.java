@@ -36,38 +36,38 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
     }
     
     public void setRowId(int parameterIndex, RowId x) throws SQLException{
-        throw Util.notImplemented();
+        getPreparedStatement().setRowId (parameterIndex, x);
     }
     
     public void setNString(int index, String value) throws SQLException{
-        throw Util.notImplemented();
+        getPreparedStatement().setNString (index, value);
     }
     
     public void setNCharacterStream(int index, Reader value, long length) throws SQLException{
-        throw Util.notImplemented();
+        getPreparedStatement().setNCharacterStream (index, value, length);
     }
     
     public void setNClob(int index, NClob value) throws SQLException{
-        throw Util.notImplemented();
+        getPreparedStatement().setNClob (index, value);
     }
     
     public void setClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
-        throw Util.notImplemented();
+        getPreparedStatement().setClob (parameterIndex, reader, length);
     }
     
     public void setBlob(int parameterIndex, InputStream inputStream, long length)
     throws SQLException{
-        throw Util.notImplemented();
+        getPreparedStatement().setBlob (parameterIndex, inputStream, length);
     }
     public void setNClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
-        throw Util.notImplemented();
+        getPreparedStatement().setNClob (parameterIndex, reader, length);
     }
     
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException{
-        throw Util.notImplemented();
-    }
+        getPreparedStatement().setSQLXML (parameterIndex, xmlObject);
+    }    
     
     /**
      * Checks if the statement is closed.

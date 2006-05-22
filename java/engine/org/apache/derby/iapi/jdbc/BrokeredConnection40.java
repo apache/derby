@@ -43,8 +43,13 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
     }
     
     public Array createArray(String typeName, Object[] elements)
-        throws SQLException {
-        throw Util.notImplemented();
+          throws SQLException {    
+         try {
+             return getRealConnection().createArray (typeName, elements);
+         } catch (SQLException sqle) {
+             notifyException(sqle);
+             throw sqle;
+         }
     }
     
     /**
@@ -101,16 +106,31 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
     
     
     public NClob createNClob() throws SQLException{
-        throw Util.notImplemented();
+         try {
+             return getRealConnection().createNClob();
+         } catch (SQLException sqle) {
+             notifyException(sqle);
+             throw sqle;
+         }
     }
     
     public SQLXML createSQLXML() throws SQLException{
-        throw Util.notImplemented();
+         try {
+             return getRealConnection().createSQLXML ();
+         } catch (SQLException sqle) {
+             notifyException(sqle);
+             throw sqle;
+         }
     }
     
     public Struct createStruct(String typeName, Object[] attributes)
-        throws SQLException {
-        throw Util.notImplemented();
+          throws SQLException {
+         try {
+             return getRealConnection().createStruct (typeName, attributes);
+         } catch (SQLException sqle) {
+             notifyException(sqle);
+             throw sqle;
+         }
     }
 
 
@@ -249,15 +269,30 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      * @return an instance of BrokeredStatement40 
      * throws java.sql.SQLException
      */
-    public BrokeredStatement newBrokeredStatement
+    public final BrokeredStatement newBrokeredStatement
             (BrokeredStatementControl statementControl) throws SQLException {
-		return new BrokeredStatement40(statementControl, getJDBCLevel());
+        try {
+            return new BrokeredStatement40(statementControl, getJDBCLevel());
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
     }
-    public BrokeredPreparedStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql, Object generatedKeys) throws SQLException {
-        return new BrokeredPreparedStatement40(statementControl, getJDBCLevel(), sql, generatedKeys);
+    public final BrokeredPreparedStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql, Object generatedKeys) throws SQLException {
+        try {
+            return new BrokeredPreparedStatement40(statementControl, getJDBCLevel(), sql, generatedKeys);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
     }
-    public BrokeredCallableStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql) throws SQLException {
-        return new BrokeredCallableStatement40(statementControl, getJDBCLevel(), sql);
+    public final BrokeredCallableStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql) throws SQLException {
+        try {
+            return new BrokeredCallableStatement40(statementControl, getJDBCLevel(), sql);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
     }
     
     /**
@@ -266,7 +301,7 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      * @return type map for this connection
      * @exception SQLException if a database access error occurs
      */
-    public java.util.Map<String,Class<?>> getTypeMap() throws SQLException {
+    public final java.util.Map<String,Class<?>> getTypeMap() throws SQLException {
         try {
             return getRealConnection().getTypeMap();
         } catch (SQLException se) {
@@ -275,7 +310,7 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
         }
     }
     
-    int getJDBCLevel() { return 4;}
+    final int getJDBCLevel() { return 4;}
     
     /**
      * Returns false unless <code>interfaces</code> is implemented 
@@ -288,7 +323,7 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      *                                whether this is a wrapper for an object 
      *                                with the given interface.
      */
-    public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+    public final boolean isWrapperFor(Class<?> interfaces) throws SQLException {
         checkIfClosed();
         return interfaces.isInstance(this);
     }
@@ -301,7 +336,7 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      * @throws java.sql.SQLExption if no object if found that implements the 
      * interface
      */
-    public <T> T unwrap(java.lang.Class<T> interfaces) 
+    public final <T> T unwrap(java.lang.Class<T> interfaces) 
                             throws SQLException{
         checkIfClosed();
         //Derby does not implement non-standard methods on 
@@ -312,6 +347,5 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
             throw Util.generateCsSQLException(SQLState.UNABLE_TO_UNWRAP,
                     interfaces);
         }
-    }
-    
+    }    
 }

@@ -50,6 +50,8 @@ public class TestConfiguration {
         hostName = props.getProperty(KEY_HOSTNAME, DEFAULT_HOSTNAME);
         isVerbose = Boolean.valueOf(props.getProperty(KEY_VERBOSE)).booleanValue();
         String portStr = props.getProperty(KEY_PORT);
+        singleLegXA = Boolean.valueOf(props.getProperty(KEY_SINGLE_LEG_XA)
+                            ).booleanValue();
         if (portStr != null) {
             try {
                 port = Integer.parseInt(portStr);
@@ -229,6 +231,14 @@ public class TestConfiguration {
 	}
 
     /**
+     * Return if it has to run under single legged xa transaction
+     * @return singleLegXA
+     */
+    public boolean isSingleLegXA () {
+        return singleLegXA;
+    }
+    
+    /**
      * Immutable data members in test configuration
      */
 	private	final Properties systemStartupProperties;
@@ -240,6 +250,7 @@ public class TestConfiguration {
     private final String hostName;
     private final JDBCClient jdbcClient;
     private boolean isVerbose;
+    private final boolean singleLegXA;
     
     /**
      * Default values for configurations
@@ -260,7 +271,8 @@ public class TestConfiguration {
     private final static String KEY_USER_NAME = "user";
     private final static String KEY_HOSTNAME = "hostName";
     private final static String KEY_PORT = "port";
-    private final static String KEY_VERBOSE = "derby.tests.debug";
+    private final static String KEY_VERBOSE = "derby.tests.debug";    
+    private final static String KEY_SINGLE_LEG_XA = "junit.xa.single";
 
     /**
      * Possible values of system properties.

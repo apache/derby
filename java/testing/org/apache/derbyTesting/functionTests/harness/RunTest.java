@@ -179,6 +179,7 @@ public class RunTest
     static boolean lastTestFailed = false;
 
     static boolean isI18N = false;
+    static boolean junitXASingle = false;
     
     /**
      * Run the test without a security manager. Hopefully
@@ -903,7 +904,10 @@ public class RunTest
 			framework = "";
 		else
 			driverName = NetServer.getDriverName(framework);
-
+        String junitXAProp = sp.getProperty ("junit.xa.single");
+        if (junitXAProp != null && junitXAProp.equals ("true")) {
+            junitXASingle = true;
+        }
         hostName = sp.getProperty("hostName");
         // force hostName to localhost if it is not set
         if (hostName == null)
@@ -2200,6 +2204,9 @@ clp.list(System.out);
             if ((hostName != null) && (!hostName.equals("localhost")))
             		jvmProps.addElement("hostName=" + hostName);
         }
+        
+        if (junitXASingle)
+            jvmProps.addElement ("junit.xa.single=true");
 
         // if we're not jdk15, don't, we'll skip
         if ((testEncoding != null) && (jvmName.equals("jdk15")))

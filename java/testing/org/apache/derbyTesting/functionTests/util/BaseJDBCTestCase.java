@@ -70,12 +70,18 @@ public class BaseJDBCTestCase
         throws SQLException {
         Connection con = null;
         JDBCClient client = CONFIG.getJDBCClient();
-        if (HAVE_DRIVER) {
+        if (HAVE_DRIVER) {            
             loadJDBCDriver(client.getJDBCDriverName());
-            con = DriverManager.getConnection(
-                    CONFIG.getJDBCUrl() + ";create=true",
-                    CONFIG.getUserName(),
-                    CONFIG.getUserPassword());
+            if (!CONFIG.isSingleLegXA()) {
+                con = DriverManager.getConnection(
+                        CONFIG.getJDBCUrl() + ";create=true",
+                        CONFIG.getUserName(),
+                        CONFIG.getUserPassword());
+            }
+            else {
+                con = getXADataSource().getXAConnection (CONFIG.getUserName(),
+                            CONFIG.getUserPassword()).getConnection();                
+            }
         } else {
             //Use DataSource for JSR169
             con = getDataSource().getConnection();
