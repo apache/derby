@@ -54,37 +54,44 @@ public class LogicalConnection40
 
     public Array createArray(String typeName, Object[] elements)
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("createArray(String,Object[])");
+		checkForNullPhysicalConnection();
+        return physicalConnection_.createArray( typeName, elements );
     }
     
     public Blob createBlob()
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("createBlob()");
+		checkForNullPhysicalConnection();
+        return physicalConnection_.createBlob();
     }
 
     public Clob createClob()
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("createClob()");
+		checkForNullPhysicalConnection();
+        return physicalConnection_.createClob();
     }
     
     public NClob createNClob()
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("createNClob()");
+		checkForNullPhysicalConnection();
+        return physicalConnection_.createNClob();
     }
 
     public <T extends BaseQuery>T createQueryObject(Class<T> ifc)
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("createQueryObject(Class<T>)");
+		checkForNullPhysicalConnection();
+		return physicalConnection_.createQueryObject( ifc );
     }
     
     public SQLXML createSQLXML()
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("createSQLXML()");
+		checkForNullPhysicalConnection();
+        return physicalConnection_.createSQLXML();
     }
 
     public Struct createStruct(String typeName, Object[] attributes)
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("createStruct(String,Object[])");
+		checkForNullPhysicalConnection();
+        return physicalConnection_.createStruct( typeName, attributes );
     }
 
     /**
