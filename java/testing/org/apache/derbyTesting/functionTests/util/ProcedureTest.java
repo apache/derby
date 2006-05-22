@@ -274,6 +274,16 @@ public abstract class ProcedureTest implements ResultSet {
 		conn.close();
 	}
 
+	// select all rows from a table
+	public static void selectRows(String table, ResultSet[] rs)
+		throws SQLException
+	{
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		Statement stmt = conn.createStatement();
+		rs[0] = stmt.executeQuery("SELECT * FROM " + table);
+		conn.close();
+	}
+	
 	public static void fivejp(ResultSet[] data1, ResultSet[] data2, ResultSet[] data3, ResultSet[] data4, ResultSet[] data5) throws SQLException {
 
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");

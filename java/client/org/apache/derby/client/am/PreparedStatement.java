@@ -218,18 +218,6 @@ public class PreparedStatement extends Statement
         }
     }
 
-    protected void finalize() throws java.lang.Throwable {
-        if (agent_.loggingEnabled()) {
-            agent_.logWriter_.traceEntry(this, "finalize");
-        }
-        if (openOnClient_) {
-            synchronized (connection_) {
-                closeX();
-            }
-        }
-        super.finalize();
-    }
-
     // called immediately after the constructor by Connection prepare*() methods
     void prepare() throws SqlException {
         try {
@@ -1607,7 +1595,7 @@ public class PreparedStatement extends Statement
     public void listenToUnitOfWork() {
         if (!listenToUnitOfWork_) {
             listenToUnitOfWork_ = true;
-            connection_.CommitAndRollbackListeners_.add(this);
+            connection_.CommitAndRollbackListeners_.put(this,null);
         }
     }
 
@@ -1711,22 +1699,13 @@ public class PreparedStatement extends Statement
         }
     }
 
-    public void close() throws SqlException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "close");
-            }
-            closeX();
-        }
-    }
-
-    // An untraced version of close()
-    public void closeX() throws SqlException {
-        if (!openOnClient_) {
-            return;
-        }
-        super.closeX();
-        if (parameterMetaData_ != null) {
+    /* (non-Javadoc)
+     * @see org.apache.derby.client.am.Statement#markClosed(boolean)
+     */
+    protected void markClosed(boolean removeListener){
+    	super.markClosed(removeListener);
+    	
+    	if (parameterMetaData_ != null) {
             parameterMetaData_.markClosed();
             parameterMetaData_ = null;
         }
@@ -1741,7 +1720,8 @@ public class PreparedStatement extends Statement
         }
         parameters_ = null;
 
-        connection_.CommitAndRollbackListeners_.remove(this);
+        if(removeListener)
+        	connection_.CommitAndRollbackListeners_.remove(this);
     }
 
 }

@@ -33,6 +33,10 @@ import org.apache.derby.impl.jdbc.EmbedResultSet;
 */
 class DRDAResultSet
 {
+	//NOTE!
+	//
+	// Since DRDAResultSets are reused, ALL variables should be set 
+	// to their default values in reset().
 
 	// resultSet states are NOT_OPENED and SUSPENDED
 	protected static final int NOT_OPENED = 1;
@@ -347,19 +351,18 @@ class DRDAResultSet
 	}
 	
 	
-	/** Clean up statements and resultSet
+	/**
+	 * This method closes the JDBC objects and frees up all references held by
+	 * this object.
 	 * 
+	 * @throws SQLException
 	 */
 	protected void close()  throws SQLException
 	{
 		if (rs != null)
 			rs.close();
 		rs = null;
-		gotPrctyp = false;
 		outovr_drdaType = null;
-		scrollType = ResultSet.TYPE_FORWARD_ONLY;	
-		concurType = 0;
-		rowCount = 0;
 		rsLens = null;
 		rsDRDATypes = null;
 		rsPrecision = null;
@@ -367,9 +370,52 @@ class DRDAResultSet
 		extDtaObjects = null;
 		splitQRYDTA = null;
 		rsExtPositions = null;
-		state=NOT_OPENED;
+	}
+	
+	/**
+	 * This method resets the state of this DRDAResultset object so that it can
+	 * be re-used. This method should reset all variables of this class.
+	 * 
+	 */
+	protected void reset() {
+		explicitlyClosed = false;
+		state = NOT_OPENED;
 		hasdata = true;
-		splitQRYDTA = null;
+		rsLens = null;
+		rsDRDATypes = null;
+		rsPrecision = null;
+		rsScale = null;
+		
+		outovr_drdaType = null;
+		
+		withHoldCursor = 0;	
+		scrollType = ResultSet.TYPE_FORWARD_ONLY;
+		concurType = 0;
+		rowCount = 0;
+		rs = null;
+		
+		blksize = 0;
+		maxblkext = 0;	
+		outovropt = 0;
+		qryclsimp = CodePoint.QRYCLSIMP_NO;	
+		qryrelscr = false;
+		qryrownbr = 0;
+		qryrfrtbl = false;	
+		qryscrorn = 0;
+		qryrowsns = false; 
+		qryblkrst = false;
+		qryrtndta = false;	
+		qryrowset = 0;
+		qryprctyp = 0;
+		gotPrctyp = false; 	
+		rtnextdta = 0;	
+		nbrrow = 0;
+		rslsetflg = null;	
+
+		extDtaObjects = null;
+		rsExtPositions = null;
+		pkgcnstkn = null;
+		splitQRYDTA = null;	
 	}
 
 

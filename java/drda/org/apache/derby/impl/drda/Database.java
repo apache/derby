@@ -183,10 +183,15 @@ class Database
 	}
 	
 	/**
-	 * Get a new DRDA statement and store it in the stmtTable if stortStmt is true
-	 * If possible recycle an existing statement
-	 * If we are asking for one with the same name it means it
-	 * was already closed.
+	 * Get a new DRDA statement and store it in the stmtTable if stortStmt is 
+	 * true. If possible recycle an existing statement. When the server gets a
+	 * new statement with a previously used pkgnamcsn, it means that 
+	 * client-side statement associated with this pkgnamcsn has been closed. In 
+	 * this case, server can re-use the DRDAStatement by doing the following:  
+	 * 1) Retrieve the old DRDAStatement associated with this pkgnamcsn and
+	 * close it.
+	 * 2) Reset the DRDAStatement state for re-use.
+	 * 
 	 * @param pkgnamcsn  Package name and section
 	 * @return DRDAStatement  
 	 */
@@ -194,8 +199,10 @@ class Database
 	throws SQLException
 	{
 		DRDAStatement stmt = getDRDAStatement(pkgnamcsn);
-		if (stmt != null)
+		if (stmt != null) {
 			stmt.close();
+			stmt.reset();
+		}
 		else
 		{
 			stmt = new DRDAStatement(this);

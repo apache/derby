@@ -1,6 +1,7 @@
 jdbcapi/bestrowidentifier.sql
 jdbcapi/characterStreams.java
 jdbcapi/checkDriver.java
+jdbcapi/derbyStress.java
 jdbcapi/nullSQLText.java
 jdbcapi/prepStmtMetaData.java
 jdbcapi/resultset.java

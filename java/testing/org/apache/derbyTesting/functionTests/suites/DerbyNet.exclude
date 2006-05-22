@@ -6,6 +6,7 @@
 # excluding jdbcapi/testRelative.java because this is a new test contributed by Shreyas Kaushik and needs to be debugged with JCC  in order to get it running with network server
 # excluding lang/updatableResultSet.java because changes are required in JCC Driver for this test to run correctly
 # excluding jdbcapi/rsgetXXXcolumnNames.java as it fails incorrectly, according to JDBC spec. Forwarding test case to JCC team.
+# excluding jdbcapi/derbyStress.java - jcc runs out of memory with this test
 jdbcapi/resultsetStream.java
 lang/errorStream.java
 lang/scrollCursors2.java
@@ -14,3 +15,4 @@ jdbcapi/statementJdbc20.java
 jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java
 lang/updatableResultSet.java
+jdbcapi/derbyStress.java
