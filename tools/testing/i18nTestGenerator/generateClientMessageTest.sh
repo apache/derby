@@ -3,6 +3,14 @@
 TESTDIR=java/testing/org/apache/derbyTesting/functionTests/tests/i18n
 ROOT=$1
 
+GSED=`which gsed`
+if [ "$GSED" = "" ]
+then
+  SED=sed
+else
+  SED=$GSED
+fi
+
 syntax()
 {
   echo "syntax: $0 derby_rootdir"
@@ -61,7 +69,7 @@ touch $FILE
 for i in $FILES
 do
   echo "    // from source file $i" >> $FILE
-  sed -n -f $MYDIR/genClient1.sed $i | sed -f $MYDIR/genClient2.sed >> $FILE 
+  $SED -n -f $MYDIR/genClient1.sed $i | $SED -f $MYDIR/genClient2.sed >> $FILE 
   #sed -n -f $MYDIR/genClient1.sed $i >> $FILE
 done
 

@@ -27,6 +27,8 @@ import org.apache.derby.client.am.ResultSet;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Types;
+import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.shared.common.reference.SQLState;
 
 // For performance, should we worry about the ordering of our DDM command parameters
 
@@ -736,7 +738,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             try {
                                 dataLength = ((java.sql.Clob) inputs[i]).length();
                             } catch (java.sql.SQLException e) {
-                                throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
+                                throw new SqlException(netAgent_.logWriter_, 
+                                    new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
+                                    e);
                             }
                         } else {
                             dataLength = ((Clob) o).length();
@@ -750,7 +754,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             try {
                                 dataLength = ((java.sql.Blob) inputs[i]).length();
                             } catch (java.sql.SQLException e) {
-                                throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
+                                throw new SqlException(netAgent_.logWriter_, 
+                                    new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
+                                    e);
                             }
                         } else { // use promoted Blob
                             dataLength = ((Blob) o).length();
@@ -773,10 +779,10 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
                         break;
                     default:
-                        throw new SqlException(netAgent_.logWriter_, "unrecognized jdbc type. " +
-                                " type: " + protocolTypesAndLengths[i][0] +
-                                ", columnCount: " + numVars +
-                                ", columnIndex: " + i);
+                        throw new SqlException(netAgent_.logWriter_, 
+                            new ClientMessageId(SQLState.NET_UNRECOGNIZED_JDBC_TYPE),
+                               new Integer(protocolTypesAndLengths[i][0]),
+                               new Integer(numVars), new Integer(i));
                     }
                 }
             }
@@ -840,7 +846,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                         writeNullByte,
                                         index + 1);
                             } catch (java.sql.SQLException e) {
-                                throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
+                                throw new SqlException(netAgent_.logWriter_, 
+                                    new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
+                                    e);
                             }
                         } else if (((Blob) b).isBinaryStream()) {
                             writeScalarStream(chainFlag,
@@ -885,7 +893,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                         writeNullByte,
                                         index + 1);
                             } catch (java.sql.SQLException e) {
-                                throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
+                                throw new SqlException(netAgent_.logWriter_, 
+                                    new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
+                                    e);
                             }
                         } else if (((Clob) c).isCharacterStream()) {
                             writeScalarStream(chainFlag,
@@ -988,7 +998,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                 // exception is thrown.
 
                 if (jdbcType == 0) {
-                    throw new SqlException(netAgent_.logWriter_, "Invalid JDBC Type for parameter " + i);
+                    throw new SqlException(netAgent_.logWriter_, 
+                        new ClientMessageId(SQLState.NET_INVALID_JDBC_TYPE_FOR_PARAM),
+                        new Integer(i));
                 }
 
                 switch (jdbcType) {
@@ -1019,7 +1031,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                             lidAndLengths[i][1] = buildPlaceholderLength(c.length());
                         } catch (java.io.UnsupportedEncodingException e) {
-                            throw new SqlException(netAgent_.logWriter_, e, "Error in building String parameter: throwable attached");
+                            throw new SqlException(netAgent_.logWriter_, 
+                                new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
+                                "byte array", "Clob", e);
                         }
                     }
                     break;
@@ -1136,7 +1150,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                             lidAndLengths[i][1] = buildPlaceholderLength(c.length());
                         } catch (java.io.UnsupportedEncodingException e) {
-                            throw new SqlException(netAgent_.logWriter_, e, "Error in building String parameter: throwable attached");
+                            throw new SqlException(netAgent_.logWriter_, 
+                                new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
+                                "byte array", "Clob");
                         }
                     }
                     break;
@@ -1194,7 +1210,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         try {
                             lidAndLengths[i][1] = buildPlaceholderLength(b.length());
                         } catch (java.sql.SQLException e) {
-                            throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of blob object, exception follows. ");
+                            throw new SqlException(netAgent_.logWriter_, 
+                                new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH), e);
                         }
                     }
                     break;
@@ -1210,7 +1227,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             try {
                                 lobLength = c.length();
                             } catch (java.sql.SQLException e) {
-                                throw new SqlException(netAgent_.logWriter_, e, "Error obtaining length of clob object, exception follows. ");
+                                throw new SqlException(netAgent_.logWriter_, 
+                                    new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
+                                    e);
                             }
                         } else {
                             lobLength = ((Clob) c).length();
@@ -1237,7 +1256,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     }
                     break;
                 default :
-                    throw new SqlException(netAgent_.logWriter_, "unrecognized sql type");
+                    throw new SqlException(netAgent_.logWriter_, 
+                        new ClientMessageId(SQLState.UNRECOGNIZED_JAVA_SQL_TYPE),
+                        new Integer(jdbcType));
                 }
 
                 if (!parameterMetaData.nullable_[i]) {
@@ -1321,12 +1342,15 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     //   prcnam can not be 0 length or > 255 length, SQLException will be thrown.
     private void buildPRCNAM(String prcnam) throws SqlException {
         if (prcnam == null) {
-            throw new SqlException(netAgent_.logWriter_, "null procedure name not supported");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.NET_NULL_PROCEDURE_NAME));
         }
 
         int prcnamLength = prcnam.length();
         if ((prcnamLength == 0) || (prcnamLength > 255)) {
-            throw new SqlException(netAgent_.logWriter_, "procedure name length, " + prcnamLength + ", is not allowed.");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.NET_PROCEDURE_NAME_LENGTH_OUT_OF_RANGE),
+                new Integer(prcnamLength), new Integer(255));
         }
 
         writeScalarString(CodePoint.PRCNAM, prcnam);

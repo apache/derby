@@ -33,7 +33,11 @@ import org.apache.derby.client.am.Types;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
+import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.JDBC30Translation;
+import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.reference.MessageId;
 
 public class NetStatementReply extends NetPackageReply implements StatementReplyInterface {
     NetStatementReply(NetAgent netAgent, int bufferSize) {
@@ -1020,10 +1024,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
 
         netAgent_.setSvrcod(svrcod);
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "Execution failed due to a distribution protocol error that caused " +
-                "deallocation of the conversation.  " +
-                "An Open Query Command was issued for a query which was already open.",
-                SqlState._58009));
+            new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+            MessageUtil.getCompleteMessage(MessageId.CONN_DRDA_QRYOPEN,
+                SqlException.CLIENT_MESSAGE_RESOURCE_NAME,
+                (Object [])null)));
     }
 
     // Open Query Failure (OPNQFLRM) Reply Message indicates that the
@@ -1393,10 +1397,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     // DSCERRCD_42 - RLO fails to reference a required GDA or RLO.
     private void descriptorErrorDetected() throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "Execution failed due to a distribution protocol error that caused " +
-                "deallocation of the conversation.  " +
-                "A PROTOCOL Invalid FDOCA Description Error was detected.",
-                SqlState._58009));
+            new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+            MessageUtil.getCompleteMessage(MessageId.CONN_DRDA_INVALIDFDOCA,
+                SqlException.CLIENT_MESSAGE_RESOURCE_NAME,
+                (Object [])null)));
     }
 
     protected void parseQRYDTA(NetResultSet netResultSet) throws DisconnectException {
@@ -1480,7 +1484,8 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             netCursor.extdtaData_.add(data);
         } catch (java.lang.OutOfMemoryError e) {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                    "Attempt to fully materialize lob data that is too large for the JVM.  "));
+                new ClientMessageId(SQLState.NET_LOB_DATA_TOO_LARGE_FOR_JVM),
+                e));
         }
     }
 
@@ -1551,7 +1556,8 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             scldtaLen = peekFastLength();
             if (scldtaLen < 18 || scldtaLen > 255) {
                 agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                        "scldta length, " + scldtaLen + ", is invalid for rdbcolid"));
+                    new ClientMessageId(SQLState.NET_SQLCDTA_INVALID_FOR_RDBCOLID),
+                    new Integer(scldtaLen)));
                 return null;
             }
             // read 2+scldtaLen number of bytes from the reply buffer into the pkgnamcsnBytes
@@ -1563,7 +1569,8 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             scldtaLen = peekFastLength();
             if (scldtaLen < 18 || scldtaLen > 255) {
                 agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                        "scldta length, " + scldtaLen + ", is invalid for pkgid"));
+                    new ClientMessageId(SQLState.NET_SQLCDTA_INVALID_FOR_PKGID),
+                    new Integer(scldtaLen)));
                 return null; // To make compiler happy.
             }
             // read 2+scldtaLen number of bytes from the reply buffer into the pkgnamcsnBytes
@@ -1577,7 +1584,8 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
 
         } else {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                    "PKGNAMCSN length, " + ddmLength + ", is invalid at SQLAM " + netAgent_.targetSqlam_));
+                new ClientMessageId(SQLState.NET_PGNAMCSN_INVALID_AT_SQLAM),
+                new Integer(ddmLength), new Integer(netAgent_.targetSqlam_)));
             return null;  // To make compiler happy.
         }
 
@@ -2275,7 +2283,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         int vcs_length = readFastUnsignedShort();
         if (vcm_length > 0 && vcs_length > 0) {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                    "only one of the VCM, VCS length can be greater than 0"));
+                new ClientMessageId(SQLState.NET_VCM_VCS_LENGTHS_INVALID)));
         } else if (vcs_length > 0) {
             stringToBeSet = readFastString(vcs_length, netAgent_.targetTypdef_.getCcsidSbcEncoding());
         }
@@ -2293,7 +2301,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         int vcs_length = readUnsignedShort();
         if (vcm_length > 0 && vcs_length > 0) {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                    "only one of the VCM, VCS length can be greater than 0"));
+                new ClientMessageId(SQLState.NET_VCM_VCS_LENGTHS_INVALID)));
         } else if (vcs_length > 0) {
             stringToBeSet = readString(vcs_length, netAgent_.targetTypdef_.getCcsidSbcEncoding());
         }
@@ -2388,8 +2396,6 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         parseEXCSQLSETreply(statement);
         endOfSameIdChainData();
     }
-
-
 }
 
 

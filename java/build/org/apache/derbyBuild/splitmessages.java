@@ -105,6 +105,14 @@ public class splitmessages {
         clientMessageIds.add(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED);
         clientMessageIds.add(SQLState.JDBC_DRIVER_REGISTER);
         clientMessageIds.add(SQLState.NO_CURRENT_ROW);
+        clientMessageIds.add(SQLState.PROPERTY_UNSUPPORTED_CHANGE);
+        clientMessageIds.add(SQLState.NET_INVALID_JDBC_TYPE_FOR_PARAM);
+        clientMessageIds.add(SQLState.UNRECOGNIZED_JAVA_SQL_TYPE);
+        clientMessageIds.add(SQLState.NET_UNRECOGNIZED_JDBC_TYPE);
+        clientMessageIds.add(SQLState.NET_SQLCDTA_INVALID_FOR_RDBCOLID);
+        clientMessageIds.add(SQLState.NET_SQLCDTA_INVALID_FOR_PKGID);
+        clientMessageIds.add(SQLState.NET_PGNAMCSN_INVALID_AT_SQLAM);
+        clientMessageIds.add(SQLState.NET_VCM_VCS_LENGTHS_INVALID);
     }
 
 	public static void main(String[] args) throws Exception {

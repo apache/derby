@@ -673,6 +673,9 @@ public interface SQLState {
     String UNSUPPORTED_ENCODING                                        = "22005.S.1";
     String CHARACTER_CONVERTER_NOT_AVAILABLE                           = "22005.S.2";
     String CANT_CONVERT_UNICODE_TO_EBCDIC                              = "22005.S.3";
+    String NET_UNRECOGNIZED_JDBC_TYPE                                  = "22005.S.4";
+    String NET_INVALID_JDBC_TYPE_FOR_PARAM                             = "22005.S.5";
+    String UNRECOGNIZED_JAVA_SQL_TYPE                                  = "22005.S.6";
 
 	String LANG_DATE_RANGE_EXCEPTION                                   = "22007.S.180";
 	String LANG_DATE_SYNTAX_EXCEPTION                                  = "22007.S.181";
@@ -1510,7 +1513,7 @@ public interface SQLState {
     String STORED_PROC_LOAD_MODULE_NOT_FOUND = "XJ210.S";
     String BATCH_CHAIN_BREAKING_EXCEPTION = "XJ211.S";
     String INVALID_ATTRIBUTE_SYNTAX = "XJ212.S";
-    String TRACELEVEL_FORMAT_INVALID = "XJ213.S";
+    String TRACELEVEL_FORMAT_INVALID = "XJ213.C";
     String IO_ERROR_UPON_LOB_FREE = "XJ214.S";
     String LOB_OBJECT_INVALID = "XJ215.S";
     
@@ -1523,6 +1526,10 @@ public interface SQLState {
     String NET_PASSWORD_TOO_LONG                                    = "XN006.C";
     String NET_ENCODING_NOT_SUPPORTED                               = "XN007.C";
     String NET_QUERY_PROCESSING_TERMINATED                          = "XN008.S";
+    String NET_ERROR_GETTING_BLOB_LENGTH                            = "XN009.S";
+    String NET_NULL_PROCEDURE_NAME                                  = "XN010.S";
+    String NET_PROCEDURE_NAME_LENGTH_OUT_OF_RANGE                   = "XN011.S";
+    String NET_WRONG_XA_VERSION                                     = "XN012.S";
     
     // Used by server for scrollable updatable insensitive result sets
     // to transmit updated state to client. Internal, not seen by user.
@@ -1575,6 +1582,12 @@ public interface SQLState {
     String COMMUNICATION_ERROR                                  = "08006.C.3";
     String CONNECTION_FAILED_ON_DEFERRED_RESET                  = "08006.C.4";
     String NET_INSUFFICIENT_DATA                                = "08006.C.5";
+    String NET_LOB_DATA_TOO_LARGE_FOR_JVM                       = "08006.C.6";
+    String NET_SQLCDTA_INVALID_FOR_RDBCOLID                     = "08006.C.7";
+    String NET_SQLCDTA_INVALID_FOR_PKGID                        = "08006.C.8";
+    String NET_PGNAMCSN_INVALID_AT_SQLAM                        = "08006.C.9";
+    String NET_VCM_VCS_LENGTHS_INVALID                          = "08006.C.10";
+
     
     // 08001 is specifically about the SQL client not being able to establish
     // a connection with the server.  Should only be used for errors that
@@ -1593,6 +1606,7 @@ public interface SQLState {
     String CONNECT_PASSWORD_LENGTH_OUT_OF_RANGE                 = "08001.C.6";
     String CONNECT_USERID_ISNULL                                = "08001.C.7";
     String CONNECT_PASSWORD_ISNULL                              = "08001.C.8";
+
         
     // system severity
     String SHUTDOWN_DATABASE = "08006.D";  

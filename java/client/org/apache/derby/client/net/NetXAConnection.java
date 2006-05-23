@@ -31,6 +31,8 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Statement;
 
 import org.apache.derby.client.ClientPooledConnection;
+import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derby.jdbc.ClientDriver;
 
@@ -232,10 +234,10 @@ public class NetXAConnection {
         // unsupported version for platform
         String platform = null;
         platform = "Linux, Unix, Windows";
-        String versionMsg = "On " + platform + " XA supports version " +
-                supportedVersion + " and above, this is version " +
-                netCon.xaHostVersion_;
-        throw new SqlException(netCon.agent_.logWriter_, versionMsg);
+        throw new SqlException(netCon.agent_.logWriter_, 
+            new ClientMessageId(SQLState.NET_WRONG_XA_VERSION),
+            platform, new Integer(supportedVersion), 
+            new Integer(netCon.xaHostVersion_));
     }
     
     /**

@@ -141,6 +141,8 @@ public interface MessageId {
     String CONN_DRDA_RDBACCRM               = "J124";
     String CONN_DRDA_DTARMCHRM              = "J125";
     String CONN_DRDA_PRCCNVRM               = "J126";
+    String CONN_DRDA_QRYOPEN                = "J127";
+    String CONN_DRDA_INVALIDFDOCA           = "J128";
 
 	/*
 	** Authentication

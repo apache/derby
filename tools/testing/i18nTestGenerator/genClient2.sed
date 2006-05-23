@@ -80,6 +80,17 @@ s/[[:space:]]rdbnam/ "rdbnam"/g
 s/[[:space:]]manager/ "manager"/g
 s/[[:space:]]level));/ "level");/g
 s/[[:space:]]operation/ "operation"/g
+s/[[:space:]]attributeString/ "attributeString"/g
+s/[[:space:]]attribute/ "attributeString"/g
+s/[[:space:]]value/ "string"/g
+s/[[:space:]]choicesStr/ "string"/g
+s/[[:space:]]url/ "string"/g
+s/[[:space:]]fp\.getFirstKey()/ "string"/g
+s/[[:space:]]fp\.getFirstValue()/ "string"/g
+s/,uee/,testException/g
+s/[[:space:]]platform/ "string"/g
+
+
 
 # 
 # Deal with extra updateCounts argument to BatchUpdateExceptoins.
