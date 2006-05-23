@@ -631,6 +631,21 @@ class EmbedXAResource implements XAResource {
                         if (!con.realConnection.transactionIsIdle())
                             throw new XAException(XAException.XAER_OUTSIDE);
                         
+                        // We need to get the isolation level up to date same 
+                        // way as it is done at start of a transaction. Before
+                        // joining the transaction, it is possible that the 
+                        // isolation level was updated using SQL. We need to 
+                        // get this state and store in the connection handle so 
+                        // that we can restore the isolation when we are in the 
+                        // local mode.
+                        try {
+	                    	if (con.currentConnectionHandle != null) {
+	                    		con.currentConnectionHandle.getIsolationUptoDate();
+	                    	}
+                    	} catch (SQLException sqle) {
+                            throw wrapInXAException(sqle);
+                        }
+                        
                         closeUnusedConnection(con.realConnection);
                     }
                     con.realConnection = tranState.conn;
