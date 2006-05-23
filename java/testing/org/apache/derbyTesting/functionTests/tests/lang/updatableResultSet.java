@@ -971,7 +971,6 @@ public class updatableResultSet {
       System.out.println("Since Derby returns false for detlesAreDetected for FORWARD_ONLY updatable resultset,the program should not rely on rs.rowDeleted() for FORWARD_ONLY updatable resultsets");
       System.out.println("Have this call to rs.rowDeleted() just to make sure the method does always return false? " + rs.rowDeleted());
 			rs.deleteRow();
-      System.out.println("Have this call to rs.rowDeleted() just to make sure the method does always return false? " + rs.rowDeleted());
 			rs.close();
 
 			System.out.println("Positive Test6b - For Forward Only resultsets, DatabaseMetaData will return false for ownUpdatesAreVisible and updatesAreDetected");
@@ -989,7 +988,6 @@ public class updatableResultSet {
 			System.out.println("Have this call to rs.rowUpdated() just to make sure the method does always return false? " + rs.rowUpdated());
 			rs.updateLong(1,123);
 			rs.updateRow();
-			System.out.println("Have this call to rs.rowUpdated() just to make sure the method does always return false? " + rs.rowUpdated());
 			rs.close();
 
 			System.out.println("Positive Test7a - delete using updatable resultset api from a temporary table");

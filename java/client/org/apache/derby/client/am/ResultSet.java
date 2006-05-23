@@ -2725,6 +2725,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         try
         {
             checkForClosedResultSet();
+            checkPositionedOnPlainRow();
 
             boolean rowUpdated = cursor_.getIsRowUpdated();
 
@@ -2742,8 +2743,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public boolean rowInserted() throws SQLException {
         try
         {
-            boolean rowInserted = false;
             checkForClosedResultSet();
+            checkPositionedOnPlainRow();
+
+            boolean rowInserted = false;
+
+            // Not implemented for any result set type,
+            // so it always returns false.
+
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "rowInserted", rowInserted);
             }
@@ -2759,10 +2766,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
         try
         {
             checkForClosedResultSet();
+            checkPositionedOnPlainRow();
 
-            boolean rowDeleted = (resultSetType_ == ResultSet.TYPE_SCROLL_INSENSITIVE) ?
-		cursor_.getIsUpdateDeleteHole() :
-		false;
+            boolean rowDeleted = 
+                (resultSetType_ == ResultSet.TYPE_SCROLL_INSENSITIVE) ?
+                cursor_.getIsUpdateDeleteHole() : false;
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "rowDeleted", rowDeleted);
@@ -4619,6 +4627,16 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
         }
     }
+
+
+    private final void checkPositionedOnPlainRow() throws SqlException {
+        if (isOnInsertRow_ || !isValidCursorPosition_) {
+            throw new SqlException
+                (agent_.logWriter_, 
+                 new ClientMessageId(SQLState.NO_CURRENT_ROW));
+        }
+    }
+
 
     private final void checkThatResultSetTypeIsScrollable() throws SqlException {
         if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) {

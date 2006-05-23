@@ -216,7 +216,6 @@ deletesAreDetected(ResultSet.TYPE_FORWARD_ONLY)? false
 The JDBC program should look at rowDeleted only if deletesAreDetected returns true
 Since Derby returns false for detlesAreDetected for FORWARD_ONLY updatable resultset,the program should not rely on rs.rowDeleted() for FORWARD_ONLY updatable resultsets
 Have this call to rs.rowDeleted() just to make sure the method does always return false? false
-Have this call to rs.rowDeleted() just to make sure the method does always return false? false
 Positive Test6b - For Forward Only resultsets, DatabaseMetaData will return false for ownUpdatesAreVisible and updatesAreDetected
 This is because, after updateRow, we position the ResultSet before the next row
 ownUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? false
@@ -224,7 +223,6 @@ othersUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY)? true
 updatesAreDetected(ResultSet.TYPE_FORWARD_ONLY)? false
 The JDBC program should look at rowUpdated only if updatesAreDetected returns true
 Since Derby returns false for updatesAreDetected for FORWARD_ONLY updatable resultset,the program should not rely on rs.rowUpdated() for FORWARD_ONLY updatable resultsets
-Have this call to rs.rowUpdated() just to make sure the method does always return false? false
 Have this call to rs.rowUpdated() just to make sure the method does always return false? false
 Positive Test7a - delete using updatable resultset api from a temporary table
 following rows in temp table before deleteRow

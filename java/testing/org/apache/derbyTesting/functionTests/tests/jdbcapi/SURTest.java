@@ -27,6 +27,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import java.util.Iterator;
+
 /**
  * Tests for variants of scrollable updatable resultsets.
  *
@@ -1061,6 +1062,120 @@ public class SURTest extends SURBaseTest {
         testScrollInsensistiveConurUpdatable3(rs);
     }
     
+    /**
+     * Check that detectability methods throw the correct exception
+     * when called in an illegal row state, that is, somehow not
+     * positioned on a row. Minion of testDetectabilityExceptions.
+     *
+     * @param rs An open updatable result set.
+     * @param state A string describing the illegal state.
+     * @return No return value.
+     */
+    private void checkDetectabilityCallsOutsideRow(ResultSet rs, 
+                                                   String state)
+    {
+        boolean b;
+        
+        try {
+            b = rs.rowUpdated();
+            fail("rowUpdated while " + state + 
+                 " did not throw exception: " + b);
+        } catch (SQLException e) {
+            assertEquals(e.getSQLState(),
+                         INVALID_CURSOR_STATE_NO_CURRENT_ROW);
+        }
+
+        try {
+            b = rs.rowDeleted();
+            fail("rowdeleted while " + state + 
+                 " did not throw exception: " + b);
+        } catch (SQLException e) {
+            assertEquals(e.getSQLState(),
+                         INVALID_CURSOR_STATE_NO_CURRENT_ROW);
+        }
+
+        try {
+            b = rs.rowInserted();
+            fail("rowInserted while " + state + 
+                 " did not throw exception: " + b);
+        } catch (SQLException e) {
+            assertEquals(e.getSQLState(),
+                         INVALID_CURSOR_STATE_NO_CURRENT_ROW);
+        }
+    }
+
+
+    /**
+     * Test that the JDBC detectability calls throw correct exceptions when
+     * called in in wrong row states. 
+     * This is done for both supported updatable result set types.
+     */
+    public void testDetectabilityExceptions() throws SQLException 
+    {
+        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+                                          ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery("select * from t1");
+        
+        checkDetectabilityCallsOutsideRow(rs, "before positioning");
+
+        rs.moveToInsertRow();
+        checkDetectabilityCallsOutsideRow(rs, 
+                                          "on insertRow before positioning");
+
+        rs.next();
+        rs.moveToInsertRow();
+        checkDetectabilityCallsOutsideRow(rs, "on insertRow");
+        rs.moveToCurrentRow(); // needed until to DERBY-1322 is fixed
+
+        rs.beforeFirst();
+        checkDetectabilityCallsOutsideRow(rs, "on beforeFirst row");
+
+        rs.afterLast();
+        checkDetectabilityCallsOutsideRow(rs, "on afterLast row");
+
+        rs.first();
+        rs.deleteRow();
+        checkDetectabilityCallsOutsideRow(rs, "after deleteRow");
+
+        rs.last();
+        rs.deleteRow();
+        checkDetectabilityCallsOutsideRow(rs, "after deleteRow of last row");
+
+        rs.close();
+        s.close();
+
+        // Not strictly SUR, but fixed in same patch, so we test it here.
+        s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                                ResultSet.CONCUR_UPDATABLE);
+        rs = s.executeQuery("select * from t1");
+
+        checkDetectabilityCallsOutsideRow(rs, "before FO positioning");
+
+        rs.moveToInsertRow();
+        checkDetectabilityCallsOutsideRow(rs, 
+                                          "on insertRow before FO positioning");
+
+        rs.next();
+        rs.moveToInsertRow();
+        checkDetectabilityCallsOutsideRow(rs, "on FO insertRow");
+
+        rs.next();
+        rs.updateInt(2, 666);
+        rs.updateRow();
+        checkDetectabilityCallsOutsideRow(rs, "after FO updateRow");
+
+        rs.next();
+        rs.deleteRow();
+        checkDetectabilityCallsOutsideRow(rs, "after FO deleteRow");
+
+        while (rs.next()) {};
+        checkDetectabilityCallsOutsideRow(rs, "after FO emptied out");
+
+        rs.close();
+        s.close();
+    }
+
+
     /**
      * Get a cursor name. We use the same cursor name for all cursors.
      */

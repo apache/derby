@@ -2155,6 +2155,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public boolean rowUpdated() throws SQLException {
 		checkIfClosed("rowUpdated");
+		checkNotOnInsertRow();
+		checkOnRow();
+
         boolean rvalue = false;
 
 		try {
@@ -2182,6 +2185,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public boolean rowInserted() throws SQLException {
 		checkIfClosed("rowInserted");
+		checkNotOnInsertRow();
+		checkOnRow();
+
 		return false;
 	}
 
@@ -2201,6 +2207,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public boolean rowDeleted() throws SQLException {
 		checkIfClosed("rowUpdated");
+		checkNotOnInsertRow();
+		checkOnRow();
+
         boolean rvalue = false;
 
 		try {
