@@ -13,13 +13,13 @@ disconnect;
 connect 'wombat_key;shutdown=true';
 
 -- configure the database for encrypion with external encryption key.
-connect 'jdbc:derby:wombat_key;dataEncryption=true;encryptionKey=61626364656667686961626364656568';
+connect 'jdbc:derby:wombat_key;dataEncryption=true;encryptionKey=6162636465666768';
 select * from t1;
 insert into t1 values(6);
 insert into t1 values(7);
 disconnect;
 connect 'wombat_key;shutdown=true';
-connect 'jdbc:derby:wombat_key;encryptionKey=61626364656667686961626364656568';
+connect 'jdbc:derby:wombat_key;encryptionKey=6162636465666768';
 select * from t1 ;
 disconnect;
 connect 'wombat_key;shutdown=true';
