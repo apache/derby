@@ -739,31 +739,24 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		case ISFIRST:
 			return (currentPosition == 1);
 		case ISLAST:
-			if (beforeFirst || afterLast)
+			if (beforeFirst || afterLast || currentPosition==0 ||
+				currentPosition<positionInSource)
 			{
 				return false;
-			}
-
-			/* If we've already seen the last row
-			 * then we can tell if we are on it by
-			 * the current position,
-			 * otherwise, we need to find the last
-			 * row in order to tell if the current row
-			 * is the last row.
+			}			
+			
+			/* If we have seen the last row, we can tell if we are 
+			 * on it by comparing currentPosition with lastPosition.
+			 * Otherwise, we check if there is a next row.
 			 */
 			if (seenLast)
 			{
-				return (currentPosition == lastPosition && currentPosition != 0);
+				return (currentPosition == lastPosition);
 			}
 			else
 			{
-				int savePosition = currentPosition;
-				boolean retval = false;
-				getLastRow();
-				if (savePosition == lastPosition && savePosition != 0)
-				{
-					retval = true;
-				}
+				final int savePosition = currentPosition;
+				final boolean retval = (getNextRowFromSource() == null);
 				getRowFromHashTable(savePosition);
 				return retval;
 			}
