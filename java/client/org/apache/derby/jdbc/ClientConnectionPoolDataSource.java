@@ -40,7 +40,7 @@ import org.apache.derby.client.am.SqlException;
  * <LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
  * </UL>
  */
-public class ClientConnectionPoolDataSource extends ClientBaseDataSource 
+public class ClientConnectionPoolDataSource extends ClientDataSource 
                                            implements ConnectionPoolDataSource {
     private static final long serialVersionUID = -539234282156481377L;
     public static final String className__ = "org.apache.derby.jdbc.ClientConnectionPoolDataSource";
