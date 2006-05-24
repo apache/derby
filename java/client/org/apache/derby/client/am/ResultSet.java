@@ -281,10 +281,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         checkForClosedResultSet();
         clearWarningsX();
 
-        if (isOnInsertRow_) {
-            isOnInsertRow_ = false;
-            isOnCurrentRow_ = true;
-        }
+        moveToCurrentRowX();
         
         wasNull_ = ResultSet.WAS_NULL_UNSET;
 
@@ -2111,6 +2108,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 	resetRowsetFlags();
 	unuseStreams();
 
+        moveToCurrentRowX();
+
         // this method has no effect if the result set has no rows.
         // only send cntqry to position the cursor before first if
         // resultset contains rows and it is not already before first, or
@@ -2148,6 +2147,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     private void afterLastX() throws SqlException {
         resetRowsetFlags();
     unuseStreams();
+    
+        moveToCurrentRowX();
 
         // this method has no effect if the result set has no rows.
         // only send cntqry to position the cursor after last if
@@ -2188,6 +2189,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         checkForClosedResultSet();
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
+        
+        moveToCurrentRowX();
 
         wasNull_ = ResultSet.WAS_NULL_UNSET;
 
@@ -2241,6 +2244,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         checkForClosedResultSet();
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
+        
+        moveToCurrentRowX();
 
         wasNull_ = ResultSet.WAS_NULL_UNSET;
 
@@ -2357,6 +2362,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
 
+        moveToCurrentRowX();
+
         wasNull_ = ResultSet.WAS_NULL_UNSET;
 
         // discard all previous updates when moving the cursor.
@@ -2439,18 +2446,15 @@ public abstract class ResultSet implements java.sql.ResultSet,
         checkForClosedResultSet();
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
+        
+        moveToCurrentRowX();
+        
         wasNull_ = ResultSet.WAS_NULL_UNSET;
 
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
 	
 	unuseStreams();
-
-        // this method may not be called when the cursor on the insert row
-        if (isOnInsertRow_) {
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
-        }
 
         // If the resultset is empty, relative(n) is a null operation
         if (resultSetContainsNoRows()) {
@@ -2569,6 +2573,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         checkForClosedResultSet();
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
+        
+        moveToCurrentRowX();
 
         wasNull_ = ResultSet.WAS_NULL_UNSET;
 
@@ -3741,22 +3747,24 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 checkForClosedResultSet();
                 checkForUpdatableResultSet("moveToCurrentRow");
 
-                if (!isOnInsertRow_) {
-                    // no affect
-                } else {
-                    resetUpdatedColumns();
-                    isOnInsertRow_ = false;
-                    isOnCurrentRow_ = true;
-                    if (currentRowInRowset_ > 0) {
-                        updateColumnInfoFromCache();
-                    }
-                    isValidCursorPosition_ = true;
-                }
+                moveToCurrentRowX();
             }
         }
         catch ( SqlException se )
         {
             throw se.getSQLException();
+        }
+    }
+    
+    private void moveToCurrentRowX() throws SqlException {
+        if (isOnInsertRow_) {
+            resetUpdatedColumns();
+            isOnInsertRow_ = false;
+            isOnCurrentRow_ = true;
+            if (currentRowInRowset_ > 0) {
+                updateColumnInfoFromCache();
+            }
+            isValidCursorPosition_ = true;
         }
     }
 

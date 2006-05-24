@@ -304,4 +304,5 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
     final static String INVALID_CURSOR_STATE_NO_CURRENT_ROW = "24000";
     final static String CURSOR_OPERATION_CONFLICT = "01001";
     final static String QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET = "01J06";
+    final static String CURSOR_NOT_POSITIONED_ON_INSERT_ROW = "XJ086";
 }

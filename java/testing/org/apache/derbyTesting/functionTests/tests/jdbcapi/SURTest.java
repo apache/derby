@@ -494,6 +494,158 @@ public class SURTest extends SURBaseTest {
     }
     
     /**
+     * Tests that it is possible to move using positioning methods after
+     * moveToInsertRow and that it is possible to delete a row after 
+     * positioning back from insertRow. Also tests that it is possible to 
+     * insert a row when positioned on insert row, that it is not possible
+     * to update or delete a row from insertRow and that it also is not possible
+     * to insert a row without being on insert row.
+     */
+    public void testInsertRowWithScrollCursor() throws SQLException {
+        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                          ResultSet.CONCUR_UPDATABLE);
+        
+        int currentPosition, lastRow;
+        
+        s.setCursorName(getNextCursorName());
+        ResultSet rs =
+            s.executeQuery("select * from t1");
+        
+        rs.last();
+        lastRow = rs.getRow();
+        
+        rs.beforeFirst();
+        
+        rs.next();
+        
+        // Test that it is possible to move to next row from insertRow
+        currentPosition = rs.getRow();
+        rs.moveToInsertRow();
+        rs.updateInt(1, currentPosition + 1000);
+        rs.next();
+        assertEquals("CurrentPosition should be " + (currentPosition + 1), 
+                rs.getRow(), currentPosition + 1);
+        // should be able to delete the row
+        rs.deleteRow();
+
+        // Test that it is possible to move using relative from insertRow
+        currentPosition = rs.getRow();
+        rs.moveToInsertRow();
+        rs.updateInt(1, currentPosition + 1000);
+        rs.relative(2);
+        assertEquals("CurrentPosition should be " + (currentPosition + 2), 
+                rs.getRow(), currentPosition + 2);
+        // should be able to delete the row
+        rs.deleteRow();
+
+        // Test that it is possible to move using absolute from insertRow
+        currentPosition = rs.getRow();
+        rs.moveToInsertRow();
+        rs.updateInt(1, currentPosition + 1000);
+        rs.absolute(6);
+        assertEquals("CurrentPosition should be 6", rs.getRow(), 6);
+        // should be able to delete the row
+        rs.deleteRow();
+
+        // Test that it is possible to move to previous row from insertRow
+        currentPosition = rs.getRow();
+        rs.moveToInsertRow();
+        rs.updateInt(1, currentPosition + 1000);
+        rs.previous();
+        assertEquals("CurrentPosition should be " + (currentPosition - 1), 
+                rs.getRow(), currentPosition - 1);
+        // should be able to delete the row
+        rs.deleteRow();
+
+        // Test that it is possible to move to first row from insertRow
+        currentPosition = rs.getRow();
+        rs.moveToInsertRow();
+        rs.updateInt(1, currentPosition + 1000);
+        rs.first();
+        assertEquals("CurrentPosition should be 1", rs.getRow(), 1);
+        assertTrue("isFirst() should return true", rs.isFirst());
+        // should be able to delete the row
+        rs.deleteRow();
+
+        // Test that it is possible to move to last row from insertRow
+        currentPosition = rs.getRow();
+        rs.moveToInsertRow();
+        rs.updateInt(1, currentPosition + 1000);
+        rs.last();
+        assertEquals("CurrentPosition should be " + lastRow, 
+                rs.getRow(), lastRow);
+        assertTrue("isLast() should return true", rs.isLast());
+        // should be able to delete the row
+        rs.deleteRow();
+
+        // Test that it is possible to move beforeFirst from insertRow
+        currentPosition = rs.getRow();
+        rs.moveToInsertRow();
+        rs.updateInt(1, currentPosition + 1000);
+        rs.beforeFirst();
+        assertTrue("isBeforeFirst() should return true", rs.isBeforeFirst());
+        rs.next();
+        assertEquals("CurrentPosition should be 1", rs.getRow(), 1);
+        assertTrue("isFirst() should return true", rs.isFirst());
+
+        // Test that it is possible to move afterLast from insertRow
+        currentPosition = rs.getRow();
+        rs.moveToInsertRow();
+        rs.updateInt(1, currentPosition + 1000);
+        rs.afterLast();
+        assertTrue("isAfterLast() should return true", rs.isAfterLast());
+        rs.previous();
+        assertEquals("CurrentPosition should be " + lastRow, 
+                rs.getRow(), lastRow);
+        assertTrue("isLast() should return true", rs.isLast());
+
+        // Test that it is possible to insert a row and move back to current row
+        rs.previous();
+        currentPosition = rs.getRow();
+        rs.moveToInsertRow();
+        rs.updateInt(1, currentPosition + 1000);
+        rs.insertRow();
+        rs.moveToCurrentRow();
+        assertEquals("CurrentPosition should be " + currentPosition, 
+                rs.getRow(), currentPosition);
+
+        
+        try {
+            rs.moveToInsertRow();
+            rs.updateInt(1, currentPosition + 2000);
+            rs.updateRow();
+        } catch (SQLException se) {
+            assertEquals("Expected exception", 
+                    se.getSQLState().substring(0, 5), 
+                    INVALID_CURSOR_STATE_NO_CURRENT_ROW);
+        }
+        
+        try {
+            rs.moveToInsertRow();
+            rs.updateInt(1, currentPosition + 2000);
+            rs.deleteRow();
+        } catch (SQLException se) {
+            assertEquals("Expected exception", 
+                    se.getSQLState().substring(0, 5), 
+                    INVALID_CURSOR_STATE_NO_CURRENT_ROW);
+        }
+        
+        try {
+            rs.moveToCurrentRow();
+            rs.updateInt(1, currentPosition + 2000);
+            rs.insertRow();
+        } catch (SQLException se) {
+            assertEquals("Expected exception", 
+                    se.getSQLState().substring(0, 5), 
+                    CURSOR_NOT_POSITIONED_ON_INSERT_ROW);
+        }
+        
+        rs.close();
+        
+        s.close();
+    }
+    
+    /**
      *  Test that you can scroll forward and update indexed records
      *  in the scrollable ResultSet (not using FOR UPDATE).
      */
