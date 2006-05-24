@@ -22,6 +22,8 @@ package org.apache.derby.client.net;
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.shared.common.reference.SQLState;
 
 
 public class NetPackageRequest extends NetConnectionRequest {
@@ -166,8 +168,9 @@ public class NetPackageRequest extends NetConnectionRequest {
                                        int lengthRequiringScldta) throws SqlException {
         int length = identifier.length();
         if (length > maxIdentifierLength) {
-            throw new SqlException(netAgent_.logWriter_, "" + identifier + " exceeds maximum identifier length of ' " +
-                    maxIdentifierLength + "'");
+            throw new SqlException(netAgent_.logWriter_,
+                new ClientMessageId(SQLState.LANG_IDENTIFIER_TOO_LONG),
+                identifier, new Integer(maxIdentifierLength));
         }
 
         return (length > lengthRequiringScldta);
@@ -177,7 +180,9 @@ public class NetPackageRequest extends NetConnectionRequest {
         try {
             return string.getBytes(encoding);
         } catch (java.lang.Exception e) {
-            throw new SqlException(netAgent_.logWriter_, e, "error on getBytes");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.JAVA_EXCEPTION), 
+                e.getClass().getName(), e.getMessage(), e);
         }
     }
 

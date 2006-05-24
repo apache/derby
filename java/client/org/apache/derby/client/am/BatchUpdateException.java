@@ -33,7 +33,7 @@ public class BatchUpdateException extends java.sql.BatchUpdateException {
      *  shared message bundle.
      */
     private static MessageUtil msgutil_ = 
-        new MessageUtil(SqlException.CLIENT_MESSAGE_RESOURCE_NAME);
+        SqlException.getMessageUtil();
 
     public BatchUpdateException(LogWriter logWriter, ClientMessageId msgid,
         Object[] args, int[] updateCounts)

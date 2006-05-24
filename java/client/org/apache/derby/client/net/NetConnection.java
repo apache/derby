@@ -42,8 +42,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 public class NetConnection extends org.apache.derby.client.am.Connection {
     
     // Use this to get internationalized strings...
-    protected static MessageUtil msgutil = 
-        new MessageUtil(SqlException.CLIENT_MESSAGE_RESOURCE_NAME);
+    protected static MessageUtil msgutil = SqlException.getMessageUtil();
 
     protected NetAgent netAgent_;
     //contains a reference to the PooledConnection from which this created 

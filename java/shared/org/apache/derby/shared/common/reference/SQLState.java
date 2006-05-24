@@ -1520,16 +1520,12 @@ public interface SQLState {
     //XN - Network-level messages
     String NET_CONNECTION_RESET_NOT_ALLOWED_IN_UNIT_OF_WORK         = "XN001.S";
     String NET_SECKTKN_NOT_RETURNED                                 = "XN002.U";
-    String NET_DBNAME_TOO_LONG                                      = "XN003.C";
-    String NET_SECTKN_TOO_LONG                                      = "XN004.C";
-    String NET_USERID_TOO_LONG                                      = "XN005.C";
-    String NET_PASSWORD_TOO_LONG                                    = "XN006.C";
-    String NET_ENCODING_NOT_SUPPORTED                               = "XN007.C";
     String NET_QUERY_PROCESSING_TERMINATED                          = "XN008.S";
     String NET_ERROR_GETTING_BLOB_LENGTH                            = "XN009.S";
     String NET_NULL_PROCEDURE_NAME                                  = "XN010.S";
     String NET_PROCEDURE_NAME_LENGTH_OUT_OF_RANGE                   = "XN011.S";
     String NET_WRONG_XA_VERSION                                     = "XN012.S";
+    String NET_INVALID_SCROLL_ORIENTATION                           = "XN013.S";
     
     // Used by server for scrollable updatable insensitive result sets
     // to transmit updated state to client. Internal, not seen by user.
@@ -1587,6 +1583,8 @@ public interface SQLState {
     String NET_SQLCDTA_INVALID_FOR_PKGID                        = "08006.C.8";
     String NET_PGNAMCSN_INVALID_AT_SQLAM                        = "08006.C.9";
     String NET_VCM_VCS_LENGTHS_INVALID                          = "08006.C.10";
+    String NET_ENCODING_NOT_SUPPORTED                           = "08006.C.11";
+
 
     
     // 08001 is specifically about the SQL client not being able to establish
@@ -1606,6 +1604,10 @@ public interface SQLState {
     String CONNECT_PASSWORD_LENGTH_OUT_OF_RANGE                 = "08001.C.6";
     String CONNECT_USERID_ISNULL                                = "08001.C.7";
     String CONNECT_PASSWORD_ISNULL                              = "08001.C.8";
+    String NET_DBNAME_TOO_LONG                                  = "08001.C.9";
+    String NET_SECTKN_TOO_LONG                                  = "08001.C.10";
+    String NET_USERID_TOO_LONG                                  = "08001.C.11";
+    String NET_PASSWORD_TOO_LONG                                = "08001.C.12";
 
         
     // system severity
@@ -1651,6 +1653,7 @@ public interface SQLState {
      */
     String DRDA_NO_AUTOCOMMIT_UNDER_XA                              = "2D521.S.1";
     String DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK              = "2D521.S.2"; 
+    String DRDA_CURSOR_NOT_OPEN                                     = "24501.S";
     String DRDA_CONNECTION_TERMINATED                               = "58009.C";
     String DRDA_MGRLVLRM                                            = "58010.C";
     String DRDA_DDM_COMMAND_NOT_SUPPORTED                           = "58014.C";

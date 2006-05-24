@@ -24,6 +24,9 @@ import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.ResultSet;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.ClientMessageId;
+
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetResultSetRequest extends NetStatementRequest
         implements ResultSetRequestInterface {
@@ -312,7 +315,8 @@ public class NetResultSetRequest extends NetStatementRequest
             return CodePoint.QRYSCRREL;
 
         default:
-            throw new SqlException(netAgent_.logWriter_, "Bug check: invalid scroll orientation");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.NET_INVALID_SCROLL_ORIENTATION));
         }
     }
 

@@ -25,12 +25,13 @@ import java.io.FilterInputStream;
 
 import java.io.IOException;
 import org.apache.derby.shared.common.i18n.MessageUtil;
+import org.apache.derby.shared.common.reference.MessageId;
 
 class CloseFilterInputStream extends FilterInputStream {
 	
 	private static final String ALREADY_CLOSED_ERR_MESSAGE = 
-        MessageUtil.getCompleteMessage("J104",
-            SqlException.CLIENT_MESSAGE_RESOURCE_NAME, (Object[]) null);
+            SqlException.getMessageUtil().getTextMessage(
+                MessageId.CONN_ALREADY_CLOSED);
 	
 	private boolean closed;
 	

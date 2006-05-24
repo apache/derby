@@ -103,8 +103,27 @@ public class SqlException extends Exception implements Diagnosable {
      *  it knows to look there if the message isn't found in the
      *  shared message bundle.
      */
-    private static MessageUtil msgutil_ = 
-        new MessageUtil(CLIENT_MESSAGE_RESOURCE_NAME);
+    private static MessageUtil msgutil_;
+    
+    /**
+     * This routine provides singleton access to an instance of MessageUtil
+     * that is constructed for client messages.  It is recommended to use
+     * this singleton rather than create your own instance.
+     *
+     * The only time you need this instance is if you need to directly
+     * format an internationalized message string.  In most instances this
+     * is done for you when you invoke a SqlException constructor
+     *
+     * @return a singleton instance of MessageUtil configured for client
+     *   messages
+     */
+    public static MessageUtil getMessageUtil() {
+        if ( msgutil_ == null ) {
+            msgutil_ = new MessageUtil(CLIENT_MESSAGE_RESOURCE_NAME);
+        }
+        
+        return msgutil_;
+    }
 
     /** 
      * The wrapped SQLException, if one exists
@@ -115,12 +134,44 @@ public class SqlException extends Exception implements Diagnosable {
     // New constructors that support internationalized messages
     // The message id is wrapped inside a class so that we can distinguish
     // between the signatures of the new constructors and the old constructors
+    
+    /**
+     * Create a SqlException.  This constructor is the "base" constructor;
+     * all other constructors (which take a ClientMessageId) delegate to this
+     * constructor
+     *
+     * @param logwriter
+     *      Can be null, but if provided, it is used to log this exception
+     *
+     * @param msgid
+     *      The message id for this message.  ClientMessageId is a simple type-safe
+     *      wrapper for org.apache.derby.shared.common.reference.SQLState message id
+     *      strings.
+     *
+     * @param args
+     *      The set of substitution arguments for the message.  The Java message
+     *      formatter will substitute these arguments into the internationalized
+     *      strings using the substitution ({0}, {1}, etc.) markers in the string.
+     *      Any object can be passed, but if you want it to be readable, make sure
+     *      toString() for the object returns something useful.
+     *
+     * @param cause
+     *      Can be null.  Indicates the cause of this exception.  If this is
+     *      an instance of SqlException or java.sql.SQLException then the exception
+     *      is chained into the nextException chain.  Otherwise it is chained
+     *      using initCause().  On JDK 1.3, since initCause() does not exist,
+     *      a non-SQL exception can not be chained.  Instead, the exception class
+     *      and message text is appended to the message for this exception.
+     *
+     * @return 
+     *      An instance of SqlException that you can throw to your heart's content.
+     */
     public SqlException(LogWriter logwriter, 
         ClientMessageId msgid, Object[] args, Throwable cause)
     {
         this(
             logwriter,
-            msgutil_.getCompleteMessage(
+            getMessageUtil().getCompleteMessage(
                 msgid.msgid,
                 args),
             ExceptionUtil.getSQLStateFromIdentifier(msgid.msgid),
@@ -130,17 +181,15 @@ public class SqlException extends Exception implements Diagnosable {
             this.setThrowable(cause);
         }
     }
-    
-    /**
-     * Use this to override the standard error code that is derived
-     * from the message severity
-     */
+
+    // Use the following SQLExceptions when you want to override the error
+    // code that is derived from the severity of the message id.
     public SqlException(LogWriter logWriter, ClientMessageId msgid, Object[] args,
         SqlCode sqlcode, Throwable t) {
         this(logWriter, msgid, args, t);
         this.errorcode_ = sqlcode.getCode();
     }
-    
+
     public SqlException(LogWriter logWriter, ClientMessageId msgid, Object[] args,
         SqlCode sqlcode) {
         this(logWriter, msgid, args, sqlcode, (Throwable)null);
@@ -160,6 +209,10 @@ public class SqlException extends Exception implements Diagnosable {
         this(logWriter, msgid, new Object[] {arg1, arg2}, sqlcode);
     }
  
+    // The following constructors are all wrappers around the base constructor,
+    // created to make it easy to code against them (you don't have to pass
+    // null arguments or construct object arrays).  See the javadoc for the
+    // "base" constructor for an explanation of the parameters
     public SqlException (LogWriter logwriter, 
             ClientMessageId msgid, Throwable cause) {
         this (logwriter, msgid, (Object[])null, cause);
@@ -260,7 +313,7 @@ public class SqlException extends Exception implements Diagnosable {
             if (JVMInfo.JDK_ID < JVMInfo.J2SE_14 )
             {
                 causeString_ = " " + 
-                    msgutil_.getTextMessage(CAUSED_BY_EXCEPTION_ID)  + " " +
+                    getMessageUtil().getTextMessage(CAUSED_BY_EXCEPTION_ID)  + " " +
                     throwable.getClass() + ": " + throwable.getMessage();
             }
             else
@@ -283,7 +336,8 @@ public class SqlException extends Exception implements Diagnosable {
     }
             
     // Constructors for backward-compatibility while we're internationalizng
-    // all the messages
+    // all the messages.  These should be removed once internationalization is
+    // complete
     public SqlException(LogWriter logWriter) {
         if (logWriter != null) {
             logWriter.traceDiagnosable(this);
@@ -366,7 +420,7 @@ public class SqlException extends Exception implements Diagnosable {
     // when getMessage() is called.
     // Called by the Agent.
     void setBatchPositionLabel(int index) {
-        batchPositionLabel_ = msgutil_.getTextMessage(BATCH_POSITION_ID) + 
+        batchPositionLabel_ = getMessageUtil().getTextMessage(BATCH_POSITION_ID) + 
             index + ": ";
     }
 

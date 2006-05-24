@@ -77,9 +77,8 @@ public class DateTime {
             dayIndx = 8;
         } else {
             throw new java.lang.IllegalArgumentException(
-                MessageUtil.getCompleteMessage(SQLState.LANG_FORMAT_EXCEPTION,
-                    SqlException.CLIENT_MESSAGE_RESOURCE_NAME,
-                    (Object[])null));
+                SqlException.getMessageUtil().getTextMessage(
+                    SQLState.LANG_FORMAT_EXCEPTION));
         }
 
         int zeroBase = ((int) '0');

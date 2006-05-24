@@ -89,6 +89,8 @@ s/[[:space:]]fp\.getFirstKey()/ "string"/g
 s/[[:space:]]fp\.getFirstValue()/ "string"/g
 s/,uee/,testException/g
 s/[[:space:]]platform/ "string"/g
+s/parsePKGNAMCT"))/parsePKGNAMCT")/
+s/[[:space:]]identifier/ "string"/g
 
 
 

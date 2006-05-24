@@ -21,6 +21,8 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.DisconnectException;
+import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetPackageReply extends NetConnectionReply {
     NetPackageReply(NetAgent netAgent, int bufferSize) {
@@ -204,7 +206,8 @@ public class NetPackageReply extends NetConnectionReply {
             return null;
         }
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                "parsePKGNAMCT not yet implemented"));
+                new ClientMessageId(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED),
+                "parsePKGNAMCT"));
         return null; // to make compiler happy
     }
 }

@@ -24,7 +24,10 @@ import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.ResultSet;
 import org.apache.derby.client.am.ResultSetCallbackInterface;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.SqlState;
+import org.apache.derby.client.am.ClientMessageId;
+
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.reference.MessageId;
 
 public class NetResultSetReply extends NetStatementReply implements ResultSetReplyInterface {
     public NetResultSetReply(NetAgent netAgent, int bufferSize) {
@@ -325,14 +328,12 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
         netAgent_.setSvrcod(svrcod);
         if (svrcod == CodePoint.SVRCOD_WARNING) {
             netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                    "The identified cursor is not open.",
-                    SqlState._24501));
+                new ClientMessageId(SQLState.DRDA_CURSOR_NOT_OPEN)));
         } else {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                    "Execution failed due to a distribution protocol error that " +
-                    "caused deallocation of the conversation.  " +
-                    "The identified cursor is not open.",
-                    SqlState._58009));
+                new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+                    SqlException.getMessageUtil().
+                    getTextMessage(MessageId.CONN_CURSOR_NOT_OPEN)));
         }
     }
 }

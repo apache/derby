@@ -32,8 +32,7 @@ public class Decimal {
      */
     public final static int PACKED_DECIMAL = 0x30;
     
-    private static MessageUtil msgutil = new MessageUtil(
-        SqlException.CLIENT_MESSAGE_RESOURCE_NAME);
+    private static MessageUtil msgutil = SqlException.getMessageUtil();
 
     //--------------------------private constants---------------------------------
 

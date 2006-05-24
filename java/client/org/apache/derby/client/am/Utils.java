@@ -23,6 +23,7 @@ package org.apache.derby.client.am;
 import java.sql.SQLException;
 import org.apache.derby.iapi.types.SQLBit;
 import org.apache.derby.shared.common.i18n.MessageUtil;
+import org.apache.derby.shared.common.reference.MessageId;
 
 // Self-contained utilities.
 // Don't reference any other driver classes, except Configuration, from within this class.
@@ -83,9 +84,8 @@ public final class Utils {
 
         if (byteArrayCmp(bBytes, tenRadixArr[tenRadixArr.length - 1]) >= 0) {
             throw new java.lang.IllegalArgumentException(
-                MessageUtil.getCompleteMessage("J105",
-                    SqlException.CLIENT_MESSAGE_RESOURCE_NAME,
-                    (Object[])null));
+                SqlException.getMessageUtil().
+                    getTextMessage(MessageId.CONN_PRECISION_TOO_LARGE));
         }
 
         int lo = 0, hi = tenRadixArr.length - 1, mi = (hi + lo) / 2;

@@ -37,8 +37,7 @@ import org.apache.derby.shared.common.i18n.MessageUtil;
 
 public class NetConnectionReply extends Reply
         implements ConnectionReplyInterface {
-    private static MessageUtil msgutil_
-        = new MessageUtil(SqlException.CLIENT_MESSAGE_RESOURCE_NAME);
+    private static MessageUtil msgutil_ = SqlException.getMessageUtil();
     
     NetConnectionReply(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);

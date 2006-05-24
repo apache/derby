@@ -25,8 +25,7 @@ import org.apache.derby.shared.common.i18n.MessageUtil;
 
 
 public abstract class Version {
-    static MessageUtil msgutil = 
-        new MessageUtil(SqlException.CLIENT_MESSAGE_RESOURCE_NAME);
+    static MessageUtil msgutil = SqlException.getMessageUtil();
     
     // Constants for internationalized message ids
     private static String SECURITY_MANAGER_NO_ACCESS_ID             = "J108";
