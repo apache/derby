@@ -31,6 +31,7 @@ import org.apache.derby.client.am.SqlState;
 import org.apache.derby.client.am.ClientMessageId;
 
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.reference.MessageId;
 
 public class Reply {
     protected org.apache.derby.client.am.Agent agent_;
@@ -157,7 +158,7 @@ public class Reply {
     // from the underlying stream.  This method will keep trying to
     // read bytes until it has obtained at least the minimum number.
     // Now returns the total bytes read for decryption, use to return void.
-    protected int fill(int minimumBytesNeeded) throws org.apache.derby.client.am.DisconnectException {
+    protected int fill(int minimumBytesNeeded) throws DisconnectException {
         // make sure that there is enough space in the buffer to hold
         // the minimum number of bytes needed.
         ensureSpaceInBufferForFill(minimumBytesNeeded);
@@ -203,7 +204,7 @@ public class Reply {
     // Make sure a certain amount of Layer A data is in the buffer.
     // The data will be in the buffer after this method is called.
     // Now returns the total bytes read for decryption, use to return void.
-    protected final int ensureALayerDataInBuffer(int desiredDataSize) throws org.apache.derby.client.am.DisconnectException {
+    protected final int ensureALayerDataInBuffer(int desiredDataSize) throws DisconnectException {
         int totalBytesRead = 0;
         // calulate the the number of bytes in the buffer.
         int avail = count_ - pos_;
@@ -215,7 +216,7 @@ public class Reply {
         return totalBytesRead;
     }
 
-    protected final void ensureBLayerDataInBuffer(int desiredDataSize) throws org.apache.derby.client.am.DisconnectException {
+    protected final void ensureBLayerDataInBuffer(int desiredDataSize) throws DisconnectException {
         if (dssIsContinued_ && (desiredDataSize > dssLength_)) {
             int continueDssHeaderCount =
                     (((desiredDataSize - dssLength_) / 32767) + 1);
@@ -233,7 +234,7 @@ public class Reply {
     // big stuff returned from the server (qrydta's for example) by
     // copying out the data into some other storage.  any extended dss header
     // info will be removed in the copying process.
-    private final void compressBLayerData(int continueDssHeaderCount) throws org.apache.derby.client.am.DisconnectException {
+    private final void compressBLayerData(int continueDssHeaderCount) throws DisconnectException {
         int tempPos = 0;
 
         // jump to the last continuation header.
@@ -309,7 +310,7 @@ public class Reply {
         dssLength_ = dssLength_ + newDssLength;
     }
 
-    protected final void readDssHeader() throws org.apache.derby.client.am.DisconnectException {
+    protected final void readDssHeader() throws DisconnectException {
         int correlationID = 0;
         int nextCorrelationID = 0;
         ensureALayerDataInBuffer(6);
@@ -397,7 +398,7 @@ public class Reply {
     }
 
 
-    private final void decryptData(int gdsFormatter, int oldDssLength) throws org.apache.derby.client.am.DisconnectException {
+    private final void decryptData(int gdsFormatter, int oldDssLength) throws DisconnectException {
         boolean readHeader;
 
         if (dssLength_ == 32761) {
@@ -572,7 +573,7 @@ public class Reply {
     }
 
 
-    final int readUnsignedShort() throws org.apache.derby.client.am.DisconnectException {
+    final int readUnsignedShort() throws DisconnectException {
         // should we be checking dss lengths and ddmScalarLengths here
         // if yes, i am not sure this is the correct place if we should be checking
         ensureBLayerDataInBuffer(2);
@@ -581,7 +582,7 @@ public class Reply {
                 ((buffer_[pos_++] & 0xff) << 0);
     }
 
-    final short readShort() throws org.apache.derby.client.am.DisconnectException {
+    final short readShort() throws DisconnectException {
         // should we be checking dss lengths and ddmScalarLengths here
         ensureBLayerDataInBuffer(2);
         adjustLengths(2);
@@ -592,7 +593,7 @@ public class Reply {
         return s;
     }
 
-    final int readInt() throws org.apache.derby.client.am.DisconnectException {
+    final int readInt() throws DisconnectException {
         // should we be checking dss lengths and ddmScalarLengths here
         ensureBLayerDataInBuffer(4);
         adjustLengths(4);
@@ -602,7 +603,7 @@ public class Reply {
         return i;
     }
 
-    final void readIntArray(int[] array) throws org.apache.derby.client.am.DisconnectException {
+    final void readIntArray(int[] array) throws DisconnectException {
         ensureBLayerDataInBuffer(array.length * 4);
         adjustLengths(array.length * 4);
 
@@ -613,7 +614,7 @@ public class Reply {
     }
 
 
-    final long readLong() throws org.apache.derby.client.am.DisconnectException {
+    final long readLong() throws DisconnectException {
         // should we be checking dss lengths and ddmScalarLengths here
         ensureBLayerDataInBuffer(8);
         adjustLengths(8);
@@ -625,7 +626,7 @@ public class Reply {
     }
 
 
-    final int[] readUnsignedShortList() throws org.apache.derby.client.am.DisconnectException {
+    final int[] readUnsignedShortList() throws DisconnectException {
         int len = ddmScalarLen_;
         ensureBLayerDataInBuffer(len);
         adjustLengths(len);
@@ -641,25 +642,25 @@ public class Reply {
         return list;
     }
 
-    final int readUnsignedByte() throws org.apache.derby.client.am.DisconnectException {
+    final int readUnsignedByte() throws DisconnectException {
         ensureBLayerDataInBuffer(1);
         adjustLengths(1);
         return (buffer_[pos_++] & 0xff);
     }
 
-    final byte readByte() throws org.apache.derby.client.am.DisconnectException {
+    final byte readByte() throws DisconnectException {
         ensureBLayerDataInBuffer(1);
         adjustLengths(1);
         return (byte) (buffer_[pos_++] & 0xff);
     }
 
-    final boolean readBoolean() throws org.apache.derby.client.am.DisconnectException {
+    final boolean readBoolean() throws DisconnectException {
         ensureBLayerDataInBuffer(1);
         adjustLengths(1);
         return buffer_[pos_++] != 0;
     }
 
-    final String readString(int length) throws org.apache.derby.client.am.DisconnectException {
+    final String readString(int length) throws DisconnectException {
         ensureBLayerDataInBuffer(length);
         adjustLengths(length);
 
@@ -668,7 +669,7 @@ public class Reply {
         return result;
     }
 
-    final String readString(int length, String encoding) throws org.apache.derby.client.am.DisconnectException {
+    final String readString(int length, String encoding) throws DisconnectException {
         ensureBLayerDataInBuffer(length);
         adjustLengths(length);
         String s = null;
@@ -676,16 +677,17 @@ public class Reply {
         try {
             s = new String(buffer_, pos_, length, encoding);
         } catch (java.io.UnsupportedEncodingException e) {
-            agent_.accumulateChainBreakingReadExceptionAndThrow(new org.apache.derby.client.am.DisconnectException(e,
-                    agent_,
-                    "encoding not supported!!"));
+            agent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(agent_,
+                    new ClientMessageId(SQLState.NET_ENCODING_NOT_SUPPORTED), 
+                    e));
         }
 
         pos_ += length;
         return s;
     }
 
-    final String readString() throws org.apache.derby.client.am.DisconnectException {
+    final String readString() throws DisconnectException {
         int len = ddmScalarLen_;
         ensureBLayerDataInBuffer(len);
         adjustLengths(len);
@@ -694,7 +696,7 @@ public class Reply {
         return result;
     }
 
-    final byte[] readBytes(int length) throws org.apache.derby.client.am.DisconnectException {
+    final byte[] readBytes(int length) throws DisconnectException {
         ensureBLayerDataInBuffer(length);
         adjustLengths(length);
 
@@ -704,7 +706,7 @@ public class Reply {
         return b;
     }
 
-    final byte[] readBytes() throws org.apache.derby.client.am.DisconnectException {
+    final byte[] readBytes() throws DisconnectException {
         int len = ddmScalarLen_;
         ensureBLayerDataInBuffer(len);
         adjustLengths(len);
@@ -715,7 +717,7 @@ public class Reply {
         return b;
     }
 
-    final byte[] readLDBytes() throws org.apache.derby.client.am.DisconnectException {
+    final byte[] readLDBytes() throws DisconnectException {
         ensureBLayerDataInBuffer(2);
         int len = ((buffer_[pos_++] & 0xff) << 8) + ((buffer_[pos_++] & 0xff) << 0);
 
@@ -733,13 +735,13 @@ public class Reply {
         return b;
     }
 
-    final void skipBytes(int length) throws org.apache.derby.client.am.DisconnectException {
+    final void skipBytes(int length) throws DisconnectException {
         ensureBLayerDataInBuffer(length);
         adjustLengths(length);
         pos_ += length;
     }
 
-    final void skipBytes() throws org.apache.derby.client.am.DisconnectException {
+    final void skipBytes() throws DisconnectException {
         int len = ddmScalarLen_;
         ensureBLayerDataInBuffer(len);
         adjustLengths(len);
@@ -748,7 +750,7 @@ public class Reply {
 
     // This will be the new and improved getData that handles all QRYDTA/EXTDTA
     // Returns the stream so that the caller can cache it
-    final ByteArrayOutputStream getData(ByteArrayOutputStream existingBuffer) throws org.apache.derby.client.am.DisconnectException {
+    final ByteArrayOutputStream getData(ByteArrayOutputStream existingBuffer) throws DisconnectException {
         boolean readHeader;
         int copySize;
         ByteArrayOutputStream baos;
@@ -800,7 +802,7 @@ public class Reply {
     // post:   dssIsContinued_ is set to true if the continuation bit is on, false otherwise
     //         dssLength_ is set to DssConstants.MAX_DSS_LEN - 2 (don't count the header for the next read)
     // helper method for getEXTDTAData
-    protected final void readDSSContinuationHeader() throws org.apache.derby.client.am.DisconnectException {
+    protected final void readDSSContinuationHeader() throws DisconnectException {
         ensureALayerDataInBuffer(2);
 
         dssLength_ =
@@ -942,13 +944,13 @@ public class Reply {
     //      The command or statement cannot be processed.  The current
     //          transaction is rolled back and the application is disconnected
     //          from the remote database.
-    final void doSyntaxrmSemantics(int syntaxErrorCode) throws org.apache.derby.client.am.DisconnectException {
-        agent_.accumulateChainBreakingReadExceptionAndThrow(new org.apache.derby.client.am.DisconnectException(agent_,
-                "Execution failed due to a distribution protocol error " +
-                "that caused deallocation of the conversation.  " +
-                "A PROTOCOL Data Stream Syntax Error was detected.  Reason: " +
-                "0x" + Integer.toHexString(syntaxErrorCode),
-                SqlState._58009));
+    final void doSyntaxrmSemantics(int syntaxErrorCode) throws DisconnectException {
+        agent_.accumulateChainBreakingReadExceptionAndThrow(
+            new DisconnectException(agent_,
+                new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+                SqlException.getMessageUtil().getTextMessage(
+                    MessageId.CONN_DRDA_DATASTREAM_SYNTAX_ERROR,
+                    new Integer(syntaxErrorCode))));
     }
 
 
@@ -987,7 +989,7 @@ public class Reply {
         topDdmCollectionStack_--;
     }
 
-    protected final int peekCodePoint() throws org.apache.derby.client.am.DisconnectException {
+    protected final int peekCodePoint() throws DisconnectException {
         if (topDdmCollectionStack_ != EMPTY_STACK) {
             if (ddmCollectionLenStack_[topDdmCollectionStack_] == 0) {
                 return END_OF_COLLECTION;
@@ -1022,7 +1024,7 @@ public class Reply {
     }
 
     // Read out the 2-byte length without moving the pos_ pointer.
-    protected final int peekLength() throws org.apache.derby.client.am.DisconnectException {
+    protected final int peekLength() throws DisconnectException {
         ensureBLayerDataInBuffer(2);
         return (((buffer_[pos_] & 0xff) << 8) +
                 ((buffer_[pos_ + 1] & 0xff) << 0));
@@ -1030,14 +1032,14 @@ public class Reply {
 
     // Read "length" number of bytes from the buffer into the byte array b starting from offset
     // "offset".  The current offset in the buffer does not change.
-    protected final int peekFastBytes(byte[] b, int offset, int length) throws org.apache.derby.client.am.DisconnectException {
+    protected final int peekFastBytes(byte[] b, int offset, int length) throws DisconnectException {
         for (int i = 0; i < length; i++) {
             b[offset + i] = buffer_[pos_ + i];
         }
         return offset + length;
     }
 
-    protected final void parseLengthAndMatchCodePoint(int expectedCodePoint) throws org.apache.derby.client.am.DisconnectException {
+    protected final void parseLengthAndMatchCodePoint(int expectedCodePoint) throws DisconnectException {
         int actualCodePoint = 0;
         if (peekedCodePoint_ == END_OF_COLLECTION) {
             actualCodePoint = readLengthAndCodePoint();
@@ -1056,17 +1058,22 @@ public class Reply {
         }
 
         if (actualCodePoint != expectedCodePoint) {
-            zThrowSyntaxError("actual code point, " + actualCodePoint +
-                    " does not match expected code point, " + expectedCodePoint);
+            agent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(agent_, 
+                    new ClientMessageId(SQLState.NET_NOT_EXPECTED_CODEPOINT), 
+                    new Integer(actualCodePoint), 
+                    new Integer(expectedCodePoint)));
         }
     }
 
-    protected final int readLengthAndCodePoint() throws org.apache.derby.client.am.DisconnectException {
+    protected final int readLengthAndCodePoint() throws DisconnectException {
         if (topDdmCollectionStack_ != EMPTY_STACK) {
             if (ddmCollectionLenStack_[topDdmCollectionStack_] == 0) {
                 return END_OF_COLLECTION;
             } else if (ddmCollectionLenStack_[topDdmCollectionStack_] < 4) {
-                zThrowSyntaxError("ddm collection contains less than 4 bytes of data");
+                agent_.accumulateChainBreakingReadExceptionAndThrow(
+                    new DisconnectException(agent_, 
+                    new ClientMessageId(SQLState.NET_DDM_COLLECTION_TOO_SMALL)));
             }
         }
 
@@ -1094,7 +1101,7 @@ public class Reply {
         return codePoint;
     }
 
-    private final void readExtendedLength() throws org.apache.derby.client.am.DisconnectException {
+    private final void readExtendedLength() throws DisconnectException {
         int numberOfExtendedLenBytes = (ddmScalarLen_ - 0x8000); // fix scroll problem was - 4
         int adjustSize = 0;
         switch (numberOfExtendedLenBytes) {
@@ -1135,31 +1142,33 @@ public class Reply {
         dssLength_ -= length;
     }
 
-    protected final void startSameIdChainParse() throws org.apache.derby.client.am.DisconnectException {
+    protected final void startSameIdChainParse() throws DisconnectException {
         readDssHeader();
         netAgent_.clearSvrcod();
     }
 
-    protected final void endOfSameIdChainData() throws org.apache.derby.client.am.DisconnectException {
+    protected final void endOfSameIdChainData() throws DisconnectException {
         netAgent_.targetTypdef_ = netAgent_.originalTargetTypdef_;
         netAgent_.targetSqlam_ = netAgent_.orignalTargetSqlam_;
 
         if (this.topDdmCollectionStack_ != Reply.EMPTY_STACK) {
-            zThrowSyntaxError("collection stack not empty at end of same id chain parse");
+            agent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(agent_, 
+                new ClientMessageId(SQLState.NET_COLLECTION_STACK_NOT_EMPTY)));
         }
         if (this.dssLength_ != 0) {
-            zThrowSyntaxError("dss length not 0 at end of same id chain parse");
+            agent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(agent_, 
+                new ClientMessageId(SQLState.NET_DSS_NOT_ZERO)));
         }
         if (dssIsChainedWithSameID_ == true) {
-            zThrowSyntaxError("dss chained with same id at end of same id chain parse");
+            agent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(agent_, 
+                new ClientMessageId(SQLState.NET_DSS_CHAINED_WITH_SAME_ID)));
         }
     }
-
-    private final void zThrowSyntaxError(String error) throws org.apache.derby.client.am.DisconnectException {
-        agent_.accumulateChainBreakingReadExceptionAndThrow(new org.apache.derby.client.am.DisconnectException(agent_, error));
-    }
-
-    protected final int peekTotalColumnCount(int tripletLength) throws org.apache.derby.client.am.DisconnectException {
+    
+    protected final int peekTotalColumnCount(int tripletLength) throws DisconnectException {
         int columnCount = 0;
         int offset = 0;
         int tripletType = FdocaConstants.CPT_TRIPLET_TYPE;
@@ -1177,7 +1186,7 @@ public class Reply {
         return columnCount;
     }
 
-    private final void peekExtendedLength() throws org.apache.derby.client.am.DisconnectException {
+    private final void peekExtendedLength() throws DisconnectException {
         peekedNumOfExtendedLenBytes_ = (peekedLength_ - 0x8004);
         switch (peekedNumOfExtendedLenBytes_) {
         case 4:
@@ -1208,71 +1217,72 @@ public class Reply {
         }
     }
 
-    final int readFastUnsignedByte() throws org.apache.derby.client.am.DisconnectException {
+    final int readFastUnsignedByte() throws DisconnectException {
         return (buffer_[pos_++] & 0xff);
     }
 
-    final short readFastShort() throws org.apache.derby.client.am.DisconnectException {
+    final short readFastShort() throws DisconnectException {
         short s = SignedBinary.getShort(buffer_, pos_);
         pos_ += 2;
         return s;
     }
 
-    final int readFastUnsignedShort() throws org.apache.derby.client.am.DisconnectException {
+    final int readFastUnsignedShort() throws DisconnectException {
         return ((buffer_[pos_++] & 0xff) << 8) +
                 ((buffer_[pos_++] & 0xff) << 0);
     }
 
-    final int readFastInt() throws org.apache.derby.client.am.DisconnectException {
+    final int readFastInt() throws DisconnectException {
         int i = SignedBinary.getInt(buffer_, pos_);
         pos_ += 4;
         return i;
     }
 
-    final String readFastString(int length) throws org.apache.derby.client.am.DisconnectException {
+    final String readFastString(int length) throws DisconnectException {
         String result = ccsidManager_.convertToUCS2(buffer_, pos_, length);
         pos_ += length;
         return result;
     }
 
-    final byte[] readFastBytes(int length) throws org.apache.derby.client.am.DisconnectException {
+    final byte[] readFastBytes(int length) throws DisconnectException {
         byte[] b = new byte[length];
         System.arraycopy(buffer_, pos_, b, 0, length);
         pos_ += length;
         return b;
     }
 
-    protected final int peekFastLength() throws org.apache.derby.client.am.DisconnectException {
+    protected final int peekFastLength() throws DisconnectException {
         return (((buffer_[pos_] & 0xff) << 8) +
                 ((buffer_[pos_ + 1] & 0xff) << 0));
     }
 
-    final void skipFastBytes(int length) throws org.apache.derby.client.am.DisconnectException {
+    final void skipFastBytes(int length) throws DisconnectException {
         pos_ += length;
     }
 
-    final void readFastIntArray(int[] array) throws org.apache.derby.client.am.DisconnectException {
+    final void readFastIntArray(int[] array) throws DisconnectException {
         for (int i = 0; i < array.length; i++) {
             array[i] = SignedBinary.getInt(buffer_, pos_);
             pos_ += 4;
         }
     }
 
-    final String readFastString(int length, String encoding) throws org.apache.derby.client.am.DisconnectException {
+    final String readFastString(int length, String encoding) throws DisconnectException {
         String s = null;
 
         try {
             s = new String(buffer_, pos_, length, encoding);
         } catch (java.io.UnsupportedEncodingException e) {
-            agent_.accumulateChainBreakingReadExceptionAndThrow(new org.apache.derby.client.am.DisconnectException(e,
-                    agent_,
-                    "encoding not supported!!"));
+            agent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(agent_,
+                    new ClientMessageId(SQLState.NET_ENCODING_NOT_SUPPORTED),
+                    e));
         }
         pos_ += length;
         return s;
     }
 
-    final byte[] readFastLDBytes() throws org.apache.derby.client.am.DisconnectException {
+    final byte[] readFastLDBytes() throws DisconnectException {
         int len = ((buffer_[pos_++] & 0xff) << 8) + ((buffer_[pos_++] & 0xff) << 0);
         if (len == 0) {
             return null;
@@ -1284,13 +1294,13 @@ public class Reply {
         return b;
     }
 
-    final long readFastLong() throws org.apache.derby.client.am.DisconnectException {
+    final long readFastLong() throws DisconnectException {
         long l = SignedBinary.getLong(buffer_, pos_);
         pos_ += 8;
         return l;
     }
 
-    final byte readFastByte() throws org.apache.derby.client.am.DisconnectException {
+    final byte readFastByte() throws DisconnectException {
         return (byte) (buffer_[pos_++] & 0xff);
     }
 
@@ -1309,7 +1319,7 @@ public class Reply {
 
     // The only difference between this method and the original getData() method is this method
     // is not doing an ensureALayerDataInBuffer
-    final ByteArrayOutputStream getFastData(ByteArrayOutputStream existingBuffer) throws org.apache.derby.client.am.DisconnectException {
+    final ByteArrayOutputStream getFastData(ByteArrayOutputStream existingBuffer) throws DisconnectException {
         boolean readHeader;
         int copySize;
         ByteArrayOutputStream baos;
@@ -1358,18 +1368,21 @@ public class Reply {
 
     // This method is only used to match the codePoint for those class instance variables
     // that are embedded in other reply messages.
-    final protected void matchCodePoint(int expectedCodePoint) throws org.apache.derby.client.am.DisconnectException {
+    final protected void matchCodePoint(int expectedCodePoint) throws DisconnectException {
         int actualCodePoint = 0;
         actualCodePoint = peekedCodePoint_;
         pos_ += 4;
         if (actualCodePoint != expectedCodePoint) {
-            zThrowSyntaxError("actual code point, " + actualCodePoint +
-                    " does not match expected code point, " + expectedCodePoint);
+            agent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(agent_, 
+                    new ClientMessageId(SQLState.NET_NOT_EXPECTED_CODEPOINT), 
+                    new Integer(actualCodePoint), 
+                    new Integer(expectedCodePoint)));
         }
     }
 
 
-    protected final int peekNumOfColumns() throws org.apache.derby.client.am.DisconnectException {
+    protected final int peekNumOfColumns() throws DisconnectException {
         // skip the 4-byte LLCP and any extended length bytes + 1-byte null sqlcagrp null indicator
         int offset = (4 + peekedNumOfExtendedLenBytes_ + 1);
 
@@ -1385,7 +1398,7 @@ public class Reply {
         return (nullInd == CodePoint.NULLDATA);
     }
 
-    private final int skipSQLDHROW(int offset) throws org.apache.derby.client.am.DisconnectException {
+    private final int skipSQLDHROW(int offset) throws DisconnectException {
         int sqldhrowgrpNullInd = buffer_[pos_ + offset++] & 0xff;
         if (sqldhrowgrpNullInd == CodePoint.NULLDATA) {
             return offset;

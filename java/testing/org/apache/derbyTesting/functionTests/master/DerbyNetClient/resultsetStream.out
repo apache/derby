@@ -9,8 +9,8 @@ FAILS DUE TO BUG 5710
 getColumnCount(): 1
 len=56
 number of reads=56
-EXPECTED SQLSTATE(null): End of Stream prematurely reached while reading InputStream, parameter #2.  Remaining data has been padded with 0x0.
-EXPECTED SQLSTATE(null): The specified size of the InputStream, parameter #2, is less than the actual InputStream length
+EXPECTED SQLSTATE(XN017): Network protocol error: end of stream prematurely reached, parameter #2.  Remaining data has been padded with 0x0.
+EXPECTED SQLSTATE(XN015): Network protocol error: the specified size of the InputStream, parameter #2, is less than the actual InputStream length.
 Test of getAsciiStream
 U+0041U+0042U+0043U+0044U+0045U+0046U+0047U+00c0U+00c1U+00c2U+00c3U+00c4U+00c5U+00ffU+003fU+003fU+003fU+003fU+003fU+003f
 U+0041U+0042U+0043U+0044U+0045U+0046U+0047U+00c0U+00c1U+00c2U+00c3U+00c4U+00c5U+00ffU+0100U+3042U+3044U+3046U+3048U+304a

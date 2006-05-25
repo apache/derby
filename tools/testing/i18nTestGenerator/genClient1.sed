@@ -6,3 +6,6 @@
 # Catch situation where the ClientMessageId parameter is on the next line
 /new ClientMessageId[^;]*$/,/);/p
 
+# This is a wrapper used in net/Reply.java that we need to test
+/zThrowSyntaxError[^;]*$/,/);/p
+

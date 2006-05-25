@@ -25,6 +25,8 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SignedBinary;
+import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.shared.common.reference.SQLState;
 
 //
 //  General Notes
@@ -1078,8 +1080,9 @@ public class Typdef implements java.lang.Cloneable {
         }
 
         if (sda == null) {
-            netAgent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(netAgent_,
-                    "Invalid FDOCA LID"));
+            netAgent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(netAgent_,
+                    new ClientMessageId(SQLState.NET_INVALID_FDOCA_ID)));
         }
 
         // 2. Set Null indicator based on PROTOCOL Type.

@@ -2,6 +2,7 @@ package org.apache.derbyTesting.functionTests.tests.i18n;
 
 import org.apache.derby.client.am.ClientMessageId; 
 import org.apache.derby.client.am.SqlException; 
+import org.apache.derby.client.am.DisconnectException; 
 import org.apache.derby.shared.common.reference.SQLState; 
 import org.apache.derby.client.am.SqlCode;
 import org.apache.derby.shared.common.i18n.MessageUtil;

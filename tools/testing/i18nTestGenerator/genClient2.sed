@@ -4,9 +4,9 @@
     try { \
        testException = new SqlException(null,
 
-# For those expressions that start with "new SqlException", pre-append
+# For those expressions that start with "new <something>Exception", pre-append
 # a try block
-/new[[:space:]]*SqlException/i\
+/new[[:space:]]*[a-zA-Z]*Exception/i\
     try {
 
 # At the end of each statement, check and print out an error
@@ -91,6 +91,9 @@ s/,uee/,testException/g
 s/[[:space:]]platform/ "string"/g
 s/parsePKGNAMCT"))/parsePKGNAMCT")/
 s/[[:space:]]identifier/ "string"/g
+s/[[:space:]]arg2))/ "arg2")/g
+s/[[:space:]]arg1/ "string"/g
+s/agent_/ null/g
 
 
 

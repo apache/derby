@@ -252,7 +252,7 @@ public class SuicideOfStreaming extends BaseJDBCTestCase {
 
     private static boolean examineExpectedInDerbyNetClient( SQLException sqlex ) {
 	return 
-	    sqlex.getSQLState().equals("08006") && 
+	    sqlex.getSQLState().equals("58009") && 
 	    sqlex.getErrorCode() == SqlCode.disconnectError.getCode();
     }
 

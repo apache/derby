@@ -115,6 +115,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.NET_SQLCDTA_INVALID_FOR_PKGID);
         clientMessageIds.add(SQLState.NET_PGNAMCSN_INVALID_AT_SQLAM);
         clientMessageIds.add(SQLState.NET_VCM_VCS_LENGTHS_INVALID);
+        clientMessageIds.add(SQLState.LANG_STRING_TOO_LONG);
     }
 
 	public static void main(String[] args) throws Exception {

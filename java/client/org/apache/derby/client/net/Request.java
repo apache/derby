@@ -264,10 +264,8 @@ public class Request {
                     padScalarStreamForError(leftToRead, bytesToRead);
                     // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
                     netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                            "Encountered an IOException reading InputStream, parameter #" +
-                            parameterIndex +
-                            ".  Remaining data has been padded with 0x0. Message: " +
-                            e.getMessage()));
+                        new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
+                        new Integer(parameterIndex), e.getMessage(), e));
                     return;
                 }
                 if (bytesRead == -1) {
@@ -281,10 +279,10 @@ public class Request {
                     //pad it with 0 and encrypt and send it to the server because it takes too much time
                     //can't just throw a SQLException either because some of the data PRPSQLSTT etc have already
                     //been sent to the server, and server is waiting for EXTDTA, server hangs for this.
-                    netAgent_.accumulateChainBreakingReadExceptionAndThrow(new org.apache.derby.client.am.DisconnectException(netAgent_,
-                            "End of Stream prematurely reached while reading InputStream, parameter #" +
-                            parameterIndex +
-                            ". "));
+                    netAgent_.accumulateChainBreakingReadExceptionAndThrow(
+                        new DisconnectException(netAgent_,
+                            new ClientMessageId(SQLState.NET_PREMATURE_EOS_DISCONNECT),
+                            new Integer(parameterIndex)));
                     return;
 
                     /*netAgent_.accumulateReadException(
@@ -305,16 +303,19 @@ public class Request {
             try {
                 if (in.read() != -1) {
                     // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                    netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                            "The specified size of the InputStream, parameter #" +
-                            parameterIndex +
-                            ", is less than the actual InputStream length"));
+                    netAgent_.accumulateReadException(new SqlException(
+                        netAgent_.logWriter_,
+                        new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
+                        new Integer(parameterIndex)));
                 }
             } catch (java.io.IOException e) {
-                netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                        "Encountered error in stream length verification for InputStream, parameter #" +
-                        parameterIndex +
-                        ".  Message: " + e.getMessage()));
+                netAgent_.accumulateReadException(new SqlException(
+                    netAgent_.logWriter_,
+                    new ClientMessageId(
+                        SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
+                    new Integer(parameterIndex), 
+                    e.getMessage(), 
+                    e));
             }
 
             byte[] newClearedBytes = new byte[clearedBytes.length +
@@ -393,17 +394,21 @@ public class Request {
                     } catch (java.io.IOException e) {
                         padScalarStreamForError(leftToRead, bytesToRead);
                         // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                        netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                                "Encountered an IOException reading InputStream, parameter #" + parameterIndex +
-                                ".  Remaining data has been padded with 0x0. Message: " + e.getMessage()));
+                        netAgent_.accumulateReadException(new SqlException(
+                            netAgent_.logWriter_,
+                            new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
+                            new Integer(parameterIndex),
+                            e.getMessage(),
+                            e));
+
                         return;
                     }
                     if (bytesRead == -1) {
                         padScalarStreamForError(leftToRead, bytesToRead);
                         // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
                         netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                                "End of Stream prematurely reached while reading InputStream, parameter #" + parameterIndex +
-                                ".  Remaining data has been padded with 0x0."));
+                            new ClientMessageId(SQLState.NET_PREMATURE_EOS),
+                            new Integer(parameterIndex)));
                         return;
                     } else {
                         bytesToRead -= bytesRead;
@@ -420,13 +425,17 @@ public class Request {
                 if (in.read() != -1) {
                     // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
                     netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                            "The specified size of the InputStream, parameter #" + parameterIndex +
-                            ", is less than the actual InputStream length"));
+                        new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
+                        new Integer(parameterIndex)));
                 }
             } catch (java.io.IOException e) {
-                netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                        "Encountered error in stream length verification for InputStream, parameter #" + parameterIndex +
-                        ".  Message: " + e.getMessage()));
+                netAgent_.accumulateReadException(new SqlException(
+                    netAgent_.logWriter_,
+                    new ClientMessageId(
+                        SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
+                    new Integer(parameterIndex),
+                    e.getMessage(),
+                    e));
             }
 
         }
@@ -488,20 +497,24 @@ public class Request {
                         } catch (java.io.IOException e) {
                             padScalarStreamForError(leftToRead, bytesToRead);
                             // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                            netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                                    "Encountered an IOException reading Reader, parameter #" +
-                                    parameterIndex +
-                                    ".  Remaining data has been padded with 0x0. Message: " +
-                                    e.getMessage()));
+                            netAgent_.accumulateReadException(new SqlException(
+                                netAgent_.logWriter_,
+                                new ClientMessageId(
+                                    SQLState.NET_IOEXCEPTION_ON_READ),
+                                new Integer(parameterIndex),
+                                e.getMessage(),
+                                e));
+
                             return;
                         }
                         if (charsRead == -1) {
                             padScalarStreamForError(leftToRead, bytesToRead);
                             // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                            netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                                    "End of Stream prematurely reached while reading Reader, parameter #" +
-                                    parameterIndex +
-                                    ".  Remaining data has been padded with 0x0."));
+                            netAgent_.accumulateReadException(new SqlException(
+                                netAgent_.logWriter_,
+                                new ClientMessageId(SQLState.NET_PREMATURE_EOS),
+                                new Integer(parameterIndex)));
+
                             return;
                         }
                         // set first half-char in buffer and save the other half for later
@@ -518,21 +531,25 @@ public class Request {
                         } catch (java.io.IOException e) {
                             padScalarStreamForError(leftToRead, bytesToRead);
                             // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                            netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_, e,
-                                    "Encountered an IOException reading Reader, parameter #" +
-                                    parameterIndex +
-                                    ".  Remaining data has been padded with 0x0. Message: " +
-                                    e.getMessage()));
+                            netAgent_.accumulateReadException(new SqlException(
+                                netAgent_.logWriter_,
+                                new ClientMessageId(
+                                    SQLState.NET_IOEXCEPTION_ON_READ),
+                                new Integer(parameterIndex),
+                                e.getMessage(),
+                                e));
+
                             return;
                         }
 
                         if (charsRead == -1) {
                             padScalarStreamForError(leftToRead, bytesToRead);
                             // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                            netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                                    "End of Stream prematurely reached while reading Reader, parameter #" +
-                                    parameterIndex +
-                                    ".  Remaining data has been padded with 0x0."));
+                            netAgent_.accumulateReadException(new SqlException(
+                                netAgent_.logWriter_,
+                                new ClientMessageId(SQLState.NET_PREMATURE_EOS),
+                                new Integer(parameterIndex)));
+
                             return;
                         }
                         for (int i = 0; i < charsRead; i++) {
@@ -551,15 +568,19 @@ public class Request {
             // check to make sure that the specified length wasn't too small
             try {
                 if (r.read() != -1) {
-                    netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                            "The specified size of the Reader, parameter #" +
-                            parameterIndex +
-                            ", is less than the actual InputStream length"));
+                    netAgent_.accumulateReadException(new SqlException(
+                        netAgent_.logWriter_,
+                        new ClientMessageId(SQLState.NET_READER_LENGTH_TOO_SMALL),
+                        new Integer(parameterIndex)));
                 }
             } catch (java.io.IOException e) {
-                netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_, e,
-                        "Encountered error in stream length verification for Reader, parameter #" +
-                        parameterIndex + ".  Message: " + e.getMessage()));
+                netAgent_.accumulateReadException(new SqlException(
+                    netAgent_.logWriter_,
+                    new ClientMessageId(
+                        SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
+                    new Integer(parameterIndex),
+                    e.getMessage(),
+                    e));
             }
         } else {  //data stream encryption
 
@@ -586,21 +607,24 @@ public class Request {
                 } catch (java.io.IOException e) {
                     padScalarStreamForError(leftToRead, bytesToRead);
                     // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                    netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_, e,
-                            "Encountered an IOException reading Reader, parameter #" +
-                            parameterIndex +
-                            ".  Remaining data has been padded with 0x0. Message: " +
-                            e.getMessage()));
+                    netAgent_.accumulateReadException(new SqlException(
+                        netAgent_.logWriter_, 
+                        new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
+                        new Integer(parameterIndex),
+                        e.getMessage(),
+                        e));
+
                     return;
                 }
 
                 if (charsRead == -1) {
                     padScalarStreamForError(leftToRead, bytesToRead);
                     // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                    netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                            "End of Stream prematurely reached while reading Reader, parameter #" +
-                            parameterIndex +
-                            ".  Remaining data has been padded with 0x0."));
+                    netAgent_.accumulateReadException(new SqlException(
+                        netAgent_.logWriter_,
+                        new ClientMessageId(SQLState.NET_PREMATURE_EOS),
+                        new Integer(parameterIndex)));
+
                     return;
                 }
                 for (int i = 0; i < charsRead; i++) {
@@ -615,15 +639,19 @@ public class Request {
             // check to make sure that the specified length wasn't too small
             try {
                 if (r.read() != -1) {
-                    netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                            "The specified size of the Reader, parameter #" +
-                            parameterIndex +
-                            ", is less than the actual InputStream length"));
+                    netAgent_.accumulateReadException(new SqlException(
+                        netAgent_.logWriter_,
+                        new ClientMessageId(SQLState.NET_READER_LENGTH_TOO_SMALL),
+                        new Integer(parameterIndex)));
                 }
             } catch (java.io.IOException e) {
-                netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_, e,
-                        "Encountered error in stream length verification for Reader, parameter #" +
-                        parameterIndex + ".  Message: " + e.getMessage()));
+                netAgent_.accumulateReadException(new SqlException(
+                    netAgent_.logWriter_, 
+                    new ClientMessageId(
+                        SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
+                    new Integer(parameterIndex),
+                    e.getMessage(),
+                    e));
             }
 
             byte[] newClearedBytes = new byte[clearedBytes.length +
@@ -1561,12 +1589,15 @@ public class Request {
         byte[] b;
         try {
             b = s.getBytes(encoding);
-        } catch (java.io.UnsupportedEncodingException e) {
-            throw new SqlException(netAgent_.logWriter_, e,
-                    "Unsupported encoding " + e.getMessage() + ". See attached Throwable.");
+        } catch (UnsupportedEncodingException e) {
+            throw new SqlException(netAgent_.logWriter_,  
+                    new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
+                    "String", "byte", e);
         }
         if (b.length > 0x7FFF) {
-            throw new SqlException(netAgent_.logWriter_, "string exceed maximum length 32767");
+            throw new SqlException(netAgent_.logWriter_, 
+                new ClientMessageId(SQLState.LANG_STRING_TOO_LONG),
+                "32767");
         }
         ensureLength(offset_ + b.length + 2);
         writeLDBytesX(b.length, b);

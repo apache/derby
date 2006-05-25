@@ -690,6 +690,7 @@ public interface SQLState {
 	String LANG_INVALID_ESCAPE_CHARACTER                               = "22019";
 	String LANG_INVALID_ESCAPE_SEQUENCE                                = "22025";
 	String LANG_INVALID_TRIM_SET                                       = "22027";
+    String LANG_STRING_TOO_LONG                                        = "22028";
 	String LANG_ESCAPE_IS_NULL                                  	   = "22501";
 
 
@@ -1526,6 +1527,11 @@ public interface SQLState {
     String NET_PROCEDURE_NAME_LENGTH_OUT_OF_RANGE                   = "XN011.S";
     String NET_WRONG_XA_VERSION                                     = "XN012.S";
     String NET_INVALID_SCROLL_ORIENTATION                           = "XN013.S";
+    String NET_IOEXCEPTION_ON_READ                                  = "XN014.S";
+    String NET_INPUTSTREAM_LENGTH_TOO_SMALL                         = "XN015.S";
+    String NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION                = "XN016.S";
+    String NET_PREMATURE_EOS                                        = "XN017.S";
+    String NET_READER_LENGTH_TOO_SMALL                              = "XN018.S";
     
     // Used by server for scrollable updatable insensitive result sets
     // to transmit updated state to client. Internal, not seen by user.
@@ -1571,20 +1577,6 @@ public interface SQLState {
     
     // 08006 means connection exception - connection failure
     String CONNECTION_FAILED_ON_RESET                           = "08006.C.1";
-    // Use this version of SOCKET_EXCEPTION any time *except* when trying to
-    // establish a connection, as the SQLState is different.  When trying
-    // to establish a connection, use CONNECT_SOCKET_EXCEPTION.
-    String SOCKET_EXCEPTION                                     = "08006.C.2";
-    String COMMUNICATION_ERROR                                  = "08006.C.3";
-    String CONNECTION_FAILED_ON_DEFERRED_RESET                  = "08006.C.4";
-    String NET_INSUFFICIENT_DATA                                = "08006.C.5";
-    String NET_LOB_DATA_TOO_LARGE_FOR_JVM                       = "08006.C.6";
-    String NET_SQLCDTA_INVALID_FOR_RDBCOLID                     = "08006.C.7";
-    String NET_SQLCDTA_INVALID_FOR_PKGID                        = "08006.C.8";
-    String NET_PGNAMCSN_INVALID_AT_SQLAM                        = "08006.C.9";
-    String NET_VCM_VCS_LENGTHS_INVALID                          = "08006.C.10";
-    String NET_ENCODING_NOT_SUPPORTED                           = "08006.C.11";
-
 
     
     // 08001 is specifically about the SQL client not being able to establish
@@ -1654,7 +1646,38 @@ public interface SQLState {
     String DRDA_NO_AUTOCOMMIT_UNDER_XA                              = "2D521.S.1";
     String DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK              = "2D521.S.2"; 
     String DRDA_CURSOR_NOT_OPEN                                     = "24501.S";
+
+    // 58009 means connection is terminated.  This can be caused by any number
+    // of reasons, so this SQL State has a lot of instances.
+    // 
+    // NOTE: if the disconnection is not caused by DRDA-level error, you should
+    // use SQL State 08006.  The way I determined this is if the error occurs
+    // in the 'client.net' package, use 58009.  If it occurs in the 'client.am'
+    // or any other client package, use 08006.  It's really not at all clear
+    // from the specs when you should use one SQL state or the other, but that's
+    // the approach I chose (David Van Couvering).
     String DRDA_CONNECTION_TERMINATED                               = "58009.C";
+    // Use this version of SOCKET_EXCEPTION any time *except* when trying to
+    // establish a connection, as the SQLState is different.  When trying
+    // to establish a connection, use CONNECT_SOCKET_EXCEPTION.
+    String SOCKET_EXCEPTION                                         = "58009.C.2";
+    String COMMUNICATION_ERROR                                      = "58009.C.3";
+    String CONNECTION_FAILED_ON_DEFERRED_RESET                      = "58009.C.4";
+    String NET_INSUFFICIENT_DATA                                    = "58009.C.5";
+    String NET_LOB_DATA_TOO_LARGE_FOR_JVM                           = "58009.C.6";
+    String NET_SQLCDTA_INVALID_FOR_RDBCOLID                         = "58009.C.7";
+    String NET_SQLCDTA_INVALID_FOR_PKGID                            = "58009.C.8";
+    String NET_PGNAMCSN_INVALID_AT_SQLAM                            = "58009.C.9";
+    String NET_VCM_VCS_LENGTHS_INVALID                              = "58009.C.10";
+    String NET_ENCODING_NOT_SUPPORTED                               = "58009.C.11";
+    String NET_NOT_EXPECTED_CODEPOINT                               = "58009.C.12";
+    String NET_DDM_COLLECTION_TOO_SMALL                             = "58009.C.13";
+    String NET_COLLECTION_STACK_NOT_EMPTY                           = "58009.C.14";
+    String NET_DSS_NOT_ZERO                                         = "58009.C.15";
+    String NET_DSS_CHAINED_WITH_SAME_ID                             = "58009.C.16";
+    String NET_PREMATURE_EOS_DISCONNECT                             = "58009.C.17";
+    String NET_INVALID_FDOCA_ID                                     = "58009.C.18";
+
     String DRDA_MGRLVLRM                                            = "58010.C";
     String DRDA_DDM_COMMAND_NOT_SUPPORTED                           = "58014.C";
     String DRDA_DDM_OBJECT_NOT_SUPPORTED                            = "58015.C";
