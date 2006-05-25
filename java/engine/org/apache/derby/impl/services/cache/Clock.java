@@ -856,18 +856,39 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 		// size() is the number of valid entries in the hash table
 
 
-		// no need to sync on getting the sizes since the if
-		// they are wrong we will just not find a invalid entry in
-		// the lookup below.
+		// no need to sync on getting the sizes since if they are
+		// wrong we will discover it in the loop.
 		if (validItemCount < holders.size()) {
 
 			synchronized (this) {
 
-				for (int i = holders.size() - 1; i >= 0 ; i--) {
+				// 1) find out how many invalid items there are in the
+				//    cache
+				// 2) search for a free invalid item
+				// 3) stop searching when there are no more invalid
+				//    items to find
+
+				int invalidItems = holders.size() - validItemCount;
+
+				// Invalid items might occur in the cache when
+				//   a) a new item is created in growCache(), but it
+				//      is not in use yet, or
+				//   b) an item is deleted (usually when a table is
+				//      dropped)
+
+				// It is critical to break out of the loop as soon as
+				// possible since we are blocking others trying to
+				// access the page cache. New items are added to the
+				// end of the page cache, so the search for invalid
+				// items should start from the end.
+
+				for (int i = holders.size() - 1; (invalidItems > 0) && (i >= 0) ; i--) {
 					CachedItem item = (CachedItem) holders.get(i);
 
-					if (item.isKept())
+					if (item.isKept()) {
+						if (!item.isValid()) invalidItems--;
 						continue;
+					}
 
 					// found a free item, just use it
 					if (!item.isValid()) {
