@@ -96,7 +96,7 @@
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/util">
       <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/util" 
-        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/util/copyfiles.ant"/>  
+        includes="*.sql,*.properties,*.policy"/>
     </copy>
   </target>
 

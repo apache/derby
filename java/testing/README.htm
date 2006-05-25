@@ -1552,89 +1552,134 @@ class: </p>
  cellspacing="3">
   <col width="994"> <tbody>
     <tr>
-      <td width="994"> <ul><li>runwith&lt;jvm&gt; - See above section <a
- href="#skipping">4.10</a><br><br>
-<li>framework - specifies which framework to run with. For example:<br>
+      <td width="994">
+      <ul>
+        <li>runwith&lt;jvm&gt; - See above section <a href="#skipping">4.10</a><br>
+          <br>
+        </li>
+        <li>framework - specifies which framework to run with. For
+example:<br>
 java -Dframework=DerbyNetClient
-org.apache.derbyTesting.functionTests.RunTest <br><br>
+org.apache.derbyTesting.functionTests.RunTest <br>
+          <br>
 lang/supersimple.sql<br>
-<li>verbose - Shows more detailed output if set to "true". For example:<br>
-<small>java -Dverbose=true
-org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql</small><br><br>
-<li>keepfiles - Indicates to not clean up any of the files if the test
-passed if set to "true".<br><br>
-<li>testSpecialProps - sets additional properties. Several can be set using
+        </li>
+        <li>verbose - Shows more detailed output if set to "true". For
+example:<br>
+          <small>java -Dverbose=true
+org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql</small><br>
+          <br>
+        </li>
+        <li>keepfiles - Indicates to not clean up any of the files if
+the test
+passed if set to "true".<br>
+          <br>
+        </li>
+        <li>testSpecialProps - sets additional properties. Several can
+be set using
 '^' as separator: <br>
- -DtestSpecialProps=&lt;prop-1&gt;=&lt;value-1&gt;^
+-DtestSpecialProps=&lt;prop-1&gt;=&lt;value-1&gt;^
 ... ^&lt;prop-n&gt;=&lt;value-n&gt;. For example:<br>
-<small>java -DTestSpecialProps=derby.infolog.append=true
+          <small>java -DTestSpecialProps=derby.infolog.append=true
 org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql</small>
-<br><br>
-<li>jvmflags - sets specific jvm properties for the jvm used in the
+          <br>
+          <br>
+        </li>
+        <li>jvmflags - sets specific jvm properties for the jvm used in
+the
 test harness, for instance initial memory, and heap size, or properties
 normally passed on with a -D. For instance: <br>
-<small>java -Djvmflags=ms32M -mx128M
-org.apache.derbyTesting.functionTests.RunTest lang/streamingColumn.java</small <br><br>
-<li>excludeJCC -
-&nbsp;&nbsp;&nbsp; See above section <a href="#skipping">4.10</a><br><br>
-<li>useprocess - (default=true) Controls whether RunTest runs the test in a 
-separate VM or in a thread in harness VM. Also does not create
+          <small>java -Djvmflags=ms32M -mx128M
+org.apache.derbyTesting.functionTests.RunTest lang/streamingColumn.java</small><br>
+          <br>
+        </li>
+        <li>excludeJCC -
+&nbsp;&nbsp;&nbsp; See above section <a href="#skipping">4.10</a><br>
+          <br>
+        </li>
+        <li>useprocess - (default=true) Controls whether RunTest runs
+the test in a separate VM or in a thread in harness VM. Also does not
+create
 subdirectories for each test and thus will
 attempt to reuse databases with the same name. It is
-potentially useful for debugging tests. Unit tests are not (yet) runnable with
-"useprocess=false". <br><br>
-<li>startServer - allows for Network Server tests to start and shutdown
+potentially useful for debugging tests. Unit tests are not (yet)
+runnable with
+"useprocess=false". <br>
+          <br>
+        </li>
+        <li>startServer - allows for Network Server tests to start and
+shutdown
 Network Server from the test itself. Default is true - i.e. the
-&nbsp;&nbsp;&nbsp;&nbsp; test harness will start Network Server.<br><br>
-<li>noSecurityManager – disable the client JVM from installing a
-SecurityManager. See section 4.13<br><br>
-<li>hostName - allows for running Network Server on a remote host. See
-section <a href="#hostName">4.14</a>.<br><br>
-<li>derbyTesting.encoding - allows for running the harness with a different
-encoding. Only supported with jdk15. Example: <br><br>
+&nbsp;&nbsp;&nbsp;&nbsp; test harness will start Network Server.<br>
+          <br>
+        </li>
+        <li>noSecurityManager – disable the client JVM from installing
+a
+SecurityManager. See section <a href="#security">4.13</a></li>
+        <li>
+          <p>derbyTesting.replacePolicyFile - replace or append the
+contents of the default policy file derby_tests.policy. default is
+false, i.e. append. See section <a href="README.htm#security">4.13</a>
+          </p>
+        </li>
+        <li>
+          <p>hostName - allows for running Network Server on a remote
+host. See
+section <a href="#hostName">4.14</a>.</p>
+        </li>
+        <li>derbyTesting.encoding - allows for running the harness with
+a different
+encoding. Only supported with jdk15. Example: <br>
+          <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small> java
 -DderbyTesting.encoding=UTF-16
 org.apache.derbyTesting.functionTests.harness.RunTest
-jdbcapi/resultset.java</small><br><br>
-<li>generateUTF8Out - copies the test .out into UTF-8 encoding. See section
-      <a href="#4.15_Encoding_issues">4.15</a>.<br><br>
-<li>derbyTesting.jar.path -
-
-      This property is required to run upgrade tests. Set this property
-      to point to the location of jar files from a previous release from
-      which we need to test upgrade. This property needs to be set only if
-      the source files will not be available when running tests. In this case,
-      the jars can be copied to any location with the following relative path
-      ${jar_location}/{majorversion.minorversion}. The property should be set
-      as follows:<br>
-<br>
-      derbyTesting.jar.path=${jar_location}<br>
-<br>
-      If the test is run on the machine where the source files from svn have
-      been built, then it is not required to set this property. The jars checked
-      into svn will be used. If the tests are being run in a location where the
-      jars from the previous release are available in a different location
-      than where the source files for the upgrade tests have been built, the
-      following property needs to be set on the command line for RunSuite or
-      RunTest where the tests are being run:<br>
-<br>
-      -Djvmflags=-DderbyTesting.jar.path={path_to_derby_jars}<br>
-<br>
-      where {path_to_derby_jars} points to a directory where the jars for the
-      previous Derby release being tested for upgrade reside in a subdirectory
-      named according to the major.minor version. For example:<br>
-<br>
-      If the Derby 10.1 jars for upgrade testing reside in
-      /opt/testing/derby/10.1 then the command line needed for the upgrade
-      tests to complete would include the following:<br>
-<br>
-      <small>java -Djvmflags=-DderbyTesting.jar.path=/opt/testing/derby org.apache.derbyTesting.functionTests.harness.RunSuite upgrade</small><br>
-<br> 
-      Please note that if you change the value of derbyTesting.jar.path
-      you will need to remove the file <small>org/apache/derbyTesting/functionTests/tests/upgradeTests/Upgrade_10_1_10_2.properties</small>
-      from your output directory and run 'ant all' for the updated value of
-      the property to be written into that generated file.<br>
-</ul>
+jdbcapi/resultset.java</small><br>
+          <br>
+        </li>
+        <li>generateUTF8Out - copies the test .out into UTF-8 encoding.
+See section <a href="#4.15_Encoding_issues">4.15</a>.<br>
+          <br>
+        </li>
+        <li>derbyTesting.jar.path - This property is required to run
+upgrade tests. Set this property to point to the location of jar files
+from a previous release from which we need to test upgrade. This
+property needs to be set only if the source files will not be available
+when running tests. In this case, the jars can be copied to any
+location with the following relative path
+${jar_location}/{majorversion.minorversion}. The property should be set
+as follows:<br>
+          <br>
+derbyTesting.jar.path=${jar_location}<br>
+          <br>
+If the test is run on the machine where the source files from svn have
+been built, then it is not required to set this property. The jars
+checked into svn will be used. If the tests are being run in a location
+where the jars from the previous release are available in a different
+location than where the source files for the upgrade tests have been
+built, the following property needs to be set on the command line for
+RunSuite or RunTest where the tests are being run:<br>
+          <br>
+-Djvmflags=-DderbyTesting.jar.path={path_to_derby_jars}<br>
+          <br>
+where {path_to_derby_jars} points to a directory where the jars for the
+previous Derby release being tested for upgrade reside in a
+subdirectory named according to the major.minor version. For example:<br>
+          <br>
+If the Derby 10.1 jars for upgrade testing reside in
+/opt/testing/derby/10.1 then the command line needed for the upgrade
+tests to complete would include the following:<br>
+          <br>
+          <small>java
+-Djvmflags=-DderbyTesting.jar.path=/opt/testing/derby
+org.apache.derbyTesting.functionTests.harness.RunSuite upgrade</small><br>
+          <br>
+Please note that if you change the value of derbyTesting.jar.path you
+will need to remove the file <small>org/apache/derbyTesting/functionTests/tests/upgradeTests/Upgrade_10_1_10_2.properties</small>
+from your output directory and run 'ant all' for the updated value of
+the property to be written into that generated file.<br>
+        </li>
+      </ul>
       </td>
     </tr>
   </tbody>
@@ -1644,11 +1689,32 @@ jdbcapi/resultset.java</small><br><br>
 default</h3>
 <p>By default the tests install the standard Java SecurityManager
 using the system property java.security.manager and use a policy file
-derby_tests.policy. This file is sourced
+derby_tests.policy. The default file is sourced
 at<br>
 ${derby.source}/java/testing/org/apache/derbyTesting/functionTests/util/derby_tests.policy</p>
 <p>During a test run this policy file is copied into ${user.dir} and
-used from there.</p>
+used from there.<br>
+Optionally a test-specific or suite-specific policy file may be
+appended or used instead. The name of the policy file remains
+derby_tests.policy. <br>
+</p>
+<p>A test_specific policy file has the same name as the test, has
+extension .policy, and is located in the same location as the test. For
+instance,
+${derby.source}/java/testing/org/apache/derbyTesting/functionTests/tests/lang/errorStream.policy
+is the test-specific policy file for the test errorStream.java. A
+suite-specific policy file has the same name as the suite, has
+extension .policy, and is located in the
+${derby.source}/java/testing/org/apache/derbyTesting/functionTests/suites
+directory.<br>
+</p>
+<p>By default, a test-specific and/or suite-specific policy file is
+appended to the default policy file (derby_tests.policy). However, if a
+test's _app.properties or suite's .properties file contains the
+property derbyTesting.replacePolicyFile=true, then the file
+derby_tests.policy will be overwritten with the contents of the test-
+or suite-specific policy file.<br>
+</p>
 <p>There are two environments for the installation of the
 SecurityManager.</p>
 <ul>
@@ -1861,7 +1927,8 @@ fashion. Tests that need to be run in this fashion can use the result
 of
 the TestUtil.getHostName() method instead.</li>
   <li>Tests can only use the ping option of the NetworkServerControl
-class.<br>
+class.</li>
+  <li>Tests cannot be dependent on test- or suite-specific policy files.<br>
   </li>
 </ol>
 New .exclude files for the current frameworks (i.e.

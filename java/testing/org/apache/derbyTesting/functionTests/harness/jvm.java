@@ -110,7 +110,7 @@ public abstract class jvm {
     String hostName;
 
 	// security defaults relative to WS
-	// not used if jvmargs serverPolicyFile or serverCodeBase are set
+	// not used if jvmargs serverCodeBase are set
 	private static String DEFAULT_POLICY="util/derby_tests.policy";
 	private static String DEFAULT_CODEBASE="/classes";
 
@@ -337,11 +337,7 @@ public abstract class jvm {
 			D = new Vector();
 		
 		String userDir = System.getProperty("user.dir");
-		String policyFile = System.getProperty("serverPolicyFile");
-		if (policyFile == null)
-		{
-				policyFile = userDir + baseName(DEFAULT_POLICY);
-		}
+		String policyFile = userDir + baseName(DEFAULT_POLICY);
 
 		String serverCodeBase = System.getProperty("serverCodeBase");
 		boolean[] isJar = new boolean[1];
@@ -357,11 +353,10 @@ public abstract class jvm {
 		File pf = new File(policyFile);
 		File cb = new File(serverCodeBase);
 
-		if (policyFile.toLowerCase().equals("none") || 
-			(!pf.exists()))
+		if (!pf.exists())
 		{
 			System.out.println("WARNING: Running without Security manager." +
-							   "serverPolicy(" + policyFile + 
+							   "policy File (" + policyFile + 
 							   ") or serverCodeBase(" +  serverCodeBase + 
 							   ") not available");
 		return D;
@@ -393,8 +388,8 @@ public abstract class jvm {
 	}
 
 	/** Get the base file name from a resource name string
-	 * @param resourceName (e.g. /org/apache/derbyTesting/functionTests/util/nwsvr.policy)
-	 * @return short name (e.g. nwsvr.policy)
+	 * @param resourceName (e.g. /org/apache/derbyTesting/functionTests/util/derby_tests.policy)
+	 * @return short name (e.g. derby_tests.policy)
 	 */
 	private static String baseName(String resourceName)
 	{

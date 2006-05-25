@@ -126,6 +126,7 @@ public class RunTest
 	static boolean startServer=true; // should test harness start the server
 	static String hostName; // needs to be settable for ipv testing, localhost otherwise.)
 	static String testEncoding; // Encoding used for child jvm and to read the test output
+	static boolean replacePolicyFile=false; // property used to see if we need to replace the default policy file or append to it.
 
 	// Other test variables for directories, files, output
 	static String scriptName = ""; // testname as passed in
@@ -277,13 +278,13 @@ public class RunTest
 	    System.out.println(sb.toString());
 	    pwDiff.println(sb.toString());
 
- 	    // before going further, get the policy file copied and if
- 	    // needed, modify it with the test's policy file
- 	    composePolicyFile();
-     
             // Run the Server if needed
 	    if ((driverName != null) && (!skiptest) )
 	    {
+            // before going further, get the policy file copied and if
+            // needed, modify it with the test's policy file
+            composePolicyFile();
+     
             System.out.println("Initialize for framework: "+ framework );
             if (jvmnet && framework.startsWith("DerbyNet"))
             {
@@ -1008,6 +1009,12 @@ public class RunTest
             addSkiptestReason("derbyTesting.encoding can only be used with jdk15, skipping test");
         }
 		
+        String replace_policy = sp.getProperty("derbyTesting.replacePolicyFile");
+        if ((replace_policy != null) && (replace_policy.equals("true")))
+            replacePolicyFile=true;
+        else
+            replacePolicyFile=false;
+        
         javaCmd = sp.getProperty("javaCmd");
         bootcp = sp.getProperty("bootcp");
         jvmflags = sp.getProperty("jvmflags");
@@ -1647,7 +1654,18 @@ clp.list(System.out);
 	                    ap.put("file.encoding",testEncoding);	
 	            }
 	        }
-	        
+	       
+	        if(!replacePolicyFile) 
+	        {
+	            String replace_policy = ap.getProperty("derbyTesting.replacePolicyFile");
+	            if (replace_policy != null && replace_policy.equals("true"))
+	                replacePolicyFile = true;
+	            else
+	                replacePolicyFile = false;
+
+	        }
+
+ 
 	        if (NetServer.isJCCConnection(framework)
 	        		|| "true".equalsIgnoreCase(ap.getProperty("noSecurityManager")))
 	        	runWithoutSecurityManager = true;
@@ -1960,6 +1978,9 @@ clp.list(System.out);
             status = tempMasterFile.delete();
             UTF8OutFile = new File(outDir, UTF8OutName);
             status = UTF8OutFile.delete();
+            File defaultPolicyFile = new File(userdir, "derby_tests.policy");
+            if (defaultPolicyFile.exists())
+            status = defaultPolicyFile.delete();
             if (deleteBaseDir)
             {
                 if (useCommonDB == false) 
@@ -2160,6 +2181,8 @@ clp.list(System.out);
 	    String systemHome, String scriptPath)
 	    throws FileNotFoundException, IOException, Exception
 	{
+    	composePolicyFile();
+        
 	    //System.out.println("testType: " + testType);
 	    String ij = "";
         // Create the test command line
@@ -2324,20 +2347,53 @@ clp.list(System.out);
     public static void composePolicyFile() throws ClassNotFoundException
     {
         try{
-            //DERBY-892: allow for test-specific policy additions
-
-            // first get the default policy file
+            //DERBY-892: allow for test- and suite-specific policy additions
+            
+            // this is the default policy file
             String default_policy = "util/derby_tests.policy";
-            File userDirHandle = new File(userdir);
-            CopySuppFiles.copyFiles(userDirHandle, default_policy);
+            
+            // if the property replacePolicyFile is set (in the 
+            // test specific _app.properties file, or at the command line)
+            // do not use the default policy file at all, otherwise, append
+            if (!replacePolicyFile)
+            {
+            	File userDirHandle = new File(userdir);
+            	CopySuppFiles.copyFiles(userDirHandle, default_policy);
+            }
+            // see if there is a suite specific policy file and append or replace
+            if ((isSuiteRun) && (suiteName!=null)) 
+            {
+                InputStream newpolicy = loadTestResource("suites/" + 
+                    suiteName.substring(0,suiteName.indexOf(':')) + 
+                    ".policy");
+                writePolicyFile(newpolicy);
+            }
 
-            // now get the test specific policy file and append
+            // if we are running with useprocess=false, we need some special
+            // properties (setSecurityManager, setIO)
+            if (!useprocess) 
+            {
+                InputStream newpolicy = loadTestResource("util/" + "useprocessfalse.policy");
+                writePolicyFile(newpolicy);
+            }
+            
+            // now get the test specific policy file and append or replace
             InputStream newpolicy =
                 loadTestResource("tests/" + testDirName + "/" + testBase + ".policy");
+            writePolicyFile(newpolicy);
+        } catch (IOException ie) {
+            System.out.println("Exception trying to create policy file: ");
+            ie.printStackTrace(); 
+        }
+    }
+
+    public static void writePolicyFile(InputStream newpolicy)
+    {
+        try{
             if (newpolicy != null)
             {
                 File oldpolicy = new File(runDir,"derby_tests.policy");
-                //if (oldpolicy.exists()) System.out.println("Appending to derby_tests.policy");
+                if (verbose && oldpolicy.exists()) System.out.println("Appending to derby_tests.policy");
                 BufferedReader policyadd = new BufferedReader(new InputStreamReader(newpolicy, "UTF-8"));
                 FileWriter policyfw = new FileWriter(oldpolicy.getPath(), true);
                 PrintWriter policypw = new PrintWriter( new BufferedWriter(policyfw, 10000), true );
@@ -2357,8 +2413,6 @@ clp.list(System.out);
     private static void execTestProcess(String[] testCmd)
         throws Exception
     {
-    	composePolicyFile();
-        
         // Execute the process and handle the results
     	Process pr = null;
     	try
@@ -2479,8 +2533,8 @@ clp.list(System.out);
     	PrintStream ps = new PrintStream(new FileOutputStream(pathStr), true);
     	
     	// Install a security manager within this JVM for this test.
-    	boolean installedSecurityManager = installSecurityManager();
     	composePolicyFile();
+    	boolean installedSecurityManager = installSecurityManager();
     	if (testType.equals("sql"))
     	{
     	    String[] ijarg = new String[3];

@@ -104,12 +104,6 @@ grant codeBase "${derbyTesting.codejar}derbyTesting.jar" {
   
   // Access all files under ${user.dir}to write the test directory structure
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
- 
-  // When running with useprocess=false need to install and uninstall
-  // the security manager and allow setIO to change the system err and out
-  // streams. Currently the nist suite runs with useprocess=false.
-  permission java.lang.RuntimePermission "setSecurityManager";
-  permission java.lang.RuntimePermission "setIO"; 
 };
 
 //
@@ -136,12 +130,6 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // Access all files under ${user.dir}to write the test directory structure
   // Also covers extin, extout and extinout locations
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
-  
-  // When running with useprocess=false need to install and uninstall
-  // the security manager and allow setIO to change the system err and out
-  // streams. Currently the nist suite runs with useprocess=false.
-  permission java.lang.RuntimePermission "setSecurityManager";
-  permission java.lang.RuntimePermission "setIO"; 
     
   // These permissions are needed to load the JCE for encryption with Sun and IBM JDK131.
   // JDK14 has the JCE  preloaded
