@@ -359,7 +359,16 @@ public class checkDataSource
     System.out.println("Issue SQL to change isolation in local transaction");
 		s.executeUpdate("set current isolation = RS");
 		printState("SQL to change isolation in local", cs1);
-
+		
+		// DERBY-1325 - Isolation level of local connection does not get reset after ending 
+		// a global transaction that was joined/resumed if the isolation level was changed 
+		// using SQL 
+		xar.start(xid, XAResource.TMJOIN);
+		printState("1st global(existing)", cs1);
+		xar.end(xid, XAResource.TMSUCCESS);
+		printState("local", cs1);
+		// DERBY-1325 end test 
+		
 		Xid xid2 = new cdsXid(1, (byte) 93, (byte) 103);
 		xar.start(xid2, XAResource.TMNOFLAGS);
 		printState("2nd global(new)", cs1);

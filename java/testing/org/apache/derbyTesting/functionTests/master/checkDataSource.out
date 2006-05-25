@@ -345,6 +345,14 @@ SQL to change isolation in local
   isolation level REPEATABLE_READ
   auto commit     true
   read only       false
+1st global(existing)
+  isolation level SERIALIZABLE
+  auto commit     false
+  read only       false
+local
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
 2nd global(new)
   isolation level REPEATABLE_READ
   auto commit     false
