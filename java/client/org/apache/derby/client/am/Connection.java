@@ -80,6 +80,10 @@ public abstract class Connection implements java.sql.Connection,
 
     // used to set transaction isolation level
     private Statement setTransactionIsolationStmt = null;
+    
+    // used to get transaction isolation level
+    private Statement getTransactionIsolationStmt = null;
+    
     // ------------------------dynamic properties---------------------------------
 
     protected boolean open_ = true;
@@ -752,6 +756,16 @@ public abstract class Connection implements java.sql.Connection,
                 accumulatedExceptions = se;
             }
         }
+        setTransactionIsolationStmt = null;
+        if (getTransactionIsolationStmt != null) {
+            try {
+                getTransactionIsolationStmt.close();
+            } catch (SQLException se) {
+                accumulatedExceptions = Utils.accumulateSQLException(
+                        se, accumulatedExceptions);
+            }
+        }
+        getTransactionIsolationStmt = null;
         try {
             flowClose();
         } catch (SqlException e) {
@@ -937,18 +951,75 @@ public abstract class Connection implements java.sql.Connection,
     }
 
     public int getTransactionIsolation() throws SQLException {
+    	
+    	// Store the current auto-commit value and use it to restore 
+    	// at the end of this method.
+    	boolean currentAutoCommit = autoCommit_;
+    	java.sql.ResultSet rs = null;
+    	
         try
         {
             checkForClosedConnection();
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getTransactionIsolation", isolation_);
             }
-            return isolation_;
+            
+            // Set auto-commit to false when executing the statement as we do not want to
+            // cause an auto-commit from getTransactionIsolation() method. 
+            autoCommit_ = false;
+            
+            // DERBY-1148 - Client reports wrong isolation level. We need to get the isolation
+            // level from the server. 'isolation_' maintained in the client's connection object
+            // can be out of sync with the real isolation when in an XA transaction. This can 
+            // also happen when isolation is set using SQL instead of JDBC. So we try to get the
+            // value from the server by calling the "current isolation" function. If we fail to 
+            // get the value, return the value stored in the client's connection object.
+            if (getTransactionIsolationStmt == null  || 
+            		!(getTransactionIsolationStmt.openOnClient_ &&
+            				getTransactionIsolationStmt.openOnServer_)) {
+                getTransactionIsolationStmt =
+                        createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                                java.sql.ResultSet.CONCUR_READ_ONLY,
+                                holdability());
+            }
+            
+            rs = getTransactionIsolationStmt.executeQuery("values current isolation");
+            rs.next();
+            String isolationStr = rs.getString(1);
+            isolation_ = translateIsolation(isolationStr);
+            rs.close();	
         }
         catch ( SqlException se )
         {
             throw se.getSQLException();
         }
+        finally {
+        	// Restore auto-commit value
+        	autoCommit_ = currentAutoCommit;
+        	if(rs != null)
+        		rs.close();
+        }
+        
+        return isolation_;
+    }
+  
+    /**
+     * Translates the isolation level from a SQL string to the JDBC int value
+     *  
+     * @param isolationStr SQL isolation string
+     * @return
+     */
+    private int translateIsolation(String isolationStr) {
+    	if(isolationStr.compareTo(DERBY_TRANSACTION_REPEATABLE_READ) == 0)
+    		return java.sql.Connection.TRANSACTION_REPEATABLE_READ;
+    	else if (isolationStr.compareTo(DERBY_TRANSACTION_SERIALIZABLE) == 0)
+    		return java.sql.Connection.TRANSACTION_SERIALIZABLE;
+    	else if (isolationStr.compareTo(DERBY_TRANSACTION_READ_COMMITTED) == 0)
+    		return java.sql.Connection.TRANSACTION_READ_COMMITTED;
+    	else if (isolationStr.compareTo(DERBY_TRANSACTION_READ_UNCOMMITTED) == 0)
+    		return java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
+    	else 
+    		return java.sql.Connection.TRANSACTION_NONE;
     }
 
     public java.sql.SQLWarning getWarnings() throws SQLException {

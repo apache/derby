@@ -82,16 +82,6 @@ public class checkDataSource
 	private  boolean needRollbackBeforePCGetConnection = 
 		TestUtil.isDerbyNetClientFramework(); 
 	
-	// DERBY-1035 With client, Connection.getTransactionIsolation() return value is 
-	// wrong after changing the isolation level with an SQL statement such as 
-	// "set current isolation = RS"
-	// Tests for setting isolation level this way only run in embedded for now.
-	private boolean canSetIsolationWithStatement = TestUtil.isEmbeddedFramework();
-	  
-	//	 DERBY-1148 - Client Connection state does not
-	// get set properly when joining a global transaction.
-	private static boolean isolationSetProperlyOnJoin = TestUtil.isEmbeddedFramework();
-	
 	// DERBY-1183 getCursorName not correct after first statement execution
 	private static boolean hasGetCursorNameBug = TestUtil.isDerbyNetClientFramework();
 	
@@ -402,14 +392,28 @@ public class checkDataSource
 		// and isolation level from the transaction,
 		// holdability remains that of this handle.
 		xar.start(xid, XAResource.TMJOIN);
-		// DERBY-1148
-		if (isolationSetProperlyOnJoin)
-			printState("re-join X1", cs1);
+		printState("re-join X1", cs1);
 		xar.end(xid, XAResource.TMSUCCESS);
 
 		// should be the same as the reset local
 		printState("back to local (same as reset)", cs1);
-
+		
+		// test suspend/resume
+		// now re-join the transaction, should pick up the read-only
+		// and isolation level from the transaction,
+		// holdability remains that of this handle.
+		xar.start(xid, XAResource.TMJOIN);
+		printState("re-join X1 second time", cs1);
+		
+		xar.end(xid, XAResource.TMSUSPEND);
+		printState("local after suspend", cs1);
+		
+		xar.start(xid, XAResource.TMRESUME);
+		printState("resume X1", cs1);
+		
+		xar.end(xid, XAResource.TMSUCCESS);
+		printState("back to local (second time)", cs1);
+		
 		cs1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 		cs1.setReadOnly(true);
 		setHoldability(cs1, true);
@@ -421,9 +425,7 @@ public class checkDataSource
 		
 		xar.start(xid, XAResource.TMJOIN);
 		cs1 = xac.getConnection();
-		// DERBY-1148
-		if (isolationSetProperlyOnJoin)
-			printState("re-join with new handle X1", cs1);
+		printState("re-join with new handle X1", cs1);
 		cs1.close();
 		xar.end(xid, XAResource.TMSUCCESS);
 
@@ -434,9 +436,7 @@ public class checkDataSource
 		cs1.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 		printState("pre-X1 commit - local", cs1);
 		xar.start(xid, XAResource.TMJOIN);
-		// DERBY-1148
-		if (isolationSetProperlyOnJoin)
-			printState("pre-X1 commit - X1", cs1);
+		printState("pre-X1 commit - X1", cs1);
 		xar.end(xid, XAResource.TMSUCCESS);
 		printState("post-X1 end - local", cs1);
 		xar.commit(xid, true);
@@ -453,8 +453,7 @@ public class checkDataSource
 		cs1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 		printState("setTransactionIsolation in local", cs1);
 
-		if (canSetIsolationWithStatement)
-			testSetIsolationWithStatement(s, xar, cs1);
+		testSetIsolationWithStatement(s, xar, cs1);
 
 		// now check re-use of *Statement objects across local/global connections.
 		System.out.println("TESTING RE_USE OF STATEMENT OBJECTS");

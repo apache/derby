@@ -287,7 +287,27 @@ reset local
   isolation level READ_COMMITTED
   auto commit     true
   read only       false
+re-join X1
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
 back to local (same as reset)
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+re-join X1 second time
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+local after suspend
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+resume X1
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+back to local (second time)
   isolation level READ_COMMITTED
   auto commit     true
   read only       false
@@ -297,10 +317,18 @@ new handle - local
   auto commit     true
   read only       false
 EVENT(6):connectionClosed
+re-join with new handle X1
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
 EVENT(6):connectionClosed
 pre-X1 commit - local
   isolation level REPEATABLE_READ
   auto commit     true
+  read only       false
+pre-X1 commit - X1
+  isolation level READ_UNCOMMITTED
+  auto commit     false
   read only       false
 post-X1 end - local
   isolation level REPEATABLE_READ
@@ -318,6 +346,69 @@ initial local
   read only       false
 Issue setTransactionIsolation in local transaction
 setTransactionIsolation in local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+Issue SQL to change isolation in local transaction
+SQL to change isolation in local
+  isolation level SERIALIZABLE
+  auto commit     true
+  read only       false
+1st global(new)
+  isolation level SERIALIZABLE
+  auto commit     false
+  read only       false
+local
+  isolation level SERIALIZABLE
+  auto commit     true
+  read only       false
+Issue SQL to change isolation in local transaction
+SQL to change isolation in local
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
+1st global(existing)
+  isolation level SERIALIZABLE
+  auto commit     false
+  read only       false
+local
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
+2nd global(new)
+  isolation level REPEATABLE_READ
+  auto commit     false
+  read only       false
+1st global(existing)
+  isolation level SERIALIZABLE
+  auto commit     false
+  read only       false
+local
+  isolation level REPEATABLE_READ
+  auto commit     true
+  read only       false
+1st global(existing)
+  isolation level SERIALIZABLE
+  auto commit     false
+  read only       false
+Issue SQL to change isolation in 1st global transaction
+change isolation of existing 1st global transaction
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       false
+local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+2nd global(existing)
+  isolation level REPEATABLE_READ
+  auto commit     false
+  read only       false
+(After 2nd global rollback) local
+  isolation level READ_UNCOMMITTED
+  auto commit     true
+  read only       false
+(After 1st global rollback) local
   isolation level READ_UNCOMMITTED
   auto commit     true
   read only       false

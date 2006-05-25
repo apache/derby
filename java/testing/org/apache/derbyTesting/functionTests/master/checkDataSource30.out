@@ -373,6 +373,26 @@ back to local (same as reset)
   isolation level READ_COMMITTED
   auto commit     true
   read only       false
+re-join X1 second time
+  holdability     false
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       true
+local after suspend
+  holdability     false
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+resume X1
+  holdability     false
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       true
+back to local (second time)
+  holdability     false
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
 EVENT(6):connectionClosed
 new handle - local 
   holdability     true
