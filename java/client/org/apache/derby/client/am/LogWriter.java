@@ -1247,7 +1247,8 @@ public class LogWriter {
                     value = "********";
                 }
                 
-                properties.setProperty(propertyKey, value);
+                if(value != null)
+                	properties.setProperty(propertyKey, value);
             }
         } catch (NamingException e) {
             throw new SqlException(this, e.toString());
