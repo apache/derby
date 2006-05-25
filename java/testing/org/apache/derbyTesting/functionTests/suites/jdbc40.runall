@@ -21,3 +21,4 @@ jdbc4/StatementEventsTest.junit
 jdbc4/StatementTest.junit
 jdbc4/VerifySignatures.junit
 jdbc4/XA40Test.junit
+jdbc4/PreparedStatementTest.junit
