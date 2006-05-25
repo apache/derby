@@ -59,6 +59,7 @@ import org.apache.derbyTesting.functionTests.harness.jvm;
     <P>
 	This tests the following specifically.
 
+    <BR>
 	10.1 Upgrade issues
 
 	<UL>
@@ -67,9 +68,14 @@ import org.apache.derbyTesting.functionTests.harness.jvm;
 	
 	Metadata tests
 	
-	10.2 Upgrade tests:
+    <BR>
+	10.2 Upgrade tests
+    <UL>
+    <LI> caseReusableRecordIdSequenceNumber
+    <LI> Trigger action re-writing and implementation changes (DERBY-438)
+    </UL>
 	
-	caseReusableRecordIdSequenceNumber
+	
 	
  */
 public class UpgradeTester {
@@ -354,6 +360,8 @@ public class UpgradeTester {
 			passed = caseInitialize(conn, phase) && passed;
 			passed = caseProcedures(conn, phase, oldMajorVersion, 
 									oldMinorVersion) && passed;
+            passed = caseTriggerVTI(conn, phase, oldMajorVersion, 
+                    oldMinorVersion) && passed;
 			runMetadataTest(classLoader, conn);
 			conn.close();
 			shutdown(classLoader, dbName);
@@ -684,7 +692,111 @@ public class UpgradeTester {
 		System.out.println("complete caseProcedures - passed " + passed);
 		return passed;
 	}
-	
+    /**
+     * Triger (internal) VTI
+     * 10.2 - Check that a statement trigger created in 10.0
+     * or 10.1 can be executed in 10.2 and that a statement
+     * trigger created in soft upgrade in 10.2 can be used
+     * in older releases.
+     * 
+     * The VTI implementing statement triggers changed in
+     * 10.2 from implementations of ResultSet to implementations
+     * of PreparedStatement. See DERBY-438. The internal
+     * api for the re-written action statement remains the
+     * same. The re-compile of the trigger on version changes
+     * should automatically switch between the two implementations.
+     *
+     * @param conn Connection
+     * @param phase Upgrade test phase
+     * @param dbMajor Major version of old release 
+     * @param dbMinor Minor version of old release
+     * @return true, if the test passes
+     * @throws SQLException
+     */
+    private boolean caseTriggerVTI(Connection conn, int phase, 
+                                    int dbMajor, int dbMinor)
+                                    throws SQLException {
+                
+        boolean passed = true;
+        
+        Statement s = conn.createStatement();
+
+        switch (phase) {
+        case PH_CREATE:
+            s.execute("CREATE TABLE D438.T438(a int, b varchar(20), c int)");
+            s.execute("INSERT INTO D438.T438 VALUES(1, 'DERBY-438', 2)");
+            s.execute("CREATE TABLE D438.T438_T1(a int, b varchar(20))");
+            s.execute("CREATE TABLE D438.T438_T2(a int, c int)");
+            s.execute(
+               "create trigger D438.T438_ROW_1 after UPDATE on D438.T438 " +
+               "referencing new as n old as o " + 
+               "for each row mode db2sql "+ 
+               "insert into D438.T438_T1(a, b) values (n.a, n.b || '_ROW')");
+            s.executeUpdate(
+               "create trigger D438.T438_STMT_1 after UPDATE on D438.T438 " +
+               "referencing new_table as n " + 
+               "for each statement mode db2sql "+ 
+               "insert into D438.T438_T1(a, b) select n.a, n.b || '_STMT' from n"); 
+            
+            conn.commit();
+            showTriggerVTITables(phase, s);
+            break;
+        case PH_SOFT_UPGRADE:
+            s.execute(
+               "create trigger D438.T438_ROW_2 after UPDATE on D438.T438 " +
+               "referencing new as n old as o " + 
+               "for each row mode db2sql "+ 
+               "insert into D438.T438_T2(a, c) values (n.a, n.c + 100)");
+             s.executeUpdate(
+                "create trigger D438.T438_STMT_2 after UPDATE on D438.T438 " +
+                "referencing new_table as n " + 
+                "for each statement mode db2sql "+ 
+                "insert into D438.T438_T2(a, c) select n.a, n.c + 4000 from n"); 
+                 
+            conn.commit();
+            showTriggerVTITables(phase, s);
+            break;
+        case PH_POST_SOFT_UPGRADE:
+            showTriggerVTITables(phase, s);
+            break;
+        case PH_HARD_UPGRADE:
+            showTriggerVTITables(phase, s);
+           break;
+        default:
+            passed = false;
+            break;
+        }
+        s.close();
+
+        System.out.println("complete caseTriggerVTI - passed " + passed);
+        return passed;
+    }
+    
+    /**
+     * Display the tables populated by the triggers.
+    */
+    private void showTriggerVTITables(int phase, Statement s) throws SQLException
+    {
+        System.out.println("Trigger VTI Phase: " + PHASES[phase]);
+        s.executeUpdate("UPDATE D438.T438 set c = c + 1");
+        s.getConnection().commit();
+        System.out.println("D438.T438_T1");
+        ResultSet rs = s.executeQuery("SELECT a,b from D438.T438_T1 ORDER BY 2");
+        while (rs.next()) {
+            System.out.println(rs.getInt(1) + ", " + rs.getString(2));
+        }
+        rs.close();
+        System.out.println("D438.T438_T2");
+        rs = s.executeQuery("SELECT a,c from D438.T438_T2 ORDER BY 2");
+        while (rs.next()) {
+            System.out.println(rs.getInt(1) + ", " + rs.getString(2));
+        }
+        rs.close();
+        s.executeUpdate("DELETE FROM D438.T438_T1");
+        s.executeUpdate("DELETE FROM D438.T438_T2");
+        s.getConnection().commit();
+    }
+    	
 	/**
 	 * Run metadata test
 	 * 

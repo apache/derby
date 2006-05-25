@@ -60,15 +60,7 @@ import java.io.InputStream;
  */
 public abstract class UpdatableVTITemplate implements PreparedStatement 
 {
-
-    //
-    // java.sql.Statement calls, passed through to our preparedStatement.
-    //
-	/**
-		@deprecated Cloudscape 5.1 no longer supports read-write VTI's with JDBC 1.2. Applications
-		can use the UpdatableVTITemplate to implement a read-write VTI.
-	*/
-	public UpdatableVTITemplate() {}
+	protected UpdatableVTITemplate() {}
 
 	/**
 	 * @see java.sql.Statement

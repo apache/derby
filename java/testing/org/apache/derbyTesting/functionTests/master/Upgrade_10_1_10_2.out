@@ -3,6 +3,12 @@ complete caseVersionCheck - passed true
 complete caseReusableRecordIdSequenceNumber - passed true
 complete caseInitialize - passed true
 complete caseProcedures - passed true
+Trigger VTI Phase: CREATE
+D438.T438_T1
+1, DERBY-438_ROW
+1, DERBY-438_STMT
+D438.T438_T2
+complete caseTriggerVTI - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -24,6 +30,7 @@ maxColumnNameLength(): 128
 getSchemas():
 TABLE_SCHEM[VARCHAR]
 APP
+D438
 NULLID
 SQLJ
 SYS
@@ -279,6 +286,9 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,APP,REFTAB2,TABLE,
 ,APP,T,TABLE,
 ,APP,TABLE1,TABLE,
+,D438,T438,TABLE,
+,D438,T438_T1,TABLE,
+,D438,T438_T2,TABLE,
 ,APP,SCREWIE,VIEW,
 getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR]
@@ -291,6 +301,9 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,APP,REFTAB2,TABLE,
 ,APP,T,TABLE,
 ,APP,TABLE1,TABLE,
+,D438,T438,TABLE,
+,D438,T438_T1,TABLE,
+,D438,T438_T2,TABLE,
 ,APP,SCREWIE,VIEW,
 getTableTypes():
 TABLE_TYPE[VARCHAR]
@@ -689,6 +702,14 @@ caseReusableRecordIdSequenceNumber - Running compress
 complete caseReusableRecordIdSequenceNumber - passed true
 complete caseInitialize - passed true
 complete caseProcedures - passed true
+Trigger VTI Phase: SOFT UPGRADE
+D438.T438_T1
+1, DERBY-438_ROW
+1, DERBY-438_STMT
+D438.T438_T2
+1, 104
+1, 4004
+complete caseTriggerVTI - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -710,6 +731,7 @@ maxColumnNameLength(): 128
 getSchemas():
 TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
 APP,null
+D438,null
 NULLID,null
 SQLJ,null
 SYS,null
@@ -723,6 +745,7 @@ SYSSTAT,null
 getSchemas(String, String):
 TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
 APP,null
+D438,null
 NULLID,null
 SQLJ,null
 SYS,null
@@ -1050,6 +1073,9 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,APP,REFTAB2,TABLE,
 ,APP,T,TABLE,
 ,APP,TABLE1,TABLE,
+,D438,T438,TABLE,
+,D438,T438_T1,TABLE,
+,D438,T438_T2,TABLE,
 ,APP,SCREWIE,VIEW,
 getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR]
@@ -1062,6 +1088,9 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,APP,REFTAB2,TABLE,
 ,APP,T,TABLE,
 ,APP,TABLE1,TABLE,
+,D438,T438,TABLE,
+,D438,T438_T1,TABLE,
+,D438,T438_T2,TABLE,
 ,APP,SCREWIE,VIEW,
 getTableTypes():
 TABLE_TYPE[VARCHAR]
@@ -1421,6 +1450,14 @@ complete caseVersionCheck - passed true
 complete caseReusableRecordIdSequenceNumber - passed true
 complete caseInitialize - passed true
 complete caseProcedures - passed true
+Trigger VTI Phase: POST SOFT UPGRADE
+D438.T438_T1
+1, DERBY-438_ROW
+1, DERBY-438_STMT
+D438.T438_T2
+1, 105
+1, 4005
+complete caseTriggerVTI - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -1442,6 +1479,7 @@ maxColumnNameLength(): 128
 getSchemas():
 TABLE_SCHEM[VARCHAR]
 APP
+D438
 NULLID
 SQLJ
 SYS
@@ -1697,6 +1735,9 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,APP,REFTAB2,TABLE,
 ,APP,T,TABLE,
 ,APP,TABLE1,TABLE,
+,D438,T438,TABLE,
+,D438,T438_T1,TABLE,
+,D438,T438_T2,TABLE,
 ,APP,SCREWIE,VIEW,
 getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR]
@@ -1709,6 +1750,9 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,APP,REFTAB2,TABLE,
 ,APP,T,TABLE,
 ,APP,TABLE1,TABLE,
+,D438,T438,TABLE,
+,D438,T438_T1,TABLE,
+,D438,T438_T2,TABLE,
 ,APP,SCREWIE,VIEW,
 getTableTypes():
 TABLE_TYPE[VARCHAR]
@@ -2106,6 +2150,14 @@ complete caseVersionCheck - passed true
 complete caseReusableRecordIdSequenceNumber - passed true
 complete caseInitialize - passed true
 complete caseProcedures - passed true
+Trigger VTI Phase: UPGRADE
+D438.T438_T1
+1, DERBY-438_ROW
+1, DERBY-438_STMT
+D438.T438_T2
+1, 106
+1, 4006
+complete caseTriggerVTI - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -2127,6 +2179,7 @@ maxColumnNameLength(): 128
 getSchemas():
 TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
 APP,null
+D438,null
 NULLID,null
 SQLJ,null
 SYS,null
@@ -2140,6 +2193,7 @@ SYSSTAT,null
 getSchemas(String, String):
 TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
 APP,null
+D438,null
 NULLID,null
 SQLJ,null
 SYS,null
@@ -2475,6 +2529,9 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,APP,REFTAB2,TABLE,
 ,APP,T,TABLE,
 ,APP,TABLE1,TABLE,
+,D438,T438,TABLE,
+,D438,T438_T1,TABLE,
+,D438,T438_T2,TABLE,
 ,APP,SCREWIE,VIEW,
 getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR]
@@ -2487,6 +2544,9 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,APP,REFTAB2,TABLE,
 ,APP,T,TABLE,
 ,APP,TABLE1,TABLE,
+,D438,T438,TABLE,
+,D438,T438_T1,TABLE,
+,D438,T438_T2,TABLE,
 ,APP,SCREWIE,VIEW,
 getTableTypes():
 TABLE_TYPE[VARCHAR]

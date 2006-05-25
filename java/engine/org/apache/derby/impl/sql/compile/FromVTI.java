@@ -534,7 +534,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		{
 			version2 = true;
 		}
-
+        
 		/* If this is a version 2 VTI */
 		if (version2)
 		{
@@ -1273,11 +1273,14 @@ public class FromVTI extends FromTable implements VTIEnvironment
 										   MethodBuilder mb, boolean reuseablePs)
 		throws StandardException
 	{
+        
+        String vtiType = version2 ?
+                "java.sql.PreparedStatement" : "java.sql.ResultSet";
 		// this sets up the method and the static field.
 		// generates:
 		// 	java.sql.ResultSet userExprFun { }
 		MethodBuilder userExprFun = acb.newGeneratedFun(
-			version2 ? "java.sql.PreparedStatement" : "java.sql.ResultSet", Modifier.PUBLIC);
+                vtiType, Modifier.PUBLIC);
 		userExprFun.addThrownException("java.lang.Exception");
 
 
@@ -1291,6 +1294,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		}
 
 		newInvocation.generateExpression(acb, userExprFun);
+        userExprFun.upCast(vtiType);
 
 		if (reuseablePs) {
 

@@ -3163,13 +3163,18 @@ public class blobclob4BLOB {
         System.out.println(START + "blobTest8Trigger");
         try {
             Statement stmt = conn.createStatement();
-            stmt.executeUpdate("CREATE TABLE blobTest8TriggerA (a BLOB(300k), b int, crc32 BIGINT)");
-            stmt.executeUpdate("CREATE TABLE blobTest8TriggerB (a BLOB(200k), b int, crc32 BIGINT)");
+            stmt.executeUpdate("CREATE TABLE blobTest8TriggerA (a BLOB(400k), b int, crc32 BIGINT)");
+            stmt.executeUpdate("CREATE TABLE blobTest8TriggerB (a BLOB(400k), b int, crc32 BIGINT)");
             stmt.executeUpdate(
                     "create trigger T8A after update on testBlob " +
                     "referencing new as n old as o " + 
                     "for each row mode db2sql "+ 
                     "insert into blobTest8TriggerA(a, b, crc32) values (n.a, n.b, n.crc32)");
+            stmt.executeUpdate(
+                    "create trigger T8B after INSERT on blobTest8TriggerA " +
+                    "referencing new_table as n " + 
+                    "for each statement mode db2sql "+ 
+                    "insert into blobTest8TriggerB(a, b, crc32) select n.a, n.b, n.crc32 from n");            
             
             conn.commit();
             ResultSet rs = stmt.executeQuery(
@@ -3182,12 +3187,29 @@ public class blobclob4BLOB {
             rs = stmt.executeQuery(
                 "select a,b,crc32 from blobTest8TriggerA");
             testBlobContents(rs);
+            rs.close();
+            conn.commit();
+            
+            rs = stmt.executeQuery(
+                "select a,b,crc32 from blobTest8TriggerB");
+            testBlobContents(rs);
+            rs.close();
+            conn.commit();
+            stmt.executeUpdate("DROP TRIGGER T8A");
+            stmt.executeUpdate("DROP TABLE blobTest8TriggerB");
+            stmt.executeUpdate("DROP TABLE blobTest8TriggerA");
+            
             stmt.close();
             conn.commit();
             System.out.println("blobTest8Trigger finished");
         }
         catch (SQLException e) {
             TestUtil.dumpSQLExceptions(e);
+            do {
+            e.printStackTrace(System.out);
+            e = e.getNextException();
+            } while (e != null);
+            
         }
         catch (Throwable e) {
             System.out.println("FAIL -- unexpected exception:" + e.toString());

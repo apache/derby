@@ -726,6 +726,7 @@ blobTest7 finished
 START: blobTest8Trigger
 Row Count 0 Null Row 0
 Row Count 9 Null Row 1
+Row Count 9 Null Row 1
 blobTest8Trigger finished
 START: blobTest91
 done row 0, length was 0
