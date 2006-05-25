@@ -272,7 +272,7 @@ public class TestConfiguration {
     private final static String KEY_HOSTNAME = "hostName";
     private final static String KEY_PORT = "port";
     private final static String KEY_VERBOSE = "derby.tests.debug";    
-    private final static String KEY_SINGLE_LEG_XA = "junit.xa.single";
+    private final static String KEY_SINGLE_LEG_XA = "derbyTesting.xa.single";
 
     /**
      * Possible values of system properties.

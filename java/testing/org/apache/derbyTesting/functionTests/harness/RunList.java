@@ -119,7 +119,7 @@ public class RunList
 	static BufferedReader runlistFile;
 	static String hostName;
 	static String testEncoding;	// Encoding used for child jvm and to read the test output 
-    static String junitxasingle;// Run junit test cases with under 
+    static String derbyTestingXaSingle;// Run junit test cases with under 
                                 // single branck xa transaction
 	
     static String [] clientExclusionKeywords = new String [] {
@@ -443,8 +443,8 @@ public class RunList
         else if (otherSpecialProps.length()>0)
             jvmProps.addElement("testSpecialProps=" + otherSpecialProps);
             
-        if (junitxasingle != null)
-            jvmProps.addElement ("junit.xa.single=" + junitxasingle);
+        if (derbyTestingXaSingle != null)
+            jvmProps.addElement ("derbyTesting.xa.single=" + derbyTestingXaSingle);
         
         // Ensure any properties that define the default connection
         // for the tests to use a DataSource are passed from the
@@ -762,7 +762,7 @@ public class RunList
 		jdk12exttest = suiteProperties.getProperty("jdk12exttest");
 		runwithibmjvm = suiteProperties.getProperty("runwithibmjvm");
 		runwithj9 = suiteProperties.getProperty("runwithj9");
-                junitxasingle = suiteProperties.getProperty("junit.xa.single");
+                derbyTestingXaSingle = suiteProperties.getProperty("derbyTesting.xa.single");
         String testJVM = jvmName;
         if (jvmName.startsWith("j9"))
         	testJVM = (jvmName.equals("j9_foundation") ? "foundation" : "j9");
