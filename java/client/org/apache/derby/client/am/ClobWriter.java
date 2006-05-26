@@ -43,7 +43,7 @@ public class ClobWriter extends java.io.Writer {
 
     public void write(int c) {
         StringBuffer sb = new StringBuffer(clob_.string_.substring(0, (int) offset_ - 1));
-        sb.append(c);
+        sb.append((char)c);
         clob_.string_ = sb.toString();
         clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
         clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
