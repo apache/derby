@@ -480,6 +480,9 @@ public class RunSuite
 		String cmlTestEncoding = sp.getProperty("derbyTesting.encoding");
 		if (cmlTestEncoding != null)
 		    suiteProperties.put("derbyTesting.encoding", cmlTestEncoding);
+                String upgradejarpath = sp.getProperty("derbyTesting.jar.path");
+                if (upgradejarpath != null)
+                    suiteProperties.put("derbyTesting.jar.path", upgradejarpath);
 		String testout = sp.getProperty("testoutname");
 		if (testout != null)
 		    suiteProperties.put("testoutname", testout); // toursDemo

@@ -126,6 +126,7 @@ public class RunTest
 	static boolean startServer=true; // should test harness start the server
 	static String hostName; // needs to be settable for ipv testing, localhost otherwise.)
 	static String testEncoding; // Encoding used for child jvm and to read the test output
+	static String upgradejarpath; // Encoding used for child jvm and to read the test output
 	static boolean replacePolicyFile=false; // property used to see if we need to replace the default policy file or append to it.
 
 	// Other test variables for directories, files, output
@@ -1003,6 +1004,7 @@ public class RunTest
         }
 		
         testEncoding = sp.getProperty("derbyTesting.encoding");
+        upgradejarpath = sp.getProperty("derbyTesting.jar.path");
         if ((testEncoding != null) && (!jvmName.equals("jdk15")))
         {
             skiptest = true;
@@ -2239,6 +2241,9 @@ clp.list(System.out);
             jvmflags = (jvmflags==null?"":jvmflags+" ") 
                          + "-Dfile.encoding=" + testEncoding; 
         }
+        
+        if (upgradejarpath != null)
+            jvmProps.addElement("derbyTesting.jar.path=" + upgradejarpath);
             
         if ( (jvmflags != null) && (jvmflags.length()>0) )
         {

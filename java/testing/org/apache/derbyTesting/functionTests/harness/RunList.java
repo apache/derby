@@ -119,8 +119,9 @@ public class RunList
 	static BufferedReader runlistFile;
 	static String hostName;
 	static String testEncoding;	// Encoding used for child jvm and to read the test output 
-    static String derbyTestingXaSingle;// Run junit test cases with under 
-                                // single branck xa transaction
+	static String upgradejarpath;	// Encoding used for child jvm and to read the test output 
+        static String derbyTestingXaSingle;// Run junit test cases with under 
+                                           // single branck xa transaction
 	
     static String [] clientExclusionKeywords = new String [] {
         "at-or-before:", "at-or-after:", "when-at-or-before:jdk",
@@ -419,7 +420,8 @@ public class RunList
             jvmProps.addElement("serverJvmName=" + serverJvmName);
         if (testEncoding != null)
             jvmProps.addElement("derbyTesting.encoding=" + testEncoding);
-
+        if (upgradejarpath != null)
+            jvmProps.addElement("derbyTesting.jar.path=" + upgradejarpath);
         if ( (hostName != null) && (hostName.length()>0) )
         	jvmProps.addElement("hostName=" + hostName);
         if ( useprocess == false )
@@ -651,6 +653,7 @@ public class RunList
             // Reset framework to the parent suite's framework, if any
             // because framework may have been set by previous suite
             testEncoding = parentProps.getProperty("derbyTesting.encoding");
+            upgradejarpath = parentProps.getProperty("derbyTesting.jar.path");
             framework = parentProps.getProperty("framework");
             serverJvm = parentProps.getProperty("serverJvm");
             serverJvmName = parentProps.getProperty("serverJvmName");
@@ -781,6 +784,7 @@ public class RunList
 		serverJvmName = suiteProperties.getProperty("serverJvmName");
 		hostName = suiteProperties.getProperty("hostName");
 		testEncoding = suiteProperties.getProperty("derbyTesting.encoding");
+		upgradejarpath = suiteProperties.getProperty("derbyTesting.jar.path");
 		canondir = suiteProperties.getProperty("canondir");
 		mtestdir = suiteProperties.getProperty("mtestdir");
 		String usepr = suiteProperties.getProperty("useprocess");
@@ -871,6 +875,11 @@ public class RunList
 		    p.put("derbyTesting.encoding", testEncoding);
 		else
             testEncoding = p.getProperty("derbyTesting.encoding");
+
+        if(parentProperties.getProperty("derbyTesting.jar.path") != null)
+		    p.put("derbyTesting.jar.path", upgradejarpath);
+		else
+            upgradejarpath = p.getProperty("derbyTesting.jar.path");
 
         if ( hostName != null )
             p.put("hostName", hostName);
