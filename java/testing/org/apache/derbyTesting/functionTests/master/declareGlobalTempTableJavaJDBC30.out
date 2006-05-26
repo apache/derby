@@ -70,11 +70,11 @@ TEST3A : Savepoint and Rollback behavior
 	 --- ---
 	{11,1}
   Create savepoint 2, drop temp table t1, rollback savepoint 2
-Expected message: Table 'SESSION.T1' does not exist.
+Expected message: Table/View 'SESSION.T1' does not exist.
   select should pass, rollback savepoint 1, select should fail
 	 C11,C12
 	 --- ---
-Expected message: Table 'SESSION.T1' does not exist.
+Expected message: Table/View 'SESSION.T1' does not exist.
 TEST3A PASSED
 TEST3B : Savepoint and Rollback behavior
  In the transaction:
@@ -87,8 +87,8 @@ TEST3B : Savepoint and Rollback behavior
 	 --- ---
   Drop temp table t2(explicit drop), rollback transaction(implicit drop of t1)
   Select from temp table t1 and t2 will fail
-Expected message: Table 'SESSION.T1' does not exist.
-Expected message: Table 'SESSION.T2' does not exist.
+Expected message: Table/View 'SESSION.T1' does not exist.
+Expected message: Table/View 'SESSION.T2' does not exist.
 TEST3B PASSED
 TEST3C : Savepoint and Rollback behavior
  In the transaction:
@@ -106,8 +106,8 @@ TEST3C : Savepoint and Rollback behavior
 	 C21,C22
 	 --- ---
   Rollback transaction and select from temp tables t1 and t2 should fail
-Expected message: Table 'SESSION.T1' does not exist.
-Expected message: Table 'SESSION.T2' does not exist.
+Expected message: Table/View 'SESSION.T1' does not exist.
+Expected message: Table/View 'SESSION.T2' does not exist.
 TEST3C PASSED
 TEST3D : Savepoint and Rollback behavior
  In the transaction:
@@ -125,7 +125,7 @@ TEST3E : Savepoint and Rollback behavior
   Create savepoint1 and declare temp table t1
   Create savepoint2 and drop temp table t1
   Rollback savepoint 1 and select from temp table t1 should fail
-Expected message: Table 'SESSION.T1' does not exist.
+Expected message: Table/View 'SESSION.T1' does not exist.
 TEST3E PASSED
 TEST3F : Savepoint and Rollback behavior
  In the transaction:
@@ -133,7 +133,7 @@ TEST3F : Savepoint and Rollback behavior
 	 C11,C12
 	 --- ---
   rollback, select on t1 should fail
-Expected message: Table 'SESSION.T1' does not exist.
+Expected message: Table/View 'SESSION.T1' does not exist.
 TEST3F PASSED
 TEST3G : Savepoint and Rollback behavior
  In the transaction:
@@ -152,14 +152,14 @@ TEST3H : Savepoint and commit behavior
 	 --- ---
  In the transaction:
   drop temp table t1 and commit, select on t1 should fail
-Expected message: Table 'SESSION.T1' does not exist.
+Expected message: Table/View 'SESSION.T1' does not exist.
 TEST3H PASSED
 TEST3I : Savepoint and Rollback behavior
  In the transaction:
   declare temp table t1 and rollback
 	 C11,C12
 	 --- ---
-Expected message: Table 'SESSION.T1' does not exist.
+Expected message: Table/View 'SESSION.T1' does not exist.
 TEST3I PASSED
 TEST3J : Savepoint and Rollback behavior
  In the transaction:

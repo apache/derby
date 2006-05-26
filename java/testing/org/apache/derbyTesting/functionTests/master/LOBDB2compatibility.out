@@ -81,7 +81,7 @@ CLOB
 2                                                                                                                               
 2                                                                                                                               
 ij> select nclob from n;
-ERROR 42X05: Table 'N' does not exist.
+ERROR 42X05: Table/View 'N' does not exist.
 ij> -- comparsion using tables
 select * from b as b1, b as b2 where b1.blob=b2.blob;
 ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
@@ -100,7 +100,7 @@ ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not suppo
 ij> select c.clob from c where c.clob = '2';
 ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
 ij> select n.nclob from n where n.nclob = '3';
-ERROR 42X05: Table 'N' does not exist.
+ERROR 42X05: Table/View 'N' does not exist.
 ij> -- ORDER tests on LOB types (not allowed)
 select c11 from t1 where cast(x'1111' as blob(5))=cast(x'1111' as blob(5));
 ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.

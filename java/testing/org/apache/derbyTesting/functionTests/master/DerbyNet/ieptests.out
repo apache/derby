@@ -780,7 +780,7 @@ call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('GROUP', 'Order' , 'extinout/order.dat', nul
 ERROR 38000: The exception 'SQL Exception: Schema 'GROUP' does not exist' was thrown while evaluating an expression. SQLSTATE: 42Y07: Schema 'GROUP' does not exist
 ij> --following export should fail because table name is not matching the way it is defined in the quotes.
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('Group', 'ORDER' , 'extinout/order.dat', null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Table 'Group.ORDER' does not exist.' was thrown while evaluating an expression. SQLSTATE: 42X05: Table 'Group.ORDER' does not exist.
+ERROR 38000: The exception 'SQL Exception: Table 'Group.ORDER' does not exist.' was thrown while evaluating an expression. SQLSTATE: 42X05: Table/View 'Group.ORDER' does not exist.
 ij> --following export should fail because of unquoted table name that is a reserved word.
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from "Group".Order' , 'extinout/order.dat' ,    null , null , null ) ;
 ERROR 38000: The exception 'SQL Exception: Syntax error: Encountered "Order" at line 1, column 23.' was thrown while evaluating an expression. SQLSTATE: 42X01: Syntax error: Encountered "Order" at line 1, column 23.
@@ -863,7 +863,7 @@ call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('inventory', 'ORDERTABLE' , 'extinout/order.
 ERROR 38000: The exception 'SQL Exception: Schema 'inventory' does not exist' was thrown while evaluating an expression. SQLSTATE: 42Y07: Schema 'inventory' does not exist
 ij> --following export should fail because table name is not in upper case.
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('INVENTORY', 'ordertable' , 'extinout/order.dat', null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Table 'INVENTORY.ordertable' does not exist.' was thrown while evaluating an expression. SQLSTATE: 42X05: Table 'INVENTORY.ordertable' does not exist.
+ERROR 38000: The exception 'SQL Exception: Table 'INVENTORY.ordertable' does not exist.' was thrown while evaluating an expression. SQLSTATE: 42X05: Table/View 'INVENTORY.ordertable' does not exist.
 ij> --following export should pass.
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('INVENTORY', 'ORDERTABLE' , 'extinout/order.dat', null, null, null) ;
 Statement executed.

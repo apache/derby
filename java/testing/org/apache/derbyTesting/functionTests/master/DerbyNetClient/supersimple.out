@@ -134,7 +134,7 @@ ij(CONNECTION1)> select count(*) from a;
 ij(CONNECTION1)> disconnect;
 ij> set connection connection0;
 ij> select count(*) from a;
-ERROR 42X05: Table 'A' does not exist.
+ERROR 42X05: Table/View 'A' does not exist.
 ij> -- Bug 4758 - Store error does not return properly to client
 autocommit off;
 ij> create table t (i int);

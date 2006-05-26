@@ -2388,189 +2388,189 @@ ij> -- =========================================================================
 create table mynChar( a nchar(10), b nchar(20), c int );
 ERROR 0A000: Feature not implemented: NATIONAL CHAR.
 ij> insert into mynChar values( '1234567890', 'abcde1234567890fghij' );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar values( 'abcdefghij', 'abcdefghij1234567890' );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar values( 'abcdefghij', '1234567890abcdefghij' );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar values( 'abcdefghij', '1234567890!@#$%^&*()' );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar values( '1234567890', 'abcde1234567890fghij', 2 );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar values( 'abcdefghij', 'abcdefghij1234567890', 1  );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar values( 'abcdefghij', '1234567890abcdefghij', 15 );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar (c) values( 0 );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar (c) values( 1 );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar (c) values( 2 );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar (a) values( 'hello' );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar (b) values( 'hello' );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> insert into mynChar values( 'abcdefghij', '1234567890!@#$%^&*()', 21 );
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> select a, b, c from mynChar;
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> select locate(a, b) from mynChar;
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> select locate(a, b, c) from mynChar;
-ERROR 42X05: Table 'MYNCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNCHAR' does not exist.
 ij> drop table mynChar;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'MYNCHAR' because it does not exist.
 ij> create table myLongnVarChar( a long nvarchar, b long nvarchar, c int );
 ERROR 0A000: Feature not implemented: LONG NVARCHAR.
 ij> insert into myLongnVarChar values( '1234567890', 'abcde1234567890fghij' );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcdefghij', 'abcdefghij1234567890' );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcdefghij', '1234567890abcdefghij' );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcdefghij', '1234567890!@#$%^&*()' );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcde', 'abcde' );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcde', 'abcd' );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( '', 'abcde' );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcde', null );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( null, 'abcde' );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( '1234567890', 'abcde1234567890fghij', 2 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcdefghij', 'abcdefghij1234567890', 1 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcdefghij', '1234567890abcdefghij', 15 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcde', 'abcde', 1 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcde', 'abcd', 1 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( '', 'abcde', 2 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcde', null, 1  );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( null, 'abcde', 1 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar (c) values( 0 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar (c) values( 1 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar (c) values( 2 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar (a) values( 'hello' );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar (b) values( 'hello' );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> insert into myLongnVarChar values( 'abcdefghij', '1234567890!@#$%^&*()', 21 );
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> select a, b, c from myLongnVarChar;
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> select locate(a, b) from myLongnVarChar;
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> select locate(a, b, c) from myLongnVarChar;
-ERROR 42X05: Table 'MYLONGNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYLONGNVARCHAR' does not exist.
 ij> drop table myLongnVarChar;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'MYLONGNVARCHAR' because it does not exist.
 ij> create table mynVarChar( a nvarchar(10), b nvarchar(20), c int );
 ERROR 0A000: Feature not implemented: NATIONAL CHAR VARYING.
 ij> insert into mynVarChar values( '1234567890', 'abcde1234567890fghij' );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcdefghij', 'abcdefghij1234567890' );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcdefghij', '1234567890abcdefghij' );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcdefghij', '1234567890!@#$%^&*()' );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcde', 'abcde' );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcde', 'abcd' );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( '', 'abcde' );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcde', null );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( null, 'abcde' );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( '1234567890', 'abcde1234567890fghij', 2 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcdefghij', 'abcdefghij1234567890', 1 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcdefghij', '1234567890abcdefghij', 15 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcde', 'abcde', 1 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcde', 'abcd', 1 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( '', 'abcde', 2 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcde', null, 1  );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( null, 'abcde', 1 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar (c) values( 0 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar (c) values( 1 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar (c) values( 2 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar (a) values( 'hello' );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar (b) values( 'hello' );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into mynVarChar values( 'abcdefghij', '1234567890!@#$%^&*()', 21 );
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> select a, b, c from mynVarChar;
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> select locate(a, b) from mynVarChar;
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> select locate(a, b, c) from mynVarChar;
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> create table myMixed( a char(10), b long nvarchar, c int );
 ERROR 0A000: Feature not implemented: LONG NVARCHAR.
 ij> insert into myMixed values( '1234567890', 'abcde1234567890fghij' );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed values( 'abcdefghij', 'abcdefghij1234567890' );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed values( 'abcdefghij', '1234567890abcdefghij' );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed values( 'abcdefghij', '1234567890!@#$%^&*()' );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed values( '1234567890', 'abcde1234567890fghij', 2 );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed values( 'abcdefghij', 'abcdefghij1234567890', 1 );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed values( 'abcdefghij', '1234567890abcdefghij', 15 );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed (c) values( 0 );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed (c) values( 1 );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed (c) values( 2 );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed (a) values( 'hello' );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed (b) values( 'hello' );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> insert into myMixed values( 'abcdefghij', '1234567890!@#$%^&*()', 21 );
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> select a, b, c from myMixed;
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> select locate(a, b) from myMixed;
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> select locate(a, b, c) from myMixed;
-ERROR 42X05: Table 'MYMIXED' does not exist.
+ERROR 42X05: Table/View 'MYMIXED' does not exist.
 ij> drop table myMixed;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'MYMIXED' because it does not exist.
 ij> create table foo( a int );
 0 rows inserted/updated/deleted
 ij> insert into foo select locate(a, b) from mynVarChar;
-ERROR 42X05: Table 'MYNVARCHAR' does not exist.
+ERROR 42X05: Table/View 'MYNVARCHAR' does not exist.
 ij> insert into foo values( {fn locate('hello', 'hello')} );
 1 row inserted/updated/deleted
 ij> select * from foo;

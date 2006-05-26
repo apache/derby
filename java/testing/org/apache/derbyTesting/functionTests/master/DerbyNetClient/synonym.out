@@ -225,7 +225,7 @@ create synonym junkSchema.syn1 for table2;
 0 rows inserted/updated/deleted
 WARNING 01522: The newly defined synonym 'SYN1' resolved to the object 'JUNKSCHEMA.TABLE2' which is currently undefined. : 
 ij> select * from junkSchema.syn1;
-ERROR 42X05: Table 'JUNKSCHEMA.TABLE2' does not exist.
+ERROR 42X05: Table/View 'JUNKSCHEMA.TABLE2' does not exist.
 ij> set schema junkSchema;
 0 rows inserted/updated/deleted
 ij> create table table2(c char(10));
@@ -346,7 +346,7 @@ ij> drop synonym mySynonym;
 0 rows inserted/updated/deleted
 ij> -- Previously compiled cached statement should get invalidated
 select * from mySynonym;
-ERROR 42X05: Table 'MYSYNONYM' does not exist.
+ERROR 42X05: Table/View 'MYSYNONYM' does not exist.
 ij> create synonym mySyn for table1;
 0 rows inserted/updated/deleted
 ij> create view v1 as select * from mySyn;
@@ -373,7 +373,7 @@ ij> create synonym multiSchema for testSchema.testtab;
 0 rows inserted/updated/deleted
 WARNING 01522: The newly defined synonym 'MULTISCHEMA' resolved to the object 'TESTSCHEMA.TESTTAB' which is currently undefined. : 
 ij> select * from multiSchema;
-ERROR 42X05: Table 'TESTSCHEMA.TESTTAB' does not exist.
+ERROR 42X05: Table/View 'TESTSCHEMA.TESTTAB' does not exist.
 ij> create table testSchema.testtab(i int, c char(10));
 0 rows inserted/updated/deleted
 ij> insert into testSchema.testtab values (1, 'synonym');

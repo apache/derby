@@ -19,7 +19,7 @@ ij(CONNECTION1)> -- Try some URL attributes
 disconnect all;
 ij> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/junk;create=true' USER 'dbadmin' PASSWORD 'dbadbmin';
 ij> select * from APP.notthere;
-ERROR 42X05: Table 'APP.NOTTHERE' does not exist.
+ERROR 42X05: Table/View 'APP.NOTTHERE' does not exist.
 ij> -- examples from the docs
 connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/wombat;create=true;user=judy;password=judy';
 ij(CONNECTION1)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/./wombat;user=judy;password=judy';
@@ -52,7 +52,7 @@ ERROR 42X05: DERBY SQL error: SQLCODE: -1, SQLSTATE: 42X05, SQLERRMC: APP.NOTTHE
 ij(CONNECTION13)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/my-db-name;create=true;user=usr;password=pwd;retrieveMessageText=true';
 ij(CONNECTION14)> -- Should see message text
 select * from APP.notthere;
-ERROR 42X05: Table 'APP.NOTTHERE' does not exist.
+ERROR 42X05: Table/View 'APP.NOTTHERE' does not exist.
 ij(CONNECTION14)> -- just user security mechanism
 connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/my-db-name;create=true;user=usr;retrieveMessageText=true';
 ij(CONNECTION15)> connect 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/wombat' USER 'APP';

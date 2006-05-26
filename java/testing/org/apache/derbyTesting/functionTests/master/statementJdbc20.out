@@ -21,7 +21,7 @@ SQLSTATE(XJ061): SQL Exception: The 'setFetchDirection()' method is only allowed
 PASS -- expected exception
 SQLSTATE(X0Y78): SQL Exception: Statement.executeQuery() cannot be called with a statement that returns a row count.
 PASS -- expected exception
-SQLSTATE(42X05): SQL Exception: Table 'TRASH' does not exist.
+SQLSTATE(42X05): SQL Exception: Table/View 'TRASH' does not exist.
 PASS -- expected exception
 SQLSTATE(X0Y79): SQL Exception: Statement.executeUpdate() cannot be called with a statement that returns a ResultSet.
 Test statementJdbc20 finished

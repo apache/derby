@@ -172,11 +172,11 @@ ij> insert into c values('12345');
 ij> insert into c values('123456');
 ERROR 22001: A truncation error was encountered trying to shrink CLOB '123456' to length 5.
 ij> insert into n values('1234');
-ERROR 42X05: Table 'N' does not exist.
+ERROR 42X05: Table/View 'N' does not exist.
 ij> insert into n values('12345');
-ERROR 42X05: Table 'N' does not exist.
+ERROR 42X05: Table/View 'N' does not exist.
 ij> insert into n values('123456');
-ERROR 42X05: Table 'N' does not exist.
+ERROR 42X05: Table/View 'N' does not exist.
 ij> --   ok
 insert into c values(cast('1234' as clob(5)));
 1 row inserted/updated/deleted
@@ -207,7 +207,7 @@ C
 12345
 12345
 ij> select * from n;
-ERROR 42X05: Table 'N' does not exist.
+ERROR 42X05: Table/View 'N' does not exist.
 ij> -- concatenate
 values cast('12' as clob(2)) || cast('34' as clob(2));
 1   
@@ -235,7 +235,7 @@ C
 12345
 12345
 ij> select * from n where n like '12%';
-ERROR 42X05: Table 'N' does not exist.
+ERROR 42X05: Table/View 'N' does not exist.
 ij> select * from b where b like cast('0102%' as blob(10));
 ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
 ij> select * from c where c like cast('12%' as clob(10));
@@ -421,40 +421,40 @@ ERROR 0A000: Feature not implemented: NCLOB.
 ij> INSERT INTO testoperatornclob VALUES (CAST(cast('50' as varchar(80)) AS NCLOB(1K)));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> select * from testoperatornclob;
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> -- these select statements should raise an error but are successful in cloudscape
 select * from testoperatornclob where colone > 10;
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone > 5;
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone < 70;
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone = 50;
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone != 10;
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone <= 70;
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone >= 10;
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone <> 10;
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone > '10';
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone > '5';
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone < '70';
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone = '50';
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone != '10';
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone <= '70';
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone >= '10';
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> select * from testoperatornclob where colone <> '10';
-ERROR 42X05: Table 'TESTOPERATORNCLOB' does not exist.
+ERROR 42X05: Table/View 'TESTOPERATORNCLOB' does not exist.
 ij> drop table testoperatornclob;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTOPERATORNCLOB' because it does not exist.
 ij> ----- test method invocations on LOB objects (should disallow)

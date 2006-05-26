@@ -72,7 +72,7 @@ ij> create view t1(i) as values 1;
 ERROR X0Y32: Table/View 'T1' already exists in Schema 'APP'.
 ij> -- drop non-existant view
 drop view notexists;
-ERROR X0X05: Table 'NOTEXISTS' does not exist.
+ERROR X0X05: Table/View 'NOTEXISTS' does not exist.
 ij> -- duplicate column name in view's column list
 create view shouldntwork (c1, c2, c1) as select i, s, f from t1;
 ERROR 42Y13: Column name 'C1' appears more than once in the CREATE VIEW statement.

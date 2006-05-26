@@ -266,7 +266,7 @@ ij> -- vw1 should be dropped
 drop view vw1;
 0 rows inserted/updated/deleted
 ij> select * from vw1;
-ERROR 42X05: Table 'VW1' does not exist.
+ERROR 42X05: Table/View 'VW1' does not exist.
 ij> -- do the indexes still exist?
 -- the create index statements should fail
 create index i13 on tab1 (c3, c1, c4);

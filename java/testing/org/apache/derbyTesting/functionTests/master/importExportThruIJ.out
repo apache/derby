@@ -87,7 +87,7 @@ ERROR 42X04: Column 'COLUMN200' is either not in any table in the FROM list or a
 ij> rollback;
 ij> -- table should not be there
 select count(*) from T3;
-ERROR 42X05: Table 'T3' does not exist.
+ERROR 42X05: Table/View 'T3' does not exist.
 ij> create table T3 (	Lname	char(30),
 			Fname	char(30),
 			Account	int not null primary key,

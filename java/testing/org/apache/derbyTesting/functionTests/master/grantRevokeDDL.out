@@ -91,9 +91,9 @@ create synonym mySym for satheesh.tsat;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> -- Expected to fail
 grant select on mySym to bar;
-ERROR 42X05: Table 'MYSYM' does not exist.
+ERROR 42X05: Table/View 'MYSYM' does not exist.
 ij(SATCONNECTION)> grant insert on mySym to foo;
-ERROR 42X05: Table 'MYSYM' does not exist.
+ERROR 42X05: Table/View 'MYSYM' does not exist.
 ij(SATCONNECTION)> CREATE FUNCTION F_ABS(P1 INT)
 RETURNS INT NO SQL
 RETURNS NULL ON NULL INPUT

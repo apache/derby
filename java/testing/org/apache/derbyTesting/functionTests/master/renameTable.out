@@ -91,7 +91,7 @@ rename table t3r to t3;
 0 rows inserted/updated/deleted
 ij> -- but the execute statement will fail
 execute p3 using 'values (30)';
-ERROR 42X05: Table 'T3R' does not exist.
+ERROR 42X05: Table/View 'T3R' does not exist.
 ij> remove p3;
 ij> autocommit on;
 ij> -- creating a table with triggers defined on it
@@ -108,7 +108,7 @@ ij> -- bug 5683. Should fail
 rename table t7 to t7r;
 ERROR X0Y25: Operation 'RENAME' cannot be performed on object 'T7' because TRIGGER 'T7INSERT' is dependent on that object.
 ij> select * from t7r;
-ERROR 42X05: Table 'T7R' does not exist.
+ERROR 42X05: Table/View 'T7R' does not exist.
 ij> select * from t7;
 C71        
 -----------
@@ -116,13 +116,13 @@ C71
 ij> rename table t6 to t6r;
 0 rows inserted/updated/deleted
 ij> insert into t7 values(3);
-ERROR 42X05: Table 'T6' does not exist.
+ERROR 42X05: Table/View 'T6' does not exist.
 ij> select * from t6r;
 C61        
 -----------
 1          
 ij> select * from t7r;
-ERROR 42X05: Table 'T7R' does not exist.
+ERROR 42X05: Table/View 'T7R' does not exist.
 ij> -- Rename should fail if there is a check constraint
 create table tcheck (i int check(i>5));
 0 rows inserted/updated/deleted

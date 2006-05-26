@@ -18,7 +18,7 @@ ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
 ij> -- PASS:0840 If table is created?
    ROLLBACK WORK;
 ij> INSERT INTO NOT_THERE VALUES ('1234567890');
-ERROR 42X05: Table 'NOT_THERE' does not exist.
+ERROR 42X05: Table/View 'NOT_THERE' does not exist.
 ij> -- PASS:0840 If ERROR, syntax error/access violation, 0 rows selected?
    ROLLBACK WORK;
 ij> CREATE VIEW NOT_HERE AS
@@ -27,7 +27,7 @@ ij> CREATE VIEW NOT_HERE AS
 ij> -- PASS:0840 If view is created?
    ROLLBACK WORK;
 ij> SELECT COUNT (*) FROM NOT_HERE;
-ERROR 42X05: Table 'NOT_HERE' does not exist.
+ERROR 42X05: Table/View 'NOT_HERE' does not exist.
 ij> -- PASS:0840 If ERROR, syntax error/access violation, 0 rows selected?
    ROLLBACK WORK;
 ij> ALTER TABLE USIG

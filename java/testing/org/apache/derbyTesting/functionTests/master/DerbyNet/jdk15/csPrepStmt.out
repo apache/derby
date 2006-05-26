@@ -53,7 +53,7 @@ insertTab ( bigtab,0)
 SQLState: 42X01 message: Syntax error: Encountered "<EOF>" at line 1, column 32.
 Expected Table does not exist 
 insertTab ( wrongtab,1000)
-SQLState: 42X05 message: Table 'WRONGTAB' does not exist.
+SQLState: 42X05 message: Table/View 'WRONGTAB' does not exist.
 Minimum BigDecimal Value: 1E-15
 Prepared Statement String: update Numeric_Tab set NULL_VAL=?
 Select NULL_VAL from Numeric_Tab

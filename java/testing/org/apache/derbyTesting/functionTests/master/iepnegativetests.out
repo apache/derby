@@ -13,8 +13,8 @@ ERROR XIE0I: An IOException occurred while writing data to the file.
 ij> --export table not found
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Table 'IEP.NOTABLE' does not exist.' was thrown while evaluating an expression.
-ERROR 42X05: Table 'IEP.NOTABLE' does not exist.
+ERROR 38000: The exception 'SQL Exception: Table/View 'IEP.NOTABLE' does not exist.' was thrown while evaluating an expression.
+ERROR 42X05: Table/View 'IEP.NOTABLE' does not exist.
 ij> ---export schema is not valid
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
@@ -182,7 +182,7 @@ ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SESSION', 'TEMP2' , 'extinout/temp1.dat
                                  null, null, null, 0) ;
 ERROR XIE0M: Table 'SESSION.TEMP2' does not exist.  
 ij> select * from session.temp2 ;
-ERROR 42X05: Table 'SESSION.TEMP2' does not exist.
+ERROR 42X05: Table/View 'SESSION.TEMP2' does not exist.
 ij> commit ;
 ij> drop table v1;
 0 rows inserted/updated/deleted

@@ -204,7 +204,7 @@ TEST35A : Temporary table created in one connection should not be available in a
 	 1
 	 -
 	{1}
-Expected message: Table 'SESSION.T2' does not exist.
+Expected message: Table/View 'SESSION.T2' does not exist.
 TEST35A PASSED
 TEST35B : Temp table in one connection should not conflict with temp table with same name in another connection
 	 C21,C22
@@ -223,7 +223,7 @@ TEST37A : Prepared statement test - drop the temp table underneath
 	 C21,C22
 	 --- ---
 	{21,1}
-Expected message: Table 'SESSION.T2' does not exist.
+Expected message: Table/View 'SESSION.T2' does not exist.
 TEST37A PASSED
 TEST37B : Prepared statement test - drop and recreate the temp table with different definition underneath
 	 C21,C22
@@ -236,7 +236,7 @@ TEST38A : Rollback behavior - declare temp table, rollback, select should fail
 	 --- ---
 	{21,1}
 TEST38A : select should fail since temp table got dropped as part of rollback
-Expected message: Table 'SESSION.T2' does not exist.
+Expected message: Table/View 'SESSION.T2' does not exist.
 TEST38A PASSED
 TEST38B : Rollback behavior - declare temp table, commit, drop temp table, rollback, select should pass
 	 C21,C22
@@ -256,7 +256,7 @@ TEST38C : Rollback behavior
 	 --- --- ---
 	{1,1,1}
   Drop temp table t2 (with 3 columns)
-  Attempted to select from temp table t2 but it failed as expected with exception Table 'SESSION.T2' does not exist.
+  Attempted to select from temp table t2 but it failed as expected with exception Table/View 'SESSION.T2' does not exist.
   Declare temp table t2 again but this time with 2 columns
 	 C21,C22
 	 --- ---
@@ -353,7 +353,7 @@ TEST38D : Rollback behavior for tables touched with DML
 	{52,2}
 	{53,3}
   temp table t6 got dropped as part of rollback of this transaction since it was declared in this same transaction
-  Attempted to select from temp table t6 but it failed as expected with exception Table 'SESSION.T6' does not exist.
+  Attempted to select from temp table t6 but it failed as expected with exception Table/View 'SESSION.T6' does not exist.
 TEST38D PASSED
 TEST39A : Verify that there is no entry in system catalogs for temporary tables
  Declare a temp table T2 and check system catalogs. Shouldn't find anything. Then drop the temp table

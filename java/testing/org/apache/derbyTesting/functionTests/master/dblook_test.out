@@ -4733,7 +4733,7 @@ File dblook.log was empty.
 Creating database 'wombat_new' from ddl script 'wombat.sql'
 FAILED: to execute cmd from DDL script:
 create view v1 (dum, dee, dokie) as select a.d, a.c, b.p1 from t1 as a, bar.t3 as b
-Table 'BAR.T3' does not exist.
+Table/View 'BAR.T3' does not exist.
 Dumping system tables for 'wombat_new'
 ----------------=================---------------
 System Tables for: wombat_new

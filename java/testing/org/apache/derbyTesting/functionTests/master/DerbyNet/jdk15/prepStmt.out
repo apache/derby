@@ -53,7 +53,7 @@ insertTab ( bigtab,0)
 SQLState: 42X01 message: Syntax error: Encountered "<EOF>" at line 1, column 29.
 Expected Table does not exist 
 insertTab ( wrongtab,1000)
-SQLState: 42X05 message: Table 'WRONGTAB' does not exist.
+SQLState: 42X05 message: Table/View 'WRONGTAB' does not exist.
 CREATE TABLE doubletab (i int, doubleVal DOUBLE)
 testBigDecimalToDoubleConversion().
  Check that values are preserved when BigDecimal 

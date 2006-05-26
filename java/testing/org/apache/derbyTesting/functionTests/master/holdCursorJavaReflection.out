@@ -14,7 +14,7 @@ After commit, look at first column's value: 1
 do next() after commit. Should be at the end of resultset
 one more next() here will give no more rows
 Holdable cursor after commit for prepared statements test over
-Expected Exception:Table 'T1NOTTHERE' does not exist.
+Expected Exception:Table/View 'T1NOTTHERE' does not exist.
 Start hold cursor for callable statements test
 do next() before commit
 look at first column's value: 1

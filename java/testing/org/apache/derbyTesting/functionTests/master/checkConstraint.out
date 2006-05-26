@@ -251,17 +251,17 @@ ij> -- beetle 5805 - support built-in function INT
 create table intTab (c1 int check(INT(1) = c1));
 ERROR 42X01: Syntax error: Encountered "INT" at line 3, column 35.
 ij> insert into intTab values 1;
-ERROR 42X05: Table 'INTTAB' does not exist.
+ERROR 42X05: Table/View 'INTTAB' does not exist.
 ij> -- this insert should fail, does not satisfy check constraint
 insert into intTab values 2;
-ERROR 42X05: Table 'INTTAB' does not exist.
+ERROR 42X05: Table/View 'INTTAB' does not exist.
 ij> create table maxIntTab (c1 int check(INT(2147483647) > c1));
 ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 38.
 ij> insert into maxIntTab values 1;
-ERROR 42X05: Table 'MAXINTTAB' does not exist.
+ERROR 42X05: Table/View 'MAXINTTAB' does not exist.
 ij> -- this insert should fail, does not satisfy check constraint
 insert into maxIntTab values 2147483647;
-ERROR 42X05: Table 'MAXINTTAB' does not exist.
+ERROR 42X05: Table/View 'MAXINTTAB' does not exist.
 ij> rollback;
 ij> -- verify that inserts, updates and statements with forced constraints are
 -- indeed dependent on the constraints

@@ -8,7 +8,7 @@ ij> --
 create table myschem.t(c int);
 0 rows inserted/updated/deleted
 ij> insert into t values (1);
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> insert into blah.t values (2);
 ERROR 42Y07: Schema 'BLAH' does not exist
 ij> insert into blah.blah.t values (3);
@@ -26,7 +26,7 @@ ERROR 42X01: Syntax error: Encountered "." at line 2, column 27.
 ij> create table myschem.s(c int);
 0 rows inserted/updated/deleted
 ij> insert into s values (1);
-ERROR 42X05: Table 'S' does not exist.
+ERROR 42X05: Table/View 'S' does not exist.
 ij> insert into honk.s values (2);
 ERROR 42Y07: Schema 'HONK' does not exist
 ij> insert into honk.blat.s values (3);

@@ -10,21 +10,21 @@ ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1 (a int);
 0 rows inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1 (a int);
 0 rows inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> --
 -- test table with unique constraint - all should work
 --
@@ -34,21 +34,21 @@ ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1 (a int not null unique);
 0 rows inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1 (a int not null unique);
 0 rows inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> --
 -- test table with primary constraint - all should work
 --
@@ -58,21 +58,21 @@ ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1 ( a int not null primary key);
 0 rows inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1 ( a int not null primary key);
 0 rows inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> --
 -- test table with check constraint - all should work
 --
@@ -82,21 +82,21 @@ ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1 ( a int check(a > 0));
 0 rows inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1 ( a int check(a > 0));
 0 rows inserted/updated/deleted
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> --
 -- test table with index - all should work
 --
@@ -108,7 +108,7 @@ ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1 (a int);
 0 rows inserted/updated/deleted
 ij> create index t1index on t1(a);
@@ -117,7 +117,7 @@ ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1 (a int);
 0 rows inserted/updated/deleted
 ij> create index t1index on t1(a);
@@ -126,7 +126,7 @@ ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> --
 -- test table with foreign key references;
 --
@@ -148,7 +148,7 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> -- the following should work since no referential constraint is left
 insert into t2 values(1);
 1 row inserted/updated/deleted
@@ -201,15 +201,15 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> -- this shouldn't find the view
 select * from vt1a;
-ERROR 42X05: Table 'VT1A' does not exist.
+ERROR 42X05: Table/View 'VT1A' does not exist.
 ij> select * from vt1b;
-ERROR 42X05: Table 'VT1B' does not exist.
+ERROR 42X05: Table/View 'VT1B' does not exist.
 ij> select * from vt1t2;
-ERROR 42X05: Table 'VT1T2' does not exist.
+ERROR 42X05: Table/View 'VT1T2' does not exist.
 ij> select * from vvt1a;
-ERROR 42X05: Table 'VVT1A' does not exist.
+ERROR 42X05: Table/View 'VVT1A' does not exist.
 ij> select * from vvvt1a;
-ERROR 42X05: Table 'VVVT1A' does not exist.
+ERROR 42X05: Table/View 'VVVT1A' does not exist.
 ij> drop table t2;
 0 rows inserted/updated/deleted
 ij> --
@@ -222,7 +222,7 @@ ij> -- this should work, statement will be invalidated and will fail when recomp
 drop table t1;
 0 rows inserted/updated/deleted
 ij> execute t1stmt;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> remove t1stmt;
 ij> create table t1(a int);
 0 rows inserted/updated/deleted
@@ -231,7 +231,7 @@ ij> -- this should work, statement will be invalidated and will fail when recomp
 drop table t1;
 0 rows inserted/updated/deleted
 ij> execute t1stmt;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> remove t1stmt;
 ij> create table t1(a int);
 0 rows inserted/updated/deleted
@@ -240,7 +240,7 @@ ij> -- this should work, statement will be invalidated and will fail when recomp
 drop table t1;
 0 rows inserted/updated/deleted
 ij> execute t1stmt;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> remove t1stmt;
 ij> --
 -- test table with triggers
@@ -256,7 +256,7 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1(a int);
 0 rows inserted/updated/deleted
 ij> create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
@@ -266,7 +266,7 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1(a int);
 0 rows inserted/updated/deleted
 ij> create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
@@ -276,7 +276,7 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> -- t1 shouldn't be found
 select * from t1;
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> drop table t2;
 0 rows inserted/updated/deleted
 ij> --
@@ -293,7 +293,7 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> -- the following should get an error when trying to recompile the trigger action
 insert into t2 values(1);
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> drop table t2;
 0 rows inserted/updated/deleted
 ij> create table t1(a int);
@@ -307,7 +307,7 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> -- the following should get an error when trying to recompile the trigger action
 insert into t2 values(1);
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> drop table t2;
 0 rows inserted/updated/deleted
 ij> create table t1(a int);
@@ -321,7 +321,7 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> -- the following should get an error when trying to recompile the trigger action
 insert into t2 values(1);
-ERROR 42X05: Table 'T1' does not exist.
+ERROR 42X05: Table/View 'T1' does not exist.
 ij> drop table t2;
 0 rows inserted/updated/deleted
 ij> --

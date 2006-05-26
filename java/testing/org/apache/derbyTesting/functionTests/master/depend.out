@@ -51,19 +51,19 @@ ij> drop table t;
 0 rows inserted/updated/deleted
 ij> -- these should fail, can't find table
 execute ins;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute sel;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute sel2;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute upd;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute del;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute sel_s;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute ins_sel;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> create table t(i int);
 0 rows inserted/updated/deleted
 ij> -- these should recompile and work, table now found
@@ -104,17 +104,17 @@ I
 ij> rollback;
 ij> -- these should fail, the table will disappear at the rollback
 execute ins;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute sel;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute sel2;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute sel_s;
-ERROR 42X05: Table 'S' does not exist.
+ERROR 42X05: Table/View 'S' does not exist.
 ij> execute upd;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute del;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> -- recreate t again
 create table t(i int);
 0 rows inserted/updated/deleted
@@ -136,17 +136,17 @@ drop table t;
 0 rows inserted/updated/deleted
 ij> -- verify that invalidate worked this time
 execute ins;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute sel;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute sel2;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute upd;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute del;
-ERROR 42X05: Table 'T' does not exist.
+ERROR 42X05: Table/View 'T' does not exist.
 ij> execute ins_sel;
-ERROR 42X05: Table 'S' does not exist.
+ERROR 42X05: Table/View 'S' does not exist.
 ij> -- cleanup, roll everything back to the beginning
 rollback;
 ij> -- verify that cascading invalidations work

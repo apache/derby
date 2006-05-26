@@ -617,7 +617,7 @@ public class grantRevoke
          "'NOSUCHCOL' is not a column in table or VTI 'S1.T1'."},
 
         {"grant select on nosuch.t1 to " + users[0].name, "42Y07", "Schema 'NOSUCH' does not exist"},
-        {"grant select on s1.nosuch to " + users[0].name, "42X05", "Table 'S1.NOSUCH' does not exist."},
+        {"grant select on s1.nosuch to " + users[0].name, "42X05", "Table/View 'S1.NOSUCH' does not exist."},
         {"grant execute on function nosuch.f0 to " + users[0].name, "42Y07", "Schema 'NOSUCH' does not exist"},
         {"grant execute on function s1.nosuch to " + users[0].name, "42Y03",
          "'S1.NOSUCH' is not recognized as a function or procedure."},

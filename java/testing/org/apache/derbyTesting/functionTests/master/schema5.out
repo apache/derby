@@ -115,7 +115,7 @@ ij> --0 PASS: if there was an error for a duplicate unique constraint
    --   SELECT T0513.C2, BASE_VS1.C1 FROM T0513, BASE_VS1
    CREATE VIEW T0513 (C1, C2) AS
    SELECT T0513.C2, BASE_VS1.C1 FROM T0513, BASE_VS1;
-ERROR 42X05: Table 'T0513' does not exist.
+ERROR 42X05: Table/View 'T0513' does not exist.
 ij> --0 PASS: if an error is returned that the view is circular
 -- ************* End of Schema *************
 disconnect;

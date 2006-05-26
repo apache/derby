@@ -19,7 +19,7 @@ ij(CONNECTION1)> -- Try some URL attributes
 disconnect all;
 ij> connect 'jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/junk;create=true:retrieveMessagesFromServerOnGetMessage=true;' USER 'dbadmin' PASSWORD 'dbadbmin';
 ij> select * from APP.notthere;
-ERROR 42X05: Table 'APP.NOTTHERE' does not exist.
+ERROR 42X05: Table/View 'APP.NOTTHERE' does not exist.
 ij> -- examples from the docs
 connect 'jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/wombat;create=true:user=judy;password=judy;retrieveMessagesFromServerOnGetMessage=true;';
 ij(CONNECTION1)> connect 'jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/"./wombat":user=judy;password=judy;retrieveMessagesFromServerOnGetMessage=true;';

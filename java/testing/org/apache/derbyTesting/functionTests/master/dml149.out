@@ -83,7 +83,7 @@ ij> -- PASS:0846 If count = 0?
    INSERT INTO NO_DUCK
 --O  SELECT 22.22, CAST (C1 AS FLOAT), 0, C1 FROM HU.ECCO;
   SELECT 22.22, CAST (C1 AS FLOAT), 0, C1 FROM ECCO;
-ERROR 42X05: Table 'ECCO' does not exist.
+ERROR 42X05: Table/View 'ECCO' does not exist.
 ij> -- PASS:0846 If ERROR, invalid character value for cast, 0 rows inserted?
    INSERT INTO NO_DUCK
   SELECT 22.22, 2.222E1, CAST (C1 AS INT), 'QUACK!' FROM HU.ECCO;
