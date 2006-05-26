@@ -468,4 +468,7 @@ defval for col C4 type CHAR DEFAULT 'null' wasnull true
 defval for col C5 type CHAR DEFAULT 'NULL' wasnull false
 defval for col C6 type CHAR DEFAULT ''NULL'' wasnull false
 defval for col C7 type INTEGER DEFAULT '88' wasnull false
+getImportedKeys('',null,null,'','APP','Derby655t1' ):
+PKTABLE_CAT,PKTABLE_SCHEM,PKTABLE_NAME,PKCOLUMN_NAME,FKTABLE_CAT,FKTABLE_SCHEM,FKTABLE_NAME,FKCOLUMN_NAME,KEY_SEQ,UPDATE_RULE,DELETE_RULE,FK_NAME,PK_NAME,DEFERRABILITY
+,APP,DERBY655T2,C21_ID,,APP,DERBY655T1,C11_ID,1,3,0,F_12,xxxxGENERATED-IDxxxx,7
 Test metadata finished

@@ -353,9 +353,12 @@ class CreateIndexConstantAction extends IndexConstantAction
 					return;
 				}
 
+				//Duplicate indexes share the physical conglomerate underneath
 				conglomId = cd.getConglomerateNumber();
 				indexRowGenerator = cd.getIndexDescriptor();
-				conglomerateUUID = cd.getUUID();
+				//DERBY-655 and DERBY-1343  
+				//Duplicate indexes will have unqiue logical conglomerate UUIDs.  
+				conglomerateUUID = dd.getUUIDFactory().createUUID();
 				duplicate = true;
 				break;
 			}
