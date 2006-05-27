@@ -41,8 +41,8 @@ import java.io.IOException;
    For more details, see DRDA Volume 3 (Distributed Data Management(DDM)
    Architecture (DDS definition)
 */
-class DDMWriter
-{
+class DDMWriter {
+    
 
     // number of nesting levels for collections.  We need to mark the length
     // location of the collection so that we can update it as we add more stuff
@@ -73,14 +73,14 @@ class DDMWriter
     // DRDA connection thread for this writer
     private DRDAConnThread agent;
 
-    //	This Object tracks the location of the current
-    //	Dss header length bytes.	This is done so
-    //	the length bytes can be automatically
-    //	updated as information is added to this stream.
+    //  This Object tracks the location of the current
+    //  Dss header length bytes.        This is done so
+    //  the length bytes can be automatically
+    //  updated as information is added to this stream.
     private int dssLengthLocation;
 
     // Current correlation ID
-    private	int correlationID;
+    private     int correlationID;
 
     // Next correlation ID
     private int nextCorrelationID;
@@ -110,61 +110,56 @@ class DDMWriter
     private int lastDSSBeforeMark;
 
     // Constructors
-    DDMWriter (int minSize, CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
-    {
-	this.bytes = new byte[minSize];
-	this.ccsidManager = ccsidManager;
-	this.agent = agent;
-	this.prevHdrLocation = -1;
-	this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
-	this.previousChainByte = DssConstants.DSS_NOCHAIN;
-	this.isContinuationDss = false;
-	this.lastDSSBeforeMark = -1;
-	reset(dssTrace);
+    DDMWriter (int minSize, CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace) {
+        this.bytes = new byte[minSize];
+        this.ccsidManager = ccsidManager;
+        this.agent = agent;
+        this.prevHdrLocation = -1;
+        this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
+        this.previousChainByte = DssConstants.DSS_NOCHAIN;
+        this.isContinuationDss = false;
+        this.lastDSSBeforeMark = -1;
+        reset(dssTrace);
     }
 
-    DDMWriter (CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
-    {
-	this.bytes = new byte[DEFAULT_BUFFER_SIZE];
-	this.ccsidManager = ccsidManager;
-	this.agent = agent;
-	this.prevHdrLocation = -1;
-	this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
-	this.previousChainByte = DssConstants.DSS_NOCHAIN;
-	this.isContinuationDss = false;
-	this.lastDSSBeforeMark = -1;
-	reset(dssTrace);
+    DDMWriter (CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace) {
+        this.bytes = new byte[DEFAULT_BUFFER_SIZE];
+        this.ccsidManager = ccsidManager;
+        this.agent = agent;
+        this.prevHdrLocation = -1;
+        this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
+        this.previousChainByte = DssConstants.DSS_NOCHAIN;
+        this.isContinuationDss = false;
+        this.lastDSSBeforeMark = -1;
+        reset(dssTrace);
     }
 
     /**
      * reset values for sending next message
      *
      */
-    protected void reset(DssTrace dssTrace)
-    {
-	offset = 0;
-	top = 0;
-	dssLengthLocation = 0;
-	nextCorrelationID = 1;
-	correlationID = DssConstants.CORRELATION_ID_UNKNOWN;
-	isDRDAProtocol = true;
-	this.dssTrace = dssTrace;
+    protected void reset(DssTrace dssTrace) {
+        offset = 0;
+        top = 0;
+        dssLengthLocation = 0;
+        nextCorrelationID = 1;
+        correlationID = DssConstants.CORRELATION_ID_UNKNOWN;
+        isDRDAProtocol = true;
+        this.dssTrace = dssTrace;
     }
 
     /**
      * set protocol to CMD protocol
      */
-    protected void setCMDProtocol()
-    {
-	isDRDAProtocol = false;
+    protected void setCMDProtocol() {
+        isDRDAProtocol = false;
     }
 
     /**
      * Create DSS reply object
      */
-    protected void createDssReply()
-    {
-	beginDss(DssConstants.DSSFMT_RPYDSS, true);
+    protected void createDssReply() {
+        beginDss(DssConstants.DSSFMT_RPYDSS, true);
     }
 
     /**
@@ -175,17 +170,15 @@ class DDMWriter
      * DRDA processing (we should only create DSS replies
      * and DSS objects).
      */
-    protected void createDssRequest()
-    {
-	beginDss(DssConstants.DSSFMT_RQSDSS, true);
+    protected void createDssRequest() {
+        beginDss(DssConstants.DSSFMT_RQSDSS, true);
     }
 
     /**
      * Create DSS data object
      */
-    protected void createDssObject()
-    {
-	beginDss(DssConstants.DSSFMT_OBJDSS, true);
+    protected void createDssObject() {
+        beginDss(DssConstants.DSSFMT_OBJDSS, true);
     }
 
     /**
@@ -194,37 +187,36 @@ class DDMWriter
      * the high-order bit to "1", per DDM spec.
      * This means:
      *
-     *	1. One or more continuation DSSes will immediately
-     * 		follow the current (continued) DSS.
-     *	2. All continuation DSSes will have a 2-byte
-     * 		continuation header, followed by data; in
-     * 		other words, chaining state, correlation
-     *		id, dss format info, and code point will
-     * 		NOT be included.  All of that info is 
-     * 		present ONLY in the FIRST DSS in the
-     *		list of continued DSSes.
+     *  1. One or more continuation DSSes will immediately
+     *          follow the current (continued) DSS.
+     *  2. All continuation DSSes will have a 2-byte
+     *          continuation header, followed by data; in
+     *          other words, chaining state, correlation
+     *          id, dss format info, and code point will
+     *          NOT be included.  All of that info is 
+     *          present ONLY in the FIRST DSS in the
+     *          list of continued DSSes.
      *
-     *	NOTE: A DSS can be a "continuation" DSS _and_
-     * 	a "continued" DSS at the same time.  However,
-     * 	the FIRST DSS to be continued canNOT be
-     *	a continuation DSS.
+     *  NOTE: A DSS can be a "continuation" DSS _and_
+     *  a "continued" DSS at the same time.  However,
+     *  the FIRST DSS to be continued canNOT be
+     *  a continuation DSS.
      */
-    private void markDssAsContinued(boolean forLob)
-    {
+    private void markDssAsContinued(boolean forLob) {
 
-	if (!forLob) {
-	    // continuation bit defaults to '1' for lobs, so
-	    // we only have to switch it if we're not writing
-	    // lobs.
-	    bytes[dssLengthLocation] |= 0x80;
-	}
+        if (!forLob) {
+            // continuation bit defaults to '1' for lobs, so
+            // we only have to switch it if we're not writing
+            // lobs.
+            bytes[dssLengthLocation] |= 0x80;
+        }
 
-	// We need to set the chaining state, but ONLY
-	// IF this is the FIRST DSS in the continuation
-	// list (only the first one has chaining state
-	// in it's header; the others do not).
-	if (!isContinuationDss)
-	    endDss(!forLob);
+        // We need to set the chaining state, but ONLY
+        // IF this is the FIRST DSS in the continuation
+        // list (only the first one has chaining state
+        // in it's header; the others do not).
+        if (!isContinuationDss)
+            endDss(!forLob);
 
     }
 
@@ -240,16 +232,15 @@ class DDMWriter
      * (because for normal processing, chaining must be
      * determined automatically based on DSS requests).
      */
-    protected void endDss(byte chainByte)
-    {
+    protected void endDss(byte chainByte) {
 
-	// Do regular endDss processing.
-	endDss(true);
+        // Do regular endDss processing.
+        endDss(true);
 
-	// Now override default chain state.
-	bytes[dssLengthLocation + 3] &= 0x0F;	// Zero out default
-	bytes[dssLengthLocation + 3] |= chainByte;
-	previousChainByte = chainByte;
+        // Now override default chain state.
+        bytes[dssLengthLocation + 3] &= 0x0F;   // Zero out default
+        bytes[dssLengthLocation + 3] |= chainByte;
+        previousChainByte = chainByte;
 
     }
 
@@ -258,28 +249,27 @@ class DDMWriter
      * and setting the chain bit.
      */
     protected void endDss() {
-	endDss(true);
+        endDss(true);
     }
 
     /**
      * End DSS header by writing the length in the length location
      * and setting the chain bit.
      */
-    private void endDss (boolean finalizeLength)
-    {
+    private void endDss (boolean finalizeLength) {
 
-	if (finalizeLength)
-	    finalizeDssLength();
+        if (finalizeLength)
+            finalizeDssLength();
 
-	if (isContinuationDss) {
-	    // no chaining information for this DSS; so we're done.
-	    isContinuationDss = false;
-	    return;
-	}
+        if (isContinuationDss) {
+            // no chaining information for this DSS; so we're done.
+            isContinuationDss = false;
+            return;
+        }
 
-	previousCorrId = correlationID;
-	prevHdrLocation = dssLengthLocation;
-	previousChainByte = DssConstants.DSSCHAIN_SAME_ID;
+        previousCorrId = correlationID;
+        prevHdrLocation = dssLengthLocation;
+        previousChainByte = DssConstants.DSSCHAIN_SAME_ID;
 
     }
 
@@ -287,10 +277,9 @@ class DDMWriter
      * End final DDM and DSS header by writing the length in the length location
      *
      */
-    protected void endDdmAndDss ()
-    {
-	endDdm();	// updates last DDM object
-	endDss();
+    protected void endDdmAndDss () {
+        endDdm();       // updates last DDM object
+        endDss();
     }
     /**
      * Copy Data to End
@@ -316,13 +305,12 @@ class DDMWriter
      *
      * @param start
      */
-    protected byte [] copyDSSDataToEnd(int start)
-    {
-	start = start + dssLengthLocation;
-	int length = offset - start;
-	byte [] temp = new byte[length];
-	System.arraycopy(bytes,start,temp,0,length);
-	return temp;
+    protected byte [] copyDSSDataToEnd(int start) {
+        start = start + dssLengthLocation;
+        int length = offset - start;
+        byte [] temp = new byte[length];
+        System.arraycopy(bytes,start,temp,0,length);
+        return temp;
     }
 
     // Collection methods
@@ -332,97 +320,91 @@ class DDMWriter
      * can be updated later
      *
      */
-    protected void startDdm (int codePoint)
-    {
-	// save the location of the beginning of the collection so
-	// that we can come back and fill in the length bytes
-	markStack[top++] = offset;
-	ensureLength (4); // verify space for length bytes and code point
-	offset += 2; // move past the length bytes before writing the code point
-	bytes[offset] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) (codePoint & 0xff);
-	offset += 2;
+    protected void startDdm (int codePoint) {
+        // save the location of the beginning of the collection so
+        // that we can come back and fill in the length bytes
+        markStack[top++] = offset;
+        ensureLength (4); // verify space for length bytes and code point
+        offset += 2; // move past the length bytes before writing the code point
+        bytes[offset] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) (codePoint & 0xff);
+        offset += 2;
     }
 
     /**
      * Erase all writes for the current ddm and reset the
      * top
      */
-    protected void clearDdm ()
-    {
-	offset = markStack[top--];
+    protected void clearDdm () {
+        offset = markStack[top--];
     }
 
     /**
      * Clear the entire send buffer
      *
      */
-    protected void clearBuffer()
-    {
-	offset = 0;
-	top = 0;
-	dssLengthLocation = 0;
-	correlationID = DssConstants.CORRELATION_ID_UNKNOWN;
-	nextCorrelationID = 1;
-	isDRDAProtocol = true;
+    protected void clearBuffer() {
+        offset = 0;
+        top = 0;
+        dssLengthLocation = 0;
+        correlationID = DssConstants.CORRELATION_ID_UNKNOWN;
+        nextCorrelationID = 1;
+        isDRDAProtocol = true;
     }
 
     /**
      * End the current DDM
      *
      */
-    protected void endDdm ()
-    {
-	// remove the top length location offset from the mark stack
-	// calculate the length based on the marked location and end of data.
-	int lengthLocation = markStack[--top];
-	int length = offset - lengthLocation;
+    protected void endDdm () {
+        // remove the top length location offset from the mark stack
+        // calculate the length based on the marked location and end of data.
+        int lengthLocation = markStack[--top];
+        int length = offset - lengthLocation;
 
-	// determine if any extended length bytes are needed.	the value returned
-	// from calculateExtendedLengthByteCount is the number of extended length
-	// bytes required. 0 indicates no exteneded length.
-	int extendedLengthByteCount = calculateExtendedLengthByteCount (length);
-	if (extendedLengthByteCount != 0)
-	    {
-		// ensure there is enough room in the buffer for the extended length bytes.
-		ensureLength (extendedLengthByteCount);
+        // determine if any extended length bytes are needed.   the value returned
+        // from calculateExtendedLengthByteCount is the number of extended length
+        // bytes required. 0 indicates no exteneded length.
+        int extendedLengthByteCount = calculateExtendedLengthByteCount (length);
+        if (extendedLengthByteCount != 0) {
+            // ensure there is enough room in the buffer for the extended length bytes.
+            ensureLength (extendedLengthByteCount);
 
-		// calculate the length to be placed in the extended length bytes.
-		// this length does not include the 4 byte llcp.
-		int extendedLength = length - 4;
+            // calculate the length to be placed in the extended length bytes.
+            // this length does not include the 4 byte llcp.
+            int extendedLength = length - 4;
 
-		// shift the data to the right by the number of extended
-		// length bytes needed.
-		int extendedLengthLocation = lengthLocation + 4;
-		System.arraycopy (bytes,
-				  extendedLengthLocation,
-				  bytes,
-				  extendedLengthLocation + extendedLengthByteCount,
-				  extendedLength);
+            // shift the data to the right by the number of extended
+            // length bytes needed.
+            int extendedLengthLocation = lengthLocation + 4;
+            System.arraycopy (bytes,
+                              extendedLengthLocation,
+                              bytes,
+                              extendedLengthLocation + extendedLengthByteCount,
+                              extendedLength);
 
-		// write the extended length
-		int shiftSize = (extendedLengthByteCount -1) * 8;
-		for (int i = 0; i < extendedLengthByteCount; i++)
-		    {
-			bytes[extendedLengthLocation++] =
-			    (byte) ((extendedLength >>> shiftSize ) & 0xff);
-			shiftSize -= 8;
-		    }
+            // write the extended length
+            int shiftSize = (extendedLengthByteCount -1) * 8;
+            for (int i = 0; i < extendedLengthByteCount; i++) {
+                bytes[extendedLengthLocation++] =
+                    (byte) ((extendedLength >>> shiftSize ) & 0xff);
+                shiftSize -= 8;
+            }
 
-		// adjust the offset to account for the shift and insert
-		offset += extendedLengthByteCount;
+            // adjust the offset to account for the shift and insert
+            offset += extendedLengthByteCount;
 
-		// the two byte length field before the codepoint contains the length
-		// of itself, the length of the codepoint, and the number of bytes used
-		// to hold the extended length.	the 2 byte length field also has the first
-		// bit on to indicate extended length bytes were used.
-		length = extendedLengthByteCount + 4;
-		length |= DssConstants.CONTINUATION_BIT;
-	    }
+            // the two byte length field before the codepoint contains the length
+            // of itself, the length of the codepoint, and the number of bytes used
+            // to hold the extended length.     the 2 byte length field also has the first
+            // bit on to indicate extended length bytes were used.
+            length = extendedLengthByteCount + 4;
+            length |= DssConstants.CONTINUATION_BIT;
+        }
 
-	// write the 2 byte length field (2 bytes before codepoint).
-	bytes[lengthLocation] = (byte) ((length >>> 8) & 0xff);
-	bytes[lengthLocation+1] = (byte) (length & 0xff);
+        // write the 2 byte length field (2 bytes before codepoint).
+        bytes[lengthLocation] = (byte) ((length >>> 8) & 0xff);
+        bytes[lengthLocation+1] = (byte) (length & 0xff);
 
     }
 
@@ -435,8 +417,7 @@ class DDMWriter
      *
      * @return current DSS block length
      */
-    protected int getDSSLength()
-    {
+    protected int getDSSLength() {
         return offset - dssLengthLocation;
     }
  
@@ -447,8 +428,7 @@ class DDMWriter
      *
      * @param value DSS length
      */
-    protected void truncateDSS(int value)
-    {
+    protected void truncateDSS(int value) {
         offset = dssLengthLocation + value;
     }
 
@@ -458,61 +438,56 @@ class DDMWriter
     /**
      * Write byte
      *
-     * @param 	value	byte to be written
+     * @param   value   byte to be written
      */
-    protected void writeByte (int value)
-    {
-	if (SanityManager.DEBUG)
-	    {
-		if (value > 255)
-		    SanityManager.THROWASSERT(
-					      "writeByte value: " + value +
-					      " may not be > 255");
-	    }
+    protected void writeByte (int value) {
+        if (SanityManager.DEBUG) {
+            if (value > 255)
+                SanityManager.THROWASSERT(
+                                          "writeByte value: " + value +
+                                          " may not be > 255");
+        }
 
-	ensureLength (1);
-	bytes[offset++] = (byte) (value & 0xff);
+        ensureLength (1);
+        bytes[offset++] = (byte) (value & 0xff);
     }
 
 
     /**
      * Write network short
      *
-     * @param 	value	value to be written
+     * @param   value   value to be written
      */
-    protected void writeNetworkShort (int value)
-    {
-	ensureLength (2);
-	bytes[offset] = (byte) ((value >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) (value & 0xff);
-	offset += 2;
+    protected void writeNetworkShort (int value) {
+        ensureLength (2);
+        bytes[offset] = (byte) ((value >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) (value & 0xff);
+        offset += 2;
     }
 
     /**
      * Write network int
      *
-     * @param 	value	value to be written
+     * @param   value   value to be written
      */
-    protected void writeNetworkInt (int value)
-    {
-	ensureLength (4);
-	bytes[offset] = (byte) ((value >>> 24) & 0xff);
-	bytes[offset + 1] = (byte) ((value >>> 16) & 0xff);
-	bytes[offset + 2] = (byte) ((value >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (value & 0xff);
-	offset += 4;
+    protected void writeNetworkInt (int value) {
+        ensureLength (4);
+        bytes[offset] = (byte) ((value >>> 24) & 0xff);
+        bytes[offset + 1] = (byte) ((value >>> 16) & 0xff);
+        bytes[offset + 2] = (byte) ((value >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (value & 0xff);
+        offset += 4;
     }
 
 
     /**
      * Write byte array
      *
-     * @param 	buf	byte array to be written
-     * @param	length  - length to write
+     * @param   buf     byte array to be written
+     * @param   length  - length to write
      */
-    protected void writeBytes (byte[] buf, int length)
-    {
-	writeBytes(buf, 0,length);
+    protected void writeBytes (byte[] buf, int length) {
+        writeBytes(buf, 0,length);
     }
 
 
@@ -520,248 +495,232 @@ class DDMWriter
     /**
      * Write byte array
      *
-     * @param 	buf	byte array to be written
-     * @param	start  - starting position
-     * @param	length  - length to write
+     * @param   buf     byte array to be written
+     * @param   start  - starting position
+     * @param   length  - length to write
      */
-    protected void writeBytes (byte[] buf, int start, int length)
-    {
+    protected void writeBytes (byte[] buf, int start, int length) {
 
-	if (SanityManager.DEBUG)
-	    {
-		if (buf == null && length > 0)
-		    SanityManager.THROWASSERT("Buf is null");
-		if (length + start - 1 > buf.length)
-		    SanityManager.THROWASSERT("Not enough bytes in buffer");
+        if (SanityManager.DEBUG) {
+            if (buf == null && length > 0)
+                SanityManager.THROWASSERT("Buf is null");
+            if (length + start - 1 > buf.length)
+                SanityManager.THROWASSERT("Not enough bytes in buffer");
 
-	    }
-	ensureLength (length);
-	System.arraycopy(buf,start,bytes,offset,length);
-	offset += length;
+        }
+        ensureLength (length);
+        System.arraycopy(buf,start,bytes,offset,length);
+        offset += length;
     }
     /**
      * Write byte array
      *
-     * @param 	buf	byte array to be written
+     * @param   buf     byte array to be written
      **/
-    protected void writeBytes (byte[] buf)
-    {
-	writeBytes(buf,buf.length);
+    protected void writeBytes (byte[] buf) {
+        writeBytes(buf,buf.length);
     }
 
 
 
-    protected void writeLDBytes(byte[] buf)
-    {
-	writeLDBytes(buf, 0);
+    protected void writeLDBytes(byte[] buf) {
+        writeLDBytes(buf, 0);
     }
 
-    protected void writeLDBytes(byte[] buf, int index)
-    {
+    protected void writeLDBytes(byte[] buf, int index) {
 
-	int length = buf.length;
-	int writeLen =  buf.length;
+        int length = buf.length;
+        int writeLen =  buf.length;
 
-	writeShort(writeLen);
+        writeShort(writeLen);
 
-	writeBytes(buf,0,writeLen);
+        writeBytes(buf,0,writeLen);
     }
 
 
     /**
      * Write code point and 4 bytes
      *
-     * @param 	codePoint - code point to write
-     * @param	value  - value to write after code point
+     * @param   codePoint - code point to write
+     * @param   value  - value to write after code point
      */
-    void writeCodePoint4Bytes (int codePoint, int value)
-    {
-	ensureLength (4);
-	bytes[offset] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) (codePoint & 0xff);
-	bytes[offset + 2] = (byte) ((value >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (value & 0xff);
-	offset += 4;
+    void writeCodePoint4Bytes (int codePoint, int value) {
+        ensureLength (4);
+        bytes[offset] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) (codePoint & 0xff);
+        bytes[offset + 2] = (byte) ((value >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (value & 0xff);
+        offset += 4;
     }
 
     /**
      * Write scalar 1 byte object includes length, codepoint and value
      *
-     * @param 	codePoint - code point to write
-     * @param	value  - value to write after code point
+     * @param   codePoint - code point to write
+     * @param   value  - value to write after code point
      */
-    void writeScalar1Byte (int codePoint, int value)
-    {
-	ensureLength (5);
-	bytes[offset] = 0x00;
-	bytes[offset + 1] = 0x05;
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	bytes[offset + 4] = (byte) (value & 0xff);
-	offset += 5;
+    void writeScalar1Byte (int codePoint, int value) {
+        ensureLength (5);
+        bytes[offset] = 0x00;
+        bytes[offset + 1] = 0x05;
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        bytes[offset + 4] = (byte) (value & 0xff);
+        offset += 5;
     }
 
     /**
      * Write scalar 2 byte object includes length, codepoint and value
      *
-     * @param 	codePoint - code point to write
-     * @param	value  - value to write after code point
+     * @param   codePoint - code point to write
+     * @param   value  - value to write after code point
      */
-    protected void writeScalar2Bytes (int codePoint, int value)
-    {
-	ensureLength (6);
-	bytes[offset] = 0x00;
-	bytes[offset + 1] = 0x06;
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	bytes[offset + 4] = (byte) ((value >>> 8) & 0xff);
-	bytes[offset + 5] = (byte) (value & 0xff);
-	offset += 6;
+    protected void writeScalar2Bytes (int codePoint, int value) {
+        ensureLength (6);
+        bytes[offset] = 0x00;
+        bytes[offset + 1] = 0x06;
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        bytes[offset + 4] = (byte) ((value >>> 8) & 0xff);
+        bytes[offset + 5] = (byte) (value & 0xff);
+        offset += 6;
     }
 
-    protected void writeScalar2Bytes ( int value)
-    {
-	ensureLength (2);
-	bytes[offset] = (byte) ((value >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) (value & 0xff);
-	offset += 2;
+    protected void writeScalar2Bytes ( int value) {
+        ensureLength (2);
+        bytes[offset] = (byte) ((value >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) (value & 0xff);
+        offset += 2;
     }
 
     /**
      * Write length and codepoint
      *
-     * @param 	length - length of object
-     * @param 	codePoint - code point to write
+     * @param   length - length of object
+     * @param   codePoint - code point to write
      */
-    protected void startDdm (int length, int codePoint)
-    {
-	ensureLength (4);
-	bytes[offset] = (byte) ((length >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) (length & 0xff);
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	offset += 4;
+    protected void startDdm (int length, int codePoint) {
+        ensureLength (4);
+        bytes[offset] = (byte) ((length >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) (length & 0xff);
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        offset += 4;
     }
 
     /**
      * Write scalar byte array object includes length, codepoint and value
      *
-     * @param 	codePoint - code point to write
-     * @param	buf  - value to write after code point
-     * @param	length - number of bytes to write
+     * @param   codePoint - code point to write
+     * @param   buf  - value to write after code point
+     * @param   length - number of bytes to write
      */
-    protected void writeScalarBytes (int codePoint, byte[] buf, int length)
-    {
-	if (SanityManager.DEBUG)
-	    {
-		if (buf == null && length > 0)
-		    SanityManager.THROWASSERT("Buf is null");
-		if (length > buf.length)
-		    SanityManager.THROWASSERT("Not enough bytes in buffer");
-	    }
-	ensureLength (length + 4);
-	bytes[offset] = (byte) (((length+4) >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) ((length+4) & 0xff);
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	System.arraycopy(buf,0,bytes,offset + 4, length);
-	offset += length + 4;
+    protected void writeScalarBytes (int codePoint, byte[] buf, int length) {
+        if (SanityManager.DEBUG) {
+            if (buf == null && length > 0)
+                SanityManager.THROWASSERT("Buf is null");
+            if (length > buf.length)
+                SanityManager.THROWASSERT("Not enough bytes in buffer");
+        }
+        ensureLength (length + 4);
+        bytes[offset] = (byte) (((length+4) >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) ((length+4) & 0xff);
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        System.arraycopy(buf,0,bytes,offset + 4, length);
+        offset += length + 4;
     }
 
 
     
     protected void writeScalarStream (boolean chainedWithSameCorrelator,
-				      int codePoint,
-				      EXTDTAInputStream in,
-				      boolean writeNullByte) 
-	throws DRDAProtocolException
-    {
+                                      int codePoint,
+                                      EXTDTAInputStream in,
+                                      boolean writeNullByte) 
+        throws DRDAProtocolException {
+        
+        // Stream equivalent of "beginDss"...
+        int spareDssLength = prepScalarStream( chainedWithSameCorrelator,
+                                               codePoint,
+                                               writeNullByte);
+            
+        // write the data
+        int bytesRead = 0;
+        int totalBytesRead = 0;
 
-	    
+        try {
+                                    
+            OutputStream out = 
+                placeLayerBStreamingBuffer( agent.getOutputStream() );
+                
+            boolean isLastSegment = false;
+                
+            while( !isLastSegment ){
+                    
+                int spareBufferLength = bytes.length - offset;
+                    
+                if( SanityManager.DEBUG ){
+                
+                    if( PropertyUtil.getSystemProperty("derby.debug.suicideOfLayerBStreaming") != null )
+                        throw new IOException();
+                }
+                    
+                bytesRead = in.read(bytes,
+                                    offset,
+                                    Math.min(spareDssLength,
+                                             spareBufferLength));
+                    
+                totalBytesRead += bytesRead;
+                offset += bytesRead;
+                spareDssLength -= bytesRead;
+                spareBufferLength -= bytesRead;
 
-	// Stream equivalent of "beginDss"...
-	int spareDssLength = prepScalarStream( chainedWithSameCorrelator,
-					       codePoint,
-					       writeNullByte);
-	    
-	// write the data
-	int bytesRead = 0;
-	int totalBytesRead = 0;
+                isLastSegment = peekStream(in) < 0;
+                    
+                if(isLastSegment || 
+                   spareDssLength == 0){
+                        
+                    flushScalarStreamSegment (isLastSegment, 
+                                              out);
+                        
+                    if( ! isLastSegment )
+                        spareDssLength = DssConstants.MAX_DSS_LENGTH - 2;
 
-	try {
-				    
-	    OutputStream out = 
-		placeLayerBStreamingBuffer( agent.getOutputStream() );
-		
-	    boolean isLastSegment = false;
-		
-	    while( !isLastSegment ){
-		    
-		int spareBufferLength = bytes.length - offset;
-		    
-		if( SanityManager.DEBUG ){
-		
-		    if( PropertyUtil.getSystemProperty("derby.debug.suicideOfLayerBStreaming") != null )
-			throw new IOException();
-		}
-		    
-		bytesRead = in.read(bytes,
-				    offset,
-				    Math.min(spareDssLength,
-					     spareBufferLength));
-		    
-		totalBytesRead += bytesRead;
-		offset += bytesRead;
-		spareDssLength -= bytesRead;
-		spareBufferLength -= bytesRead;
-
-		isLastSegment = peekStream(in) < 0;
-		    
-		if(isLastSegment || 
-		   spareDssLength == 0){
-			
-		    flushScalarStreamSegment (isLastSegment, 
-					      out);
-			
-		    if( ! isLastSegment )
-			spareDssLength = DssConstants.MAX_DSS_LENGTH - 2;
-
-		}
-		    
-	    }
-		
-	    out.flush();
-		
-	}catch(IOException e){
-	    agent.markCommunicationsFailure ("DDMWriter.writeScalarStream()",
-					     "",
-					     e.getMessage(),
-					     "*");
-	}
-				
+                }
+                    
+            }
+                
+            out.flush();
+                
+        }catch(IOException e){
+            agent.markCommunicationsFailure ("DDMWriter.writeScalarStream()",
+                                             "",
+                                             e.getMessage(),
+                                             "*");
+        }
+                                
     }
-	
+        
     /**
      * Begins a DSS stream (for writing LOB data).
      */
     private void beginDss (boolean chainedToNextStructure,
-			   int dssType)
-    {
-	beginDss(dssType, false);	// false => don't ensure length.
+                           int dssType) {
+        beginDss(dssType, false);       // false => don't ensure length.
 
-	// always turn on continuation flags... this is helpful for lobs...
-	// these bytes will get rest if dss lengths are finalized.
-	bytes[dssLengthLocation] = (byte) 0xFF;
-	bytes[dssLengthLocation + 1] = (byte) 0xFF;
+        // always turn on continuation flags... this is helpful for lobs...
+        // these bytes will get rest if dss lengths are finalized.
+        bytes[dssLengthLocation] = (byte) 0xFF;
+        bytes[dssLengthLocation + 1] = (byte) 0xFF;
 
-	// Set whether or not this DSS should be chained to
-	// the next one.  If it's chained, it has to be chained
-	// with same id (that's the nature of EXTDTA chaining).
-	if (chainedToNextStructure) {
-	    dssType |= DssConstants.GDSCHAIN_SAME_ID;
-	}
+        // Set whether or not this DSS should be chained to
+        // the next one.  If it's chained, it has to be chained
+        // with same id (that's the nature of EXTDTA chaining).
+        if (chainedToNextStructure) {
+            dssType |= DssConstants.GDSCHAIN_SAME_ID;
+        }
 
-	bytes[dssLengthLocation + 3] = (byte) (dssType & 0xff);
+        bytes[dssLengthLocation + 3] = (byte) (dssType & 0xff);
     }
 
 
@@ -776,44 +735,43 @@ class DDMWriter
      *
      */
     private int prepScalarStream( boolean chainedWithSameCorrelator,
-				  int codePoint,
-				  boolean writeNullByte) throws DRDAProtocolException
-    {
+                                  int codePoint,
+                                  boolean writeNullByte) 
+        throws DRDAProtocolException {
 
-	ensureLength( DEFAULT_BUFFER_SIZE - offset );
+        ensureLength( DEFAULT_BUFFER_SIZE - offset );
       
-	final int nullIndicatorSize = writeNullByte ? 1:0;
+        final int nullIndicatorSize = writeNullByte ? 1:0;
 
     
-	// flush the existing DSS segment ,
-	// if this stream will not fit in the send buffer or 
-	// length of this stream is unknown.
-	// Here, 10 stands for sum of headers of layer A and B.
+        // flush the existing DSS segment ,
+        // if this stream will not fit in the send buffer or 
+        // length of this stream is unknown.
+        // Here, 10 stands for sum of headers of layer A and B.
 
-	try {
-	    // The existing DSS segment was finalized by endDss; all
-	    // we have to do is send it across the wire.
-	    sendBytes(agent.getOutputStream());
-	}
-	catch (java.io.IOException e) {
-	    agent.markCommunicationsFailure ("DDMWriter.writeScalarStream()",
-					     "OutputStream.flush()",
-					     e.getMessage(),"*");
-	}
+        try {
+            // The existing DSS segment was finalized by endDss; all
+            // we have to do is send it across the wire.
+            sendBytes(agent.getOutputStream());
+        } catch (java.io.IOException e) {
+            agent.markCommunicationsFailure ("DDMWriter.writeScalarStream()",
+                                             "OutputStream.flush()",
+                                             e.getMessage(),"*");
+        }
 
-	// buildStreamDss should not call ensure length.
-	beginDss(chainedWithSameCorrelator, DssConstants.GDSFMT_OBJDSS);
+        // buildStreamDss should not call ensure length.
+        beginDss(chainedWithSameCorrelator, DssConstants.GDSFMT_OBJDSS);
 
-	writeLengthCodePoint(0x8004,codePoint);
+        writeLengthCodePoint(0x8004,codePoint);
 
 
-	// write the null byte, if necessary
-	if (writeNullByte)
-	    writeByte(0x0);
+        // write the null byte, if necessary
+        if (writeNullByte)
+            writeByte(0x0);
 
-	//Here, 6 stands for header of layer A and 
-	//4 stands for header of layer B.
-	return DssConstants.MAX_DSS_LENGTH - 6 - 4 - nullIndicatorSize;
+        //Here, 6 stands for header of layer A and 
+        //4 stands for header of layer B.
+        return DssConstants.MAX_DSS_LENGTH - 6 - 4 - nullIndicatorSize;
 
 
     }
@@ -821,60 +779,57 @@ class DDMWriter
 
     // method to determine if any data is in the request.
     // this indicates there is a dss object already in the buffer.
-    protected boolean doesRequestContainData()
-    {
-	return offset != 0;
+    protected boolean doesRequestContainData() {
+        return offset != 0;
     }
 
 
     // Writes out a scalar stream DSS segment, along with DSS continuation
     // headers if necessary.
     private void flushScalarStreamSegment ( boolean lastSegment,
-					    OutputStream out)
-	throws DRDAProtocolException
-    {
+                                            OutputStream out)
+        throws DRDAProtocolException {
 
-	// either at end of data, end of dss segment, or both.
-	if (! lastSegment) {
+        // either at end of data, end of dss segment, or both.
+        if (! lastSegment) {
 
-	    // 32k segment filled and not at end of data.
-	    try {
-		// Mark current DSS as continued, set its chaining state,
-		// then send the data across.
-		markDssAsContinued(true); 	// true => for lobs
-		sendBytes (out,
-			   false);
-			    
-	    }catch (java.io.IOException ioe) {
-		agent.markCommunicationsFailure ("DDMWriter.flushScalarStreamSegment()",
-						 "",
-						 ioe.getMessage(),
-						 "*");
-	    }
+            // 32k segment filled and not at end of data.
+            try {
+                // Mark current DSS as continued, set its chaining state,
+                // then send the data across.
+                markDssAsContinued(true);       // true => for lobs
+                sendBytes (out,
+                           false);
+                            
+            }catch (java.io.IOException ioe) {
+                agent.markCommunicationsFailure ("DDMWriter.flushScalarStreamSegment()",
+                                                 "",
+                                                 ioe.getMessage(),
+                                                 "*");
+            }
 
 
-	    // Prepare a DSS continuation header for next DSS.
-	    dssLengthLocation = offset;
-	    bytes[offset++] = (byte) (0xff);
-	    bytes[offset++] = (byte) (0xff);
-	    isContinuationDss = true;
-	}else{
-	    // we're done writing the data, so end the DSS.
-	    endDss();
+            // Prepare a DSS continuation header for next DSS.
+            dssLengthLocation = offset;
+            bytes[offset++] = (byte) (0xff);
+            bytes[offset++] = (byte) (0xff);
+            isContinuationDss = true;
+        }else{
+            // we're done writing the data, so end the DSS.
+            endDss();
 
-	}
+        }
 
     }
 
 
-    private void writeExtendedLengthBytes (int extendedLengthByteCount, long length)
-    {
-	int shiftSize = (extendedLengthByteCount -1) * 8;
-	for (int i = 0; i < extendedLengthByteCount; i++) {
-	    bytes[offset + i] = (byte) ((length >>> shiftSize) & 0xff);
-	    shiftSize -= 8;
-	}
-	offset += extendedLengthByteCount;
+    private void writeExtendedLengthBytes (int extendedLengthByteCount, long length) {
+        int shiftSize = (extendedLengthByteCount -1) * 8;
+        for (int i = 0; i < extendedLengthByteCount; i++) {
+            bytes[offset + i] = (byte) ((length >>> shiftSize) & 0xff);
+            shiftSize -= 8;
+        }
+        offset += extendedLengthByteCount;
     }
 
 
@@ -883,88 +838,83 @@ class DDMWriter
     // Note: the length value inserted in the buffer is the same as the value
     // passed in as an argument (this value is NOT incremented by 4 before being
     // inserted).
-    void writeLengthCodePoint (int length, int codePoint)
-    {
-	ensureLength (4);
-	bytes[offset] = (byte) ((length >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) (length & 0xff);
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	offset +=4;
+    void writeLengthCodePoint (int length, int codePoint) {
+        ensureLength (4);
+        bytes[offset] = (byte) ((length >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) (length & 0xff);
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        offset +=4;
     }
 
     /**
      * Write scalar object header includes length and codepoint
      *
-     * @param 	codePoint - code point to write
-     * @param	dataLength - length of object data
+     * @param   codePoint - code point to write
+     * @param   dataLength - length of object data
      */
-    protected void writeScalarHeader (int codePoint, int dataLength)
-    {
-	ensureLength (dataLength + 4);
-	bytes[offset] = (byte) (((dataLength+4) >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) ((dataLength+4) & 0xff);
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	offset += 4;
+    protected void writeScalarHeader (int codePoint, int dataLength) {
+        ensureLength (dataLength + 4);
+        bytes[offset] = (byte) (((dataLength+4) >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) ((dataLength+4) & 0xff);
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        offset += 4;
     }
 
     /**
      * Write scalar string object includes length, codepoint and value
      * the string is converted into the appropriate codeset (EBCDIC)
      *
-     * @param 	codePoint - code point to write
-     * @param	string - string to be written
+     * @param   codePoint - code point to write
+     * @param   string - string to be written
      */
-    void writeScalarString (int codePoint, String string)
-    {
-	int stringLength = string.length();
-	ensureLength ((stringLength * 2)  + 4);
-	bytes[offset] = (byte) (((stringLength+4) >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) ((stringLength+4) & 0xff);
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	offset = ccsidManager.convertFromUCS2 (string, bytes, offset + 4);
+    void writeScalarString (int codePoint, String string) {
+        int stringLength = string.length();
+        ensureLength ((stringLength * 2)  + 4);
+        bytes[offset] = (byte) (((stringLength+4) >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) ((stringLength+4) & 0xff);
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        offset = ccsidManager.convertFromUCS2 (string, bytes, offset + 4);
     }
 
     /**
      * Write padded scalar string object includes length, codepoint and value
      * the string is converted into the appropriate codeset (EBCDIC)
      *
-     * @param 	codePoint - code point to write
-     * @param	string - string to be written
-     * @param 	paddedLength - length to pad string to
+     * @param   codePoint - code point to write
+     * @param   string - string to be written
+     * @param   paddedLength - length to pad string to
      */
-    void writeScalarPaddedString (int codePoint, String string, int paddedLength)
-    {
-	int stringLength = string.length();
-	int fillLength = paddedLength - stringLength;
-	ensureLength (paddedLength + 4);
-	bytes[offset] = (byte) (((paddedLength+4) >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) ((paddedLength+4) & 0xff);
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	offset = ccsidManager.convertFromUCS2 (string, bytes, offset + 4);
-	Arrays.fill(bytes,offset, offset + fillLength,ccsidManager.space);
-	offset += fillLength;
+    void writeScalarPaddedString (int codePoint, String string, int paddedLength) {
+        int stringLength = string.length();
+        int fillLength = paddedLength - stringLength;
+        ensureLength (paddedLength + 4);
+        bytes[offset] = (byte) (((paddedLength+4) >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) ((paddedLength+4) & 0xff);
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        offset = ccsidManager.convertFromUCS2 (string, bytes, offset + 4);
+        Arrays.fill(bytes,offset, offset + fillLength,ccsidManager.space);
+        offset += fillLength;
     }
 
     /**
      * Write padded scalar string object value
      * the string is converted into the appropriate codeset (EBCDIC)
      *
-     * @param	string - string to be written
-     * @param 	paddedLength - length to pad string to
+     * @param   string - string to be written
+     * @param   paddedLength - length to pad string to
      */
-    protected void writeScalarPaddedString (String string, int paddedLength)
-    {
-	int stringLength = string.length();
+    protected void writeScalarPaddedString (String string, int paddedLength) {
+        int stringLength = string.length();
 
-	int fillLength = paddedLength -stringLength;
-	ensureLength (paddedLength);
-	offset = ccsidManager.convertFromUCS2 (string, bytes, offset);
-	Arrays.fill(bytes,offset, offset + fillLength,ccsidManager.space);
-	offset += fillLength;
+        int fillLength = paddedLength -stringLength;
+        ensureLength (paddedLength);
+        offset = ccsidManager.convertFromUCS2 (string, bytes, offset);
+        Arrays.fill(bytes,offset, offset + fillLength,ccsidManager.space);
+        offset += fillLength;
     }
 
     /**
@@ -974,103 +924,97 @@ class DDMWriter
      * @param drdaString string to be written
      * @param paddedLength length to pad string to
      */
-    protected void writeScalarPaddedString (DRDAString drdaString, int paddedLength)
-    {
-	int stringLength = drdaString.length();
-	int fillLength = paddedLength - stringLength;
-	ensureLength(paddedLength);
-	System.arraycopy(drdaString.getBytes(), 0, bytes, offset, stringLength);
-	offset += stringLength;
-	Arrays.fill(bytes, offset, offset + fillLength, ccsidManager.space);
-	offset += fillLength;
+    protected void writeScalarPaddedString (DRDAString drdaString, int paddedLength) {
+        int stringLength = drdaString.length();
+        int fillLength = paddedLength - stringLength;
+        ensureLength(paddedLength);
+        System.arraycopy(drdaString.getBytes(), 0, bytes, offset, stringLength);
+        offset += stringLength;
+        Arrays.fill(bytes, offset, offset + fillLength, ccsidManager.space);
+        offset += fillLength;
     }
 
     /**
      * Write padded scalar byte array object includes length, codepoint and value
      *
-     * @param 	codePoint - code point to write
-     * @param	buf - byte array to be written
-     * @param 	paddedLength - length to pad string to
-     * @param	padByte - byte to be used for padding
+     * @param   codePoint - code point to write
+     * @param   buf - byte array to be written
+     * @param   paddedLength - length to pad string to
+     * @param   padByte - byte to be used for padding
      */
-    protected void writeScalarPaddedBytes (int codePoint, byte[] buf, int paddedLength, byte padByte)
-    {
-	int bufLength = buf.length;
-	ensureLength (paddedLength + 4);
-	bytes[offset] = (byte) (((paddedLength+4) >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) ((paddedLength+4) & 0xff);
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	offset += 4;
-	System.arraycopy(buf,0,bytes,offset,bufLength);
-	offset += bufLength;
-	int fillLength = paddedLength - bufLength;
-	Arrays.fill(bytes,offset,offset + fillLength,padByte);
-	offset += fillLength;
+    protected void writeScalarPaddedBytes (int codePoint, byte[] buf, int paddedLength, byte padByte) {
+        int bufLength = buf.length;
+        ensureLength (paddedLength + 4);
+        bytes[offset] = (byte) (((paddedLength+4) >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) ((paddedLength+4) & 0xff);
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        offset += 4;
+        System.arraycopy(buf,0,bytes,offset,bufLength);
+        offset += bufLength;
+        int fillLength = paddedLength - bufLength;
+        Arrays.fill(bytes,offset,offset + fillLength,padByte);
+        offset += fillLength;
     }
 
     /**
      * Write padded scalar byte array object  value
      *
-     * @param	buf - byte array to be written
-     * @param 	paddedLength - length to pad string to
-     * @param	padByte - byte to be used for padding
+     * @param   buf - byte array to be written
+     * @param   paddedLength - length to pad string to
+     * @param   padByte - byte to be used for padding
      */
-    protected void writeScalarPaddedBytes (byte[] buf, int paddedLength, byte padByte)
-    {
-	int bufLength = buf.length;
-	int fillLength = paddedLength - bufLength;
-	ensureLength (paddedLength);
-	System.arraycopy(buf,0,bytes,offset,bufLength);
-	offset +=bufLength;
-	Arrays.fill(bytes,offset,offset + fillLength,padByte);
-	offset += fillLength;
+    protected void writeScalarPaddedBytes (byte[] buf, int paddedLength, byte padByte) {
+        int bufLength = buf.length;
+        int fillLength = paddedLength - bufLength;
+        ensureLength (paddedLength);
+        System.arraycopy(buf,0,bytes,offset,bufLength);
+        offset +=bufLength;
+        Arrays.fill(bytes,offset,offset + fillLength,padByte);
+        offset += fillLength;
     }
 
     /**
      * Write scalar byte array object includes length, codepoint and value
      *
-     * @param 	codePoint - code point to write
-     * @param	buf - byte array to be written
+     * @param   codePoint - code point to write
+     * @param   buf - byte array to be written
      */
-    protected void writeScalarBytes (int codePoint, byte[] buf)
-    {
-	int bufLength = buf.length;
-	ensureLength (bufLength + 4);
-	bytes[offset] = (byte) (((bufLength+4) >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) ((bufLength+4) & 0xff);
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	System.arraycopy(buf,0,bytes,offset + 4,bufLength);
-	offset += bufLength + 4;
+    protected void writeScalarBytes (int codePoint, byte[] buf) {
+        int bufLength = buf.length;
+        ensureLength (bufLength + 4);
+        bytes[offset] = (byte) (((bufLength+4) >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) ((bufLength+4) & 0xff);
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        System.arraycopy(buf,0,bytes,offset + 4,bufLength);
+        offset += bufLength + 4;
     }
 
     /**
      * Write scalar byte array object includes length, codepoint and value
      *
-     * @param 	codePoint - code point to write
-     * @param	buf - byte array to be written
-     * @param	start - starting point
-     * @param 	length - length to write
+     * @param   codePoint - code point to write
+     * @param   buf - byte array to be written
+     * @param   start - starting point
+     * @param   length - length to write
      */
-    protected void writeScalarBytes (int codePoint, byte[] buf, int start, int length)
-    {
-	if (SanityManager.DEBUG)
-	    {
-		if (buf == null && length > start)
-		    SanityManager.THROWASSERT("Buf is null");
-		if (length - start > buf.length)
-		    SanityManager.THROWASSERT("Not enough bytes in buffer");
-	    }
-	int numBytes = length - start;
-	ensureLength (numBytes + 4);
-	bytes[offset] = (byte) (((numBytes+4) >>> 8) & 0xff);
-	bytes[offset + 1] = (byte) ((numBytes+4) & 0xff);
-	bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (codePoint & 0xff);
-	offset += 4;
-	System.arraycopy(buf,start,bytes,offset,numBytes);
-	offset += numBytes;
+    protected void writeScalarBytes (int codePoint, byte[] buf, int start, int length) {
+        if (SanityManager.DEBUG) {
+            if (buf == null && length > start)
+                SanityManager.THROWASSERT("Buf is null");
+            if (length - start > buf.length)
+                SanityManager.THROWASSERT("Not enough bytes in buffer");
+        }
+        int numBytes = length - start;
+        ensureLength (numBytes + 4);
+        bytes[offset] = (byte) (((numBytes+4) >>> 8) & 0xff);
+        bytes[offset + 1] = (byte) ((numBytes+4) & 0xff);
+        bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (codePoint & 0xff);
+        offset += 4;
+        System.arraycopy(buf,start,bytes,offset,numBytes);
+        offset += numBytes;
     }
     // The following methods write data in the platform format
     // The platform format was indicated during connection time as ASC since
@@ -1079,11 +1023,10 @@ class DDMWriter
     /**
      * Write platform short
      *
-     * @param 	v	value to be written
+     * @param   v       value to be written
      */
-    protected void writeShort (int v)
-    {
-	writeNetworkShort(v);
+    protected void writeShort (int v) {
+        writeNetworkShort(v);
     }
 
     /**
@@ -1091,58 +1034,53 @@ class DDMWriter
      * @param b boolean value true = 1 false = 0
      *
      */
-    protected void writeShort(boolean b)
-    {
-	writeNetworkShort(b ? 1 : 0);
+    protected void writeShort(boolean b) {
+        writeNetworkShort(b ? 1 : 0);
     }
 
     /**
      * Write platform int
      *
-     * @param 	v	value to be written
+     * @param   v       value to be written
      */
-    protected void writeInt (int v)
-    {
-	writeNetworkInt(v);
+    protected void writeInt (int v) {
+        writeNetworkInt(v);
     }
 
     /**
      * Write platform long
      *
-     * @param 	v	value to be written
+     * @param   v       value to be written
      */
-    protected void writeLong (long v)
-    {
-	ensureLength (8);
-	bytes[offset] =	(byte) ((v >>> 56) & 0xff);
-	bytes[offset + 1] =	(byte) ((v >>> 48) & 0xff);
-	bytes[offset + 2] =	(byte) ((v >>> 40) & 0xff);
-	bytes[offset + 3] =	(byte) ((v >>> 32) & 0xff);
-	bytes[offset + 4] =	(byte) ((v >>> 24) & 0xff);
-	bytes[offset + 5] =	(byte) ((v >>> 16) & 0xff);
-	bytes[offset + 6] =	(byte) ((v >>>  8) & 0xff);
-	bytes[offset + 7] =	(byte) ((v >>>  0) & 0xff);
-	offset += 8;
+    protected void writeLong (long v) {
+        ensureLength (8);
+        bytes[offset] = (byte) ((v >>> 56) & 0xff);
+        bytes[offset + 1] =     (byte) ((v >>> 48) & 0xff);
+        bytes[offset + 2] =     (byte) ((v >>> 40) & 0xff);
+        bytes[offset + 3] =     (byte) ((v >>> 32) & 0xff);
+        bytes[offset + 4] =     (byte) ((v >>> 24) & 0xff);
+        bytes[offset + 5] =     (byte) ((v >>> 16) & 0xff);
+        bytes[offset + 6] =     (byte) ((v >>>  8) & 0xff);
+        bytes[offset + 7] =     (byte) ((v >>>  0) & 0xff);
+        offset += 8;
     }
 
     /**
      * Write platform float
      *
-     * @param 	v	value to be written
+     * @param   v       value to be written
      */
-    protected void writeFloat (float v)
-    {
-	writeInt (Float.floatToIntBits (v));
+    protected void writeFloat (float v) {
+        writeInt (Float.floatToIntBits (v));
     }
 
     /**
      * Write platform double
      *
-     * @param 	v	value to be written
+     * @param   v       value to be written
      */
-    protected void writeDouble (double v)
-    {
-	writeLong (Double.doubleToLongBits (v));
+    protected void writeDouble (double v) {
+        writeLong (Double.doubleToLongBits (v));
     }
 
     /**
@@ -1154,23 +1092,21 @@ class DDMWriter
      * @exception SQLException thrown if number of digits > 31
      */
     protected void writeBigDecimal (java.math.BigDecimal v, int precision, int scale)
-	throws SQLException
-    {
-	int length = precision / 2 + 1;
-	ensureLength (offset + length);
-	bigDecimalToPackedDecimalBytes (v,precision, scale);
-	offset += length;
+        throws SQLException {
+        int length = precision / 2 + 1;
+        ensureLength (offset + length);
+        bigDecimalToPackedDecimalBytes (v,precision, scale);
+        offset += length;
     }
 
     /**
      * Write platform boolean
      *
-     * @param 	v	value to be written
+     * @param   v       value to be written
      */
-    protected void writeBoolean (boolean v)
-    {
-	ensureLength (1);
-	bytes[offset++] = (byte) ((v ? 1 : 0) & 0xff);
+    protected void writeBoolean (boolean v) {
+        ensureLength (1);
+        bytes[offset++] = (byte) ((v ? 1 : 0) & 0xff);
     }
 
     /**
@@ -1180,9 +1116,8 @@ class DDMWriter
      *
      * @exception DRDAProtocolException
      */
-    protected void writeLDString(String s) throws DRDAProtocolException
-    {
-	writeLDString(s,0);
+    protected void writeLDString(String s) throws DRDAProtocolException {
+        writeLDString(s,0);
     }
 
 
@@ -1193,53 +1128,49 @@ class DDMWriter
      * @param index          column index to put in warning
      * @exception DRDAProtocolException
      */
-    protected void writeLDString(String s, int index) throws DRDAProtocolException
-    {
-	try {
-	    byte [] byteval = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
-	    int origLen = byteval.length;
-	    boolean multiByteTrunc = false;
-	    int writeLen =
-		java.lang.Math.min(FdocaConstants.LONGVARCHAR_MAX_LEN,
-				   origLen);
-	    /*
-	      Need to make sure we truncate on character boundaries.
-	      We are assuming
-	      http://www.sun.com/developers/gadc/technicalpublications/articles/utf8.html
-	      To find the beginning of a multibyte character:
-	      1) Does the current byte start with the bit pattern 10xxxxxx?
-	      2) If yes, move left and go to step #1.
-	      3) Finished
-	      We assume that NetworkServerControlImpl.DEFAULT_ENCODING remains UTF-8
-	    */
+    protected void writeLDString(String s, int index) 
+        throws DRDAProtocolException {
+        try {
+            byte [] byteval = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
+            int origLen = byteval.length;
+            boolean multiByteTrunc = false;
+            int writeLen =
+                java.lang.Math.min(FdocaConstants.LONGVARCHAR_MAX_LEN,
+                                   origLen);
+            /*
+              Need to make sure we truncate on character boundaries.
+              We are assuming
+              http://www.sun.com/developers/gadc/technicalpublications/articles/utf8.html
+              To find the beginning of a multibyte character:
+              1) Does the current byte start with the bit pattern 10xxxxxx?
+              2) If yes, move left and go to step #1.
+              3) Finished
+              We assume that NetworkServerControlImpl.DEFAULT_ENCODING remains UTF-8
+            */
 
-	    if (SanityManager.DEBUG)
-		{
-		    if (!(NetworkServerControlImpl.DEFAULT_ENCODING.equals("UTF8")))
-			SanityManager.THROWASSERT("Encoding assumed to be UTF8, but is actually" + NetworkServerControlImpl.DEFAULT_ENCODING);
-		}
+            if (SanityManager.DEBUG) {
+                if (!(NetworkServerControlImpl.DEFAULT_ENCODING.equals("UTF8")))
+                    SanityManager.THROWASSERT("Encoding assumed to be UTF8, but is actually" + NetworkServerControlImpl.DEFAULT_ENCODING);
+            }
 
-	    if (writeLen != origLen)
-		// first position on the first byte of the multibyte char
-		while ((byteval[writeLen -1] & 0xC0) == 0x80)
-		    {
-			multiByteTrunc = true;
-			writeLen--;
-			// Then subtract one more to get to the end of the
-			// previous character
-			if (multiByteTrunc == true)
-			    {
-				writeLen = writeLen -1;
-			    }
-		    }
+            if (writeLen != origLen)
+                // first position on the first byte of the multibyte char
+                while ((byteval[writeLen -1] & 0xC0) == 0x80) {
+                    multiByteTrunc = true;
+                    writeLen--;
+                    // Then subtract one more to get to the end of the
+                    // previous character
+                    if (multiByteTrunc == true) {
+                        writeLen = writeLen -1;
+                    }
+                }
 
-	    writeShort(writeLen);
-	    writeBytes(byteval,writeLen);
-	}
-	catch (Exception e) {
-	    //this should never happen
-	    agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
-	}
+            writeShort(writeLen);
+            writeBytes(byteval,writeLen);
+        } catch (Exception e) {
+            //this should never happen
+            agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
+        }
     }
 
     /**
@@ -1249,14 +1180,13 @@ class DDMWriter
      *
      * @exception DRDAProtocolException
      */
-    protected void writeString(String s) throws DRDAProtocolException
-    {
-	try {
-	    writeBytes(s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING));
-	} catch (Exception e) {
-	    //this should never happen
-	    agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
-	}
+    protected void writeString(String s) throws DRDAProtocolException {
+        try {
+            writeBytes(s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING));
+        } catch (Exception e) {
+            //this should never happen
+            agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
+        }
     }
 
     /**
@@ -1267,35 +1197,32 @@ class DDMWriter
      *
      * @exception DRDAProtocolException
      */
-    protected void writeString(String s, int length) throws DRDAProtocolException
-    {
-	byte[] bs = null;
-	try {
-	    bs = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
-	} catch (Exception e) {
-	    //this should never happen
-	    agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
-	}
-	int len = bs.length;
-	if (len >= length)
-	    writeBytes(bs, length);
-	else
-	    {
-		writeBytes(bs);
-		padBytes(NetworkServerControlImpl.SPACE_CHAR, length-len);
-	    }
+    protected void writeString(String s, int length) throws DRDAProtocolException {
+        byte[] bs = null;
+        try {
+            bs = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
+        } catch (Exception e) {
+            //this should never happen
+            agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
+        }
+        int len = bs.length;
+        if (len >= length)
+            writeBytes(bs, length);
+        else {
+            writeBytes(bs);
+            padBytes(NetworkServerControlImpl.SPACE_CHAR, length-len);
+        }
     }
 
     /**
      * Write pad bytes using spaceChar
      *
-     * @param   val	value to be written
-     * @param	length		length to be written
+     * @param   val     value to be written
+     * @param   length          length to be written
      */
-    protected void padBytes (byte val, int length)
-    {
-	Arrays.fill(bytes,offset, offset + length,val);
-	offset += length;
+    protected void padBytes (byte val, int length) {
+        Arrays.fill(bytes,offset, offset + length,val);
+        offset += length;
     }
 
     /**
@@ -1304,9 +1231,9 @@ class DDMWriter
      *
      * @exception IOException
      */
-    protected void flush () throws java.io.IOException
-    {
-	flush(agent.getOutputStream());
+    protected void flush () 
+        throws java.io.IOException {
+        flush(agent.getOutputStream());
     }
 
     /**
@@ -1317,24 +1244,22 @@ class DDMWriter
      * @exception IOException
      */
     protected void flush(OutputStream socketOutputStream)
-	throws java.io.IOException
-    {
-	try {
-	    socketOutputStream.write (bytes, 0, offset);
-	    socketOutputStream.flush();
-	}
-	finally {
-	    if ((dssTrace != null) && dssTrace.isComBufferTraceOn()) {
-		dssTrace.writeComBufferData (bytes,
-					     0,
-					     offset,
-					     DssTrace.TYPE_TRACE_SEND,
-					     "Reply",
-					     "flush",
-					     5);
-	    }
-	    reset(dssTrace);
-	}
+        throws java.io.IOException {
+        try {
+            socketOutputStream.write (bytes, 0, offset);
+            socketOutputStream.flush();
+        } finally {
+            if ((dssTrace != null) && dssTrace.isComBufferTraceOn()) {
+                dssTrace.writeComBufferData (bytes,
+                                             0,
+                                             offset,
+                                             DssTrace.TYPE_TRACE_SEND,
+                                             "Reply",
+                                             "flush",
+                                             5);
+            }
+            reset(dssTrace);
+        }
     }
 
     // private methods
@@ -1342,214 +1267,208 @@ class DDMWriter
     /**
      * Write DSS header
      * DSS Header format is
-     * 	2 bytes	- length
-     *	1 byte	- 'D0'	- indicates DDM data
-     * 	1 byte	- DSS format
-     *		|---|---------|----------|
-     *		| 0	|	flags |	type     |
-     *		|---|---------|----------|
-     *		| 0 | 1	2	3 | 4 5 6 7	 |
-     *		|---|---------|----------|
-     *		bit 0 - '0'
-     *		bit 1 - '0' - unchained, '1' - chained
-     *		bit 2 - '0'	- do not continue on error, '1' - continue on error
-     *		bit 3 - '0' - next DSS has different correlator, '1' - next DSS has
-     *						same correlator
-     *		type - 1 - Request DSS
-     *			 - 2 - Reply DSS
-     *			 - 3 - Object DSS
-     *			 - 4 - Communications DSS
-     *			 - 5 - Request DSS where no reply is expected
+     *  2 bytes - length
+     *  1 byte  - 'D0'  - indicates DDM data
+     *  1 byte  - DSS format
+     *          |---|---------|----------|
+     *          | 0     |       flags | type     |
+     *          |---|---------|----------|
+     *          | 0 | 1 2       3 | 4 5 6 7      |
+     *          |---|---------|----------|
+     *          bit 0 - '0'
+     *          bit 1 - '0' - unchained, '1' - chained
+     *          bit 2 - '0'     - do not continue on error, '1' - continue on error
+     *          bit 3 - '0' - next DSS has different correlator, '1' - next DSS has
+     *                                          same correlator
+     *          type - 1 - Request DSS
+     *                   - 2 - Reply DSS
+     *                   - 3 - Object DSS
+     *                   - 4 - Communications DSS
+     *                   - 5 - Request DSS where no reply is expected
      */
-    private void beginDss (int dssType, boolean ensureLen)
-    {
+    private void beginDss (int dssType, boolean ensureLen) {
 
-	// save length position, the length will be written at the end
-	dssLengthLocation = offset;
+        // save length position, the length will be written at the end
+        dssLengthLocation = offset;
 
-	// Should this really only be for non-stream DSSes?
-	if (ensureLen)
-	    ensureLength(6);
+        // Should this really only be for non-stream DSSes?
+        if (ensureLen)
+            ensureLength(6);
 
-	// Skip past length; we'll come back and set it later.
-	offset += 2;
+        // Skip past length; we'll come back and set it later.
+        offset += 2;
 
-	// write gds info
-	bytes[offset] = (byte) 0xD0;
+        // write gds info
+        bytes[offset] = (byte) 0xD0;
 
-	// Write DSS type, and default chain bit to be 
-	// DssConstants.DSSCHAIN_SAME_ID.  This default
-	// will be overridden by calls to "finalizeChain()"
-	// and/or calls to "beginDss(boolean, int)" for
-	// writing LOB data.
-	bytes[offset + 1] = (byte) dssType;
-	bytes[offset + 1] |= DssConstants.DSSCHAIN_SAME_ID;
+        // Write DSS type, and default chain bit to be 
+        // DssConstants.DSSCHAIN_SAME_ID.  This default
+        // will be overridden by calls to "finalizeChain()"
+        // and/or calls to "beginDss(boolean, int)" for
+        // writing LOB data.
+        bytes[offset + 1] = (byte) dssType;
+        bytes[offset + 1] |= DssConstants.DSSCHAIN_SAME_ID;
 
-	// save correlationID for use in error messages while processing
-	// this DSS
-	correlationID = getCorrelationID();
+        // save correlationID for use in error messages while processing
+        // this DSS
+        correlationID = getCorrelationID();
 
-	// write the reply correlation id
-	bytes[offset + 2] = (byte) ((correlationID >>> 8) & 0xff);
-	bytes[offset + 3] = (byte) (correlationID & 0xff);
-	offset += 4;
+        // write the reply correlation id
+        bytes[offset + 2] = (byte) ((correlationID >>> 8) & 0xff);
+        bytes[offset + 3] = (byte) (correlationID & 0xff);
+        offset += 4;
     }
 
     /**
      * Finish a DSS Layer A object.
      * The length of dss object will be calculated based on the difference between the
      * start of the dss, saved on the beginDss call, and the current
-     * offset into the buffer which marks the end of the data.	In the event
+     * offset into the buffer which marks the end of the data.  In the event
      * the length requires the use of continuation Dss headers, one for each 32k
      * chunk of data, the data will be shifted and the continuation headers
      * will be inserted with the correct values as needed.
      */
-    private void finalizeDssLength ()
-    {
-	// calculate the total size of the dss and the number of bytes which would
-	// require continuation dss headers.	The total length already includes the
-	// the 6 byte dss header located at the beginning of the dss.	It does not
-	// include the length of any continuation headers.
-	int totalSize = offset - dssLengthLocation;
-	int bytesRequiringContDssHeader = totalSize - DssConstants.MAX_DSS_LENGTH;
+    private void finalizeDssLength () {
+        // calculate the total size of the dss and the number of bytes which would
+        // require continuation dss headers.    The total length already includes the
+        // the 6 byte dss header located at the beginning of the dss.   It does not
+        // include the length of any continuation headers.
+        int totalSize = offset - dssLengthLocation;
+        int bytesRequiringContDssHeader = totalSize - DssConstants.MAX_DSS_LENGTH;
 
-	// determine if continuation headers are needed
-	if (bytesRequiringContDssHeader > 0)
-	    {
-		// the continuation headers are needed, so calculate how many.
-		// after the first 32767 worth of data, a continuation header is
-		// needed for every 32765 bytes (32765 bytes of data + 2 bytes of
-		// continuation header = 32767 Dss Max Size).
-		int contDssHeaderCount = bytesRequiringContDssHeader / 32765;
-		if (bytesRequiringContDssHeader % 32765 != 0)
-		    contDssHeaderCount++;
+        // determine if continuation headers are needed
+        if (bytesRequiringContDssHeader > 0){
+            // the continuation headers are needed, so calculate how many.
+            // after the first 32767 worth of data, a continuation header is
+            // needed for every 32765 bytes (32765 bytes of data + 2 bytes of
+            // continuation header = 32767 Dss Max Size).
+            int contDssHeaderCount = bytesRequiringContDssHeader / 32765;
+            if (bytesRequiringContDssHeader % 32765 != 0)
+                contDssHeaderCount++;
 
-		// right now the code will shift to the right.	In the future we may want
-		// to try something fancier to help reduce the copying (maybe keep
-		// space in the beginning of the buffer??).
-		// the offset points to the next available offset in the buffer to place
-		// a piece of data, so the last dataByte is at offset -1.
-		// various bytes will need to be shifted by different amounts
-		// depending on how many dss headers to insert so the amount to shift
-		// will be calculated and adjusted as needed.	ensure there is enough room
-		// for all the conutinuation headers and adjust the offset to point to the
-		// new end of the data.
-		int dataByte = offset - 1;
-		int shiftSize = contDssHeaderCount * 2;
-		ensureLength (shiftSize);
-		offset += shiftSize;
+            // right now the code will shift to the right.  In the future we may want
+            // to try something fancier to help reduce the copying (maybe keep
+            // space in the beginning of the buffer??).
+            // the offset points to the next available offset in the buffer to place
+            // a piece of data, so the last dataByte is at offset -1.
+            // various bytes will need to be shifted by different amounts
+            // depending on how many dss headers to insert so the amount to shift
+            // will be calculated and adjusted as needed.   ensure there is enough room
+            // for all the conutinuation headers and adjust the offset to point to the
+            // new end of the data.
+            int dataByte = offset - 1;
+            int shiftSize = contDssHeaderCount * 2;
+            ensureLength (shiftSize);
+            offset += shiftSize;
 
-		// Notes on the behavior of the Layer B segmenting loop below:
-		//
-		// We start with the right most chunk. For a 3-segment object we'd
-		// shift 2 segments: shift the first (rightmost) one 4 bytes and 
-		// the second one 2. Note that by 'first' we mean 'first time
-		// through the loop', but that is actually the last segment
-		// of data since we are moving right-to-left. For an object
-		// of K segments we will pass through this loop K-1 times.
-		// The 0th (leftmost) segment is not shifted, as it is
-		// already in the right place. When we are done, we will
-		// have made room in each segment for an additional
-		// 2 bytes for the continuation header. Thus, each
-		// segment K is shifted K*2 bytes to the right.
-		//
-		// Each time through the loop, "dataByte" points to the
-		// last byte in the segment; "dataToShift" is the amount of
-		// data that we need to shift, and "shiftSize" is the
-		// distance that we need to shift it. Since dataByte points
-		// at the last byte, not one byte beyond it (as with the
-		// "offset" variable used elsewhere in DDMWriter), the start
-		// of the segement is actually at (dataByte-dataToShift+1).
-		//
-		// After we have shifted the segment, we move back to the
-		// start of the segment and set the value of the 2-byte DSS
-		// continuation header, which needs to hold the length of
-		// this segment's data, together with the continuation flag
-		// if this is not the rightmost (passOne) segment.
-		//
-		// In general, each segment except the rightmost will contain
-		// 32765 bytes of data, plus the 2-byte header, and its
-		// continuation flag will be set, so the header value will
-		// be 0xFFFF. The rightmost segment will not have the
-		// continuation flag set, so its value may be anything from
-		// 0x0001 to 0x7FFF, depending on the amount of data in that
-		// segment.
-		//
-		// Note that the 0th (leftmost) segment also has a 2-byte
-		// DSS header, which needs to have its continuation flag set.
-		// This is done by resetting the "totalSize" variable below,
-		// at which point that variable no longer holds the total size
-		// of the object, but rather just the length of segment 0. The
-		// total size of the object was written using extended length
-		// bytes by the endDdm() method earlier.
-		//
-		// Additional information about this routine is available in the
-		// bug notes for DERBY-125:
-		// http://issues.apache.org/jira/browse/DERBY-125
-			
-		// mark passOne to help with calculating the length of the final (first or
-		// rightmost) continuation header.
-		boolean passOne = true;
-		do {
-		    // calculate chunk of data to shift
-		    int dataToShift = bytesRequiringContDssHeader % 32765;
-		    if (dataToShift == 0)
-			dataToShift = 32765;
-		    int startOfCopyData = dataByte - dataToShift + 1;
-		    System.arraycopy(bytes,startOfCopyData, bytes, 
-				     startOfCopyData + shiftSize, dataToShift);
-		    dataByte -= dataToShift;
+            // Notes on the behavior of the Layer B segmenting loop below:
+            //
+            // We start with the right most chunk. For a 3-segment object we'd
+            // shift 2 segments: shift the first (rightmost) one 4 bytes and 
+            // the second one 2. Note that by 'first' we mean 'first time
+            // through the loop', but that is actually the last segment
+            // of data since we are moving right-to-left. For an object
+            // of K segments we will pass through this loop K-1 times.
+            // The 0th (leftmost) segment is not shifted, as it is
+            // already in the right place. When we are done, we will
+            // have made room in each segment for an additional
+            // 2 bytes for the continuation header. Thus, each
+            // segment K is shifted K*2 bytes to the right.
+            //
+            // Each time through the loop, "dataByte" points to the
+            // last byte in the segment; "dataToShift" is the amount of
+            // data that we need to shift, and "shiftSize" is the
+            // distance that we need to shift it. Since dataByte points
+            // at the last byte, not one byte beyond it (as with the
+            // "offset" variable used elsewhere in DDMWriter), the start
+            // of the segement is actually at (dataByte-dataToShift+1).
+            //
+            // After we have shifted the segment, we move back to the
+            // start of the segment and set the value of the 2-byte DSS
+            // continuation header, which needs to hold the length of
+            // this segment's data, together with the continuation flag
+            // if this is not the rightmost (passOne) segment.
+            //
+            // In general, each segment except the rightmost will contain
+            // 32765 bytes of data, plus the 2-byte header, and its
+            // continuation flag will be set, so the header value will
+            // be 0xFFFF. The rightmost segment will not have the
+            // continuation flag set, so its value may be anything from
+            // 0x0001 to 0x7FFF, depending on the amount of data in that
+            // segment.
+            //
+            // Note that the 0th (leftmost) segment also has a 2-byte
+            // DSS header, which needs to have its continuation flag set.
+            // This is done by resetting the "totalSize" variable below,
+            // at which point that variable no longer holds the total size
+            // of the object, but rather just the length of segment 0. The
+            // total size of the object was written using extended length
+            // bytes by the endDdm() method earlier.
+            //
+            // Additional information about this routine is available in the
+            // bug notes for DERBY-125:
+            // http://issues.apache.org/jira/browse/DERBY-125
+                        
+            // mark passOne to help with calculating the length of the final (first or
+            // rightmost) continuation header.
+            boolean passOne = true;
+            do {
+                // calculate chunk of data to shift
+                int dataToShift = bytesRequiringContDssHeader % 32765;
+                if (dataToShift == 0)
+                    dataToShift = 32765;
+                int startOfCopyData = dataByte - dataToShift + 1;
+                System.arraycopy(bytes,startOfCopyData, bytes, 
+                                 startOfCopyData + shiftSize, dataToShift);
+                dataByte -= dataToShift;
 
 
-		    // calculate the value the value of the 2 byte continuation dss
-		    // header which includes the length of itself.  On the first pass,
-		    // if the length is 32767
-		    // we do not want to set the continuation dss header flag.
-		    int twoByteContDssHeader = dataToShift + 2;
-		    if (passOne)
-			passOne = false;
-		    else
-			{
-			    if (twoByteContDssHeader == DssConstants.MAX_DSS_LENGTH)
-				twoByteContDssHeader = (twoByteContDssHeader |
-							DssConstants.CONTINUATION_BIT);
+                // calculate the value the value of the 2 byte continuation dss
+                // header which includes the length of itself.  On the first pass,
+                // if the length is 32767
+                // we do not want to set the continuation dss header flag.
+                int twoByteContDssHeader = dataToShift + 2;
+                if (passOne)
+                    passOne = false;
+                else {
+                    if (twoByteContDssHeader == DssConstants.MAX_DSS_LENGTH)
+                        twoByteContDssHeader = (twoByteContDssHeader |
+                                                DssConstants.CONTINUATION_BIT);
 
-			}
+                }
 
-		    // insert the header's length bytes
-		    bytes[dataByte + shiftSize - 1] = (byte)
-			((twoByteContDssHeader >>> 8) & 0xff);
-		    bytes[dataByte + shiftSize] = (byte)
-			(twoByteContDssHeader & 0xff);
+                // insert the header's length bytes
+                bytes[dataByte + shiftSize - 1] = (byte)
+                    ((twoByteContDssHeader >>> 8) & 0xff);
+                bytes[dataByte + shiftSize] = (byte)
+                    (twoByteContDssHeader & 0xff);
 
-		    // adjust the bytesRequiringContDssHeader and the amount to shift for
-		    // data in upstream headers.
-		    bytesRequiringContDssHeader -= dataToShift;
-		    shiftSize -= 2;
+                // adjust the bytesRequiringContDssHeader and the amount to shift for
+                // data in upstream headers.
+                bytesRequiringContDssHeader -= dataToShift;
+                shiftSize -= 2;
 
-		    // shift and insert another header for more data.
-		}
-		while (bytesRequiringContDssHeader > 0);
+                // shift and insert another header for more data.
+            } while (bytesRequiringContDssHeader > 0);
 
-		// set the continuation dss header flag on for the first header
-		totalSize = (DssConstants.MAX_DSS_LENGTH |
-			     DssConstants.CONTINUATION_BIT);
+            // set the continuation dss header flag on for the first header
+            totalSize = (DssConstants.MAX_DSS_LENGTH |
+                         DssConstants.CONTINUATION_BIT);
 
 
-	    }
+        }
 
-	// insert the length bytes in the 6 byte dss header.
-	bytes[dssLengthLocation] = (byte) ((totalSize >>> 8) & 0xff);
-	bytes[dssLengthLocation + 1] = (byte) (totalSize & 0xff);
+        // insert the length bytes in the 6 byte dss header.
+        bytes[dssLengthLocation] = (byte) ((totalSize >>> 8) & 0xff);
+        bytes[dssLengthLocation + 1] = (byte) (totalSize & 0xff);
     }
 
-    protected void writeExtendedLength(long size)
-    {
-	int numbytes = calculateExtendedLengthByteCount(size);
-	if (size > 0)
-	    writeInt(0x8000 | numbytes);
-	else
-	    writeInt(numbytes);
+    protected void writeExtendedLength(long size) {
+        int numbytes = calculateExtendedLengthByteCount(size);
+        if (size > 0)
+            writeInt(0x8000 | numbytes);
+        else
+            writeInt(numbytes);
     }
 
 
@@ -1559,26 +1478,25 @@ class DDMWriter
      *
      * @param ddmSize - size of DDM command
      * @return minimum number of extended length bytes needed. 0 indicates no
-     * 	extended length needed.
+     *  extended length needed.
      */
-    private int calculateExtendedLengthByteCount (long ddmSize)
-    {
-	if (ddmSize <= 0x7fff)
-	    return 0;
-	// JCC does not support 2 at this time, so we always send
-	// at least 4
-	//		else if (ddmSize <= 0xffff)
-	//	return 2;
-	else if (ddmSize <= 0xffffffffL)
-	    return 4;
-	else if (ddmSize <= 0xffffffffffffL)
-	    return 6;
-	else if (ddmSize <= 0x7fffffffffffffffL)
-	    return 8;
-	else
-	    // shouldn't happen
-	    // XXX - add sanity debug stuff here
-	    return 0;
+    private int calculateExtendedLengthByteCount (long ddmSize) {
+        if (ddmSize <= 0x7fff)
+            return 0;
+        // JCC does not support 2 at this time, so we always send
+        // at least 4
+        //              else if (ddmSize <= 0xffff)
+        //      return 2;
+        else if (ddmSize <= 0xffffffffL)
+            return 4;
+        else if (ddmSize <= 0xffffffffffffL)
+            return 6;
+        else if (ddmSize <= 0x7fffffffffffffffL)
+            return 8;
+        else
+            // shouldn't happen
+            // XXX - add sanity debug stuff here
+            return 0;
     }
 
     /**
@@ -1586,18 +1504,16 @@ class DDMWriter
      *
      * @param length space required
      */
-    private void ensureLength (int length)
-    {
-	length += offset;
-	if (length > bytes.length) {
-	    if (SanityManager.DEBUG)
-		{
-		    agent.trace("DANGER - Expensive expansion of  buffer");
-		}
-	    byte newBytes[] = new byte[Math.max (bytes.length << 1, length)];
-	    System.arraycopy (bytes, 0, newBytes, 0, offset);
-	    bytes = newBytes;
-	}
+    private void ensureLength (int length) {
+        length += offset;
+        if (length > bytes.length) {
+            if (SanityManager.DEBUG) {
+                agent.trace("DANGER - Expensive expansion of  buffer");
+            }
+            byte newBytes[] = new byte[Math.max (bytes.length << 1, length)];
+            System.arraycopy (bytes, 0, newBytes, 0, offset);
+            bytes = newBytes;
+        }
     }
 
 
@@ -1611,48 +1527,44 @@ class DDMWriter
      * @exception SQLException Thrown if # digits > 31
      */
     private int bigDecimalToPackedDecimalBytes (java.math.BigDecimal b,
-						int precision, int scale)
-	throws SQLException
-    {
-	int declaredPrecision = precision;
-	int declaredScale = scale;
+                                                int precision, int scale)
+        throws SQLException {
+        int declaredPrecision = precision;
+        int declaredScale = scale;
 
-	// packed decimal may only be up to 31 digits.
-	if (declaredPrecision > 31) // this is a bugcheck only !!!
-	    {
-		clearDdm ();
-		throw new java.sql.SQLException ("Packed decimal may only be up to 31 digits!");
-	    }
+        // packed decimal may only be up to 31 digits.
+        if (declaredPrecision > 31) { // this is a bugcheck only !!! 
+            clearDdm ();
+            throw new java.sql.SQLException ("Packed decimal may only be up to 31 digits!");
+        }
 
-	// get absolute unscaled value of the BigDecimal as a String.
-	String unscaledStr = b.unscaledValue().abs().toString();
+        // get absolute unscaled value of the BigDecimal as a String.
+        String unscaledStr = b.unscaledValue().abs().toString();
 
-	// get precision of the BigDecimal.
-	int bigPrecision = unscaledStr.length();
+        // get precision of the BigDecimal.
+        int bigPrecision = unscaledStr.length();
 
-	if (bigPrecision > 31)
-	    {
-		clearDdm ();
-		throw new SQLException ("The numeric literal \"" +
-					b.toString() +
-					"\" is not valid because its value is out of range.",
-					"42820",
-					-405);
-	    }
-    	int bigScale = b.scale();
-	int bigWholeIntegerLength = bigPrecision - bigScale;
-	if ( (bigWholeIntegerLength > 0) && (!unscaledStr.equals ("0")) ) {
+        if (bigPrecision > 31) {
+            clearDdm ();
+            throw new SQLException ("The numeric literal \"" +
+                                    b.toString() +
+                                    "\" is not valid because its value is out of range.",
+                                    "42820",
+                                    -405);
+        }
+        int bigScale = b.scale();
+        int bigWholeIntegerLength = bigPrecision - bigScale;
+        if ( (bigWholeIntegerLength > 0) && (!unscaledStr.equals ("0")) ) {
             // if whole integer part exists, check if overflow.
             int declaredWholeIntegerLength = declaredPrecision - declaredScale;
-            if (bigWholeIntegerLength > declaredWholeIntegerLength)
-		{
-		    clearDdm ();
-		    throw new SQLException ("Overflow occurred during numeric data type conversion of \"" +
-					    b.toString() +
-					    "\".",
-					    "22003",
-					    -413);
-		}
+            if (bigWholeIntegerLength > declaredWholeIntegerLength) {
+                clearDdm ();
+                throw new SQLException ("Overflow occurred during numeric data type conversion of \"" +
+                                        b.toString() +
+                                        "\".",
+                                        "22003",
+                                        -413);
+            }
         }
 
         // convert the unscaled value to a packed decimal bytes.
@@ -1667,70 +1579,67 @@ class DDMWriter
         int bigIndex;
 
         if (bigScale >= declaredScale) {
-	    // If target scale is less than source scale,
-	    // discard excessive fraction.
+            // If target scale is less than source scale,
+            // discard excessive fraction.
 
-	    // set start index in source big decimal to ignore excessive fraction.
-	    bigIndex = bigPrecision-1-(bigScale-declaredScale);
+            // set start index in source big decimal to ignore excessive fraction.
+            bigIndex = bigPrecision-1-(bigScale-declaredScale);
 
-	    if (bigIndex < 0) {
-		// all digits are discarded, so only process the sign nybble.
-		bytes[offset+(packedIndex+1)/2] =
-		    (byte) ( (b.signum()>=0)?12:13 ); // sign nybble
-	    }
-	    else {
-		// process the last nybble together with the sign nybble.
-		bytes[offset+(packedIndex+1)/2] =
-		    (byte) ( ( (unscaledStr.charAt(bigIndex)-zeroBase) << 4 ) + // last nybble
-			     ( (b.signum()>=0)?12:13 ) ); // sign nybble
-	    }
-	    packedIndex-=2;
-	    bigIndex-=2;
-        }
-        else {
-	    // If target scale is greater than source scale,
-	    // pad the fraction with zero.
+            if (bigIndex < 0) {
+                // all digits are discarded, so only process the sign nybble.
+                bytes[offset+(packedIndex+1)/2] =
+                    (byte) ( (b.signum()>=0)?12:13 ); // sign nybble
+            } else {
+                // process the last nybble together with the sign nybble.
+                bytes[offset+(packedIndex+1)/2] =
+                    (byte) ( ( (unscaledStr.charAt(bigIndex)-zeroBase) << 4 ) + // last nybble
+                             ( (b.signum()>=0)?12:13 ) ); // sign nybble
+            }
+            packedIndex-=2;
+            bigIndex-=2;
+        } else {
+            // If target scale is greater than source scale,
+            // pad the fraction with zero.
 
-	    // set start index in source big decimal to pad fraction with zero.
-	    bigIndex = declaredScale-bigScale-1;
+            // set start index in source big decimal to pad fraction with zero.
+            bigIndex = declaredScale-bigScale-1;
 
-	    // process the sign nybble.
-	    bytes[offset+(packedIndex+1)/2] =
-		(byte) ( (b.signum()>=0)?12:13 ); // sign nybble
+            // process the sign nybble.
+            bytes[offset+(packedIndex+1)/2] =
+                (byte) ( (b.signum()>=0)?12:13 ); // sign nybble
 
-	    for (packedIndex-=2, bigIndex-=2; bigIndex>=0; packedIndex-=2, bigIndex-=2)
-		bytes[offset+(packedIndex+1)/2] = (byte) 0;
+            for (packedIndex-=2, bigIndex-=2; bigIndex>=0; packedIndex-=2, bigIndex-=2)
+                bytes[offset+(packedIndex+1)/2] = (byte) 0;
 
-	    if (bigIndex == -1) {
-		bytes[offset+(packedIndex+1)/2] =
-		    (byte) ( (unscaledStr.charAt(bigPrecision-1)-zeroBase) << 4 ); // high nybble
+            if (bigIndex == -1) {
+                bytes[offset+(packedIndex+1)/2] =
+                    (byte) ( (unscaledStr.charAt(bigPrecision-1)-zeroBase) << 4 ); // high nybble
 
-		packedIndex-=2;
-		bigIndex = bigPrecision-3;
-	    }
-	    else {
-		bigIndex = bigPrecision-2;
-	    }
+                packedIndex-=2;
+                bigIndex = bigPrecision-3;
+            } else {
+                bigIndex = bigPrecision-2;
+            }
         }
 
         // process the rest.
         for (; bigIndex>=0; packedIndex-=2, bigIndex-=2) {
-	    bytes[offset+(packedIndex+1)/2] =
-		(byte) ( ( (unscaledStr.charAt(bigIndex)-zeroBase) << 4 ) + // high nybble
-			 ( unscaledStr.charAt(bigIndex+1)-zeroBase ) ); // low nybble
+            bytes[offset+(packedIndex+1)/2] =
+                (byte) ( ( (unscaledStr.charAt(bigIndex)-zeroBase) << 4 ) + // high nybble
+                         ( unscaledStr.charAt(bigIndex+1)-zeroBase ) ); // low nybble
         }
 
         // process the first nybble when there is one left.
         if (bigIndex == -1) {
-	    bytes[offset+(packedIndex+1)/2] =
-		(byte) (unscaledStr.charAt(0) - zeroBase);
+            bytes[offset+(packedIndex+1)/2] =
+                (byte) (unscaledStr.charAt(0) - zeroBase);
 
-	    packedIndex-=2;
+            packedIndex-=2;
         }
 
         // pad zero in front of the big decimal if necessary.
         for (; packedIndex>=-1; packedIndex-=2)
-	    bytes[offset+(packedIndex+1)/2] = (byte) 0;
+            bytes[offset+(packedIndex+1)/2] = (byte) 0;
 
         return declaredPrecision/2 + 1;
     }
@@ -1744,81 +1653,73 @@ class DDMWriter
      *
      * @return zero padded string
      */
-    public static String zeroPadString(String s, int precision)
-    {
+    public static String zeroPadString(String s, int precision) {
 
-	if (s == null)
-	    return s;
+        if (s == null)
+            return s;
 
-	int slen = s.length();
-	if (precision == slen)
-	    return s;
-	else if (precision > slen)
-	    {
-		char[] ca  = new char[precision - slen];
-		Arrays.fill(ca,0,precision - slen,'0');
-		return new String(ca) + s;
-	    }
-	else
-	    {
-		// Shouldn't happen but just in case 
-		// truncate
-		return s.substring(0,precision);
-	    }
+        int slen = s.length();
+        if (precision == slen)
+            return s;
+        else if (precision > slen) {
+            char[] ca  = new char[precision - slen];
+            Arrays.fill(ca,0,precision - slen,'0');
+            return new String(ca) + s;
+        } else {
+            // Shouldn't happen but just in case 
+            // truncate
+            return s.substring(0,precision);
+        }
 
     }
 
     
     private void sendBytes (java.io.OutputStream socketOutputStream) 
-	throws java.io.IOException{
-	
-	sendBytes(socketOutputStream,
-		  true);
-	
+        throws java.io.IOException{
+        
+        sendBytes(socketOutputStream,
+                  true);
+        
     }
     
 
     private void sendBytes (java.io.OutputStream socketOutputStream,
-			    boolean flashStream ) 
-	throws java.io.IOException
-    {
-	resetChainState();
-	try {
-	    socketOutputStream.write (bytes, 0, offset);
-	    if(flashStream)
-		socketOutputStream.flush();
-	}
-	finally {
-	    if ((dssTrace != null) && dssTrace.isComBufferTraceOn()) {
-		dssTrace.writeComBufferData (bytes,
-					     0,
-					     offset,
-					     DssTrace.TYPE_TRACE_SEND,
-					     "Reply",
-					     "flush",
-					     5);
-	    }
-	    clearBuffer();
-	}
+                            boolean flashStream ) 
+        throws java.io.IOException{
+        resetChainState();
+        try {
+            socketOutputStream.write (bytes, 0, offset);
+            if(flashStream)
+                socketOutputStream.flush();
+        } finally {
+            if ((dssTrace != null) && dssTrace.isComBufferTraceOn()) {
+                dssTrace.writeComBufferData (bytes,
+                                             0,
+                                             offset,
+                                             DssTrace.TYPE_TRACE_SEND,
+                                             "Reply",
+                                             "flush",
+                                             5);
+            }
+            clearBuffer();
+        }
     }
 
-    protected String toDebugString(String indent)
-    {
-	String s = indent + "***** DDMWriter toDebugString ******\n";
-	int byteslen = 0;
-	if ( bytes != null)
-	    byteslen = bytes.length;
-	s += indent + "byte array length  = " + bytes.length + "\n";
-	return s;
+    protected String toDebugString(String indent) {
+        String s = indent + "***** DDMWriter toDebugString ******\n";
+        int byteslen = 0;
+        if ( bytes != null)
+            byteslen = bytes.length;
+        s += indent + "byte array length  = " + bytes.length + "\n";
+        return s;
     }
 
     /**
      * Reset any chaining state that needs to be reset
      * at time of the send
      */
-    protected void resetChainState()
-    {
-	prevHdrLocation = -1;
+    protected void resetChainState() {
+        prevHdrLocation = -1;
     }
 
     /**
@@ -1828,24 +1729,23 @@ class DDMWriter
      */
     private int getCorrelationID() {
 
-	int cId;
-	if (previousCorrId != DssConstants.CORRELATION_ID_UNKNOWN) {
-	    if (previousChainByte == DssConstants.DSSCHAIN_SAME_ID)
-		// then we have to use the last correlation id we sent.
-		cId = previousCorrId;
-	    else
-		// get correlation id as normal.
-		cId = nextCorrelationID++;
-	}
-	else {
-	    // must be the case that this is the first DSS we're
-	    // writing for this connection (because we haven't
-	    // called "endDss" yet).  So, get the corr id as
-	    // normal.
-	    cId = nextCorrelationID++;
-	}
+        int cId;
+        if (previousCorrId != DssConstants.CORRELATION_ID_UNKNOWN) {
+            if (previousChainByte == DssConstants.DSSCHAIN_SAME_ID)
+                // then we have to use the last correlation id we sent.
+                cId = previousCorrId;
+            else
+                // get correlation id as normal.
+                cId = nextCorrelationID++;
+        } else {
+            // must be the case that this is the first DSS we're
+            // writing for this connection (because we haven't
+            // called "endDss" yet).  So, get the corr id as
+            // normal.
+            cId = nextCorrelationID++;
+        }
 
-	return cId;
+        return cId;
 
     }
 
@@ -1861,46 +1761,46 @@ class DDMWriter
      * @param socketOutputStream Output stream to which we're flushing.
      */
     protected void finalizeChain(byte currChainByte,
-				 OutputStream socketOutputStream) throws DRDAProtocolException
-    {
+                                 OutputStream socketOutputStream) 
+        throws DRDAProtocolException {
 
-	// Go back to previous DSS and override the default
-	// chain state (WITH_SAME_ID) with whatever the last
-	// request dictates.
+        // Go back to previous DSS and override the default
+        // chain state (WITH_SAME_ID) with whatever the last
+        // request dictates.
 
-	if (prevHdrLocation != -1) {
-	    // Note: == -1 => the previous DSS was already sent; this
-	    // should only happen in cases where the buffer filled up
-	    // and we had to send it (which means we were probably
-	    // writing EXTDTA).  In such cases, proper chaining
-	    // should already have been handled @ time of send.
-	    bytes[prevHdrLocation + 3] &= 0x0F;	// Zero out old chain value.
-	    bytes[prevHdrLocation + 3] |= currChainByte;
-	}
+        if (prevHdrLocation != -1) {
+            // Note: == -1 => the previous DSS was already sent; this
+            // should only happen in cases where the buffer filled up
+            // and we had to send it (which means we were probably
+            // writing EXTDTA).  In such cases, proper chaining
+            // should already have been handled @ time of send.
+            bytes[prevHdrLocation + 3] &= 0x0F; // Zero out old chain value.
+            bytes[prevHdrLocation + 3] |= currChainByte;
+        }
 
-	// previousChainByte needs to match what we just did.
-	previousChainByte = currChainByte;
+        // previousChainByte needs to match what we just did.
+        previousChainByte = currChainByte;
 
-	if (currChainByte != DssConstants.DSS_NOCHAIN)
-	    // then we're still inside a chain, so don't send.
-	    return;
+        if (currChainByte != DssConstants.DSS_NOCHAIN)
+            // then we're still inside a chain, so don't send.
+            return;
 
-	// Else, we just ended the chain, so send it across.
+        // Else, we just ended the chain, so send it across.
 
-	if ((SanityManager.DEBUG) && (agent != null))
-	    agent.trace("Sending data");
+        if ((SanityManager.DEBUG) && (agent != null))
+            agent.trace("Sending data");
 
-	resetChainState();
-	if (doesRequestContainData()) {
-	    try {
-		flush(socketOutputStream);
-	    } catch (java.io.IOException e) {
-		agent.markCommunicationsFailure(
-						"DDMWriter.finalizeChain()",
-						"OutputStream.flush()",
-						e.getMessage(),"*");
-	    }
-	}
+        resetChainState();
+        if (doesRequestContainData()) {
+            try {
+                flush(socketOutputStream);
+            } catch (java.io.IOException e) {
+                agent.markCommunicationsFailure(
+                                                "DDMWriter.finalizeChain()",
+                                                "OutputStream.flush()",
+                                                e.getMessage(),"*");
+            }
+        }
 
     }
 
@@ -1911,11 +1811,10 @@ class DDMWriter
      * to allow for DRDAConnThread to "back-out" DSSes in the
      * event of errors.
      */
-    protected int markDSSClearPoint()
-    {
+    protected int markDSSClearPoint() {
 
-	lastDSSBeforeMark = prevHdrLocation;
-	return offset;
+        lastDSSBeforeMark = prevHdrLocation;
+        return offset;
 
     }
 
@@ -1930,61 +1829,61 @@ class DDMWriter
      * just do the necessary prep so that whatever comes next will
      * succeed.
      */
-    protected void clearDSSesBackToMark(int mark)
-    {
+    protected void clearDSSesBackToMark(int mark) {
 
-	// Logical clear.
-	offset = mark;
+        // Logical clear.
+        offset = mark;
 
-	// Because we've just cleared out the most recently-
-	// written DSSes, we have to make sure the next thing
-	// we write will have the correct correlation id.  We
-	// do this by setting the value of 'nextCorrelationID'
-	// based on the chaining byte from the last remaining
-	// DSS (where "remaining" means that it still exists
-	// in the buffer after the clear).
-	if (lastDSSBeforeMark == -1)
-	    // we cleared out the entire buffer; reset corr id.
-	    nextCorrelationID = 1;
-	else {
-	    // last remaining DSS had chaining, so we set "nextCorrelationID"
-	    // to be 1 greater than whatever the last remaining DSS had as
-	    // its correlation id.
-	    nextCorrelationID = 1 + (int)
-		(((bytes[lastDSSBeforeMark + 4] & 0xff) << 8) +
-		 (bytes[lastDSSBeforeMark + 5] & 0xff));
-	}
+        // Because we've just cleared out the most recently-
+        // written DSSes, we have to make sure the next thing
+        // we write will have the correct correlation id.  We
+        // do this by setting the value of 'nextCorrelationID'
+        // based on the chaining byte from the last remaining
+        // DSS (where "remaining" means that it still exists
+        // in the buffer after the clear).
+        if (lastDSSBeforeMark == -1)
+            // we cleared out the entire buffer; reset corr id.
+            nextCorrelationID = 1;
+        else {
+            // last remaining DSS had chaining, so we set "nextCorrelationID"
+            // to be 1 greater than whatever the last remaining DSS had as
+            // its correlation id.
+            nextCorrelationID = 1 + (int)
+                (((bytes[lastDSSBeforeMark + 4] & 0xff) << 8) +
+                 (bytes[lastDSSBeforeMark + 5] & 0xff));
+        }
 
     }
 
-	
-    private static int peekStream(InputStream in) throws IOException{
-	    
-	in.mark(1);
+        
+    private static int peekStream(InputStream in) 
+        throws IOException{
+            
+        in.mark(1);
 
-	try{
-	    return in.read();
-	    
-	}finally{
-	    in.reset();
-	    
-	}
+        try{
+            return in.read();
+            
+        }finally{
+            in.reset();
+            
+        }
     }
 
     
     private static int getLayerBStreamingBufferSize(){
-	return PropertyUtil.getSystemInt( Property.DRDA_PROP_STREAMOUTBUFFERSIZE , 0 );
+        return PropertyUtil.getSystemInt( Property.DRDA_PROP_STREAMOUTBUFFERSIZE , 0 );
     }
     
     
     private static OutputStream placeLayerBStreamingBuffer(OutputStream original){
-	
-	int size = getLayerBStreamingBufferSize();
-	
-	if(size < 1)
-	    return original;
-	else
-	    return new BufferedOutputStream( original, size );
+        
+        int size = getLayerBStreamingBufferSize();
+        
+        if(size < 1)
+            return original;
+        else
+            return new BufferedOutputStream( original, size );
 
     }
     
