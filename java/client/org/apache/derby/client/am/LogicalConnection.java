@@ -72,7 +72,9 @@ public class LogicalConnection implements java.sql.Connection {
 
             if (physicalConnection_.isClosed()) // connection is closed or has become stale
             {
-                pooledConnection_.trashConnection(new SqlException(null, "Connection is stale."));
+                pooledConnection_.trashConnection(new SqlException(null, 
+                    new ClientMessageId(
+                        SQLState.PHYSICAL_CONNECTION_ALREADY_CLOSED)));
             } else {
                 physicalConnection_.closeForReuse();
                 if (!physicalConnection_.isGlobalPending_()) {

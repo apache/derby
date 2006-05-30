@@ -20,6 +20,8 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 public class DisconnectException extends SqlException {
     public DisconnectException(Agent agent, ClientMessageId msgid,
         Object[] args, SqlCode sqlcode, Throwable t)  {
@@ -70,46 +72,9 @@ public class DisconnectException extends SqlException {
         this(agent, msgid, new Object[] { arg1, arg2 });
     }
     
-    // Old constructors for backward compatibility until all classes
-    // have been internationalized
-    public DisconnectException(Agent agent, String reason, SqlState sqlstate, SqlCode sqlcode) {
-        super(agent.logWriter_, reason, sqlstate, sqlcode);
-    }
-
-    public DisconnectException(Agent agent, String reason, SqlState sqlstate) {
-        super(agent.logWriter_, reason, sqlstate, SqlCode.disconnectError);
-        // make the call to close the streams and socket.
-        if (agent != null) {
-            agent.disconnectEvent();
-        }
-    }
-
-    public DisconnectException(java.lang.Throwable throwable, Agent agent, String reason, SqlState sqlstate) {
-        super(agent.logWriter_, throwable, reason, sqlstate, SqlCode.disconnectError);
-        // make the call to close the streams and socket.
-        if (agent != null) {
-            agent.disconnectEvent();
-        }
-    }
-
-    public DisconnectException(Agent agent) {
-        this(agent, (String)null, SqlState.undefined);
-    }
-
-    public DisconnectException(java.lang.Throwable throwable, Agent agent) {
-        this(throwable, agent, null, SqlState.undefined);
-    }
-
-    public DisconnectException(Agent agent, String reason) {
-        this(agent, reason, SqlState.undefined);
-    }
-
-    public DisconnectException(Throwable throwable, Agent agent, String reason) {
-        this(throwable, agent, reason, SqlState.undefined);
-    }
-
     public DisconnectException(Agent agent, SqlException e) {
-        this(agent, e.getMessage());
-        setNextException(e);
+        super(agent.logWriter_,
+            new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+            e.getMessage(), e);
     }
 }

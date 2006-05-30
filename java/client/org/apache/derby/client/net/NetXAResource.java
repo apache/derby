@@ -53,6 +53,8 @@ import javax.transaction.xa.Xid;
 import org.apache.derby.client.ClientXid;
 import org.apache.derby.client.am.Connection;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetXAResource implements XAResource {
     public static final int TMTIMEOUT = 0x00000100;
@@ -869,7 +871,8 @@ public class NetXAResource implements XAResource {
 
     private void connectionClosedFailure() throws XAException { // throw an XAException XAER_RMFAIL, with a chained SqlException - closed
         exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
-                (new SqlException(null, "Connection is Closed."),
+                (new SqlException(null, 
+                        new ClientMessageId(SQLState.NO_CURRENT_CONNECTION)),
                         exceptionsOnXA);
         throwXAException(javax.transaction.xa.XAException.XAER_RMFAIL);
     }
@@ -902,12 +905,11 @@ public class NetXAResource implements XAResource {
 
         if (rc != XAResource.XA_OK) { // error was detected
             // create an SqlException to report this error within
-            String xaRetValStr = "Error executing a " +
-                    getXAFuncStr(callInfo.xaFunction_) + ", " +
-                    "Server returned " + getXAExceptionText(rc);
             SqlException accumSql = new SqlException(conn_.netAgent_.logWriter_,
-                    xaRetValStr, org.apache.derby.client.am.SqlState.undefined,
-                    org.apache.derby.client.am.SqlCode.queuedXAError);
+                new ClientMessageId(SQLState.NET_XARETVAL_ERROR),
+                getXAFuncStr(callInfo.xaFunction_),
+                getXAExceptionText(rc),
+                org.apache.derby.client.am.SqlCode.queuedXAError);
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
                     (accumSql, exceptionsOnXA);
 

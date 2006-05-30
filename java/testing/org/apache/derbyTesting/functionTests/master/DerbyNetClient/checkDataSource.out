@@ -536,13 +536,13 @@ sruBatch update counts : 1  1  2  1 :
 sruBatch: mismatched Statement connection
 sruBatch: ru(SQL_CURLH000C) contents {1} {2} {3} {4} {5} {6} {7} {8}
 XAConnection.getConnection : getConnection() is not valid on a closed PooledConnection.
-XAResource.start : XAException - XAER_RMFAIL : Connection is Closed.
-XAResource.end : XAException - XAER_RMFAIL : Connection is Closed.
-XAResource.commit : XAException - XAER_RMFAIL : Connection is Closed.
-XAResource.prepare : XAException - XAER_RMFAIL : Connection is Closed.
-XAResource.recover : XAException - XAER_RMFAIL : Connection is Closed.
-XAResource.prepare : XAException - XAER_RMFAIL : Connection is Closed.
-XAResource.isSameRM : XAException - XAER_RMFAIL : Connection is Closed.
+XAResource.start : XAException - XAER_RMFAIL : No current connection.
+XAResource.end : XAException - XAER_RMFAIL : No current connection.
+XAResource.commit : XAException - XAER_RMFAIL : No current connection.
+XAResource.prepare : XAException - XAER_RMFAIL : No current connection.
+XAResource.recover : XAException - XAER_RMFAIL : No current connection.
+XAResource.prepare : XAException - XAER_RMFAIL : No current connection.
+XAResource.isSameRM : XAException - XAER_RMFAIL : No current connection.
 Patricio update count 1
 conn4 autcommit true
 acxs 1
@@ -550,7 +550,7 @@ acxs 2
 autocommitxastart expected ResultSet not open.  Verify that autocommit is OFF.
 acxs 1
 acxs 2
-autocommitxastart expected  : XAException - XAER_OUTSIDE : Error executing a XAResource.start(), Server returned XAER_OUTSIDE
+autocommitxastart expected  : XAException - XAER_OUTSIDE : Error executing a XAResource.start(), server returned XAER_OUTSIDE.
 Expected XA error code: -9
 acxs 3
 testing jira 95 for DataSource; ok - expected exception: XCY00

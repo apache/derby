@@ -1532,6 +1532,7 @@ public interface SQLState {
     String NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION                = "XN016.S";
     String NET_PREMATURE_EOS                                        = "XN017.S";
     String NET_READER_LENGTH_TOO_SMALL                              = "XN018.S";
+    String NET_XARETVAL_ERROR                                       = "XN019.S";
     
     // Used by server for scrollable updatable insensitive result sets
     // to transmit updated state to client. Internal, not seen by user.
@@ -1560,8 +1561,6 @@ public interface SQLState {
 	String INVALID_LISTEN_TYPE = "X0RQ6.S";
     
     // Connection exceptions - SQL State class 08
-    //following are database severity
-    String NO_CURRENT_CONNECTION = "08003";
     
     // 08004 SQL State means the server rejected the connection request
     String LOGIN_FAILED = "08004";
@@ -1572,8 +1571,11 @@ public interface SQLState {
     // to SQL2003 spec means "connection does not exist"
     // We use a suffix to distinguish them.  Because of the suffix
     // you *must* add a severity code
+    String NO_CURRENT_CONNECTION = "08003";
     String NOGETCONN_ON_CLOSED_POOLED_CONNECTION = "08003.C.1";
     String LOB_METHOD_ON_CLOSED_CONNECTION = "08003.C.2";
+    String PHYSICAL_CONNECTION_ALREADY_CLOSED = "08003.C.3";
+
     
     // 08006 means connection exception - connection failure
     String CONNECTION_FAILED_ON_RESET                           = "08006.C.1";
@@ -1677,6 +1679,9 @@ public interface SQLState {
     String NET_DSS_CHAINED_WITH_SAME_ID                             = "58009.C.16";
     String NET_PREMATURE_EOS_DISCONNECT                             = "58009.C.17";
     String NET_INVALID_FDOCA_ID                                     = "58009.C.18";
+    String NET_SECTKN_NOT_RETURNED                                  = "58009.C.19";
+    String NET_NVCM_NVCS_BOTH_NON_NULL                              = "58009.C.20";
+    String NET_SQLCDTA_INVALID_FOR_RDBNAM                           = "58009.C.21";
 
     String DRDA_MGRLVLRM                                            = "58010.C";
     String DRDA_DDM_COMMAND_NOT_SUPPORTED                           = "58014.C";

@@ -204,7 +204,7 @@ public class Configuration {
                     new ClientMessageId (SQLState.ERROR_PRIVILEGED_ACTION),
                     e.getException());                    
         } catch (java.io.IOException ioe) {
-            throw new SqlException(null, ioe, null);
+            throw SqlException.javaException(null, ioe);
         }
     }
 

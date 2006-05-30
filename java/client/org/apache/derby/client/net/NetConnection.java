@@ -466,7 +466,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 exceptionToBeThrown = (SqlException) e;
             } else // any other exceptions will be wrapped by an SqlException first
             {
-                exceptionToBeThrown = new SqlException(agent_.logWriter_, e, "Unexpected throwable caught " + e.toString());
+                exceptionToBeThrown = new SqlException(agent_.logWriter_, 
+                    new ClientMessageId(SQLState.JAVA_EXCEPTION),
+                    e.getClass().getName(), e.getMessage(), e);
             }
 
             try {
@@ -926,7 +928,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
                     // a security token is required for USRENCPWD, or EUSRIDPWD.
                     if (!sectknReceived) {
-                        agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_, "secktn was not returned "));
+                        agent_.accumulateChainBreakingReadExceptionAndThrow(
+                            new DisconnectException(agent_, 
+                                new ClientMessageId(SQLState.NET_SECTKN_NOT_RETURNED)));
                     } else {
                         targetPublicKey_ = sectkn;
                         if (encryptionManager_ != null) {

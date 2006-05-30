@@ -1251,7 +1251,9 @@ public class LogWriter {
                 	properties.setProperty(propertyKey, value);
             }
         } catch (NamingException e) {
-            throw new SqlException(this, e.toString());
+            throw new SqlException(this, 
+                new ClientMessageId(SQLState.JAVA_EXCEPTION),
+                e.getClass().getName(), e.getMessage(), e);
         }
         
         return properties;

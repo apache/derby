@@ -241,7 +241,7 @@ public class Blob extends Lob implements java.sql.Blob {
         try {
             return binaryStringPosition(pattern.getBytes(1L, (int) pattern.length()), start);
         } catch (java.sql.SQLException e) {
-            throw new SqlException(agent_.logWriter_, e.getMessage());
+            throw new SqlException(e);
         }
     }
 

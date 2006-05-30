@@ -267,13 +267,13 @@ public class SqlException extends Exception implements Diagnosable {
     
     // Once all messages are internationalized, these methods should become
     // private
-    public SqlException(LogWriter logWriter, String reason, String sqlState,
+    protected SqlException(LogWriter logWriter, String reason, String sqlState,
         int errorCode)
     {
         this(logWriter, (Throwable)null, reason, sqlState, errorCode);
     }
 
-    public SqlException(LogWriter logWriter, java.lang.Throwable throwable, 
+    protected SqlException(LogWriter logWriter, java.lang.Throwable throwable, 
         String reason, String sqlState, int errorCode ) {
         message_ = reason;
         sqlstate_ = sqlState;
@@ -334,52 +334,7 @@ public class SqlException extends Exception implements Diagnosable {
     {
         wrappedException_ = wrapme;
     }
-            
-    // Constructors for backward-compatibility while we're internationalizng
-    // all the messages.  These should be removed once internationalization is
-    // complete
-    public SqlException(LogWriter logWriter) {
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    public SqlException(LogWriter logWriter, String reason) {
-        this(logWriter, reason, null, DEFAULT_ERRCODE);
-    }
-
-    public SqlException(LogWriter logWriter, java.lang.Throwable throwable, String reason) {
-        this(logWriter, throwable, reason, null, DEFAULT_ERRCODE);
-    }
-
-    public SqlException(LogWriter logWriter, java.lang.Throwable throwable, String reason, SqlState sqlstate) {
-        this(logWriter, throwable, reason, sqlstate.getState(), DEFAULT_ERRCODE);
-    }
-
-    public SqlException(LogWriter logWriter, java.lang.Throwable throwable, String reason, String sqlstate) {
-        this(logWriter, throwable, reason, sqlstate, DEFAULT_ERRCODE);
-    }
-
-    public SqlException(LogWriter logWriter, String reason, SqlState sqlState) {
-        this(logWriter, reason, sqlState.getState(), DEFAULT_ERRCODE);
-    }
-
-    public SqlException(LogWriter logWriter, String reason, String sqlState) {
-        this(logWriter, reason, sqlState, DEFAULT_ERRCODE);
-    }
-
-    public SqlException(LogWriter logWriter, String reason, SqlState sqlState, SqlCode errorCode) {
-        this(logWriter, reason, sqlState.getState(), errorCode.getCode());
-    }
-    
-
-    public SqlException(LogWriter logWriter, java.lang.Throwable throwable, String reason, SqlState sqlState, SqlCode errorCode) {
-        this(logWriter, throwable, reason, sqlState.getState(), 
-            errorCode.getCode());
-    }
-
-    //--- End backward-compatibility constructors ----------------------
-    
+                
     
     /**
      * Convert this SqlException into a java.sql.SQLException

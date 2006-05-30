@@ -710,7 +710,9 @@ final class CrossConverters {
                     read = is.read();
                 }
             } catch (java.io.IOException e) {
-                throw new SqlException(agent_.logWriter_, e, null);
+                throw new SqlException(agent_.logWriter_, 
+                    new ClientMessageId(SQLState.JAVA_EXCEPTION),
+                    e.getClass().getName(), e.getMessage(), e);
             }
 
             if (length != totalRead) {
@@ -782,7 +784,7 @@ final class CrossConverters {
                 		new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
         } catch (java.io.IOException e) {
-            throw new SqlException(agent_.logWriter_, e, null);
+            throw SqlException.javaException(agent_.logWriter_, e);
         }
         return baos.toByteArray();
     }

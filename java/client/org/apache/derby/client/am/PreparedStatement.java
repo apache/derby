@@ -1954,8 +1954,7 @@ public class PreparedStatement extends Statement
         catch (SqlException e) { // for chain-breaking exception only
             chainBreaker = e;
             chainBreaker.setNextException(new SqlException(agent_.logWriter_,
-                    "Non-recoverable chain-breaking exception occurred during batch processing.  " +
-                    "The batch is terminated non-atomically."));
+                new ClientMessageId(SQLState.BATCH_CHAIN_BREAKING_EXCEPTION)));
         }
         // We need to clear the batch before any exception is thrown from agent_.endBatchedReadChain().
         batch_.clear();

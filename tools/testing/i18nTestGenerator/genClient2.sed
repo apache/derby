@@ -1,13 +1,13 @@
-# For those expressions that start with "new ClientMessageId", pre-append
-# a try block and create a SqlException to complete the expression
-/^[[:space:]]*new ClientMessageId/i\
-    try { \
-       testException = new SqlException(null,
-
 # For those expressions that start with "new <something>Exception", pre-append
 # a try block
 /new[[:space:]]*[a-zA-Z]*Exception/i\
     try {
+
+# For those expressions that start with "new ClientMessageId", pre-append
+# a try block and create a SqlException to complete the expression
+/^[[:space:]]*new ClientMessageId.*/i\
+    try { \
+       testException = new SqlException(null, 
 
 # At the end of each statement, check and print out an error
 # if there is a problem
@@ -34,7 +34,8 @@ s/super(//
 # the variable with a string containing the variable.  This prevents
 # compile errors saying "symbol not found"
 #
-s/logWriter/null/g
+s/[([:space:]]logWriter,/null,/g
+s/[([:space:]]logWriter_,/null,/g
 s/fileName/"fileName"/g
 s/[[:space:]]e.getMessage()/"e.getMessage"/g
 s/Configuration.packageNameForDNC/"Configuration.packageNameForDNC"/g
@@ -93,7 +94,11 @@ s/parsePKGNAMCT"))/parsePKGNAMCT")/
 s/[[:space:]]identifier/ "string"/g
 s/[[:space:]]arg2))/ "arg2")/g
 s/[[:space:]]arg1/ "string"/g
-s/agent_/ null/g
+s/[[:space:]]exceptionsOnXA/ testException/g
+s/[[:space:]]getXAFuncStr(.*)/ "string"/g
+s/[[:space:]]getXAExceptionText(.*)/ "string"/g
+s/agent_.logWriter_,/ null,/g
+s/NO_CURRENT_CONNECTION)),/NO_CURRENT_CONNECTION),/g
 
 
 
@@ -113,7 +118,7 @@ s/new Integer[[:space:]]*([^)]*/new Integer(0/g
 s/Integer.toHexString[[:space:]]*([^)]*/Integer.toHexString(0/g
 
 # Get rid of logWriter
-s/new SqlException[[:space:]]*(.*,/new SqlException(null,/g
+#s/new SqlException[[:space:]]*(.*,/new SqlException(null,/g
 
 # Don't throw, just assign
 s/throw new/testException = new/g

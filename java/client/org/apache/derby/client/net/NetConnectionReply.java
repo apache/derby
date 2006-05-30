@@ -3218,8 +3218,10 @@ public class NetConnectionReply extends Reply
                 stringToBeSet = readFastString(vcm_length, netAgent_.targetTypdef_.getCcsidMbcEncoding());
             }
             if (readFastUnsignedByte() != CodePoint.NULLDATA) {
-                agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                        "only one of NVCM, NVCS can be non-none"));
+                agent_.accumulateChainBreakingReadExceptionAndThrow(
+                    new DisconnectException(agent_,
+                        new ClientMessageId(
+                            SQLState.NET_NVCM_NVCS_BOTH_NON_NULL)));
             }
         } else {
             if (readFastUnsignedByte() != CodePoint.NULLDATA) {
@@ -3243,8 +3245,10 @@ public class NetConnectionReply extends Reply
                 skipFastBytes(vcm_length);
             }
             if (readFastUnsignedByte() != CodePoint.NULLDATA) {
-                agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                        "only one of NVCM, NVCS can be non-none"));
+                agent_.accumulateChainBreakingReadExceptionAndThrow(
+                    new DisconnectException(agent_,
+                        new ClientMessageId(
+                            SQLState.NET_NVCM_NVCS_BOTH_NON_NULL)));
             }
         } else {
             if (readFastUnsignedByte() != CodePoint.NULLDATA) {

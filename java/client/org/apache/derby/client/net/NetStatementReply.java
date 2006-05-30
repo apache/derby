@@ -1542,8 +1542,11 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             // get rdbnam
             int scldtaLen = peekFastLength();
             if (scldtaLen < 18 || scldtaLen > 255) {
-                agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                        "scldta length, " + scldtaLen + ", is invalid for rdbnam"));
+                agent_.accumulateChainBreakingReadExceptionAndThrow(
+                    new DisconnectException(agent_,
+                        new ClientMessageId(
+                            SQLState.NET_SQLCDTA_INVALID_FOR_RDBNAM),
+                    new Integer(scldtaLen)));
                 return null;
             }
             // read 2+scldtaLen number of bytes from the reply buffer into the pkgnamcsnBytes

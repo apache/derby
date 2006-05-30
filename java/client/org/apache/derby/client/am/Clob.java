@@ -733,7 +733,7 @@ public class Clob extends Lob implements java.sql.Clob {
         try {
             rdr = clob.getCharacterStream();
         } catch (java.sql.SQLException e) {
-            throw new SqlException(agent_.logWriter_, e.getMessage());
+            throw SqlException.javaException(agent_.logWriter_, e);
         }
 
         return new Clob(this.agent_, rdr, (int) length);
