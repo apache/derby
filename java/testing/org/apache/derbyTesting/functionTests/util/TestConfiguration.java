@@ -279,4 +279,24 @@ public class TestConfiguration {
      */
     private final static String UNUSED = "file://unused/";
 
+    /**
+     * Generate properties which can be set on a
+     * <code>DataSource</code> in order to connect to the default
+     * database.
+     *
+     * @return a <code>Properties</code> object containing server
+     * name, port number, database name and other attributes needed to
+     * connect to the default database
+     */
+    public static Properties getDefaultDataSourceProperties() {
+        Properties attrs = new Properties();
+        if (!(DERBY_TEST_CONFIG.getJDBCClient() == JDBCClient.EMBEDDED)) {
+            attrs.setProperty("serverName", DERBY_TEST_CONFIG.getHostName());
+            attrs.setProperty("portNumber", Integer.toString(DERBY_TEST_CONFIG.getPort()));
+        }
+        attrs.setProperty("databaseName", DERBY_TEST_CONFIG.getDatabaseName());
+        attrs.setProperty("connectionAttributes", "create=true");
+        return attrs;
+    }
+        
 }

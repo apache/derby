@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 
 import junit.framework.*;
 
@@ -69,7 +70,7 @@ public class XA40Test extends BaseJDBCTestCase {
      */
     public void setUp() 
         throws SQLException {
-        xads = getXADataSource();
+        xads = TestDataSourceFactory.getXADataSource();
         xac = xads.getXAConnection();
         xar = xac.getXAResource();
         con = xac.getConnection();

@@ -33,6 +33,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 
 /**
  * JUnit test which checks that all methods specified by the
@@ -147,7 +148,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
     private static void collectClassesFromDataSource(Set<ClassInfo> classes)
         throws SQLException
     {
-        DataSource ds = getDataSource();
+        DataSource ds = TestDataSourceFactory.getDataSource();
         addClass(classes, ds.getClass(), javax.sql.DataSource.class);
         collectClassesFromConnection(ds.getConnection
                                      (CONFIG.getUserName(),
@@ -167,7 +168,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
         collectClassesFromConnectionPoolDataSource(Set<ClassInfo> classes)
         throws SQLException
     {
-        ConnectionPoolDataSource cpds = getConnectionPoolDataSource();
+        ConnectionPoolDataSource cpds = TestDataSourceFactory.getConnectionPoolDataSource();
         addClass(classes,
                  cpds.getClass(), javax.sql.ConnectionPoolDataSource.class);
 
@@ -192,7 +193,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
     private static void collectClassesFromXADataSource(Set<ClassInfo> classes)
         throws SQLException
     {
-        XADataSource xads = getXADataSource();
+        XADataSource xads = TestDataSourceFactory.getXADataSource();
         addClass(classes, xads.getClass(), javax.sql.XADataSource.class);
 
         XAConnection xaconn = xads.getXAConnection(CONFIG.getUserName(),

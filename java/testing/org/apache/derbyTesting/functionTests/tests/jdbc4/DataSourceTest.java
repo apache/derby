@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 import java.sql.*;
@@ -52,7 +53,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * Create a default DataSource
      */
     public void setUp() {
-        ds = getDataSource();
+        ds = TestDataSourceFactory.getDataSource();
     }
     
     /**

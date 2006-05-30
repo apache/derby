@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 import java.io.FileInputStream;
@@ -420,7 +421,7 @@ public class ConnectionTest
             throws SQLException {
             //The ConnectionPoolDataSource object
             //used to get a PooledConnection object
-            ConnectionPoolDataSource cpDataSource = getConnectionPoolDataSource();
+            ConnectionPoolDataSource cpDataSource = TestDataSourceFactory.getConnectionPoolDataSource();
             PooledConnection pConn = cpDataSource.getPooledConnection();
             //doing a getConnection() returns a Connection object
             //that internally contains a BrokeredConnection40 object
@@ -474,7 +475,7 @@ public class ConnectionTest
             throws SQLException {
             // Use a XADataSource to obtain a XAConnection object, and
             // finally a "real" connection.
-            con = getXADataSource().getXAConnection().getConnection();
+            con = TestDataSourceFactory.getXADataSource().getXAConnection().getConnection();
         }
         
     } // End class XAConnectionTest

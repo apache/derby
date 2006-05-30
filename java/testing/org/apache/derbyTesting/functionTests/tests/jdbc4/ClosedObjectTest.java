@@ -41,6 +41,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 
 /**
  * Test that all methods on <code>ResultSet</code>,
@@ -702,7 +703,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         protected Connection newConnection_() throws SQLException {
-            DataSource ds = getDataSource();
+            DataSource ds = TestDataSourceFactory.getDataSource();
             return ds.getConnection(CONFIG.getUserName(),
                                     CONFIG.getUserPassword());
         }
@@ -730,7 +731,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         protected Connection newConnection_() throws SQLException {
-            ConnectionPoolDataSource ds = getConnectionPoolDataSource();
+            ConnectionPoolDataSource ds = TestDataSourceFactory.getConnectionPoolDataSource();
             PooledConnection pc =
                 ds.getPooledConnection(CONFIG.getUserName(),
                                        CONFIG.getUserPassword());
@@ -759,7 +760,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         protected Connection newConnection_() throws SQLException {
-            XADataSource ds = getXADataSource();
+            XADataSource ds = TestDataSourceFactory.getXADataSource();
             XAConnection xac = ds.getXAConnection(CONFIG.getUserName(),
                                                   CONFIG.getUserPassword());
             return xac.getConnection();

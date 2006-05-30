@@ -32,6 +32,7 @@ import java.net.URL;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 
 /**
  * JUnit test which checks that only expected methods throw SQLFeatureNotSupporteException.
@@ -326,7 +327,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		( HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
-		DataSource			ds = getDataSource();
+		DataSource			ds = TestDataSourceFactory.getDataSource();
 		Connection			conn = ds.getConnection();
 
 		vetObject( ds, unsupportedList, notUnderstoodList );
@@ -341,7 +342,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		( HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
-		ConnectionPoolDataSource	ds = getConnectionPoolDataSource();
+		ConnectionPoolDataSource	ds = TestDataSourceFactory.getConnectionPoolDataSource();
 		PooledConnection			pc = ds.getPooledConnection
 			(CONFIG.getUserName(), CONFIG.getUserPassword());
 		Connection					conn = pc.getConnection();
@@ -359,7 +360,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		( HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
-		XADataSource				ds = getXADataSource();
+		XADataSource				ds = TestDataSourceFactory.getXADataSource();
 		XAConnection				xaconn = ds.getXAConnection
 			(CONFIG.getUserName(), CONFIG.getUserPassword());
 		Connection					conn = xaconn.getConnection();

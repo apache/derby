@@ -25,6 +25,7 @@ import javax.sql.*;
 import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 
 /*
     This class is used to test the JDBC4 statement event 
@@ -68,8 +69,8 @@ public class StatementEventsTest extends BaseJDBCTestCase
      *
      */
     public void setUp() throws SQLException {
-        XADataSource xadatasource = getXADataSource();
-        ConnectionPoolDataSource cpds = getConnectionPoolDataSource();
+        XADataSource xadatasource = TestDataSourceFactory.getXADataSource();
+        ConnectionPoolDataSource cpds = TestDataSourceFactory.getConnectionPoolDataSource();
         
         pooledConnection = cpds.getPooledConnection();
         xaconnection = xadatasource.getXAConnection();
