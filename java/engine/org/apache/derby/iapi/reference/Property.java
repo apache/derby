@@ -1,103 +1,103 @@
 /*
 
-Derby - Class org.apache.derby.iapi.reference.Property
+   Derby - Class org.apache.derby.iapi.reference.Property
 
-Copyright 1998, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1998, 2004 The Apache Software Foundation or its licensors, as applicable.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
 
-*/
+ */
 
 package org.apache.derby.iapi.reference;
 
 /**
-   List of all properties understood by the system. It also has some other static fields.
+	List of all properties understood by the system. It also has some other static fields.
 
 
-   <P>
-   This class exists for two reasons
-   <Ol>
-   <LI> To act as the internal documentation for the properties. 
-   <LI> To remove the need to declare a java static field for the property
-   name in the protocol/implementation class. This reduces the footprint as
-   the string is final and thus can be included simply as a String constant pool entry.
-   </OL>
-   <P>
-   This class should not be shipped with the product.
+	<P>
+	This class exists for two reasons
+	<Ol>
+	<LI> To act as the internal documentation for the properties. 
+	<LI> To remove the need to declare a java static field for the property
+	name in the protocol/implementation class. This reduces the footprint as
+	the string is final and thus can be included simply as a String constant pool entry.
+	</OL>
+	<P>
+	This class should not be shipped with the product.
 
-   <P>
-   This class has no methods, all it contains are String's which by
-   are public, static and final since they are declared in an interface.
+	<P>
+	This class has no methods, all it contains are String's which by
+	are public, static and final since they are declared in an interface.
 */
 
 public interface Property { 
 
-    /**
-     * Name of the file that contains system wide properties. Has to be located
-     * in ${derby.system.home} if set, otherwise ${user.dir}
-     */
-    public static final String PROPERTIES_FILE = "derby.properties";
+	/**
+	 * Name of the file that contains system wide properties. Has to be located
+	 * in ${derby.system.home} if set, otherwise ${user.dir}
+	 */
+	public static final String PROPERTIES_FILE = "derby.properties";
 
 
-    /**
-       By convention properties that must not be stored any persistent form of
-       service properties start with this prefix.
-    */
-    public static final String PROPERTY_RUNTIME_PREFIX = "derby.__rt.";
+	/**
+		By convention properties that must not be stored any persistent form of
+		service properties start with this prefix.
+	*/
+	public static final String PROPERTY_RUNTIME_PREFIX = "derby.__rt.";
 
-    /*
-    ** derby.service.* and related properties
-    */
+	/*
+	** derby.service.* and related properties
+	*/
 
 
-    /*
-    ** derby.stream.* and related properties
-    */
+	/*
+	** derby.stream.* and related properties
+	*/
 	
-    /**
-       derby.stream.error.logSeverityLevel=integerValue
-       <BR>
-       Indicates the minimum level of severity for errors that are reported to the error stream.
-       Default to 0 in a "sane" server, and SESSION_SEVERITY in the insane (and product) server.
+	/**
+		derby.stream.error.logSeverityLevel=integerValue
+		<BR>
+		Indicates the minimum level of severity for errors that are reported to the error stream.
+		Default to 0 in a "sane" server, and SESSION_SEVERITY in the insane (and product) server.
 
-       @see org.apache.derby.iapi.error.ExceptionSeverity#SESSION_SEVERITY
-    */
-    String LOG_SEVERITY_LEVEL = "derby.stream.error.logSeverityLevel";
+		@see org.apache.derby.iapi.error.ExceptionSeverity#SESSION_SEVERITY
+	*/
+	String LOG_SEVERITY_LEVEL = "derby.stream.error.logSeverityLevel";
 
-    /**
-       derby.stream.error.file=<b>absolute or relative error log filename</b>
-       Takes precendence over derby.stream.error.method.
-       Takes precendence over derby.stream.error.field
-    */
+        /**
+		derby.stream.error.file=<b>absolute or relative error log filename</b>
+		Takes precendence over derby.stream.error.method.
+		Takes precendence over derby.stream.error.field
+	*/
 	
-    String ERRORLOG_FILE_PROPERTY = "derby.stream.error.file";
+	String ERRORLOG_FILE_PROPERTY = "derby.stream.error.file";
 
-    /**
-       derby.stream.error.method=
-       <className>.<methodName> returning an OutputStream or Writer object
-       Takes precendence over derby.stream.error.field
-    */
+        /**
+		derby.stream.error.method=
+			<className>.<methodName> returning an OutputStream or Writer object
+		Takes precendence over derby.stream.error.field
+	*/
 	
-    String ERRORLOG_METHOD_PROPERTY = "derby.stream.error.method";
+	String ERRORLOG_METHOD_PROPERTY = "derby.stream.error.method";
 
-    /**
-       derby.stream.error.field=
-       <className>.<fieldName> returning an OutputStream or Writer object>
-    */
+        /**
+		derby.stream.error.field=
+			<className>.<fieldName> returning an OutputStream or Writer object>
+	*/
 	
-    String ERRORLOG_FIELD_PROPERTY = "derby.stream.error.field";
+	String ERRORLOG_FIELD_PROPERTY = "derby.stream.error.field";
 
-    /** 
+	/** 
 	derby.infolog.append={true,false}
 	<BR>
 	* If the info stream goes to a file and the file already exist, it can
@@ -108,227 +108,227 @@ public interface Property {
 	* The default behavior is that the exiting file will be deleted when a new
 	* info stream is started.  
 	*/
-    String LOG_FILE_APPEND = "derby.infolog.append";
+	String LOG_FILE_APPEND = "derby.infolog.append";
 
-    /*
-    ** derby.service.* and related properties
-    */
-    /**
-       derby.system.home
-       <BR>
-       Property name for the home directory. Any relative path in the
-       system should be accessed though this property
-    */
-    String SYSTEM_HOME_PROPERTY = "derby.system.home";
+	/*
+	** derby.service.* and related properties
+	*/
+	/**
+		derby.system.home
+		<BR>
+		Property name for the home directory. Any relative path in the
+		system should be accessed though this property
+	*/
+	String SYSTEM_HOME_PROPERTY = "derby.system.home";
 
-    /**
-       derby.system.bootAll
-       <BR>
-       Automatically boot any services at start up time. When set to true
-       this services will  be booted at startup, otherwise services
-       will be booted on demand.
-    */
-    String BOOT_ALL = "derby.system.bootAll";
+	/**
+		derby.system.bootAll
+		<BR>
+		Automatically boot any services at start up time. When set to true
+		this services will  be booted at startup, otherwise services
+		will be booted on demand.
+	*/
+	String BOOT_ALL = "derby.system.bootAll";
 
-    /**
-       derby.database.noAutoBoot
-       <BR>
-       Don't automatically boot this service at start up time. When set to true
-       this service will only be booted on demand, otherwise the service
-       will be booted at startup time if possible.
-    */
-    String NO_AUTO_BOOT = "derby.database.noAutoBoot";
+	/**
+		derby.database.noAutoBoot
+		<BR>
+		Don't automatically boot this service at start up time. When set to true
+		this service will only be booted on demand, otherwise the service
+		will be booted at startup time if possible.
+	*/
+	String NO_AUTO_BOOT = "derby.database.noAutoBoot";
     
-    /**
-       derby.__deleteOnCreate
-       <BR>
-       Before creating this service delete any remenants (e.g. the directory)
-       of a previous service at the same location.
+	/**
+		derby.__deleteOnCreate
+		<BR>
+		Before creating this service delete any remenants (e.g. the directory)
+		of a previous service at the same location.
 
-       <P>
-       <B>INTERNAL USE ONLY</B> 
-    */
-    String DELETE_ON_CREATE = "derby.__deleteOnCreate";
+		<P>
+		<B>INTERNAL USE ONLY</B> 
+	*/
+	String DELETE_ON_CREATE = "derby.__deleteOnCreate";
 
-    /**
-       derby.database.forceDatabaseLock
-       <BR>
-       Cloudscape attempts to prevent two instances of Cloudscape from booting
-       the same database with the use of a file called db.lck inside the 
-       database directory.
+	/**
+        derby.database.forceDatabaseLock
+		<BR>
+        Cloudscape attempts to prevent two instances of Cloudscape from booting
+        the same database with the use of a file called db.lck inside the 
+        database directory.
 
-       On some platforms, Cloudscape can successfully prevent a second 
-       instance of Cloudscape from booting the database, and thus prevents 
-       corruption. If this is the case, you will see an SQLException like the
-       following:
+        On some platforms, Cloudscape can successfully prevent a second 
+        instance of Cloudscape from booting the database, and thus prevents 
+        corruption. If this is the case, you will see an SQLException like the
+        following:
 
-       ERROR XJ040: Failed to start database 'toursDB', see the next exception
-       for details.
-       ERROR XSDB6: Another instance of Cloudscape may have already booted the
-       database C:\databases\toursDB.
+        ERROR XJ040: Failed to start database 'toursDB', see the next exception
+        for details.
+        ERROR XSDB6: Another instance of Cloudscape may have already booted the
+        database C:\databases\toursDB.
 
-       The error is also written to the information log.
+        The error is also written to the information log.
 
-       On other platforms, Cloudscape issues a warning message if an instance
-       of Cloudscape attempts to boot a database that may already have a
-       running instance of Cloudscape attached to it.
-       However, it does not prevent the second instance from booting, and thus
-       potentially corrupting, the database.
+        On other platforms, Cloudscape issues a warning message if an instance
+        of Cloudscape attempts to boot a database that may already have a
+        running instance of Cloudscape attached to it.
+        However, it does not prevent the second instance from booting, and thus
+        potentially corrupting, the database.
 
-       If a warning message has been issued, corruption may already have 
-       occurred.
-
-
-       NOTE: When you are using Cloudview, error messages appear in the 
-       console or operating system window from which Cloudview was started.
-
-       The warning message looks like this:
-
-       WARNING: Cloudscape (instance 80000000-00d2-3265-de92-000a0a0a0200) is
-       attempting to boot the database /export/home/sky/wombat even though
-       Cloudscape (instance 80000000-00d2-3265-8abf-000a0a0a0200) may still be
-       active. Only one instance of Cloudscape
-       should boot a database at a time. Severe and non-recoverable corruption
-       can result and may have already occurred.
-
-       The warning is also written to the information log.
-
-       This warning is primarily a Technical Support aid to determine the 
-       cause of corruption. However, if you see this warning, your best 
-       choice is to close the connection and exit the JVM. This minimizes the
-       risk of a corruption. Close all instances of Cloudscape, then restart
-       one instance of Cloudscape and shut down the database properly so that
-       the db.lck file can be removed. The warning message continues to appear
-       until a proper shutdown of the Cloudscape system can delete the db.lck
-       file.
-
-       If the "derby.database.forceDatabaseLock" property is set to true
-       then this default behavior is altered on systems where cloudscape cannot
-       prevent this dual booting.  If the to true, then if the platform does
-       not provide the ability for cloudscape to guarantee no double boot, and
-       if cloudscape finds a db.lck file when it boots, it will throw an 
-       exception (TODO - mikem - add what exception), leave the db.lck file
-       in place and not boot the system.  At this point the system will not 
-       boot until the db.lck file is removed by hand.  Note that this 
-       situation can arise even when 2 VM's are not accessing the same
-       cloudscape system.  Also note that if the db.lck file is removed by 
-       hand while a VM is still accessing a derby.database, then there 
-       is no way for cloudscape to prevent a second VM from starting up and 
-       possibly corrupting the database.  In this situation no warning 
-       message will be logged to the error log.
-
-       To disable the default behavior of the db.lck file set property as 
-       follows:
-
-       derby.database.forceDatabaseLock=true
-
-    */
-    String FORCE_DATABASE_LOCK = "derby.database.forceDatabaseLock";
+        If a warning message has been issued, corruption may already have 
+        occurred.
 
 
-    /*
-    ** derby.locks.* and related properties
-    */
+        NOTE: When you are using Cloudview, error messages appear in the 
+        console or operating system window from which Cloudview was started.
 
-    String LOCKS_INTRO = "derby.locks.";
+        The warning message looks like this:
 
-    /**
-       derby.locks.escalationThreshold
-       <BR>
-       The number of row locks on a table after which we escalate to
-       table locking.  Also used by the optimizer to decide when to
-       start with table locking.  The String value must be convertible
-       to an int.
-    */
-    String LOCKS_ESCALATION_THRESHOLD = "derby.locks.escalationThreshold";
+        WARNING: Cloudscape (instance 80000000-00d2-3265-de92-000a0a0a0200) is
+        attempting to boot the database /export/home/sky/wombat even though
+        Cloudscape (instance 80000000-00d2-3265-8abf-000a0a0a0200) may still be
+        active. Only one instance of Cloudscape
+        should boot a database at a time. Severe and non-recoverable corruption
+        can result and may have already occurred.
 
-    /**
-       The default value for LOCKS_ESCALATION_THRESHOLD
-    */
-    int DEFAULT_LOCKS_ESCALATION_THRESHOLD = 5000;
+        The warning is also written to the information log.
 
-    /**
-       The minimum value for LOCKS_ESCALATION_THRESHOLD
-    */
-    int MIN_LOCKS_ESCALATION_THRESHOLD = 100;
+        This warning is primarily a Technical Support aid to determine the 
+        cause of corruption. However, if you see this warning, your best 
+        choice is to close the connection and exit the JVM. This minimizes the
+        risk of a corruption. Close all instances of Cloudscape, then restart
+        one instance of Cloudscape and shut down the database properly so that
+        the db.lck file can be removed. The warning message continues to appear
+        until a proper shutdown of the Cloudscape system can delete the db.lck
+        file.
 
-    /**
-       Configuration parameter for deadlock timeouts, set in seconds.
-    */
-    public static final String DEADLOCK_TIMEOUT = "derby.locks.deadlockTimeout";
+        If the "derby.database.forceDatabaseLock" property is set to true
+        then this default behavior is altered on systems where cloudscape cannot
+        prevent this dual booting.  If the to true, then if the platform does
+        not provide the ability for cloudscape to guarantee no double boot, and
+        if cloudscape finds a db.lck file when it boots, it will throw an 
+        exception (TODO - mikem - add what exception), leave the db.lck file
+        in place and not boot the system.  At this point the system will not 
+        boot until the db.lck file is removed by hand.  Note that this 
+        situation can arise even when 2 VM's are not accessing the same
+        cloudscape system.  Also note that if the db.lck file is removed by 
+        hand while a VM is still accessing a derby.database, then there 
+        is no way for cloudscape to prevent a second VM from starting up and 
+        possibly corrupting the database.  In this situation no warning 
+        message will be logged to the error log.
 
-    /**
-       Default value for deadlock timesouts (20 seconds)
-    */
-    public static final int DEADLOCK_TIMEOUT_DEFAULT = 20;
+        To disable the default behavior of the db.lck file set property as 
+        follows:
 
-    /**
-       Default value for wait timeouts (60 seconds)
-    */
-    public static final int WAIT_TIMEOUT_DEFAULT = 60;
+        derby.database.forceDatabaseLock=true
 
-    /**
-       Turn on lock monitor to help debug deadlocks.  Default value is OFF.
-       With this property turned on, all deadlocks will cause a tracing to be
-       output to the db2j.LOG file.
-       <BR>
-       This property takes effect dynamically.
-    */
-    public static final String DEADLOCK_MONITOR = "derby.locks.monitor";
+	*/
+	String FORCE_DATABASE_LOCK = "derby.database.forceDatabaseLock";
 
-    /**
-       Turn on deadlock trace to help debug deadlocks.
+
+	/*
+	** derby.locks.* and related properties
+	*/
+
+	String LOCKS_INTRO = "derby.locks.";
+
+	/**
+		derby.locks.escalationThreshold
+		<BR>
+		The number of row locks on a table after which we escalate to
+		table locking.  Also used by the optimizer to decide when to
+		start with table locking.  The String value must be convertible
+		to an int.
+	 */
+	String LOCKS_ESCALATION_THRESHOLD = "derby.locks.escalationThreshold";
+
+	/**
+		The default value for LOCKS_ESCALATION_THRESHOLD
+	 */
+	int DEFAULT_LOCKS_ESCALATION_THRESHOLD = 5000;
+
+	/**
+		The minimum value for LOCKS_ESCALATION_THRESHOLD
+	 */
+	int MIN_LOCKS_ESCALATION_THRESHOLD = 100;
+
+	/**
+		Configuration parameter for deadlock timeouts, set in seconds.
+	*/
+	public static final String DEADLOCK_TIMEOUT = "derby.locks.deadlockTimeout";
+
+	/**
+		Default value for deadlock timesouts (20 seconds)
+	*/
+	public static final int DEADLOCK_TIMEOUT_DEFAULT = 20;
+
+	/**
+		Default value for wait timeouts (60 seconds)
+	*/
+	public static final int WAIT_TIMEOUT_DEFAULT = 60;
+
+	/**
+		Turn on lock monitor to help debug deadlocks.  Default value is OFF.
+		With this property turned on, all deadlocks will cause a tracing to be
+		output to the db2j.LOG file.
+		<BR>
+		This property takes effect dynamically.
+	 */
+	public static final String DEADLOCK_MONITOR = "derby.locks.monitor";
+
+	/**
+		Turn on deadlock trace to help debug deadlocks.
         
-       Effect 1: This property only takes effect if DEADLOCK_MONITOR is turned
-       ON for deadlock trace.  With this property turned on, each lock object
-       involved in a deadlock will output its stack trace to db2j.LOG.
+        Effect 1: This property only takes effect if DEADLOCK_MONITOR is turned
+        ON for deadlock trace.  With this property turned on, each lock object
+        involved in a deadlock will output its stack trace to db2j.LOG.
         
-       Effect 2: When a timeout occurs, a lockTable dump will also be output
-       to db2j.LOG.  This acts independent of DEADLOCK_MONITOR.
-       <BR>
-       This property takes effect dynamically.
-    */
-    public static final String DEADLOCK_TRACE = "derby.locks.deadlockTrace";
+        Effect 2: When a timeout occurs, a lockTable dump will also be output
+        to db2j.LOG.  This acts independent of DEADLOCK_MONITOR.
+		<BR>
+		This property takes effect dynamically.
+	 */
+	public static final String DEADLOCK_TRACE = "derby.locks.deadlockTrace";
 
-    /**
-       Configuration parameter for lock wait timeouts, set in seconds.
-    */
-    public static final String LOCKWAIT_TIMEOUT = "derby.locks.waitTimeout";
+	/**
+		Configuration parameter for lock wait timeouts, set in seconds.
+	*/
+	public static final String LOCKWAIT_TIMEOUT = "derby.locks.waitTimeout";
 
-    /*
-    ** db2j.database.*
-    */
+	/*
+	** db2j.database.*
+	*/
 	
-    /**
-       derby.database.classpath
-       <BR>
-       Consists of a series of two part jar names.
-    */
-    String DATABASE_CLASSPATH = "derby.database.classpath";
+	/**
+		derby.database.classpath
+		<BR>
+		Consists of a series of two part jar names.
+	*/
+	String DATABASE_CLASSPATH = "derby.database.classpath";
 
-    /**
-       internal use only, passes the database classpathinto the class manager
-    */
-    String BOOT_DB_CLASSPATH = PROPERTY_RUNTIME_PREFIX + "database.classpath";
+	/**
+		internal use only, passes the database classpathinto the class manager
+	*/
+	String BOOT_DB_CLASSPATH = PROPERTY_RUNTIME_PREFIX + "database.classpath";
 
 
 
-    /**
-       derby.database.propertiesOnly
-    */
-    String DATABASE_PROPERTIES_ONLY = "derby.database.propertiesOnly";
+	/**
+		derby.database.propertiesOnly
+	*/
+	String DATABASE_PROPERTIES_ONLY = "derby.database.propertiesOnly";
 
-    /*
-    ** derby.storage.*
-    */
+	/*
+	** derby.storage.*
+	*/
 
     /**
      * Creation of an access factory should be done with no logging.
-     * This is a run-time property that should not make it to disk
-     * in the service.properties file.
+	 * This is a run-time property that should not make it to disk
+	 * in the service.properties file.
      **/
-    public static final String CREATE_WITH_NO_LOG =
-	PROPERTY_RUNTIME_PREFIX + "storage.createWithNoLog";
+	public static final String CREATE_WITH_NO_LOG =
+		PROPERTY_RUNTIME_PREFIX + "storage.createWithNoLog";
 
     /**
      * The page size to create a table or index with.  Must be a multiple
@@ -371,26 +371,26 @@ public interface Property {
      * false disables rll.
      *
      **/
-    public static final String ROW_LOCKING = "derby.storage.rowLocking";
+	public static final String ROW_LOCKING = "derby.storage.rowLocking";
 
-    /**
-       derby.storage.propertiesId
-       <BR>
-       Stores the id of the conglomerate that holds the per-database
-       properties. Is stored in the service.properties file.
+	/**
+		derby.storage.propertiesId
+		<BR>
+		Stores the id of the conglomerate that holds the per-database
+		properties. Is stored in the service.properties file.
 
-       <P>
-       <B>INTERNAL USE ONLY</B> 
-    */
-    String PROPERTIES_CONGLOM_ID = "derby.storage.propertiesId";
+		<P>
+		<B>INTERNAL USE ONLY</B> 
+	*/
+	String PROPERTIES_CONGLOM_ID = "derby.storage.propertiesId";
 
-    /**
-       derby.storage.tempDirectory
-       <BR>
-       Sets the temp directory for a database.
-       <P>
-    */
-    String STORAGE_TEMP_DIRECTORY = "derby.storage.tempDirectory";
+	/**
+		derby.storage.tempDirectory
+		<BR>
+		Sets the temp directory for a database.
+		<P>
+	*/
+	String STORAGE_TEMP_DIRECTORY = "derby.storage.tempDirectory";
 	
     /**
      * derby.system.durability
@@ -435,7 +435,7 @@ public interface Property {
      * This property is static; if you change it while Derby is running, 
      * the change does not take effect until you reboot.  
      */
-    public static final String DURABILITY_PROPERTY = 
+	public static final String DURABILITY_PROPERTY = 
         "derby.system.durability";
  	
     /**
@@ -447,45 +447,45 @@ public interface Property {
      */
     public static final String DURABILITY_TESTMODE_NO_SYNC = "test";
     
-    /**
+	/**
      * derby.storage.fileSyncTransactionLog
      * <p>
      * When set, the store system will use sync() call on the log at 
      * commit instead of doing  a write sync on all writes to  the log;
-     * even if the write sync mode (rws) is supported in the JVM. 
+	 * even if the write sync mode (rws) is supported in the JVM. 
      * <p>
      *
      **/
-    public static final String FILESYNC_TRANSACTION_LOG = 
+	public static final String FILESYNC_TRANSACTION_LOG = 
         "derby.storage.fileSyncTransactionLog";
 
 
-    /**
-     *	derby.storage.logArchiveMode
-     *<BR>
-     *used to identify whether the log is being archived for the database or not.
-     *  It Is stored in the service.properties file.
-     * 
+	/**
+	 *	derby.storage.logArchiveMode
+	 *<BR>
+	 *used to identify whether the log is being archived for the database or not.
+	 *  It Is stored in the service.properties file.
+	 * 
      * This property can be set to the boolean values "true" or "false".  
      * Setting the property to true means log is being archived, which could be 
-     * used for roll-forward recovery. Setting the property to 
+	 * used for roll-forward recovery. Setting the property to 
      * false disables log archive mode.
-     *<P>
-     *<B>INTERNAL USE ONLY</B> 
-     */
-    String LOG_ARCHIVE_MODE = "derby.storage.logArchiveMode";
+	 *<P>
+	 *<B>INTERNAL USE ONLY</B> 
+	 */
+	String LOG_ARCHIVE_MODE = "derby.storage.logArchiveMode";
 
 
-    /**
-     *	derby.storage.logDeviceWhenBackedUp
-     *<BR>
-     *  This property indicates the logDevice location(path) when the backup was 
-     *  taken, used to restore the log to the same location while restoring from
-     *  backup.
-     *<P>
-     *<B>INTERNAL USE ONLY</B> 
-     */
-    String LOG_DEVICE_AT_BACKUP = "derby.storage.logDeviceWhenBackedUp";
+	/**
+	 *	derby.storage.logDeviceWhenBackedUp
+	 *<BR>
+	 *  This property indicates the logDevice location(path) when the backup was 
+	 *  taken, used to restore the log to the same location while restoring from
+	 *  backup.
+	 *<P>
+	 *<B>INTERNAL USE ONLY</B> 
+	 */
+	String LOG_DEVICE_AT_BACKUP = "derby.storage.logDeviceWhenBackedUp";
     
     /**
      * derby.module.modulename
@@ -548,181 +548,181 @@ public interface Property {
      * Declare a set of classes that the class for a module or sub sub protocol requires.
      * Value is a comma separated list of classes. If the classes listed are not
      * loadable by the virtual machine then the module class will not be loaded and will not be used.
-     */
+    */
     String MODULE_ENV_CLASSES_PREFIX = "derby.env.classes.";
 
     /*
-    ** derby.language.*
-    */
+	** derby.language.*
+	*/
 
-    /**
-     * The size of the table descriptor cache used by the
-     * data dictionary.  Database.  Static.
-     * <p>
-     * Undocumented.
-     */
-    String	LANG_TD_CACHE_SIZE = "derby.language.tableDescriptorCacheSize";
-    int		LANG_TD_CACHE_SIZE_DEFAULT = 64;
+	/**
+	 * The size of the table descriptor cache used by the
+	 * data dictionary.  Database.  Static.
+	 * <p>
+	 * Undocumented.
+	 */
+	String	LANG_TD_CACHE_SIZE = "derby.language.tableDescriptorCacheSize";
+	int		LANG_TD_CACHE_SIZE_DEFAULT = 64;
 
     /**
      * The size of the permissions cache used by the data dictionary.
      * Database.  Static.
-     * <p>
-     * Undocumented.
-     */
-    String	LANG_PERMISSIONS_CACHE_SIZE = "derby.language.permissionsCacheSize";
-    int		LANG_PERMISSIONS_CACHE_SIZE_DEFAULT = 64;
-    /**
-     * The size of the stored prepared statment descriptor cache 
-     * used by the data dictionary.  Database.  Static.
-     * <p>
-     * Externally visible.
-     */
-    String	LANG_SPS_CACHE_SIZE = "derby.language.spsCacheSize";
-    int		LANG_SPS_CACHE_SIZE_DEFAULT =32;
+	 * <p>
+	 * Undocumented.
+	 */
+	String	LANG_PERMISSIONS_CACHE_SIZE = "derby.language.permissionsCacheSize";
+	int		LANG_PERMISSIONS_CACHE_SIZE_DEFAULT = 64;
+	/**
+	 * The size of the stored prepared statment descriptor cache 
+	 * used by the data dictionary.  Database.  Static.
+	 * <p>
+	 * Externally visible.
+	 */
+	String	LANG_SPS_CACHE_SIZE = "derby.language.spsCacheSize";
+	int		LANG_SPS_CACHE_SIZE_DEFAULT =32;
 
-    /**
-       derby.language.stalePlanCheckInterval
+	/**
+	  derby.language.stalePlanCheckInterval
 
-       <P>
-       This property tells the number of times a prepared statement should
-       be executed before checking whether its plan is stale.  Database.
-       Dynamic.
-       <P>
-       Externally visible.
-    */
-    String LANGUAGE_STALE_PLAN_CHECK_INTERVAL =
-	"derby.language.stalePlanCheckInterval";
+	  <P>
+	  This property tells the number of times a prepared statement should
+	  be executed before checking whether its plan is stale.  Database.
+	  Dynamic.
+	  <P>
+	  Externally visible.
+	 */
+	String LANGUAGE_STALE_PLAN_CHECK_INTERVAL =
+								"derby.language.stalePlanCheckInterval";
 
 	
-    /** Default value for above */
-    int DEFAULT_LANGUAGE_STALE_PLAN_CHECK_INTERVAL = 100;
+	/** Default value for above */
+	int DEFAULT_LANGUAGE_STALE_PLAN_CHECK_INTERVAL = 100;
 
-    /** Minimum value for above */
-    int MIN_LANGUAGE_STALE_PLAN_CHECK_INTERVAL = 5;
+	/** Minimum value for above */
+	int MIN_LANGUAGE_STALE_PLAN_CHECK_INTERVAL = 5;
 
 
-    /*
-      Statement plan cache size
-      By default, 100 statements are cached
-    */
-    String STATEMENT_CACHE_SIZE = "derby.language.statementCacheSize";
-    int STATEMENT_CACHE_SIZE_DEFAULT = 100;
+	/*
+		Statement plan cache size
+		By default, 100 statements are cached
+	 */
+	String STATEMENT_CACHE_SIZE = "derby.language.statementCacheSize";
+	int STATEMENT_CACHE_SIZE_DEFAULT = 100;
 
-    /* some static fields */
-    public static final String DEFAULT_USER_NAME = "APP";
-    public static final String DATABASE_MODULE = "org.apache.derby.database.Database";
+  /* some static fields */
+	public static final String DEFAULT_USER_NAME = "APP";
+	public static final String DATABASE_MODULE = "org.apache.derby.database.Database";
 
-    /*
-      Property to enable Grant & Revoke SQL authorization. Introduced in Derby 10.2
-      release. New databases and existing databases (in Derby 10.2) still use legacy
-      authorization by default and by setting this property to true could request for
-      SQL standard authorization model.
-    */
-    public static final String
+	/*
+		Property to enable Grant & Revoke SQL authorization. Introduced in Derby 10.2
+		release. New databases and existing databases (in Derby 10.2) still use legacy
+		authorization by default and by setting this property to true could request for
+		SQL standard authorization model.
+	 */
+	public static final String
 	SQL_AUTHORIZATION_PROPERTY = "derby.database.sqlAuthorization";
 
-    public static final String
+	public static final String
 	DEFAULT_CONNECTION_MODE_PROPERTY = "derby.database.defaultConnectionMode";
 
-    public static final String NO_ACCESS = "noAccess";
-    public static final String READ_ONLY_ACCESS = "readOnlyAccess";
-    public static final String FULL_ACCESS = "fullAccess";
-    public static final String DEFAULT_ACCESS = FULL_ACCESS;
+	public static final String NO_ACCESS = "noAccess";
+	public static final String READ_ONLY_ACCESS = "readOnlyAccess";
+	public static final String FULL_ACCESS = "fullAccess";
+	public static final String DEFAULT_ACCESS = FULL_ACCESS;
 
-    public static final String
+	public static final String
 	READ_ONLY_ACCESS_USERS_PROPERTY = "derby.database.readOnlyAccessUsers";
 
-    public static final String
+	public static final String
 	FULL_ACCESS_USERS_PROPERTY = "derby.database.fullAccessUsers";
 
-    /*
-    ** Authentication
-    */
+	/*
+	** Authentication
+	*/
 
-    // This is the property that turn on/off authentication
-    public static final String REQUIRE_AUTHENTICATION_PARAMETER =
-	"derby.connection.requireAuthentication";
+	// This is the property that turn on/off authentication
+	public static final String REQUIRE_AUTHENTICATION_PARAMETER =
+								"derby.connection.requireAuthentication";
 
-    public static final String AUTHENTICATION_PROVIDER_PARAMETER =
-	"derby.authentication.provider";
+	public static final String AUTHENTICATION_PROVIDER_PARAMETER =
+								"derby.authentication.provider";
 
-    // This is the user property used by Cloudscape and LDAP schemes
-    public static final String USER_PROPERTY_PREFIX = "derby.user.";
+	// This is the user property used by Cloudscape and LDAP schemes
+	public static final String USER_PROPERTY_PREFIX = "derby.user.";
 
-    // These are the different built-in providers Cloudscape supports
+	// These are the different built-in providers Cloudscape supports
 
-    public static final String AUTHENTICATION_PROVIDER_BUILTIN =
-	"BUILTIN";
+	public static final String AUTHENTICATION_PROVIDER_BUILTIN =
+								"BUILTIN";
 
-    public static final String AUTHENTICATION_PROVIDER_LDAP =
-	"LDAP";
+	public static final String AUTHENTICATION_PROVIDER_LDAP =
+								"LDAP";
 
-    public static final String AUTHENTICATION_SERVER_PARAMETER =
-	"derby.authentication.server";
+	public static final String AUTHENTICATION_SERVER_PARAMETER =
+								"derby.authentication.server";
 
-    /*
-    ** Log
-    */
+	/*
+	** Log
+	*/
 
-    /**
-       Property name for specifying log switch interval
-    */
-    public static final String LOG_SWITCH_INTERVAL = "derby.storage.logSwitchInterval";
+	/**
+		Property name for specifying log switch interval
+	 */
+	public static final String LOG_SWITCH_INTERVAL = "derby.storage.logSwitchInterval";
 
-    /**
-       Property name for specifying checkpoint interval
-    */
-    public static final String CHECKPOINT_INTERVAL = "derby.storage.checkpointInterval";
+	/**
+		Property name for specifying checkpoint interval
+	 */
+	public static final String CHECKPOINT_INTERVAL = "derby.storage.checkpointInterval";
 
-    /**
-       Property name for specifying log archival location
-    */
-    public static final String LOG_ARCHIVAL_DIRECTORY = "derby.storage.logArchive";
+	/**
+		Property name for specifying log archival location
+	 */
+	public static final String LOG_ARCHIVAL_DIRECTORY = "derby.storage.logArchive";
 
-    /**
-       Property name for specifying log Buffer Size
-    */
-    public static final String LOG_BUFFER_SIZE = "derby.storage.logBufferSize";
+	/**
+		Property name for specifying log Buffer Size
+	 */
+	public static final String LOG_BUFFER_SIZE = "derby.storage.logBufferSize";
 	
 	
-    /*
-    ** Upgrade
-    */
+	/*
+	** Upgrade
+	*/
 	
-    /**
-     * Allow database upgrade during alpha/beta time. Only intended
-     * to be used to allow Derby developers to test their upgrade code.
-     * Only supported as a system/application (derby.properties) property.
-     */
-    String ALPHA_BETA_ALLOW_UPGRADE = "derby.database.allowPreReleaseUpgrade";
+	/**
+	 * Allow database upgrade during alpha/beta time. Only intended
+	 * to be used to allow Derby developers to test their upgrade code.
+	 * Only supported as a system/application (derby.properties) property.
+	 */
+	String ALPHA_BETA_ALLOW_UPGRADE = "derby.database.allowPreReleaseUpgrade";
 	    
-    /**
-       db2j.inRestore
-       <BR>
-       This Property is used to indicate that we are in restore mode if
-       if the system is doing a restore from backup.
-       Used internally to set flags to indicate that service is not booted.
-       <P>
-       <B>INTERNAL USE ONLY</B> 
-    */
-    String IN_RESTORE_FROM_BACKUP = PROPERTY_RUNTIME_PREFIX  + "inRestore";
+	/**
+		db2j.inRestore
+		<BR>
+		This Property is used to indicate that we are in restore mode if
+		if the system is doing a restore from backup.
+		Used internally to set flags to indicate that service is not booted.
+		<P>
+		<B>INTERNAL USE ONLY</B> 
+	*/
+	String IN_RESTORE_FROM_BACKUP = PROPERTY_RUNTIME_PREFIX  + "inRestore";
 	
 		    
-    /**
-       db2j.deleteRootOnError
-       <BR>
-       If we a new root is created while doing restore from backup,
-       it should be deleted if a error occur before we could complete restore 
-       successfully.
-       <P>
-       <B>INTERNAL USE ONLY</B> 
-    */
-    String DELETE_ROOT_ON_ERROR  = PROPERTY_RUNTIME_PREFIX  + "deleteRootOnError";
+	/**
+		db2j.deleteRootOnError
+		<BR>
+		If we a new root is created while doing restore from backup,
+		it should be deleted if a error occur before we could complete restore 
+		successfully.
+		<P>
+		<B>INTERNAL USE ONLY</B> 
+	*/
+	String DELETE_ROOT_ON_ERROR  = PROPERTY_RUNTIME_PREFIX  + "deleteRootOnError";
 	
-    public static final String HTTP_DB_FILE_OFFSET = "db2j.http.file.offset";
-    public static final String HTTP_DB_FILE_LENGTH = "db2j.http.file.length";
-    public static final String HTTP_DB_FILE_NAME =   "db2j.http.file.name";
+	public static final String HTTP_DB_FILE_OFFSET = "db2j.http.file.offset";
+	public static final String HTTP_DB_FILE_LENGTH = "db2j.http.file.length";
+	public static final String HTTP_DB_FILE_NAME =   "db2j.http.file.name";
 
     /**
      * derby.drda.startNetworkServer
@@ -741,7 +741,7 @@ public interface Property {
      *<BR>
      * Default: false
      */
-    public final static String DRDA_PROP_LOGCONNECTIONS = "derby.drda.logConnections";
+	public final static String DRDA_PROP_LOGCONNECTIONS = "derby.drda.logConnections";
     /**
      * derby.drda.traceAll
      *<BR>
@@ -749,8 +749,8 @@ public interface Property {
      *<BR>
      * Default: false
      */
-    public final static String DRDA_PROP_TRACEALL = "derby.drda.traceAll";
-    public final static String DRDA_PROP_TRACE = "derby.drda.trace";
+	public final static String DRDA_PROP_TRACEALL = "derby.drda.traceAll";
+	public final static String DRDA_PROP_TRACE = "derby.drda.trace";
 
     /**
      * derby.drda.traceDirectory
@@ -760,11 +760,11 @@ public interface Property {
      * Default: if the derby.system.home property has been set,
      * it is the default. Otherwise, the default is the current directory.
      */
-    public final static String DRDA_PROP_TRACEDIRECTORY = "derby.drda.traceDirectory";
+	public final static String DRDA_PROP_TRACEDIRECTORY = "derby.drda.traceDirectory";
 
-    public final static String DRDA_PROP_MINTHREADS = "derby.drda.minThreads";
-    public final static String DRDA_PROP_MAXTHREADS = "derby.drda.maxThreads";
-    public final static String DRDA_PROP_TIMESLICE = "derby.drda.timeSlice";
+	public final static String DRDA_PROP_MINTHREADS = "derby.drda.minThreads";
+	public final static String DRDA_PROP_MAXTHREADS = "derby.drda.maxThreads";
+	public final static String DRDA_PROP_TIMESLICE = "derby.drda.timeSlice";
 
     /**
      * derby.drda.securityMechanism
@@ -794,16 +794,16 @@ public interface Property {
      *<BR>
      * The port number used by the network server.
      */
-    public final static String DRDA_PROP_PORTNUMBER = "derby.drda.portNumber";
-    public final static String DRDA_PROP_HOSTNAME = "derby.drda.host";
+	public final static String DRDA_PROP_PORTNUMBER = "derby.drda.portNumber";
+	public final static String DRDA_PROP_HOSTNAME = "derby.drda.host";
 
-    /**
-     * derby.drda.keepAlive
-     *
-     *<BR>
-     * client socket setKeepAlive value
-     */
-    public final static String DRDA_PROP_KEEPALIVE = "derby.drda.keepAlive";
+	/**
+	 * derby.drda.keepAlive
+	 *
+	 *<BR>
+	 * client socket setKeepAlive value
+	 */
+	public final static String DRDA_PROP_KEEPALIVE = "derby.drda.keepAlive";
 	
 
     /**
@@ -813,11 +813,11 @@ public interface Property {
      */
     public final static String DRDA_PROP_STREAMOUTBUFFERSIZE = "derby.drda.streamOutBufferSize";
 
-    /*
-    ** Internal properties, mainly used by Monitor.
-    */
-    public static final String SERVICE_PROTOCOL = "derby.serviceProtocol";
-    public static final String SERVICE_LOCALE = "derby.serviceLocale";
+	/*
+	** Internal properties, mainly used by Monitor.
+	*/
+	public static final String SERVICE_PROTOCOL = "derby.serviceProtocol";
+	public static final String SERVICE_LOCALE = "derby.serviceLocale";
 
     /**
      * db2j.storage.dataNotSyncedAtCheckPoint
@@ -832,7 +832,7 @@ public interface Property {
      * <p>
      *
      **/
-    public static final String STORAGE_DATA_NOT_SYNCED_AT_CHECKPOINT = 
+	public static final String STORAGE_DATA_NOT_SYNCED_AT_CHECKPOINT = 
         "db2j.storage.dataNotSyncedAtCheckPoint";
 
     /**
@@ -848,7 +848,7 @@ public interface Property {
      * <p>
      *
      **/
-    public static final String STORAGE_DATA_NOT_SYNCED_AT_ALLOCATION = 
+	public static final String STORAGE_DATA_NOT_SYNCED_AT_ALLOCATION = 
         "db2j.storage.dataNotSyncedAtAllocation";
 
     /**
@@ -864,7 +864,7 @@ public interface Property {
      * <p>
      *
      **/
-    public static final String STORAGE_LOG_NOT_SYNCED = 
+	public static final String STORAGE_LOG_NOT_SYNCED = 
         "db2j.storage.logNotSynced";
 
 }
