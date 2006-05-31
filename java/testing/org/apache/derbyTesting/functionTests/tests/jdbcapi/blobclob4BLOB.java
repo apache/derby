@@ -159,6 +159,7 @@ public class blobclob4BLOB {
             clobTest0(conn);
 			clobTest11(conn);
 			clobTest12(conn);
+            clobTest13Trigger(conn);
 			clobTest2(conn);
             clobTest22(conn);
             clobTest3(conn);
@@ -346,6 +347,7 @@ public class blobclob4BLOB {
                 System.out.println("FAIL. No rows in table testCLOB_MAIN");
             if (realNumRows != numRows)
                 System.out.println("FAIL. numRows is incorrect");
+            rs.close();
 
         }
 		catch (SQLException e) {
@@ -666,7 +668,7 @@ public class blobclob4BLOB {
 					   + ", but it is " + clob.length() + ", i = " + i);
 				}
 			}
-			
+			rs.close();
             conn.commit();
             System.out.println("clobTest0 finished");
         }
@@ -722,6 +724,7 @@ public class blobclob4BLOB {
 					   + ", but it is " + clob.length() + ", i = " + i);
 				
 			}
+            rs.close();
             conn.commit();
             System.out.println("clobTest11 finished");
         }
@@ -803,6 +806,72 @@ public class blobclob4BLOB {
 		}
     }
 
+    /**
+     * Test triggers on CLOB columns.
+    */
+    private static void clobTest13Trigger(Connection conn)
+    {
+        System.out.println(START + "clobTest13Trigger");
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("CREATE TABLE clobTest13TriggerA (a CLOB(400k), b int)");
+            stmt.executeUpdate("CREATE TABLE clobTest13TriggerB (a CLOB(400k), b int)");
+            stmt.executeUpdate(
+                    "create trigger T13A after update on testCLOB_MAIN " +
+                    "referencing new as n old as o " + 
+                    "for each row mode db2sql "+ 
+                    "insert into clobTest13TriggerA(a, b) values (n.a, n.b)");
+            stmt.executeUpdate(
+                    "create trigger T13B after INSERT on clobTest13TriggerA " +
+                    "referencing new_table as n " + 
+                    "for each statement mode db2sql "+ 
+                    "insert into clobTest13TriggerB(a, b) select n.a, n.b from n");            
+            
+            conn.commit();
+            ResultSet rs = stmt.executeQuery(
+                  "select a,length(a),b  from testCLOB_MAIN order by b");
+            
+            showClobContents("testCLOB_MAIN", rs);
+            
+            rs.close();
+            conn.commit();
+            int rowCount = stmt.executeUpdate("UPDATE testCLOB_MAIN set b = b + 0");
+            System.out.println("main update row count :" + rowCount);
+            conn.commit();
+            rs = stmt.executeQuery(
+               "select a,length(a),b from clobTest13TriggerA order by b");
+            showClobContents("row trigger", rs);
+            rs.close();
+            conn.commit();
+            
+            rs = stmt.executeQuery(
+            "select a,length(a),b from clobTest13TriggerB order by b");
+            showClobContents("statement trigger", rs);
+            rs.close();
+           conn.commit();
+         
+            stmt.executeUpdate("DROP TRIGGER T13A");
+            stmt.executeUpdate("DROP TABLE clobTest13TriggerB");
+            stmt.executeUpdate("DROP TABLE clobTest13TriggerA");
+            
+            stmt.close();
+            conn.commit();
+            System.out.println("clobTest13Trigger finished");
+        }
+        catch (SQLException e) {
+            TestUtil.dumpSQLExceptions(e);
+            do {
+            e.printStackTrace(System.out);
+            e = e.getNextException();
+            } while (e != null);
+            
+        }
+        catch (Throwable e) {
+            System.out.println("FAIL -- unexpected exception:" + e.toString());
+            if (debug) e.printStackTrace();
+        }
+        
+    }
 
 
 
@@ -856,6 +925,7 @@ public class blobclob4BLOB {
                         System.out.println(res);
                 }
             }
+            rs.close();
             System.out.println("clobTest2 finished");
         }
 		catch (SQLException e) {
@@ -956,6 +1026,7 @@ public class blobclob4BLOB {
                 blobclob4BLOB.printPosition(i,"I-am-hiding-here-at-position-5910",5911,clob, clobLength);
                 blobclob4BLOB.printPosition(i,"Position-9907",1,clob, clobLength);
             }
+            rs.close();
             System.out.println("clobTest3 finished");
         }
 		catch (SQLException e) {
@@ -1077,6 +1148,7 @@ public class blobclob4BLOB {
                     printPositionClob(i,searchStr,1,clob,j,searchClob);
                 }
             }
+            rs.close();
             System.out.println("clobTest4 finished");
         }
 		catch (SQLException e) {
@@ -1374,9 +1446,12 @@ public class blobclob4BLOB {
             Clob clob;
 			rs.next();
             clob = rs.getClob(1);
+            clobLength = rs.getInt(2);
+            rs.close();
             if (clob == null)
                 return;
-            clobLength = rs.getInt(2);
+
+            
             // 0 or negative position value
 			if (isDerbyNet)
 				System.out.println(" negative tests for clob.getSubstring won't run  for network server  until 5243 is fixed");
@@ -4442,6 +4517,25 @@ public class blobclob4BLOB {
         }
         in.close();
         return sum.getValue();
+    }
+    
+    private static void showClobContents(String tag, ResultSet rs)
+        throws SQLException, IOException
+    {
+        while (rs.next())
+        {
+            InputStream is = rs.getAsciiStream(1);
+            if (is == null) {
+                System.out.println(tag + ": NULL");
+                continue;
+            }
+            long clobcrc = getStreamCheckSum(is);
+            int clobLength = rs.getInt(2);
+            int b = rs.getInt(3);
+            
+            System.out.println(tag + ": length " +
+                    clobLength + " crc32 " + clobcrc + " " + b);
+        }
     }
 }
 

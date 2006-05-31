@@ -43,6 +43,39 @@ PASSED, row 5, length was 5016
 Succeeded to match, row 6
 PASSED, row 6, length was 5016
 clobTest12 finished
+START: clobTest13Trigger
+testCLOB_MAIN: NULL
+testCLOB_MAIN: length 0 crc32 0 0
+testCLOB_MAIN: length 0 crc32 0 0
+testCLOB_MAIN: length 26 crc32 3726329377 26
+testCLOB_MAIN: length 42 crc32 384104526 42
+testCLOB_MAIN: length 56 crc32 4255880856 56
+testCLOB_MAIN: length 65 crc32 3470395945 65
+testCLOB_MAIN: length 5000 crc32 2272896610 5000
+testCLOB_MAIN: length 10000 crc32 1814912934 10000
+testCLOB_MAIN: length 300000 crc32 3781770763 300000
+main update row count :10
+row trigger: NULL
+row trigger: length 0 crc32 0 0
+row trigger: length 0 crc32 0 0
+row trigger: length 26 crc32 3726329377 26
+row trigger: length 42 crc32 384104526 42
+row trigger: length 56 crc32 4255880856 56
+row trigger: length 65 crc32 3470395945 65
+row trigger: length 5000 crc32 2272896610 5000
+row trigger: length 10000 crc32 1814912934 10000
+row trigger: length 300000 crc32 3781770763 300000
+statement trigger: NULL
+statement trigger: length 0 crc32 0 0
+statement trigger: length 0 crc32 0 0
+statement trigger: length 26 crc32 3726329377 26
+statement trigger: length 42 crc32 384104526 42
+statement trigger: length 56 crc32 4255880856 56
+statement trigger: length 65 crc32 3470395945 65
+statement trigger: length 5000 crc32 2272896610 5000
+statement trigger: length 10000 crc32 1814912934 10000
+statement trigger: length 300000 crc32 3781770763 300000
+clobTest13Trigger finished
 START: clobTest2
 CLOB getSubString 9905 > 0
 EXPECTED Out of bounds exception
