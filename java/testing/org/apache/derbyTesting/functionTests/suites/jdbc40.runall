@@ -15,11 +15,12 @@ jdbc4/ClosedObjectTest.junit
 jdbc4/ConnectionTest.junit
 jdbc4/DataSourceTest.junit
 jdbc4/ParameterMetaDataWrapperTest.junit
+jdbc4/PreparedStatementTest.junit
 jdbc4/ResultSetMetaDataTest.junit
 jdbc4/ResultSetTest.junit
 jdbc4/RowIdNotImplementedTest.junit
 jdbc4/StatementEventsTest.junit
 jdbc4/StatementTest.junit
+jdbc4/UnsupportedVetter.junit
 jdbc4/VerifySignatures.junit
 jdbc4/XA40Test.junit
-jdbc4/PreparedStatementTest.junit

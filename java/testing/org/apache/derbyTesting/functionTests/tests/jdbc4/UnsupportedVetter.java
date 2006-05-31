@@ -35,7 +35,12 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 
 /**
- * JUnit test which checks that only expected methods throw SQLFeatureNotSupporteException.
+ * JUnit test which checks that only expected methods throw
+ * SQLFeatureNotSupporteException. As currently compiled, this class
+ * does not object to a handful of mandatory LOB-supporting methods which Derby
+ * does not implement. You can expose these methods by setting
+ * the STRICT_ENFORCEMENT constant to true.
+ *
  */
 public class UnsupportedVetter	extends BaseJDBCTestCase
 {
@@ -46,6 +51,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	/////////////////////////////////////////////////////////////
 
 	public	static	final	String	SQL_PACKAGE_NAME = "java.sql";
+
+	private	static	final	boolean	STRICT_ENFORCEMENT = false;
 	
 	/////////////////////////////////////////////////////////////
 	//
@@ -108,6 +115,20 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 			    java.sql.CallableStatement.class,
 				new MD[]
 				{
+					//
+					// THE FOLLOWING METHODS ARE MANDATORY ACCORDING TO THE
+					// JDBC SPEC. HOWEVER, DERBY DOES NOT IMPLEMENT THEM IN ONE
+					// OR THE OTHER OF OUR CLIENTS.
+					//
+					new FD( "getBlob", new Class[] { int.class } ),
+					new FD( "getClob", new Class[] { int.class } ),
+					
+
+					//
+					// According to the JDBC4 spec and javadoc, the following
+					// methods are optional and do not have to be implemented.
+					//
+					
 					new MD( "getArray", new Class[] { int.class } ),
 					new MD( "getArray", new Class[] { String.class } ),
 					new MD( "getBigDecimal", new Class[] { String.class } ),
@@ -200,6 +221,22 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				java.sql.ResultSet.class,
 				new MD[]
 				{
+					//
+					// THE FOLLOWING METHODS ARE MANDATORY ACCORDING TO THE
+					// JDBC SPEC. HOWEVER, DERBY DOES NOT IMPLEMENT THEM IN ONE
+					// OR THE OTHER OF OUR CLIENTS.
+					//
+					new FD( "updateBlob", new Class[] { int.class, Blob.class } ),
+					new FD( "updateBlob", new Class[] { String.class, Blob.class } ),
+					new FD( "updateClob", new Class[] { int.class, Clob.class } ),
+					new FD( "updateClob", new Class[] { String.class, Clob.class } ),
+					
+
+					//
+					// According to the JDBC4 spec and javadoc, the following
+					// methods are optional and do not have to be implemented.
+					//
+					
 				    new MD( "getNCharacterStream", new Class[] { int.class } ),
 						new MD( "getNCharacterStream", new Class[] { String.class } ),
 						new MD( "getNString", new Class[] { int.class } ),
@@ -239,29 +276,40 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 			// If you support a datatype, then you have to implement
 			// all of its methods.
 			//
-			//		    new Exclusions
-			//		    (
-			//				java.sql.Blob.class,
-			//				new MD[]
-			//				{
-			//				    new MD( "getBinaryStream", new Class[] { long.class, long.class } ),
-			//						new MD( "setBinaryStream", new Class[] { long.class } ),
-			//						new MD( "setBytes", new Class[] { long.class, byte[].class } ),
-			//						new MD( "setBytes", new Class[] { long.class, byte[].class, int.class, int.class } ),
-			//						new MD( "truncate", new Class[] { long.class } )
-			//						} ),
-			//		    new Exclusions
-			//		    (
-			//				java.sql.Clob.class,
-			//				new MD[]
-			//				{
-			//				    new MD( "getCharacterStream", new Class[] { long.class, long.class } ),
-			//						new MD( "setAsciiStream", new Class[] { long.class } ),
-			//						new MD( "setCharacterStream", new Class[] { long.class } ),
-			//						new MD( "setString", new Class[] { long.class, String.class } ),
-			//						new MD( "setString", new Class[] { long.class, String.class, int.class, int.class } ),
-			//						new MD( "truncate", new Class[] { long.class } )
-			//						} )
+
+			new Exclusions
+			(
+			 //
+			 // THE FOLLOWING METHODS ARE MANDATORY ACCORDING TO THE
+			 // JDBC SPEC. HOWEVER, DERBY DOES NOT IMPLEMENT THEM IN ONE
+			 // OR THE OTHER OF OUR CLIENTS.
+			 //
+			    java.sql.Blob.class,
+				new MD[]
+				{
+					new FD( "getBinaryStream", new Class[] { long.class, long.class } ),
+					new FD( "setBinaryStream", new Class[] { long.class } ),
+					new FD( "setBytes", new Class[] { long.class, byte[].class } ),
+					new FD( "setBytes", new Class[] { long.class, byte[].class, int.class, int.class } ),
+					new FD( "truncate", new Class[] { long.class } )
+				} ),
+			new Exclusions
+			(
+			 //
+			 // THE FOLLOWING METHODS ARE MANDATORY ACCORDING TO THE
+			 // JDBC SPEC. HOWEVER, DERBY DOES NOT IMPLEMENT THEM IN ONE
+			 // OR THE OTHER OF OUR CLIENTS.
+			 //
+			    java.sql.Clob.class,
+				new MD[]
+				{
+					new FD( "getCharacterStream", new Class[] { long.class, long.class } ),
+					new FD( "setAsciiStream", new Class[] { long.class } ),
+					new FD( "setCharacterStream", new Class[] { long.class } ),
+					new FD( "setString", new Class[] { long.class, String.class } ),
+					new FD( "setString", new Class[] { long.class, String.class, int.class, int.class } ),
+					new FD( "truncate", new Class[] { long.class } )
+				} )
 		};
 
 	//
@@ -490,6 +538,13 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 			for ( int j = 0; j < exclusionCount; j++ )
 			{
 				MD		md = mds[ j ];
+
+				//
+				// If we are strictly enforcing the JDBC standard,
+				// then expose the mandatory methods which we know Derby
+				// doesn't implement.
+				//
+				if ( STRICT_ENFORCEMENT && !md.isOptional()  ) { continue; }
 
 				Method	method = iface.getMethod( md.getMethodName(), md.getArgTypes() );
 
@@ -785,11 +840,12 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 
 	/**
 	 * <p>
-	 * Method descriptor. We abbreviate the name of this class to make
+	 * Method descriptor for optional methods which Derby does not have
+	 * to implement. We abbreviate the name of this class to make
 	 * arrays of these declarations compact and readable.
 	 * </p>
 	 */
-	public	static	final	class	MD
+	public	static	class	MD
 	{
 		private	String	_methodName;
 		private	Class[]	_argTypes;
@@ -806,6 +862,28 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 
 		/** Get the types of the method's arguments */
 		public	Class[]	getArgTypes() { return _argTypes; }
+
+		/** Return whether this method is optional */
+		public	boolean	isOptional() { return true; }
+	}
+
+	/**
+	 * <p>
+	 * Method descriptor for mandatory methods which we know Derby does not
+	 * implement. We abbreviate the name of this class to make
+	 * arrays of these declarations compact and readable.
+	 * </p>
+	 */
+	public	static	final	class	FD	extends	MD
+	{
+		private	String	_methodName;
+		private	Class[]	_argTypes;
+
+		/** Construct from methodName and argument types. */
+		public	FD( String methodName, Class[] argTypes ) { super( methodName, argTypes ); }
+
+		/** Return whether this method is optional */
+		public	boolean	isOptional() { return false; }
 	}
 
 	/**
