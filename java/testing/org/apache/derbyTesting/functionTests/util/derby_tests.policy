@@ -65,12 +65,23 @@ grant codeBase "${csinfo.codejar}derbynet.jar" {
 };
 
 //
+// Permissions for the tests (derbyTesting.jar)
+// We are liberal here, it's not a goal to make the test harness
+// or tests secure.
+//
+grant codeBase "${csinfo.codejar}derbyTesting.jar" {
+  // Access all properties using System.getProperties
+  permission java.util.PropertyPermission "*", "read, write";
+};
+
+//
 // super-set of the jar permissions for running out of the classes directory
 //
 grant codeBase "${csinfo.codeclasses}" {
 
   permission java.util.PropertyPermission "derby.*", "read";
   permission java.lang.RuntimePermission "createClassLoader";
+  permission java.util.PropertyPermission "*", "read, write";
    
   permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
   permission java.io.FilePermission "${derby.system.home}${/}derby.log", "read, write, delete";

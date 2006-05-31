@@ -2,6 +2,13 @@ Running connection checks on Nested
   isolation level 2
   auto commit     false
   read only       false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+method calls on a closed connection
+Nested <closedconn>.close() no error
+Nested <closedconn>.createStatement() 08003 - No current connection.
+Nested <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Running connection checks on DriverManager 
   isolation level 2
   auto commit     true
@@ -13,7 +20,7 @@ method calls on a closed connection
 DriverManager  <closedconn>.close() no error
 DriverManager  <closedconn>.createStatement() 08003 - No current connection.
 DriverManager  <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on EmbeddedDataSource
+Running connection checks on DataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -22,10 +29,10 @@ setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
-EmbeddedDataSource <closedconn>.close() no error
-EmbeddedDataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on EmbeddedSimpleDataSource
+DataSource <closedconn>.close() no error
+DataSource <closedconn>.createStatement() 08003 - No current connection.
+DataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on SimpleDataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -34,23 +41,10 @@ setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
-EmbeddedSimpleDataSource <closedconn>.close() no error
-EmbeddedSimpleDataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedSimpleDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on EmbeddedConnectionPoolDataSource
-  isolation level 2
-  auto commit     true
-  read only       false
-  has warnings    false
-setTypeMap(EMPTY_MAP) - ok
-setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
-setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
-EVENT(1):connectionClosed
-method calls on a closed connection
-EmbeddedConnectionPoolDataSource <closedconn>.close() no error
-EmbeddedConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on EmbeddedConnectionPoolDataSource
+SimpleDataSource <closedconn>.close() no error
+SimpleDataSource <closedconn>.createStatement() 08003 - No current connection.
+SimpleDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on ConnectionPoolDataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -60,19 +54,32 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(1):connectionClosed
 method calls on a closed connection
-EmbeddedConnectionPoolDataSource <closedconn>.close() no error
-EmbeddedConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+ConnectionPoolDataSource <closedconn>.close() no error
+ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+ConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on ConnectionPoolDataSource
+  isolation level 2
+  auto commit     true
+  read only       false
+  has warnings    false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+EVENT(1):connectionClosed
+method calls on a closed connection
+ConnectionPoolDataSource <closedconn>.close() no error
+ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+ConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Changes rolled back OK in auto closed pooled connection
 EVENT(1):connectionClosed
 expected SQL Exception: No current connection.
 expected SQL Exception: No current connection.
-Start testPoolReset EmbeddedConnectionPoolDataSource
+Start testPoolReset ConnectionPoolDataSource
 IDENTITY_VAL_LOCAL=1
 IDENTITY_VAL_LOCAL=2
 IDENTITY_VAL_LOCAL=3
-End testPoolReset EmbeddedConnectionPoolDataSource
-Running connection checks on EmbeddedXADataSource
+End testPoolReset ConnectionPoolDataSource
+Running connection checks on XADataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -82,21 +89,28 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(3):connectionClosed
 method calls on a closed connection
-EmbeddedXADataSource <closedconn>.close() no error
-EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+XADataSource <closedconn>.close() no error
+XADataSource <closedconn>.createStatement() 08003 - No current connection.
+XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Changes rolled back OK in auto closed local XAConnection
 EVENT(3):connectionClosed
-Start testPoolReset EmbeddedXADataSource
+Start testPoolReset XADataSource
 IDENTITY_VAL_LOCAL=1
 IDENTITY_VAL_LOCAL=2
 IDENTITY_VAL_LOCAL=3
-End testPoolReset EmbeddedXADataSource
+End testPoolReset XADataSource
 ERROR XJ015: Derby system shutdown.
 Running connection checks on Nested
   isolation level 2
   auto commit     false
   read only       false
+setTypeMap(EMPTY_MAP) - ok
+setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
+setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
+method calls on a closed connection
+Nested <closedconn>.close() no error
+Nested <closedconn>.createStatement() 08003 - No current connection.
+Nested <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Running connection checks on DriverManager 
   isolation level 2
   auto commit     true
@@ -108,7 +122,7 @@ method calls on a closed connection
 DriverManager  <closedconn>.close() no error
 DriverManager  <closedconn>.createStatement() 08003 - No current connection.
 DriverManager  <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on EmbeddedDataSource
+Running connection checks on DataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -117,9 +131,9 @@ setTypeMap(EMPTY_MAP) - ok
 setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to method 'java.sql.Connection.setTypeMap'
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
-EmbeddedDataSource <closedconn>.close() no error
-EmbeddedDataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+DataSource <closedconn>.close() no error
+DataSource <closedconn>.createStatement() 08003 - No current connection.
+DataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Running connection checks on EmbeddedSimpleDataSource
   isolation level 2
   auto commit     true
@@ -132,7 +146,7 @@ method calls on a closed connection
 EmbeddedSimpleDataSource <closedconn>.close() no error
 EmbeddedSimpleDataSource <closedconn>.createStatement() 08003 - No current connection.
 EmbeddedSimpleDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on EmbeddedConnectionPoolDataSource
+Running connection checks on ConnectionPoolDataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -142,10 +156,10 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(2):connectionClosed
 method calls on a closed connection
-EmbeddedConnectionPoolDataSource <closedconn>.close() no error
-EmbeddedConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on EmbeddedConnectionPoolDataSource
+ConnectionPoolDataSource <closedconn>.close() no error
+ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+ConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on ConnectionPoolDataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -155,10 +169,10 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(2):connectionClosed
 method calls on a closed connection
-EmbeddedConnectionPoolDataSource <closedconn>.close() no error
-EmbeddedConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on EmbeddedXADataSource
+ConnectionPoolDataSource <closedconn>.close() no error
+ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
+ConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on XADataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -168,10 +182,10 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(4):connectionClosed
 method calls on a closed connection
-EmbeddedXADataSource <closedconn>.close() no error
-EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on EmbeddedXADataSource
+XADataSource <closedconn>.close() no error
+XADataSource <closedconn>.createStatement() 08003 - No current connection.
+XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on XADataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -181,11 +195,11 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(4):connectionClosed
 method calls on a closed connection
-EmbeddedXADataSource <closedconn>.close() no error
-EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+XADataSource <closedconn>.close() no error
+XADataSource <closedconn>.createStatement() 08003 - No current connection.
+XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 EVENT(5):connectionClosed
-Running connection checks on Global EmbeddedXADataSource
+Running connection checks on Global XADataSource
   isolation level 2
   auto commit     false
   read only       false
@@ -194,10 +208,10 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(5):connectionClosed
 method calls on a closed connection
-Global EmbeddedXADataSource <closedconn>.close() no error
-Global EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
-Global EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on Global EmbeddedXADataSource
+Global XADataSource <closedconn>.close() no error
+Global XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Global XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on Global XADataSource
   isolation level 2
   auto commit     false
   read only       false
@@ -206,10 +220,10 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(5):connectionClosed
 method calls on a closed connection
-Global EmbeddedXADataSource <closedconn>.close() no error
-Global EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
-Global EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on Switch to local EmbeddedXADataSource
+Global XADataSource <closedconn>.close() no error
+Global XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Global XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on Switch to local XADataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -219,10 +233,10 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(5):connectionClosed
 method calls on a closed connection
-Switch to local EmbeddedXADataSource <closedconn>.close() no error
-Switch to local EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to local EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on Switch to local EmbeddedXADataSource
+Switch to local XADataSource <closedconn>.close() no error
+Switch to local XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to local XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on Switch to local XADataSource
   isolation level 2
   auto commit     true
   read only       false
@@ -232,10 +246,10 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(5):connectionClosed
 method calls on a closed connection
-Switch to local EmbeddedXADataSource <closedconn>.close() no error
-Switch to local EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to local EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on Switch to global EmbeddedXADataSource
+Switch to local XADataSource <closedconn>.close() no error
+Switch to local XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to local XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on Switch to global XADataSource
   isolation level 2
   auto commit     false
   read only       false
@@ -245,10 +259,10 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(5):connectionClosed
 method calls on a closed connection
-Switch to global EmbeddedXADataSource <closedconn>.close() no error
-Switch to global EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to global EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
-Running connection checks on Switch to global EmbeddedXADataSource
+Switch to global XADataSource <closedconn>.close() no error
+Switch to global XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to global XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Running connection checks on Switch to global XADataSource
   isolation level 2
   auto commit     false
   read only       false
@@ -258,9 +272,9 @@ setTypeMap(null) - ok XJ081 - Invalid value 'null' passed as parameter 'map' to 
 setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 EVENT(5):connectionClosed
 method calls on a closed connection
-Switch to global EmbeddedXADataSource <closedconn>.close() no error
-Switch to global EmbeddedXADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to global EmbeddedXADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Switch to global XADataSource <closedconn>.close() no error
+Switch to global XADataSource <closedconn>.createStatement() 08003 - No current connection.
+Switch to global XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 initial local
   isolation level READ_COMMITTED
   auto commit     true
@@ -519,6 +533,7 @@ autocommitxastart expected No current connection.
 acxs 1
 acxs 2
 autocommitxastart expected  : XAException - null
+Expected XA error code: -9
 acxs 3
 testing jira 95 for DataSource; ok - expected exception: XCY00
 testing jira 95 for XADataSource; ok - expected exception: XCY00

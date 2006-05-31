@@ -20,43 +20,89 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
-import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
-import org.apache.derby.jdbc.EmbeddedXADataSource;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
+import java.io.Serializable;
 import java.sql.CallableStatement;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.sql.Connection;
 import java.sql.DriverManager;
-
-import javax.sql.DataSource;
-import javax.sql.XADataSource;
-import javax.sql.PooledConnection;
-import javax.sql.XAConnection;
-import javax.sql.ConnectionPoolDataSource;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.Xid;
-import javax.sql.ConnectionEventListener;
-import javax.sql.ConnectionEvent;
-import org.apache.derby.tools.JDBCDisplayUtil;
-import org.apache.derby.tools.ij;
-
-import java.io.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Properties;
 
-import javax.naming.*;
-import javax.naming.directory.*;
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
+import javax.sql.XADataSource;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+
+import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
+import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.apache.derby.jdbc.EmbeddedXADataSource;
+import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class checkDataSource
 { 
-    protected static Hashtable conns = new Hashtable();
+	// Only test connection toString values for embedded.
+	// Client connection toString values are not correlated at this time and just 
+	// use default toString
+	// These tests are exempted from other frameworks
+	private boolean testConnectionToString = TestUtil.isEmbeddedFramework();
+	
+	// Only embedded supports SimpleDataSource (JSR169).  
+	// These tests are exempted from other frameworks
+	private boolean testSimpleDataSource = TestUtil.isEmbeddedFramework();
 
+	// for a PooledConnection.getConnection() the connection gets closed.
+	// Embedded automatically rolls back any activity on the connection.
+	// Client requires the user to rollback and gives an SQLException  
+	// java.sql.Connection.close() requested while a transaction is in progress
+	// This has been filed as DERBY-1004 
+	private  boolean needRollbackBeforePCGetConnection = 
+		TestUtil.isDerbyNetClientFramework(); 
+	
+	// DERBY-1035 With client, Connection.getTransactionIsolation() return value is 
+	// wrong after changing the isolation level with an SQL statement such as 
+	// "set current isolation = RS"
+	// Tests for setting isolation level this way only run in embedded for now.
+	private boolean canSetIsolationWithStatement = TestUtil.isEmbeddedFramework();
+	  
+	//	 DERBY-1148 - Client Connection state does not
+	// get set properly when joining a global transaction.
+	private static boolean isolationSetProperlyOnJoin = TestUtil.isEmbeddedFramework();
+	
+	// DERBY-1183 getCursorName not correct after first statement execution
+	private static boolean hasGetCursorNameBug = TestUtil.isDerbyNetClientFramework();
+	
+    // DERBY-1326 - Network server may abandon sessions when Derby system is shutdown
+    // and this causes intermittent hangs in the client
+	private static boolean hangAfterSystemShutdown = TestUtil.isDerbyNetClientFramework();
+
+	/**
+     * A hashtable of opened connections.  This is used when checking to
+     * make sure connection strings are unique; we need to make sure all
+     * the connections are closed when we are done, so they are stored
+     * in this hashtable
+     */
+	protected static Hashtable conns = new Hashtable();
+
+    /** The expected format of a connection string. In English:
+     * "<classname>@<hashcode> (XID=<xid>), (SESSION = <sessionid>),
+     *  (DATABASE=<dbname>), (DRDAID = <drdaid>)"
+     */
+    private static final String CONNSTRING_FORMAT = "\\S+@[0-9]+ " +
+        "\\(XID = .*\\), \\(SESSIONID = [0-9]+\\), " +
+        "\\(DATABASE = [A-Za-z]+\\), \\(DRDAID = .+\\)";
+    
 	public static void main(String[] args) throws Exception {
 
         try
@@ -73,7 +119,7 @@ public class checkDataSource
 	}
 
 
-	public checkDataSource() throws Exception {
+	public checkDataSource() {
 	}
 
 	protected void runTest(String[] args) throws Exception {
@@ -84,40 +130,53 @@ public class checkDataSource
 
 		dmc.createStatement().executeUpdate("create table y(i int)");
 
-		dmc.createStatement().executeUpdate("create procedure checkConn2(in dsname varchar(20)) parameter style java language java modifies SQL Data external name 'org.apache.derbyTesting.functionTests.tests.jdbcapi.checkDataSource.checkNesConn'");
+		dmc.createStatement().executeUpdate(
+                "create procedure checkConn2(in dsname varchar(20)) " +
+                "parameter style java language java modifies SQL DATA " +
+                "external name 'org.apache.derbyTesting.functionTests.tests.jdbcapi." +
+                this.getNestedMethodName() +
+                "'");
 		CallableStatement cs = dmc.prepareCall("call checkConn2(?)");
 		cs.setString(1,"Nested");
 		cs.execute();
 		
 
 		checkConnection("DriverManager ", dmc);
-		checkJBMSToString();
+		if (testConnectionToString)
+			checkJBMSToString();
 
 
-		EmbeddedDataSource dscs = new EmbeddedDataSource();
-		dscs.setDatabaseName("wombat");
-		checkToString(dscs);
+		Properties attrs = new Properties();
+		attrs.setProperty("databaseName", "wombat");
+		DataSource dscs = TestUtil.getDataSource(attrs);
+		
+		if (testConnectionToString) 
+				checkToString(dscs);
 
 		DataSource ds = dscs;
 
-		checkConnection("EmbeddedDataSource", ds.getConnection());
-		
-		EmbeddedSimpleDataSource dssimple = new EmbeddedSimpleDataSource();
-		dssimple.setDatabaseName("wombat");
-		ds = dssimple;
-		checkConnection("EmbeddedSimpleDataSource", ds.getConnection());		
+		checkConnection("DataSource", ds.getConnection());
+		 
+		DataSource dssimple = null;
+		if (testSimpleDataSource)
+		{
+			dssimple = TestUtil.getSimpleDataSource(attrs);
+			ds = dssimple;
+			checkConnection("SimpleDataSource", ds.getConnection());
+		}
 
-		EmbeddedConnectionPoolDataSource dscsp = new EmbeddedConnectionPoolDataSource();
-		dscsp.setDatabaseName("wombat");
-		//dscsp.setConnectionAttributes("unicode=true");
-		ConnectionPoolDataSource dsp = dscsp;
-		checkToString(dsp);
+		ConnectionPoolDataSource dsp = TestUtil.getConnectionPoolDataSource(attrs);
+		
+		
+		if (testConnectionToString) 
+			checkToString(dsp);
+	
 
 		PooledConnection pc = dsp.getPooledConnection();
 		pc.addConnectionEventListener(new EventCatcher(1));
 
-		checkConnection("EmbeddedConnectionPoolDataSource", pc.getConnection());
-		checkConnection("EmbeddedConnectionPoolDataSource", pc.getConnection());
+		checkConnection("ConnectionPoolDataSource", pc.getConnection());
+		checkConnection("ConnectionPoolDataSource", pc.getConnection());
 
 		// BUG 4471 - check outstanding updates are rolled back.
 		Connection c1 = pc.getConnection();
@@ -132,7 +191,9 @@ public class checkDataSource
 
 		// this update should be rolled back
 		s.executeUpdate("insert into t values(2)");
-
+		if (needRollbackBeforePCGetConnection)
+			c1.rollback();
+		
 		c1 = pc.getConnection();
 
 		ResultSet rs = c1.createStatement().executeQuery("select count(*) from t");
@@ -162,20 +223,16 @@ public class checkDataSource
 		pc.close();
 		pc = null;
 
-		testPoolReset("EmbeddedConnectionPoolDataSource", dsp.getPooledConnection());
+		testPoolReset("ConnectionPoolDataSource", dsp.getPooledConnection());
 
-
-		EmbeddedXADataSource dscsx = new EmbeddedXADataSource();
-		dscsx.setDatabaseName("wombat");
-		//dscsx.setConnectionAttributes("unicode=true");
-
-		XADataSource dsx = dscsx;
-		checkToString(dsx);
+		XADataSource dsx = TestUtil.getXADataSource(attrs);
+		if (testConnectionToString)
+			checkToString(dsx);
 
 		XAConnection xac = dsx.getXAConnection();
 		xac.addConnectionEventListener(new EventCatcher(3));
 
-		checkConnection("EmbeddedXADataSource", xac.getConnection());
+		checkConnection("XADataSource", xac.getConnection());
 
 		// BUG 4471 - check outstanding updates are rolled back wi XAConnection.
 		c1 = xac.getConnection();
@@ -188,7 +245,9 @@ public class checkDataSource
 
 		// this update should be rolled back
 		s.executeUpdate("insert into t values(2)");
-
+		if (needRollbackBeforePCGetConnection)
+			c1.rollback();
+		
 		c1 = xac.getConnection();
 
 		rs = c1.createStatement().executeQuery("select count(*) from t");
@@ -203,14 +262,16 @@ public class checkDataSource
 		xac.close();
 		xac = null;
 
-		testPoolReset("EmbeddedXADataSource", dsx.getXAConnection());
+		testPoolReset("XADataSource", dsx.getXAConnection());
 
 
-
-		try {
-			DriverManager.getConnection("jdbc:derby:;shutdown=true");
-		} catch (SQLException sqle) {
-			JDBCDisplayUtil.ShowSQLException(System.out, sqle);
+		// DERBY-1326 - hang in client after Derby system shutdown
+		if(! hangAfterSystemShutdown) {
+			try {
+				TestUtil.getConnection("","shutdown=true");
+			} catch (SQLException sqle) {
+				JDBCDisplayUtil.ShowSQLException(System.out, sqle);
+			}
 		}
 
 		dmc = ij.startJBMS();
@@ -222,24 +283,28 @@ public class checkDataSource
 
 		checkConnection("DriverManager ", dmc);
 
-		// reset ds back to the EmbeddedDataSource
+		// reset ds back to the Regular DataSource
 		ds = dscs;
-		checkConnection("EmbeddedDataSource", ds.getConnection());
+		checkConnection("DataSource", ds.getConnection());
 		
 		// and back to EmbeddedSimpleDataSource
-		ds = dssimple;
-		checkConnection("EmbeddedSimpleDataSource", dssimple.getConnection());
+		if(TestUtil.isEmbeddedFramework())
+		{
+			// JSR169 (SimpleDataSource) is only available on embedded.
+			ds = dssimple;
+			checkConnection("EmbeddedSimpleDataSource", dssimple.getConnection());
+		}
 		
 		pc = dsp.getPooledConnection();
 		pc.addConnectionEventListener(new EventCatcher(2));
-		checkConnection("EmbeddedConnectionPoolDataSource", pc.getConnection());
-		checkConnection("EmbeddedConnectionPoolDataSource", pc.getConnection());
+		checkConnection("ConnectionPoolDataSource", pc.getConnection());
+		checkConnection("ConnectionPoolDataSource", pc.getConnection());
 
 		// test "local" XAConnections
 		xac = dsx.getXAConnection();
 		xac.addConnectionEventListener(new EventCatcher(4));
-		checkConnection("EmbeddedXADataSource", xac.getConnection());
-		checkConnection("EmbeddedXADataSource", xac.getConnection());
+		checkConnection("XADataSource", xac.getConnection());
+		checkConnection("XADataSource", xac.getConnection());
 		xac.close();
 
 		// test "global" XAConnections
@@ -250,19 +315,19 @@ public class checkDataSource
 		xar.start(xid, XAResource.TMNOFLAGS);
 		Connection xacc = xac.getConnection();
 		xacc.close();
-		checkConnection("Global EmbeddedXADataSource", xac.getConnection());
-		checkConnection("Global EmbeddedXADataSource", xac.getConnection());
+		checkConnection("Global XADataSource", xac.getConnection());
+		checkConnection("Global XADataSource", xac.getConnection());
 
 		xar.end(xid, XAResource.TMSUCCESS);
 
-		checkConnection("Switch to local EmbeddedXADataSource", xac.getConnection());
-		checkConnection("Switch to local EmbeddedXADataSource", xac.getConnection());
+		checkConnection("Switch to local XADataSource", xac.getConnection());
+		checkConnection("Switch to local XADataSource", xac.getConnection());
 
 		Connection backtoGlobal = xac.getConnection();
 
 		xar.start(xid, XAResource.TMJOIN);
-		checkConnection("Switch to global EmbeddedXADataSource", backtoGlobal);
-		checkConnection("Switch to global EmbeddedXADataSource", xac.getConnection());
+		checkConnection("Switch to global XADataSource", backtoGlobal);
+		checkConnection("Switch to global XADataSource", xac.getConnection());
 		xar.end(xid, XAResource.TMSUCCESS);
 		xar.commit(xid, true);
 
@@ -301,7 +366,9 @@ public class checkDataSource
 		// and isolation level from the transaction,
 		// holdability remains that of this handle.
 		xar.start(xid, XAResource.TMJOIN);
-		printState("re-join X1", cs1);
+		// DERBY-1148
+		if (isolationSetProperlyOnJoin)
+			printState("re-join X1", cs1);
 		xar.end(xid, XAResource.TMSUCCESS);
 
 		// should be the same as the reset local
@@ -318,7 +385,9 @@ public class checkDataSource
 
 		xar.start(xid, XAResource.TMJOIN);
 		cs1 = xac.getConnection();
-		printState("re-join with new handle X1", cs1);
+		// DERBY-1148
+		if (isolationSetProperlyOnJoin)
+			printState("re-join with new handle X1", cs1);
 		cs1.close();
 		xar.end(xid, XAResource.TMSUCCESS);
 
@@ -329,7 +398,9 @@ public class checkDataSource
 		cs1.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 		printState("pre-X1 commit - local", cs1);
 		xar.start(xid, XAResource.TMJOIN);
-		printState("pre-X1 commit - X1", cs1);
+		// DERBY-1148
+		if (isolationSetProperlyOnJoin)
+			printState("pre-X1 commit - X1", cs1);
 		xar.end(xid, XAResource.TMSUCCESS);
 		printState("post-X1 end - local", cs1);
 		xar.commit(xid, true);
@@ -346,58 +417,8 @@ public class checkDataSource
 		cs1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 		printState("setTransactionIsolation in local", cs1);
 
-    System.out.println("Issue SQL to change isolation in local transaction");
-		s.executeUpdate("set current isolation = RR");
-		printState("SQL to change isolation in local", cs1);
-
-		xid = new cdsXid(1, (byte) 35, (byte) 47);
-		xar.start(xid, XAResource.TMNOFLAGS);
-		printState("1st global(new)", cs1);
-		xar.end(xid, XAResource.TMSUCCESS);
-
-		printState("local", cs1);
-    System.out.println("Issue SQL to change isolation in local transaction");
-		s.executeUpdate("set current isolation = RS");
-		printState("SQL to change isolation in local", cs1);
-		
-		// DERBY-1325 - Isolation level of local connection does not get reset after ending 
-		// a global transaction that was joined/resumed if the isolation level was changed 
-		// using SQL 
-		xar.start(xid, XAResource.TMJOIN);
-		printState("1st global(existing)", cs1);
-		xar.end(xid, XAResource.TMSUCCESS);
-		printState("local", cs1);
-		// DERBY-1325 end test 
-		
-		Xid xid2 = new cdsXid(1, (byte) 93, (byte) 103);
-		xar.start(xid2, XAResource.TMNOFLAGS);
-		printState("2nd global(new)", cs1);
-		xar.end(xid2, XAResource.TMSUCCESS);
-
-		xar.start(xid, XAResource.TMJOIN);
-		printState("1st global(existing)", cs1);
-		xar.end(xid, XAResource.TMSUCCESS);
-
-		printState("local", cs1);
-
-		xar.start(xid, XAResource.TMJOIN);
-		printState("1st global(existing)", cs1);
-    System.out.println("Issue SQL to change isolation in 1st global transaction");
-		s.executeUpdate("set current isolation = UR");
-		printState("change isolation of existing 1st global transaction", cs1);
-		xar.end(xid, XAResource.TMSUCCESS);
-
-		printState("local", cs1);
-
-		xar.start(xid2, XAResource.TMJOIN);
-		printState("2nd global(existing)", cs1);
-		xar.end(xid2, XAResource.TMSUCCESS);
-
-		xar.rollback(xid2);
-		printState("(After 2nd global rollback) local", cs1);
-
-		xar.rollback(xid);
-		printState("(After 1st global rollback) local", cs1);
+		if (canSetIsolationWithStatement)
+			testSetIsolationWithStatement(s, xar, cs1);
 
 		// now check re-use of *Statement objects across local/global connections.
 		System.out.println("TESTING RE_USE OF STATEMENT OBJECTS");
@@ -594,11 +615,16 @@ public class checkDataSource
 		rs4 = s4.executeQuery("select i from autocommitxastart");
 		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
 		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
-
+		
+		 // Get a new xid to begin another transaction. 
+		 // This should give XAER_OUTSIDE exception because
+		 // the resource manager is busy in the local transaction
+		 xid4a = new cdsXid(4, (byte) 93, (byte) 103);
 		try {
 			xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
 		} catch (XAException xae) {
 			showXAException("autocommitxastart expected ", xae);
+			System.out.println("Expected XA error code: " + xae.errorCode);
 		}
 		rs4.next(); System.out.println("acxs " + rs4.getInt(1));
 		rs4.close();
@@ -636,9 +662,77 @@ public class checkDataSource
 		} catch (Exception e) {
 				System.out.println("; wrong, unexpected exception: " + e.toString());
 		}
-
+		// skip testDSRequestAuthentication for  client because of these 
+		// two issues:
+		// DERBY-1130 : Client should not allow databaseName to be set with
+		// setConnectionAttributes
+		// DERBY-1131 : Deprecate  Derby DataSource property attributesAsPassword
+		if (TestUtil.isDerbyNetClientFramework())
+			return;
 		testDSRequestAuthentication();
 		
+	}
+
+	/**
+	 * @param s
+	 * @param xar
+	 * @param conn
+	 * @throws SQLException
+	 * @throws XAException
+	 */
+	private void testSetIsolationWithStatement(Statement s, XAResource xar, Connection conn) throws SQLException, XAException {
+		Xid xid;
+		System.out.println("Issue SQL to change isolation in local transaction");
+			s.executeUpdate("set current isolation = RR");
+			printState("SQL to change isolation in local", conn);
+
+			xid = new cdsXid(1, (byte) 35, (byte) 47);
+			xar.start(xid, XAResource.TMNOFLAGS);
+			printState("1st global(new)", conn);
+			xar.end(xid, XAResource.TMSUCCESS);
+
+			printState("local", conn);
+		System.out.println("Issue SQL to change isolation in local transaction");
+			s.executeUpdate("set current isolation = RS");
+			printState("SQL to change isolation in local", conn);
+
+			// DERBY-1325 - Isolation level of local connection does not get reset after ending 
+			// a global transaction that was joined/resumed if the isolation level was changed 
+			// using SQL 
+			xar.start(xid, XAResource.TMJOIN);
+			printState("1st global(existing)", conn);
+			xar.end(xid, XAResource.TMSUCCESS);
+			printState("local", conn);
+			// DERBY-1325 end test 
+			
+			Xid xid2 = new cdsXid(1, (byte) 93, (byte) 103);
+			xar.start(xid2, XAResource.TMNOFLAGS);
+			printState("2nd global(new)", conn);
+			xar.end(xid2, XAResource.TMSUCCESS);
+
+			xar.start(xid, XAResource.TMJOIN);
+			printState("1st global(existing)", conn);
+			xar.end(xid, XAResource.TMSUCCESS);
+
+			printState("local", conn);
+
+			xar.start(xid, XAResource.TMJOIN);
+			printState("1st global(existing)", conn);
+		System.out.println("Issue SQL to change isolation in 1st global transaction");
+			s.executeUpdate("set current isolation = UR");
+			printState("change isolation of existing 1st global transaction", conn);
+			xar.end(xid, XAResource.TMSUCCESS);
+
+			printState("local", conn);
+
+			xar.start(xid2, XAResource.TMJOIN);
+			printState("2nd global(existing)", conn);
+			xar.end(xid2, XAResource.TMSUCCESS);
+			xar.rollback(xid2);
+			printState("(After 2nd global rollback) local", conn);
+
+			xar.rollback(xid);
+			printState("(After 1st global rollback) local", conn);
 	}
 
 	protected void showXAException(String tag, XAException xae) {
@@ -676,7 +770,10 @@ public class checkDataSource
 	}
 	protected PreparedStatement createFloatStatementForStateChecking(Connection conn, String sql) throws SQLException {
 		PreparedStatement s = internalCreateFloatStatementForStateChecking(conn, sql);
-		s.setCursorName("StokeNewington");
+		// Need to make a different cursor name here because of DERBY-1036
+		// client won't allow duplicate name.
+		//s.setCursorName("StokeNewington");
+		s.setCursorName("LondonNW17");
 		s.setFetchDirection(ResultSet.FETCH_REVERSE);
 		s.setFetchSize(888);
 		s.setMaxFieldSize(317);
@@ -687,7 +784,9 @@ public class checkDataSource
 	}
 	protected CallableStatement createFloatCallForStateChecking(Connection conn, String sql) throws SQLException {
 		CallableStatement s = internalCreateFloatCallForStateChecking(conn, sql);
-		s.setCursorName("StokeNewington");
+		//DERBY-1036 - need a new name
+		//s.setCursorName("StokeNewington");
+		s.setCursorName("districtInLondon");
 		s.setFetchDirection(ResultSet.FETCH_REVERSE);
 		s.setFetchSize(999);
 		s.setMaxFieldSize(137);
@@ -702,6 +801,16 @@ public class checkDataSource
 	protected CallableStatement internalCreateFloatCallForStateChecking(Connection conn, String sql) throws SQLException {
 		return conn.prepareCall(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 	}
+    
+    /**
+     * Return the Java class and method for the procedure
+     * for the nested connection test.
+     * checkDataSource 30 will override.
+     */
+    protected String getNestedMethodName()
+    {
+        return "checkDataSource.checkNesConn";
+    }
 
 	static String rsType(int type) {
 		switch (type) {
@@ -770,7 +879,15 @@ public class checkDataSource
 	}
 
 	private static void resultSetQuery(String tag, ResultSet rs) throws SQLException {
-		System.out.print(tag + ": ru(" + rs.getCursorName() + ") contents");
+		String cursorName = rs.getCursorName();
+		//	DERBY-1183 client cursor name is not correct.
+		// need to truncate the cursor number of the generated name as it might
+		// not be consistent.
+		if (hasGetCursorNameBug && cursorName.startsWith("SQL_CUR"))
+		{
+			cursorName = cursorName.substring(0,13);
+		}
+		System.out.print(tag + ": ru(" + cursorName + ") contents");
 		while (rs.next()) {
 			System.out.print(" {" + rs.getInt(1) + "}");
 		}
@@ -794,33 +911,9 @@ public class checkDataSource
 
 	//calling checkConnection - for use in a procedure to get a nested connection.
 	public static void checkNesConn (String dsName) throws SQLException {
-		checkConnectionS(dsName, DriverManager.getConnection("jdbc:default:connection"));
-			
-	}
-
-	public static void checkConnectionS(String dsName, Connection conn) throws SQLException {
-
-		System.out.println("Running connection checks on " + dsName);
-
-		//System.out.println("  url             " + conn.getMetaData().getURL());
-		System.out.println("  isolation level " + conn.getTransactionIsolation());
-		System.out.println("  auto commit     " + conn.getAutoCommit());
-		System.out.println("  read only       " + conn.isReadOnly());
-
-		// when 4729 is fixed, remove the startsWith() clause
-		if (dsName.endsWith("DataSource") && !dsName.startsWith("Global"))
-			System.out.println("  has warnings    " + (conn.getWarnings() != null));
-
-		checkStatementS(conn, conn.createStatement());
-		checkStatementS(conn, conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
-
-		Connection c1 = conn.getMetaData().getConnection();
-		if (c1 != conn)
-			System.out.println("FAIL incorrect connection object returned for DatabaseMetaData.getConnection()");
-
-		checkConnectionPreCloseS(dsName, conn);
-		conn.close();
-	}
+        Connection conn = DriverManager.getConnection("jdbc:default:connection");
+        new checkDataSource().checkConnection(dsName, conn);			
+    }
 
 	public void checkConnection(String dsName, Connection conn) throws SQLException {
 
@@ -836,8 +929,8 @@ public class checkDataSource
 			System.out.println("  has warnings    " + (conn.getWarnings() != null));
 
 		Statement s1 = conn.createStatement();
-		checkStatement(conn, s1);
-		checkStatement(conn, conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
+		checkStatement(dsName, conn, s1);
+		checkStatement(dsName, conn, conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
 
 		Connection c1 = conn.getMetaData().getConnection();
 		if (c1 != conn)
@@ -895,7 +988,7 @@ public class checkDataSource
     /**
      * Make sure this connection's string is unique (DERBY-243)
      */
-    protected void checkToString(Connection conn) throws Exception
+    protected static void checkToString(Connection conn) throws Exception
     {
         String str = conn.toString();
 
@@ -911,7 +1004,7 @@ public class checkDataSource
      * Clear out and close connections in the connections
      * hashtable. 
      */
-    protected void clearConnections() throws SQLException
+    protected static void clearConnections() throws SQLException
     {
         java.util.Iterator it = conns.values().iterator();
         while ( it.hasNext() )
@@ -926,7 +1019,7 @@ public class checkDataSource
      * Get connections  using ij.startJBMS() and make sure
      * they're unique
      */
-    protected void checkJBMSToString() throws Exception
+    protected static void checkJBMSToString() throws Exception
     {
         clearConnections();
         // Open ten connections rather than just two to
@@ -947,7 +1040,7 @@ public class checkDataSource
      * Check uniqueness of connection strings coming from a
      * DataSouce
      */
-    protected void checkToString(DataSource ds) throws Exception
+    protected static void checkToString(DataSource ds) throws Exception
     {
         clearConnections();
         
@@ -966,7 +1059,7 @@ public class checkDataSource
      * We want to check the PooledConnection as well as the
      * underlying physical connection. 
      */
-    protected void checkToString(ConnectionPoolDataSource pds)
+    protected static void checkToString(ConnectionPoolDataSource pds)
         throws Exception
     {
         int numConnections = 10;
@@ -1006,26 +1099,12 @@ public class checkDataSource
             pc.close();
         }
         pooledConns.clear();
-        
-        // Now check that two connections from the same 
-        // PooledConnection have the same string value
-        PooledConnection pc = pds.getPooledConnection();
-        Connection conn = pc.getConnection();
-        String str = conn.toString();
-        conn = pc.getConnection();
-        if ( ! conn.toString().equals(str) )
-        {
-            throw new Exception("Two connections from the " +
-              "same pooled connection have different string " +
-              "values: " + str + ", " + conn.toString());
-        }
-        pc.close();
     }
     
     /**
      * Check uniqueness of strings for an XA data source
      */
-    protected void checkToString(XADataSource xds) throws Exception
+    protected static void checkToString(XADataSource xds) throws Exception
     {
         int numConnections = 10;
         
@@ -1064,35 +1143,7 @@ public class checkDataSource
             xc.close();
         }
         xaConns.clear();
-        
-        // Now check that two connections from the same 
-        // XAConnection have the same string value
-        XAConnection xc = xds.getXAConnection();
-        Connection conn = xc.getConnection();
-        String str = conn.toString();
-        conn = xc.getConnection();
-        if ( ! conn.toString().equals(str) )
-        {
-            throw new Exception("Two connections from the " +
-              "same pooled connection have different string " +
-              "values: " + str + ", " + conn.toString());
-        }
-        xc.close();
     }
-    
-	protected static void checkConnectionPreCloseS(String dsName, Connection conn) throws SQLException {
-		if (dsName.endsWith("DataSource")) {
-
-			// see if setting the state is carried over to any future connection from the
-			// data source object.
-			try {
-				conn.setReadOnly(true);
-			} catch (SQLException sqle) {
-				// cannot set read-only in an active transaction, & sometimes
-				// connections are active at this point.
-			}
-		}
-	}
 
 	protected void checkConnectionPreClose(String dsName, Connection conn) throws SQLException {
 		if (dsName.endsWith("DataSource")) {
@@ -1108,7 +1159,7 @@ public class checkDataSource
 		}
 	}
 
-	protected static void checkStatementS(Connection conn, Statement s) throws SQLException {
+	protected void checkStatement(String dsName, Connection conn, Statement s) throws SQLException {
 
 		Connection c1 = s.getConnection();
 		if (c1 != conn)
@@ -1122,22 +1173,10 @@ public class checkDataSource
 		if (states[1] != 2)
 			System.out.println("FAIL invalid update count for second batch statement");
 
-		s.close();
-	}
-	protected void checkStatement(Connection conn, Statement s) throws SQLException {
-
-		Connection c1 = s.getConnection();
-		if (c1 != conn)
-			System.out.println("FAIL incorrect connection object returned for Statement.getConnection()");
-
-		s.addBatch("insert into y values 1");
-		s.addBatch("insert into y values 2,3");
-		int[] states = s.executeBatch();
-		if (states[0] != 1)
-			System.out.println("FAIL invalid update count for first batch statement");
-		if (states[1] != 2)
-			System.out.println("FAIL invalid update count for second batch statement");
-
+        ResultSet rs = s.executeQuery("VALUES 1");
+        if (rs.getStatement() != s)
+            System.out.println(dsName + " FAIL incorrect Statement object returned for ResultSet.getStatement");
+        rs.close();
 		s.close();
 	}
 

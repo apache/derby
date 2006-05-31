@@ -2,3 +2,4 @@ jdbcapi/xaSimplePositive.sql
 jdbcapi/xaStateTran.sql
 jdbcapi/XATest.java
 jdbcapi/lobStreams.java
+jdbcapi/checkDataSource.java
