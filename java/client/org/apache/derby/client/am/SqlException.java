@@ -162,9 +162,6 @@ public class SqlException extends Exception implements Diagnosable {
      *      using initCause().  On JDK 1.3, since initCause() does not exist,
      *      a non-SQL exception can not be chained.  Instead, the exception class
      *      and message text is appended to the message for this exception.
-     *
-     * @return 
-     *      An instance of SqlException that you can throw to your heart's content.
      */
     public SqlException(LogWriter logwriter, 
         ClientMessageId msgid, Object[] args, Throwable cause)
