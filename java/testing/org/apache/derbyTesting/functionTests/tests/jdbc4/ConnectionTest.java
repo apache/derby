@@ -35,22 +35,19 @@ import javax.sql.*;
 
 /**
  * Tests for the JDBC 4.0 specific methods in the connection object(s).
- *
- * This class defines all test methods in <code>ConnectionTest</code>, and 
- * overrides <code>setUp</code> in subclasses to run these tests with different
- * types of connection objects. To see what connection types are tested, look
- * at the <code>suite</code> method.
- *
- * In addition, the <code>getName</code> method is overridden in the subclasses
- * to be able to see with what connection type the tests fail/run with.
+ * 
+ * Which connection implementation is tested, depends on what connection
+ * object the <code>BaseJDBCTestCase.getConnection()</code>-method returns.
+ * Currently, the property <code>derbyTesting.xa.single</code> can be set to
+ * <code>true</code> to test the XA connection object, which happens to be the
+ * same as the one used for poooled connections.
+ * The connection returned also depends on which framework is being used.
  */
 public class ConnectionTest
     extends BaseJDBCTestCase {
 
     /** 
      * Default connection used by the tests. 
-     * The setup of the connection can be overridden in the <code>setUp</code> 
-     * method in the subclasses.
      */
     protected Connection con = null;
 
@@ -64,7 +61,7 @@ public class ConnectionTest
     }
     
     /**
-     * Obtain a "regular" connection that the tests can use.
+     * Obtain a connection that the tests can use.
      */
     public void setUp() 
         throws SQLException {
@@ -146,8 +143,10 @@ public class ConnectionTest
 
     /**
      * Simply test that the method is implemented.
-     * If the method actually does what is should, is not yet tested
-     * (there are missing implementations).
+     * [TODO] Write a better test when some (believed to be) JDK bugs have
+     *        been resolved. Currently fails during query execution with 
+     *        JDK 1.6.0_b85 because of some security manager problems. May be 
+     *        fixed in a couple of beta releases.
      */
     public void testCreateQueryObjectIsImplemented()
         throws SQLException {
@@ -193,7 +192,7 @@ public class ConnectionTest
      * for the connection. This test is very limited but is tested
      * for all connection types. A more complete test of isValid is
      * found in the TestConnectionMethods.java test that is run for
-     * for embedded and network client connections.
+     * embedded and network client connections.
      */
     public void testIsValidImplemented() throws SQLException {
         // Test with an infinite (0) timeout
@@ -304,16 +303,16 @@ public class ConnectionTest
     /**
      * Create suite containing client-only tests.
      */
-    private static TestSuite clientSuite() {
-        TestSuite clientSuite = new TestSuite();
+    private static TestSuite clientSuite(String name) {
+        TestSuite clientSuite = new TestSuite(name);
         return clientSuite; 
     }
     
     /**
      * Create suite containing embedded-only tests.
      */
-    private static TestSuite embeddedSuite() {
-        TestSuite embeddedSuite = new TestSuite();
+    private static TestSuite embeddedSuite(String name) {
+        TestSuite embeddedSuite = new TestSuite(name);
         embeddedSuite.addTest(new ConnectionTest(
                     "embeddedCreateBlob"));
         embeddedSuite.addTest(new ConnectionTest(
@@ -322,162 +321,25 @@ public class ConnectionTest
     }
     
     /**
-     * Create a test suite containing tests for various connection types.
-     * Three subsuites are created:
-     * <ol><li>ConnectionTest suite</li>
-     *     <li>PooledConnectionTest suite</li>
-     *     <li>XAConnectionTest suite</li>
-     *  </ol>
-     *
+     * Create a test suite containing tests for a JDB connection.
      *  In addition, separate suites for embedded- and client-only are added
-     *  to the subsuites when appropriate.
+     *  when appropriate.
      */
     public static Test suite() {
-        TestSuite topSuite = new TestSuite("ConnectionTest top suite");
-        // Add suite for "regular" Connection tests.
-        TestSuite baseConnSuite = 
+        TestSuite connSuite = 
             new TestSuite(ConnectionTest.class, "ConnectionTest suite");
-        // Add suite for PooledConnection tests.
-        TestSuite pooledConnSuite =
-            new TestSuite(PooledConnectionTest.class,
-                          "PooledConnectionTest suite");
-        // Add suite for XAConnection tests.
-        TestSuite xaConnSuite =
-            new TestSuite(XAConnectionTest.class, "XAConnectionTest suite");
-        
         // Add client only tests
         // NOTE: JCC is excluded
         if (usingDerbyNetClient()) {
-            TestSuite clientSuite = clientSuite();
-            clientSuite.setName("ConnectionTest client-only suite");
-            baseConnSuite.addTest(clientSuite);
-            clientSuite = clientSuite();
-            clientSuite.setName("PooledConnectionTest client-only suite");
-            pooledConnSuite.addTest(clientSuite);
-            clientSuite = clientSuite();
-            clientSuite.setName("XAConnectionTest client-only suite");
-            xaConnSuite.addTest(clientSuite);
+            connSuite.addTest(
+                    clientSuite("ConnectionTest client-only suite"));
         }
         // Add embedded only tests
         if (usingEmbedded()) {
-            TestSuite embeddedSuite = embeddedSuite();
-            embeddedSuite.setName("ConnectionTest embedded-only suite");
-            baseConnSuite.addTest(embeddedSuite);
-            embeddedSuite = embeddedSuite();
-            embeddedSuite.setName("PooledConnectionTest embedded-only suite");
-            pooledConnSuite.addTest(embeddedSuite);
-            embeddedSuite = embeddedSuite();
-            embeddedSuite.setName("XAConnectionTest embedded-only suite");
-            xaConnSuite.addTest(embeddedSuite);
+            connSuite.addTest(
+                    embeddedSuite("ConnectionTest embedded-only suite"));
         }
-        topSuite.addTest(baseConnSuite);
-        topSuite.addTest(pooledConnSuite);
-        topSuite.addTest(xaConnSuite);
-        return topSuite;
+        return connSuite;
     }
-    
-    /**
-     * Tests for the real connection in a <code>PooledConnection</code>.
-     *
-     * This class subclasses <code>ConnectionTest</code>, and runs the test-
-     * methods implemented there. By doing this, we don't have to duplicate
-     * the test code. We only run the tests with a different type of 
-     * connection.
-     */
-    public static class PooledConnectionTest 
-        extends ConnectionTest {
-
-        /**
-         * Create a test with the given name.
-         * 
-         * @param name name of the test.
-         */
-        public PooledConnectionTest(String name) {
-            super(name);
-        }
-
-        /**
-         * Return name of the test, with "_POOLED" appended.
-         * Must override this method to be able to separate which connection
-         * the failure happened with, since the test methods are all in the
-         * superclass.
-         *
-         * @return the name of the test method in <code>ConnectionTest</code>,
-         *      appended with the string "_POOLED".
-         */
-        public String getName() {
-            return super.getName() + "_POOLED";
-        }
-
-        /**
-         * Obtain a connection to test through 
-         * <code>ConnectionPoolDatasource</code> and 
-         * <code>PooledConnection</code>.
-         * Currently, the connection obtained will be either a 
-         * <code>LogicalConnection<code> or a <code>BrokeredConnection</code>,
-         * depending on whether we run in embedded or client mode.
-         */
-        public void setUp()
-            throws SQLException {
-            //The ConnectionPoolDataSource object
-            //used to get a PooledConnection object
-            ConnectionPoolDataSource cpDataSource = TestDataSourceFactory.getConnectionPoolDataSource();
-            PooledConnection pConn = cpDataSource.getPooledConnection();
-            //doing a getConnection() returns a Connection object
-            //that internally contains a BrokeredConnection40 object
-            //this is then used to check the wrapper object
-            con = pConn.getConnection();
-        }
-        
-    } // End class PooledConnectionTest
-
-    /**
-     * Tests for the real connection in <code>XAConnection</code>.
-     *
-     * This class subclasses <code>ConnectionTest</code>, and runs the test-
-     * methods implemented there. By doing this, we don't have to duplicate
-     * the test code. We only run the tests with a different type of 
-     * connection.
-     */
-    public static class XAConnectionTest
-        extends ConnectionTest {
-
-        /**
-         * Create a test with the given name.
-         * 
-         * @param name name of the test.
-         */
-        public XAConnectionTest(String name) {
-            super(name);
-        }
-
-        /**
-         * Return name of the test, with "_XA" appended.
-         * Must override this method to be able to separate which connection
-         * the failure happened with, since the test methods are all in the
-         * superclass.
-         *
-         * @return the name of the test method in <code>ConnectionTest</code>,
-         *      appended with the string "_XA".
-         */
-        public String getName() {
-            return super.getName() + "_XA";
-        }
-
-        /**
-         * Obtain a connection to test through <code>XADataSource</code> and 
-         * <code>XAConnection</code>.
-         * Currently, the connection obtained will be either a 
-         * <code>LogicalConnection<code> or a <code>BrokeredConnection</code>,
-         * depending on whether we run in embedded or client mode.
-         */
-        public void setUp()
-            throws SQLException {
-            // Use a XADataSource to obtain a XAConnection object, and
-            // finally a "real" connection.
-            con = TestDataSourceFactory.getXADataSource().getXAConnection().getConnection();
-        }
-        
-    } // End class XAConnectionTest
     
 } // End class BaseJDBCTestCase
