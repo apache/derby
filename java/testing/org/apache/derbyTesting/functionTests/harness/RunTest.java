@@ -1705,12 +1705,7 @@ clp.list(System.out);
                     copyOutDir = outDir;
                 else if ( (runDir != null) && (runDir.exists()) )
                 {
-                    if (jvmName.startsWith("j9")&&  testType.equals("java"))
-                    {
-                        // for some reason, not picking up from rundir
-                        copyOutDir = outDir;
-                    }else
-					    copyOutDir = runDir;
+                    copyOutDir = runDir;
                 }
                 else
                     copyOutDir = outDir;

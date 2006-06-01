@@ -81,11 +81,11 @@ ij(SATCONNECTION)> -- Tests with views
 create view v1 as select * from tsat;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> grant select on v1 to bar;
-0 rows inserted/updated/deleted
+ERROR 2850F: Grant or Revoke operation is not allowed on object 'V1'.
 ij(SATCONNECTION)> grant insert on v1 to foo;
-0 rows inserted/updated/deleted
+ERROR 2850F: Grant or Revoke operation is not allowed on object 'V1'.
 ij(SATCONNECTION)> grant update on v1 to public;
-0 rows inserted/updated/deleted
+ERROR 2850F: Grant or Revoke operation is not allowed on object 'V1'.
 ij(SATCONNECTION)> -- Tests for synonym. Not supported currently.
 create synonym mySym for satheesh.tsat;
 0 rows inserted/updated/deleted
