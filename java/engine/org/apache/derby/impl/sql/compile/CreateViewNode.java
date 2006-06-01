@@ -33,6 +33,7 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -255,6 +256,7 @@ public class CreateViewNode extends DDLStatementNode
 
 		try {
 			compilerContext.setCurrentAuxiliaryProviderList(apl);
+			compilerContext.pushCurrentPrivType(Authorizer.SELECT_PRIV);
 
 			/* Bind the tables in the queryExpression */
 			queryExpr = queryExpr.bindNonVTITables(dataDictionary, fromList);
@@ -276,6 +278,7 @@ public class CreateViewNode extends DDLStatementNode
 		}
 		finally
 		{
+			compilerContext.popCurrentPrivType();
 			compilerContext.setCurrentAuxiliaryProviderList(prevAPL);
 		}
 
