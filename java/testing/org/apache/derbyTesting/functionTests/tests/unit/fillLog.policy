@@ -1,0 +1,7 @@
+//
+// fillLog.policy
+//
+grant codeBase "${derbyTesting.codejar}derby.jar" {
+  // for unit tests
+  permission java.util.PropertyPermission "derbyTesting.unittest.*", "read";
+};
