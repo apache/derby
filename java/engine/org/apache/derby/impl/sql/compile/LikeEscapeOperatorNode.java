@@ -552,7 +552,9 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 				return this;
 			}
 
-			greaterEqualString = Like.greaterEqualString(pattern, escape);
+			int maxWidth = receiver.getTypeServices().getMaximumWidth();
+			greaterEqualString = Like.greaterEqualString(pattern, escape, 
+														 maxWidth);
 
 
 
@@ -561,7 +563,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 			 */
             if ( ! receiver.getTypeId().isNationalStringTypeId() )
 			{
-				lessThanString = Like.lessThanString(greaterEqualString);
+				lessThanString = Like.lessThanString(pattern, escape, maxWidth);
 				eliminateLikeComparison = ! Like.isLikeComparisonNeeded(pattern);
 			}
 		}
@@ -608,8 +610,9 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 			QueryTreeNode likeLTopt;
 			if (leftOperand.requiresTypeFromContext())
 			{
+				int maxWidth = receiver.getTypeServices().getMaximumWidth();
 				likeLTopt = setupOptimizeStringFromParameter(leftOperand, rightOperand,
-								"lessThanStringFromParameter");
+								"lessThanStringFromParameter", maxWidth);
 			}
 			else
 			{
@@ -653,8 +656,9 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 			// Create an expression off the parameter
 			// new SQLChar(Like.greaterEqualString(?));
 
+			int maxWidth = receiver.getTypeServices().getMaximumWidth();
 			likeGEopt = setupOptimizeStringFromParameter(leftOperand, rightOperand,
-									"greaterEqualStringFromParameter");
+								"greaterEqualStringFromParameter", maxWidth);
 
 		} else {
 
@@ -787,7 +791,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 	}
 
 	private ValueNode setupOptimizeStringFromParameter(ValueNode parameterNode,
-						ValueNode escapeNode,String methodName)
+						ValueNode escapeNode,String methodName, int maxWidth)
 		throws StandardException {
 
 		Vector param;
@@ -811,6 +815,12 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 		param.addElement(parameterNode);
 		if (escapeNode != null)
 			param.addElement(escapeNode);
+
+		QueryTreeNode maxWidthNode = getNodeFactory().getNode(
+										C_NodeTypes.INT_CONSTANT_NODE,
+										new Integer(maxWidth),
+										getContextManager());
+		param.addElement(maxWidthNode);
 
 		methodCall.addParms(param);
 

@@ -501,6 +501,24 @@ ID         |NAME                                                                
 ij> execute s using 'values (''Bogus'', ''Name'')';
 ID         |NAME                                                                                                                                                                                            |SOURCE                                                                                                                                                                                                                                                      
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> -- test control characters
+insert into test values ('asdp', 'asdp', 'asdp');
+1 row inserted/updated/deleted
+ij> insert into test values ('aseg', 'aseg', 'aseg');
+1 row inserted/updated/deleted
+ij> prepare p1 as 'select id from test where c10 like ?';
+ij> execute p1 using 'values ''asd%'' ';
+ID        
+----------
+asdf      
+asdg      
+asdp     
+ij> select c10 from test where c10 like 'asd%';
+C10       
+----------
+asdf      
+asdg      
+asdp     
 ij> -- clean up
 drop table test;
 0 rows inserted/updated/deleted

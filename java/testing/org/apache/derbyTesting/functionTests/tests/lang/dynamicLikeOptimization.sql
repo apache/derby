@@ -169,6 +169,13 @@ execute s using 'values (''W%'', ''Warn\%Unlock\%Door'')';
 execute s using 'values (''%ing'', ''W\_Unlock\_%Door'')';
 execute s using 'values (''Bogus'', ''Name'')';
 
+-- test control characters
+insert into test values ('asdp', 'asdp', 'asdp');
+insert into test values ('aseg', 'aseg', 'aseg');
+prepare p1 as 'select id from test where c10 like ?';
+execute p1 using 'values ''asd%'' ';
+select c10 from test where c10 like 'asd%';
+
 -- clean up
 drop table test;
 drop table likeable;

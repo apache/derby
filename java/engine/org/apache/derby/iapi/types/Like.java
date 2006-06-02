@@ -688,22 +688,22 @@ public class Like {
 		return (firstChar != anyChar && firstChar != anyString);
 	}
 
-	public static String greaterEqualStringFromParameter(String pattern)
+	public static String greaterEqualStringFromParameter(String pattern, int maxWidth)
 		throws StandardException {
 
 		if (pattern == null)
 			return null;
 
-		return greaterEqualString(pattern, (String) null);
+		return greaterEqualString(pattern, (String) null, maxWidth);
 	}
 
-	public static String greaterEqualStringFromParameterWithEsc(String pattern, String escape)
+	public static String greaterEqualStringFromParameterWithEsc(String pattern, String escape, int maxWidth)
 		throws StandardException {
 
 		if (pattern == null)
 			return null;
 
-		return greaterEqualString(pattern, escape);
+		return greaterEqualString(pattern, escape, maxWidth);
 	}
 
 	/**
@@ -711,10 +711,11 @@ public class Like {
 	 *
 	 * @param pattern	The right side of the LIKE
 	 * @param escape	The escape clause
+	 * @param maxWidth	Maximum length of column, for null padding
 	 *
 	 * @return	The String for the >= clause
 	 */
-	public static String greaterEqualString(String pattern, String escape)
+	public static String greaterEqualString(String pattern, String escape, int maxWidth)
 	    throws StandardException
 	{
 
@@ -735,32 +736,29 @@ public class Like {
 				// we return a string stripping out the escape char
 				// leaving the _? in place as normal chars.
                 
-				return greaterEqualString(pattern, escChar);
+				return padWithNulls(greaterEqualString(pattern, escChar), maxWidth);
 			}
 			// drop through if no escape found
 		}
 
 		if (firstAnyChar == -1)
 		{
-			if (firstAnyString == -1)
+			if (firstAnyString != -1) // no _, found %
 			{
-				return pattern;
-			}
-			else	// no _, found %
-			{
-				return pattern.substring(0, firstAnyString);
+				pattern = pattern.substring(0, firstAnyString);
 			}
 		}
 		else if (firstAnyString == -1)
 		{
-			return pattern.substring(0, firstAnyChar);
+			pattern = pattern.substring(0, firstAnyChar);
 		}
 		else
 		{
-			return pattern.substring(0, (firstAnyChar > firstAnyString) ? 
-										firstAnyString :
-										firstAnyChar);
+			pattern = pattern.substring(0, (firstAnyChar > firstAnyString) ? 
+											firstAnyString :
+											firstAnyChar);
 		}
+		return padWithNulls(pattern, maxWidth);
 	}
 
     /** 
@@ -867,11 +865,12 @@ public class Like {
 	 * at the end of the pattern literal.    See LikeEscapeOp*Node.preprocess.
 	 *
 	 * @param pattern	The right side of the LIKE
+	 * @param maxWidth	Maximum length of column, for null padding
 	 *
 	 * @return	The String for the < clause
 	 * @exception StandardException thrown if data invalid
 	 */
-	public static String lessThanString(String pattern)
+	public static String lessThanString(String pattern, int maxWidth)
 		throws StandardException
 	{
 		//int		firstAnyChar = pattern.indexOf(anyChar);
@@ -902,21 +901,23 @@ public class Like {
 		charArray = pattern.substring(0, lastUsableChar + 1).toCharArray();
 		charArray[lastUsableChar] = newLastChar;
 
-		return new String(charArray);
+		return padWithNulls(new String(charArray), maxWidth);
 	}
 
-	public static String lessThanStringFromParameter(String pattern) throws StandardException {
-		if (pattern == null)
-			return null;
-		return lessThanString(pattern, null);
-	}
-
-	public static String lessThanStringFromParameterWithEsc(String pattern, String escape)
-		 throws StandardException
+	public static String lessThanStringFromParameter(String pattern, int maxWidth)
+		throws StandardException 
 	{
 		if (pattern == null)
 			return null;
-		return lessThanString(pattern, escape);
+		return lessThanString(pattern, null, maxWidth);
+	}
+
+	public static String lessThanStringFromParameterWithEsc(String pattern, String escape, int maxWidth)
+		throws StandardException
+	{
+		if (pattern == null)
+			return null;
+		return lessThanString(pattern, escape, maxWidth);
 	}
 
 	/**
@@ -929,11 +930,12 @@ public class Like {
 	 *
 	 * @param pattern	The right side of the LIKE
 	 * @param escape	The escape clause
+	 * @param maxWidth	Maximum length of column, for null padding
 	 *
 	 * @return	The String for the < clause
 	 * @exception StandardException thrown if data invalid
 	 */
-	public static String lessThanString(String pattern, String escape)
+	public static String lessThanString(String pattern, String escape, int maxWidth)
 		throws StandardException
 	{
 		int		lastUsableChar;
@@ -1033,7 +1035,7 @@ public class Like {
 			charArray = pattern.substring(0, lastUsableChar + 1).toCharArray();
 			charArray[lastUsableChar] = newLastChar;
 
-			return new String(charArray);
+			return padWithNulls(new String(charArray), maxWidth);
 		}
 		char[] patternChars = new char[patternLen];
 		char[] result = new char[patternLen];
@@ -1058,7 +1060,7 @@ public class Like {
 		}
 		result[r++] = newLastChar;
 		String gt = new String(result, 0, r);
-		return gt;
+		return padWithNulls(gt, maxWidth);
 	}
 	
 	/**
@@ -1101,5 +1103,24 @@ public class Like {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Pad a string with null characters, in order to make it &gt; and &lt;
+	 * comparable with SQLChar.
+	 * 
+	 * @param string	The string to pad
+	 * @param len		Max number of characters to pad to
+	 * @returns the string padded with 0s up to the given length
+	 */
+	private static String padWithNulls(String string, int len) 
+	{
+		if(string.length() >= len)
+			return string;
+
+		StringBuffer buf = new StringBuffer(len).append(string);
+		buf.setLength(len);
+		
+		return buf.toString();
 	}
 }
