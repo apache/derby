@@ -773,8 +773,11 @@ final class CodeChunk {
 		
 		if (SanityManager.DEBUG)
 		{
-			if (codeLength <= VMOpcode.MAX_CODE_LENGTH)
-			{
+            // Only validate if the class file format is valid.
+            // Ok code length and guaranteed no errors building the class.
+            if ((codeLength <= VMOpcode.MAX_CODE_LENGTH)
+                && (mb != null && mb.cb.limitMsg == null))
+            {              
 				// Validate the alternate way to calculate the
 				// max stack agrees with the dynamic as the code
 				// is built way.
