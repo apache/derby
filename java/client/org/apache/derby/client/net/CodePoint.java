@@ -153,6 +153,15 @@ public class CodePoint {
     // upon SQLSTATE 02000.
     static final int QRYCLSIMP_NO = 0x02;
 
+    // SQL Error Diagnostic Level
+    // DIAGLVL0 A null SQLDIAGGRP is returned. This is the default.
+    // DIAGLVL1 A non-null SQLDIAGGRP should be returned.
+    // DIAGLVL2 A non-null SQLDIAGGRP should be returned, and both SQLDCMSG
+    // message text fields should be returned as null strings.
+    static final byte DIAGLVL0 = (byte)0xF0;
+    static final byte DIAGLVL1 = (byte)0xF1;
+    static final byte DIAGLVL2 = (byte)0xF2;
+
     // ----------------------ddm code points--------------------------------------
 
     // Exchange Server Attributes.
@@ -484,6 +493,9 @@ public class CodePoint {
 
     // XA Manager
     static final int XAMGR = 0x1C01;
+
+    // SQL Error Diagnostic Level
+    static final int DIAGLVL = 0x2160;
 
     //-----------------------DDM reply codepoints---------------------------------
 

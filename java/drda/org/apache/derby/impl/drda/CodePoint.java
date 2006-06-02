@@ -490,6 +490,9 @@ class CodePoint
 	// Number codepoint constant.
 	static final int PKGNAMCSN = 0x2113;
 
+	// SQL Error Diagnostic Level
+	static final int DIAGLVL = 0x2160;
+
 	//-----------------------DDM reply codepoints---------------------------------
 
 	// Invalid description
@@ -646,6 +649,15 @@ class CodePoint
 	// in the QRYBLKSZ parameter, except for possibly the last
 	// query block which may be shorter.
 	static final int QRYBLKFLX = 0x01;
+
+	// SQL Error Diagnostic Level
+	// DIAGLVL0 A null SQLDIAGGRP is returned. This is the default.
+	// DIAGLVL1 A non-null SQLDIAGGRP should be returned.
+	// DIAGLVL2 A non-null SQLDIAGGRP should be returned, and both SQLDCMSG
+	// message text fields should be returned as null strings.
+	static final byte DIAGLVL0 = (byte)0xF0;
+	static final byte DIAGLVL1 = (byte)0xF1;
+	static final byte DIAGLVL2 = (byte)0xF2;
 	
 	//----------------------------fdoca code points-------------------------------
 

@@ -395,6 +395,9 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
                 typdef.isCcsidMbcSet(),
                 typdef.getCcsidMbc());
 
+        // This specifies the SQL Error Diagnostic Level
+        buildDIAGLVL();
+
         // RDB allow update is an optional parameter which indicates
         // whether the RDB allows the requester to perform update operations
         // in the RDB.  If update operations are not allowed, this connection
@@ -562,6 +565,13 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
 
         updateLengthBytes();
 
+    }
+
+    private void buildDIAGLVL() throws SqlException {
+        markLengthBytes(CodePoint.DIAGLVL);
+        
+        writeByte(CodePoint.DIAGLVL2);
+        updateLengthBytes();
     }
 
     private void buildMGRLVLLS(int agent,

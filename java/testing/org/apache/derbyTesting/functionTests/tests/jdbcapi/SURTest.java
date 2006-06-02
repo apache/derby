@@ -1258,6 +1258,36 @@ public class SURTest extends SURBaseTest {
 
 
     /**
+     * Test that rowUpdated() and rowDeleted() methods both return true when
+     * the row has first been updated and then deleted using the updateRow()
+     * and deleteRow() methods.
+     */
+    public void testRowUpdatedAndRowDeleted() throws SQLException {
+        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+                                           ResultSet.CONCUR_UPDATABLE);
+        s.setCursorName(getNextCursorName());
+        ResultSet rs = s.executeQuery("select a,b from t1");
+        rs.next();
+        rs.updateInt(1, rs.getInt(1) + 2 * recordCount);
+        rs.updateRow();
+        assertTrue("Expected rowUpdated() to return true", rs.rowUpdated());
+        rs.deleteRow();
+        rs.next();
+        rs.previous();
+        assertTrue("Expected rowUpdated() to return true", rs.rowUpdated());
+        assertTrue("Expected rowDeleted() to return true", rs.rowDeleted());
+        rs.next();
+        assertFalse("Expected rowUpdated() to return false", rs.rowUpdated());
+        assertFalse("Expected rowDeleted() to return false", rs.rowDeleted());
+        rs.previous();
+        assertTrue("Expected rowUpdated() to return true", rs.rowUpdated());
+        assertTrue("Expected rowDeleted() to return true", rs.rowDeleted());
+        rs.close();
+        s.close();
+    }
+
+
+    /**
      * Test that the JDBC detectability calls throw correct exceptions when
      * called in in wrong row states. 
      * This is done for both supported updatable result set types.

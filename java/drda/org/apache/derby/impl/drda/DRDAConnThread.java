@@ -124,6 +124,9 @@ class DRDAConnThread extends Thread {
 	private Database database; 	// pointer to the current database
 	private int sqlamLevel;		// SQLAM Level - determines protocol
 
+	// DRDA diagnostic level, DIAGLVL0 by default 
+	private byte diagnosticLevel = (byte)0xF0; 
+
 	// manager processing
 	private Vector unknownManagers;
 	private Vector knownManagers;
@@ -2934,6 +2937,10 @@ class DRDAConnThread extends Thread {
 				case CodePoint.STTSTRDEL:
 					codePointNotSupported(codePoint);
 					break;
+				// optional
+				case CodePoint.DIAGLVL:
+					diagnosticLevel = reader.readByte();
+					break;
 				default:
 					invalidCodePoint(codePoint);
 			}
@@ -5554,24 +5561,27 @@ class DRDAConnThread extends Thread {
 	private void writeSQLDIAGGRP(SQLException nextException) 
 		throws DRDAProtocolException
 	{
-		writer.writeByte(CodePoint.NULLDATA);
-		return;
+		// for now we only want to send ROW_DELETED and ROW_UPDATED warnings
+		// as extended diagnostics
+		// move to first ROW_DELETED or ROW_UPDATED exception. These have been
+		// added to the end of the warning chain.
+		while (
+				nextException != null && 
+				nextException.getSQLState() != SQLState.ROW_UPDATED &&
+				nextException.getSQLState() != SQLState.ROW_DELETED) {
+			nextException = nextException.getNextException();
+		}
 
-		/**
-		 * TODO: Enable the following code when JCC can support SQLDIAGGRP
-		 * for all SQLCARD accesses. Commented out for now.
-		 */
-		/*
-		if (nextException == null)
-		{
+		if ((nextException == null) || 
+				(diagnosticLevel == CodePoint.DIAGLVL0)) {
 			writer.writeByte(CodePoint.NULLDATA);
 			return;
 		}
+		writer.writeByte(0); // SQLDIAGGRP indicator
 
 		writeSQLDIAGSTT();
 		writeSQLDIAGCI(nextException);
 		writeSQLDIAGCN();
-		*/
 	}
 
 	/*
@@ -5601,13 +5611,32 @@ class DRDAConnThread extends Thread {
 		while (se != null)
 		{
 			String sqlState = se.getSQLState();
-			int sqlCode = getSqlCode(getExceptionSeverity(se));
+
+			// SQLCode > 0 -> Warning
+			// SQLCode = 0 -> Info
+			// SQLCode < 0 -> Error
+			int severity = getExceptionSeverity(se);
+			int sqlCode = -1;
+			if (severity == CodePoint.SVRCOD_WARNING)
+				sqlCode = 1;
+			else if (severity == CodePoint.SVRCOD_INFO)
+				sqlCode = 0;
+
 			String sqlerrmc = "";
-				
+			if (diagnosticLevel == CodePoint.DIAGLVL1) {
+				sqlerrmc = se.getLocalizedMessage();
+			}
+
 			// arguments are variable part of a message
-			Object[] args = ((EmbedSQLException)se).getArguments();
-			for (int i = 0; args != null &&  i < args.length; i++)
-				sqlerrmc += args[i].toString() + SQLERRMC_TOKEN_DELIMITER;
+			// only send arguments for diagnostic level 0
+			if (diagnosticLevel == CodePoint.DIAGLVL0) {
+				// we are only able to get arguments of EmbedSQLException
+				if (se instanceof EmbedSQLException) {
+					Object[] args = ((EmbedSQLException)se).getArguments();
+					for (int i = 0; args != null &&  i < args.length; i++)
+						sqlerrmc += args[i].toString() + SQLERRMC_TOKEN_DELIMITER;
+				}
+			}
 
 			String dbname = null;
 			if (database != null)
@@ -5618,7 +5647,6 @@ class DRDAConnThread extends Thread {
 			se = se.getNextException();
 		}
 			
-		writer.writeByte(CodePoint.NULLDATA);
 		return;
 	}
 
@@ -5648,7 +5676,7 @@ class DRDAConnThread extends Thread {
 
 		/* Count the number of chained exceptions to be sent */
 		for (se = nextException; se != null; se = se.getNextException()) i++;
-		writer.writeInt(i);
+		writer.writeShort(i);
 	}
 
 	/**
@@ -6211,26 +6239,29 @@ class DRDAConnThread extends Thread {
 			SQLWarning sqlw = (rs != null)? rs.getWarnings(): null;
 
 			// for updatable, insensitive result sets we signal the
-			// row updated condition to the client via a warning which
-			// is pushed on top of any other warnings on the result
-			// set, to be popped by client onto its rowUpdated state,
-			// i.e.  this warning should not reach API level.
+			// row updated condition to the client via a warning to be 
+			// popped by client onto its rowUpdated state, i.e. this 
+			// warning should not reach API level.
 			if (rs != null && rs.rowUpdated()) {
-				SQLWarning w = new SQLWarning(null, SQLState.ROW_UPDATED);
+				SQLWarning w = new SQLWarning(null, SQLState.ROW_UPDATED,
+						ExceptionSeverity.WARNING_SEVERITY);
 				if (sqlw != null) {
-					w.setNextWarning(sqlw);
-				} 
-				sqlw = w;
+					sqlw.setNextWarning(w);
+				} else {
+					sqlw = w;
+				}
 			}
 			// Delete holes are manifest as a row consisting of a non-null
 			// SQLCARD and a null data group. The SQLCARD has a warning
 			// SQLSTATE of 02502
 			if (rs != null && rs.rowDeleted()) {
-				SQLWarning w = new SQLWarning(null, SQLState.ROW_DELETED);
+				SQLWarning w = new SQLWarning(null, SQLState.ROW_DELETED,
+						ExceptionSeverity.WARNING_SEVERITY);
 				if (sqlw != null) {
-					w.setNextWarning(sqlw);
-				} 
-				sqlw = w;
+					sqlw.setNextWarning(w);
+				} else {
+					sqlw = w;
+				}
 			}
 
 			if (sqlw == null)

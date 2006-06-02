@@ -33,8 +33,6 @@ import org.apache.derby.client.am.SqlCode;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.shared.common.reference.SQLState;
-
 public class NetCursor extends org.apache.derby.client.am.Cursor {
 
     NetResultSet netResultSet_;
@@ -138,49 +136,51 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         int[] columnDataComputedLength = null;
         boolean[] columnDataIsNull = null;
         boolean receivedDeleteHoleWarning = false;
+        boolean receivedRowUpdatedWarning = false;
 
         if ((position_ == lastValidBytePosition_) &&
                 (netResultSet_ != null) && (netResultSet_.scrollable_)) {
             return false;
         }
 
-        NetSqlca netSqlca = this.parseSQLCARD(qrydscTypdef_);
-
-        if (netResultSet_ != null && netResultSet_.scrollable_) {
-            if (netSqlca != null && 
-                    netSqlca.getSqlState().equals(SQLState.ROW_DELETED)) {
-                receivedDeleteHoleWarning = true;
-                netSqlca = null;
-            } else {
-                setIsUpdataDeleteHole(rowIndex, false);
-            }
-            if (netSqlca != null && 
-                    netSqlca.getSqlState().equals(SQLState.ROW_UPDATED)) {
-                setIsRowUpdated(true);
-                netSqlca = null;
-            } else {
-                setIsRowUpdated(false);
-            }
-        }
+        NetSqlca[] netSqlca = this.parseSQLCARD(qrydscTypdef_);
 
         if (netSqlca != null) {
-            int sqlcode = netSqlca.getSqlCode();
-            if (sqlcode < 0) {
-                throw new SqlException(netAgent_.logWriter_, netSqlca);
-            } else {
-                if (sqlcode > 0) {
+            for (int i=0;i<netSqlca.length; i++) {
+                int sqlcode = netSqlca[i].getSqlCode();
+                if (sqlcode < 0) {
+                    throw new SqlException(netAgent_.logWriter_, 
+                            netSqlca[i]);
+                } else {
                     if (sqlcode == SqlCode.END_OF_DATA.getCode()) {
                         setAllRowsReceivedFromServer(true);
-                        if (netResultSet_ != null && netSqlca.containsSqlcax()) {
-                            netResultSet_.setRowCountEvent(netSqlca.getRowCount(qrydscTypdef_));
+                        if (netResultSet_ != null && 
+                                netSqlca[i].containsSqlcax()) {
+                            netResultSet_.setRowCountEvent(
+                                    netSqlca[i].getRowCount(
+                                        qrydscTypdef_));
                         }
-                    } else if (netResultSet_ != null) {
-                        netResultSet_.accumulateWarning(new SqlWarning(agent_.logWriter_, netSqlca));
+                    } else if (netResultSet_ != null && sqlcode > 0) {
+                        String sqlState = netSqlca[i].getSqlState();
+                        if (!sqlState.equals(SQLState.ROW_DELETED) && 
+                                !sqlState.equals(SQLState.ROW_UPDATED)) {
+                            netResultSet_.accumulateWarning(
+                                    new SqlWarning(agent_.logWriter_, 
+                                        netSqlca[i]));
+                        } else {
+                            receivedDeleteHoleWarning 
+                                    |= sqlState.equals(SQLState.ROW_DELETED);
+                            receivedRowUpdatedWarning 
+                                    |= sqlState.equals(SQLState.ROW_UPDATED);
+                        }
                     }
                 }
             }
         }
 
+        setIsUpdataDeleteHole(rowIndex, receivedDeleteHoleWarning);
+        setIsRowUpdated(receivedRowUpdatedWarning);
+        
         // If we don't have at least one byte in the buffer for the DA null indicator,
         // then we need to send a CNTQRY request to fetch the next block of data.
         // Read the DA null indicator.
@@ -426,6 +426,28 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         return i;
     }
 
+    // Reads 8-bytes from the dataBuffer from the current position.
+    // If position is already at the end of the buffer, send CNTQRY to get more 
+    // data.
+    private long readFdocaLong() throws 
+            org.apache.derby.client.am.DisconnectException, SqlException {
+        if ((position_ + 8) > lastValidBytePosition_) {
+            // Check for ENDQRYRM, throw SqlException if already received one.
+            checkAndThrowReceivedEndqryrm();
+
+            // Send CNTQRY to complete the row/rowset.
+            int lastValidByteBeforeFetch = completeSplitRow();
+
+            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was 
+            // received, throw a SqlException for the ENDQRYRM.
+            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
+        }
+
+        long i = SignedBinary.getLong(dataBuffer_, position_);
+        position_ += 8;
+        return i;
+    }
+        
     // Reads 1-byte from the dataBuffer from the current position.
     // If position is already at the end of the buffer, send CNTQRY to get more data.
     private int readFdocaOneByte() throws org.apache.derby.client.am.DisconnectException, SqlException {
@@ -672,7 +694,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     //
     // FORMAT FOR ALL SQLAM LEVELS
     //   SQLCAGRP; GROUP LID 0x54; ELEMENT TAKEN 0(all); REP FACTOR 1
-    NetSqlca parseSQLCARD(Typdef typdef) throws org.apache.derby.client.am.DisconnectException, SqlException {
+    NetSqlca[] parseSQLCARD(Typdef typdef) throws org.apache.derby.client.am.DisconnectException, SqlException {
         return parseSQLCAGRP(typdef);
     }
 
@@ -691,7 +713,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     //   SQLERRPROC; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 8
     //   SQLCAXGRP; PROTOCOL TYPE N-GDA; ENVLID 0x52; Length Override 0
     //   SQLDIAGGRP; PROTOCOL TYPE N-GDA; ENVLID 0x56; Length Override 0
-    private NetSqlca parseSQLCAGRP(Typdef typdef) throws org.apache.derby.client.am.DisconnectException, SqlException {
+    private NetSqlca[] parseSQLCAGRP(Typdef typdef) throws org.apache.derby.client.am.DisconnectException, SqlException {
         if (readFdocaOneByte() == CodePoint.NULLDATA) {
             return null;
         }
@@ -702,9 +724,18 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
 
         parseSQLCAXGRP(typdef, netSqlca);
 
-        parseSQLDIAGGRP();
+        NetSqlca[] sqlCa = parseSQLDIAGGRP();
 
-        return netSqlca;
+        NetSqlca[] ret_val;
+        if (sqlCa != null) {
+            ret_val = new NetSqlca[sqlCa.length + 1];
+            System.arraycopy(sqlCa, 0, ret_val, 1, sqlCa.length);
+        } else {
+            ret_val = new NetSqlca[1];
+        }
+        ret_val[0] = netSqlca;
+        
+        return ret_val;
     }
 
     // SQLCAXGRP : EARLY FDOCA GROUP
@@ -794,14 +825,154 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     }
 
     // SQLDIAGGRP : FDOCA EARLY GROUP
-    private void parseSQLDIAGGRP() throws DisconnectException, SqlException {
+    private NetSqlca[] parseSQLDIAGGRP() throws DisconnectException, SqlException {
+        if (readFdocaOneByte() == CodePoint.NULLDATA) {
+            return null;
+        }
+
+        parseSQLDIAGSTT();
+        NetSqlca[] sqlca = parseSQLDIAGCI();
+        parseSQLDIAGCN();
+
+        return sqlca;
+    }
+
+    // SQL Diagnostics Statement Group Description - Identity 0xD3
+    // NULLDATA will be received for now
+    private void parseSQLDIAGSTT() throws DisconnectException, SqlException {
         if (readFdocaOneByte() == CodePoint.NULLDATA) {
             return;
         }
 
-        netAgent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(netAgent_,
-                new ClientMessageId(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED),
-                "parseSQLDIAGGRP"));
+        // The server should send NULLDATA
+        netAgent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(netAgent_, 
+                    new ClientMessageId(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED),
+                    "parseSQLDIAGSTT"));
+    }
+
+    // SQL Diagnostics Condition Information Array - Identity 0xF5
+    // SQLNUMROW; ROW LID 0x68; ELEMENT TAKEN 0(all); REP FACTOR 1
+    // SQLDCIROW; ROW LID 0xE5; ELEMENT TAKEN 0(all); REP FACTOR 0(all)
+    private NetSqlca[] parseSQLDIAGCI() 
+            throws DisconnectException, SqlException {
+        int num = readFdocaTwoByteLength(); // SQLNUMGRP - SQLNUMROW
+        NetSqlca[] ret_val = null;
+        if (num != 0) {
+            ret_val = new NetSqlca[num];
+        } 
+
+        for (int i = 0; i < num; i++) {
+            ret_val[i] = parseSQLDCROW();
+        }
+        return ret_val;
+    }
+
+    // SQL Diagnostics Connection Array - Identity 0xF6
+    // NULLDATA will be received for now
+    private void parseSQLDIAGCN() throws DisconnectException, SqlException {
+        if (readFdocaOneByte() == CodePoint.NULLDATA) {
+            return;
+        }
+        
+        // The server should send NULLDATA
+        netAgent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(netAgent_, 
+                    new ClientMessageId(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED),
+                    "parseSQLDIAGCN"));
+    }
+
+    // SQL Diagnostics Condition Group Description
+    //
+    // SQLDCCODE; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
+    // SQLDCSTATE; PROTOCOL TYPE FCS; ENVLID Ox30; Lengeh Override 5
+    // SQLDCREASON; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
+    // SQLDCLINEN; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
+    // SQLDCROWN; PROTOCOL TYPE I8; ENVLID 0x16; Lengeh Override 8
+    // SQLDCER01; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
+    // SQLDCER02; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
+    // SQLDCER03; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
+    // SQLDCER04; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
+    // SQLDCPART; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
+    // SQLDCPPOP; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
+    // SQLDCMSGID; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 10
+    // SQLDCMDE; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 8
+    // SQLDCPMOD; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 5
+    // SQLDCRDB; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+    // SQLDCTOKS; PROTOCOL TYPE N-RLO; ENVLID 0xF7; Length Override 0
+    // SQLDCMSG_m; PROTOCOL TYPE NVMC; ENVLID 0x3F; Length Override 32672
+    // SQLDCMSG_S; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 32672
+    // SQLDCCOLN_m; PROTOCOL TYPE NVCM ; ENVLID 0x3F; Length Override 255
+    // SQLDCCOLN_s; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
+    // SQLDCCURN_m; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
+    // SQLDCCURN_s; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
+    // SQLDCPNAM_m; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
+    // SQLDCPNAM_s; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
+    // SQLDCXGRP; PROTOCOL TYPE N-GDA; ENVLID 0xD3; Length Override 1
+    private NetSqlca parseSQLDCGRP() 
+            throws DisconnectException, SqlException {
+        
+        int sqldcCode = readFdocaInt(); // SQLCODE
+        String sqldcState = readFdocaString(5, 
+                netAgent_.targetTypdef_.getCcsidSbcEncoding()); // SQLSTATE
+        int sqldcReason = readFdocaInt();  // REASON_CODE
+
+        skipFdocaBytes(12); // LINE_NUMBER + ROW_NUMBER
+
+        NetSqlca sqlca = new NetSqlca(netAgent_.netConnection_,
+                    sqldcCode,
+                    sqldcState,
+                    (byte[]) null);
+
+        skipFdocaBytes(49); // SQLDCER01-04 + SQLDCPART + SQLDCPPOP + SQLDCMSGID
+                            // SQLDCMDE + SQLDCPMOD + RDBNAME
+        parseSQLDCTOKS(); // MESSAGE_TOKENS
+
+        String sqldcMsg = parseVCS(qrydscTypdef_); // MESSAGE_TEXT
+
+        if (sqldcMsg != null) {
+            sqlca.setSqlerrmcBytes(sqldcMsg.getBytes(), 
+                    netAgent_.targetTypdef_.getByteOrder());
+        }
+
+        skipFdocaBytes(12);  // COLUMN_NAME + PARAMETER_NAME + EXTENDED_NAMES
+
+        parseSQLDCXGRP(); // SQLDCXGRP
+        return sqlca;
+    }
+
+    // SQL Diagnostics Condition Row - Identity 0xE5
+    // SQLDCGRP; GROUP LID 0xD5; ELEMENT TAKEN 0(all); REP FACTOR 1
+    private NetSqlca parseSQLDCROW() throws DisconnectException, SqlException {
+        return parseSQLDCGRP();
+    }
+    
+    // SQL Diagnostics Condition Token Array - Identity 0xF7
+    // NULLDATA will be received for now
+    void parseSQLDCTOKS() throws DisconnectException, SqlException {
+        if (readFdocaOneByte() == CodePoint.NULLDATA) {
+            return;
+        }
+
+        // The server should send NULLDATA
+        netAgent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(netAgent_, 
+                    new ClientMessageId(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED),
+                    "parseSQLDCTOKS"));
+    }
+
+    // SQL Diagnostics Extended Names Group Description - Identity 0xD5
+    // NULLDATA will be received for now
+    private void parseSQLDCXGRP() throws DisconnectException, SqlException {
+        if (readFdocaOneByte() == CodePoint.NULLDATA) {
+            return;
+        }
+
+        // The server should send NULLDATA
+        netAgent_.accumulateChainBreakingReadExceptionAndThrow(
+                new DisconnectException(netAgent_, 
+                    new ClientMessageId(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED),
+                    "parseSQLDCXGRP"));
     }
 
     private String parseVCS(Typdef typdefInEffect) throws DisconnectException, SqlException {

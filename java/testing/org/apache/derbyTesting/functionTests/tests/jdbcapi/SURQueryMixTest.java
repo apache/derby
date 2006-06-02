@@ -364,8 +364,7 @@ public class SURQueryMixTest extends SURBaseTest
                              "forward.", rows.get(new Integer(i)), rowString);
                 
                 
-                if (checkRowUpdated && updatedRows.contains(new Integer(i)) &&
-                        !deletedRows.contains(new Integer(i))) {
+                if (checkRowUpdated && updatedRows.contains(new Integer(i))) {
                     assertTrue("Expected rs.rowUpdated() to return true on " + 
                                "updated row " + rowString, rs.rowUpdated());
                 } 
@@ -385,8 +384,7 @@ public class SURQueryMixTest extends SURBaseTest
                          " when navigating forward.", 
                          rows.get(new Integer(i)),
                          rowString);
-            if (checkRowUpdated && updatedRows.contains(new Integer(i)) &&
-                    !deletedRows.contains(new Integer(i))) {
+            if (checkRowUpdated && updatedRows.contains(new Integer(i))) {
                 assertTrue("Expected rs.rowUpdated() to return true on " +
                            "updated row " + rowString, rs.rowUpdated());
             }
