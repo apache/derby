@@ -1007,7 +1007,7 @@ public abstract class Connection implements java.sql.Connection,
      * Translates the isolation level from a SQL string to the JDBC int value
      *  
      * @param isolationStr SQL isolation string
-     * @return
+     * @return isolation level as a JDBC integer value 
      */
     private int translateIsolation(String isolationStr) {
     	if(isolationStr.compareTo(DERBY_TRANSACTION_REPEATABLE_READ) == 0)
