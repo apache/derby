@@ -303,6 +303,22 @@ back to local (same as reset)
   isolation level READ_COMMITTED
   auto commit     true
   read only       false
+re-join X1 second time
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       true
+local after suspend
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
+resume X1
+  isolation level READ_UNCOMMITTED
+  auto commit     false
+  read only       true
+back to local (second time)
+  isolation level READ_COMMITTED
+  auto commit     true
+  read only       false
 EVENT(6):connectionClosed
 new handle - local 
   isolation level READ_COMMITTED
