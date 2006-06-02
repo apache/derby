@@ -122,8 +122,8 @@ public class NetAgent extends Agent {
         } catch (java.security.PrivilegedActionException e) {
             throw new DisconnectException(this,
                 new ClientMessageId(SQLState.CONNECT_UNABLE_TO_CONNECT_TO_SERVER),
-                new Object[] { e.getClass().getName(), server, new Integer(port), 
-                    e.getException().getMessage() },
+                new Object[] { e.getException().getClass().getName(), server, 
+                    Integer.toString(port), e.getException().getMessage() },
                 e.getException());
         }
 

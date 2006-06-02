@@ -168,15 +168,12 @@ public class SqlException extends Exception implements Diagnosable {
     {
         this(
             logwriter,
+            cause,
             getMessageUtil().getCompleteMessage(
                 msgid.msgid,
                 args),
             ExceptionUtil.getSQLStateFromIdentifier(msgid.msgid),
-            ExceptionUtil.getSeverityFromIdentifier(msgid.msgid));
-        
-        if ( cause != null ) {
-            this.setThrowable(cause);
-        }
+            ExceptionUtil.getSeverityFromIdentifier(msgid.msgid));        
     }
 
     // Use the following SQLExceptions when you want to override the error
