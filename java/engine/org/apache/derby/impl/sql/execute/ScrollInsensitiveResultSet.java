@@ -1124,10 +1124,13 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 * @exception StandardException on error
 	 */
 	public boolean isDeleted() throws StandardException  {
-		positionInHashTable.setValue(currentPosition);
-		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
-				ht.get(positionInHashTable);
-		return hashRowArray[POS_ROWDELETED].getBoolean();
+		if (currentPosition <= positionInSource && currentPosition > 0) {
+			positionInHashTable.setValue(currentPosition);
+			DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
+					ht.get(positionInHashTable);
+			return hashRowArray[POS_ROWDELETED].getBoolean();
+		}
+		return false;
 	}
 
 	/**
@@ -1139,10 +1142,13 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 * @exception StandardException on error
 	 */
 	public boolean isUpdated() throws StandardException {
-		positionInHashTable.setValue(currentPosition);
-		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
-				ht.get(positionInHashTable);
-		return hashRowArray[POS_ROWUPDATED].getBoolean();			
+		if (currentPosition <= positionInSource && currentPosition > 0) {
+			positionInHashTable.setValue(currentPosition);
+			DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
+					ht.get(positionInHashTable);
+			return hashRowArray[POS_ROWUPDATED].getBoolean();
+		}
+		return false;
 	}
 
 	public boolean isForUpdate() {

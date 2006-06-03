@@ -25,3 +25,4 @@ jdbcapi/UpdateXXXTest.junit
 jdbcapi/SURQueryMixTest.junit
 jdbcapi/SURTest.junit
 jdbcapi/URCoveringIndexTest.junit
+jdbcapi/SURTest_ij.sql

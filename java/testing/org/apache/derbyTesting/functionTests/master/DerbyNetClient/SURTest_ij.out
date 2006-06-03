@@ -1,0 +1,161 @@
+CONNECTION0* - 	jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/SURTest;create=true
+* = current connection
+ij> connect 'SURTest;create=true;';
+ij(CONNECTION1)> autocommit off;
+ij(CONNECTION1)> create table t1 (c1 int primary key, c2 int);
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> insert into t1 values 
+    (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), 
+    (6, 6), (7, 7), (8, 8), (9, 9), (10, 10);
+10 rows inserted/updated/deleted
+ij(CONNECTION1)> get scroll insensitive cursor sc1 as 'SELECT * FROM t1 FOR UPDATE';
+ij(CONNECTION1)> next sc1;
+C1 |C2         
+-----
+1 |1          
+ij(CONNECTION1)> next sc1;
+C1 |C2         
+-----
+2 |2          
+ij(CONNECTION1)> -- update row nr. 2 after positioning with next
+update t1 set c2 = c1 + 20 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> absolute 5 sc1;
+C1 |C2         
+-----
+5 |5          
+ij(CONNECTION1)> -- update row nr. 5 after positioning with absolute
+update t1 set c2 = c1 + 20 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> relative 2 sc1;
+C1 |C2         
+-----
+7 |7          
+ij(CONNECTION1)> -- update row nr. 7 after positioning with relative
+update t1 set c2 = c1 + 20 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> previous sc1;
+C1 |C2         
+-----
+6 |6          
+ij(CONNECTION1)> -- update row nr. 6 after positioning with previous
+update t1 set c2 = c1 + 20 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> relative -1 sc1;
+C1 |C2         
+-----
+5 |25         
+ij(CONNECTION1)> last sc1;
+C1 |C2         
+-----
+10 |10         
+ij(CONNECTION1)> -- update row nr. 10 after positioning with last
+update t1 set c2 = c1 + 20 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> after last sc1;
+No current row
+ij(CONNECTION1)> -- update when positioned after last should cause an error
+update t1 set c2 = c1 + 20 where current of sc1;
+ERROR XCL08: Cursor 'SQL_CURLH000C1' is not on a row.
+ij(CONNECTION1)> first sc1;
+C1 |C2         
+-----
+1 |1          
+ij(CONNECTION1)> -- update row nr. 1 after positioning with first
+update t1 set c2 = c1 + 20 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> before first sc1;
+No current row
+ij(CONNECTION1)> -- update when positioned before first should cause an error
+update t1 set c2 = c1 + 20 where current of sc1;
+ERROR XCL08: Cursor 'SQL_CURLH000C1' is not on a row.
+ij(CONNECTION1)> close sc1;
+ij(CONNECTION1)> commit;
+ij(CONNECTION1)> -- check that row where correctly updated
+select * from t1;
+C1 |C2         
+-----
+1 |21         
+2 |22         
+3 |3          
+4 |4          
+5 |25         
+6 |26         
+7 |27         
+8 |8          
+9 |9          
+10 |30         
+10 rows selected
+ij(CONNECTION1)> get scroll insensitive cursor sc1 as 'SELECT * FROM t1 FOR UPDATE';
+ij(CONNECTION1)> next sc1;
+C1 |C2         
+-----
+1 |21         
+ij(CONNECTION1)> next sc1;
+C1 |C2         
+-----
+2 |22         
+ij(CONNECTION1)> -- delete row nr. 2 after positioning with next
+delete from t1 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> absolute 5 sc1;
+C1 |C2         
+-----
+5 |25         
+ij(CONNECTION1)> -- delete row nr. 5 after positioning with absolute
+delete from t1 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> relative 2 sc1;
+C1 |C2         
+-----
+7 |27         
+ij(CONNECTION1)> -- delete row nr. 7 after positioning with relative
+delete from t1 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> previous sc1;
+C1 |C2         
+-----
+6 |26         
+ij(CONNECTION1)> -- delete row nr. 6 after positioning with previous
+delete from t1 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> relative -1 sc1;
+C1 |C2         
+-----
+NULL |NULL       
+ij(CONNECTION1)> last sc1;
+C1 |C2         
+-----
+10 |30         
+ij(CONNECTION1)> -- delete row nr. 10 after positioning with last
+delete from t1 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> after last sc1;
+No current row
+ij(CONNECTION1)> -- delete when positioned after last should cause an error
+delete from t1 where current of sc1;
+ERROR XCL08: Cursor 'SQL_CURLH000C1' is not on a row.
+ij(CONNECTION1)> first sc1;
+C1 |C2         
+-----
+1 |21         
+ij(CONNECTION1)> -- delete row nr. 1 after positioning with first
+delete from t1 where current of sc1;
+1 row inserted/updated/deleted
+ij(CONNECTION1)> before first sc1;
+No current row
+ij(CONNECTION1)> -- delete when positioned before first should cause an error
+delete from t1 where current of sc1;
+ERROR XCL08: Cursor 'SQL_CURLH000C1' is not on a row.
+ij(CONNECTION1)> close sc1;
+ij(CONNECTION1)> commit;
+ij(CONNECTION1)> -- check that row where correctly updated
+select * from t1;
+C1 |C2         
+-----
+3 |3          
+4 |4          
+8 |8          
+9 |9          
+4 rows selected
+ij(CONNECTION1)> 
