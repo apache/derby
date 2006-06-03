@@ -1233,6 +1233,24 @@ public abstract class metadata_test {
 			}
 			s.execute("drop table t1");
 
+			// test DERBY-655, DERBY-1343
+			// If a table has duplicate backing index, then it will share the 
+			// physical conglomerate with the existing index, but the duplicate
+			// indexes should have their own unique logical congomerates 
+			// associated with them. That way, it will be possible to 
+			// distinguish the 2 indexes in SYSCONGLOMERATES from each other.
+			s.execute("CREATE TABLE Derby655t1(c11_ID BIGINT NOT NULL)");
+			s.execute("CREATE TABLE Derby655t2 (c21_ID BIGINT NOT NULL primary key)");
+			s.execute("ALTER TABLE Derby655t1 ADD CONSTRAINT F_12 Foreign Key (c11_ID) REFERENCES Derby655t2 (c21_ID) ON DELETE CASCADE ON UPDATE NO ACTION");
+			s.execute("CREATE TABLE Derby655t3(c31_ID BIGINT NOT NULL primary key)");
+			s.execute("ALTER TABLE Derby655t2 ADD CONSTRAINT F_443 Foreign Key (c21_ID) REFERENCES Derby655t3(c31_ID) ON DELETE CASCADE ON UPDATE NO ACTION");
+			dmd = con.getMetaData();
+			System.out.println("\ngetImportedKeys('',null,null,'','APP','Derby655t1' ):");
+			dumpRS(met.getImportedKeys("", "APP", "DERBY655T1"));
+			s.execute("drop table Derby655t1");
+			s.execute("drop table Derby655t2");
+			s.execute("drop table Derby655t3");
+
 			// tiny test moved over from no longer used metadata2.sql
 			// This checks for a bug where you get incorrect behavior on a nested connection.
 			// if you do not get an error, the bug does not occur.			
