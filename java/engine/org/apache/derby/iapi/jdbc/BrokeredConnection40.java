@@ -24,7 +24,7 @@ import java.sql.Array;
 import java.sql.BaseQuery;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.ClientInfoException;
+import java.sql.SQLClientInfoException;
 import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.SQLXML;
@@ -42,10 +42,10 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
         super(control);
     }
     
-    public Array createArray(String typeName, Object[] elements)
+    public Array createArrayOf(String typeName, Object[] elements)
           throws SQLException {    
          try {
-             return getRealConnection().createArray (typeName, elements);
+             return getRealConnection().createArrayOf (typeName, elements);
          } catch (SQLException sqle) {
              notifyException(sqle);
              throw sqle;
@@ -169,16 +169,23 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      *
      * @param name the property key <code>String</code>
      * @param value the property value <code>String</code>
-     * @exception SQLException if the property is not supported or the 
-     * real connection could not be obtained.
+     * @exception SQLClientInfoException if the property is not
+     * supported or the real connection could not be obtained.
      */
     public void setClientInfo(String name, String value)
-    throws SQLException{        
+    throws SQLClientInfoException{        
         try {
             getRealConnection().setClientInfo(name, value);
-        } catch (SQLException se) {
+        } catch (SQLClientInfoException se) {
             notifyException(se);
             throw se;
+        }
+        catch (SQLException se) {
+            throw new SQLClientInfoException
+                (se.getMessage(), se.getSQLState(), 
+  		 (new FailedProperties40
+		  (FailedProperties40.makeProperties(name,value))).
+		 getProperties());
         }
     }
 
@@ -186,23 +193,23 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      * <code>setClientInfo</code> forwards to the real connection.  If
      * the call to <code>getRealConnection</code> fails the resulting
      * <code>SQLException</code> is wrapped in a
-     * <code>ClientInfoException</code> to satisfy the specified
+     * <code>SQLClientInfoException</code> to satisfy the specified
      * signature.
      * @param properties a <code>Properties</code> object with the
      * properties to set.
-     * @exception ClientInfoException if the properties are not
+     * @exception SQLClientInfoException if the properties are not
      * supported or the real connection could not be obtained.
      */    
     public void setClientInfo(Properties properties)
-    throws ClientInfoException{
+    throws SQLClientInfoException{
         try {
             getRealConnection().setClientInfo(properties);
-        } catch (ClientInfoException cie) {
+        } catch (SQLClientInfoException cie) {
             notifyException(cie);
             throw cie;
         }
         catch (SQLException se) {
-            throw new ClientInfoException
+            throw new SQLClientInfoException
                 (se.getMessage(), se.getSQLState(), 
   		 (new FailedProperties40(properties)).getProperties());
         }

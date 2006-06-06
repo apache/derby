@@ -71,7 +71,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				java.sql.Connection.class,
 				new MD[]
 				{
-						new MD( "createArray", new Class[] { String.class, Object[].class } ),
+						new MD( "createArrayOf", new Class[] { String.class, Object[].class } ),
 						new MD( "createNClob", new Class[] { } ),
 						new MD( "createSQLXML", new Class[] { } ),
 						new MD( "createStruct", new Class[] { String.class, Object[].class } ),

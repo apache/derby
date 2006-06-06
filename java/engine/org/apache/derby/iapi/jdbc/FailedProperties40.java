@@ -22,21 +22,39 @@ package org.apache.derby.iapi.jdbc;
 
 import java.util.Properties;
 import java.util.Enumeration;
-import java.sql.ClientInfoException;
+import java.util.Map;
+import java.util.HashMap;
+import java.sql.SQLClientInfoException;
+import java.sql.ClientInfoStatus;
 
     /**
      * Class <code>FailedProperties40</code> is a helper class for the
-     * ClientInfoException. It provides convenient access to data
-     * that is needed when constructing ClientInfoExceptions. Should
+     * SQLClientInfoException. It provides convenient access to data
+     * that is needed when constructing SQLClientInfoExceptions. Should
      * be kept in sync with its client side counter part
      * (org.apache.derby.client.am.FailedProperties40).
+     * @see java.sql.SQLClientInfoException
      * @see org.apache.derby.client.am.FailedProperties40
      */
 public class FailedProperties40 {
-    private final Properties failedProps_ = new Properties();
+    private final HashMap<String,ClientInfoStatus> failedProps_ = 
+	new HashMap<String,ClientInfoStatus>();
     private final String firstKey_;
     private final String firstValue_;
-    
+
+    /**
+     * Helper method that creates a Propery object from the name-value
+     * pair given as arguments.
+     * @param name property key
+     * @param value property value
+     * @return the created <code>Properties</code> object
+     */
+    public static Properties makeProperties(String name, String value) {
+	Properties p = new Properties();
+	if (name != null || value != null)
+	    p.setProperty(name, value);
+	return p;
+    }
     /**
      * Creates a new <code>FailedProperties40</code> instance. Since
      * Derby doesn't support any properties, all the keys from the
@@ -55,28 +73,27 @@ public class FailedProperties40 {
         Enumeration e = props.keys();
         firstKey_ = (String)e.nextElement();
         firstValue_ = props.getProperty(firstKey_);
-        failedProps_.setProperty(firstKey_, ""+ClientInfoException.
-                                 REASON_UNKNOWN_PROPERTY);
+        failedProps_.put(firstKey_, ClientInfoStatus.REASON_UNKNOWN_PROPERTY);
         while (e.hasMoreElements()) {
-            failedProps_.setProperty((String)e.nextElement(), 
-                                     ""+ClientInfoException.
-                                     REASON_UNKNOWN_PROPERTY);
+            failedProps_.put((String)e.nextElement(), 
+			     ClientInfoStatus.REASON_UNKNOWN_PROPERTY);
         }
     }
 
     /**
-     * <code>getProperties</code> provides a <code>Properties</code>
-     * object describing the failed properties (as specified in the
-     * javadoc for java.sql.ClientInfoException).
+     * <code>getProperties</code> provides a
+     * <code>Map<String,ClientInfoStatus></code> object describing the
+     * failed properties (as specified in the javadoc for
+     * java.sql.SQLClientInfoException).
      *
-     * @return a <code>Properties</code> object with the failed
-     * property keys and the reason why each failed
+     * @return a <code>Map<String,ClientInfoStatus></code> object with
+     * the failed property keys and the reason why each failed
      */
-    public Properties getProperties() { return failedProps_; }
+    public Map<String,ClientInfoStatus> getProperties() { return failedProps_; }
 
     /**
      * <code>getFirstKey</code> returns the first property key. Used
-     * when ClientInfoException is thrown with a parameterized error
+     * when SQLClientInfoException is thrown with a parameterized error
      * message.
      *
      * @return a <code>String</code> value
@@ -85,7 +102,7 @@ public class FailedProperties40 {
 
     /**
      * <code>getFirstValue</code> returns the first property value. Used
-     * when ClientInfoException is thrown with a parameterized error
+     * when SQLClientInfoException is thrown with a parameterized error
      * message.
      *
      * @return a <code>String</code> value

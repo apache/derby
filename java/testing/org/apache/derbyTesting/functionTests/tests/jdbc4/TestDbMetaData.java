@@ -94,10 +94,8 @@ public class TestDbMetaData {
         checkEmptyRS(met.getClientInfoProperties());
 
 		// Make sure the constants provided in JDBC40Translation is correct
-
-		// Uncomment this when jdk16 contains functionParameterUnknown
-//  		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_UNKNOWN == 
-// 							   DatabaseMetaData.functionParameterUnknown));
+  		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_UNKNOWN == 
+ 							   DatabaseMetaData.functionParameterUnknown));
 		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_IN == 
 							   DatabaseMetaData.functionParameterIn));
 		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_INOUT == 

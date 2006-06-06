@@ -6,6 +6,7 @@ true
 true
 true
 true
+true
 FUNCTION_CAT,FUNCTION_SCHEM,FUNCTION_NAME,REMARKS,SPECIFIC_NAME
 null,APP,DUMMY1,java.some.func,xxxxGENERATED-IDxxxx
 null,APP,DUMMY2,java.some.func,xxxxGENERATED-IDxxxx

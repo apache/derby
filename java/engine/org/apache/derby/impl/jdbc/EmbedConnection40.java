@@ -23,7 +23,7 @@ package org.apache.derby.impl.jdbc;
 import java.sql.Array;
 import java.sql.BaseQuery;
 import java.sql.Blob;
-import java.sql.ClientInfoException;
+import java.sql.SQLClientInfoException;
 import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.QueryObjectFactory;
@@ -60,7 +60,7 @@ public class EmbedConnection40 extends EmbedConnection30 {
      *-------------------------------------------------------
      */
     
-    public Array createArray(String typeName, Object[] elements)
+    public Array createArrayOf(String typeName, Object[] elements)
         throws SQLException {
         throw Util.notImplemented();
     }
@@ -141,30 +141,35 @@ public class EmbedConnection40 extends EmbedConnection30 {
 
     /**
      * <code>setClientInfo</code> will always throw a
-     * <code>ClientInfoException</code> since Derby does not support
+     * <code>SQLClientInfoException</code> since Derby does not support
      * any properties.
      *
      * @param name a property key <code>String</code>
      * @param value a property value <code>String</code>
-     * @exception SQLException always.
+     * @exception SQLClientInfoException unless both name and value are null
      */
     public void setClientInfo(String name, String value)
-    throws SQLException{
-        checkIfClosed();
+    throws SQLClientInfoException{
+        Properties p = FailedProperties40.makeProperties(name,value);
+        try { checkIfClosed(); }
+        catch (SQLException se) {
+            FailedProperties40 fp = new FailedProperties40(p);
+            throw new SQLClientInfoException(se.getMessage(), 
+                                             se.getSQLState(), 
+                                             fp.getProperties());
+        }
         // Allow null to simplify compliance testing through
         // reflection, (test all methods in an interface with null
         // arguments)
         if (name == null && value == null) {
             return;
         }
-        Properties p = new Properties();
-        p.setProperty(name, value);
         setClientInfo(p);
     }
     
     /**
      * <code>setClientInfo</code> will throw a
-     * <code>ClientInfoException</code> uless the <code>properties</code>
+     * <code>SQLClientInfoException</code> uless the <code>properties</code>
      * paramenter is empty, since Derby does not support any
      * properties. All the property keys in the
      * <code>properties</code> parameter are added to failedProperties
@@ -173,16 +178,17 @@ public class EmbedConnection40 extends EmbedConnection30 {
      *
      * @param properties a <code>Properties</code> object with the
      * properties to set
-     * @exception ClientInfoException always
+     * @exception SQLClientInfoException unless properties parameter
+     * is null or empty
      */
     public void setClientInfo(Properties properties)
-    throws ClientInfoException {
+    throws SQLClientInfoException {
         FailedProperties40 fp = new FailedProperties40(properties);
         
         try { checkIfClosed(); }
         catch (SQLException se) {
-            throw new ClientInfoException(se.getMessage(), se.getSQLState(),
-                                          fp.getProperties());
+            throw new SQLClientInfoException(se.getMessage(), se.getSQLState(),
+                                             fp.getProperties());
         }
 
         // Allow null to simplify compliance testing through
@@ -198,8 +204,8 @@ public class EmbedConnection40 extends EmbedConnection30 {
             (SQLState.PROPERTY_UNSUPPORTED_CHANGE, 
              fp.getFirstKey(), 
              fp.getFirstValue());
-        throw new ClientInfoException(se.getMessage(),
-                                      se.getSQLState(), fp.getProperties());
+        throw new SQLClientInfoException(se.getMessage(),
+                                         se.getSQLState(), fp.getProperties());
     }
     
     /**

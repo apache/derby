@@ -23,7 +23,7 @@ package org.apache.derby.client.am;
 import java.sql.Array;
 import java.sql.BaseQuery;
 import java.sql.Blob;
-import java.sql.ClientInfoException;
+import java.sql.SQLClientInfoException;
 import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.SQLXML;
@@ -52,10 +52,10 @@ public class LogicalConnection40
         super(physicalConnection, pooledConnection);
     }
 
-    public Array createArray(String typeName, Object[] elements)
+    public Array createArrayOf(String typeName, Object[] elements)
         throws SQLException {
 		checkForNullPhysicalConnection();
-        return physicalConnection_.createArray( typeName, elements );
+        return physicalConnection_.createArrayOf( typeName, elements );
     }
     
     public Blob createBlob()
@@ -172,13 +172,13 @@ public class LogicalConnection40
      *
      * @param properties a <code>Properties</code> object with the
      * properties to set
-     * @exception ClientInfoException if an error occurs
+     * @exception SQLClientInfoException if an error occurs
      */
     public void setClientInfo(Properties properties)
-        throws ClientInfoException {
+        throws SQLClientInfoException {
 	try { checkForNullPhysicalConnection(); }
 	catch (SQLException se) { 
-	    throw new ClientInfoException
+	    throw new SQLClientInfoException
 		(se.getMessage(), se.getSQLState(), 
 		 (new FailedProperties40(properties)).getProperties());
 	}
@@ -194,8 +194,15 @@ public class LogicalConnection40
      * @exception SQLException if an error occurs
      */
     public void setClientInfo(String name, String value)
-        throws SQLException {
-	checkForNullPhysicalConnection();
+        throws SQLClientInfoException {
+	try { checkForNullPhysicalConnection(); }
+        catch (SQLException se) {
+            throw new SQLClientInfoException
+                (se.getMessage(), se.getSQLState(),
+                 new FailedProperties40
+                 (FailedProperties40.makeProperties
+                  (name,value)).getProperties());
+        }
 	physicalConnection_.setClientInfo(name, value);
     }
     

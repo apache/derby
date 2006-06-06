@@ -26,7 +26,7 @@ import java.sql.QueryObjectFactory;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.client.am.SqlException;
 import java.sql.Blob;
-import java.sql.ClientInfoException;
+import java.sql.SQLClientInfoException;
 import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
@@ -128,9 +128,9 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     
 
     
-    public Array createArray(String typeName, Object[] elements)
+    public Array createArrayOf(String typeName, Object[] elements)
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("createArray(String,Object[])");
+        throw SQLExceptionFactory.notImplemented ("createArrayOf(String,Object[])");
     }
 
     /**
@@ -268,7 +268,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 
     /**
      * <code>setClientInfo</code> will always throw a
-     * <code>ClientInfoException</code> since Derby does not support
+     * <code>SQLClientInfoException</code> since Derby does not support
      * any properties.
      *
      * @param name a property key <code>String</code>
@@ -276,21 +276,24 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      * @exception SQLException always.
      */
     public void setClientInfo(String name, String value)
-    throws SQLException{
+    throws SQLClientInfoException{
+        Properties p = FailedProperties40.makeProperties(name,value); 
 	try { checkForClosedConnection(); }
-	catch (SqlException se) { throw se.getSQLException(); }
+	catch (SqlException se) {
+            throw new SQLClientInfoException
+                (se.getMessage(), se.getSQLState(), 
+                 new FailedProperties40(p).getProperties());
+        }
 
         if (name == null && value == null) {
             return;
         }
-        Properties p = new Properties();
-        p.setProperty(name, value);
         setClientInfo(p);
     }
 
     /**
      * <code>setClientInfo</code> will throw a
-     * <code>ClientInfoException</code> uless the <code>properties</code>
+     * <code>SQLClientInfoException</code> uless the <code>properties</code>
      * paramenter is empty, since Derby does not support any
      * properties. All the property keys in the
      * <code>properties</code> parameter are added to failedProperties
@@ -299,14 +302,15 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      *
      * @param properties a <code>Properties</code> object with the
      * properties to set.
-     * @exception ClientInfoException always.
+     * @exception SQLClientInfoException unless the properties
+     * parameter is null or empty.
      */
     public void setClientInfo(Properties properties)
-    throws ClientInfoException {
+    throws SQLClientInfoException {
 	FailedProperties40 fp = new FailedProperties40(properties);
 	try { checkForClosedConnection(); } 
 	catch (SqlException se) {
-	    throw new ClientInfoException(se.getMessage(), se.getSQLState(),
+	    throw new SQLClientInfoException(se.getMessage(), se.getSQLState(),
 					  fp.getProperties());
 	}
 	
@@ -319,8 +323,8 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 			     new ClientMessageId
 			     (SQLState.PROPERTY_UNSUPPORTED_CHANGE), 
 			     fp.getFirstKey(), fp.getFirstValue());
-        throw new ClientInfoException(se.getMessage(),
-				      se.getSQLState(), fp.getProperties());
+        throw new SQLClientInfoException(se.getMessage(),
+                                         se.getSQLState(), fp.getProperties());
     }
 
     /**

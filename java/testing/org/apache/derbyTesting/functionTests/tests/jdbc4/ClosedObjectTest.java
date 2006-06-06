@@ -23,7 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;
-import java.sql.ClientInfoException;
+import java.sql.SQLClientInfoException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -614,7 +614,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         /**
          * Checks that the exception has an expected SQL state (08003
          * - no current connection). Also accept
-         * <code>ClientInfoException</code>s from
+         * <code>SQLClientInfoException</code>s from
          * <code>setClientInfo()</code>.
          *
          * @param method a <code>Method</code> value
@@ -624,7 +624,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         protected void checkSQLState(Method method, SQLException sqle)
             throws SQLException
         {
-            if (sqle instanceof ClientInfoException &&
+            if (sqle instanceof SQLClientInfoException &&
                 method.getName().equals("setClientInfo") &&
                 Arrays.asList(method.getParameterTypes())
                 .equals(Arrays.asList(new Class[] { Properties.class }))) {

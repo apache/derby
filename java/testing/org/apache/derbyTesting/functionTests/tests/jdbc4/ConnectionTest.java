@@ -124,8 +124,8 @@ public class ConnectionTest
     public void testCreateArrayNotImplemented()
         throws SQLException {
         try {
-            con.createArray(null, null);
-            fail("createArray(String,Object[]) should not be implemented");
+            con.createArrayOf(null, null);
+            fail("createArrayOf(String,Object[]) should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
             // Do nothing, we are fine
         }
@@ -240,19 +240,19 @@ public class ConnectionTest
         try {
             con.setClientInfo(p);
             fail("setClientInfo(String,String) should throw "+
-                 "ClientInfoException");
-        } catch (ClientInfoException cie) {
+                 "SQLClientInfoException");
+        } catch (SQLClientInfoException cie) {
             assertSQLState("SQLStates must match", "XCY02", cie);
             assertTrue("Setting property 'prop1' must fail with "+
                        "REASON_UNKNOWN_PROPERTY",
                        cie.getFailedProperties().
-                       getProperty("prop1").
-                       equals(""+ClientInfoException.REASON_UNKNOWN_PROPERTY));
-            assertTrue("Setting property 'prop2' must fail with "+
-                       "REASON_UNKNOWN_PROPERTY",
-                       cie.getFailedProperties().
-                       getProperty("prop2").
-                       equals(""+ClientInfoException.REASON_UNKNOWN_PROPERTY));
+                       get("prop1").
+                       equals(ClientInfoStatus.REASON_UNKNOWN_PROPERTY));
+             assertTrue("Setting property 'prop2' must fail with "+
+                        "REASON_UNKNOWN_PROPERTY",
+                        cie.getFailedProperties().
+                        get("prop2").
+                        equals(ClientInfoStatus.REASON_UNKNOWN_PROPERTY));
         }
     }
 
@@ -269,15 +269,15 @@ public class ConnectionTest
         try {
             con.setClientInfo("name", "value");
             fail("setClientInfo(String,String) should throw "+
-                 "ClientInfoException");
-        } catch (ClientInfoException cie) {
+                 "SQLClientInfoException");
+        } catch (SQLClientInfoException cie) {
             assertSQLState("SQLState must match 'unsupported'",
                            "XCY02", cie);
             assertTrue("Setting property 'name' must fail with "+
                        "REASON_UNKNOWN_PROPERTY",
                        cie.getFailedProperties().
-                       getProperty("name").
-                       equals(""+ClientInfoException.REASON_UNKNOWN_PROPERTY));
+                       get("name").
+                       equals(ClientInfoStatus.REASON_UNKNOWN_PROPERTY));
         }
     }
     
