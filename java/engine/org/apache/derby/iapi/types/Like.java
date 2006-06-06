@@ -1111,7 +1111,7 @@ public class Like {
 	 * 
 	 * @param string	The string to pad
 	 * @param len		Max number of characters to pad to
-	 * @returns the string padded with 0s up to the given length
+	 * @return the string padded with 0s up to the given length
 	 */
 	private static String padWithNulls(String string, int len) 
 	{
