@@ -878,6 +878,7 @@
   <target name="initjars" depends="setsanityname,getsvnversion">
     <property name="derby.jar.dir" value="${basedir}/jars/${sanity.name}"/>
     <property name="derby.jar.topdir" value="${basedir}/jars"/>
+    <property name="manifest.file" value="${derby.jar.dir}/lists/smf.mf"/>
     <mkdir dir="${derby.jar.dir}"/>
     <mkdir dir="${derby.jar.dir}/lists"/>
     <loadfile srcFile="${basedir}/changenumber.properties"
@@ -1002,7 +1003,41 @@
 
   <target name="derbyjarwithoutosgi" depends="checkosgijar" if="osgijar.unavailable">
 
-    <manifest file="${derby.jar.dir}/lists/smf.mf">
+    <antcall target="make-core-derbyjar-manifest"/>
+
+    <jar destfile="${derby.jar.dir}/derby.jar"
+         basedir="${out.dir}"
+	 includesfile="${derby.jar.dir}/lists/derby.list"
+         compress="true"
+         filesonly="true"
+         manifest="${manifest.file}"/>
+
+  </target>
+
+  <target name="derbyjarwithosgi" depends="checkosgijar" if="osgijar.available">
+
+    <antcall target="make-core-derbyjar-manifest"/>
+
+    <!-- add extra osgi bits to manifest -->
+
+    <manifest file="${manifest.file}"  mode="update">
+      <attribute name="Bundle-Activator" value="org.apache.derby.osgi.EmbeddedActivator"/>
+      <attribute name="DynamicImport-Package" value="*"/>
+      <attribute name="Export-Package" value="org.apache.derby.authentication,org.apache.derby.database,org.apache.derby.io,org.apache.derby.jdbc,org.apache.derby.vti"/> 
+    </manifest> 
+
+    <jar destfile="${derby.jar.dir}/derby.jar"
+         basedir="${out.dir}"
+	 includesfile="${derby.jar.dir}/lists/derby.list"
+         compress="true"
+         filesonly="true"
+         manifest="${manifest.file}"/>
+
+  </target>
+
+  <target name="make-core-derbyjar-manifest">
+
+    <manifest file="${manifest.file}">
       <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
       <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
       <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
@@ -1049,61 +1084,7 @@
 	 includesfile="${derby.jar.dir}/lists/derby.list"
          compress="true"
          filesonly="true"
-         manifest="${derby.jar.dir}/lists/smf.mf"/>
-
-  </target>
-
-  <target name="derbyjarwithosgi" depends="checkosgijar" if="osgijar.available">
-
-    <manifest file="${derby.jar.dir}/lists/smf.mf">
-      <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
-      <attribute name="Bundle-Activator" value="org.apache.derby.osgi.EmbeddedActivator"/>
-      <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
-      <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
-      <attribute name="DynamicImport-Package" value="*"/>
-      <attribute name="Export-Package" value="org.apache.derby.authentication,org.apache.derby.database,org.apache.derby.io,org.apache.derby.jdbc,org.apache.derby.vti"/> 
-      	<attribute name="Sealed" value="true"/>
-    	<section name="org/apache/derby/impl/tools/sysinfo/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/iapi/services/info/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/jdbc/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/iapi/services/context/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/info/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/iapi/error/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/iapi/services/i18n/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    		<section name="org/apache/derby/impl/jdbc/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    		<section name="org/apache/derby/iapi/tools/i18n/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/loc/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-      	<section name="org/apache/derby/tools">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    </manifest> 
-
-    <jar destfile="${derby.jar.dir}/derby.jar"
-         basedir="${out.dir}"
-	 includesfile="${derby.jar.dir}/lists/derby.list"
-         compress="true"
-         filesonly="true"
-         manifest="${derby.jar.dir}/lists/smf.mf"/>
+         manifest="${manifest.file}"/>
 
   </target>
 
