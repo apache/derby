@@ -418,8 +418,20 @@ public class OptimizerImpl implements Optimizer
 
 				// If we were in the middle of a join order when this
 				// happened, then reset the join order before jumping.
+				// The call to rewindJoinOrder() here will put joinPosition
+				// back to 0.  But that said, we'll then end up incrementing 
+				// joinPosition before we start looking for the next join
+				// order (see below), which means we need to set it to -1
+				// here so that it gets incremented to "0" and then
+				// processing can continue as normal from there.  Note:
+				// we don't need to set reloadBestPlan to true here
+				// because we only get here if we have *not* found a
+				// best plan yet.
 				if (joinPosition > 0)
+				{
 					rewindJoinOrder();
+					joinPosition = -1;
+				}
 			}
 
 			// Reset the timeExceeded flag so that we'll keep going
@@ -479,9 +491,15 @@ public class OptimizerImpl implements Optimizer
 				trace(SHORT_CIRCUITING, 0, 0, 0.0, null);
 			}
 		}
+
 		if (permuteState == JUMPING && !joinPosAdvanced && joinPosition >= 0)
 		{
 			//not feeling well in the middle of jump
+			// Note: we have to make sure we reload the best plans
+			// as we rewind since they may have been clobbered
+			// (as part of the current join order) before we gave
+			// up on jumping.
+			reloadBestPlan = true;
 			rewindJoinOrder();  //fall
 			permuteState = NO_JUMP;  //give up
 		}
@@ -597,8 +615,13 @@ public class OptimizerImpl implements Optimizer
 					// we went through all of the available optimizables
 					// and none of them were legal in the current position;
 					// so we give up and fall back to normal processing.
+					// Note: we have to make sure we reload the best plans
+					// as we rewind since they may have been clobbered
+					// (as part of the current join order) before we got
+					// here.
 						if (joinPosition > 0) {
 							joinPosition--;
+							reloadBestPlan = true;
 							rewindJoinOrder();
 						}
 						permuteState = NO_JUMP;
@@ -1027,10 +1050,15 @@ public class OptimizerImpl implements Optimizer
 					// if we're done we need to put it back to -1 to indicate
 					// that it's an empty slot.  Then we rewind and pull any
 					// other Optimizables at positions < joinPosition.
+					// Note: we have to make sure we reload the best plans
+					// as we rewind since they may have been clobbered
+					// (as part of the current join order) before we got
+					// here.
 					proposedJoinOrder[joinPosition] = -1;
 					joinPosition--;
 					if (joinPosition >= 0)
 					{
+						reloadBestPlan = true;
 						rewindJoinOrder();
 						joinPosition = -1;
 					}
