@@ -56,6 +56,7 @@ public class holdCursorJava {
 		testHoldCursorOnMultiTableQuery(conn);
 		testIsolationLevelChange(conn);
 
+		conn.rollback();
 		conn.close();
     } catch (Exception e) {
 		System.out.println("FAIL -- unexpected exception "+e);
