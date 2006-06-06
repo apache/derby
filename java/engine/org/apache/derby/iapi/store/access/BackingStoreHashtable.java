@@ -272,7 +272,7 @@ public class BackingStoreHashtable
                 // needed.
                 if (hash_table == null)
                 {
-					// Check to see how much memory we think the first row
+                    // Check to see how much memory we think the first row
                     // is going to take, and then use that to set the initial
                     // capacity of the Hashtable.
                     double rowUsage = getEstimatedMemUsage(row);
@@ -290,6 +290,16 @@ public class BackingStoreHashtable
                 add_row_to_hash_table(hash_table, key, row);
             }
         }
+
+        // In the (unlikely) event that we received a "red flag" estimated_rowcnt
+        // that is too big (see comments above), it's possible that, if row_source
+        // was null or else didn't have any rows, hash_table could still be null
+        // at this point.  So we initialize it to an empty hashtable (representing
+        // an empty result set) so that calls to other methods on this
+        // BackingStoreHashtable (ex. "size()") will have a working hash_table
+        // on which to operate.
+        if (hash_table == null)
+            hash_table = new Hashtable();
     }
 
     /**************************************************************************
