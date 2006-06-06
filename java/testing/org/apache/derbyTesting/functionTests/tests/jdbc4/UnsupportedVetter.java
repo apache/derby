@@ -258,8 +258,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "refreshRow", new Class[] { } ),
 						new MD( "updateArray", new Class[] { int.class, java.sql.Array.class } ),
 						new MD( "updateArray", new Class[] { String.class, java.sql.Array.class } ),
-						new MD( "updateNCharacterStream", new Class[] { int.class, java.io.Reader.class, int.class } ),
-						new MD( "updateNCharacterStream", new Class[] { String.class, java.io.Reader.class, int.class } ),
+						new MD( "updateNCharacterStream", new Class[] { int.class, java.io.Reader.class, long.class } ),
+						new MD( "updateNCharacterStream", new Class[] { String.class, java.io.Reader.class, long.class } ),
 						new MD( "updateNClob", new Class[] { int.class, NClob.class } ),
 						new MD( "updateNClob", new Class[] { String.class, NClob.class } ),
 						new MD( "updateNString", new Class[] { int.class, String.class } ),
@@ -344,11 +344,12 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	{
 		CONFIG.setVerbosity( true );
 
-		// Build map of interfaces to their methods which may raise SQLFeatureNotSupportedException.
-		initializeExcludableMap();
-
+		HashSet<String>	vanishedMethodList = new HashSet<String>();
 		HashSet<String>	unsupportedList = new HashSet<String>();
 		HashSet<String>	notUnderstoodList = new HashSet<String>();
+
+		// Build map of interfaces to their methods which may raise SQLFeatureNotSupportedException.
+		initializeExcludableMap( vanishedMethodList );
 
 		vetDataSource( unsupportedList, notUnderstoodList );
 		vetConnectionPooledDataSource( unsupportedList, notUnderstoodList );
@@ -357,15 +358,18 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		//
 		// Print methods which behave unexpectedly.
 		//
+		printVanishedMethodList( vanishedMethodList );
 		printUnsupportedList( unsupportedList );
 		printNotUnderstoodList( notUnderstoodList );
 
+		int		actualErrorCount =
+			vanishedMethodList.size() +
+			unsupportedList.size() +
+			notUnderstoodList.size();
+
 		assertEquals
-			( "These methods should not raise SQLFeatureNotSupportedException.",
-			  0, unsupportedList.size() );
-		assertEquals
-			( "These methods raise exceptions we don't understand.",
-			  0, notUnderstoodList.size() );
+			( "Unexpected discrepancies.",
+			  0, actualErrorCount );
 	}
 
 	//
@@ -520,7 +524,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	// Initialize the hashtable of methods which are allowed to raise
 	// SQLFeatureNotSupportedException.
 	//
-	private	void	initializeExcludableMap()
+	private	void	initializeExcludableMap( HashSet<String> vanishedMethodList )
 		throws Exception
 	{
 		excludableMap = new Hashtable< Class, HashSet<Method> >();
@@ -546,9 +550,17 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				//
 				if ( STRICT_ENFORCEMENT && !md.isOptional()  ) { continue; }
 
-				Method	method = iface.getMethod( md.getMethodName(), md.getArgTypes() );
+				Method	method = null;
 
-				if ( method == null ) { fail( "Unknown method: " + md.getMethodName() ); }
+				try {
+					method = iface.getMethod( md.getMethodName(), md.getArgTypes() );
+				} catch (NoSuchMethodException e) {}
+
+				if ( method == null )
+				{
+					vanishedMethodList.add
+						( "Method has vanished from SQL interface: " + iface.getName() + "." + md );
+				}
 
 				excludedMethodSet.add( method );
 			}
@@ -662,7 +674,11 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		}
 		catch (Throwable e)
 		{
-			if ( e instanceof InvocationTargetException )
+			if ( !( e instanceof InvocationTargetException ) )
+			{
+				recordUnexpectedError( candidate, iface, method, notUnderstoodList, e );
+			}
+			else
 			{
 				Throwable	cause = e.getCause();
 				
@@ -706,14 +722,25 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 				}
 				else
 				{
-					notUnderstoodList.add
-						( candidate.getClass().getName() + " " + method + " raises " + cause );
+					recordUnexpectedError( candidate, iface, method, notUnderstoodList, cause );
 				}
 				
 			}
 		}
 	}
 
+	//
+	// Record an unexpected error.
+	//
+	private	void	recordUnexpectedError
+		( Object candidate, Class iface, Method method,
+		  HashSet<String> notUnderstoodList, Throwable cause )
+		throws Exception
+	{
+		notUnderstoodList.add
+			( candidate.getClass().getName() + " " + method + " raises " + cause );
+	}
+	
 	//
 	// Returns true if this method is allowed to raise SQLFeatureNotSupportedException.
 	//
@@ -810,6 +837,27 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		}
 	}
 
+	// debug print the list of methods which have disappeared from the SQL interface
+	private	void	printVanishedMethodList( HashSet<String> vanishedMethodList )
+	{
+		int			count = vanishedMethodList.size();
+
+		if ( count == 0 ) { return; }
+
+		println( "--------------- VANISHED METHODS ------------------" );
+		println( "--" );
+
+		String[]	result = new String[ count ];
+
+		vanishedMethodList.toArray( result );
+		Arrays.sort( result );
+
+		for ( int i = 0; i < count; i++ )
+		{
+			println( result[ i ] );
+		}
+	}
+
 	// Debug print the list of method failures which we don't understand
 	private	void	printNotUnderstoodList( HashSet<String> notUnderstoodList )
 	{
@@ -865,6 +913,31 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 
 		/** Return whether this method is optional */
 		public	boolean	isOptional() { return true; }
+
+		public	String	toString()
+		{
+			StringBuffer	buffer = new StringBuffer();
+
+			buffer.append( _methodName );
+			buffer.append( "( " );
+
+			if ( _argTypes != null )
+			{
+				int		count = _argTypes.length;
+
+				for ( int i = 0; i < count; i++ )
+				{
+					if ( i > 0 ) { buffer.append( ", " ); }
+
+					buffer.append( _argTypes[ i ].getName() );
+				}
+			}
+
+			buffer.append( " )" );
+
+			return buffer.toString();
+		}
+
 	}
 
 	/**
