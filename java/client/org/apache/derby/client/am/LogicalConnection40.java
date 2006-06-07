@@ -82,6 +82,12 @@ public class LogicalConnection40
 		return physicalConnection_.createQueryObject( ifc );
     }
     
+    public <T extends BaseQuery>T createQueryObject(Class<T> ifc, java.sql.Connection conn)
+        throws SQLException {
+		checkForNullPhysicalConnection();
+		return physicalConnection_.createQueryObject( ifc, conn );
+    }
+    
     public SQLXML createSQLXML()
         throws SQLException {
 		checkForNullPhysicalConnection();

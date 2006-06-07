@@ -57,13 +57,23 @@ public class TestQueryObject {
      * @param con 
      */
     public static void testConnectionQuery (Connection con) throws Exception {
-        TestQuery query = con.createQueryObject (TestQuery.class);
+
+		vetQueryObject( con.createQueryObject (TestQuery.class) );
+		vetQueryObject( con.createQueryObject (TestQuery.class, con) );
+    }
+    
+    /**
+     * Verify the contents of query object
+     */
+	private	static	void	vetQueryObject( TestQuery query )
+		throws Exception
+	{
         if (query.getAllData().size() != RECORD_COUNT)
             System.out.println ("expected result size 10 actual " 
                     + query.getAllData().size());
         query.close();
-    }
-    
+	}
+
     /**
      * Tests DataSource.createQueryObject
      * @param ds 

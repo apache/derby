@@ -151,6 +151,7 @@ public class ConnectionTest
     public void testCreateQueryObjectIsImplemented()
         throws SQLException {
         con.createQueryObject(TestQuery.class);
+        con.createQueryObject(TestQuery.class, con);
     }
 
     public void testCreateSQLXMLNotImplemented()
