@@ -677,6 +677,9 @@ By default, autocommit is true for a connection
 Default holdability for a connection is HOLD_CURSORS_OVER_COMMIT
 CONNECTION(not in xa transaction yet) HOLDABILITY true
 Notice that autocommit now is false for connection because it is part of the global transaction
+Notice that connection's holdability at this point is CLOSE_CURSORS_AT_COMMIT because it is part of the global transaction
+CONNECTION(in xa transaction) HOLDABILITY false
+CONNECTION(in xa transaction) HOLDABILITY false
 Autocommit on Connection inside global transaction has been set correctly to false
 CONNECTION(non-xa) HOLDABILITY false
 STATEMENT HOLDABILITY false
@@ -712,6 +715,13 @@ Expected SQLException ResultSet not open.  Verify that autocommit is OFF.
 Expected SQLException ResultSet not open.  Verify that autocommit is OFF.
 Set connection to hold 
 CONNECTION(held) HOLDABILITY true
+CONNECTION(xa) HOLDABILITY false
+Expected SQLException(setHoldability) Cannot set holdability ResultSet.HOLD_CURSORS_OVER_COMMIT for a global transaction.
+HOLDABLE Statement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
+HOLDABLE PreparedStatement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
+HOLDABLE CallableStatement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
+CONNECTION(held) HOLDABILITY true
+PASS XA HOLDABILITY TEST
 **Test holdability state for: PooledConnection **
 PASS: Holdability matches expected holdability:HOLD_CURSORS_OVER_COMMIT
 ** Test autoCommit state for: PooledConnection**

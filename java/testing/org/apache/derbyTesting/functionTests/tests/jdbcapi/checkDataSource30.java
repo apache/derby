@@ -52,6 +52,13 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 public class checkDataSource30 extends checkDataSource
 { 
 
+    // DERBY-1370 - Embedded and client driver differ in the holdability 
+	// reported inside a global transaction for statements that were created
+	// with HOLD_CURSORS_OVER_COMMIT outside the transaction
+	// It looks like embedded behaviour is correct.
+	private static boolean stmtHoldabilityError = 
+							TestUtil.isDerbyNetClientFramework();
+	
 	public static void main(String[] args) throws Exception {
 
 		checkDataSource30 tester = new checkDataSource30();
@@ -172,13 +179,8 @@ public class checkDataSource30 extends checkDataSource
 			//start a global transaction and default holdability and autocommit will be switched to match Derby XA restrictions
 			xr.start(xid, XAResource.TMNOFLAGS);
 			System.out.println("Notice that autocommit now is " + conn1.getAutoCommit() + " for connection because it is part of the global transaction");
-			if (TestUtil.isEmbeddedFramework())
-			{
-				// run only for embedded
-				// Network XA BUG: getHoldability does not return CLOSE_CURSORS_AT_COMMIT for global transaction
-				System.out.println("Notice that connection's holdability at this point is CLOSE_CURSORS_AT_COMMIT because it is part of the global transaction");
-				System.out.println("CONNECTION(in xa transaction) HOLDABILITY " + (conn1.getHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
-			}
+			System.out.println("Notice that connection's holdability at this point is CLOSE_CURSORS_AT_COMMIT because it is part of the global transaction");
+			System.out.println("CONNECTION(in xa transaction) HOLDABILITY " + (conn1.getHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
 			xr.end(xid, XAResource.TMSUCCESS);
 			conn1.commit();
 			conn1.close();
@@ -186,11 +188,7 @@ public class checkDataSource30 extends checkDataSource
 			xid = getXid(27, (byte) 21, (byte) 01);
 			xr.start(xid, XAResource.TMNOFLAGS);
 			conn1 = xac.getConnection();
-			if (TestUtil.isEmbeddedFramework())
-			{
-				// Network XA BUG: getHoldability in a xa transaction returns true
-				System.out.println("CONNECTION(in xa transaction) HOLDABILITY " + (conn1.getHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
-			}
+			System.out.println("CONNECTION(in xa transaction) HOLDABILITY " + (conn1.getHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
 			System.out.println("Autocommit on Connection inside global transaction has been set correctly to " + conn1.getAutoCommit());
 			xr.end(xid, XAResource.TMSUCCESS);
 			conn1.rollback();
@@ -279,7 +277,8 @@ public class checkDataSource30 extends checkDataSource
 			System.out.println("STATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY " + (stmtAfterGlobalTransactionResume.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
 			System.out.println("PREPAREDSTATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY " + (prepstmtAfterGlobalTransactionResume.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
 			System.out.println("CALLABLESTATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY " + (callablestmtAfterGlobalTransactionResume.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
-			if (TestUtil.isEmbeddedFramework())
+		    // DERBY-1370			
+			if (! stmtHoldabilityError)
 			{
 				// Network XA BUG gives result set closed
 				rsx.next(); System.out.println("X@3 id " + rsx.getInt(1));
@@ -306,17 +305,6 @@ public class checkDataSource30 extends checkDataSource
 			conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
 			System.out.println("CONNECTION(held) HOLDABILITY " + (conn.getHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
 
-			
-			if (!TestUtil.isEmbeddedFramework())
-			{
-				// Don't run the rest of the test for client
-				// Network XA BUG: Client allows set HOLD_CURSORS_OVER_COMMIT 
-				// to be set in a a global transaction on the connection and 
-				// statements
-				conn.close();
-				return;
-			}
-				
 			xid = getXid(24, (byte) 21, (byte) 01);
 			xr.start(xid, XAResource.TMNOFLAGS);
 			System.out.println("CONNECTION(xa) HOLDABILITY " + (conn.getHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
@@ -355,23 +343,26 @@ public class checkDataSource30 extends checkDataSource
            shxa.close();
            
            
-			// check we can use a holdable statement set up in local mode.
-            // holdability is downgraded, tested in XATest.java
-			System.out.println("STATEMENT HOLDABILITY " + (sh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
-			sh.executeQuery("select id from hold_30").close();
-			sh.execute("select id from hold_30");
-            sh.getResultSet().close();
-
-            System.out.println("PREPARED STATEMENT HOLDABILITY " + (psh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
-			psh.executeQuery().close();
-			psh.execute();
-            psh.getResultSet().close();
-
-			System.out.println("CALLABLE STATEMENT HOLDABILITY " + (csh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
-			csh.executeQuery().close();
-			csh.execute();
-            csh.getResultSet().close();
-
+		   // check we can use a holdable statement set up in local mode.
+           // holdability is downgraded, tested in XATest.java
+  	       // DERBY-1370           
+           if(! stmtHoldabilityError) {
+           		System.out.println("STATEMENT HOLDABILITY " + (sh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
+				sh.executeQuery("select id from hold_30").close();
+				sh.execute("select id from hold_30");
+	            sh.getResultSet().close();
+	
+	            System.out.println("PREPARED STATEMENT HOLDABILITY " + (psh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
+				psh.executeQuery().close();
+				psh.execute();
+	            psh.getResultSet().close();
+	
+				System.out.println("CALLABLE STATEMENT HOLDABILITY " + (csh.getResultSetHoldability() == ResultSet.HOLD_CURSORS_OVER_COMMIT));
+				csh.executeQuery().close();
+				csh.execute();
+	            csh.getResultSet().close();
+           }    	
+	            
 			// but an update works
 			sh.executeUpdate("insert into hold_30 values(10, 'init10')");
 
