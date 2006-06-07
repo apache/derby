@@ -208,7 +208,7 @@ XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
 EVENT(5):connectionClosed
 Running JDBC 3.0 connection checks on Global XADataSource
   holdability     false
-JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
+JDBC 3.0 savepoint org.apache.derby.client.am.SqlException: Cannot set savepoint when in auto-commit mode.
 Running connection checks on Global XADataSource
   isolation level 2
   auto commit     false
@@ -226,7 +226,7 @@ Global XADataSource <closedconn>.createStatement() null -  Attempt to use a clos
 Global XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
 Running JDBC 3.0 connection checks on Global XADataSource
   holdability     false
-JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
+JDBC 3.0 savepoint org.apache.derby.client.am.SqlException: Cannot set savepoint when in auto-commit mode.
 Running connection checks on Global XADataSource
   isolation level 2
   auto commit     false
@@ -282,7 +282,7 @@ Switch to local XADataSource <closedconn>.createStatement() null -  Attempt to u
 Switch to local XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
 Running JDBC 3.0 connection checks on Switch to global XADataSource
   holdability     false
-JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
+JDBC 3.0 savepoint org.apache.derby.client.am.SqlException: Cannot set savepoint when in auto-commit mode.
 Running connection checks on Switch to global XADataSource
   isolation level 2
   auto commit     false
@@ -301,7 +301,7 @@ Switch to global XADataSource <closedconn>.createStatement() null -  Attempt to 
 Switch to global XADataSource <closedstmt>.execute() null - Invalid operation: statement closed
 Running JDBC 3.0 connection checks on Switch to global XADataSource
   holdability     false
-JDBC 3.0 savepoint SQL Exception: Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
+JDBC 3.0 savepoint org.apache.derby.client.am.SqlException: Cannot set savepoint when in auto-commit mode.
 Running connection checks on Switch to global XADataSource
   isolation level 2
   auto commit     false
@@ -547,7 +547,7 @@ Statement State @ GLOBAL
   getFetchSize() 444
   getMaxFieldSize() 713
   getMaxRows() 19
-  getResultSetHoldability() CLOSE_CURSORS_AT_COMMIT 
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
 Statement State @ PS GLOBAL 
   getResultSetType() SCROLL_INSENSITIVE
   getResultSetConcurrency() READ_ONLY
@@ -555,7 +555,7 @@ Statement State @ PS GLOBAL
   getFetchSize() 888
   getMaxFieldSize() 317
   getMaxRows() 91
-  getResultSetHoldability() CLOSE_CURSORS_AT_COMMIT 
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
   Parameter Count 1
     1 type 4
 Statement State @ CS GLOBAL 
@@ -565,7 +565,7 @@ Statement State @ CS GLOBAL
   getFetchSize() 999
   getMaxFieldSize() 137
   getMaxRows() 85
-  getResultSetHoldability() CLOSE_CURSORS_AT_COMMIT 
+  getResultSetHoldability() HOLD_CURSORS_OVER_COMMIT 
   Parameter Count 2
     1 type 12
     2 type 12
@@ -610,9 +610,12 @@ LOCK TABLE
   xid row 0 lock count 14
   xid row 1 lock count 14
 END LOCK TABLE
-sru1-local-8: ru(SN1) contents {1} {2} {3}
-sru2-local-9: ru(OAK2) contents {1} {2} {3}
-sru3-local-10: ru(SF3) contents {1} {2} {3}
+sru1-local-8: mismatched Statement connection
+sru1-local-8: ru(SQL_CURLH000C) contents {1} {2} {3}
+sru2-local-9: mismatched Statement connection
+sru2-local-9: ru(SQL_CURLN000C) contents {1} {2} {3}
+sru3-local-10: mismatched Statement connection
+sru3-local-10: ru(SQL_CURLH000C) contents {1} {2} {3}
 Statement State @ LOCAL 2 
   getResultSetType() SCROLL_INSENSITIVE
   getResultSetConcurrency() READ_ONLY
@@ -651,12 +654,19 @@ sruBatch: mismatched Statement connection
 sruBatch: ru(SQL_CURLH000C) contents {1} {2} {3} {4} {5} {6} {7} {8}
 XAConnection.getConnection : getConnection() is not valid on a closed PooledConnection.
 XAResource.start : XAException - XAER_RMFAIL : Connection is Closed.
+ERROR (no SQLState): Connection is Closed.
 XAResource.end : XAException - XAER_RMFAIL : Connection is Closed.
+ERROR (no SQLState): Connection is Closed.
 XAResource.commit : XAException - XAER_RMFAIL : Connection is Closed.
+ERROR (no SQLState): Connection is Closed.
 XAResource.prepare : XAException - XAER_RMFAIL : Connection is Closed.
+ERROR (no SQLState): Connection is Closed.
 XAResource.recover : XAException - XAER_RMFAIL : Connection is Closed.
+ERROR (no SQLState): Connection is Closed.
 XAResource.prepare : XAException - XAER_RMFAIL : Connection is Closed.
+ERROR (no SQLState): Connection is Closed.
 XAResource.isSameRM : XAException - XAER_RMFAIL : Connection is Closed.
+ERROR (no SQLState): Connection is Closed.
 Patricio update count 1
 conn4 autcommit true
 acxs 1
@@ -665,6 +675,7 @@ autocommitxastart expected Invalid operation: result set closed
 acxs 1
 acxs 2
 autocommitxastart expected  : XAException - XAER_OUTSIDE : Error executing a XAResource.start(), Server returned XAER_OUTSIDE
+ERROR (no SQLState): Error executing a XAResource.start(), Server returned XAER_OUTSIDE
 Expected XA error code: -9
 acxs 3
 testing jira 95 for DataSource; ok - expected exception: XCY00
@@ -689,28 +700,27 @@ H@2 id 2
 H@3 id 3
 CONNECTION(xa) HOLDABILITY false
 STATEMENT(this one was created with holdability false, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
-STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
+STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY true
 STATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
 PREPAREDSTATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
 CALLABLESTATEMENT(this one was created with default holdability inside this global transaction. Check it's holdability) HOLDABILITY false
 X@1 id 1
 X@2 id 2
-Expected SQLException No current connection.
-Expected SQLException No current connection.
+Expected SQLException No current connection. : 
+Expected SQLException Invalid operation: result set closed
 resume XA transaction and keep using rs
 Check holdability of various jdbc objects after resuming XA transaction
 CONNECTION(xa) HOLDABILITY false
 STATEMENT(this one was created with holdability false, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
-STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY false
+STATEMENT(this one was created with holdability true, outside the global transaction. Check it's holdability inside global transaction) HOLDABILITY true
 STATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
 PREPAREDSTATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
 CALLABLESTATEMENT(this one was created with default holdability inside the global transaction when it was first started. Check it's holdability) HOLDABILITY false
 STATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
 PREPAREDSTATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
 CALLABLESTATEMENT(this one was created with default holdability after the global transaction was resumed. Check it's holdability) HOLDABILITY false
-X@3 id 3
-Expected SQLException ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
-Expected SQLException ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+Expected SQLException Invalid operation: result set closed
+Expected SQLException Invalid operation: result set closed
 Set connection to hold 
 CONNECTION(held) HOLDABILITY true
 CONNECTION(xa) HOLDABILITY false
@@ -718,9 +728,6 @@ Expected SQLException(setHoldability) Cannot set holdability ResultSet.HOLD_CURS
 HOLDABLE Statement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
 HOLDABLE PreparedStatement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
 HOLDABLE CallableStatement in global xact false connection warning ResultSetHoldability restricted to ResultSet.CLOSE_CURSORS_AT_COMMIT for a global transaction.
-STATEMENT HOLDABILITY false
-PREPARED STATEMENT HOLDABILITY false
-CALLABLE STATEMENT HOLDABILITY false
 CONNECTION(held) HOLDABILITY true
 PASS XA HOLDABILITY TEST
 **Test holdability state for: PooledConnection **

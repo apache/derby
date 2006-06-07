@@ -14,5 +14,4 @@ jdbcapi/batchUpdate.java
 jdbcapi/statementJdbc20.java
 jdbcapi/testRelative.java
 jdbcapi/resultsetJdbc30.java
-jdbcapi/checkDataSource30.java
 jdbcapi/statementJdbc30.java
