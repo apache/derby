@@ -249,6 +249,8 @@ public abstract class Connection implements java.sql.Connection,
 
             loginTimeout_ = ds.getLoginTimeout();
             dataSource_ = ds;
+            
+            holdability = ClientDataSource.HOLD_CURSORS_OVER_COMMIT;
         }
 
         
