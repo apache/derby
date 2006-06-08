@@ -251,3 +251,34 @@ rollback;
 
 autocommit on;
 drop table tab1;
+
+--
+-- DERBY-1329: Correlated subquery in UPDATE ... SET ... WHERE CURRENT OF
+--
+CREATE TABLE BASICTABLE1(ID INTEGER, C3 CHAR(10));
+CREATE TABLE BASICTABLE2(IID INTEGER, CC3 CHAR(10));
+insert into BASICTABLE1 (C3, ID) values ('abc', 1);
+insert into BASICTABLE2 (CC3, IID) values ('def', 1);
+
+-- Check data.
+select * from BASICTABLE1;
+select * from BASICTABLE2;
+
+autocommit off;
+get cursor c1 as 'select c3, id from basictable1 for update';
+next c1;
+
+-- Before fix for DERBY-1329 the following statement would fail with
+-- an ASSERT failure or an IndexOutOfBoundsException; after the fix
+-- the statement should succeed and the update as well.
+update BASICTABLE1 set C3 = (SELECT CC3 FROM BASICTABLE2
+  WHERE BASICTABLE1.ID=BASICTABLE2.IID) where current of c1;
+
+-- Check data; BASICTABLE1 should have been updated.
+select * from BASICTABLE1;
+select * from BASICTABLE2;
+
+-- Cleanup.
+rollback;
+drop table BASICTABLE1;
+drop table BASICTABLE2;

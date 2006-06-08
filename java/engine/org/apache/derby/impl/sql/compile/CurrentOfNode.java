@@ -346,6 +346,16 @@ public final class CurrentOfNode extends FromTable {
 
 			if (resultColumn != null) 
 			{
+				// If we found the ResultColumn, set the ColumnReference's
+				// table number accordingly.  Note: we used to only set
+				// the tableNumber for correlated references (as part of
+				// changes for DERBY-171) but inspection of code (esp.
+				// the comments in FromList.bindColumnReferences() and
+				// the getMatchingColumn() methods on other FromTables)
+				// suggests that we should always set the table number
+				// if we've found the ResultColumn.  So we do that here.
+				columnReference.setTableNumber( tableNumber );
+
 				// If there is a result column, are we really updating it?
 				// If so, verify that the column is updatable as well
 				notfound = 
