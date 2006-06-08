@@ -620,11 +620,6 @@ public class XATest {
 
             xar.end(xid2, XAResource.TMSUSPEND);
 
-            // DERBY-1004
-            if (TestUtil.isDerbyNetClientFramework()) {
-                System.out.println("DERBY-1004 Call conn.close to avoid exception with client");
-                conn.close();
-            }
 
             /*
              -- get local connection again

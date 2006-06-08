@@ -48,7 +48,6 @@ A
 2001       
 2002       
 2003       
-DERBY-1004 Call conn.close to avoid exception with client
 GXID |STATUS |READONLY |USERNAME |TYPE                          
 -----
 (1 |PREPARED |false |APP |UserTransaction               

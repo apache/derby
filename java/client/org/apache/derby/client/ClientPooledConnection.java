@@ -160,6 +160,15 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         if (physicalConnection_ == null) {
             throw new SqlException(logWriter_, "getConnection() is not valid on a closed PooledConnection.");
         }
+        
+        // Roll back any pending transactions.  Otherwise we get an exception 
+        // when we try to close the connection (even for re-use), with an error
+        // saying we can't close the connection with active transactions
+        // (fixes DERBY-1004)
+        if ( physicalConnection_.transactionInProgress() ) {
+            physicalConnection_.rollback();
+        }
+        
         // Not the usual case, but if we have an existing logical connection, then we must close it by spec.
         // We close the logical connection without notifying the pool manager that this pooled connection is availabe for reuse.
         if (logicalConnection_ != null) {
