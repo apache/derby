@@ -336,6 +336,8 @@ public class SQLStateConstants
         = "01004";
     public static final String WITH_CHECK_OPTION_VIOLATION_NO_SUBCLASS 
         = "44000";
+    // The SQLState when calling next on a result set which is closed.
+    public static final String RESULT_SET_IS_CLOSED = "XCL16";
     //The SQLState of the SQLExcepion thrown when a class for which 
     //isWrapperFor returns false is passed as a parameter to the 
     //unwrap method.

@@ -487,16 +487,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 			//if (onRow && !(currentRow instanceof org.apache.derby.impl.sql.execute.ValueRow))
 			//	System.out.println(currentRow.getClass());
 
-		    /*
-			    Connection.setAutoCommit says that a statement completes,
-			    and will autoCommit, when it fetches the last row or is closed.
-			    This means a close will get a "Cursor already closed" error.
-				This rule only applies when doing a next() - if it were applied
-				to scrolling actions (like FIRST or LAST) it would close
-				the cursor when doing any operation on a scrolling cursor.
-
-			    if autocommit, this will commit
-		     */
+		    // The ResultSet may implicitly close when when the ResultSet type 
+		    // is TYPE_FORWARD_ONLY and the next method of ResultSet returns 
+		    // false. This will cause a commit if autocommit = true.
 		    if (!onRow && (position == NEXT)) {
 
 		     // In case of resultset for MetaData, we will only commit
@@ -514,9 +507,11 @@ public abstract class EmbedResultSet extends ConnectionChild
 		     if (forMetaData && (lcc.getActivationCount() > 1)) {
 		     	// we do not want to commit here as there seems to be other
 		     	// statements/resultSets currently opened for this connection.
-		     } else if (owningStmt != null)
+		     } else if (owningStmt != null && 
+		    		owningStmt.getResultSetType() == TYPE_FORWARD_ONLY) {
 				 // allow the satement to commit if required.
 		     	owningStmt.resultSetClosing(this);
+		     }
 		    }
 
 			// Clear the indication of which columns were fetched as streams.
