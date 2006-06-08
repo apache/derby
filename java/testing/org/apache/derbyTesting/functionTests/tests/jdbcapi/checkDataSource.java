@@ -73,14 +73,6 @@ public class checkDataSource
 	// Only embedded supports SimpleDataSource (JSR169).  
 	// These tests are exempted from other frameworks
 	private boolean testSimpleDataSource = TestUtil.isEmbeddedFramework();
-
-	// for a PooledConnection.getConnection() the connection gets closed.
-	// Embedded automatically rolls back any activity on the connection.
-	// Client requires the user to rollback and gives an SQLException  
-	// java.sql.Connection.close() requested while a transaction is in progress
-	// This has been filed as DERBY-1004 
-	private  boolean needRollbackBeforePCGetConnection = 
-		TestUtil.isDerbyNetClientFramework(); 
 	
 	// DERBY-1183 getCursorName not correct after first statement execution
 	private static boolean hasGetCursorNameBug = TestUtil.isDerbyNetClientFramework();
@@ -213,8 +205,6 @@ public class checkDataSource
 
 		// this update should be rolled back
 		s.executeUpdate("insert into t values(2)");
-		if (needRollbackBeforePCGetConnection)
-			c1.rollback();
 		
 		c1 = pc.getConnection();
 
@@ -268,8 +258,6 @@ public class checkDataSource
 
 		// this update should be rolled back
 		s.executeUpdate("insert into t values(2)");
-		if (needRollbackBeforePCGetConnection)
-			c1.rollback();
 		
 		c1 = xac.getConnection();
 

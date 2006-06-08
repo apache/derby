@@ -714,10 +714,14 @@ public abstract class Connection implements java.sql.Connection,
 
     void checkForTransactionInProgress() throws SqlException {
         // The following precondition matches CLI semantics, see SQLDisconnect()
-        if (!autoCommit_ && inUnitOfWork_ && !allowCloseInUOW_()) {
+        if (transactionInProgress() && !allowCloseInUOW_()) {
             throw new SqlException(agent_.logWriter_,
                     new ClientMessageId (SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION));                   
         }
+    }
+    
+    public boolean transactionInProgress() {
+        return !autoCommit_ && inUnitOfWork_;
     }
 
     // This is a no-op if the connection is already closed.
