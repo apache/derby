@@ -42,6 +42,9 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.StringTokenizer;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 
 public class RunList
 {
@@ -262,6 +265,16 @@ public class RunList
 			ps = new PrintStream
 			    ( new FileOutputStream(skipFile.getCanonicalPath(),true) );
 		    }
+
+                // Due to autoloading of JDBC drivers introduced in JDBC4
+                // (see DERBY-930) the embedded driver and Derby engine
+                // might already have been loaded.  To ensure that the
+                // embedded driver and engine used by the tests run in
+                // this suite are configured to use the correct
+                // property values we try to unload the embedded driver
+                if (useprocess == false) {
+                    unloadEmbeddedDriver();
+                }
 
                 System.out.println("Now run the suite's tests");
                 //System.out.println("shutdownurl: " + shutdownurl);
@@ -1609,5 +1622,25 @@ public class RunList
 
     }
 
+
+    /**
+     * Unloads the embedded JDBC driver and Derby engine in case
+     * is has already been loaded. 
+     * The purpose for doing this is that using an embedded engine
+     * that already is loaded makes it impossible to set new 
+     * system properties for each individual suite or test.
+     */
+    private static void unloadEmbeddedDriver() {
+        // Attempt to unload the embedded driver and engine
+        try {
+            DriverManager.getConnection("jdbc:derby:;shutdown=true");
+        } catch (SQLException se) {
+            // Ignore any exception thrown
+        }
+
+        // Call the garbage collector as spesified in the Derby doc
+        // for how to get rid of the classes that has been loaded
+        System.gc();
+    }
 }
 
