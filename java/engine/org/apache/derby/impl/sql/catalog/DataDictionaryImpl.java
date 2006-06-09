@@ -3078,7 +3078,7 @@ public final class	DataDictionaryImpl
                         (DataValueDescriptor)parameterDefaults[index],
                     (DefaultInfo) null,
                     uuid,
-                    (UUID) null, 0, 0, false);
+                    (UUID) null, 0, 0);
 										
 			addDescriptorNow(cd, null, SYSCOLUMNS_CATALOG_NUM, 
 						  false, // no chance of duplicates here
@@ -3262,7 +3262,7 @@ public final class	DataDictionaryImpl
 										  (DefaultInfo) null,
 										  uuid,
 										  (UUID) null,
-										  0, 0, false);
+										  0, 0);
 										
 				updateColumnDescriptor(cd,
 									   cd.getReferencingUUID(), 
@@ -7101,7 +7101,7 @@ public final class	DataDictionaryImpl
 		return new ColumnDescriptor
 			(column.getName(), column.getID(), typeDesc, null, null, td,
 			 (UUID) null, // No defaults yet for system columns
-			 0, 0, false
+			 0, 0
 			 );
 	}
 

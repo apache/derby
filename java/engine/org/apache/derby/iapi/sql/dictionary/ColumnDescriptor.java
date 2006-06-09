@@ -95,7 +95,6 @@ public class ColumnDescriptor extends TupleDescriptor
 	 * @param defaultUUID			The UUID for the default, if any.
 	 * @param autoincStart	Start value for an autoincrement column.
 	 * @param autoincInc	Increment for autoincrement column
-	 * @param autoinc		boolean value for sanity checking.
 	 * @param userChangedWhat		Adding an autoincrement column OR
 	 *						changing increment value or start value of
 	 *						the autoincrement column.
@@ -105,12 +104,12 @@ public class ColumnDescriptor extends TupleDescriptor
 					 DataTypeDescriptor columnType, DataValueDescriptor columnDefault,
 					 DefaultInfo columnDefaultInfo,
 					 TableDescriptor table,
-					 UUID defaultUUID, long autoincStart, long autoincInc, boolean autoinc,
+					 UUID defaultUUID, long autoincStart, long autoincInc, 
 					 long userChangedWhat)
 	{
 		this(columnName, columnPosition, columnType, columnDefault,
 				columnDefaultInfo, table, defaultUUID, autoincStart,
-				autoincInc, autoinc);				
+				autoincInc);				
 		autoinc_create_or_modify_Start_Increment = userChangedWhat;
 	}
 
@@ -130,14 +129,13 @@ public class ColumnDescriptor extends TupleDescriptor
 		 * @param defaultUUID			The UUID for the default, if any.
 		 * @param autoincStart	Start value for an autoincrement column.
 		 * @param autoincInc	Increment for autoincrement column
-		 * @param autoinc		boolean value for sanity checking.
 		 */
 
 		public ColumnDescriptor(String columnName, int columnPosition,
 						 DataTypeDescriptor columnType, DataValueDescriptor columnDefault,
 						 DefaultInfo columnDefaultInfo,
 						 TableDescriptor table,
-						 UUID defaultUUID, long autoincStart, long autoincInc, boolean autoinc)
+						 UUID defaultUUID, long autoincStart, long autoincInc)
 		{
 		this.columnName = columnName;
 		this.columnPosition = columnPosition;
@@ -151,7 +149,7 @@ public class ColumnDescriptor extends TupleDescriptor
 			this.uuid = table.getUUID();
 		}
 
-		assertAutoinc(autoinc,
+		assertAutoinc(autoincInc != 0,
 			      autoincInc,
 			      columnDefaultInfo);
 
@@ -178,14 +176,13 @@ public class ColumnDescriptor extends TupleDescriptor
 	 * @param defaultUUID			The UUID for the default, if any.
 	 * @param autoincStart	Start value for an autoincrement column.
 	 * @param autoincInc	Increment for autoincrement column
-	 * @param autoinc		Boolean value, for sanity checking.
 	 */
 	public ColumnDescriptor(String columnName, int columnPosition,
 		DataTypeDescriptor columnType, DataValueDescriptor columnDefault,
 		DefaultInfo columnDefaultInfo,
 		UUID uuid,
 		UUID defaultUUID,
-        long autoincStart, long autoincInc, boolean autoinc)
+        long autoincStart, long autoincInc)
 
 	{
 		this.columnName = columnName;
@@ -196,7 +193,7 @@ public class ColumnDescriptor extends TupleDescriptor
 		this.uuid = uuid;
 		this.defaultUUID = defaultUUID;
 
-		assertAutoinc(autoinc,
+		assertAutoinc(autoincInc!=0,
 			      autoincInc,
 			      columnDefaultInfo);
 		

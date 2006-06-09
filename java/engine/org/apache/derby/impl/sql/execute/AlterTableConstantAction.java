@@ -623,8 +623,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 												   td,
 												   defaultUUID,
 												   columnInfo[ix].autoincStart,
-												   columnInfo[ix].autoincInc,
-												   columnInfo[ix].autoincInc != 0
+												   columnInfo[ix].autoincInc
 												   );
 
 		dd.addDescriptor(columnDescriptor, td,
@@ -923,8 +922,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									td,
 									columnDescriptor.getDefaultUUID(),
 								    columnInfo[ix].autoincStart,
-								    columnInfo[ix].autoincInc,
-								    columnInfo[ix].autoincInc != 0
+								    columnInfo[ix].autoincInc
 									);
 		
 
@@ -966,8 +964,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									td,
 									columnDescriptor.getDefaultUUID(),
 									columnDescriptor.getAutoincStart(),
-									columnDescriptor.getAutoincInc(),
-									columnDescriptor.getAutoincInc() != 0);
+									columnDescriptor.getAutoincInc());
 		
 
 
@@ -1035,7 +1032,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 												   defaultUUID,
 												   columnInfo[ix].autoincStart,
 												   columnInfo[ix].autoincInc,
-												   columnInfo[ix].autoincInc != 0,
 												   columnInfo[ix].autoinc_create_or_modify_Start_Increment
 												   );
 

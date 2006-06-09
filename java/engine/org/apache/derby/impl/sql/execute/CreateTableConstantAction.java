@@ -256,6 +256,7 @@ class CreateTableConstantAction extends DDLConstantAction
 				defaultUUID = dd.getUUIDFactory().createUUID();
 			}
 
+			if (columnInfo[ix].autoincInc != 0)//dealing with autoinc column
 			columnDescriptor = new ColumnDescriptor(
 				                   columnInfo[ix].name,
 								   index++,
@@ -266,9 +267,20 @@ class CreateTableConstantAction extends DDLConstantAction
 								   defaultUUID,
 								   columnInfo[ix].autoincStart,
 								   columnInfo[ix].autoincInc,
-								   columnInfo[ix].autoincInc != 0,
 								   columnInfo[ix].autoinc_create_or_modify_Start_Increment
 							   );
+			else
+				columnDescriptor = new ColumnDescriptor(
+		                   columnInfo[ix].name,
+						   index++,
+						   columnInfo[ix].dataType,
+						   columnInfo[ix].defaultValue,
+						   columnInfo[ix].defaultInfo,
+						   td,
+						   defaultUUID,
+						   columnInfo[ix].autoincStart,
+						   columnInfo[ix].autoincInc
+					   );
 
 			cdlArray[ix] = columnDescriptor;
 		}

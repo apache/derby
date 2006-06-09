@@ -728,7 +728,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 											null,
 											(TableDescriptor) null,
 											null,
-											0, 0, false);
+											0, 0);
 			rc.setColumnDescriptor(null, cd);
 			rc.setVirtualColumnId(index + 1);
 		}

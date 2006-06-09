@@ -41,7 +41,6 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
