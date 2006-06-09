@@ -176,6 +176,18 @@ prepare p1 as 'select id from test where c10 like ?';
 execute p1 using 'values ''asd%'' ';
 select c10 from test where c10 like 'asd%';
 
+-- escaped escape character preceding first wildcard (DERBY-1386)
+insert into test values ('abc#def', 'abc#def', 'abc#def');
+insert into test values ('abc\def', 'abc\def', 'abc\def');
+select id from test where c10 like 'abc##%' escape '#';
+select id from test where vc10 like 'abc##%' escape '#';
+select id from test where c10 like 'abc\\%' escape '\';
+select id from test where vc10 like 'abc\\%' escape '\';
+select id from test where c10 like 'abc##_ef' escape '#';
+select id from test where vc10 like 'abc##_ef' escape '#';
+select id from test where c10 like 'abc\\_ef' escape '\';
+select id from test where vc10 like 'abc\\_ef' escape '\';
+
 -- clean up
 drop table test;
 drop table likeable;
