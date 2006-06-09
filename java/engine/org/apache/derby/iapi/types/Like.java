@@ -852,58 +852,6 @@ public class Like {
 		return new String(result, 0, r);
 	}
 
-	/**
-	 * Return the substring from the pattern for the < clause.
-	 * (NOTE: This may be null in the degenerate case where the
-	 * last char before the first wild card can't be incremented.)
-	 *
-	 *		Optimized for ESCAPE
-	 *
-	 * This function uses the greaterThanString, and bumps its last
-	 * character by one.   This string has no escape characters, they
-	 * were stripped out, and ends just before any real pattern chars or
-	 * at the end of the pattern literal.    See LikeEscapeOp*Node.preprocess.
-	 *
-	 * @param pattern	The right side of the LIKE
-	 * @param maxWidth	Maximum length of column, for null padding
-	 *
-	 * @return	The String for the < clause
-	 * @exception StandardException thrown if data invalid
-	 */
-	public static String lessThanString(String pattern, int maxWidth)
-		throws StandardException
-	{
-		//int		firstAnyChar = pattern.indexOf(anyChar);
-		//int		firstAnyString = pattern.indexOf(anyString);
-		int		lastUsableChar;
-		int		patternLen;
-		char	oldLastChar;
-		char	newLastChar;
-		char[]	charArray;
-
-		if ((patternLen = pattern.length()) == 0)
-		{
-			// pattern is ""
-			return null;
-		}
-		
-		lastUsableChar = patternLen -1;
-		oldLastChar = pattern.charAt(lastUsableChar);
-		newLastChar = oldLastChar;
-		newLastChar++;
-
-		// Check for degenerate roll over
-		if (newLastChar < oldLastChar)
-		{
-			return null;
-		}
-
-		charArray = pattern.substring(0, lastUsableChar + 1).toCharArray();
-		charArray[lastUsableChar] = newLastChar;
-
-		return padWithNulls(new String(charArray), maxWidth);
-	}
-
 	public static String lessThanStringFromParameter(String pattern, int maxWidth)
 		throws StandardException 
 	{
@@ -922,11 +870,7 @@ public class Like {
 
 	/**
 	 * Return the substring from the pattern for the < clause.
-	 * (NOTE: This may be null in the degenerate case where the
-	 * last char before the first wild card can't be incremented.)
-	 *
-	 * 		This is unoptimized for ESCAPE.
-	 *
+	 * (NOTE: This may be null if the pattern is an empty string.)
 	 *
 	 * @param pattern	The right side of the LIKE
 	 * @param escape	The escape clause
@@ -939,13 +883,11 @@ public class Like {
 		throws StandardException
 	{
 		int		lastUsableChar;
-		int		patternLen;
 		char	oldLastChar;
 		char	newLastChar;
-		char[]	charArray;
-		char escChar = 'a';
+		final int escChar;
 
-		if ((patternLen = pattern.length()) == 0)
+		if (pattern.length() == 0)
 		{
 			// pattern is ""
 			return null;
@@ -955,6 +897,11 @@ public class Like {
 		{
 			escChar = escape.charAt(0);
 		}
+		else {
+			// Set escape character to a value outside the char range,
+			// so that comparison with a char always evaluates to false.
+			escChar = -1;
+		}
 
 		/* Find the last non-wildcard character in the pattern
 		 * and increment it.  In the most common case,
@@ -963,64 +910,37 @@ public class Like {
 		 *
 		 *	pattern			return
 		 *	-------			------
-		 *	""				SUPER_STRING (match against super string)
+		 *	""				null
 		 *	"%..."			SUPER_STRING (match against super string)
 		 *	"_..."			SUPER_STRING (match against super string)
 		 *	"asdf%"			"asdg"
 		 */
 
-		int		firstAnyChar = pattern.indexOf(anyChar);
-		int		firstAnyString = pattern.indexOf(anyString);
+		StringBuffer upperLimit = new StringBuffer(maxWidth);
 
-
-		if (escape != null)
-		{
-			while (firstAnyChar > 0 && pattern.charAt(firstAnyChar-1) == escChar)
-				firstAnyChar = pattern.indexOf(anyChar, firstAnyChar+1);
-			while (firstAnyString > 0 && pattern.charAt(firstAnyString-1) == escChar)
-				firstAnyString = pattern.indexOf(anyString, firstAnyString+1);
+		// Extract the string leading up to the first wildcard.
+		for (int i = 0; i < pattern.length(); i++) {
+			char c = pattern.charAt(i);
+			if (c == escChar) {
+				if (++i >= pattern.length()) {
+					throw StandardException.newException(
+							SQLState.LANG_INVALID_ESCAPE_SEQUENCE);
+				}
+				c = pattern.charAt(i);
+			} else if (c == anyChar || c == anyString) {
+				break;
+			}
+			upperLimit.append(c);
 		}
 
-		if (firstAnyChar == -1)
-		{
-			if (firstAnyString == -1)
-			{
-				lastUsableChar = pattern.length() -1;
-			}
-			else if (firstAnyString == 0)
-			{
-				// pattern is "%"
-				return SUPER_STRING;
-			}
-			else
-			{
-				lastUsableChar = firstAnyString - 1;
-			}
-		}
-		else if (firstAnyString == -1)
-		{
-			if (firstAnyChar == 0)
-			{
-				// pattern is "_"
-				return SUPER_STRING;
-			}
-			lastUsableChar = firstAnyChar - 1;
-		}
-		else
-		{
-			// both _ and % present
-			lastUsableChar = ((firstAnyChar > firstAnyString) ? 
-										firstAnyString :
-										firstAnyChar) - 1;
-
-			if (lastUsableChar == -1)
-			{
-				// pattern starts with a wildcard
-				return SUPER_STRING;
-			}
+		// Pattern starts with wildcard.
+		if (upperLimit.length() == 0) {
+			return SUPER_STRING;
 		}
 
-		oldLastChar = pattern.charAt(lastUsableChar);
+		// Increment the last non-wildcard character.
+		lastUsableChar = upperLimit.length() - 1;
+		oldLastChar = upperLimit.charAt(lastUsableChar);
 		newLastChar = oldLastChar;
 		newLastChar++;
 
@@ -1030,37 +950,14 @@ public class Like {
 			return SUPER_STRING;
 		}
 
-		if (escape == null)
-		{
-			charArray = pattern.substring(0, lastUsableChar + 1).toCharArray();
-			charArray[lastUsableChar] = newLastChar;
+		upperLimit.setCharAt(lastUsableChar, newLastChar);
 
-			return padWithNulls(new String(charArray), maxWidth);
+		// Pad the string with nulls.
+		if (upperLimit.length() < maxWidth) {
+			upperLimit.setLength(maxWidth);
 		}
-		char[] patternChars = new char[patternLen];
-		char[] result = new char[patternLen];
-		pattern.getChars(0, patternLen, patternChars, 0) ;
 
-		int r = 0;
-		for (int p = 0; p < lastUsableChar; p++)
-		{
-		    if (patternChars[p] == escChar)
-			{
-				p++;		// don't copy the escape char
-
-				// run out: eg.  Escape char last char?
-				if (p >= patternLen-1)
-					throw StandardException.newException(
-							SQLState.LANG_INVALID_ESCAPE_SEQUENCE);
-				result[r++] = patternChars[p];
-				continue;
-			}
-
-			result[r++] = patternChars[p];
-		}
-		result[r++] = newLastChar;
-		String gt = new String(result, 0, r);
-		return padWithNulls(gt, maxWidth);
+		return upperLimit.toString();
 	}
 	
 	/**
