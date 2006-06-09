@@ -131,15 +131,12 @@ public class Configuration {
     // -----------------------Load resource bundles for the driver asap-----------
 
     private static final String packageNameForDNC = "org.apache.derby.client";
-    private static final String classNameForResources = "org.apache.derby.client.resources.Resources";
 
     public static SqlException exceptionsOnLoadResources = null; // used by ClientDriver to accumulate load exceptions
-    public static java.util.ResourceBundle dncResources__;
 
     static {
         try {
             loadProductVersionHolder();
-            loadResources();
         } catch (SqlException e) {
             exceptionsOnLoadResources = e;
         }
@@ -166,30 +163,6 @@ public class Configuration {
             default:
                 break; // state >1, ignore
             }
-        }
-    }
-
-    private static void loadResources() throws SqlException {
-        try {
-            dncResources__ = (java.util.ResourceBundle) java.security.AccessController.doPrivileged(new org.apache.derby.client.am.GetResourceBundleAction(classNameForResources));
-        } catch (java.security.PrivilegedActionException e) {
-            throw new SqlException(null, 
-                    new ClientMessageId (SQLState.ERROR_PRIVILEGED_ACTION),
-                    e.getException());                    
-        } catch (java.util.MissingResourceException e) {
-            // A null log writer is passed, because jdbc 1 sql exceptions are automatically traced
-            throw new SqlException(null,
-                    new ClientMessageId (SQLState.MISSING_RESOURCE_BUNDLE),
-                    packageNameForDNC, Configuration.dncDriverName);
-        }
-    }
-
-    public static void checkForExceptionsFromLoadConfiguration(LogWriter dncLogWriter) throws SqlException {
-        if (dncResources__ == null) {
-             throw new SqlException(null,
-                    new ClientMessageId (SQLState.MISSING_RESOURCE_BUNDLE),
-                    Configuration.packageNameForDNC, 
-                     Configuration.dncDriverName);            
         }
     }
 

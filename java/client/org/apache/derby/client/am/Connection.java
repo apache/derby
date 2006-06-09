@@ -172,7 +172,6 @@ public abstract class Connection implements java.sql.Connection,
         if (logWriter != null) {
             logWriter.traceConnectEntry(dataSource);
         }
-        org.apache.derby.client.am.Configuration.checkForExceptionsFromLoadConfiguration(logWriter);
 
         user_ = user;
 
@@ -207,7 +206,6 @@ public abstract class Connection implements java.sql.Connection,
             logWriter.traceConnectEntry(dataSource);
         }
         isXAConnection_ = isXAConn;
-        org.apache.derby.client.am.Configuration.checkForExceptionsFromLoadConfiguration(logWriter);
 
         user_ = ClientDataSource.propertyDefault_user;
 
@@ -308,7 +306,6 @@ public abstract class Connection implements java.sql.Connection,
         if (logWriter != null) {
             logWriter.traceConnectEntry(serverName, portNumber, databaseName, properties);
         }
-        org.apache.derby.client.am.Configuration.checkForExceptionsFromLoadConfiguration(logWriter);
 
         databaseName_ = databaseName;
 
