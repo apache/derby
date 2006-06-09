@@ -24,16 +24,15 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.sql.SQLException;
 import org.apache.derby.client.am.Configuration;
-import org.apache.derby.client.am.ResourceUtilities;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.client.am.Version;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.net.ClientJDBCObjectFactoryImpl;
-import org.apache.derby.client.resources.ResourceKeys;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.reference.MessageId;
 
 
 public class ClientDriver implements java.sql.Driver {
@@ -212,9 +211,11 @@ public class ClientDriver implements java.sql.Driver {
                         properties.getProperty(Attribute.PASSWORD_ATTR));
 
         driverPropertyInfo[0].description =
-                ResourceUtilities.getResource(ResourceKeys.propertyDescription__user);
+            SqlException.getMessageUtil().getTextMessage(
+                MessageId.CONN_USERNAME_DESCRIPTION);
         driverPropertyInfo[1].description =
-                ResourceUtilities.getResource(ResourceKeys.propertyDescription__password);
+            SqlException.getMessageUtil().getTextMessage(
+                MessageId.CONN_PASSWORD_DESCRIPTION);
 
         driverPropertyInfo[0].required = true;
         driverPropertyInfo[1].required = false; // depending on the security mechanism

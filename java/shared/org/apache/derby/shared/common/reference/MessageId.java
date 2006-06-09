@@ -148,6 +148,8 @@ public interface MessageId {
     String CONN_DRDA_QRYOPEN                                = "J129";
     String CONN_DRDA_INVALIDFDOCA                           = "J130";
     String CONN_DRDA_DATASTREAM_SYNTAX_ERROR                = "J131";
+    String CONN_USERNAME_DESCRIPTION                        = "J132";
+    String CONN_PASSWORD_DESCRIPTION                        = "J133";
 
 	/*
 	** Authentication
