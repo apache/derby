@@ -659,6 +659,7 @@ public class B2I extends BTree
             b2ic.init(
                 xact_manager,                    // current transaction   
                 xact_manager.getRawStoreXact(),  // current raw store xact
+                false,                           // Not holdable
                 open_mode,
                 TransactionController.MODE_TABLE,
                 xact_manager.getRawStoreXact().newLockingPolicy(
@@ -705,6 +706,7 @@ public class B2I extends BTree
 		b2ic.init(
             xact_manager,               // current transaction   
             rawtran,                    // current raw store transaction
+            hold,                       // holdability
             open_mode,
             lock_level,
             locking_policy,
@@ -813,6 +815,7 @@ public class B2I extends BTree
             b2ic.init(
                 xact_manager,                    // current transaction   
                 xact_manager.getRawStoreXact(),  // current raw store xact
+                false,                           // Not holdable
                 open_mode,
                 TransactionController.MODE_TABLE,
                 xact_manager.getRawStoreXact().newLockingPolicy(

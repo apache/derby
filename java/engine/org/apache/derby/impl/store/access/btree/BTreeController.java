@@ -894,6 +894,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 	**/
 	public void init(
     TransactionManager              xact_manager,
+    boolean                         hold,
     ContainerHandle                 container,
     Transaction                     rawtran, 
 	int					            open_mode,
@@ -911,7 +912,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
 		super.init(
             xact_manager, xact_manager, 
-            container, rawtran, false, open_mode,
+            container, rawtran, hold, open_mode,
             lock_level, btree_locking_policy,
             conglomerate, undo, dynamic_info);
 	}
@@ -989,11 +990,6 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         }
         else
         {
-            if (SanityManager.DEBUG)
-            {
-                SanityManager.THROWASSERT("There is currently no requirement for a held btree conglomerate controller.");
-            }
-
             return(false);
         }
     }

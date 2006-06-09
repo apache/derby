@@ -77,6 +77,7 @@ public class B2IController extends BTreeController
 	void init(
     TransactionManager              xact_manager,
     Transaction                     rawtran, 
+    boolean                         hold,
     int                             open_mode,
     int                             lock_level,
     LockingPolicy                   locking_policy,
@@ -146,6 +147,7 @@ public class B2IController extends BTreeController
 		// Do generic b-tree initialization.
 		super.init(
             xact_manager, 
+            hold,
             (ContainerHandle) null, 
             rawtran, 
             open_mode,
