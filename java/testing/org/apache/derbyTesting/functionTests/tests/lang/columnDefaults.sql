@@ -103,6 +103,12 @@ create table t7(c1 int default 10);
 insert into t7 values (default);
 select * from t7;
 
+-- JIRA issue Derby-331
+create table t_331 (a int not null, b int default 0, unique (a));
+insert into t_331 values (4, default);
+insert into t_331 values (4, default);
+select * from t_331;
+
 -- clean up
 drop function asdf;
 drop table t1;
@@ -110,3 +116,5 @@ drop table t7;
 drop table "x1";
 drop table "otherschema"."y1";
 drop schema "otherschema" restrict;
+drop table t_331;
+
