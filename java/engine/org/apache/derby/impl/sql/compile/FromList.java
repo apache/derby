@@ -33,7 +33,6 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 
 import org.apache.derby.iapi.error.StandardException;
 

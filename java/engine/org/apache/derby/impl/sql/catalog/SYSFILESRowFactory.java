@@ -26,7 +26,6 @@ import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;

@@ -26,7 +26,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Activation;

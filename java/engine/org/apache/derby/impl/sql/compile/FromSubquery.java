@@ -28,7 +28,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 

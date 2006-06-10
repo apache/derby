@@ -21,7 +21,6 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 
 import org.apache.derby.iapi.error.StandardException;
 

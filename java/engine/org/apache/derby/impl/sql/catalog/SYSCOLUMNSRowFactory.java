@@ -487,11 +487,6 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		/* 9th column is AUTOINCREMENTINC (long) */
 		autoincInc = row.getColumn(SYSCOLUMNS_AUTOINCREMENTINC).getLong();
 
-		/* NOTE: We use the autoincColumn variable in order to work around 
-		 * a 1.3.0 HotSpot bug.  (#4361550)
-		 */
-		boolean autoincColumn = (autoincInc != 0); 
-
 		DataValueDescriptor col = row.getColumn(SYSCOLUMNS_AUTOINCREMENTSTART);
 		autoincStart = col.getLong();
 
@@ -500,8 +495,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 
 		colDesc = new ColumnDescriptor(columnName, columnNumber,
 							dataTypeServices, defaultValue, defaultInfo, uuid, 
-							defaultUUID, autoincStart, autoincInc, 
-							autoincColumn);
+							defaultUUID, autoincStart, autoincInc);
 		return colDesc;
 	}
 
