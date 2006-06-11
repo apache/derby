@@ -244,7 +244,7 @@ ij> ---check the error case of log device only existing when
 --following connection shoul fail.
 connect 'jdbc:derby:erwombat;createFrom=extinout/mybackup/wombat;logDevice=extinout/crwombatlog';
 ERROR XJ040: Failed to start database 'erwombat', see the next exception for details.
-ERROR XSLAT: Log directory extinout<ps>crwombatlog<ps>log exists. Please make sure specified logDevice location is correct.  
+ERROR XSLAT: The log directory 'extinout<ps>crwombatlog<ps>log' exists. The directory might belong to another database. Check that the location specified for the logDevice attribute is correct.
 ij> connect 'jdbc:derby:wombat;restoreFrom=extinout/mybackup/wombat;logDevice=extinout/wombatlog';
 ij> values SUBSTR(SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('logDevice'), LOCATE('wombatlog',SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('logDevice')),9);
 1        
