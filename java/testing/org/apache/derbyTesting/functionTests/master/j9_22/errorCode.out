@@ -298,7 +298,7 @@ XSLAS|Log directory {0} not found in backup during restore. Please make sure tha
 ij> select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = 'XSLAT';
 SQL_&|MESSAGE                                                                                                                         |SEVERITY   
 --------------------------------------------------------------------------------------------------------------------------------------------------
-XSLAT|Log directory {0} exists. Please make sure specified logDevice location is correct.                                             |45000      
+XSLAT|The log directory '{0}' exists. The directory might belong to another database. Check that the location specified for the logDe&|45000      
 ij> select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = 'XSDB0';
 SQL_&|MESSAGE                                                                                                                         |SEVERITY   
 --------------------------------------------------------------------------------------------------------------------------------------------------
