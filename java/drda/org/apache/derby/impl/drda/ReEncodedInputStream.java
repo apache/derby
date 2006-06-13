@@ -72,10 +72,14 @@ public class ReEncodedInputStream extends InputStream {
 	throws IOException
     {
 	
-	int count;
-	if(( count = reader.read(decodedBuffer_, 0, BUFFERED_CHAR_LEN )) < 1 ){
-	    return null;
-	}
+		int count;
+		do{
+			count = reader.read(decodedBuffer_, 0, BUFFERED_CHAR_LEN);
+			
+		}while(count == 0);
+			
+		if(count < 0)
+			return null;
 	
 	encodedOutputStream_.reset();
 	encodedStreamWriter_.write(decodedBuffer_,0,count);
