@@ -4836,6 +4836,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private void flowGetRowset(int orientation, long rowNumber) throws SqlException {
+        // clear lobs before fetching rows
+        cursor_.clearLobData_();
         cursor_.resetDataBuffer();
         agent_.beginWriteChain(statement_);
         

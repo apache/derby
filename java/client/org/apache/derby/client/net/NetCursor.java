@@ -128,10 +128,6 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         int colNullIndicator = CodePoint.NULLDATA;
         int length;
 
-        if (hasLobs_) {
-            extdtaPositions_.clear();  // reset positions for this row
-        }
-
         int[] columnDataPosition = null;
         int[] columnDataComputedLength = null;
         boolean[] columnDataIsNull = null;
@@ -141,6 +137,10 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         if ((position_ == lastValidBytePosition_) &&
                 (netResultSet_ != null) && (netResultSet_.scrollable_)) {
             return false;
+        }
+
+        if (hasLobs_) {
+            extdtaPositions_.clear();  // reset positions for this row
         }
 
         NetSqlca[] netSqlca = this.parseSQLCARD(qrydscTypdef_);
