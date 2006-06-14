@@ -336,7 +336,7 @@ public class Stream {
 	    int i;
 	    for(i = off ;
 		i < off + len &&
-		    wroteLength <= total ;
+		    wroteLength < total ;
 		i++, wroteLength ++){
 		
 		cbuf[i] = (char) (wroteLength % 0x10000L);
