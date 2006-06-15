@@ -97,7 +97,7 @@ public class TestPreparedStatementMethods {
     }
     void t_setNClob1() {
         try {
-            ps.setNClob(0,null);
+            ps.setNClob(0,(NClob)null);
             System.out.println("UnImplemented Exception not thrown in code");
         } catch(SQLException e) {
             if(SQLState.NOT_IMPLEMENTED.equals (e.getSQLState())) {

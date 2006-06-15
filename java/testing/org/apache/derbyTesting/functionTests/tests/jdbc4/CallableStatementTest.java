@@ -377,7 +377,7 @@ public class CallableStatementTest
     public void testSetBlobNotImplemented()
         throws SQLException {
         try {
-            cStmt.setBlob("some-parameter-name", null);
+            cStmt.setBlob("some-parameter-name", (Blob)null);
             fail("CallableStatement.setBlob(String, Blob) " +
                  "should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
@@ -388,7 +388,7 @@ public class CallableStatementTest
     public void testSetClobNotImplemented()
         throws SQLException {
         try {
-            cStmt.setClob("some-parameter-name", null);
+            cStmt.setClob("some-parameter-name", (Clob)null);
             fail("CallableStatement.setClob(String, Clob) " +
                  "should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
@@ -410,7 +410,7 @@ public class CallableStatementTest
     public void testSetNClobNClobNotImplemented()
         throws SQLException {
         try {
-            cStmt.setNClob("some-parameter-name", null);
+            cStmt.setNClob("some-parameter-name", (NClob)null);
             fail("CallableStatement.setNClob(String, NClob) " +
                  "should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {

@@ -184,7 +184,7 @@ public class ResultSetTest
     public void testUpdateNClobNotIntImplemented()
         throws SQLException {
         try {
-            rs.updateNClob(1, null);
+            rs.updateNClob(1, (NClob)null);
             fail("ResultSet.updateNClob(int, NClob) " +
                  "should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
@@ -195,7 +195,7 @@ public class ResultSetTest
     public void testUpdateNClobStringNotImplemented()
         throws SQLException {
         try {
-            rs.updateNClob("some-column-name", null);
+            rs.updateNClob("some-column-name", (NClob)null);
             fail("ResultSet.updateNClob(String, NClob) " +
                  "should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
