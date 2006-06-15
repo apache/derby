@@ -352,21 +352,39 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		synchronized(this)
 		{
 
-			// committed and dropped, do nothing.
-			// This file container may only be a stub
 			if (getCommittedDropState())
-				return;
+            {
+                // committed and dropped, do nothing.
+                // This file container may only be a stub
 
-		///////////////////////////////////////////////////
-		//
-		// RESOLVE: right now, no logical -> physical mapping.
-		// We can calculate the offset.  In the future, we may need to
-		// look at the allocation page or the in memory translation table
-		// to figure out where the page should go
-		//
-		/////////////////////////////////////////////////
+				return;
+            }
+
+            ///////////////////////////////////////////////////
+            //
+            // RESOLVE: right now, no logical -> physical mapping.
+            // We can calculate the offset.  In the future, we may need to
+            // look at the allocation page or the in memory translation table
+            // to figure out where the page should go
+            //
+            /////////////////////////////////////////////////
 
 			long pageOffset = pageNumber * pageSize;
+
+            byte [] encryptionBuf = null; 
+            if (dataFactory.databaseEncrypted() 
+                && pageNumber != FIRST_ALLOC_PAGE_NUMBER)
+            {
+                // We cannot encrypt the page in place because pageData is
+                // still being accessed as clear text.  The encryption
+                // buffer is shared by all who access this container and can
+                // only be used within the synchronized block.
+
+                encryptionBuf = getEncryptionBuffer();
+            }
+
+            byte[] dataToWrite = 
+                updatePageArray(pageNumber, pageData, encryptionBuf, false);
 
 			try
 			{
@@ -379,23 +397,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 				*/
 				if (fileData.getFilePointer() != pageOffset)
 					padFile(fileData, pageOffset);
-
-                byte [] encryptionBuf = null; 
-                if (dataFactory.databaseEncrypted() 
-					&& pageNumber != FIRST_ALLOC_PAGE_NUMBER)
-				{
-					// We cannot encrypt the page in place because pageData is
-					// still being accessed as clear text.  The encryption
-					// buffer is shared by all who access this container and can
-					// only be used within the synchronized block.
-
-                    encryptionBuf = getEncryptionBuffer();
-                }
-
-				byte[] dataToWrite = updatePageArray(pageNumber, 
-                                                     pageData, 
-                                                     encryptionBuf, 
-                                                     false);
 
 				dataFactory.writeInProgress();
 				try
@@ -421,13 +422,17 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 					throw ioe;	// not writing beyond EOF, rethrow exception
 
 				if (SanityManager.DEBUG)
-					SanityManager.ASSERT(fileData.length() >= pageOffset,
-										 "failed to blank filled missing pages");
+                {
+					SanityManager.ASSERT(
+                        fileData.length() >= pageOffset,
+                        "failed to blank filled missing pages");
+                }
+
 				fileData.seek(pageOffset);
 				dataFactory.writeInProgress();
 				try
 				{
-					fileData.write(pageData, 0, pageSize);
+					fileData.write(dataToWrite, 0, pageSize);
 				}
 				finally
 				{
@@ -478,7 +483,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
             // space
             writeHeader(pageData);
 
-            if (SanityManager.DEBUG) {
+            if (SanityManager.DEBUG) 
+            {
                 if (FormatIdUtil.readFormatIdInteger(pageData) != AllocPage.FORMAT_NUMBER)
                     SanityManager.THROWASSERT(
                             "expect " +
@@ -489,16 +495,20 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
             return pageData;
 
-        } else 
+        } 
+        else 
         {
             if (dataFactory.databaseEncrypted() || encryptWithNewEngine) 
-           {
+            {
                 return encryptPage(pageData, 
                                    pageSize, 
                                    encryptionBuf, 
                                    encryptWithNewEngine);
-            } else
+            } 
+            else
+            {
                 return pageData;
+            }
         }
     }
 
