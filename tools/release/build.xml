@@ -174,47 +174,39 @@
   </target>
 
   <!-- generate the md5 and pgp checksums for a target -->
-  <target name="sign" depends="sign.bin,sign.lib,sign.src"/>
-  <target name="sign.bin" depends="init">
+  <target name="sign" depends="sign.bin,sign.lib,sign.lib-debug,sign.src"/>
+  <target name="sign.one" depends="init">
     <antcall target="md5">
-      <param name="sign.archive" value="${release.dir}/${derby.bin}.zip"/>
+      <param name="sign.archive" value="${release.dir}/${release.prefix}.zip"/>
     </antcall>
     <antcall target="md5">
-      <param name="sign.archive" value="${release.dir}/${derby.bin}.tar.gz"/>
+      <param name="sign.archive" value="${release.dir}/${release.prefix}.tar.gz"/>
     </antcall>
     <antcall target="pgp">
-      <param name="sign.archive" value="${release.dir}/${derby.bin}.zip"/>
+      <param name="sign.archive" value="${release.dir}/${release.prefix}.zip"/>
     </antcall>
     <antcall target="pgp">
-      <param name="sign.archive" value="${release.dir}/${derby.bin}.tar.gz"/>
+      <param name="sign.archive" value="${release.dir}/${release.prefix}.tar.gz"/>
     </antcall>
   </target>
   <target name="sign.lib" depends="init">
-    <antcall target="md5">
-      <param name="sign.archive" value="${release.dir}/${derby.lib}.zip"/>
-    </antcall>
-    <antcall target="md5">
-      <param name="sign.archive" value="${release.dir}/${derby.lib}.tar.gz"/>
-    </antcall>
-    <antcall target="pgp">
-      <param name="sign.archive" value="${release.dir}/${derby.lib}.zip"/>
-    </antcall>
-    <antcall target="pgp">
-      <param name="sign.archive" value="${release.dir}/${derby.lib}.tar.gz"/>
+    <antcall target="sign.one">
+      <param name="release.prefix" value="${derby.lib}"/>
     </antcall>
   </target>
-  <target name="sign.src" depends="init">
-    <antcall target="md5">
-      <param name="sign.archive" value="${release.dir}/${derby.src}.zip"/>
+  <target name="sign.lib-debug" depends="init"> 
+    <antcall target="sign.one">
+      <param name="release.prefix" value="${derby.lib-debug}"/>
     </antcall>
-    <antcall target="md5">
-      <param name="sign.archive" value="${release.dir}/${derby.src}.tar.gz"/>
+  </target>
+  <target name="sign.bin" depends="init"> 
+    <antcall target="sign.one">
+      <param name="release.prefix" value="${derby.bin}"/>
     </antcall>
-    <antcall target="pgp">
-      <param name="sign.archive" value="${release.dir}/${derby.src}.zip"/>
-    </antcall>
-    <antcall target="pgp">
-      <param name="sign.archive" value="${release.dir}/${derby.src}.tar.gz"/>
+  </target>
+  <target name="sign.src" depends="init"> 
+    <antcall target="sign.one">
+      <param name="release.prefix" value="${derby.src}"/>
     </antcall>
   </target>
 
