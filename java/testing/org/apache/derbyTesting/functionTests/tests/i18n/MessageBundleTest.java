@@ -77,10 +77,13 @@ public class MessageBundleTest extends BaseTestCase {
                 continue;
             }
             
-            if ( id.equals("close.C.1") ) {
-                // This one is not expected to have a message string
-                continue;
-            }
+            // Skip past "special" SQL States that are not expected
+            // to have messages
+            if ( id.equals("close.C.1") )   continue;            
+            if ( id.equals("rwupd" ) )      continue;
+            if ( id.equals("02502" ) )      continue;
+            if ( id.equals("XSAX0") )       continue;
+            
             if ( ! set.add(id) )
             {
                 System.err.println("ERROR: The id " + id + 
@@ -129,7 +132,6 @@ public class MessageBundleTest extends BaseTestCase {
      */
     public void testSQLStateOrphanedIds() throws Exception {
         Iterator it = sqlStateIds.iterator();
-        boolean success = true;
         
         while ( it.hasNext() ) {
             String sqlStateId = (String)it.next();
@@ -139,15 +141,8 @@ public class MessageBundleTest extends BaseTestCase {
                 // all of them.  Just note there was a failure and continue
                 System.err.println("ERROR: Message id " + sqlStateId +
                     " in SQLState.java was not found in" +
-                    " messages_en.properties");     
-                
-                success = false;
+                    " messages_en.properties");                     
              }
-        }
-
-        if ( ! success ) {
-            fail("One or more message ids in MessageId.java was not found " +
-                "in messages_en.properties");
         }
     }
 
@@ -157,7 +152,6 @@ public class MessageBundleTest extends BaseTestCase {
      */
     public void testMessageIdOrphanedIds() throws Exception {
         Iterator it = messageIdIds.iterator();
-        boolean success = true;
         
         while ( it.hasNext() ) {
             String sqlStateId = (String)it.next();
@@ -167,15 +161,8 @@ public class MessageBundleTest extends BaseTestCase {
                 // all of them.  Just note there was a failure and continue
                 System.err.println("ERROR: Message id " + sqlStateId +
                     " in MessageId.java was not found in" +
-                    " messages_en.properties");    
-                
-                success = false;
+                    " messages_en.properties");                    
              }
-        }
-        
-        if ( ! success ) {
-            fail("One or more message ids in MessageId.java was not found " +
-                "in messages_en.properties");
         }
     }
      
@@ -185,7 +172,6 @@ public class MessageBundleTest extends BaseTestCase {
      */
     public void testMessageBundleOrphanedMessages() throws Exception {
         Iterator it = messageBundleIds.iterator();
-        boolean success = true;
         
         while (it.hasNext() ) {
             String msgid = (String)it.next();
@@ -203,12 +189,6 @@ public class MessageBundleTest extends BaseTestCase {
             System.err.println("WARNING: Message id " + msgid + 
                 " in messages_en.properties is not " +
                 "referenced in either SQLState.java or MessageId.java");
-            success = false;
-        }
-        
-        if ( ! success ) {
-            fail("One or more message ids in messages_en.properties was not " +
-                "found in SQLState.java or MessageId.java");
-        }
+        }        
     }
 }

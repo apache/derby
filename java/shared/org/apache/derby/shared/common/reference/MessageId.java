@@ -57,7 +57,6 @@ public interface MessageId {
     String LOG_CANNOT_CREATE_NEW            = "L016";
     String LOG_CANNOT_CREATE_NEW_DUETO      = "L017";
     String LOG_MAYBE_INCONSISTENT           = "L018";
-    String LOG_TRANS_LOG_SCAN               = "L019";
     String LOG_WAS_IN_DURABILITY_TESTMODE_NO_SYNC = "L020"; // database was running in
                                                             // derby.system.durability set to test 
     String LOG_DURABILITY_TESTMODE_NO_SYNC_ERR = "L021"; // hint that error could be because 
@@ -103,10 +102,8 @@ public interface MessageId {
 	String CONN_SHUT_DOWN_CLOUDSCAPE		= "J005"; // shut down Cloudscape
 	String CONN_CREATE_DATABASE				= "J007"; // create database
 	String CONN_NO_DETAILS					= "J008"; // no details
-	String CONN_SPS_INSTALLER				= "J009"; // unexepected exception while loading JDBC ...
     String CONN_DATA_ENCRYPTION             = "J010"; // encrypt database on disk
     String CONN_UPGRADE_DATABASE            = "J013"; // upgrade database 
-	String CONN_USE_UNICODE                 = "J014"; // use unicode
     String CONN_CRYPTO_PROVIDER             = "J016"; // cryptographic service provider
     String CONN_CRYPTO_ALGORITHM            = "J017"; // cryptographic algorithm
     String CONN_CRYPTO_KEY_LENGTH           = "J018"; // cryptographic key length
@@ -116,8 +113,6 @@ public interface MessageId {
 	String CONN_USERNAME_ATTR               = "J022"; // user name
 	String CONN_PASSWORD_ATTR               = "J023"; // user password
 	String CONN_LOG_DEVICE                  = "J025"; // log directory path
-	String CONN_XA_GLOBAL_XID               = "J026"; // global Xid to start XA transaction
-	String CONN_STAGE_PAGE_SIZE             = "J027"; // page size in the heap  for replication
 	String CONN_ROLL_FORWARD_RECOVERY_FROM  = "J028"; //backup path for roll-forward recovery 
 	String CONN_CREATE_FROM                 = "J029"; //backup path for creating database from backup
 	String CONN_RESTORE_FROM                = "J030"; //backup path for restoring database from backup

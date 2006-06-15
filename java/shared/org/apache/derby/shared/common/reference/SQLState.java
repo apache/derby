@@ -150,7 +150,6 @@ public interface SQLState {
 	*/
 	String SERVICE_STARTUP_EXCEPTION			= "XBM01.D";
 	String SERVICE_MISSING_IMPLEMENTATION		= "XBM02.D";
-	String SERVICE_MISSING_TARGET_IMPLEMENTATION= "XBM04.D";
 	String MISSING_PRODUCT_VERSION				= "XBM05.D";
 	String SERVICE_WRONG_BOOT_PASSWORD			= "XBM06.D";
 	String SERVICE_BOOT_PASSWORD_TOO_SHORT		= "XBM07.D";
@@ -228,7 +227,6 @@ public interface SQLState {
 	** Cache Service
 	*/
 	String OBJECT_EXISTS_IN_CACHE		= "XBCA0.S";
-	String CACHE_FULL					= "XBCA3.S";
 
 	/*
 	** Properties
@@ -382,7 +380,6 @@ public interface SQLState {
 	String LOG_RECOVERY_FAILED                                  = "XSLA6.D";
 	String LOG_REDO_FAILED                                      = "XSLA7.D";
 	String LOG_UNDO_FAILED                                      = "XSLA8.D";
-	String LOG_UNSUPPORTED_FEATURE                              = "XSLA9.D";
 	String LOG_STORE_CORRUPT                                    = "XSLAA.D";
 	String LOG_FILE_NOT_FOUND                                   = "XSLAB.D";
 	String LOG_INCOMPATIBLE_FORMAT                              = "XSLAC.D";
@@ -405,12 +402,6 @@ public interface SQLState {
 
 
 	/*
-	** Basic Services - StoredFormatException
-	*/
-	String SFE_CANT_RESTORE_INVALID_STORED_FORM                 = "XBAEA.S";
-	String SFE_FAIL_IO_EXCEPTION                                = "XBAEB.S";
-
-	/*
 	** RawStore - Transactions.Basic statement exceptions
 	*/
 	String XACT_MAX_SAVEPOINT_LEVEL_REACHED                     = "3B002.S";
@@ -420,7 +411,6 @@ public interface SQLState {
 	//Bug 4468 - release/rollback of savepoint failed because it doesn't exist 
 	String XACT_SAVEPOINT_RELEASE_ROLLBACK_FAIL                 = "3B502.S";
 	String XACT_TRANSACTION_ACTIVE                              = "XSTA2.S";
-	String XACT_NO_CONTEXT_MANAGER                              = "XSTA3.S";
 
 	/*
 	** RawStore - Transactions.Basic transaction exceptions
@@ -441,7 +431,6 @@ public interface SQLState {
 	String XACT_ABORT_EXCEPTION                                 = "XSTB0.M";
 	String XACT_CANNOT_LOG_CHANGE                               = "XSTB2.M";
 	String XACT_CANNOT_ABORT_NULL_LOGGER                        = "XSTB3.M";
-	String XACT_CANNOT_CHECKPOINT                               = "XSTB4.M";
 	String XACT_CREATE_NO_LOG                                   = "XSTB5.M";
 	String XACT_TRANSACTION_TABLE_IN_USE                        = "XSTB6.M";
 
@@ -501,14 +490,12 @@ public interface SQLState {
 	String FILE_READ_ONLY                                       = "XSDFB.S";
 	String FILE_IO_GARBLED                                      = "XSDFD.S";
 	String FILE_UNEXPECTED_EXCEPTION                            = "XSDFF.S";
-	String FILE_ILLEGAL_ENCRYPTED_PAGE_SIZE                     = "XSDFG.S";
     String BACKUP_FILE_IO_ERROR                                 = "XSDFH.S";
 	String FILE_NEW_PAGE_DURING_RECOVERY                        = "XSDFI.S";
 
 	/*
 	** RawStore - Data.FSLDemo transaction exceptions
 	*/
-	String FSL_RESOURCE_LIMIT_EXCEEDED                          = "XSDI0.T";
 
 	/*
 	** RawStore - Data.Filesystem database exceptions
@@ -646,8 +633,6 @@ public interface SQLState {
 
 	String LANG_NO_ROW_FOUND									   	   = "02000";
 
-	// 0100C is not returned for procedures written in Java, from the SQL2003 spec.
-	String LANG_DYNAMIC_RESULTS_RETURNED							   = "0100C";
 	String LANG_TOO_MANY_DYNAMIC_RESULTS_RETURNED					   = "0100E";
     
 
@@ -728,7 +713,6 @@ public interface SQLState {
 	String LANG_DB2_LENGTH_PRECISION_SCALE_VIOLATION                   = "42611";
 	String LANG_DB2_MULTIPLE_ELEMENTS								   = "42613";
 	String LANG_DB2_INVALID_CHECK_CONSTRAINT                           = "42621";
-    String LANG_INVALID_IN_CONTEXT                                     = "42703";
 	String LANG_DB2_DUPLICATE_NAMES									   = "42734";
 	String LANG_DB2_INVALID_COLS_SPECIFIED                             = "42802";
         String LANG_DB2_INVALID_SELECT_COL_FOR_HAVING = "42803";
@@ -771,7 +755,6 @@ public interface SQLState {
 	String LANG_INVALID_JOIN_ORDER_SPEC                                = "42X17";
 	String LANG_NOT_COMPARABLE                                         = "42818";
 	String LANG_NON_BOOLEAN_WHERE_CLAUSE                               = "42X19";
-	String LANG_NO_TABLE_MUST_HAVE_CURRENT_OF                          = "42X21";
 	String LANG_CURSOR_NOT_UPDATABLE                                   = "42X23";
 	//	String LANG_UNARY_MINUS_BAD_TYPE                                   = "42X24";
 	String LANG_UNARY_FUNCTION_BAD_TYPE                                = "42X25";
@@ -819,7 +802,6 @@ public interface SQLState {
 	//42X67
 	String LANG_NO_FIELD_FOUND                                         = "42X68";
 	String LANG_PRIMITIVE_REFERENCING_EXPRESSION                       = "42X69";
-	String LANG_UNKNOWN_NAMED_PARAMETER                                = "42X71";
 	String LANG_NO_STATIC_FIELD_FOUND                                  = "42X72";
 	String LANG_AMBIGUOUS_METHOD_INVOCATION                            = "42X73";
 	String LANG_INVALID_CALL_STATEMENT                                 = "42X74";
@@ -830,7 +812,6 @@ public interface SQLState {
 	String LANG_DUPLICATE_COLUMN_FOR_ORDER_BY                          = "42X79";
 	String LANG_QUALIFIED_COLUMN_NAME_NOT_ALLOWED                      = "42877";
 	String LANG_EMPTY_VALUES_CLAUSE                                    = "42X80";
-	String LANG_INSERT_COLUMN_LIST_VALUES_MISMATCH                     = "42X81";
 	String LANG_USING_CARDINALITY_VIOLATION                            = "42X82";
 	String LANG_ADDING_COLUMN_WITH_NULL_AND_NOT_NULL_CONSTRAINT        = "42X83";
 	String LANG_CANT_DROP_BACKING_INDEX                                = "42X84";
@@ -844,10 +825,8 @@ public interface SQLState {
 	String LANG_DUPLICATE_CONSTRAINT_COLUMN_NAME                       = "42X92";
 	String LANG_INVALID_CREATE_CONSTRAINT_COLUMN_LIST                  = "42X93";
 	String LANG_OBJECT_NOT_FOUND                                       = "42X94";
-	String LANG_NO_PARAMS_IN_USING                                     = "42X95";
 	String LANG_DB_CLASS_PATH_HAS_MISSING_JAR                          = "42X96";
 	String LANG_NO_PARAMS_IN_VIEWS                                     = "42X98";
-	String LANG_INVALID_USER_AGGREGATE_DEFINITION                      = "42X99";
 	String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";
@@ -868,7 +847,6 @@ public interface SQLState {
 	String LANG_INVALID_CAST                                           = "42846";
 	String LANG_AMBIGUOUS_GROUPING_COLUMN                              = "42Y19";
 	//	String LANG_UNMATCHED_GROUPING_COLUMN                              =	//	"42Y20"; -- not used
-	String LANG_TYPE_DOESNT_EXIST_OR_NO_CLASS_ALIAS                    = "42Y21";
 	String LANG_USER_AGGREGATE_BAD_TYPE                                = "42Y22";
 	String LANG_BAD_J_D_B_C_TYPE_INFO                                  = "42Y23";
 	String LANG_VIEW_NOT_UPDATEABLE                                    = "42Y24";
@@ -879,7 +857,6 @@ public interface SQLState {
 	String LANG_INVALID_NON_GROUPED_SELECT_LIST                        = "42Y29";
 	String LANG_INVALID_GROUPED_SELECT_LIST                            = "42Y30";
 	String LANG_TOO_MANY_ELEMENTS                            = "54004";
-	String LANG_BAD_AGGREGATOR_CLASS                                   = "42Y31";
 	String LANG_BAD_AGGREGATOR_CLASS2                                  = "42Y32";
 	String LANG_USER_AGGREGATE_CONTAINS_AGGREGATE                      = "42Y33";
 	String LANG_AMBIGUOUS_COLUMN_NAME_IN_TABLE                         = "42Y34";
@@ -912,7 +889,6 @@ public interface SQLState {
 	String LANG_INVALID_BULK_FETCH_WITH_JOIN_TYPE                      = "42Y65";
 	String LANG_INVALID_BULK_FETCH_UPDATEABLE                          = "42Y66";
 	String LANG_CANNOT_DROP_SYSTEM_SCHEMAS                             = "42Y67";
-	String LANG_ILLEGAL_WORK_UNIT_REFERENCE                            = "42Y68";
 	String LANG_NO_BEST_PLAN_FOUND                                     = "42Y69";
 	String LANG_ILLEGAL_FORCED_JOIN_ORDER                              = "42Y70";
 	String LANG_CANNOT_DROP_SYSTEM_ALIASES                             = "42Y71";
@@ -920,9 +896,6 @@ public interface SQLState {
 	String LANG_USER_AGGREGATE_BAD_TYPE_NULL                           = "42Y83";
 	String LANG_INVALID_DEFAULT_DEFINITION                             = "42Y84";
 	String LANG_INVALID_USE_OF_DEFAULT                                 = "42Y85";
-	String LANG_NO_INSERT_REPLACE_ON_PUBLISHED_TABLE                   = "42Y86";
-	String LANG_NO_INSERT_REPLACE_ON_TARGET_TABLE                      = "42Y87";
-	String LANG_AGGREGATES_TAKE_ONE_PARAM                              = "42Y89";
 	String LANG_STMT_NOT_UPDATABLE                                     = "42Y90";
 	String LANG_NO_SPS_USING_IN_TRIGGER                                = "42Y91";
 	String LANG_TRIGGER_BAD_REF_MISMATCH                               = "42Y92";
@@ -942,10 +915,8 @@ public interface SQLState {
 
 	// MORE GENERIC LANGUAGE STUFF
 	String LANG_COLUMN_DEFAULT										   = "42Z09.U";
-	String LANG_GQPT_NOT_IMPL										   = "42Z10.U";
 	String LANG_STREAM												   = "42Z11.U";
 
-	String LANG_CIRCULAR_DEFINITION									   = "42Z12";
 	// String LANG_UPDATABLE_VTI_BAD_GETMETADATA						   = "42Z14";
 
 	// for alter table modify column ...
@@ -1010,7 +981,6 @@ public interface SQLState {
 	String LANG_INVALID_LITERAL_LENGTH                                 = "42Z99";
     String LANG_READ_UNCOMMITTED                                       = "42Z9A";
     String LANG_VTI_BLOB_CLOB_UNSUPPORTED                              = "42Z9B";
-    String LANG_EXPLICIT_NULLS_IN_DB2_MODE                              = "42Z9C";
 	String LANG_UNSUPPORTED_TRIGGER_STMT		   					   = "42Z9D";
     String LANG_DROP_CONSTRAINT_TYPE                                   = "42Z9E";
     String LANG_QUERY_TOO_COMPLEX                                      = "42ZA0";
@@ -1182,12 +1152,7 @@ public interface SQLState {
 
 	// org.apache.derby.catalog.types
 	String TI_SQL_TYPE_NAME			= "44X00.U";
-	String TI_ERROR_CODE			= "44X02.U";
-	String TI_SQLSTATE				= "44X03.U";
-	String TI_ERROR_MESSAGE			= "44X04.U";
 	String TI_NEXT_ERROR			= "44X05.U";
-	String TI_TARGET_1ST_TIME_CI	= "44X16.U";
-	String TI_REP_PROPERTY_SPECIFICS	= "44X17.U";
 
 	// INTERNAL EXCEPTIONS
 	String LANG_UNABLE_TO_GENERATE                                     = "42Z50";
@@ -1205,9 +1170,6 @@ public interface SQLState {
 	String LANG_CANT_LOCK_TABLE                                        = "X0X02.S";
 	String LANG_TABLE_NOT_FOUND_DURING_EXECUTION                       = "X0X05.S";
 	String LANG_CANT_DROP_JAR_ON_DB_CLASS_PATH_DURING_EXECUTION        = "X0X07.S";
-	String LANG_NO_USER_DDL_IN_SYSTEM_SCHEMA_DURING_EXECUTION          = "X0X09.S";
-	String LANG_REFRESH_ONLY_PROPERTY                                  = "X0X0A.S";
-	String LANG_WORK_UNIT_ONLY                                         = "X0X0D.S";
 	String LANG_USING_CARDINALITY_VIOLATION_DURING_EXECUTION           = "X0X10.S";
 	String LANG_NO_ROWS_FROM_USING_DURING_EXECUTION                    = "X0X11.S";
 	String LANG_FILE_DOES_NOT_EXIST                                    = "X0X13.S";
@@ -1221,11 +1183,9 @@ public interface SQLState {
 	String LANG_NON_KEYED_INDEX                                        = "X0X85.S";
 	String LANG_ZERO_INVALID_FOR_R_S_ABSOLUTE                          = "X0X86.S";
 	String LANG_NO_CURRENT_ROW_FOR_RELATIVE                            = "X0X87.S";
-	String LANG_NO_MAKE_INVALID_ON_PROVIDER                            = "X0X93.S";
 	String LANG_CANT_INVALIDATE_OPEN_RESULT_SET                        = "X0X95.S";
 	String LANG_CANT_CHANGE_ISOLATION_HOLD_CURSOR                      = "X0X03.S";
 	//following three for auto-generated keys feature in JDBC3.0
-	String LANG_AUTO_GENERATED_FOR_INSERT_ONLY                         = "X0X08.S";
 	String LANG_COLUMN_POSITION_NOT_FOUND                              = "X0X0E.S";
 	String LANG_COLUMN_NAME_NOT_FOUND                                  = "X0X0F.S";
 
@@ -1256,7 +1216,6 @@ public interface SQLState {
 	String LANG_INVALID_FK_NO_REF_KEY                                  = "X0Y44.S";
 	String LANG_ADD_FK_CONSTRAINT_VIOLATION                            = "X0Y45.S";
 	String LANG_INVALID_FK_NO_REF_TAB                                  = "X0Y46.S";
-	String LANG_NOT_OUTERMOST_STATEMENT                                = "X0Y53.S";
 	String LANG_SCHEMA_NOT_EMPTY                                       = "X0Y54.S";
 	String LANG_INDEX_ROW_COUNT_MISMATCH                               = "X0Y55.S";
 	String LANG_INVALID_OPERATION_ON_SYSTEM_TABLE                      = "X0Y56.S";
@@ -1264,7 +1223,6 @@ public interface SQLState {
 	String LANG_ADD_PRIMARY_KEY_FAILED1                                = "X0Y58.S";
 	String LANG_ADD_CHECK_CONSTRAINT_FAILED                            = "X0Y59.S";
 	String LANG_NULL_DATA_IN_PRIMARY_KEY                 	   	   	   = "X0Y63.S";
-	String LANG_ILLEGAL_WORK_UNIT_RUN                                  = "X0Y65.S";
 	String LANG_NO_COMMIT_IN_NESTED_CONNECTION                         = "X0Y66.S";
 	String LANG_NO_ROLLBACK_IN_NESTED_CONNECTION                       = "X0Y67.S";
 	String LANG_OBJECT_ALREADY_EXISTS                                  = "X0Y68.S";
@@ -1272,13 +1230,10 @@ public interface SQLState {
 	String LANG_NO_DML_IN_TRIGGER                                      = "X0Y70.S";
 	String LANG_NO_XACT_IN_TRIGGER                                     = "X0Y71.S";
 	String LANG_NO_BULK_INSERT_REPLACE_WITH_TRIGGER_DURING_EXECUTION   = "X0Y72.S";
-	String LANG_NO_SET_TRANSACTION_ISOLATION_IN_NESTED_CONNECTION      = "X0Y75.S";
 	String LANG_NO_SET_TRAN_ISO_IN_GLOBAL_CONNECTION                   = "X0Y77.S";
 	String LANG_INVALID_CALL_TO_EXECUTE_QUERY		                   = "X0Y78.S";
 	String LANG_INVALID_CALL_TO_EXECUTE_UPDATE		                   = "X0Y79.S";
 	String LANG_NULL_DATA_IN_NON_NULL_COLUMN               	   	   	   = "X0Y80.S";
-	String LANG_INVALID_OPERATION_ON_PUBLISHED_OBJECT                  = "X0Y81.S";
-	String LANG_INVALID_DDL_AT_TARGET					               = "X0Y82.S";
     String LANG_IGNORE_MISSING_INDEX_ROW_DURING_DELETE                 = "X0Y83.S";
 
 
@@ -1374,9 +1329,7 @@ public interface SQLState {
 	String AUTH_SET_CONNECTION_READ_ONLY_IN_ACTIVE_XACT                = "25501";
 	String AUTH_WRITE_WITH_READ_ONLY_CONNECTION                        = "25502";
 	String AUTH_DDL_WITH_READ_ONLY_CONNECTION                          = "25503";
-	String AUTH_DDL_IN_TARGET                                          = "25504";
 	String AUTH_CANNOT_SET_READ_WRITE                                  = "25505";
-	String AUTH_INVALID_SERVER_UID                                     = "28000";
 	String AUTH_INVALID_AUTHORIZATION_PROPERTY                         = "28501";
 	String AUTH_INVALID_USER_NAME                                      = "28502.C";
 	String AUTH_USER_IN_READ_AND_WRITE_LISTS                           = "28503";
@@ -1396,7 +1349,6 @@ public interface SQLState {
 	/*
 	** Dependency manager
 	*/
-	String DEP_UNABLE_TO_REVALIDATE                                    = "XD001.S";
 	String DEP_UNABLE_TO_RESTORE                                       = "XD003.S";
 	String DEP_UNABLE_TO_STORE                                         = "XD004.S";
 
@@ -1429,7 +1381,6 @@ public interface SQLState {
     String BAD_PROPERTY_VALUE = "XJ042.S";
     String BAD_SCALE_VALUE = "XJ044.S";
     String UNIMPLEMENTED_ISOLATION_LEVEL = "XJ045.S";
-    String ALREADY_BOOTED = "XJ04A.S";
     String RESULTSET_RETURN_NOT_ALLOWED = "XJ04B.S";
     String OUTPUT_PARAMS_NOT_ALLOWED = "XJ04C.S";
     String CANNOT_AUTOCOMMIT_XA = "XJ056.S";
@@ -1543,9 +1494,6 @@ public interface SQLState {
     // printed.
     String ROW_DELETED = "02502";
 
-    String INTERNAL_ERROR = "XJ999.S";
-    String CONN_GENERIC = "X0RQB.S";
-
     //following are session severity.
     String DATABASE_NOT_FOUND = "XJ004.C";
     String MALFORMED_URL = "XJ028.C";
@@ -1554,11 +1502,7 @@ public interface SQLState {
     String CONFLICTING_CREATE_ATTRIBUTES = "XJ049.C";
 	String CONFLICTING_RESTORE_ATTRIBUTES = "XJ081.C";
     String INVALID_ATTRIBUTE = "XJ05B.C";
-    String ABORT_SESSION = "X0RQ2.C";
     String NO_SUCH_DATABASE = "X0RQ3.C";
-    String NO_HTTP = "X0RQ4.C";
-    String NO_SUCH_LISTEN_TYPE = "X0RQ5.S";
-	String INVALID_LISTEN_TYPE = "X0RQ6.S";
     
     // Connection exceptions - SQL State class 08
     
@@ -1611,8 +1555,6 @@ public interface SQLState {
     String CLOSE_REQUEST = "close.C.1"; // no message in messages.properties as it is never printed
 
     //this one had no sqlstate associated with it.
-    String SHUTDOWN = "XXXXX.C.4";
-    String IO_EXCEPTION = "XXXXX.C.5";
     String NORMAL_CLOSE = "XXXXX.C.6";
 
     //following are system severity.
@@ -1639,7 +1581,6 @@ public interface SQLState {
 
     //following are no applicable severity
     String JAVA_EXCEPTION = "XJ001.U";
-    String UNSERIALIZABLE_CONNECTION = "XJ038.U";
     String NO_UPGRADE = "XJ050.U";
         
     /*

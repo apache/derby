@@ -99,6 +99,12 @@ s/[[:space:]]getXAFuncStr(.*)/ "string"/g
 s/[[:space:]]getXAExceptionText(.*)/ "string"/g
 s/agent_.logWriter_,/ null,/g
 s/NO_CURRENT_CONNECTION)),/NO_CURRENT_CONNECTION),/g
+s/parseSQLDIAGSTT"))/parseSQLDIAGSTT")/g
+s/parseSQLDIAGCN"))/parseSQLDIAGCN")/g
+s/parseSQLDCTOKS"))/parseSQLDCTOKS")/g
+s/parseSQLDCXGRP"))/parseSQLDCXGRP")/g
+s/Integer.toString(port)/"port"/g
+
 
 
 
