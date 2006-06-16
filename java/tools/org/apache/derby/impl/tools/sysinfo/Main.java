@@ -116,7 +116,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     aw.println (javaSep);
     reportJavaInfo (aw);
     aw.println (jbmsSep);
-    reportCloudscape (aw);
+    reportDerby (aw);
 
     aw.println (sep);
 
@@ -194,7 +194,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     used
   */
 
-  private static void reportCloudscape (java.io.PrintWriter localAW) {
+  private static void reportDerby (java.io.PrintWriter localAW) {
 
 	  localAW.println("JRE - JDBC: " + org.apache.derby.iapi.services.info.JVMInfo.derbyVMLevel());
 
@@ -228,8 +228,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     }
 
 
-  } // end of reportCloudscape
-
+  } // end of reportDerby
 
   /**
     Writes out the relevant info about the Java environment to

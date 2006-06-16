@@ -121,7 +121,7 @@ public class SysInfoLog
             pw.println(org.apache.derby.impl.tools.sysinfo.Main.javaSep);
             org.apache.derby.impl.tools.sysinfo.Main.reportCloudscape(pw);
             pw.println(org.apache.derby.impl.tools.sysinfo.Main.jbmsSep);
-            org.apache.derby.impl.tools.sysinfo.Main.reportCloudscape(pw);
+            org.apache.derby.impl.tools.sysinfo.Main.reportDerby(pw);
             pw.println(org.apache.derby.impl.tools.sysinfo.Main.licSep);
             org.apache.derby.impl.tools.sysinfo.Main.printLicenseFile(pw);
             */
