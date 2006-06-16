@@ -101,8 +101,6 @@ public interface PreparedStatement
 	 *
 	 * @param activation The activation containing all the local state
 	 *		to execute the plan.
-	 * @param executeQuery		Whether or not called from a Statement.executeQuery()
-	 * @param executeUpdate	Whether or not called from a Statement.executeUpdate()
  	 * @param rollbackParentContext True if 1) the statement context is
 	 *  NOT a top-level context, AND 2) in the event of a statement-level
 	 *	 exception, the parent context needs to be rolled back, too.
@@ -116,8 +114,6 @@ public interface PreparedStatement
 	 * @exception StandardException		Thrown on failure
 	 */
     ResultSet execute(Activation activation,
-                      boolean executeQuery,
-                      boolean executeUpdate,
                       boolean rollbackParentContext,
                       long timeoutMillis)
         throws StandardException;

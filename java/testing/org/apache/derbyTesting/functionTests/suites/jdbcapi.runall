@@ -15,6 +15,7 @@ jdbcapi/maxfieldsize.java
 jdbcapi/LOBTest.java
 jdbcapi/blobclob4BLOB.java
 jdbcapi/parameterMapping.java
+jdbcapi/ProcedureTest.junit
 jdbcapi/setTransactionIsolation.java
 jdbcapi/SetQueryTimeoutTest.java
 jdbcapi/prepStmtNull.java

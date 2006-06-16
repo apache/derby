@@ -237,15 +237,13 @@ public class GenericPreparedStatement
 	{
 		Activation a = getActivation(lcc, false);
 		a.setSingleExecution();
-		return execute(a, false, false, rollbackParentContext, timeoutMillis);
+		return execute(a, rollbackParentContext, timeoutMillis);
 	}
 
 	/**
 	  *	The guts of execution.
 	  *
 	  *	@param	activation					the activation to run.
-	  * @param	executeQuery				Called via executeQuery
-	  * @param	executeUpdate				Called via executeUpdate
 	  * @param rollbackParentContext True if 1) the statement context is
 	  *  NOT a top-level context, AND 2) in the event of a statement-level
 	  *	 exception, the parent context needs to be rolled back, too.
@@ -256,8 +254,6 @@ public class GenericPreparedStatement
 	  */
 
     public ResultSet execute(Activation activation,
-                             boolean executeQuery,
-                             boolean executeUpdate,
                              boolean rollbackParentContext,
                              long timeoutMillis)
         throws
@@ -388,24 +384,6 @@ recompileOutOfDatePlan:
 				activation.close();
 			}
 
-
-			/* executeQuery() not allowed on statements
-			 * that return a row count,
-			 * executeUpdate() not allowed on statements
-			 * that return a ResultSet.
-			 * We need to do the test here so that any
-			 * exeception will rollback to the statement
-			 * savepoint.
-			 */
-			if ( (! resultSet.returnsRows()) && executeQuery)
-			{
-				throw StandardException.newException(SQLState.LANG_INVALID_CALL_TO_EXECUTE_QUERY);
-			}
-
-			if ( resultSet.returnsRows() && executeUpdate)
-			{
-				throw StandardException.newException(SQLState.LANG_INVALID_CALL_TO_EXECUTE_UPDATE);
-			}
 			return resultSet;
 			
 		}

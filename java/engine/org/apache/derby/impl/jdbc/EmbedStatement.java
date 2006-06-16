@@ -1179,14 +1179,20 @@ public class EmbedStatement extends ConnectionChild
 				a.setMaxRows(maxRows);
                 long timeoutMillis = (long)timeoutSeconds * 1000L;
                 ResultSet resultsToWrap = ps.execute(a,
-                                                     executeQuery,
-                                                     executeUpdate,
                                                      false,
                                                      timeoutMillis);
 				addWarning(a.getWarnings());
 
 
 				if (resultsToWrap.returnsRows()) {
+
+                    // The statement returns rows, so calling it with
+                    // executeUpdate() is not allowed.
+                    if (executeUpdate) {
+                        throw StandardException.newException(
+                                SQLState.LANG_INVALID_CALL_TO_EXECUTE_UPDATE);
+                    }
+
 					EmbedResultSet lresults = factory.newEmbedResultSet(getEmbedConnection(), resultsToWrap, forMetaData, this, ps.isAtomic());
 					results = lresults;
 
@@ -1217,12 +1223,28 @@ public class EmbedStatement extends ConnectionChild
 					resultsToWrap.finish();	// Don't need the result set any more
 					results = null; // note that we have none.
 
-					boolean haveDynamicResults = false;
+                    int dynamicResultCount = 0;
 					if (a.getDynamicResults() != null) {
-						haveDynamicResults = processDynamicResults(a.getDynamicResults(), a.getMaxDynamicResults());
+                        dynamicResultCount =
+                            processDynamicResults(a.getDynamicResults(),
+                                                  a.getMaxDynamicResults());
 					}
+
+                    // executeQuery() is not allowed if the statement
+                    // doesn't return exactly one ResultSet.
+                    if (executeQuery && dynamicResultCount != 1) {
+                        throw StandardException.newException(
+                                SQLState.LANG_INVALID_CALL_TO_EXECUTE_QUERY);
+                    }
+
+                    // executeUpdate() is not allowed if the statement
+                    // returns ResultSets.
+                    if (executeUpdate && dynamicResultCount > 0) {
+                        throw StandardException.newException(
+                                SQLState.LANG_INVALID_CALL_TO_EXECUTE_UPDATE);
+                    }
 					
-					if (!haveDynamicResults) {
+                    if (dynamicResultCount == 0) {
 						if (a.isSingleExecution()) {
 							a.close();
 						}
@@ -1240,7 +1262,7 @@ public class EmbedStatement extends ConnectionChild
 						}
 					}
 
-					retval = haveDynamicResults;
+                    retval = (dynamicResultCount > 0);
 				}
 	        } catch (Throwable t) {
 				if (a.isSingleExecution()) {
@@ -1446,7 +1468,22 @@ public class EmbedStatement extends ConnectionChild
 
 	private EmbedResultSet[] dynamicResults;
 	private int currentDynamicResultSet;
-	private boolean processDynamicResults(java.sql.ResultSet[][] holder, int maxDynamicResultSets) throws SQLException {
+
+    /**
+     * Go through a holder of dynamic result sets, remove those that
+     * should not be returned, and sort the result sets according to
+     * their creation.
+     *
+     * @param holder a holder of dynamic result sets
+     * @param maxDynamicResultSets the maximum number of result sets
+     * to be returned
+     * @return the actual number of result sets
+     * @exception SQLException if an error occurs
+     */
+    private int processDynamicResults(java.sql.ResultSet[][] holder,
+                                      int maxDynamicResultSets)
+        throws SQLException
+    {
 
 		EmbedResultSet[] sorted = new EmbedResultSet[holder.length];
 
@@ -1505,12 +1542,10 @@ public class EmbedStatement extends ConnectionChild
 
 			// 0100C is not returned for procedures written in Java, from the SQL2003 spec.
 			// getWarnings(StandardException.newWarning(SQLState.LANG_DYNAMIC_RESULTS_RETURNED));
-
-			return true;
 		}
 
 
-		return false;
+		return actualCount;
 	}
 
 	/**
