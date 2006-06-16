@@ -233,25 +233,47 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 				// space
 				writeHeader(pageData);
 
-				if (SanityManager.DEBUG) {
-					if (FormatIdUtil.readFormatIdInteger(pageData) != AllocPage.FORMAT_NUMBER)
+				if (SanityManager.DEBUG) 
+                {
+					if (FormatIdUtil.readFormatIdInteger(pageData) != 
+                            AllocPage.FORMAT_NUMBER)
+                    {
 						SanityManager.THROWASSERT(
 							"expect " +
 							AllocPage.FORMAT_NUMBER +
 							"got " +
 							FormatIdUtil.readFormatIdInteger(pageData));
+                    }
 				}
 
 			}
 
-		///////////////////////////////////////////////////
-		//
-		// RESOLVE: right now, no logical -> physical mapping.
-		// We can calculate the offset.  In the future, we may need to
-		// look at the allocation page or the in memory translation table
-		// to figure out where the page should go
-		//
-		/////////////////////////////////////////////////
+            // set dataToWrite to actual page buffer or encrypt buffer for
+            // use by normal write code, and retry catch block write code.
+            byte[] dataToWrite;
+
+            if (dataFactory.databaseEncrypted() 
+                && pageNumber != FIRST_ALLOC_PAGE_NUMBER)
+            {
+                // We cannot encrypt the page in place because pageData is
+                // still being accessed as clear text.  The encryption
+                // buffer is shared by all who access this container and can
+                // only be used within the synchronized block.
+                dataToWrite = encryptPage(pageData, pageSize);
+            } 
+            else 
+            {
+                dataToWrite = pageData;
+            }
+
+            ///////////////////////////////////////////////////
+            //
+            // RESOLVE: right now, no logical -> physical mapping.
+            // We can calculate the offset.  In the future, we may need to
+            // look at the allocation page or the in memory translation table
+            // to figure out where the page should go
+            //
+            /////////////////////////////////////////////////
 
 			long pageOffset = pageNumber * pageSize;
 
@@ -266,20 +288,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 				*/
 				if (fileData.getFilePointer() != pageOffset)
 					padFile(fileData, pageOffset);
-
-				byte[] dataToWrite;
-
-				if (dataFactory.databaseEncrypted() 
-					&& pageNumber != FIRST_ALLOC_PAGE_NUMBER)
-				{
-					// We cannot encrypt the page in place because pageData is
-					// still being accessed as clear text.  The encryption
-					// buffer is shared by all who access this container and can
-					// only be used within the synchronized block.
-					dataToWrite = encryptPage(pageData, pageSize);
-				} else {
-					dataToWrite = pageData;
-				}
 
 				dataFactory.writeInProgress();
 				try
@@ -305,13 +313,17 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 					throw ioe;	// not writing beyond EOF, rethrow exception
 
 				if (SanityManager.DEBUG)
-					SanityManager.ASSERT(fileData.length() >= pageOffset,
-										 "failed to blank filled missing pages");
+                {
+					SanityManager.ASSERT(
+                        fileData.length() >= pageOffset,
+                        "failed to blank filled missing pages");
+                }
+
 				fileData.seek(pageOffset);
 				dataFactory.writeInProgress();
 				try
 				{
-					fileData.write(pageData, 0, pageSize);
+					fileData.write(dataToWrite, 0, pageSize);
 				}
 				finally
 				{
