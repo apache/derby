@@ -1,6 +1,4 @@
-10.2.0.4 alpha
-Apache Derby
-Apache Derby Embedded JDBC Driver
+Start JitTest
 Drop all tables in APP schema
 Create tables until we get a wrong Start with value
 PASS: All 200 tables created without problems

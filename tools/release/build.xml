@@ -301,9 +301,6 @@
     <antcall target="regex.version"> 
       <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/testProperties.out"/>
     </antcall>
-    <antcall target="regex.version"> 
-      <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/JitTest.out"/>
-    </antcall>
   </target>
 
   <target name="regex.version">
