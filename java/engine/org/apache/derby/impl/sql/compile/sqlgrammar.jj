@@ -3914,7 +3914,7 @@ nationalCharacterStringType() throws StandardException :
 DataTypeDescriptor
 LOBType() throws StandardException :
 {
-	int	length = 1048576; // default to 1Mb if no length specified
+	int	length = 2147483647; // default to 2GB-1 if no length specified
 	String	type;
 }
 {
