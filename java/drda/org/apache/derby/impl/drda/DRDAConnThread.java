@@ -2901,6 +2901,14 @@ class DRDAConnThread extends Thread {
 					}
 					else sendWarningsOnCNTQRY = false;
 
+					// The client can not request DIAGLVL because when run with
+					// an older server it will cause an exception. Older version
+					// of the server do not recognize requests for DIAGLVL.
+					if ((appRequester.getClientType() == appRequester.DNC_CLIENT) &&
+							appRequester.greaterThanOrEqualTo(10, 2, 0)) {
+						diagnosticLevel = CodePoint.DIAGLVL1;
+					}
+
 					removeFromRequired(CodePoint.PRDID);
 					break;
 				//required
@@ -2936,10 +2944,6 @@ class DRDAConnThread extends Thread {
 				case CodePoint.STTDECDEL:
 				case CodePoint.STTSTRDEL:
 					codePointNotSupported(codePoint);
-					break;
-				// optional
-				case CodePoint.DIAGLVL:
-					diagnosticLevel = reader.readByte();
 					break;
 				default:
 					invalidCodePoint(codePoint);
@@ -6243,7 +6247,7 @@ class DRDAConnThread extends Thread {
 			// popped by client onto its rowUpdated state, i.e. this 
 			// warning should not reach API level.
 			if (rs != null && rs.rowUpdated()) {
-				SQLWarning w = new SQLWarning(null, SQLState.ROW_UPDATED,
+				SQLWarning w = new SQLWarning("", SQLState.ROW_UPDATED,
 						ExceptionSeverity.WARNING_SEVERITY);
 				if (sqlw != null) {
 					sqlw.setNextWarning(w);
@@ -6255,7 +6259,7 @@ class DRDAConnThread extends Thread {
 			// SQLCARD and a null data group. The SQLCARD has a warning
 			// SQLSTATE of 02502
 			if (rs != null && rs.rowDeleted()) {
-				SQLWarning w = new SQLWarning(null, SQLState.ROW_DELETED,
+				SQLWarning w = new SQLWarning("", SQLState.ROW_DELETED,
 						ExceptionSeverity.WARNING_SEVERITY);
 				if (sqlw != null) {
 					sqlw.setNextWarning(w);
