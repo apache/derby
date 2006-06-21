@@ -173,6 +173,19 @@ class DRDAConnThread extends Thread {
     private static final byte[] errD4_D6 = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // 12x0 
     private static final byte[] warn0_warnA = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };  // 11x ' '
 
+    // Work around a classloader bug involving interrupt handling during
+    // class loading. If the first request to load the
+    // DRDAProtocolExceptionInfo class occurs during shutdown, the
+    // loading of the class may be aborted when the Network Server calls
+    // Thread.interrupt() on the DRDAConnThread. By including a static
+    // reference to the DRDAProtocolExceptionInfo class here, we ensure
+    // that it is loaded as soon as the DRDAConnThread class is loaded,
+    // and therefore we know we won't be trying to load the class during
+    // shutdown. See DERBY-1338 for more background, including pointers
+    // to the apparent classloader bug in the JVM.
+	private static final DRDAProtocolExceptionInfo dummy =
+		new DRDAProtocolExceptionInfo(0,0,0,false);
+
 	// constructor
 	/**
 	 * Create a new Thread for processing session requests
