@@ -46,6 +46,7 @@ public class JitTest {
     	ij.getPropertyArg(args);
     	Connection conn = ij.startJBMS();
 
+    	System.out.println("Start JitTest");
     	//add tests specific to a jit issue
     	testDerby1327BadStartWithForAutoIncColumn(conn);
     	conn.close();
@@ -69,10 +70,6 @@ public class JitTest {
 	conn.setAutoCommit(false);
 		Statement stmt = null;		
 
-		DatabaseMetaData md = conn.getMetaData() ;
-		System.out.println(md.getDatabaseProductVersion());
-		System.out.println(md.getDatabaseProductName());
-		System.out.println(md.getDriverName());
 		dropAllAppTables(conn);
 		System.out.println("Create tables until we get a wrong Start with value");
 		stmt = conn.createStatement();
