@@ -291,3 +291,7 @@ PASSED
 PASSED
 Test explicitly closing implicitly closed cursor
 PASSED
+Test with 65535 query block size QRYBLKSZ  - DERBY-959
+PASSED
+Test 2 with 65535 query block size QRYBLKSZ  - DERBY-959
+PASSED

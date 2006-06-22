@@ -747,7 +747,7 @@ class CodePoint
 
 	//---------------------QRYBLSZ min and maximum
 	static final int QRYBLKSZ_MIN = 512;
-	static final int QRYBLKSZ_MAX = 32767;
+	static final int QRYBLKSZ_MAX = 10*1024*1024;
 	static final int QRYROWSET_MAX = 32767;
 	static final int QRYROWSET_DEFAULT = -1;
 
