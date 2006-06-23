@@ -531,7 +531,7 @@ LOCK TABLE
   xid row 1 lock count 12
 END LOCK TABLE
 sruBatch update counts : 1  1  2  1 :
-sruBatch: ru(null) contents {1} {2} {3} {4} {5} {6} {7} {8}
+sruBatch: ru(sruBatch) contents {1} {2} {3} {4} {5} {6} {7} {8}
 XAConnection.getXAResource : No current connection.
 XAConnection.getConnection : No current connection.
 XAResource.start : XAException - No current connection.

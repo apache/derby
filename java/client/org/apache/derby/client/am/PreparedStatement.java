@@ -1588,6 +1588,15 @@ public class PreparedStatement extends Statement
             updateCount_ = -1;
         }
 
+        // DERBY-1036: Moved check till execute time to comply with embedded
+        // behavior. Since we check here and not in setCursorName, several
+        // statements can have the same cursor name as long as their result
+        // sets are not simultaneously open.
+
+        if (sqlMode_ == isQuery__) {
+            checkForDuplicateCursorName();
+        }
+
             agent_.beginWriteChain(this);
 
             boolean piggybackedAutocommit = super.writeCloseResultSets(true);  // true means permit auto-commits
@@ -1757,9 +1766,13 @@ public class PreparedStatement extends Statement
                 if (resultSet_ != null) {
                     resultSet_.parseScrollableRowset();
                     //if (resultSet_.scrollable_) resultSet_.getRowCount();
-                    // If client's cursor name is set, map the client's cursor name to the ResultSet
-                    // Else map the server's cursor name to the ResultSet
-                    mapCursorNameToResultSet();
+
+                    // DERBY-1183: If we set it up earlier, the entry in
+                    // clientCursorNameCache_ gets wiped out by the closing of
+                    // result sets happening during readCloseResultSets above
+                    // because ResultSet#markClosed calls
+                    // Statement#removeClientCursorNameFromCache.
+                    setupCursorNameCacheAndMappings();
                 }
                 break;
 

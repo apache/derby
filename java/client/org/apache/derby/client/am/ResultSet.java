@@ -1889,12 +1889,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (generatedSection_ != null) {
                     return "stored procedure generated cursor:" + generatedSection_.getServerCursorName();
                 }
-                if (statement_.cursorName_ == null) {// cursor name is not in the maps yet.
+                if (statement_.cursorName_ == null) {// cursor name is not assigned yet
                     statement_.cursorName_ = statement_.section_.getServerCursorName();
-                    if (statement_.section_ instanceof Section) {
-                        agent_.sectionManager_.mapCursorNameToQuerySection(statement_.cursorName_,
-                                (Section) statement_.section_);
-                    }
                 }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getCursorName", statement_.cursorName_);

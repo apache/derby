@@ -110,9 +110,10 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     // "...where current of <canned-cursor-name>" when user-defined cursor names are used.
     // Both "canned" cursor names (from our jdbc package set) and user-defined cursor names are mapped.
     // Statement.cursorName_ is initialized to null until the cursor name is requested or set.
-    // When set (s.setCursorName()) with a user-defined name, then it is added to the cursor map at that time;
+    // s.setCursorName()) adds a user-defined name, but it is not
+    // added to the cursor map until execution time (DERBY-1036);
     // When requested (rs.getCursorName()), if the cursor name is still null,
-    // then is given the canned cursor name as defined by our jdbc package set and added to the cursor map.
+    // then is given the canned cursor name as defined by our jdbc package set.
     // Still need to consider how positioned updates should interact with multiple result sets from a stored.
     String cursorName_ = null;
 
@@ -824,22 +825,9 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                         "setCursorName()", "Statement");
                 }
 
-                // Duplicate cursor names not allowed.
-                if (connection_.clientCursorNameCache_.containsKey(name)) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.CURSOR_DUPLICATE_NAME), name);
-                }
-                connection_.clientCursorNameCache_.put(name, name);
+                // DERBY-1036: Duplicate cursor names not allowed, check
+                // deferred till execute time. 
 
-                // section_ is null for Statement objects.  We will defer the mapping of cursorName
-                // to section until when the query is executed.
-                if (section_ != null) {
-                    agent_.sectionManager_.mapCursorNameToQuerySection(name, (Section) section_);
-
-                    // This means we must subtitute the <users-cursor-name> with the <canned-cursor-name>
-                    // in the pass-thru sql string "...where current of <canned-cursor-name>".
-                    section_.setClientCursorName(name);
-                }
                 cursorName_ = name;
             }
         }
@@ -1893,6 +1881,15 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
         checkForAppropriateSqlMode(executeType, sqlMode_);
 
+        // DERBY-1036: Moved check till execute time to comply with embedded
+        // behavior. Since we check here and not in setCursorName, several
+        // statements can have the same cursor name as long as their result
+        // sets are not simultaneously open.
+
+        if (sqlMode_ == isQuery__) {
+            checkForDuplicateCursorName();
+        }
+
         boolean timeoutSent = false;
 
             agent_.beginWriteChain(this);
@@ -1911,16 +1908,6 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             switch (sqlMode_) {
             case isQuery__:
                 newSection = agent_.sectionManager_.getDynamicSection(resultSetHoldability_);
-
-                // if client's cursor name is set, map it to the query section in the hashtable
-                // after we obtain the section.
-                if (cursorName_ != null) {
-                    agent_.sectionManager_.mapCursorNameToQuerySection(cursorName_, newSection);
-
-                    // This means we must subtitute the <users-cursor-name> with the <canned-cursor-name>
-                    // in the pass-thru sql string "...where current of <canned-cursor-name>".
-                    newSection.setClientCursorName(cursorName_);
-                }
 
                 writePrepareDescribeOutput(sql, newSection);
                 writeOpenQuery(newSection,
@@ -2028,9 +2015,13 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 // no row is returned on open for rowset cursors.
                 if (resultSet_ != null) {
                     resultSet_.parseScrollableRowset();
-                    // If client's cursor name is set, map the client's cursor name to the ResultSet
-                    // Else map the server's cursor name to the ResultSet
-                    mapCursorNameToResultSet();
+
+                    // DERBY-1183: If we set it up it earlier, the entry in
+                    // clientCursorNameCache_ gets wiped out by the closing of
+                    // result sets happening during readCloseResultSets above
+                    // because ResultSet#markClosed calls
+                    // Statement#removeClientCursorNameFromCache.
+                    setupCursorNameCacheAndMappings();
                 }
 
                 break;
@@ -2411,6 +2402,47 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
 
+    // Two open result sets can not have the same cursor name. 
+    protected void checkForDuplicateCursorName() throws SqlException {
+        if (cursorName_ != null && (connection_.clientCursorNameCache_.
+                                    containsKey(cursorName_))) {
+            throw new SqlException
+                (agent_.logWriter_, 
+                 new ClientMessageId(SQLState.CURSOR_DUPLICATE_NAME), 
+                 cursorName_);
+        }
+    }
+
+
+    // Set up information to be able to handle cursor names:
+    // canned or user named (via setCursorName).
+    protected void setupCursorNameCacheAndMappings() {
+        if (cursorName_ != null) {
+            // The user has set a cursor name for this statement.
+            // This means we must subtitute the <users-cursor-name>
+            // with the <canned-cursor-name> in the pass-thru sql
+            // string "...where current of <canned-cursor-name>"
+            // whenever the result set produced by this statement
+            // is referenced in a positioned update/delete statement.
+            agent_.sectionManager_.mapCursorNameToQuerySection
+                (cursorName_, section_);
+            section_.setClientCursorName(cursorName_);
+            
+            // Update cache to avoid duplicates of user set cursor name.
+            connection_.clientCursorNameCache_.put(cursorName_, 
+                                                   cursorName_);
+        } else {
+	    // canned cursor name
+	    agent_.sectionManager_.mapCursorNameToQuerySection
+                (section_.getServerCursorName(), section_);
+	}
+
+        // If client's cursor name is set, map the client's cursor name to the
+        // result set, else map the server's cursor name to the result set.
+        mapCursorNameToResultSet();
+    }
+
+
     String[] extractCursorNameFromWhereCurrentOf(String sql) {
         String lowerSql = sql.toLowerCase();
         int currentIndex = lowerSql.lastIndexOf("current");
@@ -2631,9 +2663,9 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
     protected void removeClientCursorNameFromCache() {
-        if (cursorName_ != null) {
+        if (cursorName_ != null && 
+                connection_.clientCursorNameCache_.containsKey(cursorName_)) {
             connection_.clientCursorNameCache_.remove(cursorName_);
-            cursorName_ = null;
         }
     }
     

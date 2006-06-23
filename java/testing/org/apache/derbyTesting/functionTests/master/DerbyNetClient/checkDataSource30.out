@@ -534,12 +534,12 @@ sru1-local-1: mismatched Statement connection
 sru1-local-1: ru(SN1) contents {1} {2} {3}
 Expecting downgrade because global transaction sru1-global-2 is using a statement with holdability true
 sru1-global-2: mismatched Statement connection
-sru1-global-2: ru(SQL_CURLH000C) contents {1} {2} {3}
+sru1-global-2: ru(SN1) contents {1} {2} {3}
 sru2-global-3: mismatched Statement connection
 sru2-global-3: ru(OAK2) contents {1} {2} {3}
 Expecting downgrade because global transaction sru1-global-4 is using a statement with holdability true
 sru1-global-4: mismatched Statement connection
-sru1-global-4: ru(SQL_CURLH000C) contents {1} {2} {3}
+sru1-global-4: ru(SN1) contents {1} {2} {3}
 Statement State @ GLOBAL 
   getResultSetType() SCROLL_INSENSITIVE
   getResultSetConcurrency() READ_ONLY
@@ -569,11 +569,11 @@ Statement State @ CS GLOBAL
   Parameter Count 2
     1 type 12
     2 type 12
-Params-global-1: ru(SQL_CURLH000C) contents {3}
+Params-global-1: ru(params) contents {3}
 sru1-local-5: mismatched Statement connection
-sru1-local-5: ru(SQL_CURLH000C) contents {1} {2} {3}
+sru1-local-5: ru(SN1) contents {1} {2} {3}
 sru2-local-6: mismatched Statement connection
-sru2-local-6: ru(SQL_CURLN000C) contents {1} {2} {3}
+sru2-local-6: ru(OAK2) contents {1} {2} {3}
 sru3-local-7: mismatched Statement connection
 sru3-local-7: ru(SF3) contents {1} {2} {3}
 Statement State @ LOCAL 
@@ -605,17 +605,17 @@ Statement State @ CS LOCAL
   Parameter Count 2
     1 type 12
     2 type 12
-Params-local-2: ru(SQL_CURLH000C) contents {3}
+Params-local-2: ru(params) contents {3}
 LOCK TABLE
   xid row 0 lock count 14
   xid row 1 lock count 14
 END LOCK TABLE
 sru1-local-8: mismatched Statement connection
-sru1-local-8: ru(SQL_CURLH000C) contents {1} {2} {3}
+sru1-local-8: ru(SN1) contents {1} {2} {3}
 sru2-local-9: mismatched Statement connection
-sru2-local-9: ru(SQL_CURLN000C) contents {1} {2} {3}
+sru2-local-9: ru(OAK2) contents {1} {2} {3}
 sru3-local-10: mismatched Statement connection
-sru3-local-10: ru(SQL_CURLH000C) contents {1} {2} {3}
+sru3-local-10: ru(SF3) contents {1} {2} {3}
 Statement State @ LOCAL 2 
   getResultSetType() SCROLL_INSENSITIVE
   getResultSetConcurrency() READ_ONLY
@@ -651,7 +651,7 @@ LOCK TABLE
 END LOCK TABLE
 sruBatch update counts : 1  1  2  1 :
 sruBatch: mismatched Statement connection
-sruBatch: ru(SQL_CURLH000C) contents {1} {2} {3} {4} {5} {6} {7} {8}
+sruBatch: ru(sruBatch) contents {1} {2} {3} {4} {5} {6} {7} {8}
 XAConnection.getConnection : getConnection() is not valid on a closed PooledConnection.
 XAResource.start : XAException - XAER_RMFAIL : No current connection.
 XAResource.end : XAException - XAER_RMFAIL : No current connection.

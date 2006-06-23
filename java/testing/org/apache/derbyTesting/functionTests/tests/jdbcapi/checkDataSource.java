@@ -74,9 +74,6 @@ public class checkDataSource
 	// These tests are exempted from other frameworks
 	private boolean testSimpleDataSource = TestUtil.isEmbeddedFramework();
 	
-	// DERBY-1183 getCursorName not correct after first statement execution
-	private static boolean hasGetCursorNameBug = TestUtil.isDerbyNetClientFramework();
-	
     // DERBY-1326 - Network server may abandon sessions when Derby system is shutdown
     // and this causes intermittent hangs in the client
 	private static boolean hangAfterSystemShutdown = TestUtil.isDerbyNetClientFramework();
@@ -459,6 +456,7 @@ public class checkDataSource
 		sru1.executeUpdate("create table ru(i int)");
 		sru1.executeUpdate("insert into ru values 1,2,3");
 		Statement sruBatch = cs1.createStatement();
+		sruBatch.setCursorName("sruBatch");
 		Statement sruState = createFloatStatementForStateChecking(cs1);
 		PreparedStatement psruState = createFloatStatementForStateChecking(cs1, "select i from ru where i = ?");
 		CallableStatement csruState = createFloatCallForStateChecking(cs1, "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)");
@@ -792,10 +790,7 @@ public class checkDataSource
 	}
 	protected PreparedStatement createFloatStatementForStateChecking(Connection conn, String sql) throws SQLException {
 		PreparedStatement s = internalCreateFloatStatementForStateChecking(conn, sql);
-		// Need to make a different cursor name here because of DERBY-1036
-		// client won't allow duplicate name.
-		//s.setCursorName("StokeNewington");
-		s.setCursorName("LondonNW17");
+		s.setCursorName("StokeNewington");
 		s.setFetchDirection(ResultSet.FETCH_REVERSE);
 		s.setFetchSize(888);
 		s.setMaxFieldSize(317);
@@ -806,9 +801,7 @@ public class checkDataSource
 	}
 	protected CallableStatement createFloatCallForStateChecking(Connection conn, String sql) throws SQLException {
 		CallableStatement s = internalCreateFloatCallForStateChecking(conn, sql);
-		//DERBY-1036 - need a new name
-		//s.setCursorName("StokeNewington");
-		s.setCursorName("districtInLondon");
+		s.setCursorName("StokeNewington");
 		s.setFetchDirection(ResultSet.FETCH_REVERSE);
 		s.setFetchSize(999);
 		s.setMaxFieldSize(137);
@@ -902,13 +895,6 @@ public class checkDataSource
 
 	private static void resultSetQuery(String tag, ResultSet rs) throws SQLException {
 		String cursorName = rs.getCursorName();
-		//	DERBY-1183 client cursor name is not correct.
-		// need to truncate the cursor number of the generated name as it might
-		// not be consistent.
-		if (hasGetCursorNameBug && cursorName.startsWith("SQL_CUR"))
-		{
-			cursorName = cursorName.substring(0,13);
-		}
 		System.out.print(tag + ": ru(" + cursorName + ") contents");
 		SecurityCheck.inspect(rs, "java.sql.ResultSet");
 		while (rs.next()) {
