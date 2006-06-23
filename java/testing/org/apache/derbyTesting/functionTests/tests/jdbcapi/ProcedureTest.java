@@ -102,7 +102,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * Tests that <code>Statement.executeUpdate()</code> succeeds when
      * no result sets are returned.
      *
-     * <p>Currently, this test fails with the client driver and JCC.
+     * <p>Currently, this test fails with JCC.
      *
      * @exception SQLException if a database error occurs
      */
@@ -194,7 +194,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * Tests that <code>PreparedStatement.executeUpdate()</code>
      * succeeds when no result sets are returned.
      *
-     * <p>Currently, this test fails with the client driver and JCC.
+     * <p>Currently, this test fails with JCC.
      *
      * @exception SQLException if a database error occurs
      */
@@ -213,7 +213,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * Tests that <code>PreparedStatement.executeUpdate()</code> fails
      * when a result set is returned from a stored procedure.
      *
-     * <p>Currently, this test fails with the client driver and
+     * <p>Currently, this test fails with
      * JCC. However, the corresponding tests for
      * <code>Statement</code> and <code>CallableStatement</code>
      * succeed. Strange...
@@ -296,7 +296,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * Tests that <code>CallableStatement.executeUpdate()</code>
      * succeeds when no result sets are returned.
      *
-     * <p>Currently, this test fails with the client driver and JCC.
+     * <p>Currently, this test fails with JCC.
      *
      * @exception SQLException if a database error occurs
      */
@@ -579,7 +579,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         TestSuite suite = new TestSuite(ProcedureTest.class);
-        if (usingEmbedded()) {
+        if (!usingDerbyNet()) {
             suite.addTest
                 (new ProcedureTest
                  ("xtestExecuteUpdateWithNoDynamicResultSets"));
@@ -592,6 +592,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
             suite.addTest
                 (new ProcedureTest
                  ("xtestExecuteUpdateWithNoDynamicResultSets_callable"));
+        }
+        if (usingEmbedded()) {
             suite.addTest
                 (new ProcedureTest
                  ("xtestRollbackStoredProcWhenExecuteQueryReturnsNothing"));

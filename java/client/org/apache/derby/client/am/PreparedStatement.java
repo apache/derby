@@ -386,13 +386,9 @@ public class PreparedStatement extends Statement
         }
     }
 
-    // also used by Blob
-    int executeUpdateX() throws SqlException {
+    private int executeUpdateX() throws SqlException {
         flowExecute(executeUpdateMethod__);
-
-        if (sqlMode_ == isUpdate__) {
-            super.checkExecuteUpdatePostConditions("java.sql.PreparedStatement");
-        }
+        checkExecuteUpdatePostConditions("java.sql.PreparedStatement");
         return updateCount_;
     }
 
@@ -1797,6 +1793,12 @@ public class PreparedStatement extends Statement
                 if (connection_.autoCommit_ && resultSet_ == null && resultSetList_ == null && isAutoCommittableStatement_) {
                     connection_.flowAutoCommit();
                 }
+            }
+
+            // The JDBC spec says that executeUpdate() should return 0
+            // when no row count is returned.
+            if (executeType == executeUpdateMethod__ && updateCount_ < 0) {
+                updateCount_ = 0;
             }
 
             // Throw an exception if holdability returned by the server is different from requested.

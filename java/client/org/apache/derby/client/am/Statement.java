@@ -2084,6 +2084,12 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 connection_.flowAutoCommit();
             }
         }
+
+        // The JDBC spec says that executeUpdate() should return 0
+        // when no row count is returned.
+        if (executeType == executeUpdateMethod__ && updateCount_ < 0) {
+            updateCount_ = 0;
+        }
     }
 
     void flowExecuteBatch(int[] updateCounts) throws SqlException, BatchUpdateException {
