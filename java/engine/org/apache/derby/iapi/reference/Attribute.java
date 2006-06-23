@@ -92,6 +92,16 @@ public interface Attribute {
 
 	String BOOT_PASSWORD = "bootPassword";
 
+    /**
+	    The attribute that is used to chage the secret key of an encrypted
+        database. The secret key must be at least 8 characters long.
+		This key must not be stored persistently in cleartext anywhere. 
+	 */
+
+	String NEW_BOOT_PASSWORD = "newBootPassword";
+
+
+
 	/**
 		The attribute that is used for the database name, from
 		the JDBC notion of jdbc:<subprotocol>:<subname>
@@ -171,6 +181,16 @@ public interface Attribute {
 		external to the database, ie by the application.
 	*/
 	String CRYPTO_EXTERNAL_KEY = "encryptionKey";
+
+
+    /**
+	    The attribute that is used to chage the encryption 
+        key of an encrypted database. When this is specified
+        all the supplied crypto information is stored
+        external to the database, ie by the application.
+	*/
+	String NEW_CRYPTO_EXTERNAL_KEY = "newEncryptionKey";
+
 
 	/**
 	   One can encrypt the database with an encryption key at create time.

@@ -23,7 +23,6 @@ package org.apache.derby.impl.services.jce;
 import org.apache.derby.iapi.services.crypto.CipherFactory;
 import org.apache.derby.iapi.services.crypto.CipherProvider;
 
-import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -66,7 +65,7 @@ import org.apache.derby.io.StorageRandomAccessFile;
 
 	@see CipherFactory
  */
-public final class JCECipherFactory implements CipherFactory, ModuleControl, java.security.PrivilegedExceptionAction
+public final class JCECipherFactory implements CipherFactory, java.security.PrivilegedExceptionAction
 {
     private final static String MESSAGE_DIGEST = "MD5";
 
@@ -112,6 +111,29 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 	private StorageFile activeFile;
 	private int action;
 	private String activePerms;
+
+
+    /*
+     * Constructor of JCECipherFactory, initializes the new instances.
+     *
+     * @param create    true, if the database is getting configured 
+     *                  for encryption.
+     * @param props	    encryption properties/attributes to use
+     *                  for creating the cipher factory.
+     * @param newAttrs  true, if cipher factory has to be created using 
+     *                  should using the new attributes specified by the user.  
+     *                  For example to reencrypt the database with 
+     *                  a new password.
+     */
+    public JCECipherFactory(boolean create, 
+                            Properties props,
+                            boolean newAttributes) 
+        throws StandardException
+    {
+        init(create, props, newAttributes);
+    }
+    
+
 
 	static String providerErrorName(String cps) {
 
@@ -373,11 +395,11 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 		return new JCECipherProvider(mode, secretKey, iv, cryptoAlgorithm, cryptoProviderShort);
 	}
 
-	/*
-	 * module control methods
-	 */
 
-	public void	boot(boolean create, Properties properties)
+    /*
+     * Initilize the new instance of this class. 
+     */
+	public void	init(boolean create, Properties properties, boolean newAttrs)
 		throws StandardException
 	{
 
@@ -385,7 +407,13 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 		boolean storeProperties = create;
         persistentProperties = new Properties();
 
-		String externalKey = properties.getProperty(Attribute.CRYPTO_EXTERNAL_KEY);
+        // get the external key specified by the user to 
+        // encrypt the database. If user is reencrypting the
+        // database with a new encryption key,  read the value of 
+        // the new encryption key. 
+        String externalKey =  properties.getProperty((newAttrs ? 
+                                                      Attribute.NEW_CRYPTO_EXTERNAL_KEY:
+                                                      Attribute.CRYPTO_EXTERNAL_KEY));
 		if (externalKey != null) {
 			storeProperties = false;
 		}
@@ -549,10 +577,15 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 			if (externalKey != null) {
 
 				// incorrect to specify external key and boot password
-				if (properties.getProperty(Attribute.BOOT_PASSWORD) != null)
+				if (properties.getProperty((newAttrs ? 
+                                            Attribute.NEW_BOOT_PASSWORD :
+                                            Attribute.BOOT_PASSWORD)) != null)
 					throw StandardException.newException(SQLState.SERVICE_WRONG_BOOT_PASSWORD);
 
-				generatedKey = org.apache.derby.iapi.util.StringUtil.fromHexString(externalKey, 0, externalKey.length());
+				generatedKey = 
+                    org.apache.derby.iapi.util.StringUtil.fromHexString(externalKey, 
+                                                                        0, 
+                                                                        externalKey.length());
                 if (generatedKey == null) {
                     throw StandardException.newException(
                         // If length is even, we assume invalid character(s),
@@ -564,8 +597,8 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 
 			} else {
 
-				generatedKey = handleBootPassword(create, properties);
-				if(create)
+				generatedKey = handleBootPassword(create, properties, newAttrs);
+				if(create || newAttrs)
 				   persistentProperties.put(Attribute.CRYPTO_KEY_LENGTH,
                                             keyLengthBits+"-"+generatedKey.length);
 			}
@@ -608,10 +641,18 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 		throw StandardException.newException(SQLState.MISSING_ENCRYPTION_PROVIDER, t);
 	}
 
-	private byte[] handleBootPassword(boolean create, Properties properties)
+
+	private byte[] handleBootPassword(boolean create, 
+                                      Properties properties, 
+                                      boolean newPasswd)
 		throws StandardException {
 
-		String inputKey = properties.getProperty(Attribute.BOOT_PASSWORD);
+
+        // get the key  specifed by the user. If user is reencrypting the
+        // database; read the value of the new password. 
+		String inputKey = properties.getProperty((newPasswd ? 
+                                                  Attribute.NEW_BOOT_PASSWORD : 
+                                                  Attribute.BOOT_PASSWORD));
 		if (inputKey == null)
 		{
 			throw StandardException.newException(SQLState.SERVICE_WRONG_BOOT_PASSWORD);
@@ -638,7 +679,7 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 
 		byte[] generatedKey;
 
-		if (create)
+		if (create || newPasswd)
 		{
 			//
 			generatedKey = generateUniqueBytes();
@@ -653,11 +694,6 @@ public final class JCECipherFactory implements CipherFactory, ModuleControl, jav
 		}
 
 		return generatedKey;
-	}
-
-	public void stop()
-	{
-
 	}
 
     /* 

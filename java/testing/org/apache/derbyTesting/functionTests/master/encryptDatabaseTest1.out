@@ -1,4 +1,5 @@
-ij> -- This script tests configuring an un-enctypted database for encryption. 
+ij> -- This script tests configuring an un-enctypted database for encryption and
+-- reencryption of an encrypted database with new enryption key/password.
 disconnect;
 ij> ---test configure the database for encrypion with encryption key.
 connect 'wombat_key;create=true';
@@ -48,6 +49,50 @@ A
 ij> disconnect;
 ij> connect 'wombat_key;shutdown=true';
 ERROR 08006: Database 'wombat_key' shutdown.
+ij> --- reencrypt the database with a different encryption key
+connect 'jdbc:derby:wombat_key;encryptionKey=6162636465666768;newEncryptionKey=5666768616263646';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+ij> insert into t1 values(7);
+1 row inserted/updated/deleted
+ij> insert into t1 values(8);
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'wombat_key;shutdown=true';
+ERROR 08006: Database 'wombat_key' shutdown.
+ij> --- boot the database with the new encyrption key. 
+connect 'jdbc:derby:wombat_key;encryptionKey=5666768616263646';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+7          
+8          
+ij> insert into t1 values(9);
+1 row inserted/updated/deleted
+ij> insert into t1 values(10);
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'wombat_key;shutdown=true';
+ERROR 08006: Database 'wombat_key' shutdown.
+ij> --- attempt to boot with the old encrytion key, it should fail.
+connect 'jdbc:derby:wombat_key;encryptionKey=6162636465666768';
+ERROR XJ040: Failed to start database 'wombat_key', see the next exception for details.
+ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij> -- test confugring the database for encrypion with a boot password. 
 connect 'wombat_pwd;create=true';
 ij> create table t2(a int ) ;
@@ -93,4 +138,50 @@ A
 5          
 6          
 7          
+ij> disconnect;
+ij> connect 'wombat_pwd;shutdown=true';
+ERROR 08006: Database 'wombat_pwd' shutdown.
+ij> --- reconfigure the database with a different password. 
+connect 'jdbc:derby:wombat_pwd;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
+ij> select * from t2 ;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+ij> insert into t2 values(8);
+1 row inserted/updated/deleted
+ij> insert into t2 values(9);
+1 row inserted/updated/deleted
+ij> insert into t2 values(10);
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'wombat_pwd;shutdown=true';
+ERROR 08006: Database 'wombat_pwd' shutdown.
+ij> -- boot the database with the new password. 
+connect 'jdbc:derby:wombat_pwd;bootPassword=new1234xyz';
+ij> select * from t2 ;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+10         
+ij> disconnect;
+ij> connect 'wombat_pwd;shutdown=true';
+ERROR 08006: Database 'wombat_pwd' shutdown.
+ij> -- attempt to boot the database with the old password, it should fail. 
+connect 'jdbc:derby:wombat_pwd;bootPassword=xyz1234abc';
+ERROR XJ040: Failed to start database 'wombat_pwd', see the next exception for details.
+ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> 

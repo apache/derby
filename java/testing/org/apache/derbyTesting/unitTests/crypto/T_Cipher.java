@@ -79,7 +79,7 @@ public class T_Cipher extends T_Generic
 	byte[] IV;
 
 	CipherFactory factory;
-
+    
 	public T_Cipher()
 	{
 		super();
@@ -90,7 +90,7 @@ public class T_Cipher extends T_Generic
 	*/
 
 	public String getModuleToTestProtocolName() {
-		return org.apache.derby.iapi.reference.Module.CipherFactory;
+		return org.apache.derby.iapi.reference.Module.CipherFactoryBuilder;
 	}
 
     protected String getAlgorithm()
@@ -212,8 +212,11 @@ public class T_Cipher extends T_Generic
         REPORT("encryption algorithm used : " + getAlgorithm());
         REPORT("encryption provider used : " + provider);
 
-		factory = (CipherFactory)Monitor.bootServiceModule(true, (Object)null,
-            org.apache.derby.iapi.reference.Module.CipherFactory, props);
+        CipherFactoryBuilder cb =  (CipherFactoryBuilder)
+            Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CipherFactoryBuilder);
+
+        factory = cb.createCipherFactory(true, props, false);
+
 		if (factory == null)
 			throw T_Fail.testFailMsg("cannot find Cipher factory ");
 

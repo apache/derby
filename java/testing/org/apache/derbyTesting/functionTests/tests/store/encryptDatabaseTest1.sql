@@ -1,4 +1,5 @@
--- This script tests configuring an un-enctypted database for encryption. 
+-- This script tests configuring an un-enctypted database for encryption and
+-- reencryption of an encrypted database with new enryption key/password.
 
 disconnect;
 ---test configure the database for encrypion with encryption key.
@@ -24,6 +25,24 @@ select * from t1 ;
 disconnect;
 connect 'wombat_key;shutdown=true';
 
+--- reencrypt the database with a different encryption key
+connect 'jdbc:derby:wombat_key;encryptionKey=6162636465666768;newEncryptionKey=5666768616263646';
+select * from t1;
+insert into t1 values(7);
+insert into t1 values(8);
+disconnect;
+connect 'wombat_key;shutdown=true';
+
+--- boot the database with the new encyrption key. 
+connect 'jdbc:derby:wombat_key;encryptionKey=5666768616263646';
+select * from t1;
+insert into t1 values(9);
+insert into t1 values(10);
+disconnect;
+connect 'wombat_key;shutdown=true';
+--- attempt to boot with the old encrytion key, it should fail.
+connect 'jdbc:derby:wombat_key;encryptionKey=6162636465666768';
+
 -- test confugring the database for encrypion with a boot password. 
 connect 'wombat_pwd;create=true';
 create table t2(a int ) ;
@@ -44,3 +63,25 @@ disconnect;
 connect 'wombat_pwd;shutdown=true';
 connect 'jdbc:derby:wombat_pwd;bootPassword=xyz1234abc';
 select * from t2 ;
+disconnect;
+connect 'wombat_pwd;shutdown=true';
+
+
+--- reconfigure the database with a different password. 
+connect 'jdbc:derby:wombat_pwd;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
+select * from t2 ;
+insert into t2 values(8);
+insert into t2 values(9);
+insert into t2 values(10);
+disconnect;
+connect 'wombat_pwd;shutdown=true';
+-- boot the database with the new password. 
+connect 'jdbc:derby:wombat_pwd;bootPassword=new1234xyz';
+select * from t2 ;
+disconnect;
+connect 'wombat_pwd;shutdown=true';
+-- attempt to boot the database with the old password, it should fail. 
+connect 'jdbc:derby:wombat_pwd;bootPassword=xyz1234abc';
+
+
+

@@ -23,7 +23,7 @@ package org.apache.derby.iapi.reference;
 public interface Module {
 
 	String CacheFactory = "org.apache.derby.iapi.services.cache.CacheFactory";
-	String CipherFactory = "org.apache.derby.iapi.services.crypto.CipherFactory";
+	String CipherFactoryBuilder = "org.apache.derby.iapi.services.crypto.CipherFactoryBuilder";
 	String ClassFactory = "org.apache.derby.iapi.services.loader.ClassFactory";
 	String DaemonFactory = "org.apache.derby.iapi.services.daemon.DaemonFactory";
 	String JavaFactory ="org.apache.derby.iapi.services.compiler.JavaFactory";
