@@ -72,8 +72,8 @@ ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current conne
 ConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
 Changes rolled back OK in auto closed pooled connection
 EVENT(1):connectionClosed
-expected SQL Exception: No current connection.
-expected SQL Exception: No current connection.
+expected SQL Exception: (08003) No current connection.
+expected SQL Exception: (08003) No current connection.
 Start testPoolReset ConnectionPoolDataSource
 IDENTITY_VAL_LOCAL=1
 IDENTITY_VAL_LOCAL=2

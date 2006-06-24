@@ -93,7 +93,8 @@ public class checkDataSource30 extends checkDataSource
 		} catch (SQLException sqle) {
 			// we expect savepoints exceptions because either
 			// it's a global transaction, or it's in auto commit mode.
-			System.out.println("JDBC 3.0 savepoint " + sqle.toString());
+			System.out.println("JDBC 3.0 savepoint SQL Exception: (" +
+                              sqle.getSQLState() + ") " + sqle.getMessage());
 		}
 
 

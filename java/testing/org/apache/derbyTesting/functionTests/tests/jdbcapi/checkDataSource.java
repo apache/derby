@@ -219,14 +219,16 @@ public class checkDataSource
 			rs.next();
 			System.out.println("FAIL - ResultSet is open for a closed connection obtained from PooledConnection");
 		} catch (SQLException sqle) {
-			System.out.println("expected " + sqle.toString());
+			System.out.println("expected SQL Exception: (" + sqle.getSQLState()
+                              + ") " + sqle.getMessage());
 		}
 
 		try {
 			s.executeUpdate("update t set i = 1");
 			System.out.println("FAIL - Statement is open for a closed connection obtained from PooledConnection");
 		} catch (SQLException sqle) {
-			System.out.println("expected " + sqle.toString());
+			System.out.println("expected SQL Exception: (" + sqle.getSQLState()
+                              + ") " + sqle.getMessage());
 		}
 
 		pc.close();
