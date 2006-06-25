@@ -79,4 +79,10 @@ Test jira614 completed successfully -- no Distributed Protocol Exception occurre
 Jira170: caught expected table not found
 Iteration 1 successful: 555 parameter markers successfully prepared and executed.
 Test jira125 successful: 557 parameter markers successfully prepared and executed.
+JIRA-1454 repro with c2 len=12748
+Fetched a row, c2.length=12748
+JIRA-1454 repro with c2 len=12750
+Fetched a row, c2.length=12750
+JIRA-1454 repro with c2 len=12749
+Fetched a row, c2.length=12749
 prepStmt Test Ends

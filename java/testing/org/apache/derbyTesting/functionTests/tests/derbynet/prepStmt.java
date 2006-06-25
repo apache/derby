@@ -305,6 +305,7 @@ class prepStmt
 			jira614Test_a(conn);
 			jira170Test(conn);
 			jira125Test(conn);
+			jira1454Test(conn);
 			conn.close();
 			System.out.println("prepStmt Test Ends");
         }
@@ -819,6 +820,59 @@ class prepStmt
                 e.printStackTrace();
         }
     }
+	/**
+	  * Jira-1454 is an off-by-one bug in the splitQRYDTA processing in the
+	  * Network Server writeQRYDTA code, and is related to previous bugs
+	  * 614, 170, 491, and 492. The issue is that if the DSS block is exactly
+	  * the maximum DSS length (32767), then the writeQRYDTA code erroneously
+	  * thinks the DSS needs to be split when in fact it doesn't.
+	  *
+	  * The repro case sets up the boundary scenario; we run the case three
+	  * times, once with the value 1 less than the max DSS, once with the
+	  * value 1 greater than the max DSS, and once with the exact DSS length.
+	  * Only the third case triggers the JIRA-1454 bug; the other two tests
+	  * are for completeness.
+	  */
+	private static void jira1454Test(Connection conn)
+		throws Exception
+	{
+		tickleDSSLength(conn, 12748);
+		tickleDSSLength(conn, 12750);
+		tickleDSSLength(conn, 12749);
+	}
+	private static void tickleDSSLength(Connection conn, int c2Len)
+		throws Exception
+	{
+		System.out.println("JIRA-1454 repro with c2 len=" + c2Len);
+		Statement st = conn.createStatement();
+
+		try {
+			    st.execute("drop table jira1454");
+		} catch (SQLException se) {}
+		st.execute(
+				"create table jira1454(c1 varchar(20000),c2 varchar(30000))");
+
+		char [] c1 = new char[20000];
+		for (int i = 0; i < c1.length; i++)
+			    c1[i] = Character.forDigit(i%10, 10);
+		char [] c2 = new char[30000];
+		for (int i = 0; i < c2Len; i++)
+			    c2[i] = Character.forDigit(i%10, 10);
+
+		PreparedStatement pSt =
+			conn.prepareStatement("insert into jira1454 values (?,?)");
+		pSt.setString(1, new String(c1));
+		pSt.setString(2, new String(c2,0, c2Len));
+
+		pSt.execute();
+		pSt.close();
+		ResultSet rs = st.executeQuery("select * from jira1454");
+		while (rs.next())
+			    System.out.println("Fetched a row, c2.length=" +
+						            rs.getString("c2").length());
+		rs.close();
+		st.close();
+	}
 	/**
 	 * Jira-125 has to do with proper use of continuation headers 
 	 * for very large reply messages, such as the SQLDARD which is

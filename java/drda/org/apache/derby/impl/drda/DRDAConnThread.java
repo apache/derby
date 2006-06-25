@@ -6169,7 +6169,7 @@ public class DRDAConnThread extends Thread {
 				}
 			}
 			// does all this fit in one QRYDTA
-			if (writer.getDSSLength() >= blksize)
+			if (writer.getDSSLength() > blksize)
 			{
 				splitQRYDTA(stmt, blksize);
 				return false;
@@ -6334,7 +6334,7 @@ public class DRDAConnThread extends Thread {
 
 		writer.writeByte(CodePoint.NULLDATA);
 		// does all this fit in one QRYDTA
-		if (writer.getDSSLength() >= blksize)
+		if (writer.getDSSLength() > blksize)
 		{
 			splitQRYDTA(stmt, blksize);
 		}
