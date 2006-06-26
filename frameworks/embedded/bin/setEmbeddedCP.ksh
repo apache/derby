@@ -20,4 +20,4 @@ DERBY_HOME=${DERBY_HOME:-$DERBY_INSTALL}
   exit 1
 }
 
-export CLASSPATH="${DERBY_INSTALL}/lib/derby.jar:${DERBY_INSTALL}/lib/derbytools.jar:${CLASSPATH}"
+export CLASSPATH="${DERBY_HOME}/lib/derby.jar:${DERBY_HOME}/lib/derbytools.jar:${CLASSPATH}"
