@@ -382,7 +382,7 @@ public class RunList
         {
             // We want to pass this down to RunTest so it will
             // run an individual test with jvmflags like -nojit
-            jvmProps.addElement("jvmflags=" + '"' + jvmflags + '"');
+            jvmProps.addElement("jvmflags=" + jvmflags);
         }
 
         if ( (timeout != null) && (timeout.length()>0) )
