@@ -145,6 +145,8 @@ public class runtimeinfo
 			 * - by calling NetworkServerControl.getRuntimeInfo 
 			 */
 			System.out.println("Testing Runtimeinfo after closing connectiosn");
+			// give the network server a second to clean up (DERBY-1455)
+			Thread.sleep(1000);
 			NetworkServerControl derbyServer = 
 				new NetworkServerControl( InetAddress.getByName("localhost"),
 										NetworkServerControl.DEFAULT_PORTNUMBER);
