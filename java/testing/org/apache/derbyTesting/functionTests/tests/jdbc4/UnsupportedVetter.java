@@ -172,14 +172,17 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "registerOutParameter", new Class[] { int.class, int.class, String.class } ),
 						new MD( "setArray", new Class[] { int.class, java.sql.Array.class } ),
 						new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class, int.class } ),
+                                                new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class, long.class } ),
 						new MD( "setBigDecimal", new Class[] { String.class, java.math.BigDecimal.class } ),
 						new MD( "setBinaryStream", new Class[] { String.class, java.io.InputStream.class, int.class } ),
+                                                new MD( "setBinaryStream", new Class[] { String.class, java.io.InputStream.class, long.class } ),
 						new MD( "setBlob", new Class[] { String.class, java.io.InputStream.class, long.class } ),
 						new MD( "setBlob", new Class[] { String.class, Blob.class } ),
 						new MD( "setBoolean", new Class[] { String.class, boolean.class } ),
 						new MD( "setByte", new Class[] { String.class, byte.class } ),
 						new MD( "setBytes", new Class[] { String.class, byte[].class } ),
 						new MD( "setCharacterStream", new Class[] { String.class, java.io.Reader.class, int.class } ),
+                                                new MD( "setCharacterStream", new Class[] { String.class, java.io.Reader.class, long.class } ),
 						new MD( "setClob", new Class[] { String.class, java.io.Reader.class, long.class } ),
 						new MD( "setClob", new Class[] { String.class, Clob.class } ),
 						new MD( "setDate", new Class[] { String.class, java.sql.Date.class } ),
@@ -228,8 +231,14 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 					//
 					new FD( "updateBlob", new Class[] { int.class, Blob.class } ),
 					new FD( "updateBlob", new Class[] { String.class, Blob.class } ),
+                                        new FD( "updateBlob", new Class[] { int.class, InputStream.class ,long.class } ),
+                                        new FD( "updateBlob", new Class[] { String.class, InputStream.class ,long.class } ),
 					new FD( "updateClob", new Class[] { int.class, Clob.class } ),
 					new FD( "updateClob", new Class[] { String.class, Clob.class } ),
+                                        new FD( "updateClob", new Class[] { int.class, Reader.class ,long.class } ),
+                                        new FD( "updateClob", new Class[] { String.class, Reader.class ,long.class } ),
+                                        new FD( "updateNClob",new Class[] { int.class,Reader.class,long.class}),
+                                        new FD( "updateNClob",new Class[] { String.class,Reader.class,long.class}),
 					
 
 					//

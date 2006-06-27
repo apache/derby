@@ -21,7 +21,10 @@
 package org.apache.derby.client.am;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.sql.SQLException;
+import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 
@@ -3037,7 +3040,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "updateBinaryStream", column, x, length);
+                    agent_.logWriter_.traceEntry(this, "", column, x, length);
                 }
                 checkUpdatePreconditions(column, "updateBinaryStream");
                 updateColumn(column, agent_.crossConverters_.setObjectFromBinaryStream(resultSetMetaData_.types_[column - 1], x, length));
@@ -5411,4 +5414,168 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
         return isClosed;
     }
+
+
+    /**
+     * Update a column with an ascii stream value.
+     *
+     * The updateXXX() methods are used to update column values in the current
+     * row, or the insert row. The updateXXX() methods do not update the
+     * underlying database, instead the updateRow() or insertRow() methods are
+     * called to update the database.
+     *
+     * @param columnIndex
+     *            the first column is 1, the second is 2, ...
+     * @param x
+     *            the new column value
+     * @param length
+     *            the length of the stream
+     * @exception SQLException
+     *                if a database-access error occurs
+     */
+    public void updateAsciiStream(int columnIndex, InputStream x,
+                    long length) throws SQLException {
+        if(length > Integer.MAX_VALUE)
+                throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+                    new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+        else
+            updateAsciiStream(columnIndex,x,(int)length);
+    }
+
+    /**
+     * Update a column with a binary stream value.
+     *
+     * The updateXXX() methods are used to update column values in the current
+     * row, or the insert row. The updateXXX() methods do not update the
+     * underlying database, instead the updateRow() or insertRow() methods are
+     * called to update the database.
+     *
+     * @param columnIndex
+     *            the first column is 1, the second is 2, ...
+     * @param x
+     *            the new column value
+     * @param length
+     *            the length of the stream
+     * @exception SQLException
+     *                if a database-access error occurs
+     */
+    public void updateBinaryStream(int columnIndex, InputStream x,
+        long length) throws SQLException {
+         if(length > Integer.MAX_VALUE)
+                throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+                    new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+        else
+            updateBinaryStream(columnIndex,x,(int)length);
+
+     }
+
+    /**
+     * Update a column with a character stream value.
+     *
+     * The updateXXX() methods are used to update column values in the current
+     * row, or the insert row. The updateXXX() methods do not update the
+     * underlying database, instead the updateRow() or insertRow() methods are
+     * called to update the database.
+     *
+     * @param columnIndex
+     *            the first column is 1, the second is 2, ...
+     * @param x
+     *            the new column value
+     * @param length
+     *            the length of the stream
+     * @exception SQLException
+     *                if a database-access error occurs
+     */
+    public void updateCharacterStream(int columnIndex, Reader x,
+                    long length) throws SQLException {
+        if(length > Integer.MAX_VALUE)
+                throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+                    new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+        else
+            updateCharacterStream(columnIndex,x,(int)length);
+    }
+
+    /**
+     * Update a column with an ascii stream value.
+     *
+     * The updateXXX() methods are used to update column values in the current
+     * row, or the insert row. The updateXXX() methods do not update the
+     * underlying database, instead the updateRow() or insertRow() methods are
+     * called to update the database.
+     *
+     * @param columnName
+     *            the name of the column
+     * @param x
+     *            the new column value
+     * @param length
+     *            of the stream
+     * @exception SQLException
+     *                if a database-access error occurs
+     */
+    public void updateAsciiStream(String columnName, InputStream x,
+                    long length) throws SQLException {
+        try {
+            updateAsciiStream(findColumnX(columnName), x, length);
+        }
+        catch(SqlException sqle) {
+            throw sqle.getSQLException();
+        }
+    }
+
+    /**
+     * Update a column with a binary stream value.
+     *
+     * The updateXXX() methods are used to update column values in the current
+     * row, or the insert row. The updateXXX() methods do not update the
+     * underlying database, instead the updateRow() or insertRow() methods are
+     * called to update the database.
+     *
+     * @param columnName
+     *            the name of the column
+     * @param x
+     *            the new column value
+     * @param length
+     *            of the stream
+     * @exception SQLException
+     *                if a database-access error occurs
+     */
+    public void updateBinaryStream(String columnName, InputStream x,
+                    long length) throws SQLException {
+        try {
+            updateBinaryStream(findColumnX(columnName), x, length);
+        }
+        catch(SqlException sqle) {
+            throw sqle.getSQLException();
+        }
+    }
+
+    /**
+     * Update a column with a character stream value.
+     *
+     * The updateXXX() methods are used to update column values in the current
+     * row, or the insert row. The updateXXX() methods do not update the
+     * underlying database, instead the updateRow() or insertRow() methods are
+     * called to update the database.
+     *
+     * @param columnName
+     *            the name of the column
+     * @param reader
+     *            the new column value
+     * @param length
+     *            length of the stream
+     * @exception SQLException
+     *                if a database-access error occurs
+     */
+    public void updateCharacterStream(String columnName, Reader reader,
+        long length) throws SQLException {
+         try {
+             updateCharacterStream(findColumnX(columnName), reader, length);
+         }
+         catch(SqlException sqle) {
+             throw sqle.getSQLException();
+         }
+     }
 }

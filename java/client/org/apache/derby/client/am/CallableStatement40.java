@@ -212,4 +212,53 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
             throw se.getSQLException();
         }
     }
+
+
+    /**
+     * Sets the designated parameter to the given input stream, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterName the name of the first parameter
+     * @param x the java input stream which contains the ASCII parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setAsciiStream(String parameterName, InputStream x, long length)
+    throws SQLException {
+        throw SQLExceptionFactory.notImplemented ("setAsciiStream(String,InputStream,long)");
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterName the name of the first parameter
+     * @param x the java input stream which contains the binary parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setBinaryStream(String parameterName, InputStream x, long length)
+    throws SQLException {
+        throw SQLExceptionFactory.notImplemented ("setBinaryStream(String,InputStream,long)");
+    }
+
+    /**
+     * Sets the designated parameter to the given Reader, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterName the name of the first parameter
+     * @param x the java Reader which contains the UNICODE value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setCharacterStream(String parameterName, Reader x, long length)
+    throws SQLException {
+       throw SQLExceptionFactory.notImplemented ("setCharacterStream(String,Reader,long)");
+    }
 }

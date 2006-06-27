@@ -69,6 +69,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 
+import java.io.Reader;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -2626,7 +2627,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 	}
 
 	/**
-	 * JDBC 2.0
 	 *
 	 * Update a column with an ascii stream value.
 	 *
@@ -2645,7 +2645,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateAsciiStream(int columnIndex, java.io.InputStream x,
-			int length) throws SQLException {
+			long length) throws SQLException {
 		checksBeforeUpdateXXX("updateAsciiStream", columnIndex);
 
 		int colType = getColumnType(columnIndex);
@@ -2672,7 +2672,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 	}
 
 	/**
-	 * JDBC 2.0
 	 *
 	 * Update a column with a binary stream value.
 	 *
@@ -2691,7 +2690,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateBinaryStream(int columnIndex, java.io.InputStream x,
-			int length) throws SQLException {
+			long length) throws SQLException {
 		checksBeforeUpdateXXX("updateBinaryStream", columnIndex);
 		int colType = getColumnType(columnIndex);
 		switch (colType) {
@@ -2737,7 +2736,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	}
 
 	/**
-	 * JDBC 2.0
+	 * JDBC 4.0
 	 * 
 	 * Update a column with a character stream value.
 	 * 
@@ -2756,7 +2755,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 *                if a database-access error occurs
 	 */
 	public void updateCharacterStream(int columnIndex, java.io.Reader x,
-			int length) throws SQLException {
+			long length) throws SQLException {
 		//If the column type is the right datatype, this method will eventually call getDVDforColumnToBeUpdated which will check for
 		//the read only resultset. But for other datatypes, we want to catch if this updateCharacterStream is being issued
 		//against a read only resultset. And that is the reason for call to checksBeforeUpdateXXX here.
@@ -4400,6 +4399,273 @@ public abstract class EmbedResultSet extends ConnectionChild
          } else {
              topWarning.setNextWarning(w);
          }
+     }
+
+     /**
+      *
+      * JDBC 2.0
+      *
+      * Update a column with an ascii stream value.
+      *
+      * The updateXXX() methods are used to update column values in the current
+      * row, or the insert row. The updateXXX() methods do not update the
+      * underlying database, instead the updateRow() or insertRow() methods are
+      * called to update the database.
+      *
+      * @param columnIndex
+      *            the first column is 1, the second is 2, ...
+      * @param x
+      *            the new column value
+      * @param length
+      *            the length of the stream
+      * @exception SQLException
+      *                if a database-access error occurs
+      */
+     public void updateAsciiStream(int columnIndex, java.io.InputStream x,
+         int length) throws SQLException {
+         checkIfClosed("updateAsciiStream");
+         updateAsciiStream(columnIndex,x,(long)length);
+     }
+
+     /**
+      *
+      * JDBC 2.0
+      *
+      * Update a column with a binary stream value.
+      *
+      * The updateXXX() methods are used to update column values in the current
+      * row, or the insert row. The updateXXX() methods do not update the
+      * underlying database, instead the updateRow() or insertRow() methods are
+      * called to update the database.
+      *
+      * @param columnIndex
+      *            the first column is 1, the second is 2, ...
+      * @param x
+      *            the new column value
+      * @param length
+      *            the length of the stream
+      * @exception SQLException
+      *                if a database-access error occurs
+      */
+     public void updateBinaryStream(int columnIndex, java.io.InputStream x,
+         int length) throws SQLException {
+         checkIfClosed("updateBinaryStream");
+         updateBinaryStream(columnIndex,x,(long)length);
+     }
+
+     /**
+      *
+      * JDBC 2.0
+      *
+      * Update a column with a character stream value.
+      *
+      * The updateXXX() methods are used to update column values in the current
+      * row, or the insert row. The updateXXX() methods do not update the
+      * underlying database, instead the updateRow() or insertRow() methods are
+      * called to update the database.
+      *
+      * @param columnIndex
+      *            the first column is 1, the second is 2, ...
+      * @param x
+      *            the new column value
+      * @param length
+      *            the length of the stream
+      * @exception SQLException
+      *                if a database-access error occurs
+      */
+     public void updateCharacterStream(int columnIndex, java.io.Reader x,
+         int length) throws SQLException {
+         checkIfClosed("updateCharacterStream");
+         updateCharacterStream(columnIndex,x,(long)length);
+     }
+
+     /**
+      *
+      * JDBC 4.0
+      *
+      * Update a column with an ascii stream value.
+      *
+      * The updateXXX() methods are used to update column values in the current
+      * row, or the insert row. The updateXXX() methods do not update the
+      * underlying database, instead the updateRow() or insertRow() methods are
+      * called to update the database.
+      *
+      * @param columnName
+      *            the name of the column
+      * @param x
+      *            the new column value
+      * @param length
+      *            of the stream
+      * @exception SQLException
+      *                if a database-access error occurs
+      */
+     public void updateAsciiStream(String columnName, java.io.InputStream x,
+         long length) throws SQLException {
+         checkIfClosed("updateAsciiStream");
+         updateAsciiStream(findColumnName(columnName),x,length);
+     }
+
+     /**
+      *
+      * JDBC 4.0
+      *
+      * Update a column with a binary stream value.
+      *
+      * The updateXXX() methods are used to update column values in the current
+      * row, or the insert row. The updateXXX() methods do not update the
+      * underlying database, instead the updateRow() or insertRow() methods are
+      * called to update the database.
+      *
+      * @param columnName
+      *            the name of the column
+      * @param x
+      *            the new column value
+      * @param length
+      *            of the stream
+      * @exception SQLException
+      *                if a database-access error occurs
+      */
+
+     public void updateBinaryStream(String columnName, java.io.InputStream x,
+         long length) throws SQLException {
+         checkIfClosed("updateBinaryStream");
+         updateBinaryStream(findColumnName(columnName),x,length);
+     }
+
+     /**
+      * JDBC 4.0
+      *
+      * Update a column with a character stream value.
+      *
+      * The updateXXX() methods are used to update column values in the current
+      * row, or the insert row. The updateXXX() methods do not update the
+      * underlying database, instead the updateRow() or insertRow() methods are
+      * called to update the database.
+      *
+      * @param columnName
+      *            the name of the column
+      * @param reader
+      *            the new column value
+      * @param length
+      *            length of the stream
+      * @exception SQLException
+      *                if a database-access error occurs
+      */
+     public void updateCharacterStream(String columnName, java.io.Reader reader,
+         long length) throws SQLException {
+         checkIfClosed("updateCharacterStream");
+         updateCharacterStream(findColumnName(columnName),reader,length);
+     }
+
+     /**
+      *
+      * JDBC 4.0
+      *
+      * Updates the designated column with a java.sql.Blob value. The updater
+      * methods are used to update column values in the current row or the insert
+      * row. The updater methods do not update the underlying database; instead
+      * the updateRow or insertRow methods are called to update the database.
+      *
+      * @param columnIndex -
+      *            the first column is 1, the second is 2
+      * @param x -
+      *            the new column value
+      * @param length -
+      *            the length of the Blob datatype
+      * @exception SQLException
+      *
+      */
+     public void updateBlob(int columnIndex, InputStream x, long length)
+     throws SQLException {
+         checksBeforeUpdateXXX("updateBlob", columnIndex);
+         int colType = getColumnType(columnIndex);
+         if (colType != Types.BLOB)
+             throw dataTypeConversion(columnIndex, "java.sql.Blob");
+
+         if (x == null)
+             updateNull(columnIndex);
+         else {
+             updateBinaryStreamInternal(columnIndex, x, length, "updateBlob");
+         }
+     }
+
+     /**
+      *
+      * JDBC 4.0
+      *
+      * Updates the designated column with a java.sql.Blob value. The updater
+      * methods are used to update column values in the current row or the insert
+      * row. The updater methods do not update the underlying database; instead
+      * the updateRow or insertRow methods are called to update the database.
+      *
+      * @param columnName -
+      *            the name of the column to be updated
+      * @param x -
+      *            the new column value
+      * @param length -
+      *            the length of the Blob datatype
+      * @exception SQLException
+      *
+      */
+
+     public void updateBlob(String columnName, InputStream x, long length)
+     throws SQLException {
+         checkIfClosed("updateBlob");
+         updateBlob(findColumnName(columnName),x,length);
+     }
+
+     /**
+      *
+      * JDBC 4.0
+      *
+      * Updates the designated column with a java.sql.Clob value. The updater
+      * methods are used to update column values in the current row or the insert
+      * row. The updater methods do not update the underlying database; instead
+      * the updateRow or insertRow methods are called to update the database.
+      *
+      * @param columnIndex -
+      *            the first column is 1, the second is 2
+      * @param x -
+      *            the new column value
+      * @exception SQLException
+      *                Feature not implemented for now.
+      */
+     public void updateClob(int columnIndex, Reader x, long length)
+     throws SQLException {
+         checksBeforeUpdateXXX("updateClob", columnIndex);
+         int colType = getColumnType(columnIndex);
+         if (colType != Types.CLOB)
+             throw dataTypeConversion(columnIndex, "java.sql.Clob");
+
+         if (x == null) {
+             updateNull(columnIndex);
+         } else {
+             updateCharacterStreamInternal(
+                 columnIndex, x,length, "updateClob");
+         }
+     }
+
+     /**
+      *
+      * JDBC 4.0
+      *
+      * Updates the designated column with a java.sql.Clob value. The updater
+      * methods are used to update column values in the current row or the insert
+      * row. The updater methods do not update the underlying database; instead
+      * the updateRow or insertRow methods are called to update the database.
+      *
+      * @param columnName -
+      *            the name of the Clob column
+      * @param x -
+      *            the new column value
+      * @exception SQLException
+      *                Feature not implemented for now.
+      */
+
+     public void updateClob(String columnName, Reader x, long length)
+     throws SQLException {
+         checkIfClosed("updateClob");
+         updateClob(findColumnName(columnName),x,length);
      }
 }
 

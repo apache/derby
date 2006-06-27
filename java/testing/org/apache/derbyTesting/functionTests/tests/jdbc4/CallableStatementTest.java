@@ -531,6 +531,67 @@ public class CallableStatementTest
         }
     }
 
+
+    /**
+     *
+     * Tests the setCharacterStream method that accepts length as a long
+     * parameter in the Callable Statement interface
+     *
+     * @throws SQLException Upon any error that occurs while calling this
+     *         method
+     *
+     */
+
+    public void testSetCharacterStream() throws SQLException {
+        try {
+            cStmt.setCharacterStream("Some String",null,0L);
+        }
+        catch(SQLFeatureNotSupportedException sqlfne) {
+            //Do nothing as this is the expected behaviour
+
+        }
+    }
+
+    /**
+     *
+     * Tests the setAsciiStream method that accepts length as a long
+     * parameter in the Callable Statement interface
+     *
+     * @throws SQLException Upon any error that occurs while calling this
+     *         method
+     *
+     */
+
+    public void testSetAsciiStream() throws SQLException {
+        try {
+            cStmt.setAsciiStream("Some String",null,0L);
+        }
+        catch(SQLFeatureNotSupportedException sqlfne) {
+            //Do nothing as this is the expected behaviour
+
+        }
+    }
+
+    /**
+     *
+     * Tests the setBinaryStream method that accepts length as a long
+     * parameter in the Callable Statement interface
+     *
+     * @throws SQLException Upon any error that occurs while calling this
+     *         method
+     *
+     */
+
+    public void testSetBinaryStream() throws SQLException {
+        try {
+            cStmt.setBinaryStream("Some String",null,0L);
+        }
+        catch(SQLFeatureNotSupportedException sqlfne) {
+            //Do nothing as this is the expected behaviour
+
+        }
+    }
+
     /**
      * Return suite with all tests of the class.
      */

@@ -832,22 +832,51 @@ public class PreparedStatement extends Statement
 
     }
 
+    /**
+     * sets the parameter to the  Binary Stream object
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the binary parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     */
+
     public void setBinaryStream(int parameterIndex,
                                 java.io.InputStream x,
-                                int length) throws SQLException {
+                                long length) throws SQLException {
         try
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterIndex, "<input stream>", length);
+                    agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterIndex, "<input stream>", new Long(length));
                 }
-                setBinaryStreamX(parameterIndex, x, length);
+                 if(length > Integer.MAX_VALUE) {
+                    throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+                        new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+                }
+                setBinaryStreamX(parameterIndex, x, (int)length);
             }
         }
         catch ( SqlException se )
         {
             throw se.getSQLException();
         }
+    }
+
+    /**
+     * sets the parameter to the  Binary Stream object
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the binary parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     */
+
+    public void setBinaryStream(int parameterIndex,
+                                java.io.InputStream x,
+                                int length) throws SQLException {
+        setBinaryStream(parameterIndex,x,(long)length);
     }
 
     protected void setBinaryStreamX(int parameterIndex,
@@ -862,14 +891,24 @@ public class PreparedStatement extends Statement
         setInput(parameterIndex, new Blob(agent_, x, length));
     }
 
+    /**
+     * We do this inefficiently and read it all in here. The target type
+     * is assumed to be a String.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the ASCII parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     */
+
     public void setAsciiStream(int parameterIndex,
                                java.io.InputStream x,
-                               int length) throws SQLException {
+                               long length) throws SQLException {
         try
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterIndex, "<input stream>", length);
+                    agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterIndex, "<input stream>", new Long(length));
                 }
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
@@ -877,13 +916,33 @@ public class PreparedStatement extends Statement
                     setNull(parameterIndex, java.sql.Types.CLOB);
                     return;
                 }
-                setInput(parameterIndex, new Clob(agent_, x, "US-ASCII", length));
+                if(length > Integer.MAX_VALUE) {
+                    throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+                        new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+                }
+                setInput(parameterIndex, new Clob(agent_, x, "US-ASCII", (int)length));
             }
         }
         catch ( SqlException se )
         {
             throw se.getSQLException();
         }
+    }
+
+    /**
+     * We do this inefficiently and read it all in here. The target type
+     * is assumed to be a String.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the ASCII parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     */
+    public void setAsciiStream(int parameterIndex,
+                               java.io.InputStream x,
+                               int length) throws SQLException {
+        setAsciiStream(parameterIndex,x,(long)length);
     }
 
     public void setUnicodeStream(int parameterIndex,
@@ -910,14 +969,26 @@ public class PreparedStatement extends Statement
         }
     }
 
+     /**
+     * Sets the designated parameter to the given Reader, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterIndex the index of the parameter to which this set
+     *                       method is applied
+     * @param x the java Reader which contains the UNICODE value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
     public void setCharacterStream(int parameterIndex,
                                    java.io.Reader x,
-                                   int length) throws SQLException {
+                                   long length) throws SQLException {
         try
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterIndex, x, length);
+                    agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterIndex, x, new Long(length));
                 }
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
@@ -925,13 +996,36 @@ public class PreparedStatement extends Statement
                     setNull(parameterIndex, java.sql.Types.CLOB);
                     return;
                 }
-                setInput(parameterIndex, new Clob(agent_, x, length));
+                if(length > Integer.MAX_VALUE) {
+                    throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+                        new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+                }
+                setInput(parameterIndex, new Clob(agent_, x, (int)length));
             }
         }
         catch ( SqlException se )
         {
             throw se.getSQLException();
         }
+    }
+
+     /**
+     * Sets the designated parameter to the given Reader, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterIndex the index of the parameter to which this
+     *                       set method is applied
+     * @param x the java Reader which contains the UNICODE value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public void setCharacterStream(int parameterIndex,
+                                   java.io.Reader x,
+                                   int length) throws SQLException {
+        setCharacterStream(parameterIndex,x,(long)length);
     }
 
     public void setBlob(int parameterIndex, java.sql.Blob x) throws SQLException {

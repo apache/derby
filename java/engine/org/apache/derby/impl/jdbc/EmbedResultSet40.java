@@ -64,12 +64,12 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
         throw Util.notImplemented();
     }
     
-    public void updateNCharacterStream(int columnIndex, Reader x, int length) 
+    public void updateNCharacterStream(int columnIndex, Reader x, long length)
         throws SQLException {
         throw Util.notImplemented();
     }
     
-    public void updateNCharacterStream(String columnName, Reader x, int length)
+    public void updateNCharacterStream(String columnName, Reader x, long length)
         throws SQLException {
         throw Util.notImplemented();
     }
@@ -168,4 +168,43 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
         }
     }
     
+    /**
+     *
+     * Updates the designated column using the given Reader  object,
+     * which is the given number of characters long.
+     *
+     * @param columnIndex -
+     *        the first column is 1, the second is 2
+     * @param x -
+     *        the new column value
+     * @param length -
+     *        the length of the stream
+     *
+     * @exception SQLException
+     *                Feature not implemented for now.
+     */
+    public void updateNClob(int columnIndex, Reader x, long length)
+    throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * Updates the designated column using the given Reader  object,
+     * which is the given number of characters long.
+     *
+     * @param columnName -
+     *            the Name of the column to be updated
+     * @param x -
+     *            the new column value
+     * @param length -
+     *        the length of the stream
+     *
+     * @exception SQLException
+     *                Feature not implemented for now.
+     *
+     */
+    public void updateNClob(String columnName, Reader x, long length)
+    throws SQLException{
+        throw Util.notImplemented();
+    }
 }

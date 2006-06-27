@@ -223,5 +223,101 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
      */
     public void setPoolable(boolean poolable) throws SQLException {
         getStatement().setPoolable(poolable);
-    }    
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the ASCII parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setAsciiStream(int parameterIndex, InputStream x, long length)
+    throws SQLException {
+        getCallableStatement().setAsciiStream(parameterIndex,x,length);
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the binary parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setBinaryStream(int parameterIndex, InputStream x, long length)
+    throws SQLException {
+        getCallableStatement().setBinaryStream(parameterIndex,x,length);
+    }
+
+    /**
+     * Sets the designated parameter to the given Reader, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java Reader which contains the UNICODE value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setCharacterStream(int parameterIndex, Reader x, long length)
+    throws SQLException {
+        getCallableStatement().setCharacterStream(parameterIndex,x,length);
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the ASCII parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setAsciiStream(String parameterName, InputStream x, long length)
+    throws SQLException {
+        getCallableStatement().setAsciiStream(parameterName,x,length);
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the binary parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setBinaryStream(String parameterName, InputStream x, long length)
+    throws SQLException {
+        getCallableStatement().setBinaryStream(parameterName,x,length);
+    }
+
+    /**
+     * Sets the designated parameter to the given Reader, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java Reader which contains the UNICODE value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setCharacterStream(String parameterName, Reader x, long length)
+    throws SQLException {
+        getCallableStatement().setCharacterStream(parameterName,x,length);
+    }
 }

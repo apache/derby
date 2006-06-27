@@ -561,7 +561,7 @@ public abstract class EmbedPreparedStatement
      * @param length the number of bytes in the stream 
 	 * @exception SQLException thrown on failure.
      */
-    public final void setAsciiStream(int parameterIndex, InputStream x, int length)
+    public final void setAsciiStream(int parameterIndex, InputStream x, long length)
 	    throws SQLException {
 		checkStatus();
 
@@ -592,6 +592,22 @@ public abstract class EmbedPreparedStatement
 
 		setCharacterStream(parameterIndex, r, length);
 	}
+
+    /**
+     * We do this inefficiently and read it all in here. The target type
+     * is assumed to be a String.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the ASCII parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     */
+
+    public final void setAsciiStream(int parameterIndex, InputStream x, int length)
+    throws SQLException {
+        setAsciiStream(parameterIndex,x,(long)length);
+    }
+
 
     /**
 		Deprecated in JDBC 3.0
@@ -628,8 +644,7 @@ public abstract class EmbedPreparedStatement
      */
     public final void setCharacterStream(int parameterIndex,
        			  java.io.Reader reader,
-			  int length) throws SQLException
-	{
+			  long length) throws SQLException {
 		checkStatus();
 		int jdbcTypeId = getParameterJDBCType(parameterIndex);
 		switch (jdbcTypeId) {
@@ -645,6 +660,29 @@ public abstract class EmbedPreparedStatement
 
 		setCharacterStreamInternal(parameterIndex, reader, length);
 	}
+
+    /**
+     * When a very large UNICODE value is input to a LONGVARCHAR
+     * parameter, it may be more practical to send it via a
+     * java.io.Reader. JDBC will read the data from the stream
+     * as needed, until it reaches end-of-file.  The JDBC driver will
+     * do any necessary conversion from UNICODE to the database char format.
+     *
+     * <P><B>Note:</B> This stream object can either be a standard
+     * Java stream object or your own subclass that implements the
+     * standard interface.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param reader the java reader which contains the UNICODE data
+     * @param length the number of characters in the stream
+     * @exception SQLException if a database-access error occurs.
+     */
+    public final void setCharacterStream(int parameterIndex,
+        java.io.Reader reader,
+        int length) throws SQLException {
+        setCharacterStream(parameterIndex,reader,(long)length);
+    }
+
 
     private void setCharacterStreamInternal(int parameterIndex,
 						Reader reader, long length)
@@ -727,15 +765,15 @@ public abstract class EmbedPreparedStatement
 	}
 
     /**
+     * sets the parameter to the Binary stream
      * 
      * @param parameterIndex the first parameter is 1, the second is 2, ...
      * @param x the java input stream which contains the binary parameter value
      * @param length the number of bytes in the stream 
 	 * @exception SQLException thrown on failure.
      */
-    public final void setBinaryStream(int parameterIndex, InputStream x, int length)
-	    throws SQLException
-		{
+    public final void setBinaryStream(int parameterIndex, InputStream x, long length)
+	    throws SQLException {
 
 		checkStatus();
 
@@ -752,6 +790,19 @@ public abstract class EmbedPreparedStatement
 
     	setBinaryStreamInternal(parameterIndex, x, length);
 	}
+
+    /**
+     * sets the parameter to the binary stream
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the binary parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     */
+    public final void setBinaryStream(int parameterIndex, InputStream x, int length)
+    throws SQLException {
+        setBinaryStream(parameterIndex,x,(long)length);
+    }
 
     private void setBinaryStreamInternal(int parameterIndex, InputStream x,
 				long length)

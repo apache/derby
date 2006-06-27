@@ -653,6 +653,7 @@ public interface SQLState {
     String YEAR_EXCEEDS_MAXIMUM                                        = "22003.S.1";
     String DECIMAL_TOO_MANY_DIGITS                                     = "22003.S.2";
     String NUMERIC_OVERFLOW                                            = "22003.S.3";
+    String CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE                    = "22003.S.4";
 
 	String LANG_DATA_TYPE_GET_MISMATCH                                 = "22005"; // same 22005 error
     String UNSUPPORTED_ENCODING                                        = "22005.S.1";

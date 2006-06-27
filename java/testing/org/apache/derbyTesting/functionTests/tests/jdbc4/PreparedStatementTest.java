@@ -41,6 +41,9 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     Connection conn      = null;
     //PreparedStatement object
     PreparedStatement ps = null;
+    //Statement object
+    Statement s = null;
+
     
     /**
      * Create a test with the given name.
@@ -61,11 +64,22 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public void setUp() 
         throws SQLException {
         conn = getConnection();
+        //create the statement object
+        s = conn.createStatement();
         //Create the PreparedStatement that will then be used as the basis 
         //throughout this test henceforth
         //This prepared statement will however NOT be used for testing
         //setClob and setBlob
         ps = conn.prepareStatement("select count(*) from sys.systables");
+        
+         // STEP1: create the tables
+         // Structure of table
+         // --------------------------
+         // SNO            Clob Column
+         // --------------------------
+
+         s.execute("create table ClobTestTable (sno int, clobCol CLOB(1M))");
+         s.execute("create table BlobTestTable (sno int, blobCol BLOB(1M))");
     }
 
     /**
@@ -77,6 +91,11 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      */
     public void tearDown() 
         throws SQLException {
+        
+        s.execute("drop table ClobTestTable");
+        s.execute("drop table BlobTestTable");
+        s.close();
+        
         if (conn != null && !conn.isClosed()) {
             conn.rollback();
             conn.close();
@@ -287,17 +306,6 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      *
      */
     public void testSetClob() throws SQLException {
-        
-        // Keeping the above in mind 
-        // STEP1: create the tables
-        // Structure of table
-        // --------------------------
-        // SNO            Clob Column
-        // --------------------------
-        
-        Statement s = conn.createStatement();
-        s.execute("create table ClobTestTable (sno int, clobCol CLOB(1M))");
-        
         //insert default values into the table
         
         String str = "Test data for the Clob object";
@@ -336,8 +344,6 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         if(!equalClob(clobToBeInerted,clobRetrieved)) 
             fail("Clob not inserted properly using setClob");
-        
-        s.execute("drop table ClobTestTable");
     }
     
     /*
@@ -384,17 +390,6 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      *
      */
     public void testSetBlob() throws SQLException {
-        
-        // Keeping the above in mind 
-        // STEP1: create the tables
-        // Structure of table
-        // --------------------------
-        // SNO            Blob Column
-        // --------------------------
-        
-        Statement s = conn.createStatement();
-        s.execute("create table BlobTestTable (sno int, blobCol BLOB(1M))");
-        
         //insert default values into the table
         
         byte[] bytes = new byte[] {
@@ -436,8 +431,6 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         if(!equalBlob(blobToBeInerted,blobRetrieved)) 
             fail("Blob not inserted properly using setBlob");
-        
-        s.execute("drop table BlobTestTable");
     }
     
     /*
@@ -536,5 +529,145 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         } catch(Exception e) {
             fail("Unexpected exception thrown in method " + e);
         }
+    }
+    
+    
+    /**
+     *
+     * Tests the PreparedStatement interface method setCharacterStream
+     *
+     * @throws SQLException
+     *
+     */
+    public void testSetCharacterStream() throws SQLException {
+        String str = "Test data for the Clob object";
+        StringReader is = new StringReader("Test data for the Clob object");
+        
+        try {
+            is.reset();
+        } catch (IOException ioe) {
+            fail("Failed to reset Clob input stream: " + ioe.getMessage());
+        }
+        
+        PreparedStatement ps_sc = conn.prepareStatement("insert into ClobTestTable values(?,?)");
+        
+        //initially insert the data
+        ps_sc.setInt(1,1);
+        ps_sc.setCharacterStream(2,is,str.length());
+        ps_sc.executeUpdate();
+        
+        //Now query to retrieve the Clob
+        ResultSet rs = s.executeQuery("select * from ClobTestTable where sno = 1");
+        rs.next();
+        Clob clobRetrieved = rs.getClob(2);
+        rs.close();
+        
+        String str_out = clobRetrieved.getSubString(1L,(int)clobRetrieved.length());
+        
+        assertEquals("Error in inserting data into the Clob object",str,str_out);
+        ps_sc.close();
+    }
+    
+     /**
+      *
+      * Tests the PreparedStatement interface method setAsciiStream
+      *
+      * @throws SQLException
+      *
+      */
+    
+    public void testSetAsciiStream() throws SQLException {
+        //insert default values into the table
+        
+        byte[] bytes = new byte[] {
+            0x65, 0x66, 0x67, 0x68, 0x69,
+            0x69, 0x68, 0x67, 0x66, 0x65
+        };
+        
+        byte [] bytes1 = new byte[10];
+        
+        InputStream is = new java.io.ByteArrayInputStream(bytes);
+        
+        try {
+            is.reset();
+        } catch (IOException ioe) {
+            fail("Failed to reset Clob input stream: " + ioe.getMessage());
+        }
+        
+        PreparedStatement ps_sb = conn.prepareStatement("insert into ClobTestTable values(?,?)");
+        
+        //initially insert the data
+        ps_sb.setInt(1,1);
+        ps_sb.setAsciiStream(2,is,bytes.length);
+        ps_sb.executeUpdate();
+        
+        //Now query to retrieve the Clob
+        ResultSet rs = s.executeQuery("select * from ClobTestTable where sno = 1");
+        rs.next();
+        Clob ClobRetrieved = rs.getClob(2);
+        rs.close();
+        
+        try {
+            InputStream is_ret = ClobRetrieved.getAsciiStream();
+            is_ret.read(bytes1);
+        } catch(IOException ioe) {
+            fail("IOException while reading the Clob from the database");
+        }
+        for(int i=0;i<bytes.length;i++) {
+            assertEquals("Error in inserting data into the Clob",bytes[i],bytes1[i]);
+        }
+        ps_sb.close();
+    }
+    
+    /**
+     *
+     * Tests the PreparedStatement interface method setBinaryStream
+     *
+     * @throws SQLException
+     *
+     */
+    
+    public void testSetBinaryStream() throws SQLException {
+        //insert default values into the table
+        
+        byte[] bytes = new byte[] {
+            0x65, 0x66, 0x67, 0x68, 0x69,
+            0x69, 0x68, 0x67, 0x66, 0x65
+        };
+        
+        byte [] bytes1 = new byte[10];
+        
+        InputStream is = new java.io.ByteArrayInputStream(bytes);
+        
+        try {
+            is.reset();
+        } catch (IOException ioe) {
+            fail("Failed to reset blob input stream: " + ioe.getMessage());
+        }
+        
+        PreparedStatement ps_sb = conn.prepareStatement("insert into BlobTestTable values(?,?)");
+        
+        //initially insert the data
+        ps_sb.setInt(1,1);
+        ps_sb.setBinaryStream(2,is,bytes.length);
+        ps_sb.executeUpdate();
+        
+        //Now query to retrieve the Clob
+        ResultSet rs = s.executeQuery("select * from BlobTestTable where sno = 1");
+        rs.next();
+        Blob blobRetrieved = rs.getBlob(2);
+        rs.close();
+        
+        try {
+            InputStream is_ret = blobRetrieved.getBinaryStream();
+            is_ret.read(bytes1);
+        } catch(IOException ioe) {
+            fail("IOException while reading the Clob from the database");
+        }
+        
+        for(int i=0;i<bytes.length;i++) {
+            assertEquals("Error in inserting data into the Blob",bytes[i],bytes1[i]);
+        }
+        ps_sb.close();
     }
 }

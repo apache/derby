@@ -230,4 +230,51 @@ public class EmbedCallableStatement40 extends EmbedCallableStatement30 {
         }
     }
     
+    /**
+     * Sets the designated parameter to the given input stream, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterName the name of the first parameter
+     * @param x the java input stream which contains the ASCII parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setAsciiStream(String parameterName, InputStream x, long length)
+    throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterName the name of the first parameter
+     * @param x the java input stream which contains the binary parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setBinaryStream(String parameterName, InputStream x, long length)
+    throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * Sets the designated parameter to the given Reader, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterName the name of the first parameter
+     * @param x the java Reader which contains the UNICODE value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+
+    public final void setCharacterStream(String parameterName, Reader x, long length)
+    throws SQLException {
+        throw Util.notImplemented();
+    }
 }
