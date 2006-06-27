@@ -202,9 +202,6 @@ public class ODBCMetadataGenerator {
 		changeMap.put("getBestRowIdentifierAllColumns",
 			new Byte(TYPE_VALUE_CHANGE));
 
-		changeMap.put("getPrimaryKeys",
-			new Byte(TYPE_VALUE_CHANGE));
-
 		changeMap.put("getTypeInfo",
 			new Byte((byte)(COL_RENAME_CHANGE
 				| TYPE_VALUE_CHANGE
@@ -911,16 +908,13 @@ public class ODBCMetadataGenerator {
 	{
 
 		if (queryName.equals("getTypeInfo")) {
-			if (colName.equals("NULLABLE") ||
+			if (colName.equals("DATA_TYPE") ||
 				colName.equals("CASE_SENSITIVE") ||
-				colName.equals("SEARCHABLE") ||
 				colName.equals("UNSIGNED_ATTRIBUTE") ||
 				colName.equals("FIXED_PREC_SCALE") ||
 				colName.equals("AUTO_UNIQUE_VAL") ||
 				colName.equals("SQL_DATA_TYPE") ||
-				colName.equals("SQL_DATETIME_SUB") ||
-				colName.equals("MINIMUM_SCALE") ||
-				colName.equals("MAXIMUM_SCALE"))
+				colName.equals("SQL_DATETIME_SUB"))
 			{
 				return "SMALLINT";
 			}
@@ -928,6 +922,7 @@ public class ODBCMetadataGenerator {
 		else if (queryName.equals("getColumns")) {
 			if (colName.equals("DECIMAL_DIGITS") ||
 				colName.equals("NULLABLE") ||
+				colName.equals("DATA_TYPE") ||
 				colName.equals("NUM_PREC_RADIX") ||
 				colName.equals("SQL_DATA_TYPE") ||
 				colName.equals("SQL_DATETIME_SUB"))
@@ -935,23 +930,24 @@ public class ODBCMetadataGenerator {
 				return "SMALLINT";
 			}
 		}
-		else if (queryName.equals("getVersionColumns")) {
-			if (colName.equals("SCOPE") ||
-				colName.equals("DATA_TYPE") ||
-				colName.equals("DECIMAL_DIGITS") ||
-				colName.equals("PSEUDO_COLUMN"))
-			{
+		else if (queryName.equals("getProcedureColumns")) {
+			if (colName.equals("DATA_TYPE")) {
 				return "SMALLINT";
 			}
 		}
-		else if (queryName.equals("getPrimaryKeys")) {
-			if (colName.equals("KEY_SEQ"))
+		else if (queryName.equals("getVersionColumns")) {
+			if (colName.equals("DATA_TYPE")) {
 				return "SMALLINT";
+			}
+		}
+		else if (queryName.startsWith("getBestRowIdentifier")) {
+			if (colName.equals("DATA_TYPE")) {
+				return "SMALLINT";
+			}
 		}
 		else if (queryName.equals("getIndexInfo")) {
 			if (colName.equals("NON_UNIQUE") ||
-				colName.equals("TYPE") ||
-				colName.equals("ORDINAL_POSITION"))
+				colName.equals("TYPE"))
 			{
 				return "SMALLINT";
 			}

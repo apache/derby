@@ -373,29 +373,29 @@ TEST39B : Verify that there is no entry in system catalogs for SESSION schmea af
 TEST39B PASSED
 TEST40 : DatabaseMetaData.getTables() should not return temporary tables
 getTables() with no types:
-	 TABLE_CAT,TABLE_SCHEM,TABLE_NAME,TABLE_TYPE,REMARKS
-	 --------- ----------- ---------- ---------- -------
-	{,SYS,SYSALIASES,SYSTEM TABLE,}
-	{,SYS,SYSCHECKS,SYSTEM TABLE,}
-	{,SYS,SYSCOLPERMS,SYSTEM TABLE,}
-	{,SYS,SYSCOLUMNS,SYSTEM TABLE,}
-	{,SYS,SYSCONGLOMERATES,SYSTEM TABLE,}
-	{,SYS,SYSCONSTRAINTS,SYSTEM TABLE,}
-	{,SYS,SYSDEPENDS,SYSTEM TABLE,}
-	{,SYS,SYSFILES,SYSTEM TABLE,}
-	{,SYS,SYSFOREIGNKEYS,SYSTEM TABLE,}
-	{,SYS,SYSKEYS,SYSTEM TABLE,}
-	{,SYS,SYSREQUIREDPERM,SYSTEM TABLE,}
-	{,SYS,SYSROUTINEPERMS,SYSTEM TABLE,}
-	{,SYS,SYSSCHEMAS,SYSTEM TABLE,}
-	{,SYS,SYSSTATEMENTS,SYSTEM TABLE,}
-	{,SYS,SYSSTATISTICS,SYSTEM TABLE,}
-	{,SYS,SYSTABLEPERMS,SYSTEM TABLE,}
-	{,SYS,SYSTABLES,SYSTEM TABLE,}
-	{,SYS,SYSTRIGGERS,SYSTEM TABLE,}
-	{,SYS,SYSVIEWS,SYSTEM TABLE,}
-	{,SYSIBM,SYSDUMMY1,SYSTEM TABLE,}
-	{,SESSION,T3,TABLE,}
+	 TABLE_CAT,TABLE_SCHEM,TABLE_NAME,TABLE_TYPE,REMARKS,TYPE_CAT,TYPE_SCHEM,TYPE_NAME,SELF_REFERENCING_COL_NAME,REF_GENERATION
+	 --------- ----------- ---------- ---------- ------- -------- ---------- --------- ------------------------- --------------
+	{,SYS,SYSALIASES,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSCHECKS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSCOLPERMS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSCOLUMNS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSCONGLOMERATES,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSCONSTRAINTS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSDEPENDS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSFILES,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSFOREIGNKEYS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSKEYS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSREQUIREDPERM,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSROUTINEPERMS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSSCHEMAS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSSTATEMENTS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSSTATISTICS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSTABLEPERMS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSTABLES,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSTRIGGERS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYS,SYSVIEWS,SYSTEM TABLE,,null,null,null,null,null}
+	{,SYSIBM,SYSDUMMY1,SYSTEM TABLE,,null,null,null,null,null}
+	{,SESSION,T3,TABLE,,null,null,null,null,null}
 TEST40 PASSED
 TEST41 : delete where current of on temporary tables
 	 C21,C22

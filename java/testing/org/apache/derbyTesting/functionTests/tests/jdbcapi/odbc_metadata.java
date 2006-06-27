@@ -509,7 +509,13 @@ public class odbc_metadata extends metadata_test {
 			"TABLE_SCHEM", "VARCHAR", null,
 			"TABLE_NAME", "VARCHAR", null,
 			"TABLE_TYPE", "VARCHAR", null,
-			"REMARKS", "VARCHAR", null
+			"REMARKS", "VARCHAR", null,
+			// the next columns are not defined in ODBC
+			"TYPE_CAT", "VARCHAR", null,
+			"TYPE_SCHEM", "VARCHAR", null,
+			"TYPE_NAME", "VARCHAR", null,
+			"SELF_REFERENCING_COL_NAME", "VARCHAR", null,
+			"REF_GENERATION", "VARCHAR", null,
 
 		};
 
@@ -532,7 +538,13 @@ public class odbc_metadata extends metadata_test {
 			"SQL_DATETIME_SUB", "SMALLINT", null,
 			"CHAR_OCTET_LENGTH", "INTEGER", null,
 			"ORDINAL_POSITION", "INTEGER", "NOT NULL",
-			"IS_NULLABLE", "VARCHAR", null
+			"IS_NULLABLE", "VARCHAR", null,
+			// the next columns are not defined in ODBC
+			"SCOPE_CATLOG", "VARCHAR", null,
+			"SCOPE_SCHEMA", "VARCHAR", null,
+			"SCOPE_TABLE", "VARCHAR", null,
+			"SOURCE_DATA_TYPE", "SMALLINT", null,
+			"IS_AUTOINCREMENT", "VARCHAR", "NOT NULL",
 
 		};
 

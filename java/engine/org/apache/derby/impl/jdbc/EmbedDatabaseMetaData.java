@@ -1527,7 +1527,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> procedureColumnReturn - procedure return value
      *      <LI> procedureColumnResult - result column in ResultSet
      *      </UL>
-     *  <LI><B>DATA_TYPE</B> short => SQL type from java.sql.Types
+     *  <LI><B>DATA_TYPE</B> int => SQL type from java.sql.Types
      *	<LI><B>TYPE_NAME</B> String => SQL type name
      *	<LI><B>PRECISION</B> int => precision
      *	<LI><B>LENGTH</B> int => length in bytes of data
@@ -1673,6 +1673,19 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *			"VIEW",	"SYSTEM TABLE", "GLOBAL TEMPORARY",
      *			"LOCAL TEMPORARY", "ALIAS", "SYNONYM".
      *	<LI><B>REMARKS</B> String => explanatory comment on the table
+     *  <LI><B>TYPE_CAT</B> String => the types catalog (may be
+     *          <code>null</code>)
+     *  <LI><B>TYPE_SCHEM</B> String => the types schema (may be
+     *          <code>null</code>)
+     *  <LI><B>TYPE_NAME</B> String => type name (may be
+     *          <code>null</code>)
+     *  <LI><B>SELF_REFERENCING_COL_NAME</B> String => name of the
+     *          designated "identifier" column of a typed table (may
+     *          be <code>null</code>)
+     *  <LI><B>REF_GENERATION</B> String => specifies how values in
+     *          SELF_REFERENCING_COL_NAME are created. Values are
+     *          "SYSTEM", "USER", "DERIVED". (may be
+     *          <code>null</code>)
      *  </OL>
      *
      * <P><B>Note:</B> Some databases may not return information for
@@ -1808,7 +1821,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *	<LI><B>TABLE_SCHEM</B> String => table schema (may be null)
      *	<LI><B>TABLE_NAME</B> String => table name
      *	<LI><B>COLUMN_NAME</B> String => column name
-     *	<LI><B>DATA_TYPE</B> short => SQL type from java.sql.Types
+     *	<LI><B>DATA_TYPE</B> int => SQL type from java.sql.Types
      *	<LI><B>TYPE_NAME</B> String => Data source dependent type name
      *	<LI><B>COLUMN_SIZE</B> int => column size.  For char or date
      *	    types this is the maximum number of characters, for numeric or
@@ -1833,6 +1846,27 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *	<LI><B>IS_NULLABLE</B> String => "NO" means column definitely
      *      does not allow NULL values; "YES" means the column might
      *      allow NULL values.  An empty string means nobody knows.
+     *  <LI><B>SCOPE_CATLOG</B> String => catalog of table that is the
+     *  scope of a reference attribute (<code>null</code> if DATA_TYPE
+     *  isn't REF)
+     *  <LI><B>SCOPE_SCHEMA</B> String => schema of table that is the
+     *  scope of a reference attribute (<code>null</code> if the
+     *  DATA_TYPE isn't REF)
+     *  <LI><B>SCOPE_TABLE</B> String => table name that this the
+     *  scope of a reference attribure (<code>null</code> if the
+     *  DATA_TYPE isn't REF)
+     *  <LI><B>SOURCE_DATA_TYPE</B> short => source type of a distinct
+     *  type or user-generated Ref type, SQL type from java.sql.Types
+     *  (<code>null</code> if DATA_TYPE isn't DISTINCT or
+     *  user-generated REF)
+     *  <LI><B>IS_AUTOINCREMENT</B> String => Indicates whether this
+     *  column is auto incremented
+     *  <UL>
+     *  <LI> YES --- if the column is auto incremented
+     *  <LI> NO --- if the column is not auto incremented
+     *  <LI> empty string --- if it cannot be determined whether the
+     *       column is auto incremented parameter is unknown
+     *  </UL>
      *  </OL>
      *
      * @param catalog a catalog name; "" retrieves those without a
@@ -1979,7 +2013,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> bestRowSession - valid for remainder of current session
      *      </UL>
      *	<LI><B>COLUMN_NAME</B> String => column name
-     *	<LI><B>DATA_TYPE</B> short => SQL data type from java.sql.Types
+     *	<LI><B>DATA_TYPE</B> int => SQL data type from java.sql.Types
      *	<LI><B>TYPE_NAME</B> String => Data source dependent type name
      *	<LI><B>COLUMN_SIZE</B> int => precision
      *	<LI><B>BUFFER_LENGTH</B> int => not used
@@ -2174,7 +2208,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *  <OL>
      *	<LI><B>SCOPE</B> short => is not used
      *	<LI><B>COLUMN_NAME</B> String => column name
-     *	<LI><B>DATA_TYPE</B> short => SQL data type from java.sql.Types
+     *	<LI><B>DATA_TYPE</B> int => SQL data type from java.sql.Types
      *	<LI><B>TYPE_NAME</B> String => Data source dependent type name
      *	<LI><B>COLUMN_SIZE</B> int => precision
      *	<LI><B>BUFFER_LENGTH</B> int => length of column value in bytes
@@ -2283,31 +2317,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public ResultSet getPrimaryKeys(String catalog, String schema,
 			String table) throws SQLException {
-		return doGetPrimaryKeys(catalog, schema, table, "getPrimaryKeys");
-	}
-
-	/**
-	 * Get a description of a table's primary key columns.  They
-	 * are ordered by COLUMN_NAME.  Same as getPrimaryKeys above,
-	 * except that the result set will conform to ODBC specifications.
-	 */
-	public ResultSet getPrimaryKeysForODBC(String catalog, String schema,
-				String table) throws SQLException {
-		return doGetPrimaryKeys(catalog, schema, table, "odbc_getPrimaryKeys");
-	}
-
-	/**
-	 * Does the actual work for the getPrimaryKeys metadata
-	 * calls.  See getPrimaryKeys() method above for parameter
-	 * descriptions.
-	 * @param queryName Name of the query to execute; is used
-	 *	to determine whether the result set should conform to
-	 *	JDBC or ODBC specifications.
-	 */
-	private ResultSet doGetPrimaryKeys(String catalog, String schema,
-		String table, String queryName) throws SQLException {
-
-		PreparedStatement s = getPreparedQuery(queryName);
+		PreparedStatement s = getPreparedQuery("getPrimaryKeys");
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schema));
 		s.setString(3, swapNull(table));
@@ -2570,7 +2580,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * <P>Each type description has the following columns:
      *  <OL>
      *	<LI><B>TYPE_NAME</B> String => Type name
-     *	<LI><B>DATA_TYPE</B> short => SQL data type from java.sql.Types
+     *	<LI><B>DATA_TYPE</B> int => SQL data type from java.sql.Types
      *	<LI><B>PRECISION</B> int => maximum precision
      *	<LI><B>LITERAL_PREFIX</B> String => prefix used to quote a literal
      *      (may be null)
@@ -2940,6 +2950,12 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *	<LI><B>DATA_TYPE</B> String => type value defined in java.sql.Types.  
      *  One of JAVA_OBJECT, STRUCT, or DISTINCT
      *	<LI><B>REMARKS</B> String => explanatory comment on the type
+     *  <LI><B>BASE_TYPE</B> short => type code of the source type of
+     *  a DISTINCT type or the type that implements the user-generated
+     *  reference type of the SELF_REFERENCING_COLUMN of a structured
+     *  type as defined in java.sql.Types (<code>null</code> if
+     *  DATA_TYPE is not DISTINCT or not STRUCT with
+     *  REFERENCE_GENERATION = USER_DEFINED)
      *  </OL>
      *
      * <P><B>Note:</B> If the driver does not support UDTs then an empty

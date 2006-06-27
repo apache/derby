@@ -2193,7 +2193,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 "CAST(NULL AS VARCHAR(128)) AS TYPE_SCHEM," +
                 "VARCHAR('', 128) AS TYPE_NAME," +
                 "VARCHAR('',128) AS ATTR_NAME," +
-                "SMALLINT(0) AS DATA_TYPE," +
+                "0 AS DATA_TYPE," +
                 "VARCHAR('',129) AS ATTR_TYPE_NAME," +
                 "0 AS ATTR_SIZE," +
                 "0 AS DECIMAL_DIGITS," +

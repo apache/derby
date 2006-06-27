@@ -494,10 +494,7 @@ public class SystemProcedures  {
 	public static void SQLPRIMARYKEYS (String catalogName, String schemaName, String tableName, String options, ResultSet[] rs)
 		throws SQLException
 	{
-		rs[0] = isForODBC(options)
-			? ((EmbedDatabaseMetaData)getDMD()).getPrimaryKeysForODBC(
-				catalogName, schemaName, tableName)
-			: getDMD().getPrimaryKeys(catalogName, schemaName, tableName);
+		rs[0] = getDMD().getPrimaryKeys(catalogName, schemaName, tableName);
 	}
 
 	/**

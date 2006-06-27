@@ -61,7 +61,7 @@ import org.apache.derby.shared.common.reference.JDBC40Translation;
       <LI> procedureColumnReturn - procedure return value
       <LI> procedureColumnResult - result column in ResultSet
       </UL>
-  <LI><B>DATA_TYPE</B> short => SQL type from java.sql.Types
+  <LI><B>DATA_TYPE</B> int => SQL type from java.sql.Types
         <LI><B>TYPE_NAME</B> String => SQL type name, for a UDT type the
   type name is fully qualified
         <LI><B>PRECISION</B> int => precision
@@ -200,6 +200,12 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
     {
         switch (column) 
         {
+        case 3: // DATA_TYPE:
+            if (sqlType != null) {
+                return sqlType.getJDBCTypeId();
+            }
+            return java.sql.Types.JAVA_OBJECT;
+
 		case 5: // PRECISION:
                 if (sqlType != null)
                 {
@@ -240,12 +246,6 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
         {
 		case 2: // COLUMN_TYPE:
 			return columnType;
-
-		case 3: // DATA_TYPE:
-                if (sqlType != null)
-                    return (short)sqlType.getJDBCTypeId();
-                else
-                    return (short) java.sql.Types.JAVA_OBJECT;
 
 		case 7: // SCALE:
                 if (sqlType != null)
@@ -296,7 +296,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 
 		EmbedResultSetMetaData.getResultColumnDescriptor("COLUMN_NAME",				 Types.VARCHAR, false, 128),
 		EmbedResultSetMetaData.getResultColumnDescriptor("COLUMN_TYPE",				 Types.SMALLINT, false),
-		EmbedResultSetMetaData.getResultColumnDescriptor("DATA_TYPE",				 Types.SMALLINT, false),
+		EmbedResultSetMetaData.getResultColumnDescriptor("DATA_TYPE",				 Types.INTEGER, false),
 		EmbedResultSetMetaData.getResultColumnDescriptor("TYPE_NAME",				 Types.VARCHAR, false, 22),
 		EmbedResultSetMetaData.getResultColumnDescriptor("PRECISION",				 Types.INTEGER, false),
 		EmbedResultSetMetaData.getResultColumnDescriptor("LENGTH",					 Types.INTEGER, false),
