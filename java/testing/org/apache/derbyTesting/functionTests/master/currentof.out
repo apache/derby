@@ -13,7 +13,7 @@ Row: 3,you are the one
 Have 4 rows in table at start
 ERROR 42X28: Delete table 'S' is not target of cursor 'SQLCUR0'.
 PASS: delete table and cursor table mismatch caught
-ERROR XCL08: Cursor 'SQLCUR0' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 PASS: Attempt to delete cursor before first row caught
 PASS: expected and got true
 Row: 1956,hello world                                       
@@ -26,7 +26,7 @@ PASS: expected and got 1 rowon stmt: <delete after skipping>
 PASS: expected and got true
 Row: 3,you are the one                                   
 PASS: expected and got false
-ERROR XCL08: Cursor 'SQLCUR0' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 PASS: Attempt to delete cursor past last row caught
 ERROR XCL07: Cursor 'SQLCUR0' is closed. Verify that autocommit is OFF.
 PASS: Attempt to delete closed cursor caught
@@ -59,7 +59,7 @@ PASS: update of values clause cursor caught
 PASS: update of subquery cursor caught
 ERROR 42X29: Update table 'S' is not the target of cursor 'SQLCUR2'.
 PASS: update table and cursor table mismatch caught
-ERROR XCL08: Cursor 'SQLCUR2' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 PASS: Attempt to update cursor before first row caught
 PASS: expected and got true
 Row: 1956,hello world                                       
@@ -73,7 +73,7 @@ PASS: expected and got 1 rowon stmt: update after skipping
 PASS: expected and got true
 Row: 3,you are the one                                   
 PASS: expected and got false
-ERROR XCL08: Cursor 'SQLCUR2' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 PASS: Attempt to update cursor past last row caught
 ERROR 42X30: Cursor 'SQLCUR2' not found. Verify that autocommit is OFF.
 PASS: Attempt to update closed cursor caught

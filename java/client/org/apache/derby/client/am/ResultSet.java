@@ -3835,7 +3835,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         long rowToFetch = getRowUncast() - absolutePosition_;
 
         // if rowToFetch is zero, already positioned on the current row
-        if (rowToFetch != 0 || cursorUnpositionedOnServer_) {
+        if (rowToFetch != 0) {
             writePositioningFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_,
                     scrollOrientation_relative__,
                     rowToFetch);

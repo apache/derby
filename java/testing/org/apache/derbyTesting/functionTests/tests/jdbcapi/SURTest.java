@@ -18,6 +18,7 @@
  * language governing permissions and limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -242,6 +243,125 @@ public class SURTest extends SURBaseTest {
         rs.next();
         verifyTuple(rs);
         assertFailOnUpdate(rs);
+    }
+
+    /** 
+     * Test that when doing an update immediately after
+     * a commit, the update fails, because the cursor has been 
+     * postioned between the current row and the next row.
+     * The test uses a FORWARD_ONLY resultset and ResultSet update methods
+     * when doing the update.
+     */
+    public void testCursorStateAfterCommit1() 
+        throws SQLException
+    {
+        testCursorStateAfterCommit(false, ResultSet.TYPE_FORWARD_ONLY);
+    }
+
+    /** 
+     * Test that when doing an update immediately after
+     * a commit, the update fails, because the cursor has been 
+     * postioned between the current row and the next row.
+     * The test uses a SCROLL_INSENSITIVE resultset and ResultSet update methods
+     * when doing the update.
+     */
+    public void testCursorStateAfterCommit2() 
+        throws SQLException
+    {
+        testCursorStateAfterCommit(false, ResultSet.TYPE_SCROLL_INSENSITIVE);
+    }
+    
+     /** 
+     * Test that when doing an update immediately after
+     * a commit, the update fails, because the cursor has been 
+     * postioned between the current row and the next row.
+     * The test uses a FORWARD_ONLY resultset and positioned updates.
+     */
+    public void testCursorStateAfterCommit3() 
+        throws SQLException
+    {
+        testCursorStateAfterCommit(true, ResultSet.TYPE_FORWARD_ONLY);
+    }
+
+    /** 
+     * Test that when doing an update immediately after
+     * a commit, the update fails, because the cursor has been 
+     * postioned between the current row and the next row.
+     * The test uses a SCROLL_INSENSITIVE resultset and positioned updates.
+     */
+    public void testCursorStateAfterCommit4() 
+        throws SQLException
+    {
+        testCursorStateAfterCommit(true, ResultSet.TYPE_SCROLL_INSENSITIVE);
+    }
+    
+    /** 
+     * Test that when doing an update immediately after
+     * a commit, the update fails, because the cursor has been 
+     * postioned between the current row and the next row.
+     * If the cursor gets repositioned, it allows an update.
+     * @param positioned true to use positioned update, otherwise use 
+     *                   ResultSet.updateRow()
+     * @param resultSetType type of result set (as in ResultSet.getType())
+     */
+    private void testCursorStateAfterCommit(final boolean positioned, 
+                                            final int resultSetType) 
+        throws SQLException
+    {
+        final Statement s = con.createStatement(resultSetType, 
+                                                ResultSet.CONCUR_UPDATABLE);
+        final String cursorName = getNextCursorName();
+        s.setCursorName(cursorName);
+        
+        final ResultSet rs = s.executeQuery("select a from t1");
+        final int recordToUpdate = 5;
+        
+        if (resultSetType==ResultSet.TYPE_FORWARD_ONLY) {
+            for (int i = 0; i < recordToUpdate; i++) {
+                rs.next();
+            }
+        } else {
+            rs.absolute(recordToUpdate);
+        }
+        
+        con.commit();
+        
+        PreparedStatement ps = 
+            con.prepareStatement("update t1 set a=? where current of " +
+                                 cursorName);
+        // First: check that we get an exception on update without repositioning:
+        try {
+            if (positioned) {
+                ps.setInt(1, -1);
+                ps.executeUpdate();                
+                fail("Expected exception to be thrown on positioned update " + 
+                     "since cursor is not positioned");
+            } else {
+                rs.updateInt(1, -1);
+                rs.updateRow();
+                fail("Expected exception to be thrown on updateRow() since " +
+                     "cursor is not positioned");
+            }
+        } catch (SQLException e) {
+            assertSQLState("Unexpected SQLState when updating row after commit",
+                           SQLStateConstants.INVALID_CURSOR_STATE_NO_SUBCLASS,
+                           e);
+        }
+        
+        // Check that we after a repositioning can update:
+        if (resultSetType==ResultSet.TYPE_FORWARD_ONLY) {
+            rs.next();
+        } else {
+            rs.relative(0);
+        }
+        if (positioned) {
+            ps.setInt(1, -1);
+            ps.executeUpdate();                
+        } else {
+            rs.updateInt(1, -1);
+            rs.updateRow();
+        }
+        
     }
 
     /**

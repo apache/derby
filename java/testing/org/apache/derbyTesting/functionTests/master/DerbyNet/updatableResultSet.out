@@ -61,8 +61,8 @@ Got expected exception This method cannot be invoked while the cursor is on the 
 Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when the resultset is not positioned on a row
 Make sure that we got CONCUR_UPDATABLE? true
 Now attempt a deleteRow without first doing next on the resultset.
-SQL State : XCL08
-Got expected exception Cursor 'SQL_CURSH200C7' is not on a row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Now attempt a updateRow without first doing next on the resultset.
 In embedded mode, updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX
 In Network Server mode, if no updateXXX were issued before updateRow, then updateRow is a no-op and doesn't check if it is on a row or not

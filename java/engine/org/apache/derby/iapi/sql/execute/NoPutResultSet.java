@@ -150,12 +150,6 @@ public interface NoPutResultSet extends ResultSet, RowLocationRetRowSource
 	public void setCurrentRow(ExecRow row);
 
 	/**
-	 * Clear the current row
-	 *
-	 */
-	public void clearCurrentRow();
-
-	/**
 	 * Do we need to relock the row when going to the heap.
 	 *
 	 * @return Whether or not we need to relock the row when going to the heap.

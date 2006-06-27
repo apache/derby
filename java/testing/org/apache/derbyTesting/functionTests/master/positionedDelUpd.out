@@ -52,7 +52,7 @@ ij> -- .same table name
 get cursor c1 as 'select * from t2 for update';
 ij> -- 'cursor not on a row' expected
 delete from t2 where current of c1;
-ERROR XCL08: Cursor 'C1' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> -- .different table name
 delete from t1 where current of c1;
 ERROR 42X28: Delete table 'T1' is not target of cursor 'C1'.
@@ -73,7 +73,7 @@ ij> -- .delete from  base table, not exposed table name
 -- (this one should work, since base table)
 get cursor c2 as 'select * from t2 asdf for update';
 ij> delete from t2 where current of c2;
-ERROR XCL08: Cursor 'C2' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> -- restore t1
 delete from t1;
 1 row inserted/updated/deleted
@@ -108,7 +108,7 @@ No current row
 ij> next c4;
 No current row
 ij> delete from t1 where current of c4;
-ERROR XCL08: Cursor 'C4' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> close c4;
 ij> -- .target cursor exists, closed
 get cursor c5 as 'select * from t1';
@@ -150,7 +150,7 @@ I          |V         |D                     |T
 ij> delete from t1 where current of c7;
 1 row inserted/updated/deleted
 ij> delete from t1 where current of c8;
-ERROR XCL08: Cursor 'C8' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> select * from t1;
 I          |V         |D                     |T       
 ------------------------------------------------------
@@ -174,7 +174,7 @@ I          |V         |D                     |T
 ij> delete from t1 where current of c9;
 1 row inserted/updated/deleted
 ij> delete from t1 where current of c9;
-ERROR XCL08: Cursor 'C9' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> select * from t1;
 I          |V         |D                     |T       
 ------------------------------------------------------
@@ -230,7 +230,7 @@ I          |V         |D                     |T
 ------------------------------------------------------
 2          |1111111111|1.1E12                |11:11:11
 ij> delete from t1 where current of c10a;
-ERROR XCL08: Cursor 'C10A' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> select * from t1;
 I          |V         |D                     |T       
 ------------------------------------------------------
@@ -259,7 +259,7 @@ I          |V         |D                     |T
 ------------------------------------------------------
 2          |1111111111|1.1E12                |11:11:11
 ij> delete from t1 where current of c11;
-ERROR XCL08: Cursor 'C11' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> select * from t1;
 I          |V         |D                     |T       
 ------------------------------------------------------
@@ -425,7 +425,7 @@ ij> -- .same table name
 get cursor c1 as 'select * from t2 for update';
 ij> -- 'cursor not on a row' expected
 update t2 set s = s where current of c1;
-ERROR XCL08: Cursor 'C1' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> -- .different table name
 update t1 set i = i where current of c1;
 ERROR 42X29: Update table 'T1' is not the target of cursor 'C1'.
@@ -437,7 +437,7 @@ ij> -- .update base table, not exposed table name
 -- (this one should work, since base table)
 get cursor c2 as 'select * from t2 asdf for update';
 ij> update t2 set s = s where current of c2;
-ERROR XCL08: Cursor 'C2' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> -- .match correlation name
 -- (this one should fail, since correlation name)
 update asdf set s = s where current of c2;
@@ -463,7 +463,7 @@ No current row
 ij> next c4;
 No current row
 ij> update t1 set i = i where current of c4;
-ERROR XCL08: Cursor 'C4' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> close c4;
 ij> -- .target cursor exists, closed
 get cursor c5 as 'select * from t1';
@@ -513,7 +513,7 @@ I          |V         |D                     |T
 ij> delete from t1 where current of c7;
 1 row inserted/updated/deleted
 ij> update t1 set i = i + 1 where current of c8;
-ERROR XCL08: Cursor 'C8' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> select * from t1;
 I          |V         |D                     |T       
 ------------------------------------------------------
@@ -537,7 +537,7 @@ I          |V         |D                     |T
 ij> delete from t1 where current of c9;
 1 row inserted/updated/deleted
 ij> update t1 set i = i + 1 where current of c9;
-ERROR XCL08: Cursor 'C9' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> select * from t1;
 I          |V         |D                     |T       
 ------------------------------------------------------
@@ -594,7 +594,7 @@ I          |V         |D                     |T
 ------------------------------------------------------
 2          |1111111111|1.1E12                |11:11:11
 ij> update t1 set i = i + 2 where current of c10a;
-ERROR XCL08: Cursor 'C10A' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> select * from t1;
 I          |V         |D                     |T       
 ------------------------------------------------------
@@ -623,7 +623,7 @@ I          |V         |D                     |T
 ------------------------------------------------------
 2          |1111111111|1.1E12                |11:11:11
 ij> update t1 set i = i + 2 where current of c11;
-ERROR XCL08: Cursor 'C11' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> select * from t1;
 I          |V         |D                     |T       
 ------------------------------------------------------

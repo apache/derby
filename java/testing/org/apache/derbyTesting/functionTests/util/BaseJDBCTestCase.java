@@ -130,10 +130,8 @@ public class BaseJDBCTestCase
                                       SQLException exception) {
         // Make sure exception is not null. We want to separate between a
         // null-exception object, and a null-SQLState.
-        if (exception == null) {
-            throw new IllegalArgumentException("Exception cannot be null " +
-                                               "when asserting SQLState");
-        }
+        assertNotNull("Exception cannot be null when asserting on SQLState", 
+                      exception);
         
         String state = exception.getSQLState();
         

@@ -238,7 +238,7 @@ public class currentof {
    		} catch (SQLException se) {
 			String m = se.getSQLState();
 			JDBCDisplayUtil.ShowSQLException(System.out,se);
-			if ("XCL08".equals(m)) {
+			if ("24000".equals(m)) {
 				caught = true;
 				System.out.println("PASS: Attempt to delete cursor before first row caught");
 			} else {
@@ -296,7 +296,7 @@ public class currentof {
    		} catch (SQLException se) {
 			String m = se.getSQLState();
 			JDBCDisplayUtil.ShowSQLException(System.out,se);
-			if ("XCL08".equals(m)) {
+			if ("24000".equals(m)) {
 				caught = true;
 				System.out.println("PASS: Attempt to delete cursor past last row caught");
 			} else {
@@ -593,7 +593,7 @@ public class currentof {
    		} catch (SQLException se) {
 			String m = se.getSQLState();
 			JDBCDisplayUtil.ShowSQLException(System.out,se);
-			if ("XCL08".equals(m)) {
+			if ("24000".equals(m)) {
 				caught = true;
 				System.out.println("PASS: Attempt to update cursor before first row caught");
 			} else {
@@ -628,7 +628,7 @@ public class currentof {
    		} catch (SQLException se) {
 			String m = se.getSQLState();
 			JDBCDisplayUtil.ShowSQLException(System.out,se);
-			if ("XCL08".equals(m)) {
+			if ("24000".equals(m)) {
 				caught = true;
 				System.out.println("PASS: Attempt to update cursor past last row caught");
 			} else {

@@ -382,7 +382,7 @@ ij> -- test extra state in update
 get cursor c1 as 'select * from x for update of x';
 ij> prepare p1 as 'update x set x = x where current of c1';
 ij> execute p1;
-ERROR XCL08: Cursor 'C1' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> next c1;
 X          |Y          
 -----------------------

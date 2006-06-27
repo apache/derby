@@ -361,12 +361,15 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	public void reset() throws StandardException
 	{
 		// if resultset holdability after commit is false, close it
-		if (resultSet != null && (!resultSetHoldability || !resultSet.returnsRows())) {
-			// would really like to check if it is open,
-			// this is as close as we can approximate that.
-			resultSet.close();
-			resultSet = null; // forget about it, prepare for next exec.
-
+		if (resultSet != null) {
+			if (!resultSetHoldability || !resultSet.returnsRows()) {			
+				// would really like to check if it is open,
+				// this is as close as we can approximate that.
+				resultSet.close();
+				resultSet = null; // forget about it, prepare for next exec.
+			} else if (resultSet.returnsRows()) {
+				resultSet.clearCurrentRow();
+			}
 		}
 		updateHeapCC = null;
 		// REMIND: do we need to get them to stop input as well?

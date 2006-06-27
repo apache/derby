@@ -175,7 +175,7 @@ ij> -- sixth test - try positioned update with hold cursor
 get with hold cursor jdk4 as 'SELECT * FROM t1 FOR UPDATE';
 ij> -- following should give error because cursor is not positioned on any row
 update t1 set c12=12 where current of jdk4;
-ERROR XCL08: Cursor 'JDK4' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> select * from t1;
 C11        |C12        
 -----------------------
@@ -225,7 +225,7 @@ ij> -- seventh test - try positioned delete with hold cursor
 get with hold cursor jdk4 as 'SELECT * FROM t1 FOR UPDATE';
 ij> -- following should give error because cursor is not positioned on any row
 delete from t1 where current of jdk4;
-ERROR XCL08: Cursor 'JDK4' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> select * from t1;
 C11        |C12        
 -----------------------

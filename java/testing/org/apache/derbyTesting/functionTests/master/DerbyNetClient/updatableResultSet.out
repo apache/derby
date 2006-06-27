@@ -45,8 +45,8 @@ Got expected exception 'updateRow' not allowed because the ResultSet is not an u
 Negative Test7 - attempt to deleteRow & updateRow on updatable resultset when the resultset is not positioned on a row
 Make sure that we got CONCUR_UPDATABLE? true
 Now attempt a deleteRow without first doing next on the resultset.
-SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Now attempt a updateRow without first doing next on the resultset.
 updateRow will check if it is on a row or not even though no changes have been made to the row using updateXXX
 SQL State : XJ121
@@ -111,8 +111,8 @@ Since after deleteRow(), in embedded mode and Network Server mode using Derby Ne
 SQL State : XJ121
 Got expected exception Invalid operation at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
-SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
 Positive Test1b - request updatable resultset for forward only type resultset
@@ -137,8 +137,8 @@ column 2 on this row before positioned delete aa
 column 1 on this deleted row is 234
 column 2 on this deleted row is aa                  
 doing positioned delete again w/o first positioning the ResultSet on the next row will fail
-SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to do positioned delete on the current row now
 Positive Test1d - updatable resultset to do positioned update
@@ -176,8 +176,8 @@ Since after deleteRow(), ResultSet is positioned before the next row, getXXX wil
 SQL State : XJ121
 Got expected exception Invalid operation at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
-SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
 Positive Test3b - use prepared statement with concur updatable status to test updateXXX
@@ -207,8 +207,8 @@ Since after deleteRow(), ResultSet is positioned before the next row, getXXX wil
 SQL State : XJ121
 Got expected exception Invalid operation at current cursor position.
 calling deleteRow again w/o first positioning the ResultSet on the next row will fail
-SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Position the ResultSet with next()
 Should be able to deletRow() on the current row now
 Positive Test5 - donot have to select primary key to get an updatable resultset
@@ -311,8 +311,8 @@ Table t1 has following rows
 Positive Test10 - 2 updatable resultsets going against the same table, will they conflict?
 delete using first resultset
 attempt to send deleteRow on the same row through a different resultset should throw an exception
-SQL State : XCL08
-Got expected exception Cursor '<xxx-cursor-name-xxx>' is not on a row.
+SQL State : 24000
+Got expected exception Invalid cursor state - no current row.
 Move to next row in the 2nd resultset and then delete using the second resultset
 Positive Test11 - setting the fetch size to > 1 will be ignored by updatable resultset. Same as updatable cursors
 Notice the Fetch Size in run time statistics output.

@@ -210,6 +210,18 @@ public interface ResultSet
 	 */
 	ExecRow	setAfterLastRow() throws StandardException;
 
+	/**
+	 * Clear the current row. The cursor keeps it current position,
+	 * however it cannot be used for positioned updates or deletes
+	 * until a fetch is done.
+	 * This is done after a commit on holdable
+	 * result sets.
+	 * A fetch is achieved by calling one of the positioning 
+	 * methods: getLastRow(), getNextRow(), getPreviousRow(), 
+	 * getFirstRow(), getRelativeRow(..) or getAbsoluteRow(..).
+	 */
+	void clearCurrentRow();
+	 
     /**
 		Determine if the result set is at one of the positions
 		according to the constants above (ISBEFOREFIRST etc).

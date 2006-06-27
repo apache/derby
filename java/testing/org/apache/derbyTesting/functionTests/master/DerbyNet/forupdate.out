@@ -171,7 +171,7 @@ get cursor c5 as 'select i as v from t1 for update of v';
 ij> -- i (renamed v in the select) is an integer; but v is still the
 ----- varchar column, so this compiles (gets a no current row error):
 update t1 set v='hello' where current of c5;
-ERROR XCL08: Cursor 'SQL_CURSH200C1' is not on a row.
+ERROR 24000: Invalid cursor state - no current row.
 ij> close c5;
 ij> -- . include duplicate column name
 ----- expect an error:

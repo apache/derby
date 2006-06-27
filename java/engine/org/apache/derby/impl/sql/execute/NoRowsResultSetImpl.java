@@ -313,6 +313,16 @@ abstract class NoRowsResultSetImpl implements ResultSet
 		throw StandardException.newException(SQLState.LANG_DOES_NOT_RETURN_ROWS, "afterLast");
 	}
 
+	/**
+	 * Clear the current row. This is done after a commit on holdable
+	 * result sets.
+	 * This is a no-op on result set which do not provide rows.
+	 */
+	public final void clearCurrentRow() 
+	{
+		
+	}
+
     /**
      * Determine if the cursor is before the first row in the result 
      * set.   

@@ -114,7 +114,7 @@ public class CurrentOfResultSet extends NoPutResultSetImpl
 
 				// requalify the current row
 				if (cursorRow == null) {
-				     throw StandardException.newException(SQLState.LANG_NO_CURRENT_ROW, cursorName);
+					throw StandardException.newException(SQLState.NO_CURRENT_ROW);
 				}
 				// we know it will be requested, may as well get it now.
 				rowLocation = cursor.getRowLocation();
