@@ -210,7 +210,7 @@ public class closed implements Runnable {
 					else
 					{
 						sb.append(sqle.getMessage());
-						sqle.printStackTrace();
+						sqle.printStackTrace(System.out);
 					}
 				} else {
 					sb.append(sqle.getMessage());
