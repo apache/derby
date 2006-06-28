@@ -191,7 +191,51 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
         throw SQLExceptionFactory.notImplemented ("setSQLXML (int, SQLXML)");
     }
-    
+
+    /*********************************************************************************************************
+     * End of methods from PreparedStatement for JDBC 4.0
+     *********************************************************************************************************/
+
+    public void setAsciiStream(String parameterName, InputStream x)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "setAsciiStream(String,InputStream)");
+    }
+
+    public void setBinaryStream(String parameterName, InputStream x)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "setBinaryStream(String,InputStream)");
+    }
+
+    public void setBlob(String parameterName, InputStream inputStream)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "setBlob(String,InputStream)");
+    }
+
+    public void setCharacterStream(String parameterName, Reader reader)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "setCharacterStream(String,Reader)");
+    }
+
+    public void setClob(String parameterName, Reader reader)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setClob(String,Reader)");
+    }
+
+    public void setNCharacterStream(String parameterName, Reader value)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "setNCharacterStream(String,Reader)");
+    }
+
+    public void setNClob(String parameterName, Reader reader)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setNClob(String,Reader)");
+    }
+
     /**
      * Returns <code>this</code> if this class implements the interface
      *

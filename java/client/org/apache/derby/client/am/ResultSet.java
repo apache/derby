@@ -3124,6 +3124,16 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
+    public void updateNCharacterStream(int columnIndex, Reader x)
+            throws SQLException {
+        throw jdbc3MethodNotSupported();
+    }
+
+    public void updateNClob(int columnIndex, Reader reader)
+            throws SQLException {
+        throw jdbc3MethodNotSupported();
+    }
+
     // ---------------------- update on column name methods ----------------------
 
     public void updateNull(String columnName) throws SQLException {
@@ -3396,6 +3406,16 @@ public abstract class ResultSet implements java.sql.ResultSet,
         {
             throw se.getSQLException();
         }
+    }
+
+    public void updateNCharacterStream(String columnName, Reader x)
+            throws SQLException {
+        throw jdbc3MethodNotSupported();
+    }
+
+    public void updateNClob(String columnName, Reader reader)
+            throws SQLException {
+        throw jdbc3MethodNotSupported();
     }
 
     // ---------------------------------------------------------------------------

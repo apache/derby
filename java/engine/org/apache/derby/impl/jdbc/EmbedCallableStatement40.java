@@ -211,13 +211,48 @@ public class EmbedCallableStatement40 extends EmbedCallableStatement30 {
         checkStatus();
         return interfaces.isInstance(this);
     }
-    
+
+    public void setAsciiStream(String parameterName, InputStream x)
+            throws SQLException {
+        throw Util.notImplemented("setAsciiStream(String,InputStream)");
+    }
+
+    public void setBinaryStream(String parameterName, InputStream x)
+            throws SQLException {
+        throw Util.notImplemented("setBinaryStream(String,InputStream)");
+    }
+
+    public void setBlob(String parameterName, InputStream inputStream)
+            throws SQLException {
+        throw Util.notImplemented("setBlob(String,InputStream)");
+    }
+
+    public void setCharacterStream(String parameterName, Reader reader)
+            throws SQLException {
+        throw Util.notImplemented("setCharacterStream(String,Reader)");
+    }
+
+    public void setClob(String parameterName, Reader reader)
+            throws SQLException {
+        throw Util.notImplemented("setClob(String,Reader)");
+    }
+
+    public void setNCharacterStream(String parameterName, Reader value)
+            throws SQLException {
+        throw Util.notImplemented("setNCharacterStream(String,Reader)");
+    }
+
+    public void setNClob(String parameterName, Reader reader)
+            throws SQLException {
+        throw Util.notImplemented("setNClob(String,Reader)");
+    }
+
     /**
      * Returns <code>this</code> if this class implements the interface
      *
      * @param  interfaces a Class defining an interface
      * @return an object that implements the interface
-     * @throws java.sql.SQLExption if no object if found that implements the 
+     * @throws java.sql.SQLException if no object if found that implements the
      * interface
      */
     public <T> T unwrap(java.lang.Class<T> interfaces) 

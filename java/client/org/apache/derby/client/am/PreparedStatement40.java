@@ -103,13 +103,24 @@ public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedSt
     public void setNString(int index, String value) throws SQLException{
         throw SQLExceptionFactory.notImplemented ("setNString (int, String)");
     }
-    
+
+    public void setNCharacterStream(int parameterIndex, Reader value)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setNCharacterStream" +
+                "(int,Reader)");
+    }
+
     public void setNCharacterStream(int index, Reader value, long length) 
                 throws SQLException{
         throw SQLExceptionFactory.notImplemented ("setNCharacterStream " +
                 "(int,Reader,long)");
     }
-    
+
+    public void setNClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setNClob(int,Reader)");
+    }
+
     public void setNClob(int index, NClob value) throws SQLException{
         throw SQLExceptionFactory.notImplemented ("setNClob (int, NClob)");
     }

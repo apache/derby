@@ -32,7 +32,12 @@ import java.sql.Statement;
 import org.apache.derby.iapi.reference.SQLState;
 
 /**
- * Implementation of JDBC 4 specific ResultSet methods.
+ * JDBC 4 specific methods that cannot be implemented in superclasses and
+ * unimplemented JDBC 4 methods.
+ * In general, the implementations should be pushed to the superclasses. This
+ * is not possible if the methods use objects or features not available in the
+ * Java version associated with the earlier JDBC version, since Derby classes
+ * are compiled with the lowest possible Java version.
  */
 public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet20{
     
@@ -55,20 +60,22 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
     public RowId getRowId(String columnName) throws SQLException {
         throw Util.notImplemented();
     }
-    
-    public void updateRowId(int columnIndex, RowId x) throws SQLException {
+
+    public void updateNCharacterStream(int columnIndex, Reader x)
+            throws SQLException {
         throw Util.notImplemented();
     }
-    
-    public void updateRowId(String columnName, RowId x) throws SQLException {
-        throw Util.notImplemented();
-    }
-    
+
     public void updateNCharacterStream(int columnIndex, Reader x, long length)
         throws SQLException {
         throw Util.notImplemented();
     }
-    
+
+    public void updateNCharacterStream(String columnName, Reader x)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public void updateNCharacterStream(String columnName, Reader x, long length)
         throws SQLException {
         throw Util.notImplemented();
@@ -85,11 +92,21 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
     public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
         throw Util.notImplemented();
     }
+
+    public void updateNClob(int columnIndex, Reader reader)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
     
     public void updateNClob(String columnName, NClob nClob) throws SQLException {
         throw Util.notImplemented();
     }
-    
+
+    public void updateNClob(String columnName, Reader reader)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public Reader getNCharacterStream(int columnIndex) throws SQLException {
         throw Util.notImplemented();
     }
@@ -113,7 +130,15 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
     public String getNString(String columnName) throws SQLException {
         throw Util.notImplemented();
     }
-    
+
+    public void updateRowId(int columnIndex, RowId x) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateRowId(String columnName, RowId x) throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public SQLXML getSQLXML(int columnIndex) throws SQLException {
         throw Util.notImplemented();
     }

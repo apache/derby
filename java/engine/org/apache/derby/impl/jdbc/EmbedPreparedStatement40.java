@@ -47,11 +47,21 @@ public class EmbedPreparedStatement40 extends  EmbedPreparedStatement30 {
     public void setNString(int index, String value) throws SQLException{
         throw Util.notImplemented();
     }
-    
+
+    public void setNCharacterStream(int parameterIndex, Reader value)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public void setNCharacterStream(int index, Reader value, long length) throws SQLException{
         throw Util.notImplemented();
     }
-    
+
+    public void setNClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public void setNClob(int index, NClob value) throws SQLException{
         throw Util.notImplemented();
     }    
