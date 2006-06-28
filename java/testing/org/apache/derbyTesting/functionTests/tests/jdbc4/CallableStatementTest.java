@@ -545,6 +545,8 @@ public class CallableStatementTest
     public void testSetCharacterStream() throws SQLException {
         try {
             cStmt.setCharacterStream("Some String",null,0L);
+            fail("CallableStatement.setCharacterStream() " +
+                 "should not be implemented");
         }
         catch(SQLFeatureNotSupportedException sqlfne) {
             //Do nothing as this is the expected behaviour
@@ -565,6 +567,8 @@ public class CallableStatementTest
     public void testSetAsciiStream() throws SQLException {
         try {
             cStmt.setAsciiStream("Some String",null,0L);
+            fail("CallableStatement.setAsciiStream() " +
+                 "should not be implemented");
         }
         catch(SQLFeatureNotSupportedException sqlfne) {
             //Do nothing as this is the expected behaviour
@@ -585,6 +589,8 @@ public class CallableStatementTest
     public void testSetBinaryStream() throws SQLException {
         try {
             cStmt.setBinaryStream("Some String",null,0L);
+            fail("CallableStatement.setBinaryStream() " +
+                 "should not be implemented");
         }
         catch(SQLFeatureNotSupportedException sqlfne) {
             //Do nothing as this is the expected behaviour

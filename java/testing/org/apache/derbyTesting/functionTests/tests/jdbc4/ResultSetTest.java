@@ -261,7 +261,7 @@ public class ResultSetTest
      */
 
     public void testUpdateBinaryStream()
-    throws SQLException {
+    throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol LONG VARCHAR FOR BIT DATA)");
@@ -322,12 +322,8 @@ public class ResultSetTest
         rs1.next();
         InputStream is_ret = rs1.getBinaryStream(2);
 
-        try {
-            is_ret.read(bytes_ret);
-            is_ret.close();
-        } catch(IOException ioe) {
-            fail("Error in the InputStream");
-        }
+        is_ret.read(bytes_ret);
+        is_ret.close();
 
         for(int i=0;i<bytes_for_update.length;i++) {
             assertEquals("Error in updateBinaryStream",bytes_for_update[i],bytes_ret[i]);
@@ -345,7 +341,7 @@ public class ResultSetTest
      */
 
     public void testUpdateAsciiStream()
-    throws SQLException {
+    throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol LONG VARCHAR)");
@@ -406,12 +402,8 @@ public class ResultSetTest
         rs1.next();
         InputStream is_ret = rs1.getAsciiStream(2);
 
-        try {
-            is_ret.read(bytes_ret);
-            is_ret.close();
-        } catch(IOException ioe) {
-            fail("Error in the InputStream");
-        }
+        is_ret.read(bytes_ret);
+        is_ret.close();
 
         for(int i=0;i<bytes_for_update.length;i++) {
             assertEquals("Error in updateAsciiStream",bytes_for_update[i],bytes_ret[i]);
@@ -429,7 +421,7 @@ public class ResultSetTest
      */
 
     public void testUpdateCharacterStream()
-    throws SQLException {
+    throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol LONG VARCHAR)");
@@ -471,12 +463,7 @@ public class ResultSetTest
 
         char [] c_ret = new char[str_for_update.length()];
 
-        try {
-            r_ret.read(c_ret);
-        }
-        catch(IOException ioe) {
-            fail("Error in reading the InputStream");
-        }
+        r_ret.read(c_ret);
 
         String str_ret = new String(c_ret);
 
@@ -498,7 +485,7 @@ public class ResultSetTest
      */
 
     public void testUpdateBinaryStreamStringParameterName()
-    throws SQLException {
+    throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol LONG VARCHAR FOR BIT DATA)");
@@ -560,12 +547,8 @@ public class ResultSetTest
         rs1.next();
         InputStream is_ret = rs1.getBinaryStream(2);
 
-        try {
-            is_ret.read(bytes_ret);
-            is_ret.close();
-        } catch(IOException ioe) {
-            fail("Error in the InputStream");
-        }
+        is_ret.read(bytes_ret);
+        is_ret.close();
 
         for(int i=0;i<bytes_for_update.length;i++) {
             assertEquals("Error in updateBinaryStream",bytes_for_update[i],bytes_ret[i]);
@@ -583,7 +566,7 @@ public class ResultSetTest
      */
 
     public void testUpdateAsciiStreamStringParameterName()
-    throws SQLException {
+    throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol LONG VARCHAR)");
@@ -644,12 +627,8 @@ public class ResultSetTest
         rs1.next();
         InputStream is_ret = rs1.getAsciiStream(2);
 
-        try {
-            is_ret.read(bytes_ret);
-            is_ret.close();
-        } catch(IOException ioe) {
-            fail("Error in the InputStream");
-        }
+        is_ret.read(bytes_ret);
+        is_ret.close();
 
         for(int i=0;i<bytes_for_update.length;i++) {
             assertEquals("Error in updateAsciiStream",bytes_for_update[i],bytes_ret[i]);
@@ -667,7 +646,7 @@ public class ResultSetTest
      */
 
     public void testUpdateCharacterStreamStringParameterName()
-    throws SQLException {
+    throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol LONG VARCHAR)");
@@ -709,12 +688,7 @@ public class ResultSetTest
 
         char [] c_ret = new char[str_for_update.length()];
 
-        try {
-            r_ret.read(c_ret);
-        }
-        catch(IOException ioe) {
-            fail("Error in reading the InputStream");
-        }
+        r_ret.read(c_ret);
 
         String str_ret = new String(c_ret);
 
@@ -734,7 +708,7 @@ public class ResultSetTest
      * @throws SQLException if some error occurs while calling the method
      */
     public void embeddedUpdateClob()
-    throws SQLException {
+    throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol Clob)");
@@ -810,12 +784,8 @@ public class ResultSetTest
         rs1.next();
         InputStream is_ret = rs1.getAsciiStream(2);
 
-        try {
-            is_ret.read(bytes_ret);
-            is_ret.close();
-        } catch(IOException ioe) {
-            fail("Error in the InputStream");
-        }
+        is_ret.read(bytes_ret);
+        is_ret.close();
 
         for(int i=0;i<bytes1.length;i++) {
             assertEquals("Error in updateAsciiStream",bytes1[i],bytes_ret[i]);
@@ -832,7 +802,7 @@ public class ResultSetTest
      * @throws SQLException if some error occurs while calling the method
      */
     public void embeddedUpdateBlob()
-    throws SQLException {
+    throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol Blob)");
@@ -908,12 +878,8 @@ public class ResultSetTest
         rs1.next();
         InputStream is_ret = rs1.getBinaryStream(2);
 
-        try {
-            is_ret.read(bytes_ret);
-            is_ret.close();
-        } catch(IOException ioe) {
-            fail("Error in the InputStream");
-        }
+        is_ret.read(bytes_ret);
+        is_ret.close();
 
         for(int i=0;i<bytes1.length;i++) {
             assertEquals("Error in updateBlob",bytes1[i],bytes_ret[i]);
@@ -930,7 +896,7 @@ public class ResultSetTest
      * @throws SQLException if some error occurs while calling the method
      */
     public void embeddedUpdateClobStringParameterName()
-    throws SQLException {
+    throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol Clob)");
@@ -1006,12 +972,8 @@ public class ResultSetTest
         rs1.next();
         InputStream is_ret = rs1.getAsciiStream(2);
 
-        try {
-            is_ret.read(bytes_ret);
-            is_ret.close();
-        } catch(IOException ioe) {
-            fail("Error in the InputStream");
-        }
+        is_ret.read(bytes_ret);
+        is_ret.close();
 
         for(int i=0;i<bytes1.length;i++) {
             assertEquals("Error in updateAsciiStream",bytes1[i],bytes_ret[i]);
@@ -1028,7 +990,7 @@ public class ResultSetTest
      * @throws SQLException if some error occurs while calling the method
      */
     public void embeddedUpdateBlobStringParameterName()
-    throws SQLException {
+    throws Exception {
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol Blob)");
@@ -1104,12 +1066,8 @@ public class ResultSetTest
         rs1.next();
         InputStream is_ret = rs1.getBinaryStream(2);
 
-        try {
-            is_ret.read(bytes_ret);
-            is_ret.close();
-        } catch(IOException ioe) {
-            fail("Error in the InputStream");
-        }
+        is_ret.read(bytes_ret);
+        is_ret.close();
 
         for(int i=0;i<bytes1.length;i++) {
             assertEquals("Error in updateBlob",bytes1[i],bytes_ret[i]);

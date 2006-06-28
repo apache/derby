@@ -539,15 +539,11 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * @throws SQLException
      *
      */
-    public void testSetCharacterStream() throws SQLException {
+    public void testSetCharacterStream() throws Exception {
         String str = "Test data for the Clob object";
         StringReader is = new StringReader("Test data for the Clob object");
         
-        try {
-            is.reset();
-        } catch (IOException ioe) {
-            fail("Failed to reset Clob input stream: " + ioe.getMessage());
-        }
+        is.reset();
         
         PreparedStatement ps_sc = conn.prepareStatement("insert into ClobTestTable values(?,?)");
         
@@ -576,7 +572,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
       *
       */
     
-    public void testSetAsciiStream() throws SQLException {
+    public void testSetAsciiStream() throws Exception {
         //insert default values into the table
         
         byte[] bytes = new byte[] {
@@ -588,11 +584,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         InputStream is = new java.io.ByteArrayInputStream(bytes);
         
-        try {
-            is.reset();
-        } catch (IOException ioe) {
-            fail("Failed to reset Clob input stream: " + ioe.getMessage());
-        }
+        is.reset();
         
         PreparedStatement ps_sb = conn.prepareStatement("insert into ClobTestTable values(?,?)");
         
@@ -627,7 +619,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      *
      */
     
-    public void testSetBinaryStream() throws SQLException {
+    public void testSetBinaryStream() throws Exception {
         //insert default values into the table
         
         byte[] bytes = new byte[] {
@@ -639,11 +631,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         InputStream is = new java.io.ByteArrayInputStream(bytes);
         
-        try {
-            is.reset();
-        } catch (IOException ioe) {
-            fail("Failed to reset blob input stream: " + ioe.getMessage());
-        }
+        is.reset();
         
         PreparedStatement ps_sb = conn.prepareStatement("insert into BlobTestTable values(?,?)");
         
