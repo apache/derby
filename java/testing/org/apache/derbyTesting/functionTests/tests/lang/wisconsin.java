@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 import org.apache.derby.iapi.tools.i18n.LocalizedInput;
@@ -178,7 +179,32 @@ public class wisconsin {
 		stmt.execute("insert into BPRIME select * from TENKTUP2 where TENKTUP2.unique2 < 1000");
 
 		conn.commit();
+		
+		PreparedStatement ps2 = conn.prepareStatement
+			("call SYSCS_UTIL.SYSCS_COMPRESS_TABLE(?, ?, ?)");
+		ps2.setString(1, "APP");
+		ps2.setString(2, "BPRIME");
+		ps2.setInt(3, 0);
+		ps2.executeUpdate();
+		conn.commit();
 
+		ps2.setString(1, "APP");
+		ps2.setString(2, "TENKTUP1");
+		ps2.setInt(3, 0);
+		ps2.executeUpdate();
+		conn.commit();
+		
+		ps2.setString(1, "APP");
+		ps2.setString(2, "TENKTUP2");
+		ps2.setInt(3, 0);
+		ps2.executeUpdate();
+		conn.commit();
+
+		ps2.setString(1, "APP");
+		ps2.setString(2, "ONEKTUP");
+		ps2.setInt(3, 0);
+		ps2.executeUpdate();
+		conn.commit();
 	}
 	
 }
