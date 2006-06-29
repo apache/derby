@@ -277,7 +277,7 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
      * Sets the designated parameter to the given input stream, which will have
      * the specified number of bytes.
      *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param parameterName the name of the parameter 
      * @param x the java input stream which contains the ASCII parameter value
      * @param length the number of bytes in the stream
      * @exception SQLException thrown on failure.
@@ -293,7 +293,7 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
      * Sets the designated parameter to the given input stream, which will have
      * the specified number of bytes.
      *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param parameterName the name of the parameter
      * @param x the java input stream which contains the binary parameter value
      * @param length the number of bytes in the stream
      * @exception SQLException thrown on failure.
@@ -309,7 +309,7 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
      * Sets the designated parameter to the given Reader, which will have
      * the specified number of bytes.
      *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param parameterName the name of the parameter
      * @param x the java Reader which contains the UNICODE value
      * @param length the number of bytes in the stream
      * @exception SQLException thrown on failure.
