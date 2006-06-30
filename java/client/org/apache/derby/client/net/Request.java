@@ -215,233 +215,287 @@ public class Request {
 
         simpleDssFinalize = simpleFinalizeBuildingNextDss;
     }
-
-    // We need to reuse the agent's sql exception accumulation mechanism
-    // for this write exception, pad if the length is too big, and truncation if the length is too small
-    final void writeScalarStream(boolean chained,
+	
+	
+	final void writeScalarStream(boolean chained,
                                  boolean chainedWithSameCorrelator,
                                  int codePoint,
                                  int length,
                                  java.io.InputStream in,
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, SqlException {
-        int leftToRead = length;
-        int extendedLengthByteCount = prepScalarStream(chained,
-                chainedWithSameCorrelator,
-                writeNullByte,
-                leftToRead);
-        int bytesToRead;
+		
+		if (netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRIDDTA ||
+			netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRPWDDTA) {
+			
+			writeEncryptedScalarStream(chained,
+									   chainedWithSameCorrelator,
+									   codePoint,
+									   length,
+									   in,
+									   writeNullByte,
+									   parameterIndex);
 
-        if (writeNullByte) {
-            bytesToRead = Utils.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
-        } else {
-            bytesToRead = Utils.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
-        }
+		}else{
+			
+			writePlainScalarStream(chained,
+								   chainedWithSameCorrelator,
+								   codePoint,
+								   length,
+								   in,
+								   writeNullByte,
+								   parameterIndex);
+			
+		}
 
-        if (netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRIDDTA ||
-                netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRPWDDTA) {
+	}
 
-            byte[] lengthAndCodepoint;
-            lengthAndCodepoint = buildLengthAndCodePointForEncryptedLob(codePoint,
-                    leftToRead,
-                    writeNullByte,
-                    extendedLengthByteCount);
+    // We need to reuse the agent's sql exception accumulation mechanism
+    // for this write exception, pad if the length is too big, and truncation if the length is too small
+    final void writeEncryptedScalarStream(boolean chained,
+										  boolean chainedWithSameCorrelator,
+										  int codePoint,
+										  int length,
+										  java.io.InputStream in,
+										  boolean writeNullByte,
+										  int parameterIndex) throws DisconnectException, SqlException {
+        
 
+			
+		int leftToRead = length;
+		int extendedLengthByteCount = prepScalarStream(chained,
+													   chainedWithSameCorrelator,
+													   writeNullByte,
+													   leftToRead);
+		int bytesToRead;
 
-
-            // we need to stream the input, rather than fully materialize it
-            // write the data
-
-            byte[] clearedBytes = new byte[leftToRead];
-            int bytesRead = 0;
-            int totalBytesRead = 0;
-            int pos = 0;
-            do {
-                try {
-                    bytesRead = in.read(clearedBytes, pos, leftToRead);
-                    totalBytesRead += bytesRead;
-                } catch (java.io.IOException e) {
-                    padScalarStreamForError(leftToRead, bytesToRead);
-                    // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                    netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                        new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
-                        new Integer(parameterIndex), e.getMessage(), e));
-                    return;
-                }
-                if (bytesRead == -1) {
-                    //padScalarStreamForError(leftToRead, bytesToRead);
-                    // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                    /*throw new SqlException(netAgent_.logWriter_,
-                        "End of Stream prematurely reached while reading InputStream, parameter #" +
-                        parameterIndex +
-                        ".  Remaining data has been padded with 0x0.");*/
-                    //is it OK to do a chain break Exception here. It's not good to
-                    //pad it with 0 and encrypt and send it to the server because it takes too much time
-                    //can't just throw a SQLException either because some of the data PRPSQLSTT etc have already
-                    //been sent to the server, and server is waiting for EXTDTA, server hangs for this.
-                    netAgent_.accumulateChainBreakingReadExceptionAndThrow(
-                        new DisconnectException(netAgent_,
-                            new ClientMessageId(SQLState.NET_PREMATURE_EOS_DISCONNECT),
-                            new Integer(parameterIndex)));
-                    return;
-
-                    /*netAgent_.accumulateReadException(
-                        new SqlException(netAgent_.logWriter_,
-                        "End of Stream prematurely reached while reading InputStream, parameter #" +
-                        parameterIndex +
-                        ".  Remaining data has been padded with 0x0."));
-                    return;*/
-                } else {
-                    pos += bytesRead;
-                    //offset_ += bytesRead;  //comment this out for data stream encryption.
-                    leftToRead -= bytesRead;
-                }
-
-            } while (leftToRead > 0);
-
-            // check to make sure that the specified length wasn't too small
-            try {
-                if (in.read() != -1) {
-                    // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                    netAgent_.accumulateReadException(new SqlException(
-                        netAgent_.logWriter_,
-                        new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
-                        new Integer(parameterIndex)));
-                }
-            } catch (java.io.IOException e) {
-                netAgent_.accumulateReadException(new SqlException(
-                    netAgent_.logWriter_,
-                    new ClientMessageId(
-                        SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
-                    new Integer(parameterIndex), 
-                    e.getMessage(), 
-                    e));
-            }
-
-            byte[] newClearedBytes = new byte[clearedBytes.length +
-                    lengthAndCodepoint.length];
-            System.arraycopy(lengthAndCodepoint, 0, newClearedBytes, 0,
-                    lengthAndCodepoint.length);
-            System.arraycopy(clearedBytes, 0, newClearedBytes, lengthAndCodepoint.length, clearedBytes.length);
-            //it's wrong here, need to add in the real length after the codepoing 146c
-            byte[] encryptedBytes;
-            encryptedBytes = netAgent_.netConnection_.getEncryptionManager().
-                    encryptData(newClearedBytes,
-                            NetConfiguration.SECMEC_EUSRIDPWD,
-                            netAgent_.netConnection_.getTargetPublicKey(),
-                            netAgent_.netConnection_.getTargetPublicKey());
-
-            int encryptedBytesLength = encryptedBytes.length;
-            int sendingLength = bytes_.length - offset_;
-            if (encryptedBytesLength > (bytes_.length - offset_)) {
-
-                System.arraycopy(encryptedBytes, 0, bytes_, offset_, (bytes_.length - offset_));
-                offset_ = 32767;
-                try {
-                    sendBytes(netAgent_.getOutputStream());
-                } catch (java.io.IOException ioe) {
-                    netAgent_.throwCommunicationsFailure(ioe);
-                }
-            } else {
-                System.arraycopy(encryptedBytes, 0, bytes_, offset_, encryptedBytesLength);
-                offset_ = offset_ + encryptedBytes.length;
-            }
-
-            encryptedBytesLength = encryptedBytesLength - sendingLength;
-            while (encryptedBytesLength > 0) {
-                //dssLengthLocation_ = offset_;
-                offset_ = 0;
-
-                if ((encryptedBytesLength - 32765) > 0) {
-                    bytes_[offset_++] = (byte) (0xff);
-                    bytes_[offset_++] = (byte) (0xff);
-                    System.arraycopy(encryptedBytes, sendingLength, bytes_, offset_, 32765);
-                    encryptedBytesLength -= 32765;
-                    sendingLength += 32765;
-                    offset_ = 32767;
-                    try {
-                        sendBytes(netAgent_.getOutputStream());
-                    } catch (java.io.IOException ioe) {
-                        netAgent_.throwCommunicationsFailure(ioe);
-                    }
-                } else {
-                    int leftlength = encryptedBytesLength + 2;
-                    bytes_[offset_++] = (byte) ((leftlength >>> 8) & 0xff);
-                    bytes_[offset_++] = (byte) (leftlength & 0xff);
-
-                    System.arraycopy(encryptedBytes, sendingLength, bytes_, offset_, encryptedBytesLength);
-
-                    offset_ += encryptedBytesLength;
-                    dssLengthLocation_ = offset_;
-                    encryptedBytesLength = 0;
-                }
-
-            }
-        } else //if not data strteam encryption
-        {
-            buildLengthAndCodePointForLob(codePoint,
-                    leftToRead,
-                    writeNullByte,
-                    extendedLengthByteCount);
-
-            int bytesRead = 0;
-            int totalBytesRead = 0;
-            do {
-                do {
-                    try {
-                        bytesRead = in.read(bytes_, offset_, bytesToRead);
-                        totalBytesRead += bytesRead;
-                    } catch (java.io.IOException e) {
-                        padScalarStreamForError(leftToRead, bytesToRead);
-                        // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                        netAgent_.accumulateReadException(new SqlException(
-                            netAgent_.logWriter_,
-                            new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
-                            new Integer(parameterIndex),
-                            e.getMessage(),
-                            e));
-
-                        return;
-                    }
-                    if (bytesRead == -1) {
-                        padScalarStreamForError(leftToRead, bytesToRead);
-                        // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                        netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                            new ClientMessageId(SQLState.NET_PREMATURE_EOS),
-                            new Integer(parameterIndex)));
-                        return;
-                    } else {
-                        bytesToRead -= bytesRead;
-                        offset_ += bytesRead;
-                        leftToRead -= bytesRead;
-                    }
-                } while (bytesToRead > 0);
-
-                bytesToRead = flushScalarStreamSegment(leftToRead, bytesToRead);
-            } while (leftToRead > 0);
-
-            // check to make sure that the specified length wasn't too small
-            try {
-                if (in.read() != -1) {
-                    // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-                    netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-                        new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
-                        new Integer(parameterIndex)));
-                }
-            } catch (java.io.IOException e) {
-                netAgent_.accumulateReadException(new SqlException(
-                    netAgent_.logWriter_,
-                    new ClientMessageId(
-                        SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
-                    new Integer(parameterIndex),
-                    e.getMessage(),
-                    e));
-            }
-
-        }
+		if (writeNullByte) {
+			bytesToRead = Utils.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
+		} else {
+			bytesToRead = Utils.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
+		}
+			
+		byte[] lengthAndCodepoint;
+		lengthAndCodepoint = buildLengthAndCodePointForEncryptedLob(codePoint,
+																	leftToRead,
+																	writeNullByte,
+																	extendedLengthByteCount);
 
 
+
+		// we need to stream the input, rather than fully materialize it
+		// write the data
+
+		byte[] clearedBytes = new byte[leftToRead];
+		int bytesRead = 0;
+		int totalBytesRead = 0;
+		int pos = 0;
+		do {
+			try {
+				bytesRead = in.read(clearedBytes, pos, leftToRead);
+				totalBytesRead += bytesRead;
+			} catch (java.io.IOException e) {
+				padScalarStreamForError(leftToRead, bytesToRead);
+				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+				netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
+																   new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
+																   new Integer(parameterIndex), e.getMessage(), e));
+				return;
+			}
+			if (bytesRead == -1) {
+				//padScalarStreamForError(leftToRead, bytesToRead);
+				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+				/*throw new SqlException(netAgent_.logWriter_,
+				  "End of Stream prematurely reached while reading InputStream, parameter #" +
+				  parameterIndex +
+				  ".  Remaining data has been padded with 0x0.");*/
+				//is it OK to do a chain break Exception here. It's not good to
+				//pad it with 0 and encrypt and send it to the server because it takes too much time
+				//can't just throw a SQLException either because some of the data PRPSQLSTT etc have already
+				//been sent to the server, and server is waiting for EXTDTA, server hangs for this.
+				netAgent_.accumulateChainBreakingReadExceptionAndThrow(
+																	   new DisconnectException(netAgent_,
+																							   new ClientMessageId(SQLState.NET_PREMATURE_EOS_DISCONNECT),
+																							   new Integer(parameterIndex)));
+				return;
+
+				/*netAgent_.accumulateReadException(
+				  new SqlException(netAgent_.logWriter_,
+				  "End of Stream prematurely reached while reading InputStream, parameter #" +
+				  parameterIndex +
+				  ".  Remaining data has been padded with 0x0."));
+				  return;*/
+			} else {
+				pos += bytesRead;
+				//offset_ += bytesRead;  //comment this out for data stream encryption.
+				leftToRead -= bytesRead;
+			}
+
+		} while (leftToRead > 0);
+
+		// check to make sure that the specified length wasn't too small
+		try {
+			if (in.read() != -1) {
+				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+				netAgent_.accumulateReadException(new SqlException(
+																   netAgent_.logWriter_,
+																   new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
+																   new Integer(parameterIndex)));
+			}
+		} catch (java.io.IOException e) {
+			netAgent_.accumulateReadException(new SqlException(
+															   netAgent_.logWriter_,
+															   new ClientMessageId(
+																				   SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
+															   new Integer(parameterIndex), 
+															   e.getMessage(), 
+															   e));
+		}
+
+		byte[] newClearedBytes = new byte[clearedBytes.length +
+										  lengthAndCodepoint.length];
+		System.arraycopy(lengthAndCodepoint, 0, newClearedBytes, 0,
+						 lengthAndCodepoint.length);
+		System.arraycopy(clearedBytes, 0, newClearedBytes, lengthAndCodepoint.length, clearedBytes.length);
+		//it's wrong here, need to add in the real length after the codepoing 146c
+		byte[] encryptedBytes;
+		encryptedBytes = netAgent_.netConnection_.getEncryptionManager().
+			encryptData(newClearedBytes,
+						NetConfiguration.SECMEC_EUSRIDPWD,
+						netAgent_.netConnection_.getTargetPublicKey(),
+						netAgent_.netConnection_.getTargetPublicKey());
+
+		int encryptedBytesLength = encryptedBytes.length;
+		int sendingLength = bytes_.length - offset_;
+		if (encryptedBytesLength > (bytes_.length - offset_)) {
+
+			System.arraycopy(encryptedBytes, 0, bytes_, offset_, (bytes_.length - offset_));
+			offset_ = 32767;
+			try {
+				sendBytes(netAgent_.getOutputStream());
+			} catch (java.io.IOException ioe) {
+				netAgent_.throwCommunicationsFailure(ioe);
+			}
+		} else {
+			System.arraycopy(encryptedBytes, 0, bytes_, offset_, encryptedBytesLength);
+			offset_ = offset_ + encryptedBytes.length;
+		}
+
+		encryptedBytesLength = encryptedBytesLength - sendingLength;
+		while (encryptedBytesLength > 0) {
+			//dssLengthLocation_ = offset_;
+			offset_ = 0;
+
+			if ((encryptedBytesLength - 32765) > 0) {
+				bytes_[offset_++] = (byte) (0xff);
+				bytes_[offset_++] = (byte) (0xff);
+				System.arraycopy(encryptedBytes, sendingLength, bytes_, offset_, 32765);
+				encryptedBytesLength -= 32765;
+				sendingLength += 32765;
+				offset_ = 32767;
+				try {
+					sendBytes(netAgent_.getOutputStream());
+				} catch (java.io.IOException ioe) {
+					netAgent_.throwCommunicationsFailure(ioe);
+				}
+			} else {
+				int leftlength = encryptedBytesLength + 2;
+				bytes_[offset_++] = (byte) ((leftlength >>> 8) & 0xff);
+				bytes_[offset_++] = (byte) (leftlength & 0xff);
+
+				System.arraycopy(encryptedBytes, sendingLength, bytes_, offset_, encryptedBytesLength);
+
+				offset_ += encryptedBytesLength;
+				dssLengthLocation_ = offset_;
+				encryptedBytesLength = 0;
+			}
+
+		}
     }
+	
+	
+	// We need to reuse the agent's sql exception accumulation mechanism
+    // for this write exception, pad if the length is too big, and truncation if the length is too small
+	final void writePlainScalarStream(boolean chained,
+									  boolean chainedWithSameCorrelator,
+									  int codePoint,
+									  int length,
+									  java.io.InputStream in,
+									  boolean writeNullByte,
+									  int parameterIndex) throws DisconnectException, SqlException {
+		int leftToRead = length;
+		int extendedLengthByteCount = prepScalarStream(chained,
+													   chainedWithSameCorrelator,
+													   writeNullByte,
+													   leftToRead);
+		int bytesToRead;
+				
+		if (writeNullByte) {
+			bytesToRead = Utils.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
+		} else {
+			bytesToRead = Utils.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
+		}
+				
+		buildLengthAndCodePointForLob(codePoint,
+									  leftToRead,
+									  writeNullByte,
+									  extendedLengthByteCount);
+
+		int bytesRead = 0;
+		int totalBytesRead = 0;
+		do {
+			do {
+				try {
+					bytesRead = in.read(bytes_, offset_, bytesToRead);
+					totalBytesRead += bytesRead;
+				} catch (java.io.IOException e) {
+					padScalarStreamForError(leftToRead, bytesToRead);
+					// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+					netAgent_.accumulateReadException(new SqlException(
+																	   netAgent_.logWriter_,
+																	   new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
+																	   new Integer(parameterIndex),
+																	   e.getMessage(),
+																	   e));
+
+					return;
+				}
+				if (bytesRead == -1) {
+					padScalarStreamForError(leftToRead, bytesToRead);
+					// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+					netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
+																	   new ClientMessageId(SQLState.NET_PREMATURE_EOS),
+																	   new Integer(parameterIndex)));
+					return;
+				} else {
+					bytesToRead -= bytesRead;
+					offset_ += bytesRead;
+					leftToRead -= bytesRead;
+				}
+			} while (bytesToRead > 0);
+
+			bytesToRead = flushScalarStreamSegment(leftToRead, bytesToRead);
+		} while (leftToRead > 0);
+
+		// check to make sure that the specified length wasn't too small
+		try {
+			if (in.read() != -1) {
+				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+				netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
+																   new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
+																   new Integer(parameterIndex)));
+			}
+		} catch (java.io.IOException e) {
+			netAgent_.accumulateReadException(new SqlException(
+															   netAgent_.logWriter_,
+															   new ClientMessageId(
+																				   SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
+															   new Integer(parameterIndex),
+															   e.getMessage(),
+															   e));
+		}
+	}
+
 
     // Throw DataTruncation, instead of closing connection if input size mismatches
     // An implication of this, is that we need to extend the chaining model
