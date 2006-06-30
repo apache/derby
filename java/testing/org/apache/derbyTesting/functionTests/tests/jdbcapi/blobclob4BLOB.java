@@ -33,6 +33,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringBufferInputStream;
+import java.io.StringReader;
 import java.io.Writer;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -185,9 +187,10 @@ public class blobclob4BLOB {
            // restart the connection
             conn = ij.startJBMS();
             
-            // do not run this test with DerbyNet
+            // do not run these tests with DerbyNet
             if (!TestUtil.isJCCFramework()) {
                 clobTest10(conn);
+                clobTest14(conn);
             }
   
             conn.setAutoCommit(false);
@@ -218,9 +221,10 @@ public class blobclob4BLOB {
             conn.setAutoCommit(false);
             blobTest96(conn);
             
-            // do not run this test with DerbyNet
+            // do not run these tests with DerbyNet
             if (!TestUtil.isJCCFramework()) {
                 blobTest10(conn);
+                blobTest11(conn);
             }
 
             clobTestSelfDestructive(conn);
@@ -2650,6 +2654,87 @@ public class blobclob4BLOB {
         }
     }
 
+    /**
+     * Test fix for derby-1421.
+     *
+     * Test that the getClob() returns the correct value for the blob before and
+     * after updating the Clob using the method updateCharacterStream().
+     *
+     * @param conn Connection
+     * @throws SQLException
+     */
+    private static void clobTest14(Connection conn) throws SQLException {
+        Statement s = conn.createStatement();
+        s.execute("CREATE TABLE derby1421 (c1 int, c2 clob)");
+
+        String clobData = "initial clob ";
+        PreparedStatement ps = 
+                conn.prepareStatement("insert into derby1421 values (?, ?)");
+        for (int i=0; i<10; i++) {
+            ps.setInt(1, i);
+            ps.setString(2, clobData + i);
+            ps.execute();
+        }
+        ps.close();
+
+        Statement scrollStmt = conn.createStatement(
+                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = scrollStmt.executeQuery("SELECT * FROM derby1421");
+
+        rs.first();
+        updateClobWithUpdateCharacterStream(rs);
+        rs.next();
+        updateClobWithUpdateCharacterStream(rs);
+        rs.relative(3);
+        updateClobWithUpdateCharacterStream(rs);
+        rs.absolute(7);
+        updateClobWithUpdateCharacterStream(rs);
+        rs.previous();
+        updateClobWithUpdateCharacterStream(rs);
+        rs.last();
+        updateClobWithUpdateCharacterStream(rs);
+        rs.previous();
+        updateClobWithUpdateCharacterStream(rs);
+
+        rs.close();
+        scrollStmt.close();
+
+        s.execute("DROP TABLE derby1421");
+        s.close();
+    }
+
+    private static void updateClobWithUpdateCharacterStream(ResultSet rs) 
+            throws SQLException 
+    {
+        Clob c;
+        String value, expectedValue;
+        String clobData = "initial clob ";
+        String updatedClobData = "updated clob ";
+
+        c = rs.getClob(2);
+        // check contents
+        value = c.getSubString(1, (int)c.length());
+        expectedValue = clobData + rs.getInt(1);
+        if (value.compareToIgnoreCase(expectedValue) != 0) {
+            System.out.println("clobTest14 - Error: wrong clob value");
+        }
+
+        // update contents
+        value = (updatedClobData + rs.getInt(1));
+        Reader updateValue = new StringReader(value);
+        rs.updateCharacterStream(2, updateValue, value.length());
+        rs.updateRow();
+        // check update values 
+        rs.next(); // leave the row
+        rs.previous(); // go back to updated row
+        c = rs.getClob(2);
+        // check contents
+        value = c.getSubString(1, (int)c.length());
+        expectedValue = updatedClobData + rs.getInt(1);
+        if (value.compareToIgnoreCase(expectedValue) != 0) {
+            System.out.println("clobTest14 - Error: wrong clob value");
+        }
+    }
 
     // test behaviour of system with self destructive user
     // update a long column underneath a clob
@@ -4306,6 +4391,88 @@ public class blobclob4BLOB {
         }
     }
 
+    /**
+     * Test fix for derby-1421.
+     *
+     * Test that the getBlob() returns the correct value for the blob before and
+     * after updating the blob using the method updateBinaryStream().
+     *
+     * @param conn Connection
+     * @throws SQLException
+     */
+    private static void blobTest11(Connection conn) throws SQLException {
+        Statement s = conn.createStatement();
+        s.execute("CREATE TABLE derby1421 (c1 int, c2 blob)");
+
+        String blobData = "initial blob ";
+        PreparedStatement ps = 
+                conn.prepareStatement("insert into derby1421 values (?, ?)");
+        for (int i=0; i<10; i++) {
+            ps.setInt(1, i);
+            ps.setBytes(2, (blobData + i).getBytes());
+            ps.execute();
+        }
+        ps.close();
+
+        Statement scrollStmt = conn.createStatement(
+                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = scrollStmt.executeQuery("SELECT * FROM derby1421");
+
+        rs.first();
+        updateBlobWithUpdateBinaryStream(rs);
+        rs.next();
+        updateBlobWithUpdateBinaryStream(rs);
+        rs.relative(3);
+        updateBlobWithUpdateBinaryStream(rs);
+        rs.absolute(7);
+        updateBlobWithUpdateBinaryStream(rs);
+        rs.previous();
+        updateBlobWithUpdateBinaryStream(rs);
+        rs.last();
+        updateBlobWithUpdateBinaryStream(rs);
+        rs.previous();
+        updateBlobWithUpdateBinaryStream(rs);
+
+        rs.close();
+        scrollStmt.close();
+
+        s.execute("DROP TABLE derby1421");
+        s.close();
+    }
+
+    private static void updateBlobWithUpdateBinaryStream(ResultSet rs) 
+            throws SQLException 
+    {
+        Blob b;
+        byte[] value, expectedValue;
+        String blobData = "initial blob ";
+        String updatedBlobData = "updated blob ";
+        
+        b = rs.getBlob(2);
+        // check contents
+        value = b.getBytes(1, blobData.length() + 1);
+        expectedValue = (blobData + rs.getInt(1)).getBytes();
+        if (!Arrays.equals(value, expectedValue)) {
+            System.out.println("blobTest11 - Error: wrong blob value");
+        }
+
+        // update contents
+        value = (updatedBlobData + rs.getInt(1)).getBytes();
+        InputStream updateValue = new ByteArrayInputStream(value);
+        rs.updateBinaryStream(2, updateValue, value.length);
+        rs.updateRow();
+        // check update values 
+        rs.next(); // leave the row
+        rs.previous(); // go back to updated row
+        b = rs.getBlob(2);
+        // check contents
+        value = b.getBytes(1, updatedBlobData.length() + 1);
+        expectedValue = (updatedBlobData + rs.getInt(1)).getBytes();
+        if (!Arrays.equals(value, expectedValue)) 
+        {
+            System.out.println("blobTest11 - Error: wrong blob value");
+        }
+    }
 
     /**
      * Test fix for derby-265.
