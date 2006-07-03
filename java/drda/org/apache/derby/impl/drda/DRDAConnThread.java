@@ -772,7 +772,8 @@ class DRDAConnThread extends Thread {
 
 							stmt.rsSuspend();
 
-							if (stmt.getQryprctyp() == CodePoint.LMTBLKPRC) {
+							if (stmt.getQryprctyp() == CodePoint.LMTBLKPRC &&
+									stmt.getQryrowset() != 0) {
 								// The DRDA spec allows us to send
 								// QRYDTA here if there are no LOB
 								// columns.

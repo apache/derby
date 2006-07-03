@@ -1857,6 +1857,68 @@ flush
 checkerror SYNTAXRM 8 20 QRYROWSET
 endTest
 //
+DISPLAY "Test QRYROWSET=0 on OPNQRY with scrollable cursor"
+include connect.inc
+createDssRequest
+startDdm PRPSQLSTT
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLATTR
+writeByte 0	// null indicator
+writeEncodedLDString "SCROLL INSENSITIVE WITH HOLD" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "values(1)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss
+flush
+checkSQLCard 0 "     "
+createDssRequest
+startDdm OPNQRY
+startDdm PKGNAMCSN
+writePaddedString "test" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid"  18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+startDdm QRYBLKSZ
+writeInt 32767
+endDdm
+startDdm QRYROWSET
+writeInt 0
+endDdm
+endDdm
+endDss
+flush
+readReplyDss
+readLengthAndCodepoint OPNQRYRM
+skipBytes
+readReplyDss
+readLengthAndCodepoint QRYDSC
+skipBytes
+// DERBY-1468: QRYDTA was incorrectly sent here.
+// Send an invalid CNTQRY and check that the next
+// response is an error instead of QRYDTA.
+createDssRequest
+startDdm CNTQRY
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 14 PKGNAMCSN
+endTest
+//
 DISPLAY "Test to see OPNQRY returns PRCCNVRM if non-existent RDBNAM specified"
 include connect.inc
 createDssRequest

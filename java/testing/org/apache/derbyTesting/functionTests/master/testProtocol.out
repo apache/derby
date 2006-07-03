@@ -161,6 +161,8 @@ Test too large value for QRYROWSET codepoint on CNTQRY
 PASSED
 Test invalid value for QRYROWSET on OPNQRY
 PASSED
+Test QRYROWSET=0 on OPNQRY with scrollable cursor
+PASSED
 Test to see OPNQRY returns PRCCNVRM if non-existent RDBNAM specified
 PASSED
 Test too large value for QRYRFRTBL codepoint on CNTQRY
