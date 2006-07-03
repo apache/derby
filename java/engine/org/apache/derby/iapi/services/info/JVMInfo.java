@@ -42,7 +42,7 @@ public abstract class JVMInfo
 	public static final int J2SE_14 = 4;
 	public static final int J2SE_142 = 5;
 	public static final int J2SE_15 = 6; // aka J2SE 5.0
-	public static final int J2SE_16 = 7; 
+	public static final int J2SE_16 = 7; // Java SE 6, not J2SE
 
 	public static final boolean J2ME;
 
@@ -165,6 +165,7 @@ public abstract class JVMInfo
 		case J2SE_14: return "J2SE 1.4 - JDBC 3.0";
 		case J2SE_142: return "J2SE 1.4.2 - JDBC 3.0";
 		case J2SE_15: return "J2SE 5.0 - JDBC 3.0";
+		case J2SE_16: return "Java SE 6 - JDBC 4.0";
 		default: return "?-?";
 		}
 	}
