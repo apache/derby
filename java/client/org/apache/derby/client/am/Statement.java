@@ -419,24 +419,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
     private ResultSet executeQueryX(String sql) throws SqlException {
         flowExecute(executeQueryMethod__, sql);
-
-        checkExecuteQueryPostConditions("java.sql.Statement");
         return resultSet_;
-    }
-
-    void checkExecuteQueryPostConditions(String jdbcStatementInterfaceName) throws SqlException {
-        // We'll just rely on finalizers to close the dangling result sets.
-        if (resultSetList_ != null && resultSetList_.length != 1) {
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.MULTIPLE_RESULTS_ON_EXECUTE_QUERY),
-                jdbcStatementInterfaceName, jdbcStatementInterfaceName);
-        }
-
-        if (resultSet_ == null) {
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.USE_EXECUTE_UPDATE_WITH_NO_RESULTS),
-                jdbcStatementInterfaceName, jdbcStatementInterfaceName);
-        }
     }
 
     public int executeUpdate(String sql) throws SQLException {
@@ -461,24 +444,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
     private int executeUpdateX(String sql) throws SqlException {
         flowExecute(executeUpdateMethod__, sql);
-
-        checkExecuteUpdatePostConditions("java.sql.Statement");
         return updateCount_;
-    }
-
-    void checkExecuteUpdatePostConditions(String jdbcStatementInterfaceName) throws SqlException {
-        // We'll just rely on finalizers to close the dangling result sets.
-        if (resultSetList_ != null) {
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.MULTIPLE_RESULTS_ON_EXECUTE_QUERY),
-                jdbcStatementInterfaceName, jdbcStatementInterfaceName);
-        }
-
-        // We'll just rely on the finalizer to close the dangling result set.
-        if (resultSet_ != null) {
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.LANG_INVALID_CALL_TO_EXECUTE_UPDATE));
-        }
     }
 
     /**
@@ -2079,6 +2045,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         // In the case of executing a call to a stored procedure.
         if (sqlMode_ == isCall__) {
             parseStorProcReturnedScrollableRowset();
+            checkForStoredProcResultSetCount(executeType);
             // When there is no result sets back, we will commit immediately when autocommit is true.
             if (connection_.autoCommit_ && resultSet_ == null && resultSetList_ == null) {
                 connection_.flowAutoCommit();
@@ -2233,6 +2200,14 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
     //-------------------------------helper methods-------------------------------
 
+    /**
+     * Returns the name of the java.sql interface implemented by this class.
+     * @return name of java.sql interface
+     */
+    protected String getJdbcStatementInterfaceName() {
+        return "java.sql.Statement";
+    }
+
     // Should investigate if it can be optimized..  if we can avoid this parsing..
     //
     void parseSqlAndSetSqlModes(String sql) throws SqlException {
@@ -2365,6 +2340,76 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         if (executeType == executeUpdateMethod__ && sqlMode == isQuery__) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_INVALID_CALL_TO_EXECUTE_UPDATE));
+        }
+    }
+
+    /**
+     * Checks that the number of result sets returned by the statement
+     * is consistent with the executed type. <code>executeQuery()</code>
+     * should return exactly one result set and <code>executeUpdate()</code>
+     * none. Raises an exception if the result set count does not match the
+     * execute type.
+     *
+     * @param executeType one of <code>executeQueryMethod__</code>,
+     * <code>executeUpdateMethod__</code> and <code>executeMethod__</code>
+     * @exception SqlException if the number of result sets does not
+     *                         match the execute type
+     */
+    private void checkResultSetCount(int executeType) throws SqlException {
+        switch (executeType) {
+        case executeQueryMethod__:
+            // We'll just rely on finalizers to close the dangling result sets.
+            if (resultSetList_ != null && resultSetList_.length > 1) {
+                throw new
+                    SqlException(agent_.logWriter_,
+                                 new ClientMessageId(
+                                    SQLState.MULTIPLE_RESULTS_ON_EXECUTE_QUERY),
+                                 getJdbcStatementInterfaceName(),
+                                 getJdbcStatementInterfaceName());
+            }
+            if (resultSet_ == null || resultSetList_.length == 0) {
+                ClientMessageId messageId =
+                    new ClientMessageId(
+                                SQLState.USE_EXECUTE_UPDATE_WITH_NO_RESULTS);
+                throw new SqlException(agent_.logWriter_, messageId,
+                                       getJdbcStatementInterfaceName(),
+                                       getJdbcStatementInterfaceName());
+            }
+            break;
+        case executeUpdateMethod__:
+            // We'll just rely on finalizers to close the dangling result sets.
+            if (resultSet_ != null && resultSetList_.length > 0) {
+                ClientMessageId messageId =
+                    new ClientMessageId(
+                        SQLState.LANG_INVALID_CALL_TO_EXECUTE_UPDATE);
+                throw new SqlException(agent_.logWriter_, messageId);
+            }
+            break;
+        }
+    }
+
+    /**
+     * Checks that a stored procedure returns the correct number of
+     * result sets given its execute type. If the number is incorrect,
+     * make sure the transaction is rolled back when auto commit is
+     * enabled.
+     *
+     * @param executeType one of <code>executeQueryMethod__</code>,
+     * <code>executeUpdateMethod__</code> and <code>executeMethod__</code>
+     * @exception SqlException if the number of result sets does not
+     *                         match the execute type
+     * @see #checkResultSetCount(int)
+     */
+    protected final void checkForStoredProcResultSetCount(int executeType)
+        throws SqlException
+    {
+        try {
+            checkResultSetCount(executeType);
+        } catch (SqlException se) {
+            if (connection_.autoCommit_) {
+                connection_.flowRollback();
+            }
+            throw se;
         }
     }
 

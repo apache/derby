@@ -360,8 +360,6 @@ public class PreparedStatement extends Statement
     // also called by some DBMD methods
     ResultSet executeQueryX() throws SqlException {
         flowExecute(executeQueryMethod__);
-
-        super.checkExecuteQueryPostConditions("java.sql.PreparedStatement");
         return resultSet_;
     }
 
@@ -388,7 +386,6 @@ public class PreparedStatement extends Statement
 
     private int executeUpdateX() throws SqlException {
         flowExecute(executeUpdateMethod__);
-        checkExecuteUpdatePostConditions("java.sql.PreparedStatement");
         return updateCount_;
     }
 
@@ -1297,7 +1294,8 @@ public class PreparedStatement extends Statement
         }
     }
 
-    private boolean executeX() throws SqlException {
+    // also used by SQLCA
+    boolean executeX() throws SqlException {
         flowExecute(executeMethod__);
 
         return resultSet_ != null;
@@ -1882,6 +1880,7 @@ public class PreparedStatement extends Statement
 
             if (sqlMode_ == isCall__) {
                 parseStorProcReturnedScrollableRowset();
+                checkForStoredProcResultSetCount(executeType);
                 // When there are no result sets back, we will commit immediately when autocommit is true.
                 // make sure a commit is not performed when making the call to the sqlca message procedure
                 if (connection_.autoCommit_ && resultSet_ == null && resultSetList_ == null && isAutoCommittableStatement_) {
@@ -2106,6 +2105,14 @@ public class PreparedStatement extends Statement
     }
 
     //----------------------------internal use only helper methods----------------
+
+    /**
+     * Returns the name of the java.sql interface implemented by this class.
+     * @return name of java.sql interface
+     */
+    protected String getJdbcStatementInterfaceName() {
+        return "java.sql.PreparedStatement";
+    }
 
     private int checkSetterPreconditions(int parameterIndex) throws SqlException {
         super.checkForClosedStatement();

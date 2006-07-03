@@ -373,7 +373,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * <code>executeQuery()</code> are correctly rolled back when the
      * query fails because the number of returned result sets is zero.
      *
-     * <p> This test case fails with the client driver and JCC (DERBY-1364).
+     * <p> This test case fails with JCC.
      *
      * @exception SQLException if a database error occurs
      */
@@ -401,7 +401,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * query fails because the number of returned result sets is more
      * than one.
      *
-     * <p> This test case fails with the client driver and JCC (DERBY-1364).
+     * <p> This test case fails with JCC.
      *
      * @exception SQLException if a database error occurs
      */
@@ -428,7 +428,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * <code>executeUpdate()</code> are correctly rolled back when the
      * query fails because the stored procedure returned a result set.
      *
-     * <p> This test case fails with the client driver and JCC (DERBY-1364).
+     * <p> This test case fails with JCC.
      *
      * @exception SQLException if a database error occurs
      */
@@ -447,6 +447,101 @@ public class ProcedureTest extends BaseJDBCTestCase {
         assertFalse("Side effects from stored procedure not rolled back.",
                     rs.next());
         rs.close();
+        stmt.close();
+    }
+
+    /**
+     * Tests that the effects of executing a stored procedure with
+     * <code>executeQuery()</code> are correctly rolled back when the
+     * query fails because the number of returned result sets is zero.
+     *
+     * <p> This test case fails with JCC.
+     *
+     * @exception SQLException if a database error occurs
+     */
+    public void xtestRollbackStoredProcWhenExecuteQueryReturnsNothing_prepared()
+        throws SQLException
+    {
+        conn.setAutoCommit(true);
+        PreparedStatement ps =
+            conn.prepareStatement("CALL PROC_WITH_SIDE_EFFECTS(?)");
+        ps.setInt(1, 0);
+        try {
+            ResultSet rs = ps.executeQuery();
+            fail("executeQuery() didn't fail.");
+        } catch (SQLException sqle) {
+            assertNoResultSetFromExecuteQuery(sqle);
+        }
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
+        assertFalse("Side effects from stored procedure not rolled back.",
+                    rs.next());
+        rs.close();
+        ps.close();
+        stmt.close();
+    }
+
+    /**
+     * Tests that the effects of executing a stored procedure with
+     * <code>executeQuery()</code> are correctly rolled back when the
+     * query fails because the number of returned result sets is more
+     * than one.
+     *
+     * <p> This test case fails with JCC.
+     *
+     * @exception SQLException if a database error occurs
+     */
+    public void xtestRollbackStoredProcWhenExecuteQueryReturnsTooMuch_prepared()
+        throws SQLException
+    {
+        conn.setAutoCommit(true);
+        PreparedStatement ps =
+            conn.prepareStatement("CALL PROC_WITH_SIDE_EFFECTS(?)");
+        ps.setInt(1, 2);
+        try {
+            ResultSet rs = ps.executeQuery();
+            fail("executeQuery() didn't fail.");
+        } catch (SQLException sqle) {
+            assertMultipleResultsFromExecuteQuery(sqle);
+        }
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
+        assertFalse("Side effects from stored procedure not rolled back.",
+                    rs.next());
+        rs.close();
+        ps.close();
+        stmt.close();
+    }
+
+    /**
+     * Tests that the effects of executing a stored procedure with
+     * <code>executeUpdate()</code> are correctly rolled back when the
+     * query fails because the stored procedure returned a result set.
+     *
+     * <p> This test case fails with JCC.
+     *
+     * @exception SQLException if a database error occurs
+     */
+    public void
+        xtestRollbackStoredProcWhenExecuteUpdateReturnsResults_prepared()
+        throws SQLException
+    {
+        conn.setAutoCommit(true);
+        PreparedStatement ps =
+            conn.prepareStatement("CALL PROC_WITH_SIDE_EFFECTS(?)");
+        ps.setInt(1, 1);
+        try {
+            ps.executeUpdate();
+            fail("executeUpdate() didn't fail.");
+        } catch (SQLException sqle) {
+            assertResultsFromExecuteUpdate(sqle);
+        }
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
+        assertFalse("Side effects from stored procedure not rolled back.",
+                    rs.next());
+        rs.close();
+        ps.close();
         stmt.close();
     }
 
@@ -521,14 +616,10 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @param sqle a <code>SQLException</code> value
      */
     private static void assertNoResultSetFromExecuteQuery(SQLException sqle) {
-        if (usingEmbedded()) {
-            assertSQLState("Unexpected SQL state.", "X0Y78", sqle);
-        } else if (usingDerbyNetClient()) {
-            assertSQLState("Unexpected SQL state.", "XJ205", sqle);
-        } else if (usingDerbyNet()) {
+        if (usingDerbyNet()) {
             assertNull("Unexpected SQL state.", sqle.getSQLState());
         } else {
-            fail("Unrecognized framework.");
+            assertSQLState("Unexpected SQL state.", "X0Y78", sqle);
         }
     }
 
@@ -540,14 +631,10 @@ public class ProcedureTest extends BaseJDBCTestCase {
      */
     private static void assertMultipleResultsFromExecuteQuery(SQLException sqle)
     {
-        if (usingEmbedded()) {
-            assertSQLState("Unexpected SQL state.", "X0Y78", sqle);
-        } else if (usingDerbyNetClient()) {
-            assertSQLState("Unexpected SQL state.", "XJ201", sqle);
-        } else if (usingDerbyNet()) {
+        if (usingDerbyNet()) {
             assertNull("Unexpected SQL state.", sqle.getSQLState());
         } else {
-            fail("Unrecognized framework.");
+            assertSQLState("Unexpected SQL state.", "X0Y78", sqle);
         }
     }
 
@@ -558,14 +645,10 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @param sqle a <code>SQLException</code> value
      */
     private static void assertResultsFromExecuteUpdate(SQLException sqle) {
-        if (usingEmbedded()) {
-            assertSQLState("Unexpected SQL state.", "X0Y79", sqle);
-        } else if (usingDerbyNetClient()) {
-            assertSQLState("Unexpected SQL state.", "XJ201", sqle);
-        } else if (usingDerbyNet()) {
+        if (usingDerbyNet()) {
             assertNull("Unexpected SQL state.", sqle.getSQLState());
         } else {
-            fail("Unrecognized framework.");
+            assertSQLState("Unexpected SQL state.", "X0Y79", sqle);
         }
 
     }
@@ -592,8 +675,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
             suite.addTest
                 (new ProcedureTest
                  ("xtestExecuteUpdateWithNoDynamicResultSets_callable"));
-        }
-        if (usingEmbedded()) {
             suite.addTest
                 (new ProcedureTest
                  ("xtestRollbackStoredProcWhenExecuteQueryReturnsNothing"));
@@ -603,6 +684,18 @@ public class ProcedureTest extends BaseJDBCTestCase {
             suite.addTest
                 (new ProcedureTest
                  ("xtestRollbackStoredProcWhenExecuteUpdateReturnsResults"));
+            suite.addTest
+                (new ProcedureTest
+                 ("xtestRollbackStoredProcWhenExecuteQueryReturnsNothing" +
+                  "_prepared"));
+            suite.addTest
+                (new ProcedureTest
+                 ("xtestRollbackStoredProcWhenExecuteQueryReturnsTooMuch" +
+                  "_prepared"));
+            suite.addTest
+                (new ProcedureTest
+                 ("xtestRollbackStoredProcWhenExecuteUpdateReturnsResults" +
+                  "_prepared"));
         }
         return new TestSetup(suite) {
             public void setUp() throws Exception {

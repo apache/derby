@@ -127,89 +127,6 @@ public class CallableStatement extends PreparedStatement
 
     //---------------------------entry points-------------------------------------
 
-    public boolean execute() throws SQLException {
-        try
-        {
-            synchronized (connection_) {
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "execute");
-                }
-                boolean b = executeX();
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceExit(this, "execute", b);
-                }
-                return b;
-            }
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
-    }
-
-    // also used by SQLCA
-    boolean executeX() throws SqlException {
-        super.flowExecute(executeMethod__);
-        return resultSet_ != null;
-    }
-
-    public java.sql.ResultSet executeQuery() throws SQLException {
-        try
-        {
-            synchronized (connection_) {
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "executeQuery");
-                }
-                ResultSet resultSet = executeQueryX();
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceExit(this, "executeQuery", resultSet);
-                }
-                return resultSet;
-            }
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
-    }
-
-    // also used by DBMD methods
-    ResultSet executeQueryX() throws SqlException {
-        super.flowExecute(executeQueryMethod__);
-        super.checkExecuteQueryPostConditions("java.sql.CallableStatement");
-        return resultSet_;
-    }
-
-    public int executeUpdate() throws SQLException {
-        try
-        {
-            synchronized (connection_) {
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "executeUpdate");
-                }
-                int updateValue = executeUpdateX();
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
-                }
-                return updateValue;
-            }
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
-    }
-
-    int executeUpdateX() throws SqlException {
-        super.flowExecute(executeUpdateMethod__);
-
-        super.checkExecuteUpdatePostConditions("java.sql.CallableStatement");
-        // make sure update count >= 0 even if derby don't support update count for call
-        //return (updateCount_ < 0) ? 0 : updateCount_;
-        return updateCount_;
-    }
-
-
     public void clearParameters() throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
@@ -1427,6 +1344,14 @@ public class CallableStatement extends PreparedStatement
     }
     
     //----------------------------helper methods----------------------------------
+
+    /**
+     * Returns the name of the java.sql interface implemented by this class.
+     * @return name of java.sql interface
+     */
+    protected String getJdbcStatementInterfaceName() {
+        return "java.sql.CallableStatement";
+    }
 
     private int checkForEscapedCallWithResult(int parameterIndex) throws SqlException {
         if (escapedProcedureCallWithResult_) {
