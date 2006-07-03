@@ -377,5 +377,12 @@ call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 
 drop table names;
 
+-- bug 578. 
+declare global temporary table session.ztemp
+( orderID varchar( 50 ) )
+not logged;
+
+select orderID from session.ztemp group by orderID;
+
 -- reset autocommit
 autocommit on;

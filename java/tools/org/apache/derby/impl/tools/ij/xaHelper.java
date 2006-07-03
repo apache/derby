@@ -64,6 +64,9 @@ class xaHelper implements xaAbstractHelper
 	  
 	public void setFramework(String fm)
 	{
+                if (fm == null) {
+                    return;
+                }
 		framework = fm.toUpperCase(Locale.ENGLISH);
 		if (framework.endsWith("NET") ||
 			framework.equals("DB2JCC"))

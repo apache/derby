@@ -134,7 +134,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Distinct Scan ResultSet for ONE using index xxxxFILTERED-UUIDxxxx at serializable isolation level using share table locking: 
+Distinct Scan ResultSet for ONE at serializable isolation level using share table locking: 
 Number of opens = 1
 Hash table size = 1
 Distinct column is column number 1
@@ -153,10 +153,8 @@ scan information:
 	Number of rows visited=8
 	Scan type=heap
 	start position:
-	None
-	stop position:
-	None
-	scan qualifiers:
+null	stop position:
+null	scan qualifiers:
 None
 	next qualifiers:
 None
@@ -219,7 +217,7 @@ insert mode: normal
 Rows inserted = 3
 Indexes updated = 0
 Execute Time = 0
-	Distinct Scan ResultSet for TWO using index xxxxFILTERED-UUIDxxxx at serializable isolation level using share table locking: 
+	Distinct Scan ResultSet for TWO at serializable isolation level using share table locking: 
 	Number of opens = 1
 	Hash table size = 3
 	Distinct columns are column numbers (1,2)
@@ -238,10 +236,8 @@ Execute Time = 0
 		Number of rows visited=9
 		Scan type=heap
 		start position:
-	None
-		stop position:
-	None
-		scan qualifiers:
+null		stop position:
+null		scan qualifiers:
 None
 		next qualifiers:
 None

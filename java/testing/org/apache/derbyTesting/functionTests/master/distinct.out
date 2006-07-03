@@ -2614,7 +2614,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Distinct Scan ResultSet for NAMES using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+Distinct Scan ResultSet for NAMES at read committed isolation level using instantaneous share row locking: 
 Number of opens = 1
 Hash table size = 3
 Distinct column is column number 1
@@ -2633,10 +2633,8 @@ scan information:
 	Number of rows visited=6
 	Scan type=heap
 	start position:
-	None
-	stop position:
-	None
-	scan qualifiers:
+null	stop position:
+null	scan qualifiers:
 None
 	next qualifiers:
 None
@@ -2681,7 +2679,7 @@ projection = true
 	restriction time (milliseconds) = 0
 	projection time (milliseconds) = 0
 Source result set:
-	Distinct Scan ResultSet for NAMES using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+	Distinct Scan ResultSet for NAMES at read committed isolation level using instantaneous share row locking: 
 	Number of opens = 1
 	Hash table size = 6
 	Distinct columns are column numbers (0,1)
@@ -2700,10 +2698,8 @@ Source result set:
 		Number of rows visited=6
 		Scan type=heap
 		start position:
-	None
-		stop position:
-	None
-		scan qualifiers:
+null		stop position:
+null		scan qualifiers:
 None
 		next qualifiers:
 None
@@ -2784,6 +2780,14 @@ ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 0 rows inserted/updated/deleted
 ij> drop table names;
 0 rows inserted/updated/deleted
+ij> -- bug 578. 
+declare global temporary table session.ztemp
+( orderID varchar( 50 ) )
+not logged;
+0 rows inserted/updated/deleted
+ij> select orderID from session.ztemp group by orderID;
+ORDERID                                           
+--------------------------------------------------
 ij> -- reset autocommit
 autocommit on;
 ij> 

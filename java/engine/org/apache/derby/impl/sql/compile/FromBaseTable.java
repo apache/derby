@@ -3085,8 +3085,33 @@ public class FromBaseTable extends FromTable
 	{
 		return getTrulyTheBestAccessPath().getCostEstimate();
 	}
-
-	private void generateMaxSpecialResultSet
+	
+        /* helper method used by generateMaxSpecialResultSet and
+         * generateDistinctScan to return the name of the index if the 
+         * conglomerate is an index. 
+         * @param cd   Conglomerate for which we need to push the index name
+         * @param mb   Associated MethodBuilder
+         * @throws StandardException
+         */
+        private void pushIndexName(ConglomerateDescriptor cd, MethodBuilder mb) 
+          throws StandardException
+        {
+            if (cd.isConstraint()) {
+                DataDictionary dd = getDataDictionary();
+                ConstraintDescriptor constraintDesc = 
+                    dd.getConstraintDescriptor(tableDescriptor, cd.getUUID());
+                mb.push(constraintDesc.getConstraintName());
+            } else if (cd.isIndex())  {
+                mb.push(cd.getConglomerateName());
+            } else {
+             // If the conglomerate is the base table itself, make sure we push null.
+             //  Before the fix for DERBY-578, we would push the base table name 
+             //  and  this was just plain wrong and would cause statistics information to be incorrect.
+              mb.pushNull("java.lang.String");
+            }
+        }
+	
+        private void generateMaxSpecialResultSet
 	(
 		ExpressionClassBuilder	acb,
 		MethodBuilder mb
@@ -3106,7 +3131,8 @@ public class FromBaseTable extends FromTable
 		**		resultSetNumber,			
 		**		resultRowAllocator,			
 		**		conglomereNumber,			
-		**		tableName,			
+		**		tableName,
+		**		optimizeroverride			
 		**		indexName,			
 		**		colRefItem,			
 		**		lockMode,			
@@ -3132,7 +3158,7 @@ public class FromBaseTable extends FromTable
 			mb.push(org.apache.derby.iapi.util.PropertyUtil.sortProperties(tableProperties));
 		else
 			mb.pushNull("java.lang.String");
-		mb.push(cd.getConglomerateName());
+                pushIndexName(cd, mb);
 		mb.push(colRefItem);
 		mb.push(getTrulyTheBestAccessPath().getLockMode());
 		mb.push(tableLockGranularity);
@@ -3167,7 +3193,8 @@ public class FromBaseTable extends FromTable
 		**		resultSetNumber,			
 		**		resultRowAllocator,			
 		**		conglomereNumber,			
-		**		tableName,			
+		**		tableName,
+		**		optimizeroverride			
 		**		indexName,			
 		**		colRefItem,			
 		**		lockMode,			
@@ -3226,7 +3253,7 @@ public class FromBaseTable extends FromTable
 			mb.push(org.apache.derby.iapi.util.PropertyUtil.sortProperties(tableProperties));
 		else
 			mb.pushNull("java.lang.String");
-		mb.push(cd.getConglomerateName());
+		pushIndexName(cd, mb);
 		mb.push(cd.isConstraint());
 		mb.push(colRefItem);
 		mb.push(getTrulyTheBestAccessPath().getLockMode());

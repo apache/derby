@@ -9052,7 +9052,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Distinct Scan ResultSet for T1 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+			Distinct Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking: 
 			Number of opens = 1
 			Hash table size = 5
 			Distinct columns are column numbers (0,1)
@@ -9071,10 +9071,8 @@ Source result set:
 				Number of rows visited=5
 				Scan type=heap
 				start position:
-	None
-				stop position:
-	None
-				scan qualifiers:
+null				stop position:
+null				scan qualifiers:
 None
 				next qualifiers:
 None
@@ -9092,7 +9090,7 @@ None
 				restriction time (milliseconds) = 0
 				projection time (milliseconds) = 0
 			Source result set:
-				Distinct Scan ResultSet for T3 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+				Distinct Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking: 
 				Number of opens = 5
 				Hash table size = 99
 				Distinct columns are column numbers (0,1)
@@ -9111,10 +9109,8 @@ None
 					Number of rows visited=54579
 					Scan type=heap
 					start position:
-	None
-					stop position:
-	None
-					scan qualifiers:
+null					stop position:
+null					scan qualifiers:
 None
 					next qualifiers:
 None
@@ -9219,7 +9215,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				Left result set:
-					Distinct Scan ResultSet for T2 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+					Distinct Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking: 
 					Number of opens = 1
 					Hash table size = 5
 					Distinct columns are column numbers (0,1)
@@ -9238,15 +9234,13 @@ Source result set:
 						Number of rows visited=5
 						Scan type=heap
 						start position:
-	None
-						stop position:
-	None
-						scan qualifiers:
+null						stop position:
+null						scan qualifiers:
 None
 						next qualifiers:
 None
 				Right result set:
-					Distinct Scan ResultSet for T1 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+					Distinct Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking: 
 					Number of opens = 5
 					Hash table size = 5
 					Distinct columns are column numbers (0,1)
@@ -9265,10 +9259,8 @@ None
 						Number of rows visited=5
 						Scan type=heap
 						start position:
-	None
-						stop position:
-	None
-						scan qualifiers:
+null						stop position:
+null						scan qualifiers:
 None
 						next qualifiers:
 None
@@ -9286,7 +9278,7 @@ None
 					restriction time (milliseconds) = 0
 					projection time (milliseconds) = 0
 				Source result set:
-					Distinct Scan ResultSet for T3 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+					Distinct Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking: 
 					Number of opens = 25
 					Hash table size = 99
 					Distinct columns are column numbers (0,1)
@@ -9305,10 +9297,8 @@ None
 						Number of rows visited=54579
 						Scan type=heap
 						start position:
-	None
-						stop position:
-	None
-						scan qualifiers:
+null						stop position:
+null						scan qualifiers:
 None
 						next qualifiers:
 None
@@ -9326,7 +9316,7 @@ None
 				restriction time (milliseconds) = 0
 				projection time (milliseconds) = 0
 			Source result set:
-				Distinct Scan ResultSet for T4 using index xxxxFILTERED-UUIDxxxx at read committed isolation level using instantaneous share row locking: 
+				Distinct Scan ResultSet for T4 at read committed isolation level using instantaneous share row locking: 
 				Number of opens = 20
 				Hash table size = 92
 				Distinct columns are column numbers (0,1)
@@ -9345,10 +9335,8 @@ None
 					Number of rows visited=48812
 					Scan type=heap
 					start position:
-	None
-					stop position:
-	None
-					scan qualifiers:
+null					stop position:
+null					scan qualifiers:
 None
 					next qualifiers:
 None

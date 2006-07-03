@@ -2784,6 +2784,14 @@ ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 0 rows inserted/updated/deleted
 ij> drop table names;
 0 rows inserted/updated/deleted
+ij> -- bug 578. 
+declare global temporary table session.ztemp
+( orderID varchar( 50 ) )
+not logged;
+0 rows inserted/updated/deleted
+ij> select orderID from session.ztemp group by orderID;
+ORDERID                                           
+--------------------------------------------------
 ij> -- reset autocommit
 autocommit on;
 ij> 
