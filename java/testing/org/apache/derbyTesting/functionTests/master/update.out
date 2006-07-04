@@ -565,4 +565,28 @@ ij> drop table BASICTABLE1;
 0 rows inserted/updated/deleted
 ij> drop table BASICTABLE2;
 0 rows inserted/updated/deleted
+ij> -- tests for DERBY-1043
+CREATE TABLE DERBY10431 (ID SMALLINT GENERATED ALWAYS AS IDENTITY, A_COL VARCHAR(15) NOT NULL PRIMARY KEY);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE DERBY10432 (TYPE VARCHAR(15) NOT NULL, A_COL VARCHAR(15) NOT NULL, AMOUNT SMALLINT NOT NULL DEFAULT 0);
+0 rows inserted/updated/deleted
+ij> INSERT INTO DERBY10431(A_COL) VALUES ('apples');
+1 row inserted/updated/deleted
+ij> INSERT INTO DERBY10432 VALUES ('tree fruit','apples',1);
+1 row inserted/updated/deleted
+ij> SELECT * FROM DERBY10431;
+ID    |A_COL          
+----------------------
+1     |apples         
+ij> SELECT * FROM DERBY10432;
+TYPE           |A_COL          |AMOUNT
+--------------------------------------
+tree fruit     |apples         |1     
+ij> -- after fix for DERBY-1043 this update should cause an exception
+UPDATE DERBY10432 SET DERBY10432.A_COL = DERBY10431.A_COL WHERE A_COL = 'apples';
+ERROR 42X04: Column 'DERBY10431.A_COL' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DERBY10431.A_COL' is not a column in the target table.
+ij> DROP TABLE DERBY10431;
+0 rows inserted/updated/deleted
+ij> DROP TABLE DERBY10432;
+0 rows inserted/updated/deleted
 ij> 
