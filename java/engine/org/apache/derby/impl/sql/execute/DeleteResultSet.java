@@ -475,6 +475,7 @@ class DeleteResultSet extends DMLWriteResultSet
 			triggerActivator.notifyEvent(TriggerEvents.BEFORE_DELETE, 
 										 rowHolder.getResultSet(), 
 										 (CursorResultSet)null);
+			triggerActivator.cleanup();
 
 		}
 
@@ -487,9 +488,11 @@ class DeleteResultSet extends DMLWriteResultSet
 		// fire AFTER trigger
 		if (triggerActivator != null)
 		{
+			triggerActivator.reopen();
 			triggerActivator.notifyEvent(TriggerEvents.AFTER_DELETE, 
 										 rowHolder.getResultSet(),
 										 (CursorResultSet)null);
+			triggerActivator.cleanup();
 		}
 		
 	}
@@ -608,12 +611,6 @@ class DeleteResultSet extends DMLWriteResultSet
 	public void	cleanUp() throws StandardException
 	{ 
 		numOpens = 0;
-
-		if (triggerActivator != null)
-		{
-			triggerActivator.cleanup();
-			// trigger activator is reused
-		}
 
 		/* Close down the source ResultSet tree */
 		if (source != null)

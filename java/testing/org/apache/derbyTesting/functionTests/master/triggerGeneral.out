@@ -1074,4 +1074,63 @@ ij> drop table tsn;
 0 rows inserted/updated/deleted
 ij> drop table tsn_t;
 0 rows inserted/updated/deleted
+ij> -- Testcase showing DERBY-1064
+CREATE TABLE T10641 ( X INT PRIMARY KEY );
+0 rows inserted/updated/deleted
+ij> CREATE TABLE T10641_DELETIONS ( X INT );
+0 rows inserted/updated/deleted
+ij> CREATE TABLE T10642 (
+    Y INT,
+    CONSTRAINT Y_AND_X FOREIGN KEY(Y) REFERENCES T10641(X) ON DELETE CASCADE);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE T10642_DELETIONS ( Y INT );
+0 rows inserted/updated/deleted
+ij> CREATE TRIGGER TRIGGER_T10641
+    AFTER DELETE ON T10641
+    REFERENCING OLD AS OLD_ROW
+    FOR EACH ROW MODE DB2SQL
+    INSERT INTO T10641_DELETIONS VALUES (OLD_ROW.X);
+0 rows inserted/updated/deleted
+ij> CREATE TRIGGER TRIGGER_T10642
+    AFTER DELETE ON T10642
+    REFERENCING OLD AS OLD_ROW
+    FOR EACH ROW MODE DB2SQL
+    INSERT INTO T10642_DELETIONS VALUES (OLD_ROW.Y);
+0 rows inserted/updated/deleted
+ij> INSERT INTO T10641 VALUES (0);
+1 row inserted/updated/deleted
+ij> INSERT INTO T10642 VALUES (0);
+1 row inserted/updated/deleted
+ij> INSERT INTO T10641 VALUES (1);
+1 row inserted/updated/deleted
+ij> INSERT INTO T10642 VALUES (1);
+1 row inserted/updated/deleted
+ij> SELECT * FROM T10641;
+X          
+-----------
+0          
+1          
+ij> SELECT * FROM T10642;
+Y          
+-----------
+0          
+1          
+ij> DELETE FROM T10641;
+2 rows inserted/updated/deleted
+ij> SELECT * FROM T10641;
+X          
+-----------
+ij> SELECT * FROM T10642;
+Y          
+-----------
+ij> SELECT * FROM T10641_DELETIONS;
+X          
+-----------
+0          
+1          
+ij> SELECT * FROM T10642_DELETIONS;
+Y          
+-----------
+0          
+1          
 ij> 
