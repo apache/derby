@@ -110,6 +110,11 @@ public class T_DaemonService extends T_MultiThreadedIterations
 	*/
 	protected void runTestSet() throws T_Fail
 	{
+		// we don't want t_checkStatus() to hang because of
+		// unsubscribed records from a previous, failed iteration
+		// (DERBY-989)
+		serviceRecord.clear();
+
 		try
 		{
 			/* test basic DaemonService interface */
@@ -243,8 +248,16 @@ public class T_DaemonService extends T_MultiThreadedIterations
 
 		synchronized(s1)
 		{
-			if (save != s1.timesServiced)
-				throw T_Fail.testFailMsg("unsubscribed continue to get serviced");
+			// DERBY-989: The client should not be serviced after it
+			// unsubscribes. However, it might have been in the
+			// process of being serviced when unsubscribe() was
+			// called. Therefore, performWork() can run even after the
+			// save variable was initialized, but only once.
+			int diff = s1.timesServiced - save;
+			// Check that the client has not been serviced more than
+			// once after it unsubscribed.
+			T_Fail.T_ASSERT((diff == 0 || diff == 1),
+							"unsubscribed continue to get serviced");
 
 			// unsubscribed can subscribe again
 			s1.timesServiced = 0;
