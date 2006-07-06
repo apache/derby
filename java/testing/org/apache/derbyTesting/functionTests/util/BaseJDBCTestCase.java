@@ -19,6 +19,9 @@
  */
 package org.apache.derbyTesting.functionTests.util;
 
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.Reader;
 import java.sql.*;
 
 /**
@@ -113,6 +116,100 @@ public class BaseJDBCTestCase
     */
     public static boolean usingDerbyNet() {
         return (CONFIG.getJDBCClient() == JDBCClient.DERBYNET);
+    }
+
+    /**
+     * Assert equality between two <code>Blob</code> objects.
+     * If both input references are <code>null</code>, they are considered
+     * equal. The same is true if both blobs have <code>null</code>-streams.
+     *
+     * @param b1 first <code>Blob</code>.
+     * @param b2 second <code>Blob</code>.
+     * @throws AssertionFailedError if blobs are not equal.
+     */
+    public static void assertEquals(Blob b1, Blob b2) {
+        if (b1 == null || b2 == null) {
+            assertNull("Blob b2 is null, b1 is not", b1);
+            assertNull("Blob b1 is null, b2 is not", b2);
+            return;
+        }
+        InputStream is1 = null, is2 = null;
+        try {
+            assertEquals("Blobs have different lengths",
+                         b1.length(), b2.length());
+            is1 = b1.getBinaryStream();
+            is2 = b2.getBinaryStream();
+            if (is1 == null || is2 == null) {
+                assertNull("Blob b2 has null-stream, blob b1 doesn't", is1);
+                assertNull("Blob b1 has null-stream, blob b2 doesn't", is2);
+                return;
+            }
+        } catch (SQLException sqle) {
+            fail("SQLException while asserting Blob equality: " +
+                    sqle.getMessage());
+        }
+        try {
+            long index = 1;
+            int by1 = is1.read();
+            int by2 = is2.read();
+            do {
+                assertEquals("Blobs differ at index " + index,
+                        by1, by2);
+                index++;
+                by1 = is1.read();
+                by2 = is2.read();
+            } while ( by1 != -1 || by2 != -1);
+        } catch (IOException ioe) {
+            fail("IOException while asserting Blob equality: " +
+                    ioe.getMessage());
+        }
+    }
+
+    /**
+     * Assert equality between two <code>Clob</code> objects.
+     * If both input references are <code>null</code>, they are considered
+     * equal. The same is true if both clobs have <code>null</code>-streams.
+     *
+     * @param c1 first <code>Clob</code>.
+     * @param c2 second <code>Clob</code>.
+     * @throws AssertionFailedError if clobs are not equal.
+     */
+    public static void assertEquals(Clob c1, Clob c2) {
+        if (c1 == null || c2 == null) {
+            assertNull("Clob c2 is null, c1 is not", c1);
+            assertNull("Clob c1 is null, c2 is not", c2);
+            return;
+        }
+        Reader r1 = null, r2 = null;
+        try {
+            assertEquals("Clobs have different lengths",
+                         c1.length(), c2.length());
+            r1 = c1.getCharacterStream();
+            r2 = c2.getCharacterStream();
+            if (r1 == null || r2 == null) {
+                assertNull("Clob c2 has null-stream, clob c1 doesn't", r1);
+                assertNull("Clob c1 has null-stream, clob c2 doesn't", r2);
+                return;
+            }
+        } catch (SQLException sqle) {
+            fail("SQLException while asserting Clob equality: " +
+                    sqle.getMessage());
+        }
+        try {
+            long index = 1;
+            int ch1 = r1.read();
+            int ch2 = r2.read();
+            do {
+                assertEquals("Clobs differ at index " + index,
+                        ch1, ch2);
+                index++;
+                ch1 = r1.read();
+                ch2 = r2.read();
+            } while (ch1 != -1 || ch2 != -1);
+        } catch (IOException ioe) {
+            fail("IOException while asserting Clob equality: " +
+                    ioe.getMessage());
+        }
     }
 
     /**
