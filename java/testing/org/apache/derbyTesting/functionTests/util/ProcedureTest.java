@@ -178,7 +178,9 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 
 		// return no results
 		if (p2 == 199) {
+			data1[0].close();
 			data1[0] = null;
+			data2[0].close();
 			data2[0] = null;
 		}
 
