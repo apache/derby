@@ -145,12 +145,14 @@ MaxLogNumber_app.properties
 MaxLogNumber_derby.properties
 MaxLogNumberRecovery_app.properties
 MaxLogNumberRecovery_derby.properties
+obtest_customer.jar
 OnlineBackupTest1_app.properties
 onlineBackupTest2.sql
 onlineBackupTest2_app.properties
 OnlineBackupTest3_app.properties
-obtest_customer.jar
 onlineBackupTest4.sql
 onlineBackupTest4_app.properties
+OnlineBackupTest5.sql
+OnlineBackupTest5_app.properties
 BackupPathTests_app.properties
 LogDeviceTest_app.properties

@@ -2251,7 +2251,8 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
             {
 				SanityManager.THROWASSERT(
                     "shiftUp failed, low must be between 0 and recordCount." + 
-                    "  low = " + low + ", recordCount = " + recordCount);
+                    "  low = " + low + ", recordCount = " + recordCount +
+                    "\n page = " + this);
             }
 		}
 
