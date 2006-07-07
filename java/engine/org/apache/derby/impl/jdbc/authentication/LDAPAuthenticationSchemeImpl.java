@@ -225,7 +225,7 @@ extends JNDIAuthenticationSchemeBase
 
 			} else {
 
-				if (ldapServer.startsWith(dfltLDAPURL))
+				if (ldapServer.startsWith(dfltLDAPURL) || ldapServer.startsWith("ldaps://") )
 					this.providerURL = ldapServer;
 				else if (ldapServer.startsWith("//"))
 					this.providerURL = "ldap:" + ldapServer;
