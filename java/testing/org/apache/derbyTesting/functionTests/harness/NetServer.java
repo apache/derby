@@ -173,10 +173,10 @@ public class NetServer
 
         if (!jvmName.equals("jview"))
         {
-            if (setJvmFlags && (jvmflags.indexOf("-ms") == -1))
+            if (setJvmFlags && ((jvmflags.indexOf("-ms") == -1) || (jvmflags.indexOf("-Xms") == -1)))
             // only setMs if no starting memory was given
                 jvm.setMs(16*1024*1024); // -ms16m
-            if (setJvmFlags && (jvmflags.indexOf("-mx") == -1))
+            if (setJvmFlags && ((jvmflags.indexOf("-mx") == -1) || (jvmflags.indexOf("-Xmx") == -1)))
             // only setMx if no max memory was given
                 jvm.setMx(32*1024*1024); // -mx32m
             jvm.setNoasyncgc(true); // -noasyncgc

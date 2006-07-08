@@ -843,8 +843,25 @@ public class RunList
             javaCmd = "java";
         else
             p.put("javaCmd", javaCmd);
-    	if ( jvmflags != null )
-    		p.put("jvmflags", jvmflags);
+
+        // all jvmflags should get appended, with command line overwrite top suite 
+        // properties overwrite lower level suite properties
+        // but we're letting the jvm handle that by putting the cmdline last.
+        // note that at this point, the parentproperties already should have appended the
+        // jvmflags from the command line and the top suite properties file
+        // only need to add the lower suite properties in the mix
+        String totaljvmflags = jvmflags;
+        String subjvmflags = p.getProperty("jvmflags");
+        String parentjvmflags = parentProperties.getProperty("jvmflags");
+        if ((subjvmflags != null) && (parentjvmflags != null) && (!subjvmflags.equals(parentjvmflags)))
+        {
+            totaljvmflags = subjvmflags + "^" + totaljvmflags;
+        }
+        if (totaljvmflags != null)
+        {
+            jvmflags= totaljvmflags;
+        }
+
     	if ( classpath != null )
     		p.put("classpath", classpath);
     	if ( classpathServer != null )

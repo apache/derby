@@ -1585,11 +1585,17 @@ org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql</small>
           <br>
           <br>
         </li>
-        <li>jvmflags - sets specific jvm properties for the jvm used in
-the
-test harness, for instance initial memory, and heap size, or properties
-normally passed on with a -D. For instance: <br>
-          <small>java -Djvmflags=ms32M -mx128M
+        <li>jvmflags - sets specific jvm properties for each jvm instantiated by the
+test harness, for instance for setting initial memory, and heap size, or other properties
+that need to be passed on to the jvm, separated by '^'. This property
+can be set on the commandline for either RunTest or RunSuite, or in one
+of the properties files used by the tests. The property jvmflags
+when passed on at the command line supercedes the properties set in a suite's propertyfile, 
+and those supercede jvmflags properties set in a subsuite's or test's propertyfile,
+because the 'highest' level properties are passed to the jvm last. Setting this property
+for a test that runs with useprocess=false cannot have any effect.
+Example: <br>
+          <small>java -Djvmflags=ms32M^-mx128M
 org.apache.derbyTesting.functionTests.RunTest lang/streamingColumn.java</small><br>
           <br>
         </li>

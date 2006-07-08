@@ -285,7 +285,13 @@ public class RunTest
             // before going further, get the policy file copied and if
             // needed, modify it with the test's policy file
             composePolicyFile();
-     
+            String spacedJvmFlags = jvmflags;
+            // we now replace any '^' in jvmflags with ' '
+            if ((jvmflags != null) && (jvmflags.indexOf("^")>0))
+            {
+                spacedJvmFlags = spaceJvmFlags(jvmflags);   
+            }
+            
             System.out.println("Initialize for framework: "+ framework );
             if (jvmnet && framework.startsWith("DerbyNet"))
             {
@@ -298,11 +304,11 @@ public class RunTest
                 }
 
                 ns = new NetServer(baseDir, jvmnetjvm, classpathServer, null,
-                                     jvmflags,framework, startServer);
+                                     spacedJvmFlags,framework, startServer);
             }
             else
                 ns = new NetServer(baseDir, jvmName, classpathServer, 
-                                     javaCmd, jvmflags,framework, startServer);
+                                     javaCmd, spacedJvmFlags,framework, startServer);
 
             //  With useprocess=true, we have a new dir for each test, and all files for
             // the test, including a clean database, go in that directory. So, network server
@@ -896,6 +902,25 @@ public class RunTest
         throws Exception
     {
         // Get any properties specified on the command line
+        
+        // before doing anything else, get jvmflags, evaluate any -D 
+        // see if there is anything useful to the test harness in jvmflags
+        if ((jvmflags != null) && (jvmflags.length() > 0))
+        {
+            StringTokenizer st = new StringTokenizer(jvmflags,"^");
+            while (st.hasMoreTokens())
+            {
+                String tmpstr = st.nextToken();
+                if ((tmpstr.indexOf("=")> 0) && (tmpstr.startsWith("-D")))
+                {
+                    // strip off the '-D'
+                    String key = tmpstr.substring(2, tmpstr.indexOf("="));
+                    String value = tmpstr.substring((tmpstr.indexOf("=") +1), tmpstr.length());
+                    sp.put(key, value);
+                }
+            }
+        }
+        
         searchCP = sp.getProperty("ij.searchClassPath");
 		String frameworkp = sp.getProperty("framework");
 		if (frameworkp != null)
@@ -1292,7 +1317,6 @@ public class RunTest
 		// Properties
 		Properties clp = new Properties();
 		Properties ap = new Properties();
-		Properties sdp = new Properties();
 
         // If there are special flags for ij or server, load these
         // into properties to be merged with app and/or derby props
@@ -1391,7 +1415,7 @@ clp.list(System.out);
 
 //System.out.println("clPropFile: " + clPropFile.getPath());
             bos = new BufferedOutputStream(new FileOutputStream(clPropFile));
-            clp.save(bos, "Derby Properties");
+            clp.store(bos, "Derby Properties");
         	bos.close();
         }
 
@@ -1434,6 +1458,7 @@ clp.list(System.out);
 //System.out.println("isAp = " + isAp);
 //System.out.println(defaultPackageName + testBase + "_app.properties");
 //System.out.println("**************");
+
 
         // Try loading the ap and def properties if they exist
         // Merge only if the test's app properties has usedefaults property
@@ -1532,8 +1557,39 @@ clp.list(System.out);
 		
 //System.out.println("appPropFile: " + appPropFile.getPath());
             bos = new BufferedOutputStream(new FileOutputStream(appPropFile));
-            ap.save(bos, "App Properties");
+            ap.store(bos, "App Properties");
             bos.close();
+            
+            // Check now through jvmflags for insteresting properties
+            // First grab jvmflags from _app.properties for the jvm process cannot
+            // use it if just in the test's _app.properties file
+            // note that it's already too late if useprocess is false
+            String apppropsjvmflags = ap.getProperty("jvmflags");
+            if (apppropsjvmflags != null)
+            {
+                if (jvmflags != null)
+                    jvmflags = apppropsjvmflags + "^" + jvmflags;
+                else
+                    jvmflags = apppropsjvmflags;
+            }
+            // see if there is anything useful for the test harness in jvmflags
+            // from commandline or suite properties
+            if ((jvmflags != null) && (jvmflags.length() > 0))
+            {
+                StringTokenizer st = new StringTokenizer(jvmflags,"^");
+                while (st.hasMoreTokens())
+                {
+                    
+                    String tmpstr = st.nextToken();
+                    if ((tmpstr.indexOf("=")> 0) && (tmpstr.startsWith("-D")))
+                    {
+                        // start at position 2, i.e. strip off the "-D"
+                        String key = tmpstr.substring(2, tmpstr.indexOf("="));
+                        String value = tmpstr.substring((tmpstr.indexOf("=")+1), tmpstr.length());
+                        ap.put(key, value);
+                    }
+                }
+            }
 
             // Depending on the framework, the app prop file may need editing
             if ( (framework.length()>0) || (encryption) )
@@ -1557,7 +1613,7 @@ clp.list(System.out);
         		try
         		{
             		bos = new BufferedOutputStream(new FileOutputStream(appPropFile));
-            		ap.save(bos, "Test Properties");
+            		ap.store(bos, "Test Properties");
             		bos.close();
                 }
             	catch(IOException ioe)
@@ -1632,19 +1688,6 @@ clp.list(System.out);
 				startServerProp.equalsIgnoreCase("false"))
 				startServer =false;
 			
-	        // Check for jvmflags (like "-nojit -ms32M -mx32M")
-	        // These may have been set as a system property already
-	        if (jvmflags == null)
-	        {
-	            jvmflags = ap.getProperty("jvmflags");
-	            // If set in app props to up the memory, this
-	            // is only meant to be applied to 11x vms
-	            if ( (jvmflags != null) && (!jvmName.equals("currentjvm")) )
-	            {
-	                if (jvmflags.startsWith("-ms"))
-	                    jvmflags = "";
-	            }
-	        }
 	        //Check derbyTesting.encoding property
 	        if(testEncoding == null) {
 	            testEncoding = ap.getProperty("derbyTesting.encoding");
@@ -1653,7 +1696,7 @@ clp.list(System.out);
 	            {
 	                    jvmflags = (jvmflags==null?"":jvmflags+" ") 
 	                                + "-Dfile.encoding=" + testEncoding; 
-	                    ap.put("file.encoding",testEncoding);	
+	                    ap.put("file.encoding",testEncoding);
 	            }
 	        }
 	       
@@ -1762,7 +1805,7 @@ clp.list(System.out);
         while (st.hasMoreTokens())
         {
 	        String token = st.nextToken();
-            if ( ! (token.startsWith("-D") || token.startsWith("-X"))) { sb.append(dintro); }
+            if (! (token.startsWith("-"))) { sb.append(dintro); }
             sb.append(token);
             sb.append(" ");
         }
@@ -2242,13 +2285,18 @@ clp.list(System.out);
             
         if ( (jvmflags != null) && (jvmflags.length()>0) )
         {
+            // We now replace any '^' in jvmflags with ' '
+            if (jvmflags.indexOf("^")>0)
+            {
+                jvmflags = spaceJvmFlags(jvmflags);
+            }
             jvm.setFlags(jvmflags);
         }
         
         
         if (testType.equals("multi"))
         {
-            if ( (jvmflags != null) && (jvmflags.indexOf("mx") == -1) )
+            if ( (jvmflags != null) && (jvmflags.indexOf("mx") == -1) && (jvmflags.indexOf("Xmx") == -1))
                 jvm.setMx(64*1024*1024); // -mx64m
             
             // MultiTest is special case, so pass on properties
@@ -2344,6 +2392,19 @@ clp.list(System.out);
         return sCmd;
     }
 
+    public static String spaceJvmFlags(String caretedJvmFlags)
+    {
+    	String spacedJvmFlags = "";
+    	// there must at least be one
+    	StringTokenizer st = new StringTokenizer(jvmflags,"^");
+    	while (st.hasMoreTokens())
+    	{
+    	    spacedJvmFlags += st.nextToken() + " ";
+    	}
+    	spacedJvmFlags = spacedJvmFlags.substring(0,spacedJvmFlags.length() -1);
+    	return spacedJvmFlags;    
+    }
+    
     public static void composePolicyFile() throws ClassNotFoundException
     {
         try{

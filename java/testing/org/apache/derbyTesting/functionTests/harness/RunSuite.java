@@ -93,7 +93,6 @@ public class RunSuite
 		{
 		 		javaCmd = "j9";
 				String javaHome = System.getProperty("java.home");
-				//jvmflags = "-Xiss16k -Xss512k -Xmso16k -Xmx392388k";
 		}
 		String j9config = System.getProperty("com.ibm.oti.configuration");
 		if (j9config != null) 
@@ -384,10 +383,13 @@ public class RunSuite
 		    javaCmd = jcmd;
 		    suiteProperties.put("javaCmd", javaCmd);
 		}
+		// get System properties for jvmflags, and put them to the end, thus
+		// when the time comes to have this converted into actual jvm flags
+		// the ones given at the command line will overwrite whatever's in the suite
 		String jflags = sp.getProperty("jvmflags");
 		if (jflags != null)
 		{
-		    jvmflags = jflags;
+		    jvmflags = jvmflags + "^" + jflags;
 		    suiteProperties.put("jvmflags", jvmflags);
 		}
 		String testflags = sp.getProperty("testJavaFlags");
@@ -403,7 +405,7 @@ public class RunSuite
 		if (testprops != null)
 		{
 		    if (testSpecialProps == null)
-		        testSpecialProps = testflags;
+		        testSpecialProps = testprops;
 		    else // add to testSpecialProps
 		        testSpecialProps = testSpecialProps + "^" + testprops;
 		    suiteProperties.put("testSpecialProps", testSpecialProps);
