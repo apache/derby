@@ -141,7 +141,7 @@ public class StatementTablePermission extends StatementPermission
 		  || oneAuthHasPermissionOnTable( dd, authorizationId, forGrant);
 	}
 
-	private boolean oneAuthHasPermissionOnTable(DataDictionary dd, String authorizationId, boolean forGrant)
+	protected boolean oneAuthHasPermissionOnTable(DataDictionary dd, String authorizationId, boolean forGrant)
 		throws StandardException
 	{
 		TablePermsDescriptor perms = dd.getTablePermissions( tableUUID, authorizationId);
@@ -174,6 +174,19 @@ public class StatementTablePermission extends StatementPermission
 
 		return "Y".equals(priv) || (!forGrant) && "y".equals( priv);
 	} // end of hasPermissionOnTable
+
+	/**
+	 * @see StatementPermission#getPermissionDescriptor
+	 */
+	public PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
+	throws StandardException
+	{
+		//if the required type of privilege exists for the given authorizer,
+		//then pass the permission descriptor for it.
+		if (oneAuthHasPermissionOnTable( dd, authid, false))
+			return dd.getTablePermissions(tableUUID, authid);
+		else return null;
+	}
 
 	/**
 	 * Return privilege needed for this access as string

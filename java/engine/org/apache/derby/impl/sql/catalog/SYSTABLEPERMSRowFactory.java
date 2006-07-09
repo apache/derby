@@ -29,6 +29,7 @@ import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
@@ -49,16 +50,17 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
 	static final String TABLENAME_STRING = "SYSTABLEPERMS";
 
     // Column numbers for the SYSTABLEPERMS table. 1 based
-    private static final int GRANTEE_COL_NUM = 1;
-    private static final int GRANTOR_COL_NUM = 2;
-    private static final int TABLEID_COL_NUM = 3;
-    private static final int SELECTPRIV_COL_NUM = 4;
-    private static final int DELETEPRIV_COL_NUM = 5;
-    private static final int INSERTPRIV_COL_NUM = 6;
-    private static final int UPDATEPRIV_COL_NUM = 7;
-    private static final int REFERENCESPRIV_COL_NUM = 8;
-    private static final int TRIGGERPRIV_COL_NUM = 9;
-    private static final int COLUMN_COUNT = 9;
+	private static final int SYSTABLEPERMS_TABLEPERMSID = 1;
+    private static final int GRANTEE_COL_NUM = 2;
+    private static final int GRANTOR_COL_NUM = 3;
+    private static final int TABLEID_COL_NUM = 4;
+    private static final int SELECTPRIV_COL_NUM = 5;
+    private static final int DELETEPRIV_COL_NUM = 6;
+    private static final int INSERTPRIV_COL_NUM = 7;
+    private static final int UPDATEPRIV_COL_NUM = 8;
+    private static final int REFERENCESPRIV_COL_NUM = 9;
+    private static final int TRIGGERPRIV_COL_NUM = 10;
+    private static final int COLUMN_COUNT = 10;
 
     public static final int GRANTEE_TABLE_GRANTOR_INDEX_NUM = 0;
 	private static final int[][] indexColumnPositions = 
@@ -89,8 +91,10 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
 
 	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent) throws StandardException
 	{
+		UUID						oid;
         DataValueDescriptor grantee = null;
         DataValueDescriptor grantor = null;
+        String tablePermID = null;
         String tableID = null;
         String selectPriv = null;
         String deletePriv = null;
@@ -107,7 +111,15 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
         else
         {
             TablePermsDescriptor tpd = (TablePermsDescriptor) td;
-            grantee = getAuthorizationID( tpd.getGrantee());
+            oid = tpd.getUUID();
+            if ( oid == null )
+            {
+				oid = getUUIDFactory().createUUID();
+				tpd.setUUID(oid);
+            }
+            tablePermID = oid.toString();
+
+			grantee = getAuthorizationID( tpd.getGrantee());
             grantor = getAuthorizationID( tpd.getGrantor());
             tableID = tpd.getTableUUID().toString();
             selectPriv = tpd.getSelectPriv();
@@ -118,6 +130,7 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
             triggerPriv = tpd.getTriggerPriv();
         }
         ExecRow row = getExecutionFactory().getValueRow( COLUMN_COUNT);
+        row.setColumn( SYSTABLEPERMS_TABLEPERMSID, dvf.getCharDataValue(tablePermID));
         row.setColumn( GRANTEE_COL_NUM, grantee);
         row.setColumn( GRANTOR_COL_NUM, grantor);
         row.setColumn( TABLEID_COL_NUM, dvf.getCharDataValue( tableID));
@@ -137,10 +150,12 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
                                            DataDictionary dataDictionary)
 		throws StandardException
     {
-        if( SanityManager.DEBUG)
+		if( SanityManager.DEBUG)
             SanityManager.ASSERT( row.nColumns() == COLUMN_COUNT,
                                   "Wrong size row passed to SYSTABLEPERMSRowFactory.buildDescriptor");
 
+        String tablePermsUUIDString = row.getColumn(SYSTABLEPERMS_TABLEPERMSID).getString();
+        UUID tablePermsUUID = getUUIDFactory().recreateUUID(tablePermsUUIDString);
         String tableUUIDString = row.getColumn( TABLEID_COL_NUM).getString();
         UUID tableUUID = getUUIDFactory().recreateUUID(tableUUIDString);
         String selectPriv  = row.getColumn( SELECTPRIV_COL_NUM).getString();
@@ -165,12 +180,15 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
                                   "Invalid SYSTABLEPERMS.triggerPriv column value: " + triggerPriv);
         }
 
-        return new TablePermsDescriptor( dataDictionary,
+		TablePermsDescriptor tabPermsDesc =
+        new TablePermsDescriptor( dataDictionary,
                                          getAuthorizationID( row, GRANTEE_COL_NUM),
                                          getAuthorizationID( row, GRANTOR_COL_NUM),
                                          tableUUID,
                                          selectPriv, deletePriv, insertPriv,
                                          updatePriv, referencesPriv, triggerPriv);
+		tabPermsDesc.setUUID(tablePermsUUID);
+		return tabPermsDesc;
     } // end of buildDescriptor
 
 	/** builds a column list for the catalog */
@@ -180,6 +198,15 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
         {
             columnList = new SystemColumn[ COLUMN_COUNT];
 
+            columnList[ SYSTABLEPERMS_TABLEPERMSID - 1] =
+                new SystemColumnImpl( convertIdCase( "TABLEPERMSID"),
+                                      SYSTABLEPERMS_TABLEPERMSID,
+                                      0, // precision
+                                      0, // scale
+                                      false, // nullability
+                                      "CHAR",
+                                      true,
+                                      36);
             columnList[ GRANTEE_COL_NUM - 1] =
               new SystemColumnImpl( convertIdCase( "GRANTEE"),
                                     GRANTEE_COL_NUM,

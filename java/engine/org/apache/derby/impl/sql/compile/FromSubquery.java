@@ -703,6 +703,15 @@ public class FromSubquery extends FromTable
 		return rcList;
 	}
 
+	/** 
+	 * @see QueryTreeNode#disablePrivilegeCollection
+	 */
+	public void disablePrivilegeCollection()
+	{
+		super.disablePrivilegeCollection();
+		subquery.disablePrivilegeCollection();
+	}
+
 	/**
 	 * Search to see if a query references the specifed table name.
 	 *

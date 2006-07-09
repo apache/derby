@@ -33,10 +33,7 @@ import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -65,18 +62,11 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
-
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.LanguageProperties;
 
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.ScanController;
@@ -86,12 +76,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
-import org.apache.derby.impl.sql.execute.HashScanResultSet;
-
-
-
-import java.sql.Connection;
 
 import java.util.Enumeration;
 import java.util.Properties;
@@ -2214,7 +2198,22 @@ public class FromBaseTable extends FromTable
 				{
 					resultColumns.setCountMismatchAllowed(true);
 				}
-	
+				//Views execute with definer's privileges and if any one of 
+				//those privileges' are revoked from the definer, the view gets
+				//dropped. So, a view can exist in Derby only if it's owner has
+				//all the privileges needed to create one. In order to do a 
+				//select from a view, a user only needs select privilege on the
+				//view and doesn't need any privilege for objects accessed by
+				//the view. Hence, when collecting privilege requirement for a
+				//sql accessing a view, we only need to look for select privilege
+				//on the actual view and that is what the following code is
+				//checking.
+				for (int i = 0; i < resultColumns.size(); i++) {
+					ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+					if (rc.isPrivilegeCollectionRequired())
+						compilerContext.addRequiredColumnPriv( rc.getTableColumnDescriptor());
+				}
+
 				fsq = (FromTable) getNodeFactory().getNode(
 					C_NodeTypes.FROM_SUBQUERY,
 					rsn, 
@@ -2224,6 +2223,13 @@ public class FromBaseTable extends FromTable
 					getContextManager());
 				// Transfer the nesting level to the new FromSubquery
 				fsq.setLevel(level);
+				//We are getting ready to bind the query underneath the view. Since
+				//that query is going to run with definer's privileges, we do not
+				//need to collect any privilege requirement for that query. 
+				//Following call is marking the query to run with definer 
+				//privileges. This marking will make sure that we do not collect
+				//any privilege requirement for it.
+				fsq.disablePrivilegeCollection();
 				return fsq.bindNonVTITables(dataDictionary, fromListParam);
 			}
 			finally

@@ -598,6 +598,16 @@ public abstract class ResultSetNode extends QueryTreeNode
 									getContextManager());
 	}
 
+	/** 
+	 * @see QueryTreeNode#disablePrivilegeCollection
+	 */
+	public void disablePrivilegeCollection()
+	{
+		super.disablePrivilegeCollection();
+		if (resultColumns != null)
+			resultColumns.disablePrivilegeCollection();
+	}
+
 	/**
 	 * Bind the result columns of this ResultSetNode when there is no
 	 * base table to bind them to.  This is useful for SELECT statements,

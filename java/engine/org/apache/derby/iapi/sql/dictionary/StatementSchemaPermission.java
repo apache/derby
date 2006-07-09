@@ -75,4 +75,17 @@ public class StatementSchemaPermission extends StatementPermission
 					SQLState.AUTH_NOT_DATABASE_OWNER, authid, schemaName);
 		}
 	}
+
+	/**
+	 * Schema level permission is never required as list of privileges required
+	 * for triggers/constraints/views and hence we don't do any work here, but
+	 * simply return null
+	 * 
+	 * @see StatementPermission#check
+	 */
+	public PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
+	throws StandardException
+	{
+		return null;
+	}
 }

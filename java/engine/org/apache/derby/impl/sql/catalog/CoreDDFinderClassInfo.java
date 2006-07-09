@@ -40,9 +40,13 @@ public class CoreDDFinderClassInfo extends FormatableInstanceGetter {
 			case StoredFormatIds.TABLE_DESCRIPTOR_FINDER_V01_ID:
 			case StoredFormatIds.TRIGGER_DESCRIPTOR_FINDER_V01_ID:
 			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
+			case StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID:
+			case StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID:
 				return new DDdependableFinder(fmtId);
 			case StoredFormatIds.COLUMN_DESCRIPTOR_FINDER_V01_ID:
 				return new DDColumnDependableFinder(fmtId);
+			case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
+				return new DDColumnPermissionsDependableFinder(fmtId);
 			default:
 				return null;
 		}

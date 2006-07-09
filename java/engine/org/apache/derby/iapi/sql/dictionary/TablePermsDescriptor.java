@@ -20,9 +20,14 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import org.apache.derby.catalog.Dependable;
+import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
 
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class describes a row in the SYS.SYSTABLEPERMS system table, which
@@ -31,6 +36,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 public class TablePermsDescriptor extends PermissionsDescriptor
 {
     private final UUID tableUUID;
+    private final String tableName;
     private final String selectPriv;
     private final String deletePriv;
     private final String insertPriv;
@@ -47,7 +53,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
                                  String insertPriv,
                                  String updatePriv,
                                  String referencesPriv,
-                                 String triggerPriv)
+                                 String triggerPriv) throws StandardException
 	{
 		super (dd, grantee, grantor);
         this.tableUUID = tableUUID;
@@ -57,6 +63,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
         this.updatePriv = updatePriv;
         this.referencesPriv = referencesPriv;
         this.triggerPriv = triggerPriv;
+        tableName = dd.getTableDescriptor(tableUUID).getName();
 	}
 
     /**
@@ -65,7 +72,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
     public TablePermsDescriptor( DataDictionary dd,
                                  String grantee,
                                  String grantor,
-                                 UUID tableUUID)
+                                 UUID tableUUID) throws StandardException
     {
         this( dd, grantee, grantor, tableUUID,
               (String) null, (String) null, (String) null, (String) null, (String) null, (String) null);
@@ -87,7 +94,8 @@ public class TablePermsDescriptor extends PermissionsDescriptor
 
 	public String toString()
 	{
-		return "tablePerms: grantee=" + getGrantee() + 
+		return "tablePerms: grantee=" + getGrantee() +
+		",tablePermsUUID=" + getUUID() +
 			",grantor=" + getGrantor() +
           ",tableUUID=" + getTableUUID() +
           ",selectPriv=" + getSelectPriv() +
@@ -117,4 +125,52 @@ public class TablePermsDescriptor extends PermissionsDescriptor
     {
         return super.keyHashCode() + tableUUID.hashCode();
     }
+	
+	/**
+	 * @see PermissionsDescriptor#checkOwner
+	 */
+	public boolean checkOwner(String authorizationId) throws StandardException
+	{
+		TableDescriptor td = getDataDictionary().getTableDescriptor(tableUUID);
+		if (td.getSchemaDescriptor().getAuthorizationId().equals(authorizationId))
+			return true;
+		else
+			return false;
+	}
+
+	//////////////////////////////////////////////
+	//
+	// PROVIDER INTERFACE
+	//
+	//////////////////////////////////////////////
+
+	/**
+	 * Return the name of this Provider.  (Useful for errors.)
+	 *
+	 * @return String	The name of this provider.
+	 */
+	public String getObjectName()
+	{
+		return "Table Privilege on " + tableName; 
+	}
+
+	/**
+	 * Get the provider's type.
+	 *
+	 * @return char		The provider's type.
+	 */
+	public String getClassType()
+	{
+		return Dependable.TABLE_PERMISSION;
+	}
+
+	/**		
+		@return the stored form of this provider
+
+			@see Dependable#getDependableFinder
+	 */
+	public DependableFinder getDependableFinder() 
+	{
+	    return	new DDdependableFinder(StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID);
+	}
 }

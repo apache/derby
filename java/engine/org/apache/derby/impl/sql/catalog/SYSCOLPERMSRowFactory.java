@@ -59,12 +59,13 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 	static final String TABLENAME_STRING = "SYSCOLPERMS";
 
     // Column numbers for the SYSCOLPERMS table. 1 based
-    private static final int GRANTEE_COL_NUM = 1;
-    private static final int GRANTOR_COL_NUM = 2;
-    private static final int TABLEID_COL_NUM = 3;
-    private static final int TYPE_COL_NUM = 4;
-    private static final int COLUMNS_COL_NUM = 5;
-    private static final int COLUMN_COUNT = 5;
+	private static final int SYSCOLPERMS_COLPERMSID = 1;
+    private static final int GRANTEE_COL_NUM = 2;
+    private static final int GRANTOR_COL_NUM = 3;
+    private static final int TABLEID_COL_NUM = 4;
+    private static final int TYPE_COL_NUM = 5;
+    private static final int COLUMNS_COL_NUM = 6;
+    private static final int COLUMN_COUNT = 6;
 
     public static final int GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM = 0;
 	private static final int[][] indexColumnPositions = 
@@ -95,6 +96,8 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 
 	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent) throws StandardException
 	{
+        UUID						oid;
+        String colPermID = null;
         DataValueDescriptor grantee = null;
         DataValueDescriptor grantor = null;
         String tableID = null;
@@ -109,6 +112,13 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
         else
         {
             ColPermsDescriptor cpd = (ColPermsDescriptor) td;
+            oid = cpd.getUUID();
+            if ( oid == null )
+            {
+            	oid = getUUIDFactory().createUUID();
+            	cpd.setUUID(oid);           
+            }
+            colPermID = oid.toString();
             grantee = getAuthorizationID( cpd.getGrantee());
             grantor = getAuthorizationID( cpd.getGrantor());
             tableID = cpd.getTableUUID().toString();
@@ -116,6 +126,7 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
             columns = cpd.getColumns();
         }
         ExecRow row = getExecutionFactory().getValueRow( COLUMN_COUNT);
+        row.setColumn( SYSCOLPERMS_COLPERMSID, dvf.getCharDataValue(colPermID));
         row.setColumn( GRANTEE_COL_NUM, grantee);
         row.setColumn( GRANTOR_COL_NUM, grantor);
         row.setColumn( TABLEID_COL_NUM, dvf.getCharDataValue( tableID));
@@ -134,6 +145,8 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
             SanityManager.ASSERT( row.nColumns() == COLUMN_COUNT,
                                   "Wrong size row passed to SYSCOLPERMSRowFactory.buildDescriptor");
 
+        String colPermsUUIDString = row.getColumn( SYSCOLPERMS_COLPERMSID).getString();
+        UUID colPermsUUID = getUUIDFactory().recreateUUID(colPermsUUIDString);
         String tableUUIDString = row.getColumn( TABLEID_COL_NUM).getString();
         UUID tableUUID = getUUIDFactory().recreateUUID(tableUUIDString);
         String type = row.getColumn( TYPE_COL_NUM).getString();
@@ -144,10 +157,13 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
                                   "r".equals( type) || "R".equals( type),
                                   "Invalid type passed to SYSCOLPERMSRowFactory.buildDescriptor");
 
-        return new ColPermsDescriptor( dataDictionary, 
-                                       getAuthorizationID( row, GRANTEE_COL_NUM),
-                                       getAuthorizationID( row, GRANTOR_COL_NUM),
-                                       tableUUID, type, columns);
+        ColPermsDescriptor colPermsDesc =
+	        new ColPermsDescriptor( dataDictionary, 
+                    getAuthorizationID( row, GRANTEE_COL_NUM),
+                    getAuthorizationID( row, GRANTOR_COL_NUM),
+                    tableUUID, type, columns);
+        colPermsDesc.setUUID(colPermsUUID);
+        return colPermsDesc;
     } // end of buildDescriptor
 
 	/** builds a column list for the catalog */
@@ -157,6 +173,15 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
         {
             columnList = new SystemColumn[ COLUMN_COUNT];
 
+            columnList[ SYSCOLPERMS_COLPERMSID - 1] =
+                new SystemColumnImpl( convertIdCase( "COLPERMSID"),
+                                      SYSCOLPERMS_COLPERMSID,
+                                      0, // precision
+                                      0, // scale
+                                      false, // nullability
+                                      "CHAR",
+                                      true,
+                                      36);
             columnList[ GRANTEE_COL_NUM - 1] =
               new SystemColumnImpl( convertIdCase( "GRANTEE"),
                                     GRANTEE_COL_NUM,

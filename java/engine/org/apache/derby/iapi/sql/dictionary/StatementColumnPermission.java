@@ -93,9 +93,6 @@ public class StatementColumnPermission extends StatementTablePermission
 		if( hasPermissionOnTable(dd, authorizationId, forGrant))
 			return;
 		FormatableBitSet permittedColumns = null;
-		FormatableBitSet grantablePermittedColumns = null;
-		FormatableBitSet publicPermittedColumns = null;
-		FormatableBitSet publicPrantablePermittedColumns = null;
 		if( ! forGrant)
 		{
 			permittedColumns = addPermittedColumns( dd,
@@ -156,4 +153,71 @@ public class StatementColumnPermission extends StatementTablePermission
 		}
 		return permittedColumns;
 	} // end of addPermittedColumns
+
+	/**
+	 * @see StatementPermission#getPermissionDescriptor
+	 */
+	public PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
+	throws StandardException
+	{
+		//If table permission found for authorizationid, then simply return that
+		if (oneAuthHasPermissionOnTable( dd, authid, false))
+			return dd.getTablePermissions(tableUUID, authid);
+		//If table permission found for PUBLIC, then simply return that
+		if (oneAuthHasPermissionOnTable( dd, Authorizer.PUBLIC_AUTHORIZATION_ID, false))
+			return dd.getTablePermissions(tableUUID, Authorizer.PUBLIC_AUTHORIZATION_ID);
+		
+		//If table level permission not found, then we have to find permissions 
+		//at column level. Look for column level permission for the passed 
+		//authorizer. If found any of the required column level permissions,
+		//return the permission descriptor for it.
+		ColPermsDescriptor colsPermsDesc = dd.getColumnPermissions(tableUUID, privType, false, authid);
+		if( colsPermsDesc != null)
+		{
+			if( colsPermsDesc.getColumns() != null){
+				FormatableBitSet permittedColumns = colsPermsDesc.getColumns();
+				for( int i = columns.anySetBit(); i >= 0; i = columns.anySetBit( i))
+				{
+					if(permittedColumns.get(i))
+						return colsPermsDesc;
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * This method gets called in execution phase after it is established that 
+	 * all the required privileges exist for the given sql. This method gets 
+	 * called by create view/trigger/constraint to record their dependency on 
+	 * various privileges.
+	 * Special code is required to track column level privileges.
+	 * It is possible that some column level privileges are available to the
+	 * passed authorizer id but the rest required column level privileges
+	 * are available at PUBLIC level. In this method, we check if all the
+	 * required column level privileges are found for the passed authorizer.
+	 * If yes, then simply return null, indicating that no dependency is 
+	 * required at PUBLIC level, because all the required privileges were found
+	 * at the user level. But if some column level privileges are not
+	 * available at user level, then they have to exist at the PUBLIC
+	 * level when this method gets called.  
+	 */
+	public PermissionsDescriptor getPUBLIClevelColPermsDescriptor(String authid, DataDictionary dd)
+	throws StandardException
+	{
+		ColPermsDescriptor colsPermsDesc = dd.getColumnPermissions(tableUUID, privType, false, authid);
+		FormatableBitSet permittedColumns = colsPermsDesc.getColumns();
+		boolean allColumnsCoveredByUserLevelPrivilege = true;
+		for( int i = columns.anySetBit(); i >= 0 && allColumnsCoveredByUserLevelPrivilege; i = columns.anySetBit( i))
+		{
+			if(permittedColumns.get(i))
+				continue;
+			else
+				allColumnsCoveredByUserLevelPrivilege = false;
+		}
+		if (allColumnsCoveredByUserLevelPrivilege)
+			return null;
+		else
+			return (dd.getColumnPermissions(tableUUID, privType, false, Authorizer.PUBLIC_AUTHORIZATION_ID));	
+	}
 }

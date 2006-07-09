@@ -17,10 +17,10 @@ ij> grant update on satheesh.tsat to foo;
 ij> grant update(i) on satheesh.tsat to bar;
 0 rows inserted/updated/deleted
 ij> select * from sys.systableperms;
-GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-PUBLIC                                                                                                                          |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
-FOO                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|y|y|y|N|N
+TABLEPERMSID                        |GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+xxxxFILTERED-UUIDxxxx|PUBLIC                                                                                                                          |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
+xxxxFILTERED-UUIDxxxx|FOO                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|y|y|y|N|N
 2 rows selected
 ij> connect 'grantRevokeDDL' user 'bar' as barConnection;
 ij(BARCONNECTION)> -- Following revokes should fail. Only owner can revoke permissions
@@ -47,10 +47,10 @@ ij(SATCONNECTION)> revoke delete on satheesh.tsat from foo;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> -- Check success by looking at systableperms directly for now
 select * from sys.systableperms;
-GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-PUBLIC                                                                                                                          |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
-FOO                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|N|y|N|N|N
+TABLEPERMSID                        |GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+xxxxFILTERED-UUIDxxxx|PUBLIC                                                                                                                          |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|y|N|N|N|N|N
+xxxxFILTERED-UUIDxxxx|FOO                                                                                                                             |SATHEESH                                                                                                                        |xxxxFILTERED-UUIDxxxx|N|N|y|N|N|N
 2 rows selected
 ij(SATCONNECTION)> revoke insert on satheesh.tsat from foo;
 0 rows inserted/updated/deleted
@@ -58,8 +58,8 @@ ij(SATCONNECTION)> revoke select on satheesh.tsat from public;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> -- Check success by looking at systableperms directly for now
 select * from sys.systableperms;
-GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TABLEPERMSID                        |GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 0 rows selected
 ij(SATCONNECTION)> -- Test routine permissions
 CREATE FUNCTION F_ABS(P1 INT)
@@ -81,11 +81,11 @@ ij(SATCONNECTION)> -- Tests with views
 create view v1 as select * from tsat;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> grant select on v1 to bar;
-ERROR 2850F: Grant or Revoke operation is not allowed on object 'V1'.
+0 rows inserted/updated/deleted
 ij(SATCONNECTION)> grant insert on v1 to foo;
-ERROR 2850F: Grant or Revoke operation is not allowed on object 'V1'.
+0 rows inserted/updated/deleted
 ij(SATCONNECTION)> grant update on v1 to public;
-ERROR 2850F: Grant or Revoke operation is not allowed on object 'V1'.
+0 rows inserted/updated/deleted
 ij(SATCONNECTION)> -- Tests for synonym. Not supported currently.
 create synonym mySym for satheesh.tsat;
 0 rows inserted/updated/deleted
@@ -487,4 +487,672 @@ ij(SATCONNECTION)> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storage.
 --------------------------------------------------------------------------------------------------------------------------------
 4096                                                                                                                            
 1 row selected
-ij(SATCONNECTION)> 
+ij(SATCONNECTION)> -- Testing views to make sure we collect their depedencies on privileges in SYSDEPENDS table
+connect 'grantRevokeDDL;create=true' user 'mamta1' as mamta1;
+WARNING 01J01: Database 'grantRevokeDDL' not created, connection made to existing database instead.
+ij(MAMTA1)> create table t11 (c111 int not null primary key);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t11 values(1);
+1 row inserted/updated/deleted
+ij(MAMTA1)> insert into t11 values(2);
+1 row inserted/updated/deleted
+ij(MAMTA1)> select * from t11;
+C111       
+-----------
+1          
+2          
+2 rows selected
+ij(MAMTA1)> create table t12 (c121 int, c122 char);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t12 values (1,'1');
+1 row inserted/updated/deleted
+ij(MAMTA1)> select * from t12;
+C121       |C122
+----------------
+1          |1   
+1 row selected
+ij(MAMTA1)> create table t13 (c131 int, c132 char);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t13 values (1,'1');
+1 row inserted/updated/deleted
+ij(MAMTA1)> select * from t13;
+C131       |C132
+----------------
+1          |1   
+1 row selected
+ij(MAMTA1)> grant select on t12 to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant select on t11 to public;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> connect 'grantRevokeDDL;create=true' user 'mamta2' as mamta2;
+WARNING 01J01: Database 'grantRevokeDDL' not created, connection made to existing database instead.
+ij(MAMTA2)> -- both of following will pass because mamt2 has has required privileges because of PUBLIC select access of mamta1.t11.
+create view v21 as select t1.c111, t2.c122 from mamta1.t11 as t1, mamta1.t12 as t2;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> create view v22 as select * from mamta1.t11;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> create view v23 as select * from mamta1.t12;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> -- When the create view v23 from mamta2's session is executed in mamta1, there will be only
+--    one row in sysdepends for view v23. That row will be for view's dependency on t12.
+--    There will be no row for privilege dependency because table t12 is owned by the same
+--    user who is creating the view v23 and hence there is no privilege required.
+create view v23 as select * from mamta1.t12;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> -- satConnection is dba and hence doesn't need explicit privileges to access ojects in any schema within the database
+set connection satConnection;
+ij(SATCONNECTION)> -- since satConnection is dba, following will not fail even if satConnection has no explicit privilege to mamta2.v22
+create view v11 as select * from mamta2.v22;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> connect 'grantRevokeDDL;create=true' user 'mamta3' as mamta3;
+WARNING 01J01: Database 'grantRevokeDDL' not created, connection made to existing database instead.
+ij(MAMTA3)> create table t31(c311 int);
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- since mamta3 is not dba, following will fail because no access to mamta2.v22
+create view v31 as select * from mamta2.v22;
+ERROR 28508: User 'MAMTA3' does not have select permission on column 'C111' of table 'MAMTA2'.'V22'.
+ij(MAMTA3)> -- mamta3 has access to mamta1.t11 since there is PUBLIC select access on that table but there is no access to mamta2.v22
+create view v32 as select v22.c111 as a, t11.c111 as b from mamta2.v22 v22, mamta1.t11 t11;
+ERROR 28508: User 'MAMTA3' does not have select permission on column 'C111' of table 'MAMTA2'.'V22'.
+ij(MAMTA3)> -- Try to create a view with no privilege to more than one object. 
+create view v33 as select v22.c111 as a, t11.c111 as b from mamta2.v22 v22, mamta1.t11 t11, mamta2.v21;
+ERROR 28508: User 'MAMTA3' does not have select permission on column 'C111' of table 'MAMTA2'.'V22'.
+ij(MAMTA3)> -- connect as mamta2 and give select privilege on v22 to mamta3
+set connection mamta2;
+ij(MAMTA2)> grant select on v22 to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta3;
+ij(MAMTA3)> -- mamta3 has the required privileges now, so following should work
+create view v31 as select * from mamta2.v22;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- following will pass because mamta3 has direct access to v22 and public access to t11
+create view v32 as select v22.c111 as a, t11.c111 as b from mamta2.v22 v22, mamta1.t11 t11;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- following will still fail because mamta3 doesn't have access to mamta1.t12.c121
+create view v33 as select v22.c111 as a, t12.c121 as b from mamta2.v22 v22, mamta1.t12 t12;
+ERROR 28508: User 'MAMTA3' does not have select permission on column 'C121' of table 'MAMTA1'.'T12'.
+ij(MAMTA3)> -- connect as mamta2 and give select privilege on v23 to mamta3
+set connection mamta2;
+ij(MAMTA2)> grant select on v23 to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta3;
+ij(MAMTA3)> -- although mamta3 doesn't have direct access to mamta1.t12, it can look at it through view mamta2.v23 since mamta3 has select privilege
+-- on mamta2.v23
+create view v34 as select * from mamta2.v23;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- following should work fine because mamta3 has access to all the
+-- objects in it's schema
+create view v35 as select * from v34;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- Write some views based on a routine
+set connection mamta1;
+ij(MAMTA1)> CREATE FUNCTION F_ABS1(P1 INT)
+	RETURNS INT NO SQL
+	RETURNS NULL ON NULL INPUT
+	EXTERNAL NAME 'java.lang.Math.abs'
+	LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> values f_abs1(-5);
+1          
+-----------
+5          
+1 row selected
+ij(MAMTA1)> create view v11(c111) as values mamta1.f_abs1(-5);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant select on v11 to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> select * from v11;
+C111       
+-----------
+5          
+1 row selected
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> create view v24 as select * from mamta1.v11;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> select * from v24;
+C111       
+-----------
+5          
+1 row selected
+ij(MAMTA2)> -- following will fail because no execute permissions on mamta1.f_abs
+create view v25(c251) as (values mamta1.f_abs1(-1));
+ERROR 2850A: User 'MAMTA2' does not have execute permission on FUNCTION 'MAMTA1'.'F_ABS1'.
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> grant execute on function f_abs1 to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> create view v25(c251) as (values mamta1.f_abs1(-1));
+0 rows inserted/updated/deleted
+ij(MAMTA2)> select * from v25;
+C251       
+-----------
+1          
+1 row selected
+ij(MAMTA2)> -- try column level privileges and views
+-- In this test, user has permission on one column but not on the other
+set connection mamta1;
+ij(MAMTA1)> create table t14(c141 int, c142 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t14 values (1,1), (2,2);
+2 rows inserted/updated/deleted
+ij(MAMTA1)> grant select(c141) on t14 to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> -- following will fail because no access on column mamta1.t14.c142
+create view v26 as (select * from mamta1.t14 where c142=1);
+ERROR 28508: User 'MAMTA2' does not have select permission on column 'C142' of table 'MAMTA1'.'T14'.
+ij(MAMTA2)> -- following will fail for the same reason
+create view v26 as (select c141 from mamta1.t14 where c142=1);
+ERROR 28508: User 'MAMTA2' does not have select permission on column 'C142' of table 'MAMTA1'.'T14'.
+ij(MAMTA2)> -- following will pass because view is based on column that it can access
+create view v27 as (select c141 from mamta1.t14);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> select * from v27;
+C141       
+-----------
+1          
+2          
+2 rows selected
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> -- give access to all the columns in t14 to mamta2
+grant select on t14 to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> -- now following will pass
+create view v26 as (select c141 from mamta1.t14 where c142=1);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> select * from v26;
+C141       
+-----------
+1          
+1 row selected
+ij(MAMTA2)> -- in this column level privilege test, there is a user level permission on one column
+--   and a PUBLIC level on the other column. 
+set connection mamta1;
+ij(MAMTA1)> create table t15(c151 int, c152 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t15 values(1,1),(2,2);
+2 rows inserted/updated/deleted
+ij(MAMTA1)> grant select(c151) on t15 to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant select(c152) on t15 to public;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> create view v28 as (select c152 from mamta1.t15 where c151=1);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> -- create trigger privilege collection
+-- TriggerTest
+-- first grant one column level privilege at user level and another at public level and then define the trigger
+set connection mamta1;
+ij(MAMTA1)> drop table t11TriggerTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T11TRIGGERTEST' because it does not exist.
+ij(MAMTA1)> create table t11TriggerTest (c111 int not null primary key, c112 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t11TriggerTest values(1,1);
+1 row inserted/updated/deleted
+ij(MAMTA1)> insert into t11TriggerTest values(2,2);
+1 row inserted/updated/deleted
+ij(MAMTA1)> grant select(c111) on t11TriggerTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant select(c112) on t11TriggerTest to public;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> drop table t21TriggerTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T21TRIGGERTEST' because it does not exist.
+ij(MAMTA2)> create table t21TriggerTest (c211 int);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> drop table t22TriggerTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T22TRIGGERTEST' because it does not exist.
+ij(MAMTA2)> create table t22TriggerTest (c221 int);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> -- following should pass because all the privileges are in places
+create trigger tr21t21TriggerTest after insert on t21TriggerTest for each statement mode db2sql
+	insert into t22TriggerTest values (select c111 from mamta1.t11TriggerTest where c112=1);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> insert into t21TriggerTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA2)> select * from t21TriggerTest;
+C211       
+-----------
+1          
+1 row selected
+ij(MAMTA2)> select * from t22TriggerTest;
+C221       
+-----------
+1          
+1 row selected
+ij(MAMTA2)> drop table t21TriggerTest;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> drop table t22TriggerTest;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> -- grant all the privileges at the table level and then define the trigger
+set connection mamta1;
+ij(MAMTA1)> drop table t11TriggerTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> create table t11TriggerTest (c111 int not null primary key);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t11TriggerTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA1)> insert into t11TriggerTest values(2);
+1 row inserted/updated/deleted
+ij(MAMTA1)> create table t12RoutineTest (c121 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t12RoutineTest values (1),(2);
+2 rows inserted/updated/deleted
+ij(MAMTA1)> grant select on t11TriggerTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant insert on t12RoutineTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> select * from t11TriggerTest;
+C111       
+-----------
+1          
+2          
+2 rows selected
+ij(MAMTA1)> select * from t12RoutineTest;
+C121       
+-----------
+1          
+2          
+2 rows selected
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> create table t21TriggerTest (c211 int);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> -- following should pass because all the privileges are in places
+create trigger tr21t21TriggerTest after insert on t21TriggerTest for each statement mode db2sql
+	insert into mamta1.t12RoutineTest values (select c111 from mamta1.t11TriggerTest where c111=1);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> -- this insert's trigger will cause a new row in mamta1.t12RoutineTest
+insert into t21TriggerTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA2)> select * from t21TriggerTest;
+C211       
+-----------
+1          
+1 row selected
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> select * from t11TriggerTest;
+C111       
+-----------
+1          
+2          
+2 rows selected
+ij(MAMTA1)> select * from t12RoutineTest;
+C121       
+-----------
+1          
+2          
+1          
+3 rows selected
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> -- following should fail because mamta2 doesn't have trigger permission on mamta1.t11TriggerTest
+create trigger tr11t11TriggerTest after insert on mamta1.t11TriggerTest for each statement mode db2sql
+        insert into mamta1.t12RoutineTest values (1);
+ERROR 28506: User 'MAMTA2' does not have trigger permission on table 'MAMTA1'.'T11TRIGGERTEST'.
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> grant trigger on t11TriggerTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> -- following will pass now because mamta2 has trigger permission on mamta1.t11TriggerTest
+create trigger tr11t11TriggerTest after insert on mamta1.t11TriggerTest for each statement mode db2sql
+        insert into mamta1.t12RoutineTest values (1);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> -- following will fail becuae mamta2 has TRIGGER privilege but not INSERT privilege on mamta1.t11TriggerTest
+insert into mamta1.t11TriggerTest values(3);
+ERROR 28506: User 'MAMTA2' does not have insert permission on table 'MAMTA1'.'T11TRIGGERTEST'.
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> delete from t11TriggerTest;
+2 rows inserted/updated/deleted
+ij(MAMTA1)> delete from t12RoutineTest;
+3 rows inserted/updated/deleted
+ij(MAMTA1)> insert into mamta1.t11TriggerTest values(3);
+1 row inserted/updated/deleted
+ij(MAMTA1)> select * from t11TriggerTest;
+C111       
+-----------
+3          
+1 row selected
+ij(MAMTA1)> select * from t12RoutineTest;
+C121       
+-----------
+1          
+1 row selected
+ij(MAMTA1)> drop table t11TriggerTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> drop table t12RoutineTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> -- Test routine and trigger combination. Thing to note is triggers always
+--   run with definer's privileges whereas routines always run with
+--   session user's privileges
+set connection mamta1;
+ij(MAMTA1)> drop table t12RoutineTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T12ROUTINETEST' because it does not exist.
+ij(MAMTA1)> create table t12RoutineTest (c121 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t12RoutineTest values (1),(2);
+2 rows inserted/updated/deleted
+ij(MAMTA1)> drop table t13TriggerTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T13TRIGGERTEST' because it does not exist.
+ij(MAMTA1)> create table t13TriggerTest (c131 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t13TriggerTest values (1),(2);
+2 rows inserted/updated/deleted
+ij(MAMTA1)> grant select on t12RoutineTest to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant insert on t13TriggerTest to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> drop function selectFromSpecificSchema;
+ERROR 42Y55: 'DROP FUNCTION' cannot be performed on 'SELECTFROMSPECIFICSCHEMA' because it does not exist.
+ij(MAMTA1)> CREATE FUNCTION selectFromSpecificSchema (P1 INT)
+        RETURNS INT 
+        RETURNS NULL ON NULL INPUT
+        EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.selectFromSpecificSchema'
+        LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant execute on function selectFromSpecificSchema to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta3;
+ij(MAMTA3)> drop table t31TriggerTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T31TRIGGERTEST' because it does not exist.
+ij(MAMTA3)> create table t31TriggerTest(c11 int);
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- following will pass because all the required privileges are in place for mamta3
+create trigger tr31t31 after insert on t31TriggerTest for each statement mode db2sql
+        insert into mamta1.t13TriggerTest values (values mamta1.selectFromSpecificSchema(1));
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- following insert will cause a row to be inserted into mamta1.t13TriggerTest if the session user
+--    has SELECT privilege on mamta1.t12RoutineTest. This shows that although triggers execute
+--    with definer privileges, routines always execute with session user's privilege, even when 
+--    called by an object which runs with definer's privilege 
+insert into t31TriggerTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA3)> select * from t31TriggerTest;
+C11        
+-----------
+1          
+1 row selected
+ij(MAMTA3)> set connection mamta1;
+ij(MAMTA1)> select * from t12RoutineTest;
+C121       
+-----------
+1          
+2          
+2 rows selected
+ij(MAMTA1)> select * from t13TriggerTest;
+C131       
+-----------
+1          
+2          
+1          
+3 rows selected
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> -- will fail because mamta2 doesn't have INSERT privilege on mamta3.t31TriggerTest
+insert into mamta3.t31TriggerTest values(1);
+ERROR 28506: User 'MAMTA2' does not have insert permission on table 'MAMTA3'.'T31TRIGGERTEST'.
+ij(MAMTA2)> set connection mamta3;
+ij(MAMTA3)> grant insert on t31TriggerTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> set connection mamta2;
+ij(MAMTA2)> -- should still fail because trigger on mamta3.t31TriggerTest accesses a routine which
+--   accesses a table on which mamta2 doesn't have SELECT privilege on. mamta3 doesn't
+--   need execute privilege on routine because it is getting accessed by trigger which runs
+--   with the definer privilege. But the routine itself never runs with definer privilege and
+--   hence the session user needs access to objects accessed by the routine.
+insert into mamta3.t31TriggerTest values(1);
+ERROR 38000: The exception 'SQL Exception: User 'MAMTA2' does not have select permission on column 'C121' of table 'MAMTA1'.'T12ROUTINETEST'.' was thrown while evaluating an expression.
+ERROR 28508: User 'MAMTA2' does not have select permission on column 'C121' of table 'MAMTA1'.'T12ROUTINETEST'.
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> grant select on t12RoutineTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> -- mamta2 got the SELECT privilege on mamta1.t12RoutineTest and hence following insert should pass
+insert into mamta3.t31TriggerTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA2)> set connection mamta3;
+ij(MAMTA3)> select * from t31TriggerTest;
+C11        
+-----------
+1          
+1          
+2 rows selected
+ij(MAMTA3)> set connection mamta1;
+ij(MAMTA1)> select * from t12RoutineTest;
+C121       
+-----------
+1          
+2          
+2 rows selected
+ij(MAMTA1)> select * from t13TriggerTest;
+C131       
+-----------
+1          
+2          
+1          
+1          
+4 rows selected
+ij(MAMTA1)> -- Test routine and view combination. Thing to note is views always
+--   run with definer's privileges whereas routines always run with
+--   session user's privileges. So, eventhough a routine might be
+--   getting accessed by a view which is running with definer's
+--   privileges, during the routine execution, the session user's
+--   privileges will get used.
+set connection mamta1;
+ij(MAMTA1)> drop table t12RoutineTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> create table t12RoutineTest (c121 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t12RoutineTest values (1),(2);
+2 rows inserted/updated/deleted
+ij(MAMTA1)> grant select on t12RoutineTest to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> drop function selectFromSpecificSchema;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> CREATE FUNCTION selectFromSpecificSchema (P1 INT)
+        RETURNS INT 
+        RETURNS NULL ON NULL INPUT
+        EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.selectFromSpecificSchema'
+        LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant execute on function selectFromSpecificSchema to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta3;
+ij(MAMTA3)> drop view v21ViewTest;
+ERROR X0X05: Table/View 'V21VIEWTEST' does not exist.
+ij(MAMTA3)> -- following will succeed because mamta3 has EXECUTE privileges on the function
+create view v21ViewTest(c211) as values mamta1.selectFromSpecificSchema(1);
+0 rows inserted/updated/deleted
+ij(MAMTA3)> select * from v21ViewTest;
+C211       
+-----------
+1          
+1 row selected
+ij(MAMTA3)> grant select on v21ViewTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> set connection mamta2;
+ij(MAMTA2)> -- Although mamta2 has SELECT privileges on mamta3.v21ViewTest, mamta2 doesn't have
+--    SELECT privileges on table mamta1.t12RoutineTest accessed by the routine
+--    (which is underneath the view) and hence select from view will fail
+select * from mamta3.v21ViewTest;
+C211       
+-----------
+ERROR 38000: The exception 'SQL Exception: User 'MAMTA2' does not have select permission on column 'C121' of table 'MAMTA1'.'T12ROUTINETEST'.' was thrown while evaluating an expression.
+ERROR 28508: User 'MAMTA2' does not have select permission on column 'C121' of table 'MAMTA1'.'T12ROUTINETEST'.
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> grant select  on t12RoutineTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> -- now the view select will succeed
+select * from mamta3.v21ViewTest;
+C211       
+-----------
+1          
+1 row selected
+ij(MAMTA2)> -- In this test, the trigger is accessing a view. Any user that has insert privilege
+--  on trigger table will be able to make an insert even if that user doesn't have
+--  privileges on objects referenced by the trigger.
+set connection mamta1;
+ij(MAMTA1)> drop table t11TriggerTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T11TRIGGERTEST' because it does not exist.
+ij(MAMTA1)> create table t11TriggerTest (c111 int not null primary key);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t11TriggerTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA1)> insert into t11TriggerTest values(2);
+1 row inserted/updated/deleted
+ij(MAMTA1)> grant select on t11TriggerTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> drop view v21ViewTest;
+ERROR X0X05: Table/View 'V21VIEWTEST' does not exist.
+ij(MAMTA2)> create view v21ViewTest as select * from mamta1.t11TriggerTest;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> grant select on v21ViewTest to mamta4;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta3;
+ij(MAMTA3)> drop table t31TriggerTest;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> create table t31TriggerTest (c311 int);
+0 rows inserted/updated/deleted
+ij(MAMTA3)> grant insert on t31TriggerTest to mamta4;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> connect 'grantRevokeDDL;create=true' user 'mamta4' as mamta4;
+WARNING 01J01: Database 'grantRevokeDDL' not created, connection made to existing database instead.
+ij(MAMTA4)> drop table t41TriggerTest;
+ERROR 42Y07: Schema 'MAMTA4' does not exist
+ij(MAMTA4)> create table t41TriggerTest (c411 int);
+0 rows inserted/updated/deleted
+ij(MAMTA4)> drop trigger tr41t41;
+ERROR 42X94: TRIGGER 'TR41T41' does not exist.
+ij(MAMTA4)> create trigger tr41t41 after insert on t41TriggerTest for each statement mode db2sql
+        insert into mamta3.t31TriggerTest (select * from mamta2.v21ViewTest);
+0 rows inserted/updated/deleted
+ij(MAMTA4)> insert into t41TriggerTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA4)> insert into t41TriggerTest values(2);
+1 row inserted/updated/deleted
+ij(MAMTA4)> select * from t41TriggerTest;
+C411       
+-----------
+1          
+2          
+2 rows selected
+ij(MAMTA4)> set connection mamta1;
+ij(MAMTA1)> select * from t11TriggerTest;
+C111       
+-----------
+1          
+2          
+2 rows selected
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> select * from v21ViewTest;
+C111       
+-----------
+1          
+2          
+2 rows selected
+ij(MAMTA2)> set connection mamta3;
+ij(MAMTA3)> select * from t31TriggerTest;
+C311       
+-----------
+1          
+2          
+1          
+2          
+4 rows selected
+ij(MAMTA3)> -- will fail because no permissions on mamta4.t41TriggerTest
+insert into mamta4.t41TriggerTest values(1);
+ERROR 28506: User 'MAMTA3' does not have insert permission on table 'MAMTA4'.'T41TRIGGERTEST'.
+ij(MAMTA3)> -- will fail because no permissions on mamta2.v21ViewTest
+select * from mamta2.v21ViewTest;
+ERROR 28508: User 'MAMTA3' does not have select permission on column 'C111' of table 'MAMTA2'.'V21VIEWTEST'.
+ij(MAMTA3)> -- will fail because no permissions on mamta1.t11TriggerTest
+select * from mamta1.t11TriggerTest;
+ERROR 28508: User 'MAMTA3' does not have select permission on column 'C111' of table 'MAMTA1'.'T11TRIGGERTEST'.
+ij(MAMTA3)> set connection mamta4;
+ij(MAMTA4)> grant insert on t41TriggerTest to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA4)> set connection mamta3;
+ij(MAMTA3)> -- although mamta3 doesn't have access to the objects referenced by the insert trigger
+--   following insert will still pass because triggers run with definer's privileges.
+insert into mamta4.t41TriggerTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA3)> -- Test constraints
+set connection mamta1;
+ij(MAMTA1)> drop table t11ConstraintTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T11CONSTRAINTTEST' because it does not exist.
+ij(MAMTA1)> create table t11ConstraintTest (c111 int not null primary key);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t11ConstraintTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA1)> insert into t11ConstraintTest values(2);
+1 row inserted/updated/deleted
+ij(MAMTA1)> grant references on t11ConstraintTest to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> drop table t21ConstraintTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T21CONSTRAINTTEST' because it does not exist.
+ij(MAMTA2)> create table t21ConstraintTest (c111 int not null primary key);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> insert into t21ConstraintTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA2)> insert into t21ConstraintTest values(2);
+1 row inserted/updated/deleted
+ij(MAMTA2)> grant references on t21ConstraintTest to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta3;
+ij(MAMTA3)> create table t31ConstraintTest (c311 int references mamta1.t11ConstraintTest, c312 int references mamta2.t21ConstraintTest);
+0 rows inserted/updated/deleted
+ij(MAMTA3)> drop table t31ConstraintTest;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- multi-key foreign key constraint and the REFERENCES privilege granted at user level. This should cause only
+--   one row in SYSDEPENDS for REFERENCES privilege.
+set connection mamta1;
+ij(MAMTA1)> drop table t11ConstraintTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> create table t11ConstraintTest (c111 int not null, c112 int not null, primary key (c111, c112));
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant references on t11ConstraintTest to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta3;
+ij(MAMTA3)> drop table t31ConstraintTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T31CONSTRAINTTEST' because it does not exist.
+ij(MAMTA3)> create table t31ConstraintTest (c311 int, c312 int, foreign key(c311, c312) references mamta1.t11ConstraintTest);
+0 rows inserted/updated/deleted
+ij(MAMTA3)> drop table t31ConstraintTest;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- Same test as above with multi-key foreign key constraint but one column REFERENCES privilege granted at user level
+--   and other column REFERENCES privilege granted at PUBLIC level. This should cause two rows in SYSDEPENDS for REFERENCES privilege.
+set connection mamta1;
+ij(MAMTA1)> drop table t11ConstraintTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> create table t11ConstraintTest (c111 int not null, c112 int not null, primary key (c111, c112));
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant references(c111) on t11ConstraintTest to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> grant references(c112) on t11ConstraintTest to PUBLIC;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> --connect 'jdbc:derby:c:/dellater/dbmaintest2;create=true' user 'mamta3' as mamta3;
+set connection mamta3;
+ij(MAMTA3)> drop table t31ConstraintTest;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T31CONSTRAINTTEST' because it does not exist.
+ij(MAMTA3)> create table t31ConstraintTest (c311 int,  c312 int, foreign key(c311, c312) references mamta1.t11ConstraintTest);
+0 rows inserted/updated/deleted
+ij(MAMTA3)> drop table t31ConstraintTest;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- Same test as above with multi-key foreign key constraint, one column REFERENCES privilege granted at user level
+--   and other column REFERENCES privilege granted at PUBLIC level. This should cause two rows in SYSDEPENDS for REFERENCES privilege.
+--   But foreign key reference is added using alter table rather than at create table time
+create table t31constrainttest(c311 int, c312 int);
+0 rows inserted/updated/deleted
+ij(MAMTA3)> alter table t31constrainttest add foreign key (c311, c312) references mamta1.t11constrainttest;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> drop table t31ConstraintTest;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> -- create the table again, but this time one foreign key constraint on one table with single column primary key and
+--   another foreign key constraint on another table with multi-column primary key
+create table t31constrainttest(c311 int, c312 int, c313 int references mamta2.t21ConstraintTest);
+0 rows inserted/updated/deleted
+ij(MAMTA3)> alter table t31constrainttest add foreign key (c311, c312) references mamta1.t11constrainttest;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> 

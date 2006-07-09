@@ -20,9 +20,14 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import org.apache.derby.catalog.Dependable;
+import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class describes rows in the SYS.SYSROUTINEPERMS system table, which keeps track of the routine
@@ -31,23 +36,25 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 public class RoutinePermsDescriptor extends PermissionsDescriptor
 {
     private final UUID routineUUID;
+    private final String routineName;
     private final boolean hasExecutePermission;
 	
 	public RoutinePermsDescriptor( DataDictionary dd,
                                    String grantee,
                                    String grantor,
                                    UUID routineUUID,
-                                   boolean hasExecutePermission)
+                                   boolean hasExecutePermission) throws StandardException
 	{
         super (dd, grantee, grantor);
         this.routineUUID = routineUUID;
         this.hasExecutePermission = hasExecutePermission;
+        routineName = dd.getAliasDescriptor(routineUUID).getObjectName();
 	}
 	
 	public RoutinePermsDescriptor( DataDictionary dd,
                                    String grantee,
                                    String grantor,
-                                   UUID routineUUID)
+                                   UUID routineUUID) throws StandardException
 	{
         this( dd, grantee, grantor, routineUUID, true);
 	}
@@ -57,7 +64,7 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
      */
 	public RoutinePermsDescriptor( DataDictionary dd,
                                    String grantee,
-                                   String grantor)
+                                   String grantor) throws StandardException
     {
         this( dd, grantee, grantor, (UUID) null);
     }
@@ -73,7 +80,8 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
 
 	public String toString()
 	{
-		return "routinePerms: grantor=" + getGrantee() + 
+		return "routinePerms: grantee=" + getGrantee() + 
+        ",routinePermsUUID=" + getUUID() +
           ",grantor=" + getGrantor() +
           ",routineUUID=" + getRoutineUUID();
 	}		
@@ -98,4 +106,52 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
     {
         return super.keyHashCode() + routineUUID.hashCode();
     }
+	
+	/**
+	 * @see PermissionsDescriptor#checkOwner
+	 */
+	public boolean checkOwner(String authorizationId) throws StandardException
+	{
+		UUID sd = getDataDictionary().getAliasDescriptor(routineUUID).getSchemaUUID();
+		if (getDataDictionary().getSchemaDescriptor(sd, null).getAuthorizationId().equals(authorizationId))
+			return true;
+		else
+			return false;
+	}
+
+	//////////////////////////////////////////////
+	//
+	// PROVIDER INTERFACE
+	//
+	//////////////////////////////////////////////
+
+	/**
+	 * Return the name of this Provider.  (Useful for errors.)
+	 *
+	 * @return String	The name of this provider.
+	 */
+	public String getObjectName()
+	{
+		return "Routine Privilege on " + routineName; 
+	}
+
+	/**
+	 * Get the provider's type.
+	 *
+	 * @return char		The provider's type.
+	 */
+	public String getClassType()
+	{
+		return Dependable.ROUTINE_PERMISSION;
+	}
+
+	/**		
+		@return the stored form of this provider
+
+			@see Dependable#getDependableFinder
+	 */
+	public DependableFinder getDependableFinder() 
+	{
+	    return	new DDdependableFinder(StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID);
+	}
 }

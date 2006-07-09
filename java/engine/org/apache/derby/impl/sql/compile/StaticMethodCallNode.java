@@ -235,7 +235,8 @@ public class StaticMethodCallNode extends MethodCallNode
 
 
 		alreadyBound = true;
-		getCompilerContext().addRequiredRoutinePriv(ad);
+		if (isPrivilegeCollectionRequired())
+			getCompilerContext().addRequiredRoutinePriv(ad);
 
 		// If this is a function call with a variable length
 		// return type, then we need to push a CAST node.

@@ -678,7 +678,8 @@ public class ResultColumn extends ValueNode
 
 		setColumnDescriptor(tableDescriptor, columnDescriptor);
 		setVirtualColumnId(columnId);
-		getCompilerContext().addRequiredColumnPriv( columnDescriptor);
+		if (isPrivilegeCollectionRequired())
+			getCompilerContext().addRequiredColumnPriv( columnDescriptor);
 	}
 	
 	/**
@@ -1322,6 +1323,16 @@ public class ResultColumn extends ValueNode
 	public boolean updatableByCursor()
 	{
 		return updatableByCursor;
+	}
+
+	/** 
+	 * @see QueryTreeNode#disablePrivilegeCollection
+	 */
+	public void disablePrivilegeCollection()
+	{
+		super.disablePrivilegeCollection();
+		if (expression != null)
+			expression.disablePrivilegeCollection();
 	}
 
 	/**

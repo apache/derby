@@ -391,9 +391,12 @@ public class DeleteNode extends DMLModStatementNode
 
 				}
 			}
-			getCompilerContext().pushCurrentPrivType( getPrivType());
-			getCompilerContext().addRequiredTablePriv( targetTableDescriptor);
-			getCompilerContext().popCurrentPrivType();
+			if (isPrivilegeCollectionRequired())
+			{
+				getCompilerContext().pushCurrentPrivType( getPrivType());
+				getCompilerContext().addRequiredTablePriv( targetTableDescriptor);
+				getCompilerContext().popCurrentPrivType();
+			}
 		}
 		finally
 		{

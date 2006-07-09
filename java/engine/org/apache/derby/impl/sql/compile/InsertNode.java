@@ -502,9 +502,13 @@ public final class InsertNode extends DMLModStatementNode
 			autoincRowLocation = 
 				dd.computeAutoincRowLocations(tc, targetTableDescriptor);
 
-			getCompilerContext().pushCurrentPrivType(getPrivType());
-			getCompilerContext().addRequiredTablePriv(targetTableDescriptor);
-			getCompilerContext().popCurrentPrivType();
+			if (isPrivilegeCollectionRequired())
+			{
+				getCompilerContext().pushCurrentPrivType(getPrivType());
+				getCompilerContext().addRequiredTablePriv(targetTableDescriptor);
+				getCompilerContext().popCurrentPrivType();				
+			}
+
 		}
 		else
 		{

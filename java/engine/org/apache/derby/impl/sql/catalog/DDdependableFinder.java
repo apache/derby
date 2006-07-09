@@ -33,7 +33,6 @@ import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
-import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -249,6 +248,15 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
 				return Dependable.VIEW;
 
+			case StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID:
+				return Dependable.TABLE_PERMISSION;
+			
+			case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
+				return Dependable.COLUMNS_PERMISSION;
+
+			case StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID:
+				return Dependable.ROUTINE_PERMISSION;
+
 			default:
 				if (SanityManager.DEBUG)
 				{
@@ -302,6 +310,7 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	protected Dependable getDependable(DataDictionary dd, UUID dependableObjectID)
 		throws StandardException
 	{
+		LanguageConnectionContext lcc;
 		switch (formatId)
 		{
 			case StoredFormatIds.ALIAS_DESCRIPTOR_FINDER_V01_ID:
@@ -339,6 +348,18 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
 				return dd.getViewDescriptor(dependableObjectID);
 
+			case StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID:
+				lcc = (LanguageConnectionContext)
+				ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+				return dd.getTablePermissions(dependableObjectID,
+						lcc.getAuthorizationId());
+
+			case StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID:
+				lcc = (LanguageConnectionContext)
+				ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+				return dd.getRoutinePermissions(dependableObjectID,
+						lcc.getAuthorizationId());
+
 			default:
 				if (SanityManager.DEBUG)
 				{
@@ -356,6 +377,7 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	protected String getSQLObjectName(DataDictionary dd, UUID dependableObjectID)
 		throws StandardException
 	{
+		LanguageConnectionContext lcc;
 		switch (formatId)
 		{
 			case StoredFormatIds.ALIAS_DESCRIPTOR_FINDER_V01_ID:
@@ -388,6 +410,7 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 
 			case StoredFormatIds.TABLE_DESCRIPTOR_FINDER_V01_ID:
 			case StoredFormatIds.COLUMN_DESCRIPTOR_FINDER_V01_ID:
+			case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
 				return getDependable(dd, dependableObjectID).getObjectName();
 
 			case StoredFormatIds.TRIGGER_DESCRIPTOR_FINDER_V01_ID:
@@ -395,6 +418,18 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 
 			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
 				return dd.getTableDescriptor(dependableObjectID).getName();
+
+			case StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID:
+				lcc = (LanguageConnectionContext)
+				ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+				return dd.getTablePermissions(dependableObjectID,
+						lcc.getAuthorizationId()).getObjectName();
+
+			case StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID:
+				lcc = (LanguageConnectionContext)
+				ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+				return dd.getRoutinePermissions(dependableObjectID,
+						lcc.getAuthorizationId()).getObjectName();
 
 			default:
 				if (SanityManager.DEBUG)

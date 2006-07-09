@@ -20,8 +20,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -578,8 +576,8 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 					columnReference.setSourceLevel(currentLevel);
 					columnNameMatch = true;
 
-					CompilerContext cc = getCompilerContext();
-					cc.addRequiredColumnPriv( resultColumn.getTableColumnDescriptor());
+					if (fromTable.isPrivilegeCollectionRequired())
+						getCompilerContext().addRequiredColumnPriv( resultColumn.getTableColumnDescriptor());						
 				}
 				else
 				{

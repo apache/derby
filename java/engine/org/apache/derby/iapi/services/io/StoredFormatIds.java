@@ -308,6 +308,24 @@ public interface StoredFormatIds {
      */
         static public final int TABLE_DESCRIPTOR_FINDER_V01_ID =
                 (MIN_ID_2 + 137);
+
+        /**
+        class org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo
+     */
+        static public final int ROUTINE_PERMISSION_FINDER_V01_ID =
+                (MIN_ID_2 + 461);
+
+        /**
+        class org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo
+     */
+        static public final int TABLE_PERMISSION_FINDER_V01_ID =
+                (MIN_ID_2 + 462);
+
+        /**
+        class org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo
+     */
+        static public final int COLUMNS_PERMISSION_FINDER_V01_ID =
+                (MIN_ID_2 + 463);
         
         /**
         class org.apache.derby.impl.sql.catalog.DataDictionaryDescriptorFinder
@@ -1834,7 +1852,7 @@ public interface StoredFormatIds {
          * Make sure this is updated when a new module is added
          */
         public static final int MAX_ID_2 =
-                (MIN_ID_2 + 460);
+                (MIN_ID_2 + 463);
 
         // DO NOT USE 4 BYTE IDS ANYMORE
         static public final int MAX_ID_4 =

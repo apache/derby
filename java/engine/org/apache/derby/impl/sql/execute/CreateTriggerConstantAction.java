@@ -27,7 +27,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
@@ -308,6 +307,8 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		dm.addDependency(triggerd, actionspsd, lcc.getContextManager());
 		dm.addDependency(triggerd, triggerTable, lcc.getContextManager());
 		dm.addDependency(actionspsd, triggerTable, lcc.getContextManager());
+		//store trigger's dependency on various privileges in the dependeny system
+		storeViewTriggerDependenciesOnPrivileges(activation, triggerd);		
 	}
 
 

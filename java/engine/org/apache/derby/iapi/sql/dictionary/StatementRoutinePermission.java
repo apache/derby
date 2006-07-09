@@ -71,4 +71,13 @@ public class StatementRoutinePermission extends StatementPermission
 												  ad.getDescriptorName());
 		}
 	} // end of check
+
+	/**
+	 * @see StatementPermission#getPermissionDescriptor
+	 */
+	public PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
+	throws StandardException
+	{
+		return dd.getRoutinePermissions(routineUUID,authid);
+	}
 }

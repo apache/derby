@@ -95,6 +95,30 @@ public abstract class QueryTreeNode implements Visitable
 	private GenericConstantActionFactory	constantActionFactory;
 
 	/**
+	 * In Derby SQL Standard Authorization, views, triggers and constraints 
+	 * execute with definer's privileges. Taking a specific eg of views
+	 * user1
+	 * create table t1 (c11 int);
+	 * create view v1 as select * from user1.t1;
+	 * grant select on v1 to user2;
+	 * user2
+	 * select * from user1.v1;
+	 * Running with definer's privileges mean that since user2 has select
+	 * privileges on view v1 owned by user1, then that is sufficient for user2
+	 * to do a select from view v1. View v1 underneath might access some
+	 * objects that user2 doesn't have privileges on, but that is not a problem
+	 * since views execute with definer's privileges. In order to implement this
+	 * behavior, when doing a select from view v1, we only want to check for
+	 * select privilege on view v1. While processing the underlying query for
+	 * view v1, we want to stop collecting the privilege requirements for the
+	 * query underneath. Following flag, isPrivilegeCollectionRequired is used
+	 * for this purpose. The flag will be true when we are the top level of view
+	 * and then it is turned off while we process the query underlying the view
+	 * v1.             
+	 */
+	boolean isPrivilegeCollectionRequired = true;
+
+	/**
 	 * Set the ContextManager for this node.
 	 * 
 	 * @param cm	The ContextManager.
@@ -497,6 +521,39 @@ public abstract class QueryTreeNode implements Visitable
 	final boolean isSessionSchema(String schemaName)
 	{
 		return SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME.equals(schemaName);
+	}
+
+	/**
+	 * Triggers, constraints and views get executed with their definer's
+	 * privileges and they can exist in the system only if their definers'
+	 * still have all the privileges to creeate them. Based on this, any
+	 * time a trigger/view/constraint is executing, we do not need to waste
+	 * time in checking if the definer still has the right set of privileges.
+	 * At compile time, we wil make sure that we do not collect the privilege
+	 * requirement for objects accessed with definer privileges by calling the
+	 * following method. 
+	 */
+	public void disablePrivilegeCollection()
+	{
+		isPrivilegeCollectionRequired = false;
+	}
+
+	/**
+	 * Return true from this method means that we need to collect privilege
+	 * requirement for this node. For following cases, this method will
+	 * return true.
+	 * 1)execute view - collect privilege to access view but do not collect
+	 * privilege requirements for objects accessed by actual view uqery
+	 * 2)execute select - collect privilege requirements for objects accessed
+	 * by select statement
+	 * 3)create view -  collect privileges for select statement : the select
+	 * statement for create view falls under 2) category above.
+	 * 
+	 * @return true if need to collect privilege requirement for this node
+	 */
+	public boolean isPrivilegeCollectionRequired()
+	{
+		return(isPrivilegeCollectionRequired);
 	}
 
 	/**

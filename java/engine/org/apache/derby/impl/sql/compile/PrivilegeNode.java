@@ -122,9 +122,9 @@ public class PrivilegeNode extends QueryTreeNode
             if (isSessionSchema(sd.getSchemaName()))
                 throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
 
-            // GrantRevoke TODO: Need to enable for views later. Disable for now.
-            // Disable grant on VTIs and Synonyms
-            if (td.getTableType() != TableDescriptor.BASE_TABLE_TYPE)
+            // GrantRevoke TODO: Disable grant on VTIs and Synonyms
+            if (td.getTableType() != TableDescriptor.BASE_TABLE_TYPE &&
+            		td.getTableType() != TableDescriptor.VIEW_TYPE)
                 throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, tableName.getFullTableName());
 
             specificPrivileges.bind( td);

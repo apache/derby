@@ -216,6 +216,8 @@ class CreateViewConstantAction extends DDLConstantAction
 				throw StandardException.plainWrapException(te);
 			}
 		}
+		//store view's dependency on various privileges in the dependeny system
+		storeViewTriggerDependenciesOnPrivileges(activation, vd);
 
 		dd.addDescriptor(vd, sd, DataDictionary.SYSVIEWS_CATALOG_NUM, true, tc);
 	}

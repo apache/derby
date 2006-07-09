@@ -238,10 +238,11 @@ abstract class DDLStatementNode extends StatementNode
 			sd  = new SchemaDescriptor(getDataDictionary(), schemaName,
 				(String) null, (UUID)null, false);
 
-			cc.addRequiredSchemaPriv(schemaName, null, Authorizer.CREATE_SCHEMA_PRIV);
+			if (isPrivilegeCollectionRequired())
+				cc.addRequiredSchemaPriv(schemaName, null, Authorizer.CREATE_SCHEMA_PRIV);
 		}
 
-		if (ownerCheck)
+		if (ownerCheck && isPrivilegeCollectionRequired())
 			cc.addRequiredSchemaPriv(sd.getSchemaName(), null,
 						Authorizer.MODIFY_SCHEMA_PRIV);
 

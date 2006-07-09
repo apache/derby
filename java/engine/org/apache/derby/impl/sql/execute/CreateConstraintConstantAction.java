@@ -33,19 +33,14 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.dictionary.DDUtils;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.types.DataValueFactory;
 
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -54,12 +49,9 @@ import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 
 import org.apache.derby.iapi.sql.Activation;
 
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 
@@ -360,6 +352,8 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				
 				/* Create stored dependency on the referenced constraint */
 				dm.addDependency(conDesc, referencedConstraint, lcc.getContextManager());
+				//store constraint's dependency on REFERENCES privileges in the dependeny system
+				storeConstraintDependenciesOnPrivileges(activation, conDesc, referencedConstraint.getTableId());				
 				break;
 
 			default:
@@ -426,7 +420,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				DependencyManager.CREATE_CONSTRAINT, lcc);
 		}
 	}
-
+	
 	/**
 	 * Is the constant action for a foreign key
 	 *

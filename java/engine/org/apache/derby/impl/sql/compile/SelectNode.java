@@ -1968,6 +1968,17 @@ public class SelectNode extends ResultSetNode
 		return false;
 	}
 
+	/** 
+	 * @see QueryTreeNode#disablePrivilegeCollection
+	 */
+	public void disablePrivilegeCollection()
+	{
+		super.disablePrivilegeCollection();
+		int fromListSize = fromList.size();
+		for( int i = 0; i < fromListSize; i++)
+			((FromTable) fromList.elementAt(i)).disablePrivilegeCollection();
+	}
+
 	/**
 	 * Return whether or not this ResultSetNode contains a subquery with a
 	 * reference to the specified target table.

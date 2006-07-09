@@ -117,7 +117,8 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 				// Set tableDescriptor for this column descriptor. Needed for adding required table
 				// access permission. Column descriptors may not have this set already.
 				cd.setTableDescriptor(td);
-				getCompilerContext().addRequiredColumnPriv(cd);
+				if (isPrivilegeCollectionRequired())
+					getCompilerContext().addRequiredColumnPriv(cd);
 			}
 
 		}
@@ -132,7 +133,8 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 					// Set tableDescriptor for this column descriptor. Needed for adding required table
 					// access permission. Column descriptors may not have this set already.
 					cd.setTableDescriptor(td);
-					getCompilerContext().addRequiredColumnPriv(cd);
+					if (isPrivilegeCollectionRequired())
+						getCompilerContext().addRequiredColumnPriv(cd);
 				}
 			}
 		}

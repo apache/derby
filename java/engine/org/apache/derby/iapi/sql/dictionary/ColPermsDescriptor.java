@@ -20,10 +20,16 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import org.apache.derby.catalog.Dependable;
+import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.impl.sql.catalog.DDColumnPermissionsDependableFinder;
+//import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class describes a row in the SYS.SYSCOLPERMS system table, which keeps
@@ -34,18 +40,20 @@ public class ColPermsDescriptor extends PermissionsDescriptor
     private final UUID tableUUID;
     private final String type;
     private final FormatableBitSet columns;
+    private final String tableName;
 	
 	public ColPermsDescriptor( DataDictionary dd,
-                               String grantee,
+			                   String grantee,
                                String grantor,
                                UUID tableUUID,
                                String type,
-                               FormatableBitSet columns)
+                               FormatableBitSet columns) throws StandardException
 	{
 		super (dd, grantee, grantor);
         this.tableUUID = tableUUID;
         this.type = type;
         this.columns = columns;
+        tableName = dd.getTableDescriptor(tableUUID).getName();
 	}
 
     /**
@@ -55,7 +63,7 @@ public class ColPermsDescriptor extends PermissionsDescriptor
                                String grantee,
                                String grantor,
                                UUID tableUUID,
-                               String type)
+                               String type) throws StandardException
     {
         this( dd, grantee, grantor, tableUUID, type, (FormatableBitSet) null);
     }
@@ -72,14 +80,15 @@ public class ColPermsDescriptor extends PermissionsDescriptor
 
 	public String toString()
 	{
-		return "colPerms: grantor=" + getGrantee() + 
+		return "colPerms: grantee=" + getGrantee() + 
+        ",colPermsUUID=" + getUUID() +
 			",grantor=" + getGrantor() +
           ",tableUUID=" + getTableUUID() +
           ",type=" + getType() +
           ",columns=" + getColumns();
 	}		
 
-    /**
+	/**
      * @return true iff the key part of this permissions descriptor equals the key part of another permissions
      *         descriptor.
      */
@@ -101,4 +110,54 @@ public class ColPermsDescriptor extends PermissionsDescriptor
         return super.keyHashCode() + tableUUID.hashCode() +
           ((type == null) ? 0 : type.hashCode());
     }
+	
+	/**
+	 * @see PermissionsDescriptor#checkOwner
+	 */
+	public boolean checkOwner(String authorizationId) throws StandardException
+	{
+		TableDescriptor td = getDataDictionary().getTableDescriptor(tableUUID);
+		if (td.getSchemaDescriptor().getAuthorizationId().equals(authorizationId))
+			return true;
+		else
+			return false;
+	}
+
+	//////////////////////////////////////////////
+	//
+	// PROVIDER INTERFACE
+	//
+	//////////////////////////////////////////////
+
+	/**
+	 * Return the name of this Provider.  (Useful for errors.)
+	 *
+	 * @return String	The name of this provider.
+	 */
+	public String getObjectName()
+	{
+		return "Column Privilege on " + tableName; 
+	}
+
+	/**
+	 * Get the provider's type.
+	 *
+	 * @return char		The provider's type.
+	 */
+	public String getClassType()
+	{
+		return Dependable.COLUMNS_PERMISSION;
+	}
+
+	/**		
+		@return the stored form of this provider
+
+			@see Dependable#getDependableFinder
+	 */
+	public DependableFinder getDependableFinder() 
+	{
+	    return	new DDColumnPermissionsDependableFinder(StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID, 
+	    		type);
+	}
+
 }

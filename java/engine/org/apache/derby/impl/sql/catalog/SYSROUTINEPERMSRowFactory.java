@@ -24,7 +24,6 @@ import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.PermissionsCatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 
@@ -34,17 +33,12 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.catalog.Statistics;
-
-import java.sql.Timestamp;
 
 /**
  * Factory for creating a SYSROUTINEPERMS row.
@@ -56,11 +50,12 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 	static final String TABLENAME_STRING = "SYSROUTINEPERMS";
 
     // Column numbers for the SYSROUTINEPERMS table. 1 based
-    private static final int GRANTEE_COL_NUM = 1;
-    private static final int GRANTOR_COL_NUM = 2;
-    private static final int ALIASID_COL_NUM = 3;
-    private static final int GRANTOPTION_COL_NUM = 4;
-    private static final int COLUMN_COUNT = 4;
+    private static final int SYSROUTINEPERMS_ROUTINPERMSID = 1;
+    private static final int GRANTEE_COL_NUM = 2;
+    private static final int GRANTOR_COL_NUM = 3;
+    private static final int ALIASID_COL_NUM = 4;
+    private static final int GRANTOPTION_COL_NUM = 5;
+    private static final int COLUMN_COUNT = 5;
 
     static final int GRANTEE_ALIAS_GRANTOR_INDEX_NUM = 0;
 	private static final int[][] indexColumnPositions = 
@@ -91,6 +86,8 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 
 	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent) throws StandardException
 	{
+		UUID oid;
+        String routinePermID = null;
         DataValueDescriptor grantee = null;
         DataValueDescriptor grantor = null;
         String routineID = null;
@@ -103,12 +100,20 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
         else
         {
             RoutinePermsDescriptor rpd = (RoutinePermsDescriptor) td;
+            oid = rpd.getUUID();
+            if ( oid == null )
+            {
+				oid = getUUIDFactory().createUUID();
+				rpd.setUUID(oid);
+            }
+            routinePermID = oid.toString();
             grantee = getAuthorizationID( rpd.getGrantee());
             grantor = getAuthorizationID( rpd.getGrantor());
             if( rpd.getRoutineUUID() != null)
                 routineID = rpd.getRoutineUUID().toString();
         }
 		ExecRow row = getExecutionFactory().getValueRow( COLUMN_COUNT);
+		row.setColumn( SYSROUTINEPERMS_ROUTINPERMSID, dvf.getCharDataValue(routinePermID));
         row.setColumn( GRANTEE_COL_NUM, grantee);
         row.setColumn( GRANTOR_COL_NUM, grantor);
         row.setColumn( ALIASID_COL_NUM, dvf.getCharDataValue( routineID));
@@ -126,13 +131,18 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
             SanityManager.ASSERT( row.nColumns() == COLUMN_COUNT,
                                   "Wrong size row passed to SYSROUTINEPERMSRowFactory.buildDescriptor");
 
+        String routinePermsUUIDString = row.getColumn(SYSROUTINEPERMS_ROUTINPERMSID).getString();
+        UUID routinePermsUUID = getUUIDFactory().recreateUUID(routinePermsUUIDString);
         String aliasUUIDString = row.getColumn( ALIASID_COL_NUM).getString();
         UUID aliasUUID = getUUIDFactory().recreateUUID(aliasUUIDString);
 
-        return new RoutinePermsDescriptor( dataDictionary,
-                                           getAuthorizationID( row, GRANTEE_COL_NUM),
-                                           getAuthorizationID( row, GRANTOR_COL_NUM),
-                                           aliasUUID);
+        RoutinePermsDescriptor routinePermsDesc =
+	        new RoutinePermsDescriptor( dataDictionary,
+                    getAuthorizationID( row, GRANTEE_COL_NUM),
+                    getAuthorizationID( row, GRANTOR_COL_NUM),
+                    aliasUUID);
+        routinePermsDesc.setUUID(routinePermsUUID);
+			return routinePermsDesc;
     } // end of buildDescriptor
 
 	/** builds a column list for the catalog */
@@ -142,6 +152,15 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
         {
             columnList = new SystemColumn[ COLUMN_COUNT];
 
+            columnList[ SYSROUTINEPERMS_ROUTINPERMSID - 1] =
+                new SystemColumnImpl( convertIdCase( "ROUTINEPERMSID"),
+                                      SYSROUTINEPERMS_ROUTINPERMSID,
+                                      0, // precision
+                                      0, // scale
+                                      false, // nullability
+                                      "CHAR",
+                                      true,
+                                      36);
             columnList[ GRANTEE_COL_NUM - 1] =
               new SystemColumnImpl( convertIdCase( "GRANTEE"),
                                     GRANTEE_COL_NUM,

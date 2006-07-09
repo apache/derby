@@ -521,5 +521,8 @@ String[] TwoByte = {
         /* 458 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter, XML_ID
         /* 459 */   "org.apache.derby.impl.store.raw.data.EncryptContainerOperation",
         /* 460 */   "org.apache.derby.impl.store.raw.data.EncryptContainerUndoOperation",
+        /* 461 */   "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
+        /* 462 */   "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
+        /* 463 */   "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
 };
 }

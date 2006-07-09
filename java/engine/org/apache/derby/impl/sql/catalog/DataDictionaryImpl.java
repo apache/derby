@@ -9797,7 +9797,7 @@ public final class	DataDictionaryImpl
      * Get one user's column privileges for a table.
      *
      * @param tableUUID
-     * @param privType Authorizer.SELECT_PRIV, Authorizer.UPDATE_PRIV, or Authorizer.REFERENCES_PRIV
+     * @param privType(as int) Authorizer.SELECT_PRIV, Authorizer.UPDATE_PRIV, or Authorizer.REFERENCES_PRIV
      * @param forGrant
      * @param authorizationId The user name
      *
@@ -9827,6 +9827,39 @@ public final class	DataDictionaryImpl
         return (ColPermsDescriptor) getPermissions( key);
     } // end of getColumnPermissions
 
+    /**
+     * Get one user's column privileges for a table. This routine gets called by
+     * ColPermsDescriptor.getDependableFinder and that method has hold of 
+     * privilege type in String form.
+     *
+     * @param tableUUID
+     * @param privType(as String) Authorizer.SELECT_PRIV, Authorizer.UPDATE_PRIV, or Authorizer.REFERENCES_PRIV
+     * @param forGrant
+     * @param authorizationId The user name
+     *
+     * @return a ColPermsDescriptor or null if the user has no separate column
+     *         permissions of the specified type on the table. Note that the user may have been granted
+     *         permission on all the columns of the table (no column list), in which case this routine
+     *         will return null. You must also call getTablePermissions to see if the user has permission
+     *         on a set of columns.
+     *
+     * @exception StandardException
+     */
+    public ColPermsDescriptor getColumnPermissions( UUID tableUUID,
+            String privTypeStr,
+            boolean forGrant,
+            String authorizationId)
+    throws StandardException
+	{
+        ColPermsDescriptor key = new ColPermsDescriptor( this,
+                                                         authorizationId,
+                                                         (String) null,
+                                                         tableUUID,
+                                                         privTypeStr);
+        return (ColPermsDescriptor) getPermissions( key);
+    	
+	}
+
     private static final String[] colPrivTypeMap;
     private static final String[] colPrivTypeMapForGrant;
     static {
@@ -9839,7 +9872,7 @@ public final class	DataDictionaryImpl
         colPrivTypeMap[ Authorizer.REFERENCES_PRIV] = "r";
         colPrivTypeMapForGrant[ Authorizer.REFERENCES_PRIV] = "R";
     }
-    
+
     /**
      * Get one user's permissions for a routine (function or procedure).
      *

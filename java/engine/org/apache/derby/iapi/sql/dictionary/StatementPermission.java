@@ -39,4 +39,27 @@ public abstract class StatementPermission
 	public abstract void check( LanguageConnectionContext lcc,
 								String authorizationId,
 								boolean forGrant) throws StandardException;
+
+	/**
+	 * 
+	 * Get the PermissionDescriptor for the passed authorization id for this
+	 * object. This method gets called during the execution phase of create 
+	 * view/constraint/trigger. The return value of this method is saved in
+	 * dependency system to keep track of views/constraints/triggers 
+	 * dependencies on required permissions. This happens in execution phase 
+	 * after it has been established that passed authorization id has all the 
+	 * permissions it needs to create that view/constraint/trigger. Which means 
+	 * that we can only get to writing into dependency system once all the required 
+	 * privileges are confirmed. 
+	 *   
+	 * @param authorizationId	AuthorizationId
+	 * @param dd	DataDictionary
+	 * 
+	 * @return PermissionsDescriptor	The PermissionDescriptor for the passed
+	 *  authorization id on this object
+	 * 
+	 * @exception StandardException
+	 */
+	public abstract PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
+	throws StandardException;
 }

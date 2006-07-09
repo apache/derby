@@ -47,6 +47,15 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 		conn.close();
 	}
 
+	public static int selectFromSpecificSchema(int p1) throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("select * from mamta1.t12RoutineTest");
+		ps.executeQuery();
+		ps.close();
+		conn.close();
+		return (1);
+	}
+
 	private static void insertInBig(Connection conn, String A, String B, String C, String D) throws SQLException {
 		PreparedStatement ps = conn.prepareStatement("insert into big values (?, ?, ?, ?)");
 		ps.setString(1, A);

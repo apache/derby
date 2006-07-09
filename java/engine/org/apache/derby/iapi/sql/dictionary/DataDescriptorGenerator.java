@@ -440,6 +440,7 @@ public class DataDescriptorGenerator
                                                          String referencesPerm,
                                                          String triggerPerm,
                                                          String grantor)
+	throws StandardException
     {
         if( "N".equals( selectPerm) && "N".equals( deletePerm) && "N".equals( insertPerm)
             && "N".equals( updatePerm) && "N".equals( referencesPerm) && "N".equals( triggerPerm))
@@ -475,7 +476,7 @@ public class DataDescriptorGenerator
     public ColPermsDescriptor newColPermsDescriptor( TableDescriptor td,
                                                      String type,
                                                      FormatableBitSet columns,
-                                                     String grantor)
+                                                     String grantor) throws StandardException
     {
         return new ColPermsDescriptor( dataDictionary,
                                        (String) null,
@@ -492,6 +493,7 @@ public class DataDescriptorGenerator
      * @param grantor
      */
     public RoutinePermsDescriptor newRoutinePermsDescriptor( AliasDescriptor ad, String grantor)
+	throws StandardException
     {
         return new RoutinePermsDescriptor( dataDictionary,
                                            (String) null,

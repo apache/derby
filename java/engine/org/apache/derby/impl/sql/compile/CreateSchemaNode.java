@@ -110,7 +110,8 @@ public class CreateSchemaNode extends DDLStatementNode
 		super.bind();
 
 		CompilerContext cc = getCompilerContext();
-		cc.addRequiredSchemaPriv(name, aid, Authorizer.CREATE_SCHEMA_PRIV);
+		if (isPrivilegeCollectionRequired())
+			cc.addRequiredSchemaPriv(name, aid, Authorizer.CREATE_SCHEMA_PRIV);
 
 		return this;
 	}
