@@ -43,7 +43,7 @@ ij> -- . implicit update test for read only spec
 ----- with a 'cursor not updatable' message
 get cursor c as 'select i, v from t1, t2';
 ij> delete from t1 where current of c;
-ERROR 42X30: Cursor 'SQL_CURLH000C1' not found. Verify that autocommit is OFF.
+ERROR 42X30: Cursor '<xxx-cursor-name-xxx>' not found. Verify that autocommit is OFF.
 ij> --  cursor with same name already exists
 get cursor c as 'select i, v from t1, t2';
 ERROR XJ203: Cursor name 'C' is already in use
@@ -56,19 +56,19 @@ No current row
 ij> -- the delete will get a 'cursor not updatable' execution error, but won't get
 ----- a compile time error
 delete from t1 where current of c1;
-ERROR 42X30: Cursor 'SQL_CURLH000C1' not found. Verify that autocommit is OFF.
+ERROR 42X30: Cursor '<xxx-cursor-name-xxx>' not found. Verify that autocommit is OFF.
 ij> close c1;
 ij> -- . read only for read only cursor spec
 ----- we know because the delete is refused with a 'cursor not updatable' message
 get cursor c2 as 'select i, v from t1, t2 for read only';
 ij> delete from t1 where current of c2;
-ERROR 42X30: Cursor 'SQL_CURLH000C1' not found. Verify that autocommit is OFF.
+ERROR 42X30: Cursor '<xxx-cursor-name-xxx>' not found. Verify that autocommit is OFF.
 ij> close c2;
 ij> -- . read only for updatable cursor spec
 ----- we know because the delete is refused with a 'cursor not updatable' message
 get cursor c3 as 'select i, v from t1 where i is not null for read only';
 ij> delete from t1 where current of c3;
-ERROR 42X30: Cursor 'SQL_CURLH000C1' not found. Verify that autocommit is OFF.
+ERROR 42X30: Cursor '<xxx-cursor-name-xxx>' not found. Verify that autocommit is OFF.
 ij> close c3;
 ij> -- . for update col not in select list
 ----- this is allowed:
@@ -133,7 +133,7 @@ I
 1          
 ij> -- this will get a target table mismatch error, it uses the correlation name:
 delete from s1 where current of c4;
-ERROR 42X28: Delete table 'S1' is not target of cursor 'SQL_CURLH000C1'.
+ERROR 42X28: Delete table 'S1' is not target of cursor '<xxx-cursor-name-xxx>'.
 ij> -- this will compile and succeed, it uses the table name:
 delete from t1 where current of c4;
 1 row inserted/updated/deleted
@@ -223,7 +223,7 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 -----
 Statement Name: 
-	SQL_CURLH000C1
+	<xxx-cursor-name-xxx>
 Statement Text: 
 	select i, b from t3 FOR UPDATE
 Parse Time: 0
@@ -268,7 +268,7 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 -----
 Statement Name: 
-	SQL_CURLH000C1
+	<xxx-cursor-name-xxx>
 Statement Text: 
 	select i, b from t3  where i = ? FOR UPDATE
 Parse Time: 0
@@ -334,7 +334,7 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 -----
 Statement Name: 
-	SQL_CURLH000C3
+	<xxx-cursor-name-xxx>
 Statement Text: 
 	select i, b from t3 where i < ? FOR UPDATE
 Parse Time: 0
@@ -394,7 +394,7 @@ ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 -----
 Statement Name: 
-	SQL_CURLH000C3
+	<xxx-cursor-name-xxx>
 Statement Text: 
 	select i, b from t3  where b = ? FOR UPDATE
 Parse Time: 0
