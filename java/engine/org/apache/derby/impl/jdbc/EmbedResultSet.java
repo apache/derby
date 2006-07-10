@@ -126,13 +126,16 @@ public abstract class EmbedResultSet extends ConnectionChild
 	private ResultSetMetaData rMetaData;
 	private SQLWarning topWarning;
 
-	// This activation is set by EmbedStatement
-	// for a single execution Activation. Ie.
-	// a ResultSet from a Statement.executeQuery().
-	// In this case the finalization of the ResultSet
-	// will mark the Activation as unused.
-	// c.f. EmbedPreparedStatement.finalize().
-	Activation finalizeActivation;
+	/**
+	 This activation is set by EmbedStatement
+	 for a single execution Activation. Ie.
+	 a ResultSet from a Statement.executeQuery().
+	 In this case the closing of this ResultSet will close
+	 the activation or the finalization of the ResultSet
+	 without it being closed will mark the Activation as unused.
+	 c.f. EmbedPreparedStatement.finalize().
+    */
+	Activation singleUseActivation;
 
 	// Order of creation 
 	final int order;
@@ -230,7 +233,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 		//CONCUR_READ_ONLY or CONCUR_UPDATABLE depending on whether the underlying language resultset is updateable or not.
 		//If the underlying language resultset is not updateable, then the concurrency of the ResultSet object will be CONCUR_READ_ONLY
 		//and a warning will be issued on the ResultSet object.
-		if (stmt == null) concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
+		if (stmt == null)
+			concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
 		else if (stmt.getResultSetConcurrency() == JDBC20Translation.CONCUR_READ_ONLY)
 			concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
 		else {
@@ -294,8 +298,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 	protected void finalize() throws Throwable {
 		super.finalize();
 
-		if (finalizeActivation != null) {
-			finalizeActivation.markUnused();
+		if (singleUseActivation != null) {
+			singleUseActivation.markUnused();
 		}		
 	}
 
@@ -578,7 +582,14 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 			try	{
 				try	{
-				    theResults.finish(); // release the result set, don't just close it
+					theResults.finish(); // release the result set, don't just close it
+				    
+				    if (this.singleUseActivation != null)
+				    {
+				    	this.singleUseActivation.close();
+				    	this.singleUseActivation = null;
+				    }
+				    
 				} catch (Throwable t) {
 					throw handleException(t);
 				}

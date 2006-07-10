@@ -1202,7 +1202,7 @@ public class EmbedStatement extends ConnectionChild
 					// closed sometime later by the connection
 					// outside of finalization.
 					if (a.isSingleExecution())
-						lresults.finalizeActivation = a;
+						lresults.singleUseActivation = a;
 
 					updateCount = -1;
 					retval = true;
