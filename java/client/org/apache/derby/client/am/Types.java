@@ -21,6 +21,7 @@ package org.apache.derby.client.am;
 
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 
 // This enumeration of types represents the typing scheme used by our jdbc driver.
 // Once this is finished, we need to review our switches to make sure they are exhaustive
@@ -102,6 +103,18 @@ public class Types {
             case TIMESTAMP:     return "TIMESTAMP";
             case VARBINARY:     return "VARBINARY";
             case VARCHAR:       return "VARCHAR";
+            // Types we don't support:
+            case java.sql.Types.ARRAY: return "ARRAY";
+            case java.sql.Types.DATALINK: return "DATALINK";
+            case JDBC40Translation.NCHAR: return "NATIONAL CHAR";
+            case JDBC40Translation.NCLOB: return "NCLOB";
+            case JDBC40Translation.NVARCHAR: return "NATIONAL CHAR VARYING";
+            case JDBC40Translation.LONGNVARCHAR: return "LONG NVARCHAR";
+            case java.sql.Types.REF: return "REF";
+            case JDBC40Translation.ROWID: return "ROWID";
+            case JDBC40Translation.SQLXML: return "SQLXML";
+            case java.sql.Types.STRUCT: return "STRUCT";
+            // Unknown type:
             default:            return "<UNKNOWN>";
         }
     }

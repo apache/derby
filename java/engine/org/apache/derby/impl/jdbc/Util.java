@@ -32,6 +32,7 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -265,8 +266,10 @@ public abstract class Util  {
 
 	public static String typeName(int jdbcType) {
 		switch (jdbcType) {
+			case Types.ARRAY: return TypeId.ARRAY_NAME;
 			case Types.BIT 		:  return TypeId.BIT_NAME;
 			case JDBC30Translation.SQL_TYPES_BOOLEAN  : return TypeId.BOOLEAN_NAME;
+			case JDBC30Translation.DATALINK: return TypeId.DATALINK_NAME;
 			case Types.TINYINT 	:  return TypeId.TINYINT_NAME;
 			case Types.SMALLINT	:  return TypeId.SMALLINT_NAME;
 			case Types.INTEGER 	:  return TypeId.INTEGER_NAME;
@@ -280,9 +283,16 @@ public abstract class Util  {
 			case Types.DECIMAL	:  return TypeId.DECIMAL_NAME;
 
 			case Types.CHAR		:  return TypeId.CHAR_NAME;
+			case JDBC40Translation.NCHAR:
+				return TypeId.NATIONAL_CHAR_NAME;
 			case Types.VARCHAR 	:  return TypeId.VARCHAR_NAME;
+			case JDBC40Translation.NVARCHAR:
+				return TypeId.NATIONAL_VARCHAR_NAME;
 			case Types.LONGVARCHAR 	:  return "LONGVARCHAR";
+			case JDBC40Translation.LONGNVARCHAR:
+				return TypeId.NATIONAL_LONGVARCHAR_NAME;
             case Types.CLOB     :  return TypeId.CLOB_NAME;
+			case JDBC40Translation.NCLOB: return TypeId.NCLOB_NAME;
 
 			case Types.DATE 		:  return TypeId.DATE_NAME;
 			case Types.TIME 		:  return TypeId.TIME_NAME;
@@ -295,7 +305,11 @@ public abstract class Util  {
 
 			case Types.OTHER		:  return "OTHER";
 			case Types.JAVA_OBJECT	:  return "Types.JAVA_OBJECT";
+			case Types.REF : return TypeId.REF_NAME;
+			case JDBC40Translation.ROWID: return TypeId.ROWID_NAME;
+			case Types.STRUCT: return TypeId.STRUCT_NAME;
 			case StoredFormatIds.XML_TYPE_ID :  return TypeId.XML_NAME;
+			case JDBC40Translation.SQLXML: return TypeId.SQLXML_NAME;
 			default : return String.valueOf(jdbcType);
 		}
 	}

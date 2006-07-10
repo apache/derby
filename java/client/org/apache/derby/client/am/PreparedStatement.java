@@ -20,6 +20,7 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.io.InputStream;
@@ -1214,6 +1215,7 @@ public class PreparedStatement extends Statement
                             int targetJdbcType,
                             int scale) throws SqlException {
         parameterIndex = checkSetterPreconditions(parameterIndex);
+        checkForSupportedDataType(targetJdbcType);
         checkForValidScale(scale);
 
         if (x == null) {
@@ -2159,6 +2161,45 @@ public class PreparedStatement extends Statement
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.BAD_SCALE_VALUE),
                 new Integer(scale));
+        }
+    }
+
+    /**
+     * Checks whether a data type is supported for
+     * <code>setObject(int, Object, int)</code> and
+     * <code>setObject(int, Object, int, int)</code>.
+     *
+     * @param dataType the data type to check
+     * @exception SqlException if the type is not supported
+     */
+    private void checkForSupportedDataType(int dataType) throws SqlException {
+
+        // JDBC 4.0 javadoc for setObject() says:
+        //
+        // Throws: (...) SQLFeatureNotSupportedException - if
+        // targetSqlType is a ARRAY, BLOB, CLOB, DATALINK,
+        // JAVA_OBJECT, NCHAR, NCLOB, NVARCHAR, LONGNVARCHAR, REF,
+        // ROWID, SQLXML or STRUCT data type and the JDBC driver does
+        // not support this data type
+        //
+        // Of these types, we only support BLOB, CLOB and
+        // (sort of) JAVA_OBJECT.
+
+        switch (dataType) {
+        case java.sql.Types.ARRAY:
+        case java.sql.Types.DATALINK:
+        case JDBC40Translation.NCHAR:
+        case JDBC40Translation.NCLOB:
+        case JDBC40Translation.NVARCHAR:
+        case JDBC40Translation.LONGNVARCHAR:
+        case java.sql.Types.REF:
+        case JDBC40Translation.ROWID:
+        case JDBC40Translation.SQLXML:
+        case java.sql.Types.STRUCT:
+            throw new SqlException
+                (agent_.logWriter_,
+                 new ClientMessageId(SQLState.DATA_TYPE_NOT_SUPPORTED),
+                 Types.getTypeString(dataType));
         }
     }
 

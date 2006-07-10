@@ -602,9 +602,12 @@ public class CallableStatementTest
      * Return suite with all tests of the class.
      */
     public static Test suite() {
+        TestSuite mainSuite = new TestSuite();
         TestSuite suite = new TestSuite(CallableStatementTest.class,
                                         "CallableStatementTest suite");
-        return new CallableStatementTestSetup(suite);
+        mainSuite.addTest(new CallableStatementTestSetup(suite));
+        mainSuite.addTest(SetObjectUnsupportedTest.suite(true));
+        return mainSuite;
     }
     
 } // End class CallableStatementTest

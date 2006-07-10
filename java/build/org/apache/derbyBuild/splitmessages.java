@@ -105,6 +105,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.CANT_CONVERT_UNICODE_TO_EBCDIC);
         clientMessageIds.add(SQLState.SECMECH_NOT_SUPPORTED);
         clientMessageIds.add(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED);
+        clientMessageIds.add(SQLState.DATA_TYPE_NOT_SUPPORTED);
         clientMessageIds.add(SQLState.JDBC_DRIVER_REGISTER);
         clientMessageIds.add(SQLState.NO_CURRENT_ROW);
         clientMessageIds.add(SQLState.LANG_IDENTIFIER_TOO_LONG);

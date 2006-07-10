@@ -174,6 +174,19 @@ public final class TypeId implements Formatable
         // section "10.2 Type name determination".
         public static final String      XML_NAME = "XML";
         
+        // ARRAY and STRUCT are JDBC 2.0 data types that are not
+        // supported by Derby.
+        public static final String      ARRAY_NAME = "ARRAY";
+        public static final String      STRUCT_NAME = "STRUCT";
+
+        // DATALINK is a JDBC 3.0 data type. Not supported by Derby.
+        public static final String      DATALINK_NAME = "DATALINK";
+
+        // ROWID and SQLXML are new types in JDBC 4.0. Not supported
+        // by Derby.
+        public static final String      ROWID_NAME = "ROWID";
+        public static final String      SQLXML_NAME = "SQLXML";
+
         /**
          * The following constants define the type precedence hierarchy.
          */

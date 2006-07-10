@@ -25,10 +25,12 @@ package org.apache.derby.shared.common.reference;
         new public statics in the jdbc 4.0 interfaces.  By providing
         an intermediary class with hard-coded copies of constants that
         will be available in jdbc 4.0, it becomes possible to refer to
-        these constants when compiling against older jdk versions. The
-        jdbc40 test suite (compiled against jdk16) contains tests that
-        verifies that these hard coded constants are in fact equal to
-        those found in jdk16.
+        these constants when compiling against older jdk versions.
+
+        <P>The test <code>jdbc4/JDBC40TranslationTest.junit</code>,
+        which is compiled against jdk16, contains tests that verifies
+        that these hard coded constants are in fact equal to those
+        found in jdk16.
 
         <P>
         This class should not be shipped with the product.
@@ -51,4 +53,12 @@ public interface JDBC40Translation {
     public static final int FUNCTION_NO_NULLS          = 0;
     public static final int FUNCTION_NULLABLE          = 1;
     public static final int FUNCTION_NULLABLE_UNKNOWN  = 2;
+
+    // constants from java.sql.Types
+    public static final int NCHAR = -8;
+    public static final int NVARCHAR = -9;
+    public static final int LONGNVARCHAR = -10;
+    public static final int NCLOB = 2007;
+    public static final int ROWID = 2008;
+    public static final int SQLXML = 2009;
 }

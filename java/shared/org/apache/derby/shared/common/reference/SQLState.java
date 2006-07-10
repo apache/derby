@@ -1318,6 +1318,7 @@ public interface SQLState {
     String CANCEL_NOT_SUPPORTED_BY_SERVER                           = "0A000.S.4";
     String SECMECH_NOT_SUPPORTED                                    = "0A000.S.5";
     String DRDA_COMMAND_NOT_IMPLEMENTED                             = "0A000.C.6";
+    String DATA_TYPE_NOT_SUPPORTED = "0A000.S.7";
 
 
 

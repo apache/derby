@@ -14,6 +14,7 @@ jdbc4/ClobTest.junit
 jdbc4/ClosedObjectTest.junit
 jdbc4/ConnectionTest.junit
 jdbc4/DataSourceTest.junit
+jdbc4/JDBC40TranslationTest.junit
 jdbc4/ParameterMetaDataWrapperTest.junit
 jdbc4/PreparedStatementTest.junit
 jdbc4/ResultSetMetaDataTest.junit

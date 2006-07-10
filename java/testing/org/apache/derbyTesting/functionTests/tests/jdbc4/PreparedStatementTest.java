@@ -102,6 +102,13 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         }
         conn = null;
     }
+
+    public static Test suite() {
+        TestSuite suite = new TestSuite();
+        suite.addTestSuite(PreparedStatementTest.class);
+        suite.addTest(SetObjectUnsupportedTest.suite(false));
+        return suite;
+    }
     
     //--------------------------------------------------------------------------
     //BEGIN THE TEST OF THE METHODS THAT THROW AN UNIMPLEMENTED EXCEPTION IN
