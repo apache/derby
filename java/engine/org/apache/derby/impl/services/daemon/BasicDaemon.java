@@ -43,7 +43,7 @@ import java.util.List;
 	recoverable, they are all lost when the system crashes or is shutdown.
 	System shutdown, even orderly ones, do not wait for daemons to finish its
 	work or empty its queue.  Furthermore, any Serviceable subscriptions,
-	including onDemandOnly, must tolerate spurrious services.  The BasicDaemon
+	including onDemandOnly, must tolerate spurious services.  The BasicDaemon
 	will setup a context manager with no context on it.  The Serviceable
 	object's performWork must provide useful context on the context manager to
 	do its work.  The BasicDaemon will wrap performWork call with try / catch
@@ -161,6 +161,15 @@ public class BasicDaemon implements DaemonService, Runnable
 		return clientNumber;
 	}
 
+	/**
+	 * Removes a client from the list of subscribed clients. The call does not
+	 * wait for the daemon to finish the work it is currently performing.
+	 * Therefore, the client must tolerate that its <code>performWork()</code>
+	 * method could be invoked even after the call to
+	 * <code>unsubscribe()</code> has returned (but not more than once).
+	 *
+	 * @param clientNumber client identifier
+	 */
 	public void unsubscribe(int clientNumber)
 	{
 		if (clientNumber < 0 || clientNumber > subscription.size())

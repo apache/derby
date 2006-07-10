@@ -28,10 +28,18 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
   asynchronous I/O and general clean up.  It should not be used as a general
   worker thread for parallel execution.  A DaemonService can be subscribe to by
   many Serviceable objects and a DaemonService will call that object's
-  performWork from time to time.  These performWork method is defined by the
+  performWork from time to time.  The performWork method is defined by the
   client object and should be well behaved - in other words, it should not take
   too long or hog too many resources or deadlock with anyone else.  And it
   cannot (should not) error out.
+
+  <P>It is up to each <code>DaemonService</code> implementation to define its
+  level of service, including
+  <UL>
+  <LI>how quickly and how often the clients should expect to be be serviced
+  <LI>how the clients are prioritized
+  <LI>whether the clients need to tolerate spurious services
+  </UL>
  
   <P>MT - all routines on the interface must be MT-safe.
 
@@ -66,7 +74,12 @@ public interface DaemonService
 
 
 	/**
-		Get rid of a client from the daemon.
+		Get rid of a client from the daemon. If a client is being serviced when
+		the call is made, the implementation may choose whether or not the call
+		should block until the client has completed its work. If the call does
+		not block, the client must be prepared to handle calls to its
+		<code>performWork()</code> method even after <code>unsubscribe()</code>
+		has returned.
 
 		@param clientNumber the number that uniquely identify the client
 	*/
