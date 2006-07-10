@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import javax.xml.transform.Result;
+import junit.extensions.TestSetup;
 import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
@@ -30,9 +31,29 @@ import java.sql.*;
 
 /**
  * Tests of JDBC4 features in ResultSet.
+ *
+ * Some utility methods have been introduced for the updateXXX test-methods.
+ * This test also makes use of a TestSetup wrapper to perform one-time
+ * setup and teardown for the whole suite.
  */
 public class ResultSetTest
     extends BaseJDBCTestCase {
+
+    private static final byte[] BYTES1 = {
+            0x65, 0x66, 0x67, 0x68, 0x69,
+            0x69, 0x68, 0x67, 0x66, 0x65
+        };
+
+    private static final byte[] BYTES2 = {
+            0x69, 0x68, 0x67, 0x66, 0x65,
+            0x65, 0x66, 0x67, 0x68, 0x69
+        };
+
+    /** 
+     * Key used to identify inserted rows.
+     * Use method <code>requestKey</code> to obtain it. 
+     **/
+    private static int insertKey = 0;
 
     /** Default connection used by the tests. */
     private Connection con = null;
@@ -40,6 +61,8 @@ public class ResultSetTest
     private Statement stmt = null;
     /** Default resultset used by the tests. */
     private ResultSet rs = null;
+    /** Default row identifier used by the tests. */
+    private int key = -1;
 
     /**
      * Create test with given name.
@@ -52,6 +75,7 @@ public class ResultSetTest
 
     public void setUp()
         throws SQLException {
+        key = requestKey();
         con = getConnection();
         stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE);
@@ -262,23 +286,6 @@ public class ResultSetTest
 
     public void testUpdateBinaryStream()
     throws Exception {
-        //create the table
-        stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
-                "datacol LONG VARCHAR FOR BIT DATA)");
-        //Initial set of bytes used to create the Binary Stream that has to
-        //be inserted
-        byte[] bytes = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-
-        //Bytes that are used to create the BinaryStream that will be used in
-        //the updateAsciiStream method
-        byte[] bytes_for_update = new byte[] {
-            0x69, 0x68, 0x67, 0x66, 0x65,
-            0x65, 0x66, 0x67, 0x68, 0x69
-        };
-
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it
@@ -288,17 +295,16 @@ public class ResultSetTest
         byte[] bytes_ret = new byte[10];
 
         //Input Stream inserted initially
-        InputStream is = new java.io.ByteArrayInputStream(bytes);
+        InputStream is = new java.io.ByteArrayInputStream(BYTES1);
 
         //InputStream that is used for update
         InputStream is_for_update = new
-                java.io.ByteArrayInputStream(bytes_for_update);
+                java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = con.prepareStatement
-                ("insert into UpdateTestTable_ResultSet values(?,?)");
-        ps_sb.setInt(1,1);
-        ps_sb.setBinaryStream(2,is,bytes.length);
+        PreparedStatement ps_sb = prep(con, "dLongBit");
+        ps_sb.setInt(1,key);
+        ps_sb.setBinaryStream(2,is,BYTES1.length);
         ps_sb.executeUpdate();
         ps_sb.close();
 
@@ -306,10 +312,9 @@ public class ResultSetTest
         //use a different ResultSet variable so that the
         //other tests can go on unimpacted
 
-        ResultSet rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet for update");
+        ResultSet rs1 = fetchUpd(con, "dLongBit", key);
         rs1.next();
-        rs1.updateBinaryStream(2,is_for_update,(int)bytes_for_update.length);
+        rs1.updateBinaryStream(1,is_for_update,(int)BYTES2.length);
         rs1.updateRow();
         rs1.close();
 
@@ -317,20 +322,17 @@ public class ResultSetTest
         //using the updateBinaryStream method is the same
         //data that we expected
 
-        rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet");
+        rs1 = fetch(con, "dLongBit", key);
         rs1.next();
-        InputStream is_ret = rs1.getBinaryStream(2);
+        InputStream is_ret = rs1.getBinaryStream(1);
 
         is_ret.read(bytes_ret);
         is_ret.close();
 
-        for(int i=0;i<bytes_for_update.length;i++) {
-            assertEquals("Error in updateBinaryStream",bytes_for_update[i],bytes_ret[i]);
+        for(int i=0;i<BYTES2.length;i++) {
+            assertEquals("Error in updateBinaryStream",BYTES2[i],bytes_ret[i]);
         }
         rs1.close();
-        //delete the table
-        stmt .execute("drop table UpdateTestTable_ResultSet");
     }
 
     /**
@@ -345,19 +347,6 @@ public class ResultSetTest
         //create the table
         stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
                 "datacol LONG VARCHAR)");
-        //Initial set of bytes used to create the Ascii Stream that has to
-        //be inserted
-        byte[] bytes = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-
-        //Bytes that are used to create the AsciiStream that will be used in
-        //the updateAsciiStream method
-        byte[] bytes_for_update = new byte[] {
-            0x69, 0x68, 0x67, 0x66, 0x65,
-            0x65, 0x66, 0x67, 0x68, 0x69
-        };
 
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
@@ -368,17 +357,17 @@ public class ResultSetTest
         byte[] bytes_ret = new byte[10];
 
         //Input Stream inserted initially
-        InputStream is = new java.io.ByteArrayInputStream(bytes);
+        InputStream is = new java.io.ByteArrayInputStream(BYTES1);
 
         //InputStream that is used for update
         InputStream is_for_update = new
-                java.io.ByteArrayInputStream(bytes_for_update);
+                java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
         PreparedStatement ps_sb = con.prepareStatement
                 ("insert into UpdateTestTable_ResultSet values(?,?)");
         ps_sb.setInt(1,1);
-        ps_sb.setAsciiStream(2,is,bytes.length);
+        ps_sb.setAsciiStream(2,is,BYTES1.length);
         ps_sb.executeUpdate();
         ps_sb.close();
 
@@ -389,7 +378,7 @@ public class ResultSetTest
         ResultSet rs1 = stmt.executeQuery
                 ("select * from UpdateTestTable_ResultSet for update");
         rs1.next();
-        rs1.updateAsciiStream(2,is_for_update,(int)bytes_for_update.length);
+        rs1.updateAsciiStream(2,is_for_update,(int)BYTES2.length);
         rs1.updateRow();
         rs1.close();
 
@@ -405,8 +394,8 @@ public class ResultSetTest
         is_ret.read(bytes_ret);
         is_ret.close();
 
-        for(int i=0;i<bytes_for_update.length;i++) {
-            assertEquals("Error in updateAsciiStream",bytes_for_update[i],bytes_ret[i]);
+        for(int i=0;i<BYTES2.length;i++) {
+            assertEquals("Error in updateAsciiStream",BYTES2[i],bytes_ret[i]);
         }
         rs1.close();
         //delete the table
@@ -422,10 +411,6 @@ public class ResultSetTest
 
     public void testUpdateCharacterStream()
     throws Exception {
-        //create the table
-        stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
-                "datacol LONG VARCHAR)");
-
         String str = "Test data";
         String str_for_update = "Test data used for update";
 
@@ -434,9 +419,8 @@ public class ResultSetTest
                 (str_for_update);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = con.prepareStatement
-                ("insert into UpdateTestTable_ResultSet values(?,?)");
-        ps_sb.setInt(1,1);
+        PreparedStatement ps_sb = prep(con, "dLongVarchar"); 
+        ps_sb.setInt(1,key);
         ps_sb.setCharacterStream(2,r,str.length());
         ps_sb.executeUpdate();
         ps_sb.close();
@@ -444,10 +428,9 @@ public class ResultSetTest
         //Update operation
         //use a different ResultSet variable so that the
         //other tests can go on unimpacted
-        ResultSet rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet for update");
+        ResultSet rs1 = fetchUpd(con, "dLongVarchar", key);
         rs1.next();
-        rs1.updateCharacterStream(2,r_for_update,str_for_update.length());
+        rs1.updateCharacterStream(1,r_for_update,str_for_update.length());
         rs1.updateRow();
         rs1.close();
 
@@ -455,11 +438,10 @@ public class ResultSetTest
         //using the updateAsciiStream method is the same
         //data that we expected
 
-        rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet");
+        rs1 = fetch(con, "dLongVarchar", key); 
         rs1.next();
 
-        StringReader r_ret = (StringReader)rs1.getCharacterStream(2);
+        StringReader r_ret = (StringReader)rs1.getCharacterStream(1);
 
         char [] c_ret = new char[str_for_update.length()];
 
@@ -472,9 +454,6 @@ public class ResultSetTest
 
 
         rs1.close();
-
-        //delete the table
-        stmt .execute("drop table UpdateTestTable_ResultSet");
     }
 
     /**
@@ -486,23 +465,6 @@ public class ResultSetTest
 
     public void testUpdateBinaryStreamStringParameterName()
     throws Exception {
-        //create the table
-        stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
-                "datacol LONG VARCHAR FOR BIT DATA)");
-        //Initial set of bytes used to create the Binary Stream that has to
-        //be inserted
-        byte[] bytes = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-
-        //Bytes that are used to create the BinaryStream that will be used in
-        //the updateAsciiStream method
-        byte[] bytes_for_update = new byte[] {
-            0x69, 0x68, 0x67, 0x66, 0x65,
-            0x65, 0x66, 0x67, 0x68, 0x69
-        };
-
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it
@@ -512,17 +474,16 @@ public class ResultSetTest
         byte[] bytes_ret = new byte[10];
 
         //Input Stream inserted initially
-        InputStream is = new java.io.ByteArrayInputStream(bytes);
+        InputStream is = new java.io.ByteArrayInputStream(BYTES1);
 
         //InputStream that is used for update
         InputStream is_for_update = new
-                java.io.ByteArrayInputStream(bytes_for_update);
+                java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = con.prepareStatement
-                ("insert into UpdateTestTable_ResultSet values(?,?)");
-        ps_sb.setInt(1,1);
-        ps_sb.setBinaryStream(2,is,bytes.length);
+        PreparedStatement ps_sb = prep(con, "dLongBit");
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2,is,BYTES1.length);
         ps_sb.executeUpdate();
         ps_sb.close();
 
@@ -531,10 +492,9 @@ public class ResultSetTest
         //use a different ResultSet variable so that the
         //other tests can go on unimpacted
 
-        ResultSet rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet for update");
+        ResultSet rs1 = fetchUpd(con, "dLongBit", key);
         rs1.next();
-        rs1.updateBinaryStream("datacol",is_for_update,(int)bytes_for_update.length);
+        rs1.updateBinaryStream("dLongBit",is_for_update,(int)BYTES2.length);
         rs1.updateRow();
         rs1.close();
 
@@ -542,20 +502,17 @@ public class ResultSetTest
         //using the updateBinaryStream method is the same
         //data that we expected
 
-        rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet");
+        rs1 = fetch(con, "dLongBit", key);
         rs1.next();
-        InputStream is_ret = rs1.getBinaryStream(2);
+        InputStream is_ret = rs1.getBinaryStream(1);
 
         is_ret.read(bytes_ret);
         is_ret.close();
 
-        for(int i=0;i<bytes_for_update.length;i++) {
-            assertEquals("Error in updateBinaryStream",bytes_for_update[i],bytes_ret[i]);
+        for(int i=0;i<BYTES2.length;i++) {
+            assertEquals("Error in updateBinaryStream",BYTES2[i],bytes_ret[i]);
         }
         rs1.close();
-        //delete the table
-        stmt .execute("drop table UpdateTestTable_ResultSet");
     }
 
     /**
@@ -567,23 +524,6 @@ public class ResultSetTest
 
     public void testUpdateAsciiStreamStringParameterName()
     throws Exception {
-        //create the table
-        stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
-                "datacol LONG VARCHAR)");
-        //Initial set of bytes used to create the Ascii Stream that has to
-        //be inserted
-        byte[] bytes = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-
-        //Bytes that are used to create the AsciiStream that will be used in
-        //the updateAsciiStream method
-        byte[] bytes_for_update = new byte[] {
-            0x69, 0x68, 0x67, 0x66, 0x65,
-            0x65, 0x66, 0x67, 0x68, 0x69
-        };
-
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it
@@ -593,17 +533,16 @@ public class ResultSetTest
         byte[] bytes_ret = new byte[10];
 
         //Input Stream inserted initially
-        InputStream is = new java.io.ByteArrayInputStream(bytes);
+        InputStream is = new java.io.ByteArrayInputStream(BYTES1);
 
         //InputStream that is used for update
         InputStream is_for_update = new
-                java.io.ByteArrayInputStream(bytes_for_update);
+                java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = con.prepareStatement
-                ("insert into UpdateTestTable_ResultSet values(?,?)");
-        ps_sb.setInt(1,1);
-        ps_sb.setAsciiStream(2,is,bytes.length);
+        PreparedStatement ps_sb = prep(con, "dLongVarchar");
+        ps_sb.setInt(1, key);
+        ps_sb.setAsciiStream(2,is,BYTES1.length);
         ps_sb.executeUpdate();
         ps_sb.close();
 
@@ -611,10 +550,9 @@ public class ResultSetTest
         //use a different ResultSet variable so that the
         //other tests can go on unimpacted
 
-        ResultSet rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet for update");
+        ResultSet rs1 = fetchUpd(con, "dLongVarchar", key);
         rs1.next();
-        rs1.updateAsciiStream("datacol",is_for_update,(int)bytes_for_update.length);
+        rs1.updateAsciiStream("dLongVarchar",is_for_update,(int)BYTES2.length);
         rs1.updateRow();
         rs1.close();
 
@@ -622,20 +560,17 @@ public class ResultSetTest
         //using the updateAsciiStream method is the same
         //data that we expected
 
-        rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet");
+        rs1 = fetch(con, "dLongVarchar", key);
         rs1.next();
-        InputStream is_ret = rs1.getAsciiStream(2);
+        InputStream is_ret = rs1.getAsciiStream(1);
 
         is_ret.read(bytes_ret);
         is_ret.close();
 
-        for(int i=0;i<bytes_for_update.length;i++) {
-            assertEquals("Error in updateAsciiStream",bytes_for_update[i],bytes_ret[i]);
+        for(int i=0;i<BYTES2.length;i++) {
+            assertEquals("Error in updateAsciiStream",BYTES2[i],bytes_ret[i]);
         }
         rs1.close();
-        //delete the table
-        stmt .execute("drop table UpdateTestTable_ResultSet");
     }
 
      /**
@@ -647,10 +582,6 @@ public class ResultSetTest
 
     public void testUpdateCharacterStreamStringParameterName()
     throws Exception {
-        //create the table
-        stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
-                "datacol LONG VARCHAR)");
-
         String str = "Test data";
         String str_for_update = "Test data used for update";
 
@@ -659,9 +590,8 @@ public class ResultSetTest
                 (str_for_update);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = con.prepareStatement
-                ("insert into UpdateTestTable_ResultSet values(?,?)");
-        ps_sb.setInt(1,1);
+        PreparedStatement ps_sb = prep(con, "dLongVarchar");
+        ps_sb.setInt(1, key);
         ps_sb.setCharacterStream(2,r,str.length());
         ps_sb.executeUpdate();
         ps_sb.close();
@@ -669,10 +599,11 @@ public class ResultSetTest
         //Update operation
         //use a different ResultSet variable so that the
         //other tests can go on unimpacted
-        ResultSet rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet for update");
+        ResultSet rs1 = fetchUpd(con, "dLongVarchar", key);
         rs1.next();
-        rs1.updateCharacterStream("datacol",r_for_update,str_for_update.length());
+        rs1.updateCharacterStream("dLongVarchar", 
+                                  r_for_update,
+                                  str_for_update.length());
         rs1.updateRow();
         rs1.close();
 
@@ -680,11 +611,10 @@ public class ResultSetTest
         //using the updateAsciiStream method is the same
         //data that we expected
 
-        rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet");
+        rs1 = fetch(con, "dLongVarchar", key);
         rs1.next();
 
-        StringReader r_ret = (StringReader)rs1.getCharacterStream(2);
+        StringReader r_ret = (StringReader)rs1.getCharacterStream(1);
 
         char [] c_ret = new char[str_for_update.length()];
 
@@ -696,9 +626,6 @@ public class ResultSetTest
             str_ret);
 
         rs1.close();
-
-        //delete the table
-        stmt .execute("drop table UpdateTestTable_ResultSet");
     }
 
     /**
@@ -709,23 +636,6 @@ public class ResultSetTest
      */
     public void embeddedUpdateClob()
     throws Exception {
-        //create the table
-        stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
-                "datacol Clob)");
-        //Initial set of bytes used to create the Ascii Stream for the Clob
-        //that has to be inserted
-        byte[] bytes1 = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-
-        //Bytes that are used to create the AsciiStream for the Clob
-        //that will be used in the updateClob method
-        byte[] bytes2 = new byte[] {
-            0x69, 0x68, 0x67, 0x66, 0x65,
-            0x65, 0x66, 0x67, 0x68, 0x69
-        };
-
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it
@@ -735,23 +645,23 @@ public class ResultSetTest
         byte[] bytes_ret = new byte[10];
 
         //1 Input Stream for insertion
-        InputStream is1 = new java.io.ByteArrayInputStream(bytes1);
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
 
         //2 Input Stream for insertion
-        InputStream is2 = new java.io.ByteArrayInputStream(bytes2);
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = con.prepareStatement
-                ("insert into UpdateTestTable_ResultSet values(?,?)");
+        PreparedStatement ps_sb = prep(con, "dClob");
 
         //first insert
-        ps_sb.setInt(1,1);
-        ps_sb.setAsciiStream(2,is1,bytes1.length);
+        ps_sb.setInt(1,key);
+        ps_sb.setAsciiStream(2,is1,BYTES1.length);
         ps_sb.executeUpdate();
 
         //second insert
-        ps_sb.setInt(1,2);
-        ps_sb.setAsciiStream(2,is2,bytes2.length);
+        int key2 = requestKey();
+        ps_sb.setInt(1,key2);
+        ps_sb.setAsciiStream(2,is2,BYTES2.length);
         ps_sb.executeUpdate();
 
         ps_sb.close();
@@ -764,13 +674,14 @@ public class ResultSetTest
         //update the second result set with this
         //Clob value
 
-        ResultSet rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet for update");
+        ResultSet rs1 = fetchUpd(con, "dClob", key);
         rs1.next();
-        Clob clob = rs1.getClob(2);
+        Clob clob = rs1.getClob(1);
+        rs1.close();
 
+        rs1 = fetchUpd(con, "dClob", key2);
         rs1.next();
-        rs1.updateClob(2,clob);
+        rs1.updateClob(1,clob);
         rs1.updateRow();
         rs1.close();
 
@@ -778,21 +689,10 @@ public class ResultSetTest
         //using the updateClob method is the same
         //data that we expected
 
-        rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet");
+        rs1 = fetch(con, "dClob", key2);
         rs1.next();
-        rs1.next();
-        InputStream is_ret = rs1.getAsciiStream(2);
-
-        is_ret.read(bytes_ret);
-        is_ret.close();
-
-        for(int i=0;i<bytes1.length;i++) {
-            assertEquals("Error in updateAsciiStream",bytes1[i],bytes_ret[i]);
-        }
+        assertEquals(clob, rs1.getClob(1));
         rs1.close();
-        //delete the table
-        stmt .execute("drop table UpdateTestTable_ResultSet");
     }
 
      /**
@@ -803,23 +703,6 @@ public class ResultSetTest
      */
     public void embeddedUpdateBlob()
     throws Exception {
-        //create the table
-        stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
-                "datacol Blob)");
-        //Initial set of bytes used to create the Binary Stream that has to
-        //be inserted
-        byte[] bytes1 = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-
-        //Bytes that are used to create the BinaryStream for the Blob
-        //that will be used in the updateBlob method
-        byte[] bytes2 = new byte[] {
-            0x69, 0x68, 0x67, 0x66, 0x65,
-            0x65, 0x66, 0x67, 0x68, 0x69
-        };
-
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it
@@ -829,23 +712,23 @@ public class ResultSetTest
         byte[] bytes_ret = new byte[10];
 
         //1 Input Stream for insertion
-        InputStream is1 = new java.io.ByteArrayInputStream(bytes1);
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
 
         //2 Input Stream for insertion
-        InputStream is2 = new java.io.ByteArrayInputStream(bytes2);
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = con.prepareStatement
-                ("insert into UpdateTestTable_ResultSet values(?,?)");
+        PreparedStatement ps_sb = prep(con, "dBlob");
 
         //first insert
-        ps_sb.setInt(1,1);
-        ps_sb.setBinaryStream(2,is1,bytes1.length);
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2,is1,BYTES1.length);
         ps_sb.executeUpdate();
 
         //second insert
-        ps_sb.setInt(1,2);
-        ps_sb.setBinaryStream(2,is2,bytes2.length);
+        int key2 = requestKey();
+        ps_sb.setInt(1, key2);
+        ps_sb.setBinaryStream(2,is2,BYTES2.length);
         ps_sb.executeUpdate();
 
         ps_sb.close();
@@ -858,13 +741,14 @@ public class ResultSetTest
         //update the second result set with this
         //Clob value
 
-        ResultSet rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet for update");
+        ResultSet rs1 = fetch(con, "dBlob", key);
         rs1.next();
-        Blob blob = rs1.getBlob(2);
+        Blob blob = rs1.getBlob(1);
+        rs1.close();
 
+        rs1 = fetchUpd(con, "dBlob", key2);
         rs1.next();
-        rs1.updateBlob(2,blob);
+        rs1.updateBlob(1,blob);
         rs1.updateRow();
         rs1.close();
 
@@ -872,21 +756,10 @@ public class ResultSetTest
         //using the updateBlob method is the same
         //data that we expected
 
-        rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet");
+        rs1 = fetch(con, "dBlob", key2);
         rs1.next();
-        rs1.next();
-        InputStream is_ret = rs1.getBinaryStream(2);
-
-        is_ret.read(bytes_ret);
-        is_ret.close();
-
-        for(int i=0;i<bytes1.length;i++) {
-            assertEquals("Error in updateBlob",bytes1[i],bytes_ret[i]);
-        }
+        assertEquals(blob, rs1.getBlob(1));
         rs1.close();
-        //delete the table
-        stmt .execute("drop table UpdateTestTable_ResultSet");
     }
 
     /**
@@ -897,23 +770,6 @@ public class ResultSetTest
      */
     public void embeddedUpdateClobStringParameterName()
     throws Exception {
-        //create the table
-        stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
-                "datacol Clob)");
-        //Initial set of bytes used to create the Ascii Stream for the Clob
-        //that has to be inserted
-        byte[] bytes1 = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-
-        //Bytes that are used to create the AsciiStream for the Clob
-        //that will be used in the updateClob method
-        byte[] bytes2 = new byte[] {
-            0x69, 0x68, 0x67, 0x66, 0x65,
-            0x65, 0x66, 0x67, 0x68, 0x69
-        };
-
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it
@@ -923,23 +779,23 @@ public class ResultSetTest
         byte[] bytes_ret = new byte[10];
 
         //1 Input Stream for insertion
-        InputStream is1 = new java.io.ByteArrayInputStream(bytes1);
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
 
         //2 Input Stream for insertion
-        InputStream is2 = new java.io.ByteArrayInputStream(bytes2);
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = con.prepareStatement
-                ("insert into UpdateTestTable_ResultSet values(?,?)");
+        PreparedStatement ps_sb = prep(con, "dClob");
 
         //first insert
-        ps_sb.setInt(1,1);
-        ps_sb.setAsciiStream(2,is1,bytes1.length);
+        ps_sb.setInt(1, key);
+        ps_sb.setAsciiStream(2,is1,BYTES1.length);
         ps_sb.executeUpdate();
 
         //second insert
-        ps_sb.setInt(1,2);
-        ps_sb.setAsciiStream(2,is2,bytes2.length);
+        int key2 = requestKey();
+        ps_sb.setInt(1, key2);
+        ps_sb.setAsciiStream(2,is2,BYTES2.length);
         ps_sb.executeUpdate();
 
         ps_sb.close();
@@ -952,13 +808,14 @@ public class ResultSetTest
         //update the second result set with this
         //Clob value
 
-        ResultSet rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet for update");
+        ResultSet rs1 = fetch(con, "dClob", key);
         rs1.next();
-        Clob clob = rs1.getClob(2);
+        Clob clob = rs1.getClob(1);
+        rs1.close();
 
+        rs1 = fetchUpd(con, "dClob", key2);
         rs1.next();
-        rs1.updateClob("datacol",clob);
+        rs1.updateClob("dClob",clob);
         rs1.updateRow();
         rs1.close();
 
@@ -966,21 +823,10 @@ public class ResultSetTest
         //using the updateClob method is the same
         //data that we expected
 
-        rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet");
+        rs1 = fetch(con, "dClob", key2);
         rs1.next();
-        rs1.next();
-        InputStream is_ret = rs1.getAsciiStream(2);
-
-        is_ret.read(bytes_ret);
-        is_ret.close();
-
-        for(int i=0;i<bytes1.length;i++) {
-            assertEquals("Error in updateAsciiStream",bytes1[i],bytes_ret[i]);
-        }
+        assertEquals(clob, rs1.getClob(1));
         rs1.close();
-        //delete the table
-        stmt .execute("drop table UpdateTestTable_ResultSet");
     }
 
      /**
@@ -991,23 +837,6 @@ public class ResultSetTest
      */
     public void embeddedUpdateBlobStringParameterName()
     throws Exception {
-        //create the table
-        stmt.execute("create table UpdateTestTable_ResultSet (sno int, " +
-                "datacol Blob)");
-        //Initial set of bytes used to create the Binary Stream that has to
-        //be inserted
-        byte[] bytes1 = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-
-        //Bytes that are used to create the BinaryStream for the Blob
-        //that will be used in the updateBlob method
-        byte[] bytes2 = new byte[] {
-            0x69, 0x68, 0x67, 0x66, 0x65,
-            0x65, 0x66, 0x67, 0x68, 0x69
-        };
-
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it
@@ -1017,23 +846,23 @@ public class ResultSetTest
         byte[] bytes_ret = new byte[10];
 
         //1 Input Stream for insertion
-        InputStream is1 = new java.io.ByteArrayInputStream(bytes1);
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
 
         //2 Input Stream for insertion
-        InputStream is2 = new java.io.ByteArrayInputStream(bytes2);
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = con.prepareStatement
-                ("insert into UpdateTestTable_ResultSet values(?,?)");
+        PreparedStatement ps_sb = prep(con, "dBlob");
 
         //first insert
-        ps_sb.setInt(1,1);
-        ps_sb.setBinaryStream(2,is1,bytes1.length);
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2,is1,BYTES1.length);
         ps_sb.executeUpdate();
 
         //second insert
-        ps_sb.setInt(1,2);
-        ps_sb.setBinaryStream(2,is2,bytes2.length);
+        int key2 = requestKey();
+        ps_sb.setInt(1, key2);
+        ps_sb.setBinaryStream(2,is2,BYTES2.length);
         ps_sb.executeUpdate();
 
         ps_sb.close();
@@ -1046,13 +875,14 @@ public class ResultSetTest
         //update the second result set with this
         //Clob value
 
-        ResultSet rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet for update");
+        ResultSet rs1 = fetch(con, "dBlob", key);
         rs1.next();
-        Blob blob = rs1.getBlob(2);
+        Blob blob = rs1.getBlob(1);
+        rs1.close();
 
+        rs1 = fetchUpd(con, "dBlob", key2);
         rs1.next();
-        rs1.updateBlob("datacol",blob);
+        rs1.updateBlob("dBlob",blob);
         rs1.updateRow();
         rs1.close();
 
@@ -1060,22 +890,15 @@ public class ResultSetTest
         //using the updateBlob method is the same
         //data that we expected
 
-        rs1 = stmt.executeQuery
-                ("select * from UpdateTestTable_ResultSet");
+        rs1 = fetch(con, "dBlob", key2);
         rs1.next();
-        rs1.next();
-        InputStream is_ret = rs1.getBinaryStream(2);
-
-        is_ret.read(bytes_ret);
-        is_ret.close();
-
-        for(int i=0;i<bytes1.length;i++) {
-            assertEquals("Error in updateBlob",bytes1[i],bytes_ret[i]);
-        }
+        assertEquals(blob, rs1.getBlob(1)); 
         rs1.close();
-        //delete the table
-        stmt .execute("drop table UpdateTestTable_ResultSet");
     }
+
+    /************************************************************************
+     **                        T E S T  S E T U P                           *
+     ************************************************************************/
 
     /**
      * Create suite containing client-only tests.
@@ -1115,6 +938,109 @@ public class ResultSetTest
             rsSuite.addTest(
                     embeddedSuite("ResultSetTest embedded-only suite"));
         }
-        return rsSuite;
+        // Wrap suite in a TestSetup-class.
+        return new TestSetup(rsSuite) {
+                public void setUp()
+                        throws SQLException {
+                    oneTimeSetup();
+                }
+
+                public void tearDown()
+                        throws SQLException {
+                    oneTimeTearDown();
+                }
+            };
+    }
+
+    /**
+     * Perform one-time setup for the suite.
+     * Creates the necessary tables for the tests.
+     */
+    protected static void oneTimeSetup()
+            throws SQLException {
+        Connection con = getConnection();
+        Statement stmt = con.createStatement();
+        stmt.execute("create table UpdateTestTableResultSet (" +
+                "sno int not null unique," +
+                "dBlob BLOB," +
+                "dClob CLOB," +
+                "dLongVarchar LONG VARCHAR," +
+                "dLongBit LONG VARCHAR FOR BIT DATA)");
+        stmt.close();
+        con.close();
+    }
+
+    /**
+     * Perform one-time cleanup for the suite.
+     * Deletes the tables used by the tests.
+     */
+    protected static void oneTimeTearDown()
+            throws SQLException {
+        Connection con = getConnection();
+        Statement stmt = con.createStatement();
+        stmt.execute("drop table UpdateTestTableResultSet");
+        stmt.close();
+        con.close();
+    }
+
+    /*************************************************************************
+     **                    U T I L I T Y  M E T H O D S                      *
+     *************************************************************************/
+
+    /**
+     * Get a key that is used to identify an inserted row.
+     * Introduced to avoid having to delete table contents after each test,
+     * and because the order of the tests is not guaranteed.
+     *
+     * @return an integer in range [1, Integer.MAX_VALUE -1]
+     */
+    private static final int requestKey() {
+        return ++insertKey;
+    }
+
+    /**
+     * Prepare commonly used statement to insert a row.
+     *
+     * @param con connection to database
+     * @param colName name of the column to insert into
+     */
+    private static PreparedStatement prep(Connection con, String colName)
+            throws SQLException {
+        return con.prepareStatement("insert into UpdateTestTableResultSet " +
+                "(sno, " + colName + ") values (?,?)");
+    }
+
+    /**
+     * Fetch the specified row for update.
+     *
+     * @param con connection to database
+     * @param colName name of the column to fetch
+     * @param key identifier for row to fetch
+     * @return a <code>ResultSet</code> with zero or one row, depending on
+     *      the key used
+     */
+    private static ResultSet fetchUpd(Connection con, String colName, int key)
+            throws SQLException {
+        Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                             ResultSet.CONCUR_UPDATABLE);
+        return stmt.executeQuery("select " + colName +
+                " from UpdateTestTableResultSet where sno = " + key +
+                " for update");
+    }
+
+    /**
+     * Fetch the specified row.
+     *
+     * @param con connection to database
+     * @param colName name of the column to fetch
+     * @param key identifier for row to fetch
+     * @return a <code>ResultSet</code> with zero or one row, depending on
+     *      the key used
+     */
+    private static ResultSet fetch(Connection con, String colName, int key)
+            throws SQLException {
+        Statement stmt = con.createStatement();
+        return stmt.executeQuery("select " + colName +
+                " from UpdateTestTableResultSet where sno = " + key);
     }
 }
