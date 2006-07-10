@@ -2212,6 +2212,8 @@ clp.list(System.out);
 			derbySystemHome = userDirName;
 		testJvmProps.addElement("derby.system.home=" + derbySystemHome);
 		testJvmProps.addElement("derby.infolog.append=true ");
+		testJvmProps.addElement("user.language=en");
+		testJvmProps.addElement("user.country=US");
 		// Why is this being done here
 		//if (jvm != null)
 		    //testJvmProps.addElement("jvm="+jvm.getName());
