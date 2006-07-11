@@ -2119,27 +2119,43 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
    
 
-	private long getFirstLogNeeded(CheckpointOperation checkpoint){
-
+    /**
+     * Return the "oldest" log file still needed by recovery. 
+     * <p>
+     * Returns the log file that contains the undoLWM, ie. the oldest
+     * log record of all uncommitted transactions in the given checkpoint.
+     * 
+     * If no checkpoint is given then returns -1, indicating all log records
+     * may be necessary.
+     *
+     **/
+	private long getFirstLogNeeded(CheckpointOperation checkpoint)
+    {
 		long firstLogNeeded;
 
 		// one truncation at a time
 		synchronized (this)
 		{
-			firstLogNeeded = (checkpoint != null ? LogCounter.getLogFileNumber(checkpoint.undoLWM()) : -1);
+			firstLogNeeded = 
+                (checkpoint != null ? 
+                     LogCounter.getLogFileNumber(checkpoint.undoLWM()) : -1);
 
 			if (SanityManager.DEBUG)
 			{
 				if (SanityManager.DEBUG_ON(LogToFile.DBG_FLAG))
-					SanityManager.DEBUG(DBG_FLAG, "truncatLog: undoLWM firstlog needed " + firstLogNeeded);
+					SanityManager.DEBUG(DBG_FLAG, 
+                       "truncatLog: undoLWM firstlog needed " + firstLogNeeded);
 			}
 
 			if (SanityManager.DEBUG)
 			{
 				if (SanityManager.DEBUG_ON(LogToFile.DBG_FLAG))
 				{
-				SanityManager.DEBUG(DBG_FLAG, "truncatLog: checkpoint truncationLWM firstlog needed " + firstLogNeeded);
-				SanityManager.DEBUG(DBG_FLAG, "truncatLog: firstLogFileNumber = " + firstLogFileNumber);
+                    SanityManager.DEBUG(DBG_FLAG, 
+                      "truncatLog: checkpoint truncationLWM firstlog needed " +
+                      firstLogNeeded);
+                    SanityManager.DEBUG(DBG_FLAG, 
+                      "truncatLog: firstLogFileNumber = " + firstLogFileNumber);
 				}
 			}
 		}
@@ -4472,24 +4488,27 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 
 	/*
-	 * start the transaction log backup, transaction log is  is required
-	 * to bring the database to the consistent state on restore. 
-
+	 * Start the transaction log backup.  
+     *
+     * The transaction log is required to bring the database to the consistent 
+     * state on restore. 
+     *
 	 * All the log files that are created after the backup starts 
-	 * should be kept around until they are copied into the backup,
+	 * must be kept around until they are copied into the backup,
 	 * even if there are checkpoints when backup is in progress. 
 	 *
-	 * copy the log control files to the backup (the checkpoint recorded in the
-     * control files is the backup checkpoint), Restore will use the checkpoint 
+	 * Copy the log control files to the backup (the checkpoint recorded in the
+     * control files is the backup checkpoint). Restore will use the checkpoint 
      * info in these control files to perform recovery to bring 
-	 * the database to the consistent state.  and find first log file 
-	 * that need to be copied into the backup to bring the database
-	 * to the consistent state on restore. 
+	 * the database to the consistent state.  
+     *
+     * Find first log file that needs to be copied into the backup to bring 
+     * the database to the consistent state on restore. 
 	 * 
-     * In the end, existing log files that are needed to recover from the backup 
+     * In the end, existing log files that are needed to recover from the backup
      * checkpoint are copied into the backup, any log that gets generated after
-     * this call are copied into the backup after all the all the information 
-     * in the data containers is  written to the backup, when endLogBackup() 
+     * this call are also copied into the backup after all the information 
+     * in the data containers is written to the backup, when endLogBackup() 
      * is called.
 	 *
      * @param toDir - location where the log files should be copied to.
@@ -4528,8 +4547,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			toFile = new File(toDir,fromFile.getName());
 			if(!privCopyFile(fromFile, toFile))
 			{
-				throw StandardException.newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
-													 fromFile, toFile);
+				throw StandardException.newException(
+                    SQLState.RAWSTORE_ERROR_COPYING_FILE, fromFile, toFile);
 			}
 
 			// copy the log mirror control file
@@ -4537,21 +4556,22 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			toFile = new File(toDir,fromFile.getName());
 			if(!privCopyFile(fromFile, toFile))
 			{
-				throw StandardException.newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
-													 fromFile, toFile);
+				throw StandardException.newException(
+                    SQLState.RAWSTORE_ERROR_COPYING_FILE, fromFile, toFile);
 			}
 
-			// find the first  log file number that is  active
+			// find the first log file number that is active
 			logFileToBackup = getFirstLogNeeded(currentCheckpoint);
 		}
 
-		// copy all the log files that has to go into the backup 
-		backupLogFiles(toDir, getLogFileNumber()-1);
+		// copy all the log files that have to go into the backup 
+		backupLogFiles(toDir, getLogFileNumber() - 1);
 	}	
 
 	/*
 	 * copy the log files into the given backup location
-     * @param toDir - location where the log files should be copied to.
+     *
+     * @param toDir               - location to copy the log files to
      * @param lastLogFileToBackup - last log file that needs to be copied.
 	 **/
 	private void backupLogFiles(File toDir, long lastLogFileToBackup) 
@@ -4564,15 +4584,15 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			File toFile = new File(toDir, fromFile.getName());
 			if(!privCopyFile(fromFile, toFile))
 			{
-				throw StandardException.newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
-													 fromFile, toFile);
+				throw StandardException.newException(
+                    SQLState.RAWSTORE_ERROR_COPYING_FILE, fromFile, toFile);
 			}
 			logFileToBackup++;
 		}
 	}
 
 	/*
-	 * copy all the log files that has to go into  the backup
+	 * copy all the log files that have to go into the backup
 	 * and mark that backup is compeleted. 
      *
      * @param toDir - location where the log files should be copied to.
@@ -4583,19 +4603,20 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		long lastLogFileToBackup;
 		if (logArchived)
 		{
-			// when the log is being  archived for roll-frward recovery
-			// we would like to switch to  a new log file.
-			// otherwise during restore  logfile in the backup could 
+			// when the log is being archived for roll-forward recovery
+			// we would like to switch to a new log file.
+			// otherwise during restore logfile in the backup could 
 			// overwrite the more uptodate log files in the 
 			// online log path. And also we would like to mark the end
 			// marker for the log file other wise during roll-forward recovery,
-			// if we see a log file with fuzzy end , we think that is the 
+			// if we see a log file with fuzzy end, we think that is the 
 			// end of the recovery.
 			switchLogFile();
-			lastLogFileToBackup = getLogFileNumber()-1 ;
-		}else
+			lastLogFileToBackup = getLogFileNumber() - 1;
+		}
+        else
 		{
-			// for a plain online backup partiall filled up log file is ok, 
+			// for a plain online backup partial filled up log file is ok, 
 			// no need to do a log switch.
 			lastLogFileToBackup = getLogFileNumber();	
 		}

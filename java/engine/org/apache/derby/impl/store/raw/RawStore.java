@@ -677,7 +677,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	 * Backup the database.
 	 * Online backup copies all the database files (log, seg0  ...Etc) to the
 	 * specified backup location without blocking any user operation for the 
-	 * duration of the backup. Stable copy is made of each page using using 
+	 * duration of the backup. Stable copy is made of each page using 
      * page level latches and in some cases with the help of monitors.  
      * Transaction log is also backed up, this is used to bring the database to 
      * the consistent state on restore.
@@ -685,12 +685,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * <P> MT- only one thread  is allowed to perform backup at any given time. 
      *  Synchronized on this. Parallel backups are not supported. 
 	 */
-	public synchronized void backup(Transaction t, 
-                                    File backupDir) 
+	public synchronized void backup(Transaction t, File backupDir) 
         throws StandardException
 	{
         if (!privExists(backupDir))
 		{
+            // if backup dir does not exist, go ahead and create it.
+
             if (!privMkdirs(backupDir))
             {
                 throw StandardException.newException(
@@ -700,6 +701,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		}
 		else
 		{
+            // entity with backup name exists, make sure it is a directory.
+
             if (!privIsDirectory(backupDir))
             {
 				throw StandardException.newException(
@@ -710,10 +713,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // check if a user has given the backup as a database directory by
             // mistake, backup path can not be a derby database directory. 
             // If a directory contains PersistentService.PROPERTIES_NAME, it 
-            // is assumed as derby database directory because derby databases
-            // always has this file. 
+            // is assumed to be a derby database directory because derby 
+            // databases always have this file. 
  
-            if (privExists(new File(backupDir, PersistentService.PROPERTIES_NAME))) { 
+            if (privExists(
+                    new File(backupDir, PersistentService.PROPERTIES_NAME))) 
+            { 
                 throw StandardException.newException(
                     SQLState.RAWSTORE_CANNOT_BACKUP_INTO_DATABASE_DIRECTORY,
                     (File) backupDir); 
@@ -732,22 +737,27 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         
 		try
 		{
-			// first figure out our name
-			StorageFile dbase = storageFactory.newStorageFile( null); // The database directory
-            String canonicalDbName = storageFactory.getCanonicalName();
-            int lastSep = canonicalDbName.lastIndexOf( storageFactory.getSeparator());
-			String dbname = canonicalDbName.substring( lastSep + 1);
+			// get name of the current db, ie. database directory of current db.
+			StorageFile dbase           = storageFactory.newStorageFile(null); 
+            String      canonicalDbName = storageFactory.getCanonicalName();
+            int         lastSep         = 
+                canonicalDbName.lastIndexOf(storageFactory.getSeparator());
+			String      dbname          = 
+                canonicalDbName.substring(lastSep + 1);
 
 			// append to end of history file
-			historyFile = privFileWriter( storageFactory.newStorageFile( BACKUP_HISTORY), true);
+			historyFile = 
+                privFileWriter(
+                    storageFactory.newStorageFile(BACKUP_HISTORY), true);
             
 			backupcopy = new File(backupDir, dbname);
 
-			logHistory(historyFile,
-                        MessageService.getTextMessage(
-                            MessageId.STORE_BACKUP_STARTED, 
-                            canonicalDbName, 
-                            getFilePath(backupcopy)));
+			logHistory(
+                historyFile,
+                MessageService.getTextMessage(
+                    MessageId.STORE_BACKUP_STARTED, 
+                    canonicalDbName, 
+                    getFilePath(backupcopy)));
 
             
             // check if a backup copy of this database already exists,
@@ -792,6 +802,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             dbHistoryFile = storageFactory.newStorageFile(BACKUP_HISTORY);
             backupHistoryFile = new File(backupcopy, BACKUP_HISTORY); 
+
             // copy the history file into the backup. 
             if(!privCopyFile(dbHistoryFile, backupHistoryFile))
                 throw StandardException. 
@@ -803,14 +814,16 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // the backup. 
             StorageFile jarDir = 
                 storageFactory.newStorageFile(FileResource.JAR_DIRECTORY_NAME);
-            if (privExists(jarDir)) {
 
+            if (privExists(jarDir)) 
+            {
                 // find the list of schema directories under the jar dir and
-                // then copy only the plain files under those directories. One could
-                // just use the recursive copy of directory to copy all the files
-                // under the jar dir, but the problem with that is if a user 
-                // gives jar directory as the backup path by mistake, copy will 
-                // fail while copying the backup dir onto itself in recursion
+                // then copy only the plain files under those directories. One 
+                // could just use the recursive copy of directory to copy all 
+                // the files under the jar dir, but the problem with that is if
+                // a user gives jar directory as the backup path by mistake, 
+                // copy will fail while copying the backup dir onto itself in 
+                // recursion
 
                 String [] jarSchemaList = privList(jarDir);
                 File backupJarDir = new File(backupcopy, 
@@ -827,9 +840,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 {
                     StorageFile jarSchemaDir = 
                         storageFactory.newStorageFile(jarDir, jarSchemaList[i]);
-                    File backupJarSchemaDir = new File(backupJarDir, jarSchemaList[i]);
+                    File backupJarSchemaDir = 
+                        new File(backupJarDir, jarSchemaList[i]);
+
                     if (!privCopyDirectory(jarSchemaDir, backupJarSchemaDir, 
-                                           (byte[])null, null, false)) {
+                                           (byte[])null, null, false)) 
+                    {
                         throw StandardException.
                             newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
                                          jarSchemaDir, backupJarSchemaDir);  
@@ -844,55 +860,69 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             StorageFile logdir = logFactory.getLogDirectory();
             
-            try {
-                
+            try 
+            {
                 String name = Monitor.getMonitor().getServiceName(this);
-                PersistentService ps = Monitor.getMonitor().getServiceType(this);
+                PersistentService ps = 
+                    Monitor.getMonitor().getServiceType(this);
                 String fullName = ps.getCanonicalServiceName(name);
-                Properties prop = ps.getServiceProperties(fullName, (Properties)null);
+                Properties prop = 
+                    ps.getServiceProperties(fullName, (Properties)null);
+
                 StorageFile defaultLogDir = 
-                    storageFactory.newStorageFile( LogFactory.LOG_DIRECTORY_NAME);
+                    storageFactory.newStorageFile(
+                        LogFactory.LOG_DIRECTORY_NAME);
 
                 if (!logdir.equals(defaultLogDir))  
                 {
                     prop.remove(Attribute.LOG_DEVICE);
                     if (SanityManager.DEBUG)
-                        SanityManager.ASSERT(prop.getProperty(Attribute.LOG_DEVICE) == null,
-                                             "cannot get rid of logDevice property");
+                    {
+                        SanityManager.ASSERT(
+                            prop.getProperty(Attribute.LOG_DEVICE) == null,
+                            "cannot get rid of logDevice property");
+                    }
+
                     logHistory(historyFile,
                                MessageService.getTextMessage(
                                MessageId.STORE_EDITED_SERVICEPROPS));
                 }
             
                 // save the service properties into the backup.
-                ps.saveServiceProperties( backupcopy.getPath(), prop, false);
+                ps.saveServiceProperties(backupcopy.getPath(), prop, false);
 
-            }catch(StandardException se) {
-                logHistory(historyFile,
-                           MessageService.getTextMessage(
-                           MessageId.STORE_ERROR_EDIT_SERVICEPROPS)
-                           + se);
+            }
+            catch(StandardException se) 
+            {
+                logHistory(
+                   historyFile,
+                   MessageService.getTextMessage(
+                       MessageId.STORE_ERROR_EDIT_SERVICEPROPS) + se);
 
                 return; // skip the rest and let finally block clean up
             }
 
             // Incase of encrypted database and the key is an external 
             // encryption key, there is an extra file with name  
-            // Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE , this file should be
+            // Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE, this file should be
             // copied in to the backup.
             StorageFile verifyKeyFile = 
                 storageFactory.newStorageFile(
                                  Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE);
-            if (privExists(verifyKeyFile)) {
+            if (privExists(verifyKeyFile)) 
+            {
                 File backupVerifyKeyFile = 
-                    new File(backupcopy, Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE);
+                    new File(
+                        backupcopy, Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE);
+
                 if(!privCopyFile(verifyKeyFile, backupVerifyKeyFile))
                    throw StandardException.
                        newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
                                     verifyKeyFile, backupVerifyKeyFile);  
             }
                 
-			File logBackup = new File(backupcopy, LogFactory.LOG_DIRECTORY_NAME);
+			File logBackup = 
+                new File(backupcopy, LogFactory.LOG_DIRECTORY_NAME);
 
 			// this is wierd, delete it
             if (privExists(logBackup))
@@ -924,7 +954,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                     (File) segBackup);
             }
 
-
 			// backup all the information in the data segment.
 			dataFactory.backupDataFiles(t, segBackup);
 
@@ -935,7 +964,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 
             // copy the log that got generated after the backup started to
-			// backup location and tell the logfactory that backup has come to end.
+			// backup location and tell the logfactory that backup has come 
+            // to end.
 			logFactory.endLogBackup(logBackup);
 																		  
 			logHistory(historyFile,
