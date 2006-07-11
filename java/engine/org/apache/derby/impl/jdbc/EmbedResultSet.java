@@ -218,7 +218,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 		if (SanityManager.DEBUG)
 		SanityManager.ASSERT(resultsToWrap!=null);
 		theResults = resultsToWrap;
-		this.forMetaData = forMetaData;
+		
+		// ResultSet's for metadata are single use, they are created
+		// with a PreparedStatement internally, but that statement is
+		// never returned to the application.
+		if (this.forMetaData = forMetaData)
+			singleUseActivation = resultsToWrap.getActivation();
         this.applicationStmt = this.stmt = owningStmt = stmt;
 
         this.timeoutMillis = stmt == null
