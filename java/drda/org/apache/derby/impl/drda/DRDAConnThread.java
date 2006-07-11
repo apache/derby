@@ -4358,8 +4358,14 @@ class DRDAConnThread extends Thread {
 				{
 					case  DRDAConstants.DRDA_TYPE_LOBBYTES:
 					case  DRDAConstants.DRDA_TYPE_NLOBBYTES:
-						if (SanityManager.DEBUG)
-							trace("parameter value is: "+paramBytes);
+						if (SanityManager.DEBUG) {
+							if (paramBytes==null) {
+								trace("parameter value is NULL (LOB)");
+							} else {
+								trace("parameter value is a LOB with length: " + 
+									  paramBytes.length);
+							}
+						}
 						ps.setBytes(i+1, paramBytes);
 						break;
 					case DRDAConstants.DRDA_TYPE_LOBCSBCS:
