@@ -26,33 +26,44 @@ import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
+import java.util.Enumeration;
 
 /*
     This class is used to test the JDBC4 statement event 
     support 
 */
-public class StatementEventsTest extends BaseJDBCTestCase 
-        implements StatementEventListener {
-    //used to test StatementEvents raised from PooledConnection
-    PooledConnection pooledConnection;
-    //used to test StatementEvents raised from XAConnection
-    XAConnection xaconnection;
-    
-    Connection conn;
-    PreparedStatement ps_close;
-    PreparedStatement ps_error;
-    boolean statementCloseEventOccurred=false;
-    boolean statementErrorEventOccurred=false;
-    
-    //In the case of the client driver when the connection is closed then 
-    //the prepared statements associated with the connection are also closed
-    //this would raise closed events for corresponding prepared statements
-    
-    //using a flag to identify the occurrence of the error event in the
-    //network client which can also cause the close event to be raised
-    boolean client_ErrorEvent=false;
-    
-    
+public class StatementEventsTest extends BaseJDBCTestCase {
+
+    /**
+     * Type of data source to use. If <code>true</code>, use
+     * <code>XADataSource</code>; otherwise, use
+     * <code>ConnectionPoolDataSource</code>.
+     */
+    private boolean xa;
+    /**
+     * Type of statement to use. If <code>true</code>, use
+     * <code>CallableStatement</code>; otherwise, use
+     * <code>PreparedStatement</code>.
+     */
+    private boolean callable;
+
+    /** The statement that caused the last statementClosed event. */
+    private Statement closedStatement;
+    /** Number of times statementClosed events have been raised. */
+    private int closedCount;
+    /** The statement that caused the last statementError event. */
+    private Statement errorStatement;
+    /** Number of times statementError events have been raised. */
+    private int errorCount;
+
+    /**
+     * The pooled connection to use in the test (could also be an XA
+     * connection).
+     */
+    private PooledConnection pooledConnection;
+    /** The connection object to use in the test. */
+    private Connection connection;
+
     /**
      * Create a test with the given name.
      *
@@ -61,221 +72,185 @@ public class StatementEventsTest extends BaseJDBCTestCase
     public StatementEventsTest(String name) {
         super(name);
     }
-    
+
     /**
+     * Set whether the test should use <code>XADataSource</code> or
+     * <code>ConnectionPoolDataSource</code>.
      *
-     * get a connection object from which the PreparedStatement objects
-     * that will be used to raise the events will be created
+     * @param xa if <code>true</code>, use XA
+     */
+    private void setXA(boolean xa) {
+        this.xa = xa;
+    }
+
+    /**
+     * Set whether the test should use <code>CallableStatement</code> or
+     * <code>PreparedStatement</code>.
      *
+     * @param callable if <code>true</code>, use callable statement; otherwise,
+     * use prepared statement
+     */
+    private void setCallable(boolean callable) {
+        this.callable = callable;
+    }
+
+    /**
+     * Return the name of the test.
+     *
+     * @return name of the test
+     */
+    public String getName() {
+        return super.getName() + (xa ? "_xa" : "_pooled") +
+            (callable ? "_callable" : "_prepared");
+    }
+
+    // TEST SETUP
+
+    /**
+     * Set up the connection to the database and register a statement event
+     * listener.
+     *
+     * @exception SQLException if a database error occurs
      */
     public void setUp() throws SQLException {
-        XADataSource xadatasource = TestDataSourceFactory.getXADataSource();
-        ConnectionPoolDataSource cpds = TestDataSourceFactory.getConnectionPoolDataSource();
-        
-        pooledConnection = cpds.getPooledConnection();
-        xaconnection = xadatasource.getXAConnection();
-        //register this class as a event listener for the
-        //statement events
-        //registering as a listener for the 
-        //PooledConnection object
-        pooledConnection.addStatementEventListener(this);
-        //registering as a listener for the 
-        //XAConnection
-        xaconnection.addStatementEventListener(this);
-    }
-    
-    /*
-        The method closes a created Prepared Statement
-        to raise a closed event  
-    */
-    void raiseCloseEvent() {
-        try {
-            ps_close = conn.prepareStatement("values 1");
-            //call the close method on this prepared statement object
-            //this should result in a statement event being generated 
-            //control is transferred to the sattementCLosed function
-            ps_close.close();
-        } catch(SQLException e) {
-            e.printStackTrace();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        if (xa) {
+            XADataSource ds = TestDataSourceFactory.getXADataSource();
+            pooledConnection = ds.getXAConnection();
+        } else {
+            ConnectionPoolDataSource ds =
+                TestDataSourceFactory.getConnectionPoolDataSource();
+            pooledConnection = ds.getPooledConnection();
         }
+        StatementEventListener listener = new StatementEventListener() {
+                public void statementClosed(StatementEvent event) {
+                    closedStatement = event.getStatement();
+                    closedCount++;
+                }
+                public void statementErrorOccurred(StatementEvent event) {
+                    errorStatement = event.getStatement();
+                    errorCount++;
+                }
+            };
+        pooledConnection.addStatementEventListener(listener);
+        connection = pooledConnection.getConnection();
     }
 
-    /*
-        This method closes a connection and then tries to close the prepared 
-        statement associated with the connection causing an error
-        event
-    */
-    void raiseErrorEvent() {
-        try {
-            //mark the falg to indicate that we are raising a error event 
-            //on the client framework
-            if(usingDerbyNetClient())            
-                client_ErrorEvent = true;
-            
-            ps_error = conn.prepareStatement("values 1");
-            
-            //close the connection associated with this prepared statement
-            conn.close();
-            //Now execute the prepared statement this should cause an error
-            ps_error.execute();
-            
-        } catch(SQLException e) {
-            /*  
-                Throw an exception only if the exception does not have a
-                state of 08003 which is the state of the SqlException
-                got when the connection associated with the PreparedStatement
-                is closed before doing a execute on the PreparedStatement 
-            */
-            if(!(e.getSQLState().compareTo("08003") == 0)) {
-                e.printStackTrace();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    /*
-        implementations of methods in interface 
-        javax.sql.StatementEventListener
-    */
-    
-    public void statementClosed(StatementEvent event) {
-        statementCloseEventOccurred = true;
-        //If the event was caused by ps_close and not
-        //by ps_error. In this case client_ErrorEvent
-        //will be false.
-        //In this case check if the StatementEvent
-        //has a proper reference to ps_close
-        //which is the actual prepared statement
-        //that caused the error event.
-        if(!client_ErrorEvent && (ps_close==null || 
-            !event.getStatement().equals(ps_close))) {
-            System.out.println("The statement event has the wrong reference " +
-                "of PreparedStatement");
-        }
-        
-        //If it is caused by the error occurred event on the 
-        //Network client side. upon doing a Connection.close()
-        //the Prepared Statements associated with the 
-        //Connection are automatically marked closed
-        //check if the StatementEvent has a proper reference to ps_error
-        if(client_ErrorEvent && (ps_error==null || 
-            !event.getStatement().equals(ps_error))) {
-            System.out.println("The statement event has the wrong reference" +
-                " of PreparedStatement");
-        }
-    }
-
-    public void statementErrorOccurred(StatementEvent event) {
-        statementErrorEventOccurred = true;
-        if(ps_error==null || !event.getStatement().equals(ps_error)) {
-            System.out.println("The statement event has the wrong reference +  of PreparedStatement");
-        }
-    }
-    
     /**
+     * Free resources used in the test.
      *
-     * Check to see if the events were properly raised during execution.
-     * raise the close and the error event for the PooledConnection and
-     * check if they occur properly.
-     * 
-     * @throws java.sql.SQLException 
-     *
+     * @exception SQLException if a database error occurs
      */
-    public void testIfEventOccurredInPooledConnection() throws SQLException {
-        //Get a connection from the PooledConnection object
-        conn = pooledConnection.getConnection();
-        raiseCloseEvent();
-        raiseErrorEvent();
-        
-        //reset the flags to enable it to be used for 
-        //both the cases of XAConnection and PooledConnection
-        if(statementCloseEventOccurred != true) {
-            System.out.println("The Close Event did not occur");
-        }
-        else {
-            statementCloseEventOccurred = false;
-        }
-            
-        if(statementErrorEventOccurred != true) {
-            System.out.println("The Error Event did not occur");
-        }
-        else {
-            statementErrorEventOccurred = false;
-        }
-        
-        //close the used prepared statements and connections
-        //for the PooledConnection StatementEventListener tests
-        //so that if tests on PooledConnection is the first instance of the 
-        //tests that are run then we can run the same for
-        //XAConnection.
-        if(ps_close != null && !ps_close.isClosed()) {
-            ps_close.close();
-        }
-        if(ps_error != null && !ps_error.isClosed()) {
-            ps_error.close();
-        }
-        if(conn != null && !conn.isClosed()) {
-            conn.rollback();
-            conn.close();
-        }
-        if(pooledConnection != null)
-            pooledConnection.close();
+    public void tearDown() throws SQLException {
+        connection.close();
+        pooledConnection.close();
     }
-    
+
     /**
-     * Check to see if the events were properly raised during execution.
-     * Raise the close and the error event for the XAConnection and check if 
-     * if they occur properly.
+     * Return suite with all tests of the class for all combinations of
+     * pooled/xa connection and prepared/callable statement.
      *
-     * @throws java.sql.SQLExeption
-     */
-    public void testIfEventOccurredInXAConnection() throws SQLException {
-        //Get a connection from the XAConnection object
-        conn = xaconnection.getConnection();
-        raiseCloseEvent();
-        raiseErrorEvent();
-        
-        //reset the flags to enable it to be used for 
-        //both the cases of XAConnection and PooledConnection
-        if(statementCloseEventOccurred != true) {
-            System.out.println("The Close Event did not occur");
-        }
-        else {
-            statementCloseEventOccurred = false;
-        }
-        
-        if(statementErrorEventOccurred != true) {
-            System.out.println("The Error Event did not occur");
-        }
-        else {
-            statementErrorEventOccurred = false;
-        }
-        
-        //close the used prepared statements and connections
-        //for the XAConnection StatementEventListener tests
-        //so that if tests on XAConnection is the first instance of the 
-        //tests that are run then we can run the same for
-        //PooledConnection.
-        if(ps_close != null) {
-            ps_close.close();
-        }
-        if(ps_error != null) {
-            ps_error.close();
-        }
-        if(conn != null && !conn.isClosed()) {
-            conn.rollback();
-            conn.close();
-        }
-    }
-    
-    /**
-     * Return suite with all tests of the class.
+     * @return a test suite
      */
     public static Test suite() {
-        return (new TestSuite(StatementEventsTest.class,
-                              "StatementEventsTest suite"));
+        TestSuite suites = new TestSuite();
+        boolean[] truefalse = new boolean[] { true, false };
+        for (boolean xa : truefalse) {
+            for (boolean callable : truefalse) {
+                suites.addTest(new Suite(xa, callable));
+            }
+        }
+        return suites;
+    }
+
+    /**
+     * Test suite class which contains all test cases in
+     * <code>StatementEventsTest</code> for a given configuration.
+     */
+    private static class Suite extends TestSuite {
+        private Suite(boolean xa, boolean callable) {
+            super(StatementEventsTest.class);
+            for (Enumeration e = tests(); e.hasMoreElements(); ) {
+                StatementEventsTest test =
+                    (StatementEventsTest) e.nextElement();
+                test.setXA(xa);
+                test.setCallable(callable);
+            }
+        }
+    }
+
+    // UTILITIES
+
+    /**
+     * Prepare a statement.
+     *
+     * @param sql SQL text
+     * @return a <code>PreparedStatement</code> or
+     * <code>CallableStatement</code> object
+     * @exception SQLException if a database error occurs
+     */
+    private PreparedStatement prepare(String sql) throws SQLException {
+        if (callable) {
+            return connection.prepareCall(sql);
+        }
+        return connection.prepareStatement(sql);
+    }
+
+    // TEST CASES
+
+    /**
+     * Test that a close event is raised when a statement is closed.
+     *
+     * @exception SQLException if a database error occurs
+     */
+    public void testCloseEvent() throws SQLException {
+        PreparedStatement ps = prepare("VALUES (1)");
+        ps.close();
+        assertSame("Close event raised on wrong statement.",
+                   ps, closedStatement);
+        assertEquals("Incorrect close count.", 1, closedCount);
+    }
+
+    /**
+     * Test whether a close event is raised when a connection is
+     * closed. (Client should raise a close event since the connection calls
+     * <code>close()</code> on its statements. Embedded should not raise a
+     * close event since the connection does not call <code>close()</code> on
+     * its statements.)
+     *
+     * @exception SQLException if a database error occurs
+     */
+    public void testCloseEventOnClosedConnection() throws SQLException {
+        PreparedStatement ps = prepare("VALUES (1)");
+        connection.close();
+        if (usingDerbyNetClient()) {
+            assertSame("Close event raised on wrong statement.",
+                       ps, closedStatement);
+            assertEquals("Incorrect close count.", 1, closedCount);
+        } else if (usingEmbedded()) {
+            assertNull("Didn't expect close event.", closedStatement);
+            assertEquals("Incorrect close count.", 0, closedCount);
+        } else {
+            fail("Unknown framework.");
+        }
+    }
+
+    /**
+     * Test that an error event is raised when <code>execute()</code> fails
+     * because the connection is closed.
+     *
+     * @exception SQLException if a database error occurs
+     */
+    public void testErrorEventOnClosedConnection() throws SQLException {
+        PreparedStatement ps = prepare("VALUES (1)");
+        connection.close();
+        try {
+            ps.execute();
+            fail("No exception thrown.");
+        } catch (SQLException e) {
+            assertSQLState("Unexpected SQL state.", "08003", e);
+            assertSame("Error event raised on wrong statement.",
+                       ps, errorStatement);
+            assertEquals("Incorrect error count.", 1, errorCount);
+        }
     }
 }
