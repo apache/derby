@@ -43,9 +43,6 @@ create trigger tbad NO CASCADE before insert on x for each statement mode db2sql
 
 create trigger tbad NO CASCADE before insert on x for each statement mode db2sql lock table x in share mode;
 
-create trigger tbad NO CASCADE before insert on x for each statement mode db2sql 
-	call APP.SOMEPROC();
-
 ------------------------------------
 -- DML, cannot perform dml on same
 -- table for before trigger, of for

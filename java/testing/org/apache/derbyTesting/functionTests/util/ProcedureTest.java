@@ -46,7 +46,75 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 		ps.close();
 		conn.close();
 	}
+	
+	public static void updateRow(int p1) throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("update t1 set i=i+?");
+		ps.setInt(1, p1);
+		ps.executeUpdate();
+		ps.close();
+		conn.close();
+	}
 
+	public static void deleteRow(int p1) throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("delete from t1 where i=?");
+		ps.setInt(1, p1);
+		ps.executeUpdate();
+		ps.close();
+		conn.close();
+	}
+	
+	public static void alterTable() throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("alter table t1 add column test integer");
+		ps.execute();
+		ps.close();
+		conn.close();
+	}
+	
+	public static void dropTable() throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("drop table t1");
+		ps.execute();
+		ps.close();
+		conn.close();
+	}		
+	
+	public static void createIndex() throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("create index ix on t1(i,b)");
+		ps.execute();
+		ps.close();
+		conn.close();
+	}
+	
+	public static void dropIndex() throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("drop index ix");
+		ps.execute();
+		ps.close();
+		conn.close();
+	}
+	
+	public static void createTrigger() throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("create trigger test_trig" +
+				" AFTER delete on t1 for each STATEMENT mode db2sql insert into" +
+				" t1 values(20, 'twenty')");
+		ps.execute();
+		ps.close();
+		conn.close();
+	}
+	
+	public static void dropTrigger() throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("drop trigger test_trig");
+		ps.execute();
+		ps.close();
+		conn.close();
+	}
+	
 	public static int selectFromSpecificSchema(int p1) throws SQLException {
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 		PreparedStatement ps = conn.prepareStatement("select * from mamta1.t12RoutineTest");

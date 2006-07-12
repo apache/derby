@@ -907,16 +907,14 @@ drop table t1;
 
 -- Part I) SQL-Procedure-Statement restrictions:
 
--- 1) BEFORE triggers: can't have CALL, INSERT, UPDATE, or DELETE as action; when beetle 5253 is resolved, thsese should be changed to "no cascade before", instead of just "before".
+-- 1) BEFORE triggers: can't have INSERT, UPDATE, or DELETE as action; when beetle 5253 is resolved, thsese should be changed to "no cascade before", instead of just "before".
 create table t1 (i int, j int);
 create table t2 (i int);
 create trigger trig1a NO CASCADE before insert on t1 for each row mode db2sql insert into t2 values(1);
 create trigger trig1b NO CASCADE before insert on t1 for each row mode db2sql update t2 set i=1 where i=2;
 create trigger trig1c NO CASCADE before insert on t1 for each row mode db2sql delete from t2 where i=8;
-create trigger trig1d NO CASCADE before insert on t1 for each row mode db2sql call procOne();
 
--- 2) AFTER triggers: can't have CALL as action, but others should still work.
-create trigger trig2 after insert on t1 for each row mode db2sql call procOne();
+-- 2) AFTER triggers
 create trigger trig2a after insert on t1 for each row mode db2sql insert into t2 values(1);
 create trigger trig2b after insert on t1 for each row mode db2sql update t2 set i=1 where i=2;
 create trigger trig2c after insert on t1 for each row mode db2sql delete from t2 where i=8;

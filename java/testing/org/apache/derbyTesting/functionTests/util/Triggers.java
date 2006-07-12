@@ -113,6 +113,12 @@ public class Triggers
 		conn.close();
 	}
 
+	public static void getConnection() throws Throwable
+	{
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		conn.close();
+		System.out.println("getConnection() called");
+	}
 	// used for performance numbers
 	static void zipThroughRs(ResultSet s) throws SQLException
 	{

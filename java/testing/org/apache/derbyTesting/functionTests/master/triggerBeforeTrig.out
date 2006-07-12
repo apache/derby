@@ -48,9 +48,6 @@ create trigger tbad NO CASCADE before insert on x for each statement mode db2sql
 ERROR 42X01: Syntax error: Encountered "set" at line 4, column 82.
 ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql lock table x in share mode;
 ERROR 42X01: Syntax error: Encountered "lock" at line 1, column 82.
-ij> create trigger tbad NO CASCADE before insert on x for each statement mode db2sql 
-	call APP.SOMEPROC();
-ERROR 42X01: Syntax error: Encountered "call" at line 2, column 9.
 ij> ------------------------------------
 -- DML, cannot perform dml on same
 -- table for before trigger, of for

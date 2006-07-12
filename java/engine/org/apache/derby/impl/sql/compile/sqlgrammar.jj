@@ -2699,6 +2699,8 @@ proceduralStatement(Token[] tokenHolder) throws StandardException :
 	statementNode = preparableDeleteStatement()
 |
 	statementNode =  preparableSelectStatement(true)	
+|
+	statementNode =  callStatement()	
 )
 	{
 		return statementNode;

@@ -327,23 +327,18 @@ public class InternalTriggerExecutionContext implements TriggerExecutionContext,
 	 */
 	public void validateStatement(ConstantAction constantAction) throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			if (constantAction instanceof DDLConstantAction)
-				SanityManager.THROWASSERT("DDL NOT SUPPORTED IN TRIGGER");
+		// DDL statements are not allowed in triggers
+		if (constantAction instanceof DDLConstantAction) {
+			throw StandardException.newException(SQLState.LANG_NO_DDL_IN_TRIGGER, triggerd.getName(), constantAction.toString());
 		}
-
+		
 		/*
-		** No INSERT/UPDATE/DELETE on trigger table
-		** for a before trigger.
+		** No INSERT/UPDATE/DELETE for a before trigger.
 	 	*/
 		else if (triggerd.isBeforeTrigger() && 
 				constantAction instanceof WriteCursorConstantAction)
 		{
-			if (constantAction.modifiesTableId(targetTableId))
-			{
-				throw StandardException.newException(SQLState.LANG_NO_DML_IN_TRIGGER, triggerd.getName(), targetTableName);
-			}
+			throw StandardException.newException(SQLState.LANG_NO_DML_IN_TRIGGER, triggerd.getName(), targetTableName);
 		}
 	}
 
