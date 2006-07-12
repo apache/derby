@@ -28,8 +28,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.impl.sql.catalog.DDColumnPermissionsDependableFinder;
-//import org.apache.derby.impl.sql.catalog.DDdependableFinder;
+import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class describes a row in the SYS.SYSCOLPERMS system table, which keeps
@@ -37,10 +36,10 @@ import org.apache.derby.impl.sql.catalog.DDColumnPermissionsDependableFinder;
  */
 public class ColPermsDescriptor extends PermissionsDescriptor
 {
-    private final UUID tableUUID;
-    private final String type;
-    private final FormatableBitSet columns;
-    private final String tableName;
+    private UUID tableUUID;
+    private String type;
+    private FormatableBitSet columns;
+    private String tableName;
 	
 	public ColPermsDescriptor( DataDictionary dd,
 			                   String grantee,
@@ -53,7 +52,10 @@ public class ColPermsDescriptor extends PermissionsDescriptor
         this.tableUUID = tableUUID;
         this.type = type;
         this.columns = columns;
-        tableName = dd.getTableDescriptor(tableUUID).getName();
+        //tableUUID can be null only if the constructor with colPermsUUID
+        //has been invoked.
+        if (tableUUID != null)
+        	tableName = dd.getTableDescriptor(tableUUID).getName();
 	}
 
     /**
@@ -66,7 +68,14 @@ public class ColPermsDescriptor extends PermissionsDescriptor
                                String type) throws StandardException
     {
         this( dd, grantee, grantor, tableUUID, type, (FormatableBitSet) null);
-    }
+    }           
+    
+    public ColPermsDescriptor( DataDictionary dd,
+            UUID colPermsUUID) throws StandardException
+    {
+        super(dd,null,null);
+        this.oid = colPermsUUID;
+	}
     
     public int getCatalogNumber()
     {
@@ -107,8 +116,8 @@ public class ColPermsDescriptor extends PermissionsDescriptor
      */
     public int hashCode()
     {
-        return super.keyHashCode() + tableUUID.hashCode() +
-          ((type == null) ? 0 : type.hashCode());
+    	return super.keyHashCode() + tableUUID.hashCode() +
+		((type == null) ? 0 : type.hashCode());
     }
 	
 	/**
@@ -156,8 +165,7 @@ public class ColPermsDescriptor extends PermissionsDescriptor
 	 */
 	public DependableFinder getDependableFinder() 
 	{
-	    return	new DDColumnPermissionsDependableFinder(StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID, 
-	    		type);
+	    return	new DDdependableFinder(StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID);
 	}
 
 }

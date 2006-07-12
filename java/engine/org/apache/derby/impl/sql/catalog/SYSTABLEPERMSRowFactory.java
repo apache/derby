@@ -50,7 +50,7 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
 	static final String TABLENAME_STRING = "SYSTABLEPERMS";
 
     // Column numbers for the SYSTABLEPERMS table. 1 based
-	private static final int SYSTABLEPERMS_TABLEPERMSID = 1;
+	private static final int TABLEPERMSID_COL_NUM = 1;
     private static final int GRANTEE_COL_NUM = 2;
     private static final int GRANTOR_COL_NUM = 3;
     private static final int TABLEID_COL_NUM = 4;
@@ -63,21 +63,25 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
     private static final int COLUMN_COUNT = 10;
 
     public static final int GRANTEE_TABLE_GRANTOR_INDEX_NUM = 0;
+    public static final int TABLEPERMSID_INDEX_NUM = 1;
 	private static final int[][] indexColumnPositions = 
 	{ 
-		{ GRANTEE_COL_NUM, TABLEID_COL_NUM, GRANTOR_COL_NUM}
+		{ GRANTEE_COL_NUM, TABLEID_COL_NUM, GRANTOR_COL_NUM},
+		{ TABLEPERMSID_COL_NUM }
 	};
 	private static final String[][] indexColumnNames =
 	{
-		{"GRANTEE", "TABLEID", "GRANTOR"}
+		{"GRANTEE", "TABLEID", "GRANTOR"},
+		{"TABLEPERMSID"}
 	};
-    private static final boolean[] indexUniqueness = { true};
+    private static final boolean[] indexUniqueness = { true, true};
     
     private	static final String[] uuids =
     {
         "b8450018-0103-0e39-b8e7-00000010f010" // catalog UUID
 		,"004b0019-0103-0e39-b8e7-00000010f010"	// heap UUID
-		,"c851401a-0103-0e39-b8e7-00000010f010"	// index
+		,"c851401a-0103-0e39-b8e7-00000010f010"	// index1
+		,"80220011-010c-426e-c599-0000000f1120"	// index2
     };
 
     private SystemColumn[] columnList;
@@ -130,7 +134,7 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
             triggerPriv = tpd.getTriggerPriv();
         }
         ExecRow row = getExecutionFactory().getValueRow( COLUMN_COUNT);
-        row.setColumn( SYSTABLEPERMS_TABLEPERMSID, dvf.getCharDataValue(tablePermID));
+        row.setColumn( TABLEPERMSID_COL_NUM, dvf.getCharDataValue(tablePermID));
         row.setColumn( GRANTEE_COL_NUM, grantee);
         row.setColumn( GRANTOR_COL_NUM, grantor);
         row.setColumn( TABLEID_COL_NUM, dvf.getCharDataValue( tableID));
@@ -154,7 +158,7 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
             SanityManager.ASSERT( row.nColumns() == COLUMN_COUNT,
                                   "Wrong size row passed to SYSTABLEPERMSRowFactory.buildDescriptor");
 
-        String tablePermsUUIDString = row.getColumn(SYSTABLEPERMS_TABLEPERMSID).getString();
+        String tablePermsUUIDString = row.getColumn(TABLEPERMSID_COL_NUM).getString();
         UUID tablePermsUUID = getUUIDFactory().recreateUUID(tablePermsUUIDString);
         String tableUUIDString = row.getColumn( TABLEID_COL_NUM).getString();
         UUID tableUUID = getUUIDFactory().recreateUUID(tableUUIDString);
@@ -198,9 +202,9 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
         {
             columnList = new SystemColumn[ COLUMN_COUNT];
 
-            columnList[ SYSTABLEPERMS_TABLEPERMSID - 1] =
+            columnList[ TABLEPERMSID_COL_NUM - 1] =
                 new SystemColumnImpl( convertIdCase( "TABLEPERMSID"),
-                                      SYSTABLEPERMS_TABLEPERMSID,
+                                      TABLEPERMSID_COL_NUM,
                                       0, // precision
                                       0, // scale
                                       false, // nullability
@@ -309,6 +313,9 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
             row.setColumn(2, getDataValueFactory().getNullChar( (StringDataValue) null)); // table UUID
             row.setColumn(3, getNullAuthorizationID()); // grantor
             break;
+        case TABLEPERMSID_INDEX_NUM:
+            row.setColumn(1, getDataValueFactory().getNullChar( (StringDataValue) null)); // TABLEPERMSID
+            break;
         }
         return row;
     } // end of buildEmptyIndexRow
@@ -338,6 +345,11 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
             row.setColumn(1, getAuthorizationID( perm.getGrantee()));
             String tableUUIDStr = ((TablePermsDescriptor) perm).getTableUUID().toString();
             row.setColumn(2, getDataValueFactory().getCharDataValue( tableUUIDStr));
+            break;
+        case TABLEPERMSID_INDEX_NUM:
+            row = getExecutionFactory().getIndexableRow( 1);
+            String tablePermsUUIDStr = perm.getObjectID().toString();
+            row.setColumn(1, getDataValueFactory().getCharDataValue( tablePermsUUIDStr));
             break;
         }
         return row;

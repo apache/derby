@@ -9782,6 +9782,14 @@ public final class	DataDictionaryImpl
         return (TablePermsDescriptor) getPermissions( key);
     } // end of getTablePermissions
 
+	/* @see org.apache.derby.iapi.sql.dictionary.DataDictionary#getTablePermissions */
+    public TablePermsDescriptor getTablePermissions( UUID tablePermsUUID)
+    throws StandardException
+	{
+        TablePermsDescriptor key = new TablePermsDescriptor( this, tablePermsUUID);
+        return (TablePermsDescriptor) getPermissions( key);
+	}
+
     private Object getPermissions( PermissionsDescriptor key) throws StandardException
     {
         // RESOLVE get a READ COMMITTED (shared) lock on the permission row
@@ -9792,6 +9800,14 @@ public final class	DataDictionaryImpl
         getPermissionsCache().release( entry);
         return perms;
     }
+
+	/* @see org.apache.derby.iapi.sql.dictionary.DataDictionary#getColumnPermissions */
+    public ColPermsDescriptor getColumnPermissions( UUID colPermsUUID)
+    throws StandardException
+	{
+    	ColPermsDescriptor key = new ColPermsDescriptor( this, colPermsUUID);
+        return (ColPermsDescriptor) getPermissions( key);
+	}
 
     /**
      * Get one user's column privileges for a table.
@@ -9828,9 +9844,8 @@ public final class	DataDictionaryImpl
     } // end of getColumnPermissions
 
     /**
-     * Get one user's column privileges for a table. This routine gets called by
-     * ColPermsDescriptor.getDependableFinder and that method has hold of 
-     * privilege type in String form.
+     * Get one user's column privileges for a table. This routine gets called 
+     * during revoke privilege processing
      *
      * @param tableUUID
      * @param privType(as String) Authorizer.SELECT_PRIV, Authorizer.UPDATE_PRIV, or Authorizer.REFERENCES_PRIV
@@ -9890,6 +9905,14 @@ public final class	DataDictionaryImpl
 
         return (RoutinePermsDescriptor) getPermissions( key);
     } // end of getRoutinePermissions
+    
+	/* @see org.apache.derby.iapi.sql.dictionary.DataDictionary#getRoutinePermissions */
+    public RoutinePermsDescriptor getRoutinePermissions( UUID routinePermsUUID)
+    throws StandardException
+	{
+    	RoutinePermsDescriptor key = new RoutinePermsDescriptor( this, routinePermsUUID);
+        return (RoutinePermsDescriptor) getPermissions( key);    	
+	}
 
     /**
      * Add or remove a permission to/from the permission database.
@@ -9993,10 +10016,22 @@ public final class	DataDictionaryImpl
     TablePermsDescriptor getUncachedTablePermsDescriptor( TablePermsDescriptor key)
         throws StandardException
     {
-        return (TablePermsDescriptor)
-          getUncachedPermissionsDescriptor( SYSTABLEPERMS_CATALOG_NUM,
-                                            SYSTABLEPERMSRowFactory.GRANTEE_TABLE_GRANTOR_INDEX_NUM,
-                                            key);
+    	if (key.getObjectID() == null)
+    	{
+    		//the TABLEPERMSID for SYSTABLEPERMS is not known, so use
+    		//table id, grantor and granteee to find TablePermsDescriptor
+            return (TablePermsDescriptor)
+              getUncachedPermissionsDescriptor( SYSTABLEPERMS_CATALOG_NUM,
+                                                SYSTABLEPERMSRowFactory.GRANTEE_TABLE_GRANTOR_INDEX_NUM,
+                                                key);
+    	} else
+    	{
+    		//we know the TABLEPERMSID for SYSTABLEPERMS, so use that to
+    		//find TablePermsDescriptor from the sytem table
+    		return (TablePermsDescriptor)
+			getUncachedPermissionsDescriptor(SYSTABLEPERMS_CATALOG_NUM,
+					SYSTABLEPERMSRowFactory.TABLEPERMSID_INDEX_NUM,key);
+    	}
     } // end of getUncachedTablePermsDescriptor
 
 
@@ -10013,11 +10048,23 @@ public final class	DataDictionaryImpl
     ColPermsDescriptor getUncachedColPermsDescriptor( ColPermsDescriptor key)
         throws StandardException
     {
-        return (ColPermsDescriptor)
-          getUncachedPermissionsDescriptor( SYSCOLPERMS_CATALOG_NUM,
-                                            SYSCOLPERMSRowFactory.GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM,
-                                            key);
-                                                                        
+    	if (key.getObjectID() == null)
+    	{
+    		//the COLPERMSID for SYSCOLPERMS is not known, so use tableid,
+    		//privilege type, grantor and granteee to find ColPermsDescriptor
+            return (ColPermsDescriptor)
+	          getUncachedPermissionsDescriptor( SYSCOLPERMS_CATALOG_NUM,
+	                                            SYSCOLPERMSRowFactory.GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM,
+	                                            key);
+    	}else
+    	{
+    		//we know the COLPERMSID for SYSCOLPERMS, so use that to
+    		//find ColPermsDescriptor from the sytem table
+            return (ColPermsDescriptor)
+	          getUncachedPermissionsDescriptor( SYSCOLPERMS_CATALOG_NUM,
+	                                            SYSCOLPERMSRowFactory.COLPERMSID_INDEX_NUM,
+	                                            key);
+    	}
     } // end of getUncachedColPermsDescriptor
 
     private TupleDescriptor getUncachedPermissionsDescriptor( int catalogNumber,
@@ -10050,10 +10097,23 @@ public final class	DataDictionaryImpl
     RoutinePermsDescriptor getUncachedRoutinePermsDescriptor( RoutinePermsDescriptor key)
         throws StandardException
     {
-        return (RoutinePermsDescriptor)
-          getUncachedPermissionsDescriptor( SYSROUTINEPERMS_CATALOG_NUM,
-                                            SYSROUTINEPERMSRowFactory.GRANTEE_ALIAS_GRANTOR_INDEX_NUM,
-                                            key);
+    	if (key.getObjectID() == null)
+    	{
+    		//the ROUTINEPERMSID for SYSROUTINEPERMS is not known, so use aliasid,
+    		//grantor and granteee to find RoutinePermsDescriptor
+            return (RoutinePermsDescriptor)
+            getUncachedPermissionsDescriptor( SYSROUTINEPERMS_CATALOG_NUM,
+            		SYSROUTINEPERMSRowFactory.GRANTEE_ALIAS_GRANTOR_INDEX_NUM,
+                                              key);
+    	} else
+    	{
+    		//we know the ROUTINEPERMSID for SYSROUTINEPERMS, so use that to
+    		//find RoutinePermsDescriptor from the sytem table
+    		return (RoutinePermsDescriptor)
+			getUncachedPermissionsDescriptor(SYSROUTINEPERMS_CATALOG_NUM,
+					SYSROUTINEPERMSRowFactory.ROUTINEPERMSID_INDEX_NUM,key);
+
+    	}
     } // end of getUncachedRoutinePermsDescriptor
  
 	private String[][] DIAG_VTI_CLASSES =

@@ -1570,7 +1570,7 @@ public interface DataDictionary
         throws StandardException;
 
     /**
-     * Get one user's privileges on a table
+     * Get one user's privileges on a table using tableUUID and authorizationid
      *
      * @param tableUUID
      * @param authorizationId The user name
@@ -1581,6 +1581,18 @@ public interface DataDictionary
      */
     public TablePermsDescriptor getTablePermissions( UUID tableUUID, String authorizationId)
         throws StandardException;
+
+    /**
+     * Get one user's privileges on a table using tablePermsUUID
+     *
+     * @param tablePermsUUID
+     *
+     * @return a TablePermsDescriptor
+     *
+     * @exception StandardException
+     */
+    public TablePermsDescriptor getTablePermissions( UUID tablePermsUUID)
+    throws StandardException;
 
     /**
      * Get one user's column privileges for a table.
@@ -1604,10 +1616,10 @@ public interface DataDictionary
                                                     String authorizationId)
         throws StandardException;
 
+
     /**
-     * Get one user's column privileges for a table. This routine gets called by
-     * ColPermsDescriptor.getDependableFinder and that method has hold of 
-     * privilege type in String form.
+     * Get one user's column privileges for a table. This routine gets called 
+     * during revoke privilege processing
      *
      * @param tableUUID
      * @param privType(as String) Authorizer.SELECT_PRIV, Authorizer.UPDATE_PRIV, or Authorizer.REFERENCES_PRIV
@@ -1627,6 +1639,17 @@ public interface DataDictionary
             boolean forGrant,
             String authorizationId)
     throws StandardException;
+    /**
+     * Get one user's column privileges on a table using colPermsUUID
+     *
+     * @param colPermsUUID
+     *
+     * @return a ColPermsDescriptor
+     *
+     * @exception StandardException
+     */
+    public ColPermsDescriptor getColumnPermissions( UUID colPermsUUID)
+    throws StandardException;
 
     /**
      * Get one user's permissions for a routine (function or procedure).
@@ -1640,6 +1663,18 @@ public interface DataDictionary
      */
     public RoutinePermsDescriptor getRoutinePermissions( UUID routineUUID, String authorizationId)
         throws StandardException;
+    
+    /**
+     * Get one user's privileges for a routine using routinePermsUUID
+     *
+     * @param routinePermsUUID
+     *
+     * @return a RoutinePermsDescriptor
+     *
+     * @exception StandardException
+     */
+    public RoutinePermsDescriptor getRoutinePermissions( UUID routinePermsUUID)
+    throws StandardException;
 
 	/**
 	 * Return the Java class to use for the VTI for

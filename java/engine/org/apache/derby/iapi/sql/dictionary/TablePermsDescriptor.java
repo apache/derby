@@ -35,14 +35,14 @@ import org.apache.derby.impl.sql.catalog.DDdependableFinder;
  */
 public class TablePermsDescriptor extends PermissionsDescriptor
 {
-    private final UUID tableUUID;
-    private final String tableName;
-    private final String selectPriv;
-    private final String deletePriv;
-    private final String insertPriv;
-    private final String updatePriv;
-    private final String referencesPriv;
-    private final String triggerPriv;
+    private UUID tableUUID;
+    private String tableName;
+    private String selectPriv;
+    private String deletePriv;
+    private String insertPriv;
+    private String updatePriv;
+    private String referencesPriv;
+    private String triggerPriv;
 	
 	public TablePermsDescriptor( DataDictionary dd,
                                  String grantee,
@@ -63,7 +63,10 @@ public class TablePermsDescriptor extends PermissionsDescriptor
         this.updatePriv = updatePriv;
         this.referencesPriv = referencesPriv;
         this.triggerPriv = triggerPriv;
-        tableName = dd.getTableDescriptor(tableUUID).getName();
+        //tableUUID can be null only if the constructor with tablePermsUUID
+        //has been invoked.
+        if (tableUUID != null)
+        	tableName = dd.getTableDescriptor(tableUUID).getName();
 	}
 
     /**
@@ -78,6 +81,14 @@ public class TablePermsDescriptor extends PermissionsDescriptor
               (String) null, (String) null, (String) null, (String) null, (String) null, (String) null);
     }
     
+    public TablePermsDescriptor( DataDictionary dd,
+            UUID tablePermsUUID) throws StandardException
+            {
+        this( dd, null, null, null,
+                (String) null, (String) null, (String) null, (String) null, (String) null, (String) null);
+        this.oid = tablePermsUUID;
+			}
+
     public int getCatalogNumber()
     {
         return DataDictionary.SYSTABLEPERMS_CATALOG_NUM;
@@ -123,7 +134,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
      */
     public int hashCode()
     {
-        return super.keyHashCode() + tableUUID.hashCode();
+    	return super.keyHashCode() + tableUUID.hashCode();
     }
 	
 	/**

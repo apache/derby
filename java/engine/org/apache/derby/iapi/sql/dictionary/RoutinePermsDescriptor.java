@@ -35,9 +35,9 @@ import org.apache.derby.impl.sql.catalog.DDdependableFinder;
  */
 public class RoutinePermsDescriptor extends PermissionsDescriptor
 {
-    private final UUID routineUUID;
-    private final String routineName;
-    private final boolean hasExecutePermission;
+    private UUID routineUUID;
+    private String routineName;
+    private boolean hasExecutePermission;
 	
 	public RoutinePermsDescriptor( DataDictionary dd,
                                    String grantee,
@@ -48,7 +48,10 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
         super (dd, grantee, grantor);
         this.routineUUID = routineUUID;
         this.hasExecutePermission = hasExecutePermission;
-        routineName = dd.getAliasDescriptor(routineUUID).getObjectName();
+        //routineUUID can be null only if the constructor with routineePermsUUID
+        //has been invoked.
+        if (routineUUID != null)
+        	routineName = dd.getAliasDescriptor(routineUUID).getObjectName();
 	}
 	
 	public RoutinePermsDescriptor( DataDictionary dd,
@@ -68,6 +71,13 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
     {
         this( dd, grantee, grantor, (UUID) null);
     }
+	   
+    public RoutinePermsDescriptor( DataDictionary dd, UUID routineePermsUUID) 
+    throws StandardException
+	{
+        this( dd, null, null, null, true);
+        this.oid = routineePermsUUID;
+	}
     
     public int getCatalogNumber()
     {

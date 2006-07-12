@@ -126,13 +126,46 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 		// Add or remove the privileges to/from the SYS.SYSTABLEPERMS and SYS.SYSCOLPERMS tables
 		for( Iterator itr = grantees.iterator(); itr.hasNext();)
 		{
+			// It is possible for grant statement to look like following
+			//   grant all privileges on t11 to mamata2, mamata3;
+			// This means that dd.addRemovePermissionsDescriptor will be called
+			// twice for tablePermsDesc, once for each grantee.
+			// First it's called for mamta2. After a row is inserted for mamta2 
+			// into SYS.SYSTABLEPERMS, the tablePermsDesc's uuid will get 
+			// populated with the uuid of the row that just got inserted into 
+			// SYS.SYSTABLEPERMS for mamta2
+			// Next, before dd.addRemovePermissionsDescriptor gets called for 
+			// MAMTA3, we should set the tablePermsDesc's uuid to null or 
+			// otherwise, we will think that there is a duplicate row getting
+			// inserted for the same uuid.
+			// Same logic applies to colPermsDescriptor
 			String grantee = (String) itr.next();
 			if( tablePermsDesc != null)
+			{
+				if (!grant)
+				{
+					TablePermsDescriptor tempTablePermsDesc = 
+						dd.getTablePermissions(td.getUUID(), grantee);
+					tablePermsDesc.setUUID(tempTablePermsDesc.getUUID());
+					
+				} else
+	            	tablePermsDesc.setUUID(null);
 				dd.addRemovePermissionsDescriptor( grant, tablePermsDesc, grantee, tc);
+			}
 			for( int i = 0; i < columnBitSets.length; i++)
 			{
 				if( colPermsDescs[i] != null)
-					dd.addRemovePermissionsDescriptor( grant, colPermsDescs[i], grantee, tc);
+				{
+					if (!grant)
+					{
+						ColPermsDescriptor tempColPermsDescriptor = 
+							dd.getColumnPermissions(td.getUUID(), colPermsDescs[i].getType() ,grant, grantee);
+						colPermsDescs[i].setUUID(tempColPermsDescriptor.getUUID());
+						
+					} else
+		            	colPermsDescs[i].setUUID(null);
+					dd.addRemovePermissionsDescriptor( grant, colPermsDescs[i], grantee, tc);					
+				}
 			}
 		}
 	} // end of executeConstantAction

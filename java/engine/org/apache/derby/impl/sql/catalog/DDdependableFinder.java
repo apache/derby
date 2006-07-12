@@ -310,7 +310,6 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	protected Dependable getDependable(DataDictionary dd, UUID dependableObjectID)
 		throws StandardException
 	{
-		LanguageConnectionContext lcc;
 		switch (formatId)
 		{
 			case StoredFormatIds.ALIAS_DESCRIPTOR_FINDER_V01_ID:
@@ -348,17 +347,14 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
 				return dd.getViewDescriptor(dependableObjectID);
 
+			case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
+				return dd.getColumnPermissions(dependableObjectID);
+
 			case StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID:
-				lcc = (LanguageConnectionContext)
-				ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
-				return dd.getTablePermissions(dependableObjectID,
-						lcc.getAuthorizationId());
+				return dd.getTablePermissions(dependableObjectID);
 
 			case StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID:
-				lcc = (LanguageConnectionContext)
-				ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
-				return dd.getRoutinePermissions(dependableObjectID,
-						lcc.getAuthorizationId());
+				return dd.getRoutinePermissions(dependableObjectID);
 
 			default:
 				if (SanityManager.DEBUG)
@@ -377,7 +373,6 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	protected String getSQLObjectName(DataDictionary dd, UUID dependableObjectID)
 		throws StandardException
 	{
-		LanguageConnectionContext lcc;
 		switch (formatId)
 		{
 			case StoredFormatIds.ALIAS_DESCRIPTOR_FINDER_V01_ID:
@@ -410,7 +405,6 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 
 			case StoredFormatIds.TABLE_DESCRIPTOR_FINDER_V01_ID:
 			case StoredFormatIds.COLUMN_DESCRIPTOR_FINDER_V01_ID:
-			case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
 				return getDependable(dd, dependableObjectID).getObjectName();
 
 			case StoredFormatIds.TRIGGER_DESCRIPTOR_FINDER_V01_ID:
@@ -419,17 +413,14 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
 				return dd.getTableDescriptor(dependableObjectID).getName();
 
+			case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
+				return dd.getColumnPermissions(dependableObjectID).getObjectName();
+
 			case StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID:
-				lcc = (LanguageConnectionContext)
-				ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
-				return dd.getTablePermissions(dependableObjectID,
-						lcc.getAuthorizationId()).getObjectName();
+				return dd.getTablePermissions(dependableObjectID).getObjectName();
 
 			case StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID:
-				lcc = (LanguageConnectionContext)
-				ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
-				return dd.getRoutinePermissions(dependableObjectID,
-						lcc.getAuthorizationId()).getObjectName();
+				return dd.getRoutinePermissions(dependableObjectID).getObjectName();
 
 			default:
 				if (SanityManager.DEBUG)

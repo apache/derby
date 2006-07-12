@@ -81,6 +81,7 @@ SYSALIASES_INDEX2 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSi
 SYSALIASES_INDEX3 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSCHECKS_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSCOLPERMS_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
+SYSCOLPERMS_INDEX2 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSCOLUMNS_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSCOLUMNS_INDEX2 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSCONGLOMERATES_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
@@ -98,12 +99,14 @@ SYSFOREIGNKEYS_INDEX2 |{ derby.storage.initialPages=1, derby.storage.minimumReco
 SYSKEYS_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSREQUIREDPERM_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSROUTINEPERMS_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
+SYSROUTINEPERMS_INDEX2 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSSCHEMAS_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSSCHEMAS_INDEX2 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSSTATEMENTS_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSSTATEMENTS_INDEX2 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSSTATISTICS_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSTABLEPERMS_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
+SYSTABLEPERMS_INDEX2 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSTABLES_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSTABLES_INDEX2 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
 SYSTRIGGERS_INDEX1 |{ derby.storage.initialPages=1, derby.storage.minimumRecordSize=1, derby.storage.pageReservedSpace=0, derby.storage.pageSize=4096, derby.storage.reusableRecordId=true }                                                                                                                                                                                                                                                                                                                                            
@@ -279,6 +282,7 @@ SYSCHECKS |0
 SYSCHECKS |1     
 SYSCOLPERMS |0     
 SYSCOLPERMS |1     
+SYSCOLPERMS |1     
 SYSCOLUMNS |0     
 SYSCOLUMNS |1     
 SYSCOLUMNS |1     
@@ -306,6 +310,7 @@ SYSREQUIREDPERM |0
 SYSREQUIREDPERM |1     
 SYSROUTINEPERMS |0     
 SYSROUTINEPERMS |1     
+SYSROUTINEPERMS |1     
 SYSSCHEMAS |0     
 SYSSCHEMAS |1     
 SYSSCHEMAS |1     
@@ -315,6 +320,7 @@ SYSSTATEMENTS |1
 SYSSTATISTICS |0     
 SYSSTATISTICS |1     
 SYSTABLEPERMS |0     
+SYSTABLEPERMS |1     
 SYSTABLEPERMS |1     
 SYSTABLES |0     
 SYSTABLES |1     
@@ -499,6 +505,7 @@ SYSCHECKS |0
 SYSCHECKS |1     
 SYSCOLPERMS |0     
 SYSCOLPERMS |1     
+SYSCOLPERMS |1     
 SYSCOLUMNS |0     
 SYSCOLUMNS |1     
 SYSCOLUMNS |1     
@@ -526,6 +533,7 @@ SYSREQUIREDPERM |0
 SYSREQUIREDPERM |1     
 SYSROUTINEPERMS |0     
 SYSROUTINEPERMS |1     
+SYSROUTINEPERMS |1     
 SYSSCHEMAS |0     
 SYSSCHEMAS |1     
 SYSSCHEMAS |1     
@@ -535,6 +543,7 @@ SYSSTATEMENTS |1
 SYSSTATISTICS |0     
 SYSSTATISTICS |1     
 SYSTABLEPERMS |0     
+SYSTABLEPERMS |1     
 SYSTABLEPERMS |1     
 SYSTABLES |0     
 SYSTABLES |1     
