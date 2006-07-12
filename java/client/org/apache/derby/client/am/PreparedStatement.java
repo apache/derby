@@ -408,6 +408,7 @@ public class PreparedStatement extends Statement
 
     // also used by DBMD methods
     void setNullX(int parameterIndex, int jdbcType) throws SqlException {
+        checkForSupportedDataType(jdbcType);
         super.checkForClosedStatement();  // investigate what can be pushed up to setNull
         parameterIndex = checkSetterPreconditions(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = jdbcType;
@@ -1215,13 +1216,14 @@ public class PreparedStatement extends Statement
                             int targetJdbcType,
                             int scale) throws SqlException {
         parameterIndex = checkSetterPreconditions(parameterIndex);
-        checkForSupportedDataType(targetJdbcType);
         checkForValidScale(scale);
 
         if (x == null) {
             setNullX(parameterIndex, targetJdbcType);
             return;
         }
+
+        checkForSupportedDataType(targetJdbcType);
 
         // JDBC Spec specifies that conversion should occur on the client if
         // the targetJdbcType is specified.

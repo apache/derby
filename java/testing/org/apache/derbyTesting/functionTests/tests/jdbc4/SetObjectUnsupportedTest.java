@@ -29,7 +29,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 
 /**
- * Tests that calling <code>setObject()</code> with
+ * Tests that calling <code>setObject()</code> and <code>setNull()</code> with
  * <code>sqlTargetType</code> set to an unsupported type fails with
  * <code>SQLFeatureNotSupportedException</code>.
  *
@@ -81,7 +81,8 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
 
     /**
      * Test that <code>setObject()</code> with the specified
-     * <code>sqlTargetType</code>.
+     * <code>sqlTargetType</code> throws
+     * <code>SQLFeatureNotSupportedException</code>.
      *
      * @exception SQLException if a database error occurs
      */
@@ -93,6 +94,61 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
         } catch (SQLFeatureNotSupportedException e) {
             // expected exception
         }
+        ps.close();
+    }
+
+    /**
+     * Test that <code>setObject()</code> with the specified
+     * <code>sqlTargetType</code> throws
+     * <code>SQLFeatureNotSupportedException</code>.
+     *
+     * @exception SQLException if a database error occurs
+     */
+    public void testUnsupportedSetObjectWithScale() throws SQLException {
+        PreparedStatement ps = prepare();
+        try {
+            ps.setObject(1, null, typeInfo.type, 0);
+            fail("No exception thrown.");
+        } catch (SQLFeatureNotSupportedException e) {
+            // expected exception
+        }
+        ps.close();
+    }
+
+    /**
+     * Test that <code>setNull()</code> with the specified
+     * <code>sqlTargetType</code> throws
+     * <code>SQLFeatureNotSupportedException</code>.
+     *
+     * @exception SQLException if a database error occurs
+     */
+    public void testUnsupportedSetNull() throws SQLException {
+        PreparedStatement ps = prepare();
+        try {
+            ps.setNull(1, typeInfo.type);
+            fail("No exception thrown.");
+        } catch (SQLFeatureNotSupportedException e) {
+            // expected exception
+        }
+        ps.close();
+    }
+
+    /**
+     * Test that <code>setNull()</code> with the specified
+     * <code>sqlTargetType</code> throws
+     * <code>SQLFeatureNotSupportedException</code>.
+     *
+     * @exception SQLException if a database error occurs
+     */
+    public void testUnsupportedSetNullWithTypeName() throws SQLException {
+        PreparedStatement ps = prepare();
+        try {
+            ps.setNull(1, typeInfo.type, typeInfo.name);
+            fail("No exception thrown.");
+        } catch (SQLFeatureNotSupportedException e) {
+            // expected exception
+        }
+        ps.close();
     }
 
     /**
@@ -125,6 +181,14 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
         for (TypeInfo typeInfo : TYPES) {
             suite.addTest(new SetObjectUnsupportedTest
                           ("testUnsupportedSetObject", typeInfo, callable));
+            suite.addTest(new SetObjectUnsupportedTest
+                          ("testUnsupportedSetObjectWithScale",
+                           typeInfo, callable));
+            suite.addTest(new SetObjectUnsupportedTest
+                          ("testUnsupportedSetNull", typeInfo, callable));
+            suite.addTest(new SetObjectUnsupportedTest
+                          ("testUnsupportedSetNullWithTypeName",
+                           typeInfo, callable));
         }
         return suite;
     }

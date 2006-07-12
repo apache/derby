@@ -311,6 +311,7 @@ public abstract class EmbedPreparedStatement
      */
     public void setNull(int parameterIndex, int sqlType) throws SQLException {
 
+		checkForSupportedDataType(sqlType);
 		checkStatus();
 
 		int jdbcTypeId = getParameterJDBCType(parameterIndex);
@@ -1011,12 +1012,12 @@ public abstract class EmbedPreparedStatement
     public final void setObject(int parameterIndex, Object x, int targetSqlType, int scale)
             throws SQLException {
 
-        checkForSupportedDataType(targetSqlType);
-
 		if (x == null) {
 			setNull(parameterIndex, targetSqlType);
 			return;
 		}
+
+		checkForSupportedDataType(targetSqlType);
 
 		int paramJDBCType = getParameterJDBCType(parameterIndex);
 
