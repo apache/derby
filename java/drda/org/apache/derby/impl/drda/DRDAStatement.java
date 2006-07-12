@@ -39,10 +39,11 @@ import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.jdbc.EngineStatement;
+import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
+import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.impl.jdbc.EmbedParameterSetMetaData;
 import org.apache.derby.impl.jdbc.Util;
 
 /**
@@ -81,7 +82,7 @@ class DRDAStatement
 	protected byte [] rslsetflg;		// Result Set Flags
 	protected int maxrslcnt;			// Maximum Result set count
 	protected PreparedStatement ps;     // Prepared statement
-	protected EmbedParameterSetMetaData stmtPmeta; // param metadata
+	protected EngineParameterMetaData stmtPmeta; // param metadata
 	protected boolean isCall;
 	protected String procName;			// callable statement's method name
 	private   int[] outputTypes;		// jdbc type for output parameter or NOT_OUTPUT_PARAM
@@ -537,11 +538,7 @@ class DRDAStatement
 	 */
 	protected PreparedStatement getPreparedStatement() throws SQLException
 	{
-		if (ps instanceof BrokeredPreparedStatement)
-			return (PreparedStatement)(
-						   ((BrokeredPreparedStatement) ps).getStatement());
-		else
-			return ps;
+		return ps;
 	}
 
 
@@ -1153,7 +1150,7 @@ class DRDAStatement
 	{
 		if (ps != null && ps instanceof CallableStatement)
 		{
-			EmbedParameterSetMetaData pmeta = 	getParameterMetaData();
+			EngineParameterMetaData pmeta = 	getParameterMetaData();
 
 			return Math.min(pmeta.getPrecision(index),
 							FdocaConstants.NUMERIC_MAX_PRECISION);
@@ -1174,7 +1171,7 @@ class DRDAStatement
 	{
 		if (ps != null && ps instanceof CallableStatement)
 		{
-			EmbedParameterSetMetaData pmeta = 	getParameterMetaData();
+			EngineParameterMetaData pmeta = 	getParameterMetaData();
 			return Math.min(pmeta.getScale(index),FdocaConstants.NUMERIC_MAX_PRECISION);
 		}
 		else 
@@ -1324,7 +1321,7 @@ class DRDAStatement
 
 	private void setupCallableStatementParams(CallableStatement cs) throws SQLException
 	{
-		EmbedParameterSetMetaData pmeta = 	getParameterMetaData();
+		EngineParameterMetaData pmeta = 	getParameterMetaData();
 		int numElems = pmeta.getParameterCount();
 
 		for ( int i = 0; i < numElems; i ++)
@@ -1555,31 +1552,21 @@ class DRDAStatement
 
 	
 	/** 
-	 * Get parameter metadata from EmbedPreparedStatement or 
-	 * BrokeredPreparedStatement. We use reflection because we don't know which
-	 * we have.
-	 * 
-	 * @return EmbedParameterSetMetaData for the prepared statement. 
+	 * Retrieve the ParameterMetaData for the prepared statement. 
+     * To do so, use the engine defined interfaces:
+     * @see org.apache.derby.iapi.jdbc.EnginePreparedStatement
+     * @see org.apache.derby.iapi.jdbc.EngineParameterMetaData 
+	 * @return EngineParameterMetaData for the prepared statement. 
 	 * Note: there is no separate BrokeredParameterSetMetaData.
 	 */
-	protected EmbedParameterSetMetaData getParameterMetaData() throws SQLException
+	protected EngineParameterMetaData getParameterMetaData() throws SQLException
 	{
 		if (stmtPmeta != null)
 			return stmtPmeta;
 
-		EmbedParameterSetMetaData pmeta = null;
-		Class[] getParameterMetaDataParam = {};
-		try {
-			Method sh =
-				getPreparedStatement().getClass().getMethod("getEmbedParameterSetMetaData", getParameterMetaDataParam);
-			pmeta = (EmbedParameterSetMetaData)
-				sh.invoke(getPreparedStatement(),null);
-			stmtPmeta = pmeta;
-		}
-		catch (Exception e) {
-			handleReflectionException(e);
-		}
-		return stmtPmeta;
+		stmtPmeta = ((EnginePreparedStatement)ps).getEmbedParameterSetMetaData();
+        
+        return stmtPmeta;
 	}
 	
 	/**

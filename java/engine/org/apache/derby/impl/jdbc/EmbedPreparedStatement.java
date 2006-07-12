@@ -70,6 +70,8 @@ import java.io.Reader;
 import java.sql.Types;
 
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
+import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
+import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 
 /**
  *
@@ -81,7 +83,7 @@ import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
  */
 public abstract class EmbedPreparedStatement
 	extends EmbedStatement
-	implements java.sql.PreparedStatement
+	implements EnginePreparedStatement
 {
 
 	//Moving jdbc2.0 batch related code in this class because callableStatement in jdbc 20 needs
@@ -1444,11 +1446,11 @@ public abstract class EmbedPreparedStatement
     * Retrieves the number, types and properties of this PreparedStatement
     * object's parameters.
     *
-    * @return a EmbedParameterSetMetaData object that contains information about the
+    * @return a EngineParameterMetaData object that contains information about the
     * number, types and properties of this PreparedStatement object's parameters.
     * @exception SQLException if a database access error occurs
 	*/
-	public EmbedParameterSetMetaData getEmbedParameterSetMetaData()
+	public EngineParameterMetaData getEmbedParameterSetMetaData()
     	throws SQLException
 	{
 	  checkExecStatus();
