@@ -25,15 +25,15 @@ xxxxFILTERED-UUIDxxxx|FOO                                                       
 ij> connect 'grantRevokeDDL' user 'bar' as barConnection;
 ij(BARCONNECTION)> -- Following revokes should fail. Only owner can revoke permissions
 revoke select on satheesh.tsat from public;
-ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 2850C
 ij(BARCONNECTION)> revoke insert on satheesh.tsat from foo;
-ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 2850C
 ij(BARCONNECTION)> revoke update(i) on satheesh.tsat from foo;
-ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 2850C
 ij(BARCONNECTION)> revoke update on satheesh.tsat from foo;
-ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 2850C
 ij(BARCONNECTION)> revoke delete on satheesh.tsat from foo;
-ERROR 2850C: User 'BAR' is not the owner of Table/View 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 2850C
 ij(BARCONNECTION)> set connection satConnection;
 ij(SATCONNECTION)> -- Revoke permissions not granted already
 revoke trigger on satheesh.tsat from foo;
@@ -91,9 +91,9 @@ create synonym mySym for satheesh.tsat;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> -- Expected to fail
 grant select on mySym to bar;
-ERROR 42X05: Table/View 'MYSYM' does not exist.
+ERROR: Failed with SQLSTATE 42X05
 ij(SATCONNECTION)> grant insert on mySym to foo;
-ERROR 42X05: Table/View 'MYSYM' does not exist.
+ERROR: Failed with SQLSTATE 42X05
 ij(SATCONNECTION)> CREATE FUNCTION F_ABS(P1 INT)
 RETURNS INT NO SQL
 RETURNS NULL ON NULL INPUT
@@ -132,33 +132,33 @@ ij(SWIPERCONNECTION)> set schema satheesh;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> -- All these DDLs should fail.
 create table NotMyTable (i int, j int);
-ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ERROR: Failed with SQLSTATE 2850D
 ij(SWIPERCONNECTION)> drop table tsat;
-ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ERROR: Failed with SQLSTATE 2850D
 ij(SWIPERCONNECTION)> drop index tsat_ind;
-ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ERROR: Failed with SQLSTATE 2850D
 ij(SWIPERCONNECTION)> create view myview as select * from satheesh.tsat;
-ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ERROR: Failed with SQLSTATE 2850D
 ij(SWIPERCONNECTION)> CREATE FUNCTION FuncNotMySchema(P1 INT)
 RETURNS INT NO SQL RETURNS NULL ON NULL INPUT
 EXTERNAL NAME 'java.lang.Math.abs'
 LANGUAGE JAVA PARAMETER STYLE JAVA;
-ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ERROR: Failed with SQLSTATE 2850D
 ij(SWIPERCONNECTION)> alter table tsat add column k int;
-ERROR 2850D: User 'SWIPER' can not perform the operation in schema 'SATHEESH'.
+ERROR: Failed with SQLSTATE 2850D
 ij(SWIPERCONNECTION)> create table swiper.mytab ( i int, j int);
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> set schema swiper;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> -- Some simple DML tests. Should all fail.
 select * from satheesh.tsat;
-ERROR 28508: User 'SWIPER' does not have select permission on column 'I' of table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28508
 ij(SWIPERCONNECTION)> insert into satheesh.tsat values (1, 2);
-ERROR 28506: User 'SWIPER' does not have insert permission on table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28506
 ij(SWIPERCONNECTION)> update satheesh.tsat set i=j;
-ERROR 28508: User 'SWIPER' does not have update permission on column 'I' of table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28508
 ij(SWIPERCONNECTION)> create table my_tsat (i int not null, c char(10), constraint fk foreign key(i) references satheesh.tsat);
-ERROR 28508: User 'SWIPER' does not have references permission on column 'I' of table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28508
 ij(SWIPERCONNECTION)> -- Now grant some permissions to swiper
 set connection satConnection;
 ij(SATCONNECTION)> grant select(i), update(j) on tsat to swiper;
@@ -170,19 +170,19 @@ ij(SATCONNECTION)> grant references on tsat to swiper;
 ij(SATCONNECTION)> set connection swiperConnection;
 ij(SWIPERCONNECTION)> -- Now some of these should pass
 select * from satheesh.tsat;
-ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28508
 ij(SWIPERCONNECTION)> select i from satheesh.tsat;
 I          
 -----------
 0 rows selected
 ij(SWIPERCONNECTION)> select i from satheesh.tsat where j=2;
-ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28508
 ij(SWIPERCONNECTION)> select i from satheesh.tsat where 2 > (select count(i) from satheesh.tsat);
 I          
 -----------
 0 rows selected
 ij(SWIPERCONNECTION)> select i from satheesh.tsat where 2 > (select count(j) from satheesh.tsat);
-ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28508
 ij(SWIPERCONNECTION)> select i from satheesh.tsat where 2 > (select count(*) from satheesh.tsat);
 I          
 -----------
@@ -192,7 +192,7 @@ ij(SWIPERCONNECTION)> update satheesh.tsat set j=j+1;
 ij(SWIPERCONNECTION)> update satheesh.tsat set j=2 where i=2;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> update satheesh.tsat set j=2 where j=1;
-ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28508
 ij(SWIPERCONNECTION)> select * from satheesh.table1;
 A          |B          |C         
 ----------------------------------
@@ -202,25 +202,25 @@ C
 ----------
 0 rows selected
 ij(SWIPERCONNECTION)> select b from satheesh.table1 t1, satheesh.tsat t2 where t1.a = t2.j;
-ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28508
 ij(SWIPERCONNECTION)> select * from satheesh.table1, (select i from satheesh.tsat) table2;
 A          |B          |C         |I          
 ----------------------------------------------
 0 rows selected
 ij(SWIPERCONNECTION)> select * from satheesh.table1, (select j from satheesh.tsat) table2;
-ERROR 28508: User 'SWIPER' does not have select permission on column 'J' of table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28508
 ij(SWIPERCONNECTION)> -- GrantRevoke TODO: This one should pass, but currently fails. Bind update expression in two steps.
 update satheesh.tsat set j=i;
-ERROR 28508: User 'SWIPER' does not have update permission on column 'I' of table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28508
 ij(SWIPERCONNECTION)> create table my_tsat (i int not null, c char(10), constraint fk foreign key(i) references satheesh.tsat);
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> -- Some TRIGGER privilege checks. See GrantRevoke.java for more tests
 set connection swiperConnection;
 ij(SWIPERCONNECTION)> -- Should fail
 create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
-ERROR 28506: User 'SWIPER' does not have trigger permission on table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28506
 ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
-ERROR 28506: User 'SWIPER' does not have trigger permission on table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28506
 ij(SWIPERCONNECTION)> -- Grant trigger privilege
 set connection satConnection;
 ij(SATCONNECTION)> grant trigger on tsat to swiper;
@@ -241,9 +241,9 @@ ij(SATCONNECTION)> revoke trigger on tsat from swiper;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> set connection swiperConnection;
 ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
-ERROR 28506: User 'SWIPER' does not have trigger permission on table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28506
 ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
-ERROR 28506: User 'SWIPER' does not have trigger permission on table 'SATHEESH'.'TSAT'.
+ERROR: Failed with SQLSTATE 28506
 ij(SWIPERCONNECTION)> -- Now grant access to public and try again
 set connection satConnection;
 ij(SATCONNECTION)> grant trigger on tsat to public;
@@ -275,9 +275,9 @@ set connection swiperConnection;
 ij(SWIPERCONNECTION)> set schema satheesh;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> values f_abs(-5);
-ERROR 2850A: User 'SWIPER' does not have execute permission on FUNCTION 'SATHEESH'.'F_ABS'.
+ERROR: Failed with SQLSTATE 2850A
 ij(SWIPERCONNECTION)> select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
-ERROR 2850A: User 'SWIPER' does not have execute permission on FUNCTION 'SATHEESH'.'F_ABS'.
+ERROR: Failed with SQLSTATE 2850A
 ij(SWIPERCONNECTION)> -- Now grant execute permission and try again
 set connection satConnection;
 ij(SATCONNECTION)> grant execute on function f_abs to swiper;
@@ -301,9 +301,9 @@ ij(SATCONNECTION)> revoke execute on function f_abs from swiper RESTRICT;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> set connection swiperConnection;
 ij(SWIPERCONNECTION)> values f_abs(-5);
-ERROR 2850A: User 'SWIPER' does not have execute permission on FUNCTION 'SATHEESH'.'F_ABS'.
+ERROR: Failed with SQLSTATE 2850A
 ij(SWIPERCONNECTION)> select f_abs(-4) from sys.systables where tablename like 'SYSTAB%';
-ERROR 2850A: User 'SWIPER' does not have execute permission on FUNCTION 'SATHEESH'.'F_ABS'.
+ERROR: Failed with SQLSTATE 2850A
 ij(SWIPERCONNECTION)> -- Now try public permission
 set connection satConnection;
 ij(SATCONNECTION)> grant execute on function f_abs to public;
@@ -325,14 +325,14 @@ ij(SWIPERCONNECTION)> -- Test schema creation authorization checks
 set connection swiperConnection;
 ij(SWIPERCONNECTION)> -- Negative tests. Should all fail
 create schema myFriend;
-ERROR 2850E: User 'SWIPER' can not create schema 'MYFRIEND'. Only database owner could issue this statement.
+ERROR: Failed with SQLSTATE 2850E
 ij(SWIPERCONNECTION)> create schema mySchema authorization me;
-ERROR 2850E: User 'SWIPER' can not create schema 'MYSCHEMA'. Only database owner could issue this statement.
+ERROR: Failed with SQLSTATE 2850E
 ij(SWIPERCONNECTION)> create schema myschema authorization swiper;
-ERROR 2850E: User 'SWIPER' can not create schema 'MYSCHEMA'. Only database owner could issue this statement.
+ERROR: Failed with SQLSTATE 2850E
 ij(SWIPERCONNECTION)> connect 'grantRevokeDDL;user=sam';
 ij(CONNECTION0)> create schema sam authorization swiper;
-ERROR 2850E: User 'SAM' can not create schema 'SAM'. Only database owner could issue this statement.
+ERROR: Failed with SQLSTATE 2850E
 ij(CONNECTION0)> -- Should pass
 create schema authorization sam;
 0 rows inserted/updated/deleted
@@ -374,13 +374,13 @@ xxxxFILTERED-UUIDxxxx|TESTSCHEMA                                                
 ij(SATCONNECTION)> -- Test implicit creation of schemas.. Should fail
 set connection swiperConnection;
 ij(SWIPERCONNECTION)> create table mywork.t1(i int);
-ERROR 2850E: User 'SWIPER' can not create schema 'MYWORK'. Only database owner could issue this statement.
+ERROR: Failed with SQLSTATE 2850E
 ij(SWIPERCONNECTION)> create view mywork.v1 as select * from swiper.swiperTab;
-ERROR 2850E: User 'SWIPER' can not create schema 'MYWORK'. Only database owner could issue this statement.
+ERROR: Failed with SQLSTATE 2850E
 ij(SWIPERCONNECTION)> -- Implicit schema creation should only work if creating own schema
 connect 'grantRevokeDDL;user=monica' as monicaConnection;
 ij(MONICACONNECTION)> create table mywork.t1 ( i int);
-ERROR 2850E: User 'MONICA' can not create schema 'MYWORK'. Only database owner could issue this statement.
+ERROR: Failed with SQLSTATE 2850E
 ij(MONICACONNECTION)> create table monica.shouldPass(c char(10));
 0 rows inserted/updated/deleted
 ij(MONICACONNECTION)> -- Check if DBA can ignore all privilege checks
@@ -415,20 +415,20 @@ ij(SATCONNECTION)> -- Test system routines. Some don't need explicit grant and o
 set connection satConnection;
 ij(SATCONNECTION)> -- Try granting or revoking from system tables. Should fail
 grant select on sys.systables to sam;
-ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYS.SYSTABLES'.
+ERROR: Failed with SQLSTATE 2850F
 ij(SATCONNECTION)> grant delete on sys.syscolumns to sam;
-ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYS.SYSCOLUMNS'.
+ERROR: Failed with SQLSTATE 2850F
 ij(SATCONNECTION)> grant update(alias) on sys.sysaliases to swiper;
-ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYS.SYSALIASES'.
+ERROR: Failed with SQLSTATE 2850F
 ij(SATCONNECTION)> revoke all privileges on sys.systableperms from public;
-ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYS.SYSTABLEPERMS'.
+ERROR: Failed with SQLSTATE 2850F
 ij(SATCONNECTION)> revoke trigger on sys.sysroutineperms from sam;
-ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYS.SYSROUTINEPERMS'.
+ERROR: Failed with SQLSTATE 2850F
 ij(SATCONNECTION)> -- Try granting or revoking from system routines that is expected fail
 grant execute on procedure sysibm.sqlprocedures to sam;
-ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYSIBM.SQLPROCEDURES'.
+ERROR: Failed with SQLSTATE 2850F
 ij(SATCONNECTION)> revoke execute on procedure sysibm.sqlcamessage from public restrict;
-ERROR 2850F: Grant or Revoke operation is not allowed on object 'SYSIBM.SQLCAMESSAGE'.
+ERROR: Failed with SQLSTATE 2850F
 ij(SATCONNECTION)> -- Try positive tests
 connect 'grantRevokeDDL;user=sam' as samConnection;
 ij(SAMCONNECTION)> create table samTable(i int);
@@ -458,17 +458,17 @@ ij(SAMCONNECTION)> call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SAM', 'SAMTABLE
 ij(SAMCONNECTION)> -- Try compressing tables not owned...
 -- INPLACE_COMPRESS currently passes, pending DERBY-1062
 call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SWIPER', 'MYTAB', 1);
-ERROR 38000: The exception 'SQL Exception: User 'SAM' can not perform the operation in schema 'SWIPER'.' was thrown while evaluating an expression.
-ERROR 2850D: User 'SAM' can not perform the operation in schema 'SWIPER'.
+ERROR: Failed with SQLSTATE 38000
+ERROR: Failed with SQLSTATE 2850D
 ij(SAMCONNECTION)> call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SWIPER', 'MYTAB', 1, 1, 1);
 0 rows inserted/updated/deleted
 ij(SAMCONNECTION)> -- Try other system routines. All should fail
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', 'SAMTABLE' , 'extinout/table.dat', null, null, null);
-ERROR 2850A: User 'SAM' does not have execute permission on PROCEDURE 'SYSCS_UTIL'.'SYSCS_EXPORT_TABLE'.
+ERROR: Failed with SQLSTATE 2850A
 ij(SAMCONNECTION)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
-ERROR 2850A: User 'SAM' does not have execute permission on PROCEDURE 'SYSCS_UTIL'.'SYSCS_SET_DATABASE_PROPERTY'.
+ERROR: Failed with SQLSTATE 2850A
 ij(SAMCONNECTION)> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storage.pageSize');
-ERROR 2850A: User 'SAM' does not have execute permission on FUNCTION 'SYSCS_UTIL'.'SYSCS_GET_DATABASE_PROPERTY'.
+ERROR: Failed with SQLSTATE 2850A
 ij(SAMCONNECTION)> -- Try after DBA grants permissions
 set connection satConnection;
 ij(SATCONNECTION)> grant execute on procedure SYSCS_UTIL.SYSCS_EXPORT_TABLE to public;
@@ -551,13 +551,13 @@ ij(MAMTA3)> create table t31(c311 int);
 0 rows inserted/updated/deleted
 ij(MAMTA3)> -- since mamta3 is not dba, following will fail because no access to mamta2.v22
 create view v31 as select * from mamta2.v22;
-ERROR 28508: User 'MAMTA3' does not have select permission on column 'C111' of table 'MAMTA2'.'V22'.
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> -- mamta3 has access to mamta1.t11 since there is PUBLIC select access on that table but there is no access to mamta2.v22
 create view v32 as select v22.c111 as a, t11.c111 as b from mamta2.v22 v22, mamta1.t11 t11;
-ERROR 28508: User 'MAMTA3' does not have select permission on column 'C111' of table 'MAMTA2'.'V22'.
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> -- Try to create a view with no privilege to more than one object. 
 create view v33 as select v22.c111 as a, t11.c111 as b from mamta2.v22 v22, mamta1.t11 t11, mamta2.v21;
-ERROR 28508: User 'MAMTA3' does not have select permission on column 'C111' of table 'MAMTA2'.'V22'.
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> -- connect as mamta2 and give select privilege on v22 to mamta3
 set connection mamta2;
 ij(MAMTA2)> grant select on v22 to mamta3;
@@ -571,7 +571,7 @@ create view v32 as select v22.c111 as a, t11.c111 as b from mamta2.v22 v22, mamt
 0 rows inserted/updated/deleted
 ij(MAMTA3)> -- following will still fail because mamta3 doesn't have access to mamta1.t12.c121
 create view v33 as select v22.c111 as a, t12.c121 as b from mamta2.v22 v22, mamta1.t12 t12;
-ERROR 28508: User 'MAMTA3' does not have select permission on column 'C121' of table 'MAMTA1'.'T12'.
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> -- connect as mamta2 and give select privilege on v23 to mamta3
 set connection mamta2;
 ij(MAMTA2)> grant select on v23 to mamta3;
@@ -617,7 +617,7 @@ C111
 1 row selected
 ij(MAMTA2)> -- following will fail because no execute permissions on mamta1.f_abs
 create view v25(c251) as (values mamta1.f_abs1(-1));
-ERROR 2850A: User 'MAMTA2' does not have execute permission on FUNCTION 'MAMTA1'.'F_ABS1'.
+ERROR: Failed with SQLSTATE 2850A
 ij(MAMTA2)> set connection mamta1;
 ij(MAMTA1)> grant execute on function f_abs1 to mamta2;
 0 rows inserted/updated/deleted
@@ -641,10 +641,10 @@ ij(MAMTA1)> grant select(c141) on t14 to mamta2;
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> -- following will fail because no access on column mamta1.t14.c142
 create view v26 as (select * from mamta1.t14 where c142=1);
-ERROR 28508: User 'MAMTA2' does not have select permission on column 'C142' of table 'MAMTA1'.'T14'.
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA2)> -- following will fail for the same reason
 create view v26 as (select c141 from mamta1.t14 where c142=1);
-ERROR 28508: User 'MAMTA2' does not have select permission on column 'C142' of table 'MAMTA1'.'T14'.
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA2)> -- following will pass because view is based on column that it can access
 create view v27 as (select c141 from mamta1.t14);
 0 rows inserted/updated/deleted
@@ -686,7 +686,7 @@ ij(MAMTA2)> -- create trigger privilege collection
 -- first grant one column level privilege at user level and another at public level and then define the trigger
 set connection mamta1;
 ij(MAMTA1)> drop table t11TriggerTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T11TRIGGERTEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> create table t11TriggerTest (c111 int not null primary key, c112 int);
 0 rows inserted/updated/deleted
 ij(MAMTA1)> insert into t11TriggerTest values(1,1);
@@ -699,11 +699,11 @@ ij(MAMTA1)> grant select(c112) on t11TriggerTest to public;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> drop table t21TriggerTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T21TRIGGERTEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA2)> create table t21TriggerTest (c211 int);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> drop table t22TriggerTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T22TRIGGERTEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA2)> create table t22TriggerTest (c221 int);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- following should pass because all the privileges are in places
@@ -789,7 +789,7 @@ ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> -- following should fail because mamta2 doesn't have trigger permission on mamta1.t11TriggerTest
 create trigger tr11t11TriggerTest after insert on mamta1.t11TriggerTest for each statement mode db2sql
         insert into mamta1.t12RoutineTest values (1);
-ERROR 28506: User 'MAMTA2' does not have trigger permission on table 'MAMTA1'.'T11TRIGGERTEST'.
+ERROR: Failed with SQLSTATE 28506
 ij(MAMTA2)> set connection mamta1;
 ij(MAMTA1)> grant trigger on t11TriggerTest to mamta2;
 0 rows inserted/updated/deleted
@@ -800,7 +800,7 @@ create trigger tr11t11TriggerTest after insert on mamta1.t11TriggerTest for each
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- following will fail becuae mamta2 has TRIGGER privilege but not INSERT privilege on mamta1.t11TriggerTest
 insert into mamta1.t11TriggerTest values(3);
-ERROR 28506: User 'MAMTA2' does not have insert permission on table 'MAMTA1'.'T11TRIGGERTEST'.
+ERROR: Failed with SQLSTATE 28506
 ij(MAMTA2)> set connection mamta1;
 ij(MAMTA1)> delete from t11TriggerTest;
 2 rows inserted/updated/deleted
@@ -827,13 +827,13 @@ ij(MAMTA1)> -- Test routine and trigger combination. Thing to note is triggers a
 --   session user's privileges
 set connection mamta1;
 ij(MAMTA1)> drop table t12RoutineTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T12ROUTINETEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> create table t12RoutineTest (c121 int);
 0 rows inserted/updated/deleted
 ij(MAMTA1)> insert into t12RoutineTest values (1),(2);
 2 rows inserted/updated/deleted
 ij(MAMTA1)> drop table t13TriggerTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T13TRIGGERTEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> create table t13TriggerTest (c131 int);
 0 rows inserted/updated/deleted
 ij(MAMTA1)> insert into t13TriggerTest values (1),(2);
@@ -843,7 +843,7 @@ ij(MAMTA1)> grant select on t12RoutineTest to mamta3;
 ij(MAMTA1)> grant insert on t13TriggerTest to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> drop function selectFromSpecificSchema;
-ERROR 42Y55: 'DROP FUNCTION' cannot be performed on 'SELECTFROMSPECIFICSCHEMA' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> CREATE FUNCTION selectFromSpecificSchema (P1 INT)
         RETURNS INT 
         RETURNS NULL ON NULL INPUT
@@ -854,7 +854,7 @@ ij(MAMTA1)> grant execute on function selectFromSpecificSchema to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta3;
 ij(MAMTA3)> drop table t31TriggerTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T31TRIGGERTEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table t31TriggerTest(c11 int);
 0 rows inserted/updated/deleted
 ij(MAMTA3)> -- following will pass because all the required privileges are in place for mamta3
@@ -889,7 +889,7 @@ C131
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> -- will fail because mamta2 doesn't have INSERT privilege on mamta3.t31TriggerTest
 insert into mamta3.t31TriggerTest values(1);
-ERROR 28506: User 'MAMTA2' does not have insert permission on table 'MAMTA3'.'T31TRIGGERTEST'.
+ERROR: Failed with SQLSTATE 28506
 ij(MAMTA2)> set connection mamta3;
 ij(MAMTA3)> grant insert on t31TriggerTest to mamta2;
 0 rows inserted/updated/deleted
@@ -900,8 +900,8 @@ ij(MAMTA2)> -- should still fail because trigger on mamta3.t31TriggerTest access
 --   with the definer privilege. But the routine itself never runs with definer privilege and
 --   hence the session user needs access to objects accessed by the routine.
 insert into mamta3.t31TriggerTest values(1);
-ERROR 38000: The exception 'SQL Exception: User 'MAMTA2' does not have select permission on column 'C121' of table 'MAMTA1'.'T12ROUTINETEST'.' was thrown while evaluating an expression.
-ERROR 28508: User 'MAMTA2' does not have select permission on column 'C121' of table 'MAMTA1'.'T12ROUTINETEST'.
+ERROR: Failed with SQLSTATE 38000
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA2)> set connection mamta1;
 ij(MAMTA1)> grant select on t12RoutineTest to mamta2;
 0 rows inserted/updated/deleted
@@ -958,7 +958,7 @@ ij(MAMTA1)> grant execute on function selectFromSpecificSchema to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta3;
 ij(MAMTA3)> drop view v21ViewTest;
-ERROR X0X05: Table/View 'V21VIEWTEST' does not exist.
+ERROR: Failed with SQLSTATE X0X05
 ij(MAMTA3)> -- following will succeed because mamta3 has EXECUTE privileges on the function
 create view v21ViewTest(c211) as values mamta1.selectFromSpecificSchema(1);
 0 rows inserted/updated/deleted
@@ -976,8 +976,8 @@ ij(MAMTA2)> -- Although mamta2 has SELECT privileges on mamta3.v21ViewTest, mamt
 select * from mamta3.v21ViewTest;
 C211       
 -----------
-ERROR 38000: The exception 'SQL Exception: User 'MAMTA2' does not have select permission on column 'C121' of table 'MAMTA1'.'T12ROUTINETEST'.' was thrown while evaluating an expression.
-ERROR 28508: User 'MAMTA2' does not have select permission on column 'C121' of table 'MAMTA1'.'T12ROUTINETEST'.
+ERROR: Failed with SQLSTATE 38000
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA2)> set connection mamta1;
 ij(MAMTA1)> grant select  on t12RoutineTest to mamta2;
 0 rows inserted/updated/deleted
@@ -993,7 +993,7 @@ ij(MAMTA2)> -- In this test, the trigger is accessing a view. Any user that has 
 --  privileges on objects referenced by the trigger.
 set connection mamta1;
 ij(MAMTA1)> drop table t11TriggerTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T11TRIGGERTEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> create table t11TriggerTest (c111 int not null primary key);
 0 rows inserted/updated/deleted
 ij(MAMTA1)> insert into t11TriggerTest values(1);
@@ -1004,7 +1004,7 @@ ij(MAMTA1)> grant select on t11TriggerTest to mamta2;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> drop view v21ViewTest;
-ERROR X0X05: Table/View 'V21VIEWTEST' does not exist.
+ERROR: Failed with SQLSTATE X0X05
 ij(MAMTA2)> create view v21ViewTest as select * from mamta1.t11TriggerTest;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> grant select on v21ViewTest to mamta4;
@@ -1019,11 +1019,11 @@ ij(MAMTA3)> grant insert on t31TriggerTest to mamta4;
 ij(MAMTA3)> connect 'grantRevokeDDL;create=true' user 'mamta4' as mamta4;
 WARNING 01J01: Database 'grantRevokeDDL' not created, connection made to existing database instead.
 ij(MAMTA4)> drop table t41TriggerTest;
-ERROR 42Y07: Schema 'MAMTA4' does not exist
+ERROR: Failed with SQLSTATE 42Y07
 ij(MAMTA4)> create table t41TriggerTest (c411 int);
 0 rows inserted/updated/deleted
 ij(MAMTA4)> drop trigger tr41t41;
-ERROR 42X94: TRIGGER 'TR41T41' does not exist.
+ERROR: Failed with SQLSTATE 42X94
 ij(MAMTA4)> create trigger tr41t41 after insert on t41TriggerTest for each statement mode db2sql
         insert into mamta3.t31TriggerTest (select * from mamta2.v21ViewTest);
 0 rows inserted/updated/deleted
@@ -1062,13 +1062,13 @@ C311
 4 rows selected
 ij(MAMTA3)> -- will fail because no permissions on mamta4.t41TriggerTest
 insert into mamta4.t41TriggerTest values(1);
-ERROR 28506: User 'MAMTA3' does not have insert permission on table 'MAMTA4'.'T41TRIGGERTEST'.
+ERROR: Failed with SQLSTATE 28506
 ij(MAMTA3)> -- will fail because no permissions on mamta2.v21ViewTest
 select * from mamta2.v21ViewTest;
-ERROR 28508: User 'MAMTA3' does not have select permission on column 'C111' of table 'MAMTA2'.'V21VIEWTEST'.
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> -- will fail because no permissions on mamta1.t11TriggerTest
 select * from mamta1.t11TriggerTest;
-ERROR 28508: User 'MAMTA3' does not have select permission on column 'C111' of table 'MAMTA1'.'T11TRIGGERTEST'.
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> set connection mamta4;
 ij(MAMTA4)> grant insert on t41TriggerTest to mamta3;
 0 rows inserted/updated/deleted
@@ -1080,7 +1080,7 @@ insert into mamta4.t41TriggerTest values(1);
 ij(MAMTA3)> -- Test constraints
 set connection mamta1;
 ij(MAMTA1)> drop table t11ConstraintTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T11CONSTRAINTTEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> create table t11ConstraintTest (c111 int not null primary key);
 0 rows inserted/updated/deleted
 ij(MAMTA1)> insert into t11ConstraintTest values(1);
@@ -1091,7 +1091,7 @@ ij(MAMTA1)> grant references on t11ConstraintTest to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> drop table t21ConstraintTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T21CONSTRAINTTEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA2)> create table t21ConstraintTest (c111 int not null primary key);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> insert into t21ConstraintTest values(1);
@@ -1116,7 +1116,7 @@ ij(MAMTA1)> grant references on t11ConstraintTest to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta3;
 ij(MAMTA3)> drop table t31ConstraintTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T31CONSTRAINTTEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table t31ConstraintTest (c311 int, c312 int, foreign key(c311, c312) references mamta1.t11ConstraintTest);
 0 rows inserted/updated/deleted
 ij(MAMTA3)> drop table t31ConstraintTest;
@@ -1135,7 +1135,7 @@ ij(MAMTA1)> grant references(c112) on t11ConstraintTest to PUBLIC;
 ij(MAMTA1)> --connect 'jdbc:derby:c:/dellater/dbmaintest2;create=true' user 'mamta3' as mamta3;
 set connection mamta3;
 ij(MAMTA3)> drop table t31ConstraintTest;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T31CONSTRAINTTEST' because it does not exist.
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table t31ConstraintTest (c311 int,  c312 int, foreign key(c311, c312) references mamta1.t11ConstraintTest);
 0 rows inserted/updated/deleted
 ij(MAMTA3)> drop table t31ConstraintTest;
