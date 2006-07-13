@@ -24,6 +24,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 
@@ -87,7 +88,7 @@ import java.util.Calendar;
  */
 
 public abstract class EmbedResultSet extends ConnectionChild 
-    implements java.sql.ResultSet, Comparable {
+    implements EngineResultSet, Comparable {
 
 	// cursor movement
 	protected static final int FIRST = 1;

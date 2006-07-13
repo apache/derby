@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 
-import org.apache.derby.impl.jdbc.EmbedResultSet;
+import org.apache.derby.iapi.jdbc.EngineResultSet;
 
 /**
 	DRDAResultSet holds result set information
@@ -470,7 +470,7 @@ class DRDAResultSet
 		if (!gotPrctyp && qryprctyp == CodePoint.LMTBLKPRC)
 		{
 			gotPrctyp = true;
-			if (rs == null || ((EmbedResultSet) rs).isForUpdate() ||
+			if (rs == null || ((EngineResultSet)rs).isForUpdate() ||
 				/* for now we are not supporting LOB under LMTBLKPRC.  drda spec only
 				 * disallows LOB under LMTBLKPRC if OUTOVR is also for ANY CNTQRY reply.
 				 * To support LOB, QRYDTA protocols for LOB will need to be changed.
