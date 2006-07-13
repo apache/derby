@@ -944,28 +944,27 @@ public class PreparedStatement extends Statement
         setAsciiStream(parameterIndex,x,(long)length);
     }
 
+    /**
+     * Sets the specified parameter to the given input stream. Deprecated
+     * in JDBC 3.0 and this method will always just throw a feature not
+     * implemented exception.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the UNICODE parameter
+     * value
+     * @param length the number of bytes in the stream
+     * @exception SQLException throws feature not implemented.
+     */
     public void setUnicodeStream(int parameterIndex,
                                  java.io.InputStream x,
                                  int length) throws SQLException {
-        try
-        {
-            synchronized (connection_) {
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceDeprecatedEntry(this, "setUnicodeStream", parameterIndex, "<input stream>", length);
-                }
-                parameterIndex = checkSetterPreconditions(parameterIndex);
-                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
-                if (x == null) {
-                    setNull(parameterIndex, java.sql.Types.CLOB);
-                    return;
-                }
-                setInput(parameterIndex, new Clob(agent_, x, "UnicodeBigUnmarked", length));
-            }
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceDeprecatedEntry(this, "setUnicodeStream",
+                                                   parameterIndex,
+                                                   "<input stream>", length);
         }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
+
+        throw SQLExceptionFactory.notImplemented ("setUnicodeStream");
     }
 
      /**

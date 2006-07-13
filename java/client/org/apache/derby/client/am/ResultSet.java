@@ -1161,43 +1161,21 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    // Live life on the edge and run unsynchronized
+    /**
+     * Retrieve the value of the specified column as a stream of two-byte
+     * Unicode characters. Deprecated in JDBC 2.0 and this method will just
+     * throw a feature not implemented exception.
+     *
+     * @param column the column to retrieve as a Unicode stream
+     * @exception SQLException throws feature not implemented
+     */
     public java.io.InputStream getUnicodeStream(int column) throws SQLException {
-        try
-        {
-            closeCloseFilterInputStream();
-
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceDeprecatedEntry(this, "getUnicodeStream", column);
-            }
-
-            checkGetterPreconditions(column);
-        useStream(column);
-
-            java.io.InputStream result = null;
-            if (wasNonNullSensitiveUpdate(column)) {
-                try {
-                    result = new java.io.ByteArrayInputStream
-                            (((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR,
-                                    updatedColumns_[column - 1])).getBytes("UTF-8"));
-                } catch (java.io.UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                        "String", "java.io.ByteArrayInputStream(UTF-8)", e);
-                }
-            } else {
-                result = isNull(column) ? null : cursor_.getUnicodeStream(column);
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceDeprecatedExit(this, "getUnicodeStream", result);
-            }
-            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
-            return createCloseFilterInputStream(result);
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceDeprecatedEntry(this, "getUnicodeStream",
+                                                   column);
         }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
+
+        throw SQLExceptionFactory.notImplemented ("getUnicodeStream");
     }
 
     // Live life on the edge and run unsynchronized

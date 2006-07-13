@@ -23,7 +23,7 @@ getXXX on : SMALLINT
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=32 was null false JDBC MATCH(OK)
@@ -44,7 +44,7 @@ getXXX on : SMALLINT
   getCharacterStream=IC JDBC MATCH (INVALID)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.lang.Integer was null false
 setNull() with all JDBC Types on SMALLINT
   setNull(Types.TINYINT) getShort=0 was null true
@@ -150,8 +150,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getShort=0 was null true CLOUD EXT (OK)
   setBlob(null) as batch getShort=0 was null true CLOUD EXT (OK)
-  setUnicodeStream()  (22018):Invalid character string format for type SMALLINT. JDBC MATCH (INVALID)
-  setUnicodeStream(null) getShort=0 was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getShort=46 was null false JDBC MATCH(OK)
@@ -196,7 +196,7 @@ getXXX on : INTEGER
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=32 was null false JDBC MATCH(OK)
@@ -217,7 +217,7 @@ getXXX on : INTEGER
   getCharacterStream=IC JDBC MATCH (INVALID)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.lang.Integer was null false
 setNull() with all JDBC Types on INTEGER
   setNull(Types.TINYINT) getInt=0 was null true
@@ -323,8 +323,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getInt=0 was null true CLOUD EXT (OK)
   setBlob(null) as batch getInt=0 was null true CLOUD EXT (OK)
-  setUnicodeStream()  (22018):Invalid character string format for type INTEGER. JDBC MATCH (INVALID)
-  setUnicodeStream(null) getInt=0 was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getInt=46 was null false JDBC MATCH(OK)
@@ -369,7 +369,7 @@ getXXX on : BIGINT
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=32 was null false JDBC MATCH(OK)
@@ -390,7 +390,7 @@ getXXX on : BIGINT
   getCharacterStream=IC JDBC MATCH (INVALID)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.lang.Long was null false
 setNull() with all JDBC Types on BIGINT
   setNull(Types.TINYINT) getLong=0 was null true
@@ -496,8 +496,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getLong=0 was null true CLOUD EXT (OK)
   setBlob(null) as batch getLong=0 was null true CLOUD EXT (OK)
-  setUnicodeStream()  (22018):Invalid character string format for type BIGINT. JDBC MATCH (INVALID)
-  setUnicodeStream(null) getLong=0 was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getLong=46 was null false JDBC MATCH(OK)
@@ -542,7 +542,7 @@ getXXX on : REAL
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=32 was null false JDBC MATCH(OK)
@@ -563,7 +563,7 @@ getXXX on : REAL
   getCharacterStream=IC JDBC MATCH (INVALID)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.lang.Float was null false
 setNull() with all JDBC Types on REAL
   setNull(Types.TINYINT) getFloat=0.0 was null true
@@ -669,8 +669,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getFloat=0.0 was null true CLOUD EXT (OK)
   setBlob(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
-  setUnicodeStream()  (22018):Invalid character string format for type REAL. JDBC MATCH (INVALID)
-  setUnicodeStream(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getFloat=46.0 was null false JDBC MATCH(OK)
@@ -716,7 +716,7 @@ FAIL - mismatch column type 8 expected 6
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=32 was null false JDBC MATCH(OK)
@@ -737,7 +737,7 @@ FAIL - mismatch column type 8 expected 6
   getCharacterStream=IC JDBC MATCH (INVALID)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.lang.Double was null false
 setNull() with all JDBC Types on FLOAT
   setNull(Types.TINYINT) getDouble=0.0 was null true
@@ -843,8 +843,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getDouble=0.0 was null true CLOUD EXT (OK)
   setBlob(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
-  setUnicodeStream()  (22018):Invalid character string format for type DOUBLE. JDBC MATCH (INVALID)
-  setUnicodeStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getDouble=46.0 was null false JDBC MATCH(OK)
@@ -889,7 +889,7 @@ getXXX on : DOUBLE
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=32 was null false JDBC MATCH(OK)
@@ -910,7 +910,7 @@ getXXX on : DOUBLE
   getCharacterStream=IC JDBC MATCH (INVALID)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.lang.Double was null false
 setNull() with all JDBC Types on DOUBLE
   setNull(Types.TINYINT) getDouble=0.0 was null true
@@ -1016,8 +1016,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getDouble=0.0 was null true CLOUD EXT (OK)
   setBlob(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
-  setUnicodeStream()  (22018):Invalid character string format for type DOUBLE. JDBC MATCH (INVALID)
-  setUnicodeStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getDouble=46.0 was null false JDBC MATCH(OK)
@@ -1062,7 +1062,7 @@ getXXX on : DECIMAL(10,5)
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=32 was null false JDBC MATCH(OK)
@@ -1083,7 +1083,7 @@ getXXX on : DECIMAL(10,5)
   getCharacterStream=IC JDBC MATCH (INVALID)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.math.BigDecimal was null false
 setNull() with all JDBC Types on DECIMAL(10,5)
   setNull(Types.TINYINT) getBigDecimal=null was null true
@@ -1189,8 +1189,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getBigDecimal=null was null true CLOUD EXT (OK)
   setBlob(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
-  setUnicodeStream()  (22018):Invalid character string format for type DECIMAL. JDBC MATCH (INVALID)
-  setUnicodeStream(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getBigDecimal=46.00000 was null false JDBC MATCH(OK)
@@ -1241,7 +1241,7 @@ getXXX on : CHAR(60)
   getCharacterStream=null was null true JDBC MATCH(OK)
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=32 was null false JDBC MATCH(OK)
@@ -1262,7 +1262,7 @@ getXXX on : CHAR(60)
   getCharacterStream=0x33,0x32 was null false JDBC MATCH(OK)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.lang.String was null false
 setNull() with all JDBC Types on CHAR(60)
   setNull(Types.TINYINT) getString=null was null true
@@ -1367,8 +1367,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch getString=EncodedString: > 12867 29251 55 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 < was null false CLOUD EXT (OK)
   setBlob(null) getString=null was null true CLOUD EXT (OK)
   setBlob(null) as batch getString=null was null true CLOUD EXT (OK)
-  setUnicodeStream() getString=EncodedString: > 33347 51966 50 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 < was null false CLOUD EXT (OK)
-  setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getString=46                                                           was null false JDBC MATCH(OK)
@@ -1413,7 +1413,7 @@ getXXX on : VARCHAR(60)
   getCharacterStream=null was null true JDBC MATCH(OK)
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=32 was null false JDBC MATCH(OK)
@@ -1434,7 +1434,7 @@ getXXX on : VARCHAR(60)
   getCharacterStream=0x33,0x32 was null false JDBC MATCH(OK)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.lang.String was null false
 setNull() with all JDBC Types on VARCHAR(60)
   setNull(Types.TINYINT) getString=null was null true
@@ -1539,8 +1539,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch getString=EncodedString: > 12867 29251 55 < was null false CLOUD EXT (OK)
   setBlob(null) getString=null was null true CLOUD EXT (OK)
   setBlob(null) as batch getString=null was null true CLOUD EXT (OK)
-  setUnicodeStream() getString=EncodedString: > 33347 51966 50 < was null false CLOUD EXT (OK)
-  setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getString=46 was null false JDBC MATCH(OK)
@@ -1585,7 +1585,7 @@ getXXX on : LONG VARCHAR
   getCharacterStream=null was null true JDBC MATCH(OK)
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=32 was null false JDBC MATCH(OK)
@@ -1606,7 +1606,7 @@ getXXX on : LONG VARCHAR
   getCharacterStream=0x33,0x32 was null false JDBC MATCH(OK)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.lang.String was null false
 setNull() with all JDBC Types on LONG VARCHAR
   setNull(Types.TINYINT) getString=null was null true
@@ -1711,8 +1711,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch getString=EncodedString: > 12867 29251 55 < was null false CLOUD EXT (OK)
   setBlob(null) getString=null was null true CLOUD EXT (OK)
   setBlob(null) as batch getString=null was null true CLOUD EXT (OK)
-  setUnicodeStream() getString=EncodedString: > 33347 51966 50 < was null false CLOUD EXT (OK)
-  setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getString=46 was null false JDBC MATCH(OK)
@@ -1759,7 +1759,7 @@ getXXX on : VARCHAR(60) FOR BIT DATA
   getCharacterStream=null was null true JDBC MATCH(OK)
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=IC JDBC MATCH (INVALID)
@@ -1780,7 +1780,7 @@ getXXX on : VARCHAR(60) FOR BIT DATA
   getCharacterStream=0x403,0xfdc3 was null false JDBC MATCH(OK)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :[B was null false
 setNull() with all JDBC Types on VARCHAR(60) FOR BIT DATA
   setNull(Types.TINYINT) getBytes=null was null true
@@ -1886,8 +1886,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch getBytes=0x32,0x43 was null false CLOUD EXT (OK)
   setBlob(null) getBytes=null was null true CLOUD EXT (OK)
   setBlob(null) as batch getBytes=null was null true CLOUD EXT (OK)
-  setUnicodeStream()  (XCL12):An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'. JDBC FAIL VARCHAR(60) FOR BIT DATA
-  setUnicodeStream(null) getBytes=null was null true JDBC MATCH(OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC FAIL VARCHAR(60) FOR BIT DATA
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC FAIL VARCHAR(60) FOR BIT DATA
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (XCL12):An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'VARCHAR () FOR BIT DATA'. JDBC FAIL VARCHAR(60) FOR BIT DATA
@@ -1934,7 +1934,7 @@ getXXX on : DATE
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=IC JDBC MATCH (INVALID)
@@ -1955,7 +1955,7 @@ getXXX on : DATE
   getCharacterStream=IC JDBC MATCH (INVALID)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.sql.Date was null false
 setNull() with all JDBC Types on DATE
   setNull(Types.TINYINT) getDate=null was null true
@@ -2061,8 +2061,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getDate=null was null true CLOUD EXT (OK)
   setBlob(null) as batch getDate=null was null true CLOUD EXT (OK)
-  setUnicodeStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setUnicodeStream(null) getDate=null was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
@@ -2107,7 +2107,7 @@ getXXX on : TIME
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=IC JDBC MATCH (INVALID)
@@ -2128,7 +2128,7 @@ getXXX on : TIME
   getCharacterStream=IC JDBC MATCH (INVALID)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.sql.Time was null false
 setNull() with all JDBC Types on TIME
   setNull(Types.TINYINT) getTime=null was null true
@@ -2234,8 +2234,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getTime=null was null true CLOUD EXT (OK)
   setBlob(null) as batch getTime=null was null true CLOUD EXT (OK)
-  setUnicodeStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setUnicodeStream(null) getTime=null was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIME
@@ -2280,7 +2280,7 @@ getXXX on : TIMESTAMP
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=IC JDBC MATCH (INVALID)
@@ -2301,7 +2301,7 @@ getXXX on : TIMESTAMP
   getCharacterStream=IC JDBC MATCH (INVALID)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.sql.Timestamp was null false
 setNull() with all JDBC Types on TIMESTAMP
   setNull(Types.TINYINT) getTimestamp=null was null true
@@ -2407,8 +2407,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getTimestamp=null was null true CLOUD EXT (OK)
   setBlob(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
-  setUnicodeStream()  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC MATCH (INVALID)
-  setUnicodeStream(null) getTimestamp=null was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String)  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL TIMESTAMP
@@ -2453,7 +2453,7 @@ getXXX on : CLOB(1k)
   getCharacterStream=SPECIFIC CHECK OK
   getClob=null was null true JDBC MATCH(OK)
   getBlob=SPECIFIC CHECK OK
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=IC JDBC MATCH (INVALID)
@@ -2474,7 +2474,7 @@ getXXX on : CLOB(1k)
   getCharacterStream=0x36,0x37 was null false CLOUD EXT (OK)
   getClob=67 was null false JDBC MATCH(OK)
   getBlob=IC JDBC MATCH (INVALID)
-  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.sql.Clob was null false
 setNull() with all JDBC Types on CLOB(1k)
   setNull(Types.TINYINT) getClob=null was null true
@@ -2579,8 +2579,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch IC JDBC MATCH (INVALID)
   setBlob(null) getClob=null was null true CLOUD EXT (OK)
   setBlob(null) as batch getClob=null was null true CLOUD EXT (OK)
-  setUnicodeStream() getClob=0x8243,0xcafe was null false CLOUD EXT (OK)
-  setUnicodeStream(null) getClob=null was null true CLOUD EXT (OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC MATCH (INVALID)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) getClob=0x34,0x36 was null false CLOUD EXT (OK)
@@ -2625,7 +2625,7 @@ getXXX on : BLOB(1k)
   getCharacterStream=SPECIFIC CHECK OK
   getClob=SPECIFIC CHECK OK
   getBlob=null was null true JDBC MATCH(OK)
-  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=null was null true
  VALID VALUE
   getByte=IC JDBC MATCH (INVALID)
@@ -2646,7 +2646,7 @@ getXXX on : BLOB(1k)
   getCharacterStream=0x8243,0xcafe was null false CLOUD EXT (OK)
   getClob=IC JDBC MATCH (INVALID)
   getBlob=0x82,0x43 was null false JDBC MATCH(OK)
-  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getUnicodeStream= (0A000):Feature not implemented: getUnicodeStream. JDBC MATCH (INVALID)
   getObject=CORRECT :java.sql.Blob was null false
 setNull() with all JDBC Types on BLOB(1k)
   setNull(Types.TINYINT) getBlob=null was null true
@@ -2752,8 +2752,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setBlob() as batch getBlob=0x32,0x43 was null false JDBC MATCH(OK)
   setBlob(null) getBlob=null was null true JDBC MATCH(OK)
   setBlob(null) as batch getBlob=null was null true JDBC MATCH(OK)
-  setUnicodeStream()  (XCL12):An attempt was made to put a data value of type 'java.lang.String' into a data value of type 'BLOB'. JDBC FAIL BLOB(1k)
-  setUnicodeStream(null) getBlob=null was null true JDBC MATCH(OK)
+  setUnicodeStream()  (0A000):Feature not implemented: setUnicodeStream. JDBC FAIL BLOB(1k)
+  setUnicodeStream(null)  (0A000):Feature not implemented: setUnicodeStream. JDBC FAIL BLOB(1k)
   setObject(null)  OK Type is not supported.
   setObject(null) as batch  OK Type is not supported.
   setObject(java.lang.String) IC JDBC MATCH (INVALID)
