@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.EmbeddedDriver
+   Derby - Class org.apache.derby.jdbc.AutoloadedDriver
 
    Copyright 1997, 2004 The Apache Software Foundation or its licensors, as applicable.
 
@@ -36,22 +36,12 @@ import org.apache.derby.iapi.jdbc.JDBCBoot;
 
 
 /**
-	The embedded JDBC driver (Type 4) for Derby.
-	<P>
-	The driver automatically supports the correct JDBC specification version
-	for the Java Virtual Machine's environment.
-	<UL>
-	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
-	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
-	</UL>
+   This is the dummy driver which is autoloaded under JDBC4 and registered with
+   the DriverManager. Loading this class will NOT automatically boot the Derby engine.
+   Instead, the engine boots lazily when you ask for a
+   Connection. Alternatively, you can force the engine to boot as follows:
 
-	<P>
-	Loading this JDBC driver boots the database engine
-	within the same Java virtual machine.
-	<P>
-	The correct code to load the Derby engine using this driver is
-	(with approriate try/catch blocks):
-	 <PRE>
+   	 <PRE>
 	 Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
 
 	 // or
@@ -60,43 +50,30 @@ import org.apache.derby.iapi.jdbc.JDBCBoot;
 
     
 	</PRE>
-	When loaded in this way, the class boots the actual JDBC driver indirectly.
-	The JDBC specification recommends the Class.ForName method without the .newInstance()
-	method call, but adding the newInstance() guarantees
-	that Derby will be booted on any Java Virtual Machine.
-
-	<P>
-	Any initial error messages are placed in the PrintStream
-	supplied by the DriverManager. If the PrintStream is null error messages are
-	sent to System.err. Once the Derby engine has set up an error
-	logging facility (by default to derby.log) all subsequent messages are sent to it.
-	<P>
-	By convention, the class used in the Class.forName() method to
-	boot a JDBC driver implements java.sql.Driver.
-
-	This class is not the actual JDBC driver that gets registered with
-	the Driver Manager. It proxies requests to the registered Derby JDBC driver.
-
-	@see java.sql.DriverManager
-	@see java.sql.DriverManager#getLogStream
-	@see java.sql.Driver
-	@see java.sql.SQLException
 */
-
-public class EmbeddedDriver  implements Driver {
-
-	static {
-
-		EmbeddedDriver.boot();
-	}
-
-	private	AutoloadedDriver	_autoloadedDriver;
+public class AutoloadedDriver implements Driver
+{
+	// This flag is set if the engine is forcibly brought down.
+	private	static	boolean	_engineForcedDown = false;
 	
-	// Boot from the constructor as well to ensure that
-	// Class.forName(...).newInstance() reboots Derby 
-	// after a shutdown inside the same JVM.
-	public EmbeddedDriver() {
-		EmbeddedDriver.boot();
+	//
+	// This is the driver that's specific to the JDBC level we're running at.
+	// It's the module which boots the whole Derby engine.
+	//
+	private	static	Driver	_driverModule;
+	
+	static
+	{
+		try {
+			DriverManager.registerDriver( new AutoloadedDriver() );
+		}
+		catch (SQLException se)
+		{
+			String	message = MessageService.getTextMessage
+				(MessageId.JDBC_DRIVER_REGISTER_ERROR, se.getMessage() );
+
+			throw new IllegalStateException( message );
+		}
 	}
 
 	/*
@@ -108,9 +85,16 @@ public class EmbeddedDriver  implements Driver {
     @see java.sql.Driver
 	*/
 	public boolean acceptsURL(String url) throws SQLException {
-		return getDriverModule().acceptsURL(url);
+
+		//
+		// We don't want to accidentally boot the engine just because
+		// the application is looking for a connection from some other
+		// driver.
+		//
+		return ( isBooted() && InternalDriver.embeddedDriverAcceptsURL(url) );
 	}
 
+   
 	/**
 		Connect to the URL if possible
 		@exception SQLException illegal url or problem with connectiong
@@ -119,6 +103,16 @@ public class EmbeddedDriver  implements Driver {
 	public Connection connect(String url, Properties info)
 		throws SQLException
 	{
+		//
+		// This pretty piece of logic compensates for the following behavior
+		// of the DriverManager: When asked to get a Connection, the
+		// DriverManager cycles through all of its autoloaded drivers, looking
+		// for one which will return a Connection. Without this pretty logic,
+		// the embedded driver module will be booted by any request for
+		// a connection which cannot be satisfied by drivers ahead of us
+		// in the list.
+		if (!InternalDriver.embeddedDriverAcceptsURL(url)) { return null; }
+
 		return getDriverModule().connect(url, info);
 	}
 
@@ -145,7 +139,6 @@ public class EmbeddedDriver  implements Driver {
 			return 0;
 		}
 	}
-
     /**
      * Returns the driver's minor version number.
      @see java.sql.Driver
@@ -172,29 +165,57 @@ public class EmbeddedDriver  implements Driver {
 		}
 	}
 
-  /**
-   * Lookup the booted driver module appropriate to our JDBC level.
-   */
-	private	Driver	getDriverModule()
-		throws SQLException
-	{
-		return AutoloadedDriver.getDriverModule();
-	}
+	///////////////////////////////////////////////////////////////////////
+	//
+	// Support for booting and shutting down the engine.
+	//
+	///////////////////////////////////////////////////////////////////////
 
-
-   /*
-	** Find the appropriate driver for our JDBC level and boot it.
-	*  This is package protected so that AutoloadedDriver can call it.
+	/*
+	** Retrieve the driver which is specific to our JDBC level.
+	** We defer real work to this specific driver.
 	*/
-	static void boot() {
-		PrintStream ps = DriverManager.getLogStream();
+	public static	Driver getDriverModule() throws SQLException {
 
-		if (ps == null)
-			ps = System.err;
+		if ( _engineForcedDown )
+		{
+			// Driver not registered 
+			throw new SQLException
+				(MessageService.getTextMessage(MessageId.CORE_JDBC_DRIVER_UNREGISTERED));
+		}
 
-		new JDBCBoot().boot(Attribute.PROTOCOL, ps);
+		if ( !isBooted() ) { EmbeddedDriver.boot(); }
+
+		return _driverModule;
 	}
+	
+	/*
+	** Record which driver module actually booted.
+	*/
+	protected	static	void	registerDriverModule( Driver driver )
+	{
+		_driverModule = driver;
+		_engineForcedDown = false;
+	}
+	
+	/*
+	** Unregister the driver. This happens when the engine is
+	** forcibly shut down.
+	*/
+	protected	static	void	unregisterDriverModule()
+	{
+		_driverModule = null;
+		_engineForcedDown = true;
+	}
+	
 
-
+	/*
+	** Return true if the engine has been booted.
+	*/
+	private	static	boolean	isBooted()
+	{
+		return ( _driverModule != null );
+	}
 	
 }
+

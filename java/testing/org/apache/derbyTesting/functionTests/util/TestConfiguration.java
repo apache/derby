@@ -201,6 +201,56 @@ public class TestConfiguration {
         return isVerbose;
     }
     
+	/**
+	 * <p>
+	 * Return true if we expect that the DriverManager will autoload the client driver.
+	 * </p>
+	 */
+	public	boolean	autoloading()
+		throws Exception
+	{
+		//
+		// DriverManager autoloads the client only as of JDBC4.
+		//
+		if ( !supportsJDBC4() )
+		{
+			return false;
+		}
+
+		//
+		// The DriverManager will autoload drivers specified by the jdbc.drivers
+		// property. 
+		//
+		if ( getSystemStartupProperty( DRIVER_LIST ) != null )
+		{
+			return true;
+		}
+
+		//
+		// The DriverManager will also look inside our jar files for
+		// the generated file META-INF/services/java.sql.Driver. This file
+		// will contain the name of the driver to load. So if we are running
+		// this test against Derby jar files, we expect that the driver will
+		// be autoloaded.
+		//
+		// Note that if we run with a security manager, we get permissions
+		// exception at startup when the driver is autoloaded. This exception
+		// is silently swallowed and the result is that the driver is not
+		// loaded even though we expect it to be.
+		//
+		if ( loadingFromJars() )
+		{
+			return true;
+		}
+
+		//
+		// OK, we've run out of options. We do not expect that the driver
+		// will be autoloaded.
+		//
+
+		return false;
+	}
+
  	/**
  	 * <p>
 	 * Return true if the client supports JDBC4, i.e., if the VM level is at
@@ -273,6 +323,7 @@ public class TestConfiguration {
     private final static String KEY_PORT = "port";
     private final static String KEY_VERBOSE = "derby.tests.debug";    
     private final static String KEY_SINGLE_LEG_XA = "derbyTesting.xa.single";
+	private final static String DRIVER_LIST = "jdbc.drivers";
 
     /**
      * Possible values of system properties.

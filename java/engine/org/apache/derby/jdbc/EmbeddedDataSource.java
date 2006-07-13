@@ -503,7 +503,9 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 					// If we know the driver, we loaded it.   Otherwise only
 					// work if DriverManager has already loaded it.
 
-					driver = (InternalDriver) DriverManager.getDriver(url);
+					AutoloadedDriver	autoloadedDriver =
+						(AutoloadedDriver) DriverManager.getDriver(url);
+					driver = (InternalDriver) autoloadedDriver.getDriverModule();
 					// DriverManager will throw an exception if it cannot find the driver
 				}
 			}

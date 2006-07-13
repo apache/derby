@@ -68,27 +68,18 @@ public class Driver20 extends InternalDriver implements Driver {
 		super.boot(create, properties);
 
 		// Register with the driver manager
-		try {			
-			DriverManager.registerDriver(this);
+		AutoloadedDriver.registerDriverModule( this );
 
-			// hold onto the driver manager to avoid it being garbage collected.
-			// make sure the class is loaded by using .class
-			antiGCDriverManager = java.sql.DriverManager.class;
-
-		} catch (SQLException e) {
-			throw StandardException.newException(SQLState.JDBC_DRIVER_REGISTER, e);
-		}
+		// hold onto the driver manager to avoid its being garbage collected.
+		// make sure the class is loaded by using .class
+		antiGCDriverManager = java.sql.DriverManager.class;
 	}
 
 	public void stop() {
 
 		super.stop();
 
-		try {
-			DriverManager.deregisterDriver(this);
-		} catch (SQLException sqle) {
-			// just do nothing
-		}
+		AutoloadedDriver.unregisterDriverModule();
 	}
 
 	/**

@@ -23,3 +23,8 @@ jdbcapi/dataSourceReference.java
 largedata/LobLimits.java
 jdbc4/TestDbMetaData.java
 jdbc4/TestJDBC40Exception.java
+#
+# This test brings the network server up and down by itself
+# and so should not be run with a competing server.
+#
+jdbc4/AutoloadBooting.java

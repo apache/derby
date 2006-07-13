@@ -119,6 +119,7 @@
       <classpath>
         <pathelement path="${java13compile.classpath}"/>
       </classpath>
+      <include name="${derby.dir}/jdbc/AutoloadedDriver.java"/>
       <include name="${derby.dir}/jdbc/EmbeddedDriver.java"/>
       <include name="${derby.dir}/jdbc/ReferenceableDataSource.java"/>
       <include name="${derby.dir}/jdbc/EmbeddedDataSource.java"/>

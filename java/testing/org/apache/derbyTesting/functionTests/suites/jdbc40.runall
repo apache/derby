@@ -7,6 +7,7 @@ jdbc4/TestPreparedStatementMethods.java
 jdbc4/TestResultSetMethods.java
 
 # JUnit tests
+jdbc4/AutoloadBooting.junit
 jdbc4/AutoloadTest.junit
 jdbc4/BlobTest.junit
 jdbc4/CallableStatementTest.junit

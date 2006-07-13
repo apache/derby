@@ -49,24 +49,15 @@ public class BlobClobTestSetup
     private static ResultSet rs = null;
     /** Statement used to fetch BLOB or CLOB. */
     private static Statement stmt = null;
-    /** Stream used to insert BLOB. */
-    private static InputStream blobInput = null;
     /** Blob data. */
     private static final byte[] blobData = new byte[] {
         0x65, 0x66, 0x67, 0x68, 0x69,
         0x69, 0x68, 0x67, 0x66, 0x65
     };
-    /** Stream used to insert CLOB. */
-    private static Reader clobInput = null;
     /** Clob data. */
     private static final String clobData =
         "This is a string, inserted into a CLOB";
    
-    static {
-        blobInput = new ByteArrayInputStream(blobData, 0, blobData.length);
-        clobInput = new StringReader(clobData);
-    }
-    
     /**
      * Create a test setup for the specified blob or clob test.
      *
@@ -116,6 +107,7 @@ public class BlobClobTestSetup
      */
     public static Blob getSampleBlob(Connection con) 
         throws SQLException {
+		InputStream blobInput = new ByteArrayInputStream(blobData, 0, blobData.length);
         PreparedStatement pStmt = 
             con.prepareStatement("update BLOBCLOB set BLOBDATA = ? where ID = ?");
         try {
@@ -145,6 +137,7 @@ public class BlobClobTestSetup
      */
     public static Clob getSampleClob(Connection con) 
         throws SQLException {
+		Reader clobInput = new StringReader(clobData);
         PreparedStatement pStmt = 
             con.prepareStatement("update BLOBCLOB set CLOBDATA = ? where ID = ?");
         try {

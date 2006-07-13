@@ -161,9 +161,12 @@ public interface MessageId {
 	String CORE_JDBC_DRIVER_UNREGISTERED= "I015"; // JDBCDriver is not registered with the JDBC driver manager
 	String CORE_DATABASE_NOT_AVAILABLE	= "I024"; // Database not available
 	String CORE_DRIVER_NOT_AVAILABLE	= "I025"; // JDBC Driver not available
+	String JDBC_DRIVER_REGISTER_ERROR 	= "I026"; // Error while registering driver
 
     /*
      * Monitor
      */
     String SERVICE_PROPERTIES_DONT_EDIT = "M001"; // Tell user not to edit service.properties
+
+
 }

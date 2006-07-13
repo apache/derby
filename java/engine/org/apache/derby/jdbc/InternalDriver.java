@@ -104,7 +104,16 @@ public abstract class InternalDriver implements ModuleControl {
 	** Methods from java.sql.Driver
 	*/
 	public boolean acceptsURL(String url) {
-		return active &&
+		return active && embeddedDriverAcceptsURL( url );
+	}
+
+	/*
+	** This method can be called by AutoloadedDriver so that we
+	** don't accidentally boot Derby while answering the question "Can
+	** you handle this URL?"
+	*/
+	public static	boolean embeddedDriverAcceptsURL(String url) {
+		return
 		//	need to reject network driver's URL's
 		!url.startsWith(Attribute.JCC_PROTOCOL) && !url.startsWith(Attribute.DNC_PROTOCOL) &&
 		(url.startsWith(Attribute.PROTOCOL) || url.equals(Attribute.SQLJ_NESTED));

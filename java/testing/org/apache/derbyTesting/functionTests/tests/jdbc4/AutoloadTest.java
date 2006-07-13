@@ -44,15 +44,14 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
 	//
 	/////////////////////////////////////////////////////////////
 
+	private	static	final	String	NONEXISTENT_DATABASE = "nonexistentDatabase";
+	
 	/////////////////////////////////////////////////////////////
 	//
 	//	STATE
 	//
 	/////////////////////////////////////////////////////////////
 
-	private	static	final	String	NONEXISTENT_DATABASE = "nonexistentDatabase";
-	private	static	final	String	DRIVER_LIST = "jdbc.drivers";
-	
 	/////////////////////////////////////////////////////////////
 	//
 	//	CONSTRUCTOR
@@ -101,7 +100,7 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
 		// We expect that the connection to the database will fail for
 		// one reason or another.
 		//
-		if ( autoloading() )
+		if ( CONFIG.autoloading() )
 		{
 			println( "We ARE autoloading..." );
 
@@ -151,64 +150,10 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
 		catch ( SQLException e ) { se = e; }
 
 		println( "Caught expected SQLException: " + se );
-		
+
 		assertSQLState( expectedSQLState, expectedSQLState, se );
 	}
 
-	/**
-	 * <p>
-	 * Return true if we expect that the DriverManager will autoload the client driver.
-	 * </p>
-	 */
-	private	boolean	autoloading()
-		throws Exception
-	{
-		//
-		// DriverManager autoloads the client only as of JDBC4.
-		//
-		if ( !CONFIG.supportsJDBC4() )
-		{
-			println( "NOT JDBC4..." );
-			return false;
-		}
-
-		//
-		// The DriverManager will autoload drivers specified by the jdbc.drivers
-		// property. 
-		//
-		if ( CONFIG.getSystemStartupProperty( DRIVER_LIST ) != null )
-		{
-			println( "Drivers list encoded in startup properties..." );
-			return true;
-		}
-
-		//
-		// The DriverManager will also look inside our jar files for
-		// the generated file META-INF/services/java.sql.Driver. This file
-		// will contain the name of the driver to load. So if we are running
-		// this test against Derby jar files, we expect that the driver will
-		// be autoloaded.
-		//
-		// Note that if we run with a security manager, we get permissions
-		// exception at startup when the driver is autoloaded. This exception
-		// is silently swallowed and the result is that the driver is not
-		// loaded even though we expect it to be.
-		//
-		if ( CONFIG.loadingFromJars() )
-		{
-			println( "Loading from jars..." );
-			return true;
-		}
-
-		//
-		// OK, we've run out of options. We do not expect that the driver
-		// will be autoloaded.
-		//
-
-		println( "None of the above. Not autoloading..." );
-		
-		return false;
-	}
 
 }
 

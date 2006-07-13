@@ -964,7 +964,7 @@
 
     <!-- declare the embedded driver for autoloading by the JDBC 4 DriverManager -->
     <antcall target="declare-autoloadable-driver">
-      <param name="driver.name" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+      <param name="driver.name" value="org.apache.derby.jdbc.AutoloadedDriver"/>
     </antcall>
 
     <!-- the next two targets are orthogonal. Only one will be executed, -->
