@@ -4114,6 +4114,48 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		return false;
 	}
 
+
+    /**
+     *  Check to see if a database has been upgraded to the required
+     *  level in order to use a store feature.
+     *
+     * @param requiredMajorVersion  required database Engine major version
+     * @param requiredMinorVersion  required database Engine minor version
+     * @param feature Non-null to throw an exception, null to return the 
+     *                state of the version match.
+     * @return <code> true </code> if the database has been upgraded to 
+     *         the required level, <code> false </code> otherwise.
+     * @exception  StandardException 
+     *             if the database is not at the require version 
+     *             when <code>feature</code> feature is 
+     *             not <code> null </code>. 
+     */
+	public boolean checkVersion(int requiredMajorVersion, 
+                                int requiredMinorVersion, 
+                                String feature) throws StandardException 
+    {
+        
+        boolean isRequiredVersion = 
+            checkVersion(requiredMajorVersion, requiredMinorVersion);
+
+        // if the database is not at the required version , throw exception 
+        // if the feature is non-null . 
+        if (!isRequiredVersion && feature != null) 
+        {
+            throw StandardException.newException(
+                  SQLState.LANG_STATEMENT_UPGRADE_REQUIRED, feature,
+                  ProductVersionHolder.simpleVersionString(onDiskMajorVersion, 
+                                                           onDiskMinorVersion, 
+                                                           onDiskBeta),
+                  ProductVersionHolder.simpleVersionString(requiredMajorVersion, 
+                                                           requiredMinorVersion, 
+                                                           false));
+        }
+
+        return isRequiredVersion;
+    }
+
+
 	/*
 	** Sending information to the user without throwing exception.
 	** There are times when unusual external or system related things happen in

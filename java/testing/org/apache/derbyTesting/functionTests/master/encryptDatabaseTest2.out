@@ -1,0 +1,138 @@
+ij> -- This script tests  configuring an un-encrypted database 
+-- for encryption and re-encryption of an encrypted database.
+-- with new enryption key/password.
+-- if there are any global transactions in the prepared state after
+-- recovery; encrypion/re-encryption of a database should fail. 
+disconnect;
+ij> xa_datasource 'wombat_en' create;
+ij> xa_connect ;
+ij> xa_start xa_noflags 0;
+ij> xa_getconnection;
+ij> create table foo (a int);
+0 rows inserted/updated/deleted
+ij> insert into foo values (0);
+1 row inserted/updated/deleted
+ij> insert into foo values (1);
+1 row inserted/updated/deleted
+ij> select * from foo;
+A          
+-----------
+0          
+1          
+ij> xa_end xa_success 0;
+ij> xa_commit xa_1phase 0;
+ij> -- prepare transaction and shutdown
+xa_start xa_noflags 1;
+ij> insert into foo values (2);
+1 row inserted/updated/deleted
+ij> insert into foo values (3);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 1;
+ij> -- prepare the global tx
+xa_prepare 1;
+ij> -- shutdown the database
+disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> -- configure the database for encrypion with an external encryption key.
+-- this should fail because of the global transacton in the prepared state.
+connect 'jdbc:derby:wombat_en;dataEncryption=true;encryptionKey=6162636465666768';
+ERROR XJ040: Failed to start database 'wombat_en', see the next exception for details.
+ERROR XBCXO: Cannot encrypt the database when there is a global transaction in the prepared state.
+ij> ---attempt to configure the database for encrypion with a boot password.
+-- this should fail because of the global transacton in 
+-- the prepared state.
+connect 'jdbc:derby:wombat_en;dataEncryption=true;bootPassword=xyz1234abc';
+ERROR XJ040: Failed to start database 'wombat_en', see the next exception for details.
+ERROR XBCXO: Cannot encrypt the database when there is a global transaction in the prepared state.
+ij> -- now reboot the db and commit the transaction in the prepapred state. 
+xa_datasource 'wombat_en';
+ij> xa_connect ;
+ij> xa_start xa_noflags 2;
+ij> xa_getconnection;
+ij> insert into foo values (4);
+1 row inserted/updated/deleted
+ij> xa_recover xa_startrscan;
+Recovered 1 in doubt transactions
+Transaction 1 : (1,FILTERED,FILTERED)
+ij> xa_commit xa_2phase 1;
+ij> select * from foo;
+A          
+-----------
+0          
+1          
+2          
+3          
+4          
+ij> xa_end xa_success 2;
+ij> xa_commit xa_1phase 2;
+ij> -- shutdown the database
+disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> --- configure the database for encrypion with a boot password.
+--- this should pass.
+connect 'jdbc:derby:wombat_en;dataEncryption=true;bootPassword=xyz1234abc';
+ij> disconnect;
+ij> xa_datasource 'wombat_en';
+ij> xa_connect ;
+ij> xa_start xa_noflags 3;
+ij> xa_getconnection;
+ij> insert into foo values (5);
+1 row inserted/updated/deleted
+ij> xa_end xa_success 3;
+ij> -- prepare the global tx
+xa_prepare 3;
+ij> -- shutdown the database
+disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> -- attempt to reconfigure the database with a new password. 
+-- this should fail because of the global transaction in the prepared state
+-- after recovery.
+connect 'jdbc:derby:wombat_en;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
+ERROR XJ040: Failed to start database 'wombat_en', see the next exception for details.
+ERROR XBCXP: Cannot re-encrypt the database with a new boot password or an external encryption key when there is a global transaction in the prepared state.
+ij> -- now reboot the db and commit the transaction in the prepared state. 
+connect 'jdbc:derby:wombat_en;bootPassword=xyz1234abc';
+ij> disconnect;
+ij> xa_datasource 'wombat_en';
+ij> xa_connect ;
+ij> xa_start xa_noflags 4;
+ij> xa_getconnection;
+ij> insert into foo values (6);
+1 row inserted/updated/deleted
+ij> xa_recover xa_startrscan;
+Recovered 1 in doubt transactions
+Transaction 1 : (3,FILTERED,FILTERED)
+ij> xa_commit xa_2phase 3;
+ij> select * from foo;
+A          
+-----------
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+ij> xa_end xa_success 4;
+ij> xa_commit xa_1phase 4;
+ij> -- shutdown the database
+disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> --- re-encrypt the database with a new password. 
+--- this should pass. 
+connect 'jdbc:derby:wombat_en;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
+ij> select * from foo ;
+A          
+-----------
+0          
+1          
+2          
+3          
+4          
+5          
+6          
+ij> 

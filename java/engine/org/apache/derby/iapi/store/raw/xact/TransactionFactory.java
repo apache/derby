@@ -268,6 +268,17 @@ public interface TransactionFactory extends Corruptable {
 	*/
 	public boolean noActiveUpdateTransaction();
 
+
+    /**
+     * Check if there are any prepared transanctions.
+     *
+     * <P>MT - unsafe, called during boot, which is single threaded.
+     *
+     * @return   <tt>true</tt> if prepared transactions exist,
+     *			 <tt>false</tt> otherwise.
+     */
+	public boolean hasPreparedXact();
+
 	/**
 		Database creation finished
 

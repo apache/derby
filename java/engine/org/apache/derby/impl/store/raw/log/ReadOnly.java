@@ -371,4 +371,32 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
     public void setupLogEncryption() throws StandardException {
         // nothing to do for a read-only database. 
     }
+
+    /**
+     *  Check to see if a database has been upgraded to the required
+     *  level in order to use a store feature.
+     *
+     * This method is generally used to prevent writes to 
+     * data/log file by a particular store feature until the 
+     * database is upgraded to the required version. 
+     * In read-only database writes are not allowed, so nothing to do
+     * for this method in this implementation of the log factory.
+     *
+     * @param requiredMajorVersion  required database Engine major version
+     * @param requiredMinorVersion  required database Engine minor version
+     * @param feature Non-null to throw an exception, null to return the 
+     *                state of the version match.
+     *
+     * @exception  StandardException 
+     *             not implemented exception is thrown
+     */
+	public boolean checkVersion(int requiredMajorVersion, 
+                                int requiredMinorVersion, 
+                                String feature) 
+        throws StandardException
+    {
+        // nothing to do for read only databases; 
+        throw StandardException.newException(
+                  SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
+    }
 }

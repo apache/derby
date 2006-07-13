@@ -222,7 +222,9 @@ public interface SQLState {
     String ENCRYPTION_UNABLE_KEY_VERIFICATION  = "XBCXL.S";
     String ENCRYPTION_INVALID_EXKEY_LENGTH          = "XBCXM.S";
     String ENCRYPTION_ILLEGAL_EXKEY_CHARS           = "XBCXN.S";
-        
+    String ENCRYPTION_PREPARED_XACT_EXIST   =  "XBCXO.S";
+    String REENCRYPTION_PREPARED_XACT_EXIST =  "XBCXP.S";
+
 	/*
 	** Cache Service
 	*/

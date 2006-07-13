@@ -542,24 +542,62 @@ public class TransactionTable implements Formatable
 	}
 
 	/**
-		Is there a prepared transaction in the transaction table.
+       Is there a prepared transaction that are recovered 
+       durring the recovery in the transaction table.
 
-		<P>MT - unsafe, caller is recovery, which is single threaded.
-	*/
-	public boolean hasPreparedRecoveredXact()
-	{
-		for (Enumeration e = trans.elements(); e.hasMoreElements(); )
-		{
-			TransactionTableEntry ent = (TransactionTableEntry) e.nextElement();
+       <P>MT - unsafe, caller is recovery, which is single threaded.
+    */
+    public boolean hasPreparedRecoveredXact()
+    {
+        return hasPreparedXact(true);
+    }
 
-			if (ent != null && ent.isRecovery() && 
-				(ent.getTransactionStatus() & Xact.END_PREPARED) != 0)
+
+    /**
+       Is there a prepared transaction in the transaction table.
+       <P>MT - unsafe, called during boot, which is single threaded.
+    */
+    public boolean hasPreparedXact()
+    {
+        return hasPreparedXact(false);
+    }
+
+    /**
+     * Is there a prepared transaction in the transaction table.
+     * 
+     * <P>MT - unsafe, caller is recovery/at boot, which is single threaded.
+     *
+     * @param recovered  <code> true </code> to search  for transaction 
+     *                  that are in prepared during recovery.  
+     *                  recovered tranaction. 
+     *                  <code> false > to search for just prepared 
+     *                  transactons. 
+     * @return         <code> true if there is a prepared transaction and
+     *                  recovered when <code> recovered </code> argument is 
+     *                  <code> true </code>
+     */
+
+    private boolean hasPreparedXact(boolean recovered)
+    {
+        for (Enumeration e = trans.elements(); e.hasMoreElements(); )
+        {
+            TransactionTableEntry ent = (TransactionTableEntry) e.nextElement();
+
+            if (ent != null && 
+                (ent.getTransactionStatus() & Xact.END_PREPARED) != 0)
             {
-				return true;
+                if (recovered) {
+                    if(ent.isRecovery())
+                        return true;
+                } else {
+                    return true;
+                }
             }
-		}
-		return false;
-	}
+        }
+        return false;
+    }
+
+
 
 
 	/**

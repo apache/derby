@@ -58,6 +58,8 @@ encryptDatabase.sql
 encryptDatabase_app.properties
 encryptDatabaseTest1.sql
 encryptDatabaseTest1_app.properties
+encryptDatabaseTest2.sql
+encryptDatabaseTest2_app.properties
 encryptParams.sql
 encryptParams_app.properties
 encryptionKey.sql

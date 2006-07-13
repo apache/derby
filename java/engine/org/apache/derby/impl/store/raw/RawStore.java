@@ -1354,6 +1354,9 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         throws StandardException 
     {
 
+        // check if the database can be encrypted.
+        canEncryptDatabase(reEncrypt);
+
         // check point the datase, so that encryption does not have
         // to encrypt the existing transactions logs. 
  
@@ -1419,6 +1422,49 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             newDecryptionEngine = null;   
             newEncryptionEngine = null;
             transaction.close(); 
+        }
+    }
+
+
+    /**
+     * checks if the database is in the right state to (re)encrypt it.
+     *
+     * @param  reEncrypt true if the database getting encrypted 
+     *                   with new password/key.
+     * @exception  StandardException  
+     *             if there is global transaction in the prepared state or
+     *             if the database is not at the version 10.2 or above, this
+     *             feature is not supported.  
+     */
+    private void canEncryptDatabase(boolean reEncrypt) 
+        throws StandardException 
+    {
+
+        String feature = (reEncrypt ? 
+                          "newBootPassword/newEncryptionKey attribute" : 
+                          "dataEncryption attribute on an existing database");
+
+        // check if the database version is at 10.2 or above.
+        // encrytpion or re-encryption of the database 
+        // is supported  only in version 10.2 or above. 
+		logFactory.checkVersion(
+                       RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10, 
+                       RawStoreFactory.DERBY_STORE_MINOR_VERSION_2, 
+                       feature);
+
+        // database can not be (re)encrypted if there 
+        // are any global transactions in the prepared state 
+        // after the recovery. The reason for this restriction 
+        // is that any transaction log before the encryption can not 
+        // be read once database is reconfigure with new encryption 
+        // key.
+        if (xactFactory.hasPreparedXact()) {
+            if(reEncrypt) 
+                throw StandardException.newException(
+                       SQLState.REENCRYPTION_PREPARED_XACT_EXIST);
+            else 
+                throw StandardException.newException(
+                       SQLState.ENCRYPTION_PREPARED_XACT_EXIST);
         }
     }
 

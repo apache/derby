@@ -822,6 +822,26 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		return (ttab.hasActiveUpdateTransaction() == false);
 	}
 
+
+    /**
+     * Check if there are any prepared transanctions in the 
+     * transaction table. 
+     *
+     * Caller must be aware that if there is no other mechanism to stop
+     * transactions from starting and ending, then this information is
+     * outdated as soon as it is reported.
+     *
+     * @return     <tt>true</tt> if there are prepared 
+     *              transactions in the transaction table,
+     *              <tt>false</tt> otherwise.
+     */
+	public boolean hasPreparedXact()
+	{
+		return (ttab.hasPreparedXact());
+	}
+
+
+
 	/*
 		remove the transaction Id an return false iff the transaction is found
 		in the table and it doesn't need exclusion from quiesce state
