@@ -6261,6 +6261,9 @@ class DRDAConnThread extends Thread {
 			
 			// Send ResultSet warnings if there are any
 			SQLWarning sqlw = (rs != null)? rs.getWarnings(): null;
+			if (rs != null) {
+				rs.clearWarnings();
+			}
 
 			// for updatable, insensitive result sets we signal the
 			// row updated condition to the client via a warning to be 

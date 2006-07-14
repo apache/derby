@@ -1477,6 +1477,39 @@ public class SURTest extends SURBaseTest {
         s.close();
     }
 
+    /**
+     * DERBY-1481 - ResultSet.beforeFirst() gives protocol error on scrollable,
+     * updatable result sets that are downgraded to read-only
+     * 
+     * Check that no exception is thrown when calling positioning methods on a
+     * result set that has been downgraded to read-only.
+     *
+     */
+    public void testDowngradeToScrollReadOnly() throws SQLException {
+        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+                                          ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery("select * from t1 order by b");
+
+        // check that the ResultSet was downgraded
+        assertWarning(rs.getWarnings(), 
+                QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET);
+        
+        // call positioning methods
+        rs.next();
+        rs.next();
+        rs.previous();
+        rs.relative(1);
+        rs.absolute(3);
+        rs.relative(-1);
+        rs.first();
+        rs.last();
+        rs.beforeFirst();
+        rs.afterLast();
+        
+        // close result set and statement
+        rs.close();
+        s.close();
+    }
 
     /**
      * Get a cursor name. We use the same cursor name for all cursors.
