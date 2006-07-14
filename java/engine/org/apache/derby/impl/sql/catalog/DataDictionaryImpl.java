@@ -9929,6 +9929,23 @@ public final class	DataDictionaryImpl
                                                 TransactionController tc)
         throws StandardException
     {
+		// It is possible for grant statements to look like following
+		//   grant execute on function f_abs to mamata2, mamata3;
+		//   grant all privileges on t11 to mamata2, mamata3;
+		// This means that dd.addRemovePermissionsDescriptor will be called
+		// twice for TablePermsDescriptor and twice for RoutinePermsDescriptor, 
+    	// once for each grantee.
+		// First it's called for mamta2. When a row is inserted for mamta2 
+		// into the correct system table for the permission descriptor, the 
+    	// permission descriptor's uuid gets populated with the uuid of 
+    	// the row that just got inserted into the system table for mamta2
+		// Now, before dd.addRemovePermissionsDescriptor leaves so it can
+    	// get called for MAMTA3, we should reset the Permission Descriptor's 
+    	// uuid to null or otherwise, for the next call to 
+    	// dd.addRemovePermissionDescriptor, we will think that there is a 
+    	// duplicate row getting inserted for the same uuid.
+		// Same logic applies to ColPermsDescriptor
+    	
         int catalogNumber = perm.getCatalogNumber();
 
         perm.setGrantee( grantee);
@@ -9955,7 +9972,15 @@ public final class	DataDictionaryImpl
         if( existingRow == null)
         {
             if( ! add)
+            	//we didn't find an entry in system catalog and this is revoke
+            	//so that means there is nothing to revoke. Simply return.
+            	//No need to reset permission descriptor's uuid because
+            	//no row was ever found in system catalog for the given
+            	//permission and hence uuid can't be non-null
                 return;
+            //We didn't find an entry in system catalog and this is grant so 
+            //so that means we have to enter a new row in system catalog for
+            //this grant.
             ExecRow row = ti.getCatalogRowFactory().makeRow( perm, (TupleDescriptor) null);
             int insertRetCode = ti.insertRow(row, tc, true /* wait */);
             if( SanityManager.DEBUG)
@@ -9973,7 +9998,12 @@ public final class	DataDictionaryImpl
             else
                 changedColCount = rf.removePermissions( existingRow, perm, colsChanged);
             if( changedColCount == 0)
-                return;
+            {
+            	//grant/revoke privilege didn't change anything and hence just
+            	//return after resetting the uuid in the permission descriptor
+            	perm.setUUID(null);
+                return;            	
+            }
             if( changedColCount < 0)
             {
                 // No permissions left in the current row
@@ -10002,6 +10032,8 @@ public final class	DataDictionaryImpl
         Cacheable cacheEntry = getPermissionsCache().findCached( perm);
         if( cacheEntry != null)
             getPermissionsCache().remove( cacheEntry);
+    	//Before leaving, reset the uuid in the permission descriptor
+    	perm.setUUID(null);
     } // end of addPermissionsDescriptor
 
     /**

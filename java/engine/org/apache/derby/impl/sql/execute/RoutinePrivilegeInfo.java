@@ -76,21 +76,7 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 		dd.startWriting(lcc);
 		for( Iterator itr = grantees.iterator(); itr.hasNext();)
 		{
-			// It is possible for grant statement to look like following
-			//   grant execute on function f_abs to mamata2, mamata3;
-			// This means that dd.addRemovePermissionsDescriptor will be called
-			// twice for routinePermsDesc, once for each grantee.
-			// First it's called for mamta2. After a row is inserted for mamta2 
-			// into SYS.SYSROUTINEPERMS, the routinePermsDesc's uuid will get 
-			// populated with the uuid of the row that just got inserted into 
-			// SYS.SYSROUTINEPERMS for mamta2
-			// Next, before dd.addRemovePermissionsDescriptor gets called for 
-			// MAMTA3, we should set the routinePermsDesc's uuid to null or 
-			// otherwise, we will think that there is a duplicate row getting
-			// inserted for the same uuid.
 			String grantee = (String) itr.next();
-            if(grant)
-            	routinePermsDesc.setUUID(null);
 			dd.addRemovePermissionsDescriptor( grant, routinePermsDesc, grantee, tc);
 		}
 	} // end of executeConstantAction

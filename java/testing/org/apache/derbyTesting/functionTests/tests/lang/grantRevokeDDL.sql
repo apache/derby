@@ -357,8 +357,68 @@ call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', 'SAMTABLE' , 'extinout/table.dat', nul
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
 values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storage.pageSize');
 
--- Testing views to make sure we collect their depedencies on privileges in SYSDEPENDS table
+-- grant one permission on table to user1 and another permission to user3,
+-- then grant another permission on that same table to user1 and 
+-- user2(this is the first permission to user2 on the table) and user3 
+-- (this user already has the permission being granted). Notice that 
+-- the first 2 grant statements created a row in SYSTABLEPERMS for 
+-- user1 and user3. Third grant is going to update the pre-existing
+-- row for user1. The third grant is going to insert a new row for 
+-- user2 in SYSTABLEPERMS and the third grant is going to be a no-op 
+-- for user3. 
+-- So, basically, this is to test that one single grant statment can
+-- update and insert and no-op rows into SYSTABLEPERMS for different users.
 connect 'grantRevokeDDL;create=true' user 'mamta1' as mamta1;
+create table t11 (c111 int not null primary key);
+insert into t11 values(1);
+grant select on t11 to mamta2;
+grant insert on t11 to mamta3;
+grant insert on t11 to mamta2, mamta3, mamta4;
+connect 'grantRevokeDDL;create=true' user 'mamta2' as mamta2;
+select * from mamta1.t11;
+insert into mamta1.t11 values(2);
+select * from mamta1.t11;
+connect 'grantRevokeDDL;create=true' user 'mamta3' as mamta3;
+-- following select will fail because no permissions
+select * from mamta1.t11;
+insert into mamta1.t11 values(3);
+connect 'grantRevokeDDL;create=true' user 'mamta4' as mamta4;
+-- following select will fail because no permissions
+select * from mamta1.t11;
+insert into mamta1.t11 values(4);
+set connection mamta1;
+revoke all privileges on t11 from PUBLIC;
+select * from mamta1.t11;
+drop table t11;
+
+-- now test the column level permissions
+set connection mamta1;
+create table t11 (c111 int not null primary key, c112 int, c113 int, c114 int);
+insert into t11 values(1,1,1,1);
+grant select(c111) on t11 to mamta2;
+grant select(c112) on t11 to mamta2, mamta3;
+grant update(c112) on t11 to mamta2, mamta3, mamta4;
+grant update on t11 to mamta2;
+set connection mamta2;
+update mamta1.t11 set c113 = 2 where c111=1;
+select c111,c112 from mamta1.t11;
+-- following will fail because no select permissions on all the columns
+select * from mamta1.t11;
+set connection mamta3;
+-- following will fail because no update permission on column c113
+update mamta1.t11 set c113=3;
+select c112 from mamta1.t11;
+set connection mamta4;
+-- following will fail because no select permission on column c112
+select c112 from mamta1.t11;
+set connection mamta1;
+select * from mamta1.t11;
+revoke select on t11 from mamta2, mamta3, mamta4;
+revoke update(c111, c112) on t11 from mamta2, mamta3, mamta4;
+drop table t11;
+
+-- Testing views to make sure we collect their depedencies on privileges in SYSDEPENDS table
+set connection mamta1;
 create table t11 (c111 int not null primary key);
 insert into t11 values(1);
 insert into t11 values(2);
@@ -372,7 +432,7 @@ select * from t13;
 grant select on t12 to mamta2;
 grant select on t11 to public;
 
-connect 'grantRevokeDDL;create=true' user 'mamta2' as mamta2;
+set connection mamta2;
 -- both of following will pass because mamt2 has has required privileges because of PUBLIC select access of mamta1.t11.
 create view v21 as select t1.c111, t2.c122 from mamta1.t11 as t1, mamta1.t12 as t2;
 create view v22 as select * from mamta1.t11;
@@ -389,7 +449,7 @@ create view v23 as select * from mamta1.t12;
 set connection satConnection; 
 -- since satConnection is dba, following will not fail even if satConnection has no explicit privilege to mamta2.v22
 create view v11 as select * from mamta2.v22;
-connect 'grantRevokeDDL;create=true' user 'mamta3' as mamta3;
+set connection mamta3;
 create table t31(c311 int);
 -- since mamta3 is not dba, following will fail because no access to mamta2.v22
 create view v31 as select * from mamta2.v22;
@@ -651,7 +711,7 @@ set connection mamta3;
 drop table t31TriggerTest;
 create table t31TriggerTest (c311 int);
 grant insert on t31TriggerTest to mamta4;
-connect 'grantRevokeDDL;create=true' user 'mamta4' as mamta4;
+set connection mamta4;
 drop table t41TriggerTest;
 create table t41TriggerTest (c411 int);
 drop trigger tr41t41;
