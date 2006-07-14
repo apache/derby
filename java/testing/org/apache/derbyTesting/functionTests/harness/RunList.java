@@ -45,6 +45,8 @@ import java.util.StringTokenizer;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+
 
 public class RunList
 {
@@ -1649,6 +1651,8 @@ public class RunList
      */
     private static void unloadEmbeddedDriver() {
         // Attempt to unload the embedded driver and engine
+        // but only if we're not having a J2ME configuration i.e. no DriverManager, so check...
+        if (TestUtil.HAVE_DRIVER_CLASS)
         try {
             DriverManager.getConnection("jdbc:derby:;shutdown=true");
         } catch (SQLException se) {
