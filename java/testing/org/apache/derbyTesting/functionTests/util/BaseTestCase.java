@@ -120,5 +120,24 @@ public class BaseTestCase
 	
     }
     
+    /**
+     * Get system property.
+     *
+     * @param name name of the property
+     */
+    protected static String getSystemProperty(final String name)
+	throws PrivilegedActionException {
+
+	return (String )AccessController.doPrivileged
+	    (new java.security.PrivilegedAction(){
+
+		    public Object run(){
+			return System.getProperty(name);
+
+		    }
+
+		}
+	     );
+    }
     
 } // End class BaseTestCase

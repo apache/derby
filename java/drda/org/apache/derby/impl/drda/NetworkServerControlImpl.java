@@ -290,6 +290,9 @@ public final class NetworkServerControlImpl {
 	private Runnable acceptClients;
 	
 
+	// if the server is started from the command line, it should shutdown the
+	// databases it has booted.
+	private boolean shutdownDatabasesOnShutdown = false;
 	
 
 	// constructor
@@ -639,22 +642,23 @@ public final class NetworkServerControlImpl {
 			runQueue.notifyAll();
 		}						
 
-		/*
-		// Shutdown Cloudscape
-		try {
-			if (cloudscapeDriver != null)
-				cloudscapeDriver.connect("jdbc:derby:;shutdown=true", 
-										 (Properties) null);
-		} catch (SQLException sqle) {
-			// If we can't shutdown cloudscape. Perhaps authentication is
-			// set to true or some other reason. We will just print a
-			// message to the console and proceed.
-			if (((EmbedSQLException)sqle).getMessageId() !=
-			  SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN)
-				consolePropertyMessage("DRDA_ShutdownWarning.I",
-									   sqle.getMessage());
+		if (shutdownDatabasesOnShutdown) {
+
+			// Shutdown Cloudscape
+			try {
+				if (cloudscapeDriver != null)
+					cloudscapeDriver.connect("jdbc:derby:;shutdown=true",
+											 (Properties) null);
+			} catch (SQLException sqle) {
+				// If we can't shutdown cloudscape. Perhaps authentication is
+				// set to true or some other reason. We will just print a
+				// message to the console and proceed.
+				if (((EmbedSQLException)sqle).getMessageId() !=
+				  SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN)
+					consolePropertyMessage("DRDA_ShutdownWarning.I",
+										   sqle.getMessage());
+			}
 		}
-		*/
 
 		consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
 						        {att_srvclsnm, versionString, 
@@ -1712,6 +1716,9 @@ public final class NetworkServerControlImpl {
 		switch (command)
 		{
 			case COMMAND_START:
+				// the server was started from the command line, shutdown the
+				// databases when the server is shutdown
+				shutdownDatabasesOnShutdown = true;
 				blockingStart(makePrintWriter(System.out));
 				break;
 			case COMMAND_SHUTDOWN:
