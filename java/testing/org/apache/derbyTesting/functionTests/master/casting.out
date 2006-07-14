@@ -1073,9 +1073,9 @@ VALUES CAST (CAST (NULL AS SMALLINT) AS BIGINT )
 NULL                
 Test #4
 VALUES CAST (CAST (NULL AS SMALLINT) AS DECIMAL(10,5) )
-1            
--------------
-NULL         
+1           
+------------
+NULL        
 Test #5
 VALUES CAST (CAST (NULL AS SMALLINT) AS REAL )
 1            
@@ -1138,9 +1138,9 @@ VALUES CAST (CAST (0 AS SMALLINT) AS BIGINT )
 0                   
 Test #21
 VALUES CAST (CAST (0 AS SMALLINT) AS DECIMAL(10,5) )
-1            
--------------
-0.00000      
+1           
+------------
+0.00000     
 Test #22
 VALUES CAST (CAST (0 AS SMALLINT) AS REAL )
 1            
@@ -1203,9 +1203,9 @@ VALUES CAST (CAST (NULL AS INTEGER) AS BIGINT )
 NULL                
 Test #38
 VALUES CAST (CAST (NULL AS INTEGER) AS DECIMAL(10,5) )
-1            
--------------
-NULL         
+1           
+------------
+NULL        
 Test #39
 VALUES CAST (CAST (NULL AS INTEGER) AS REAL )
 1            
@@ -1268,9 +1268,9 @@ VALUES CAST (CAST (11 AS INTEGER) AS BIGINT )
 11                  
 Test #55
 VALUES CAST (CAST (11 AS INTEGER) AS DECIMAL(10,5) )
-1            
--------------
-11.00000     
+1           
+------------
+11.00000    
 Test #56
 VALUES CAST (CAST (11 AS INTEGER) AS REAL )
 1            
@@ -1333,9 +1333,9 @@ VALUES CAST (CAST (NULL AS BIGINT) AS BIGINT )
 NULL                
 Test #72
 VALUES CAST (CAST (NULL AS BIGINT) AS DECIMAL(10,5) )
-1            
--------------
-NULL         
+1           
+------------
+NULL        
 Test #73
 VALUES CAST (CAST (NULL AS BIGINT) AS REAL )
 1            
@@ -1398,9 +1398,9 @@ VALUES CAST (CAST (22 AS BIGINT) AS BIGINT )
 22                  
 Test #89
 VALUES CAST (CAST (22 AS BIGINT) AS DECIMAL(10,5) )
-1            
--------------
-22.00000     
+1           
+------------
+22.00000    
 Test #90
 VALUES CAST (CAST (22 AS BIGINT) AS REAL )
 1            
@@ -1463,9 +1463,9 @@ VALUES CAST (CAST (NULL AS DECIMAL(10,5)) AS BIGINT )
 NULL                
 Test #106
 VALUES CAST (CAST (NULL AS DECIMAL(10,5)) AS DECIMAL(10,5) )
-1            
--------------
-NULL         
+1           
+------------
+NULL        
 Test #107
 VALUES CAST (CAST (NULL AS DECIMAL(10,5)) AS REAL )
 1            
@@ -1528,9 +1528,9 @@ VALUES CAST (CAST (3.3 AS DECIMAL(10,5)) AS BIGINT )
 3                   
 Test #123
 VALUES CAST (CAST (3.3 AS DECIMAL(10,5)) AS DECIMAL(10,5) )
-1            
--------------
-3.30000      
+1           
+------------
+3.30000     
 Test #124
 VALUES CAST (CAST (3.3 AS DECIMAL(10,5)) AS REAL )
 1            
@@ -1593,9 +1593,9 @@ VALUES CAST (CAST (NULL AS REAL) AS BIGINT )
 NULL                
 Test #140
 VALUES CAST (CAST (NULL AS REAL) AS DECIMAL(10,5) )
-1            
--------------
-NULL         
+1           
+------------
+NULL        
 Test #141
 VALUES CAST (CAST (NULL AS REAL) AS REAL )
 1            
@@ -1656,9 +1656,9 @@ VALUES CAST (CAST (4.4 AS REAL) AS BIGINT )
 4                   
 Test #157
 VALUES CAST (CAST (4.4 AS REAL) AS DECIMAL(10,5) )
-1            
--------------
-4.40000      
+1           
+------------
+4.40000     
 Test #158
 VALUES CAST (CAST (4.4 AS REAL) AS REAL )
 1            
@@ -1719,9 +1719,9 @@ VALUES CAST (CAST (NULL AS DOUBLE) AS BIGINT )
 NULL                
 Test #174
 VALUES CAST (CAST (NULL AS DOUBLE) AS DECIMAL(10,5) )
-1            
--------------
-NULL         
+1           
+------------
+NULL        
 Test #175
 VALUES CAST (CAST (NULL AS DOUBLE) AS REAL )
 1            
@@ -1782,9 +1782,9 @@ VALUES CAST (CAST (5.5 AS DOUBLE) AS BIGINT )
 5                   
 Test #191
 VALUES CAST (CAST (5.5 AS DOUBLE) AS DECIMAL(10,5) )
-1            
--------------
-5.50000      
+1           
+------------
+5.50000     
 Test #192
 VALUES CAST (CAST (5.5 AS DOUBLE) AS REAL )
 1            
@@ -1845,9 +1845,9 @@ VALUES CAST (CAST (NULL AS CHAR(60)) AS BIGINT )
 NULL                
 Test #208
 VALUES CAST (CAST (NULL AS CHAR(60)) AS DECIMAL(10,5) )
-1            
--------------
-NULL         
+1           
+------------
+NULL        
 Test #209
 VALUES CAST (CAST (NULL AS CHAR(60)) AS REAL )
 EXPECTED CASTING EXCEPTION: Cannot convert types 'CHAR' to 'REAL'.
@@ -1918,9 +1918,9 @@ VALUES CAST (CAST ('22' AS CHAR(60)) AS BIGINT )
 22                  
 Test #225
 VALUES CAST (CAST ('3.3' AS CHAR(60)) AS DECIMAL(10,5) )
-1            
--------------
-3.30000      
+1           
+------------
+3.30000     
 Test #226
 VALUES CAST (CAST ('4.4' AS CHAR(60)) AS REAL )
 EXPECTED CASTING EXCEPTION: Cannot convert types 'CHAR' to 'REAL'.
@@ -1991,9 +1991,9 @@ VALUES CAST (CAST (NULL AS VARCHAR(60)) AS BIGINT )
 NULL                
 Test #242
 VALUES CAST (CAST (NULL AS VARCHAR(60)) AS DECIMAL(10,5) )
-1            
--------------
-NULL         
+1           
+------------
+NULL        
 Test #243
 VALUES CAST (CAST (NULL AS VARCHAR(60)) AS REAL )
 EXPECTED CASTING EXCEPTION: Cannot convert types 'VARCHAR' to 'REAL'.
@@ -2064,9 +2064,9 @@ VALUES CAST (CAST ('22' AS VARCHAR(60)) AS BIGINT )
 22                  
 Test #259
 VALUES CAST (CAST ('3.3' AS VARCHAR(60)) AS DECIMAL(10,5) )
-1            
--------------
-3.30000      
+1           
+------------
+3.30000     
 Test #260
 VALUES CAST (CAST ('4.4' AS VARCHAR(60)) AS REAL )
 EXPECTED CASTING EXCEPTION: Cannot convert types 'VARCHAR' to 'REAL'.
@@ -3181,9 +3181,9 @@ C
 --------------------
 22                  
 SELECT distinct c FROM DECIMAL_TAB WHERE c = 3.3
-C            
--------------
-3.30000      
+C           
+------------
+3.30000     
 SELECT distinct c FROM REAL_TAB WHERE c = 4.4
 C            
 -------------
@@ -3238,8 +3238,8 @@ select c from BIGINT_TAB WHERE c = CAST(NULL AS SMALLINT)
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(NULL AS SMALLINT)
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(NULL AS SMALLINT)
 C            
 -------------
@@ -3278,8 +3278,8 @@ select c from BIGINT_TAB WHERE c = CAST(NULL AS INTEGER)
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(NULL AS INTEGER)
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(NULL AS INTEGER)
 C            
 -------------
@@ -3318,8 +3318,8 @@ select c from BIGINT_TAB WHERE c = CAST(NULL AS BIGINT)
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(NULL AS BIGINT)
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(NULL AS BIGINT)
 C            
 -------------
@@ -3358,8 +3358,8 @@ select c from BIGINT_TAB WHERE c = CAST(NULL AS DECIMAL(10,5))
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(NULL AS DECIMAL(10,5))
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(NULL AS DECIMAL(10,5))
 C            
 -------------
@@ -3398,8 +3398,8 @@ select c from BIGINT_TAB WHERE c = CAST(NULL AS REAL)
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(NULL AS REAL)
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(NULL AS REAL)
 C            
 -------------
@@ -3438,8 +3438,8 @@ select c from BIGINT_TAB WHERE c = CAST(NULL AS DOUBLE)
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(NULL AS DOUBLE)
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(NULL AS DOUBLE)
 C            
 -------------
@@ -3875,8 +3875,8 @@ select c from BIGINT_TAB WHERE c = CAST(0 AS SMALLINT)
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(0 AS SMALLINT)
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(0 AS SMALLINT)
 C            
 -------------
@@ -3915,8 +3915,8 @@ select c from BIGINT_TAB WHERE c = CAST(11 AS INTEGER)
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(11 AS INTEGER)
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(11 AS INTEGER)
 C            
 -------------
@@ -3955,8 +3955,8 @@ select c from BIGINT_TAB WHERE c = CAST(22 AS BIGINT)
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(22 AS BIGINT)
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(22 AS BIGINT)
 C            
 -------------
@@ -3995,8 +3995,8 @@ select c from BIGINT_TAB WHERE c = CAST(3.3 AS DECIMAL(10,5))
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(3.3 AS DECIMAL(10,5))
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(3.3 AS DECIMAL(10,5))
 C            
 -------------
@@ -4035,8 +4035,8 @@ select c from BIGINT_TAB WHERE c = CAST(4.4 AS REAL)
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(4.4 AS REAL)
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(4.4 AS REAL)
 C            
 -------------
@@ -4075,8 +4075,8 @@ select c from BIGINT_TAB WHERE c = CAST(5.5 AS DOUBLE)
 C                   
 --------------------
 select c from DECIMAL_TAB WHERE c = CAST(5.5 AS DOUBLE)
-C            
--------------
+C           
+------------
 select c from REAL_TAB WHERE c = CAST(5.5 AS DOUBLE)
 C            
 -------------

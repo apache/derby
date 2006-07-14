@@ -19,24 +19,24 @@ ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'TAB1' , 'extinout/tab1_fr.unl' ,
 0 rows inserted/updated/deleted
 ij> -- localized display is off
 select * from tab1;
-C1      |C2        |C3                  
-----------------------------------------
-12.345  |2000-05-25|test row 1          
-32.432  |2000-01-14|test row 2          
-54.846  |2000-08-21|test row 3          
-98.214  |2000-12-08|test row 4          
-77.406  |2000-10-19|test row 5          
-50.395  |2000-11-29|test row 6          
+C1     |C2        |C3                  
+---------------------------------------
+12.345 |2000-05-25|test row 1          
+32.432 |2000-01-14|test row 2          
+54.846 |2000-08-21|test row 3          
+98.214 |2000-12-08|test row 4          
+77.406 |2000-10-19|test row 5          
+50.395 |2000-11-29|test row 6          
 ij> LOCALIZEDDISPLAY ON;
 ij> select * from tab1;
-C1      |C2                |C3                  
-------------------------------------------------
-12.345  |May 25, 2000      |test row 1          
-32.432  |January 14, 2000  |test row 2          
-54.846  |August 21, 2000   |test row 3          
-98.214  |December 8, 2000  |test row 4          
-77.406  |October 19, 2000  |test row 5          
-50.395  |November 29, 2000 |test row 6          
+C1     |C2                |C3                  
+-----------------------------------------------
+12.345 |May 25, 2000      |test row 1          
+32.432 |January 14, 2000  |test row 2          
+54.846 |August 21, 2000   |test row 3          
+98.214 |December 8, 2000  |test row 4          
+77.406 |October 19, 2000  |test row 5          
+50.395 |November 29, 2000 |test row 6          
 ij> drop table tab1;
 0 rows inserted/updated/deleted
 ij> create table tab1( c1 decimal(5,3), c2 date, c3 char(20) );
@@ -47,22 +47,22 @@ ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'TAB1' , 'extinout/tab1_fr.unl' ,
 ij> -- localized display is off
 LOCALIZEDDISPLAY OFF;
 ij> select * from tab1;
-C1      |C2        |C3                  
-----------------------------------------
-12.345  |2000-05-25|test row 1          
-32.432  |2000-01-14|test row 2          
-54.846  |2000-08-21|test row 3          
-98.214  |2000-12-08|test row 4          
-77.406  |2000-10-19|test row 5          
-50.395  |2000-11-29|test row 6          
+C1     |C2        |C3                  
+---------------------------------------
+12.345 |2000-05-25|test row 1          
+32.432 |2000-01-14|test row 2          
+54.846 |2000-08-21|test row 3          
+98.214 |2000-12-08|test row 4          
+77.406 |2000-10-19|test row 5          
+50.395 |2000-11-29|test row 6          
 ij> LOCALIZEDDISPLAY ON;
 ij> select * from tab1;
-C1      |C2                |C3                  
-------------------------------------------------
-12.345  |May 25, 2000      |test row 1          
-32.432  |January 14, 2000  |test row 2          
-54.846  |August 21, 2000   |test row 3          
-98.214  |December 8, 2000  |test row 4          
-77.406  |October 19, 2000  |test row 5          
-50.395  |November 29, 2000 |test row 6          
+C1     |C2                |C3                  
+-----------------------------------------------
+12.345 |May 25, 2000      |test row 1          
+32.432 |January 14, 2000  |test row 2          
+54.846 |August 21, 2000   |test row 3          
+98.214 |December 8, 2000  |test row 4          
+77.406 |October 19, 2000  |test row 5          
+50.395 |November 29, 2000 |test row 6          
 ij> 

@@ -7,8 +7,8 @@ real + dec(10,2) -- precision: 7 scale: 0 display size: 13 type name: REAL
 double precision - dec(10,2) -- precision: 15 scale: 0 display size: 22 type name: DOUBLE
 dec(10,2) - double precision -- precision: 15 scale: 2 display size: 22 type name: DOUBLE
 result row: 11.10 3.3 4.4 14.4 -6.699999999999999 6.699999999999999
-DECIMAL(10,0) -- precision: 10 scale: 0 display size: 12 type name: DECIMAL
-DECIMAL(10,10) -- precision: 10 scale: 10 display size: 12 type name: DECIMAL
+DECIMAL(10,0) -- precision: 10 scale: 0 display size: 11 type name: DECIMAL
+DECIMAL(10,10) -- precision: 10 scale: 10 display size: 13 type name: DECIMAL
 DECIMAL(10,2) -- precision: 10 scale: 2 display size: 12 type name: DECIMAL
 Column result scale after division is: 23
 dc / 2 = 5.55000000000000000000000

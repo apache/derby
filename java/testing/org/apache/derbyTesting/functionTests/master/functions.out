@@ -551,36 +551,36 @@ LANGUAGE JAVA PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
 ij> -- Test cases for DERBY-479
 VALUES CAST( RN_COS(RN_RADIANS(null)) AS DECIMAL(3,2));
-1     
-------
-NULL  
+1    
+-----
+NULL 
 ij> VALUES CAST( RN_COS(RN_RADIANS(90.0)) AS DECIMAL(3,2));
-1     
-------
-0.00  
+1    
+-----
+0.00 
 ij> VALUES CAST( CALL_COS(CALL_RADIANS(90.0)) AS DECIMAL(3,2));
-1     
-------
-0.00  
+1    
+-----
+0.00 
 ij> VALUES CAST( CALL_COS(CALL_RADIANS(null)) AS DECIMAL(3,2));
-1     
-------
+1    
+-----
 ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
 ij> VALUES CAST( CALL_COS(RN_RADIANS(null)) AS DECIMAL(3,2));
-1     
-------
+1    
+-----
 ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
 ij> VALUES CAST( CALL_COS(RN_RADIANS(90.0)) AS DECIMAL(3,2));
-1     
-------
-0.00  
+1    
+-----
+0.00 
 ij> VALUES CAST( RN_COS(CALL_RADIANS(90.0)) AS DECIMAL(3,2));
-1     
-------
-0.00  
+1    
+-----
+0.00 
 ij> VALUES CAST( RN_COS(CALL_RADIANS(null)) AS DECIMAL(3,2));
-1     
-------
+1    
+-----
 ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
 ij> DROP FUNCTION RN_COS;
 0 rows inserted/updated/deleted
@@ -609,96 +609,96 @@ VALUES PI();
 ----------------------
 3.141592653589793     
 ij> select cast (ACOS(d) as DECIMAL(6,3)) AS ACOS FROM SYSFUN_MATH_TEST;
-ACOS     
----------
-NULL     
-0.836    
+ACOS    
+--------
+NULL    
+0.836   
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> select cast (ASIN(d) as DECIMAL(6,3)) AS ASIN FROM SYSFUN_MATH_TEST;
-ASIN     
----------
-NULL     
-0.734    
+ASIN    
+--------
+NULL    
+0.734   
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> select cast (ATAN(d) as DECIMAL(6,3)) AS ATAN FROM SYSFUN_MATH_TEST;
-ATAN     
----------
-NULL     
-0.590    
-0.929    
+ATAN    
+--------
+NULL    
+0.590   
+0.929   
 ij> select cast (COS(d) as DECIMAL(6,3)) AS COS FROM SYSFUN_MATH_TEST;
-COS      
----------
-NULL     
-0.783    
-0.228    
+COS     
+--------
+NULL    
+0.783   
+0.228   
 ij> select cast (SIN(d) as DECIMAL(6,3)) AS SIN FROM SYSFUN_MATH_TEST;
-SIN      
----------
-NULL     
-0.620    
-0.973    
+SIN     
+--------
+NULL    
+0.620   
+0.973   
 ij> select cast (TAN(d) as DECIMAL(6,3)) AS TAN FROM SYSFUN_MATH_TEST;
-TAN      
----------
-NULL     
-0.792    
-4.255    
+TAN     
+--------
+NULL    
+0.792   
+4.255   
 ij> select cast (DEGREES(d) as DECIMAL(6,3)) AS DEGREES FROM SYSFUN_MATH_TEST;
-DEGREES  
----------
-NULL     
-38.388   
-76.776   
+DEGREES 
+--------
+NULL    
+38.388  
+76.776  
 ij> select cast (RADIANS(d) as DECIMAL(6,3)) AS RADIANS FROM SYSFUN_MATH_TEST;
-RADIANS  
----------
-NULL     
-0.011    
-0.023    
+RADIANS 
+--------
+NULL    
+0.011   
+0.023   
 ij> select cast (LN(d) as DECIMAL(6,3)) AS LN,
        cast (LOG(d) as DECIMAL(6,3)) AS LOG
                        FROM SYSFUN_MATH_TEST;
-LN       |LOG      
--------------------
-NULL     |NULL     
--0.400   |-0.400   
-0.292    |0.292    
+LN      |LOG     
+-----------------
+NULL    |NULL    
+-0.400  |-0.400  
+0.292   |0.292   
 ij> select cast (EXP(d) as DECIMAL(6,3)) AS EXP FROM SYSFUN_MATH_TEST;
-EXP      
----------
-NULL     
-1.954    
-3.819    
+EXP     
+--------
+NULL    
+1.954   
+3.819   
 ij> select cast (LOG10(d) as DECIMAL(6,3)) AS LOG10 FROM SYSFUN_MATH_TEST;
-LOG10    
----------
-NULL     
--0.173   
-0.127    
+LOG10   
+--------
+NULL    
+-0.173  
+0.127   
 ij> select cast (CEIL(d) as DECIMAL(6,3)) AS CEIL FROM SYSFUN_MATH_TEST;
-CEIL     
----------
-NULL     
-1.000    
-2.000    
+CEIL    
+--------
+NULL    
+1.000   
+2.000   
 ij> select cast (CEILING(d) as DECIMAL(6,3)) AS CEILING FROM SYSFUN_MATH_TEST;
-CEILING  
----------
-NULL     
-1.000    
-2.000    
+CEILING 
+--------
+NULL    
+1.000   
+2.000   
 ij> select cast (FLOOR(d) as DECIMAL(6,3)) AS FLOOR FROM SYSFUN_MATH_TEST;
-FLOOR    
----------
-NULL     
-0.000    
-1.000    
+FLOOR   
+--------
+NULL    
+0.000   
+1.000   
 ij> select cast (SYSFUN.ACOS(d) as DECIMAL(6,3)) AS SYSFUN_ACOS FROM SYSFUN_MATH_TEST;
-SYSFUN_A&
----------
-NULL     
-0.836    
+SYSFUN_&
+--------
+NULL    
+0.836   
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> drop table SYSFUN_MATH_TEST;
 0 rows inserted/updated/deleted

@@ -123,231 +123,231 @@ ij> select count(*) from T3;
 -----------
 102        
 ij> select * from T1 where State = 'CA';
-ACCOUNT    |FNAME                         |LNAME                         |COMPANY                            |ADDRESS                                 |CITY                |STATE|ZIP       |PAYMENT    |BALANCE    
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-10000      |Bugs                          |Bunny                         |Warner Brothers                    |  -- Rabbit Hole --                     |Los Angeles         |CA   |94001     |0.00       |100.00     
-10129      |Mickey                        |Mouse                         |Disneyland                         |Magic Kingdom                           |Los Angeles         |CA   |94000     |0.00       |1.00       
+ACCOUNT    |FNAME                         |LNAME                         |COMPANY                            |ADDRESS                                 |CITY                |STATE|ZIP       |PAYMENT   |BALANCE   
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+10000      |Bugs                          |Bunny                         |Warner Brothers                    |  -- Rabbit Hole --                     |Los Angeles         |CA   |94001     |0.00      |100.00    
+10129      |Mickey                        |Mouse                         |Disneyland                         |Magic Kingdom                           |Los Angeles         |CA   |94000     |0.00      |1.00      
 ij> select * from T2 where State = 'CA';
-ACCOUNT    |FNAME                         |LNAME                         |COMPANY                            |ADDRESS                                 |CITY                |STATE|ZIP       |PAYMENT    |BALANCE    
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ACCOUNT    |FNAME                         |LNAME                         |COMPANY                            |ADDRESS                                 |CITY                |STATE|ZIP       |PAYMENT   |BALANCE   
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij> select * from T3 where Fname = 'Bugs' or Fname = 'Mickey';
-LNAME                         |FNAME                         |ACCOUNT    |COMPANY                            |PAYMENT    |BALANCE    
--------------------------------------------------------------------------------------------------------------------------------------
-Bunny                         |Bugs                          |10000      |Warner Brothers                    |0.00       |10000.00   
-Mouse                         |Mickey                        |10129      |Disneyland                         |0.00       |3.00       
+LNAME                         |FNAME                         |ACCOUNT    |COMPANY                            |PAYMENT   |BALANCE   
+-----------------------------------------------------------------------------------------------------------------------------------
+Bunny                         |Bugs                          |10000      |Warner Brothers                    |0.00      |10000.00  
+Mouse                         |Mickey                        |10129      |Disneyland                         |0.00      |3.00      
 ij> select Balance, Account, Company from T1 order by Balance;
-BALANCE    |ACCOUNT    |COMPANY                            
------------------------------------------------------------
-1.00       |10129      |Disneyland                         
-100.00     |10000      |Warner Brothers                    
-218.00     |10019      |Market Place                       
-222.00     |10023      |Madson & Huth Communication Co     
-223.00     |10024      |La Salle Clinic                    
-224.00     |10025      |Town & Country Electric Inc.       
-225.00     |10026      |Saturn of Appleton                 
-226.00     |10027      |Bemiss Corp.                       
-227.00     |10028      |AAL Member Credit Union            
-228.00     |10029      |Office Support                     
-229.00     |10030      |EAA                                
-230.00     |10031      |Kurz Electric                      
-231.00     |10032      |Alpha 1                            
-233.00     |10034      |Valley Trust Corporation           
-234.00     |10035      |Fox Community Credit Union         
-235.00     |10036      |Valley Lawn Care                   
-236.00     |10037      |Network Health Plan                
-237.00     |10038      |Kolosso Toyota                     
-238.00     |10039      |AAL                                
-239.00     |10040      |WDFF                               
-240.00     |10041      |AAL                                
-241.00     |10042      |Novus Health Group                 
-242.00     |10043      |AAL                                
-243.00     |10044      |AAL Capital Management             
-244.00     |10045      |AAL Printing/Distribution          
-245.00     |10046      |Lawrence University                
-246.00     |10047      |Ken Gibson Assoc.                  
-247.00     |10048      |Menasha Employees Credit Union     
-248.00     |10049      |UPIU                               
-249.00     |10050      |AAL                                
-251.00     |10052      |Fox Valley Technical College       
-252.00     |10053      |Bergstrom Air Force Base           
-253.00     |10054      |Bank One                           
-254.00     |10055      |Bergstrom Enterprises              
-255.00     |10056      |Fox Cities Bank                    
-256.00     |10057      |Town of Vandenbroek                
-257.00     |10058      |Kitz Printing                      
-259.00     |10060      |Prime Control Systems              
-260.00     |10061      |Van Vreede's                       
-261.00     |10062      |Insurance Brokerage Services       
-262.00     |10063      |Fox Valley Travel                  
-263.00     |10064      |M & M Advertising                  
-264.00     |10065      |University of Women                
-265.00     |10066      |YMCA                               
-266.00     |10067      |O'Donnell Publishing               
-267.00     |10068      |Western Ice                        
-268.00     |10069      |Four D Corporation                 
-269.00     |10070      |Andrews Mautner, Inc.              
-270.00     |10071      |Laser Typesetting                  
-271.00     |10072      |Wallach & Assoc.                   
-272.00     |10073      |Town of Grand River                
-273.00     |10074      |Cabelvision                        
-274.00     |10075      |Print & Mail, Inc.                 
-275.00     |10076      |Jewelers Mutual Insurance          
-276.00     |10077      |Burton Karstedt                    
-278.00     |10079      |Twin City Rod & Gun Club           
-279.00     |10080      |American Legion                    
-280.00     |10081      |TechLine                           
-281.00     |10082      |Data One Computer Service          
-282.00     |10083      |Appleton Area School District      
-283.00     |10084      |Banta Corporate                    
-284.00     |10085      |HRC Inc.                           
-285.00     |10086      |Phopar                             
-286.00     |10087      |Sutherland Electric                
-288.00     |10088      |Banta Credit Union                 
-289.00     |10089      |Uffenbeck Diamonds                 
-290.00     |10090      |Equitable Reserve Association      
-291.00     |10091      |Derksen Printing                   
-292.00     |10092      |Custom Printing                    
-293.00     |10093      |Faye's Fine Jewelry                
-294.00     |10094      |Haugners Inc.                      
-295.00     |10095      |Pyramid Marketing & Advertising    
-297.00     |10097      |Wisconsin Tissue Credit Union      
-298.00     |10098      |AAL                                
-299.00     |10099      |Pat Woods Inc                      
-301.00     |10100      |Creative Learning International    
-302.00     |10101      |United Health                      
-303.00     |10102      |Memorial Florists                  
-304.00     |10103      |Fay Hawkinson & Kruse Inc          
-305.00     |10104      |Enterprise Motors                  
-306.00     |10105      |Weidert Group Inc                  
-307.00     |10106      |Principal Financial                
-308.00     |10107      |Woodfield Suites                   
-309.00     |10108      |Master Litho                       
-310.00     |10109      |Rawhide Boys Ranch                 
-311.00     |10110      |Ad Works                           
-312.00     |10111      |Directions Inc                     
-313.00     |10112      |Counseling Resource Center         
-314.00     |10113      |World Wide Auto Parts              
-315.00     |10114      |Secura Insurance                   
-316.00     |10115      |Witthuhn Printing                  
-317.00     |10116      |St Mary's Central High School      
-319.00     |10117      |Valley Periodontics                
-320.00     |10118      |Neenah Printing                    
-321.00     |10119      |YMCA of Appleton                   
-322.00     |10120      |Appleton Medical Center            
-323.00     |10121      |Quinlan Dentistry                  
-324.00     |10122      |Klusendorf Chiropractic            
-325.00     |10123      |Drucks Plumbing                    
-326.00     |10124      |Market Link                        
-327.00     |10125      |Norandex                           
-328.00     |10126      |Appleton Camping                   
+BALANCE   |ACCOUNT    |COMPANY                            
+----------------------------------------------------------
+1.00      |10129      |Disneyland                         
+100.00    |10000      |Warner Brothers                    
+218.00    |10019      |Market Place                       
+222.00    |10023      |Madson & Huth Communication Co     
+223.00    |10024      |La Salle Clinic                    
+224.00    |10025      |Town & Country Electric Inc.       
+225.00    |10026      |Saturn of Appleton                 
+226.00    |10027      |Bemiss Corp.                       
+227.00    |10028      |AAL Member Credit Union            
+228.00    |10029      |Office Support                     
+229.00    |10030      |EAA                                
+230.00    |10031      |Kurz Electric                      
+231.00    |10032      |Alpha 1                            
+233.00    |10034      |Valley Trust Corporation           
+234.00    |10035      |Fox Community Credit Union         
+235.00    |10036      |Valley Lawn Care                   
+236.00    |10037      |Network Health Plan                
+237.00    |10038      |Kolosso Toyota                     
+238.00    |10039      |AAL                                
+239.00    |10040      |WDFF                               
+240.00    |10041      |AAL                                
+241.00    |10042      |Novus Health Group                 
+242.00    |10043      |AAL                                
+243.00    |10044      |AAL Capital Management             
+244.00    |10045      |AAL Printing/Distribution          
+245.00    |10046      |Lawrence University                
+246.00    |10047      |Ken Gibson Assoc.                  
+247.00    |10048      |Menasha Employees Credit Union     
+248.00    |10049      |UPIU                               
+249.00    |10050      |AAL                                
+251.00    |10052      |Fox Valley Technical College       
+252.00    |10053      |Bergstrom Air Force Base           
+253.00    |10054      |Bank One                           
+254.00    |10055      |Bergstrom Enterprises              
+255.00    |10056      |Fox Cities Bank                    
+256.00    |10057      |Town of Vandenbroek                
+257.00    |10058      |Kitz Printing                      
+259.00    |10060      |Prime Control Systems              
+260.00    |10061      |Van Vreede's                       
+261.00    |10062      |Insurance Brokerage Services       
+262.00    |10063      |Fox Valley Travel                  
+263.00    |10064      |M & M Advertising                  
+264.00    |10065      |University of Women                
+265.00    |10066      |YMCA                               
+266.00    |10067      |O'Donnell Publishing               
+267.00    |10068      |Western Ice                        
+268.00    |10069      |Four D Corporation                 
+269.00    |10070      |Andrews Mautner, Inc.              
+270.00    |10071      |Laser Typesetting                  
+271.00    |10072      |Wallach & Assoc.                   
+272.00    |10073      |Town of Grand River                
+273.00    |10074      |Cabelvision                        
+274.00    |10075      |Print & Mail, Inc.                 
+275.00    |10076      |Jewelers Mutual Insurance          
+276.00    |10077      |Burton Karstedt                    
+278.00    |10079      |Twin City Rod & Gun Club           
+279.00    |10080      |American Legion                    
+280.00    |10081      |TechLine                           
+281.00    |10082      |Data One Computer Service          
+282.00    |10083      |Appleton Area School District      
+283.00    |10084      |Banta Corporate                    
+284.00    |10085      |HRC Inc.                           
+285.00    |10086      |Phopar                             
+286.00    |10087      |Sutherland Electric                
+288.00    |10088      |Banta Credit Union                 
+289.00    |10089      |Uffenbeck Diamonds                 
+290.00    |10090      |Equitable Reserve Association      
+291.00    |10091      |Derksen Printing                   
+292.00    |10092      |Custom Printing                    
+293.00    |10093      |Faye's Fine Jewelry                
+294.00    |10094      |Haugners Inc.                      
+295.00    |10095      |Pyramid Marketing & Advertising    
+297.00    |10097      |Wisconsin Tissue Credit Union      
+298.00    |10098      |AAL                                
+299.00    |10099      |Pat Woods Inc                      
+301.00    |10100      |Creative Learning International    
+302.00    |10101      |United Health                      
+303.00    |10102      |Memorial Florists                  
+304.00    |10103      |Fay Hawkinson & Kruse Inc          
+305.00    |10104      |Enterprise Motors                  
+306.00    |10105      |Weidert Group Inc                  
+307.00    |10106      |Principal Financial                
+308.00    |10107      |Woodfield Suites                   
+309.00    |10108      |Master Litho                       
+310.00    |10109      |Rawhide Boys Ranch                 
+311.00    |10110      |Ad Works                           
+312.00    |10111      |Directions Inc                     
+313.00    |10112      |Counseling Resource Center         
+314.00    |10113      |World Wide Auto Parts              
+315.00    |10114      |Secura Insurance                   
+316.00    |10115      |Witthuhn Printing                  
+317.00    |10116      |St Mary's Central High School      
+319.00    |10117      |Valley Periodontics                
+320.00    |10118      |Neenah Printing                    
+321.00    |10119      |YMCA of Appleton                   
+322.00    |10120      |Appleton Medical Center            
+323.00    |10121      |Quinlan Dentistry                  
+324.00    |10122      |Klusendorf Chiropractic            
+325.00    |10123      |Drucks Plumbing                    
+326.00    |10124      |Market Link                        
+327.00    |10125      |Norandex                           
+328.00    |10126      |Appleton Camping                   
 ij> select Balance, Account, Company from T2 order by Balance;
-BALANCE    |ACCOUNT    |COMPANY                            
------------------------------------------------------------
+BALANCE   |ACCOUNT    |COMPANY                            
+----------------------------------------------------------
 ij> select Balance, Account, Company from T3 order by Balance;
-BALANCE    |ACCOUNT    |COMPANY                            
------------------------------------------------------------
-3.00       |10129      |Disneyland                         
-218.00     |10019      |Market Place                       
-222.00     |10023      |Madson & Huth Communication Co     
-223.00     |10024      |La Salle Clinic                    
-224.00     |10025      |Town & Country Electric Inc.       
-225.00     |10026      |Saturn of Appleton                 
-226.00     |10027      |Bemiss Corp.                       
-227.00     |10028      |AAL Member Credit Union            
-228.00     |10029      |Office Support                     
-229.00     |10030      |EAA                                
-230.00     |10031      |Kurz Electric                      
-231.00     |10032      |Alpha 1                            
-233.00     |10034      |Valley Trust Corporation           
-234.00     |10035      |Fox Community Credit Union         
-235.00     |10036      |Valley Lawn Care                   
-236.00     |10037      |Network Health Plan                
-237.00     |10038      |Kolosso Toyota                     
-238.00     |10039      |AAL                                
-239.00     |10040      |WDFF                               
-240.00     |10041      |AAL                                
-241.00     |10042      |Novus Health Group                 
-242.00     |10043      |AAL                                
-243.00     |10044      |AAL Capital Management             
-244.00     |10045      |AAL Printing/Distribution          
-245.00     |10046      |Lawrence University                
-246.00     |10047      |Ken Gibson Assoc.                  
-247.00     |10048      |Menasha Employees Credit Union     
-248.00     |10049      |UPIU                               
-249.00     |10050      |AAL                                
-251.00     |10052      |Fox Valley Technical College       
-252.00     |10053      |Bergstrom Air Force Base           
-253.00     |10054      |Bank One                           
-254.00     |10055      |Bergstrom Enterprises              
-255.00     |10056      |Fox Cities Bank                    
-256.00     |10057      |Town of Vandenbroek                
-257.00     |10058      |Kitz Printing                      
-259.00     |10060      |Prime Control Systems              
-260.00     |10061      |Van Vreede's                       
-261.00     |10062      |Insurance Brokerage Services       
-262.00     |10063      |Fox Valley Travel                  
-263.00     |10064      |M & M Advertising                  
-264.00     |10065      |University of Women                
-265.00     |10066      |YMCA                               
-266.00     |10067      |O'Donnell Publishing               
-267.00     |10068      |Western Ice                        
-268.00     |10069      |Four D Corporation                 
-269.00     |10070      |Andrews Mautner, Inc.              
-270.00     |10071      |Laser Typesetting                  
-271.00     |10072      |Wallach & Assoc.                   
-272.00     |10073      |Town of Grand River                
-273.00     |10074      |Cabelvision                        
-274.00     |10075      |Print & Mail, Inc.                 
-275.00     |10076      |Jewelers Mutual Insurance          
-276.00     |10077      |Burton Karstedt                    
-278.00     |10079      |Twin City Rod & Gun Club           
-279.00     |10080      |American Legion                    
-280.00     |10081      |TechLine                           
-281.00     |10082      |Data One Computer Service          
-282.00     |10083      |Appleton Area School District      
-283.00     |10084      |Banta Corporate                    
-284.00     |10085      |HRC Inc.                           
-285.00     |10086      |Phopar                             
-286.00     |10087      |Sutherland Electric                
-288.00     |10088      |Banta Credit Union                 
-289.00     |10089      |Uffenbeck Diamonds                 
-290.00     |10090      |Equitable Reserve Association      
-291.00     |10091      |Derksen Printing                   
-292.00     |10092      |Custom Printing                    
-293.00     |10093      |Faye's Fine Jewelry                
-294.00     |10094      |Haugners Inc.                      
-295.00     |10095      |Pyramid Marketing & Advertising    
-297.00     |10097      |Wisconsin Tissue Credit Union      
-298.00     |10098      |AAL                                
-299.00     |10099      |Pat Woods Inc                      
-301.00     |10100      |Creative Learning International    
-302.00     |10101      |United Health                      
-303.00     |10102      |Memorial Florists                  
-304.00     |10103      |Fay Hawkinson & Kruse Inc          
-305.00     |10104      |Enterprise Motors                  
-306.00     |10105      |Weidert Group Inc                  
-307.00     |10106      |Principal Financial                
-308.00     |10107      |Woodfield Suites                   
-309.00     |10108      |Master Litho                       
-310.00     |10109      |Rawhide Boys Ranch                 
-311.00     |10110      |Ad Works                           
-312.00     |10111      |Directions Inc                     
-313.00     |10112      |Counseling Resource Center         
-314.00     |10113      |World Wide Auto Parts              
-315.00     |10114      |Secura Insurance                   
-316.00     |10115      |Witthuhn Printing                  
-317.00     |10116      |St Mary's Central High School      
-319.00     |10117      |Valley Periodontics                
-320.00     |10118      |Neenah Printing                    
-321.00     |10119      |YMCA of Appleton                   
-322.00     |10120      |Appleton Medical Center            
-323.00     |10121      |Quinlan Dentistry                  
-324.00     |10122      |Klusendorf Chiropractic            
-325.00     |10123      |Drucks Plumbing                    
-326.00     |10124      |Market Link                        
-327.00     |10125      |Norandex                           
-328.00     |10126      |Appleton Camping                   
-10000.00   |10000      |Warner Brothers                    
+BALANCE   |ACCOUNT    |COMPANY                            
+----------------------------------------------------------
+3.00      |10129      |Disneyland                         
+218.00    |10019      |Market Place                       
+222.00    |10023      |Madson & Huth Communication Co     
+223.00    |10024      |La Salle Clinic                    
+224.00    |10025      |Town & Country Electric Inc.       
+225.00    |10026      |Saturn of Appleton                 
+226.00    |10027      |Bemiss Corp.                       
+227.00    |10028      |AAL Member Credit Union            
+228.00    |10029      |Office Support                     
+229.00    |10030      |EAA                                
+230.00    |10031      |Kurz Electric                      
+231.00    |10032      |Alpha 1                            
+233.00    |10034      |Valley Trust Corporation           
+234.00    |10035      |Fox Community Credit Union         
+235.00    |10036      |Valley Lawn Care                   
+236.00    |10037      |Network Health Plan                
+237.00    |10038      |Kolosso Toyota                     
+238.00    |10039      |AAL                                
+239.00    |10040      |WDFF                               
+240.00    |10041      |AAL                                
+241.00    |10042      |Novus Health Group                 
+242.00    |10043      |AAL                                
+243.00    |10044      |AAL Capital Management             
+244.00    |10045      |AAL Printing/Distribution          
+245.00    |10046      |Lawrence University                
+246.00    |10047      |Ken Gibson Assoc.                  
+247.00    |10048      |Menasha Employees Credit Union     
+248.00    |10049      |UPIU                               
+249.00    |10050      |AAL                                
+251.00    |10052      |Fox Valley Technical College       
+252.00    |10053      |Bergstrom Air Force Base           
+253.00    |10054      |Bank One                           
+254.00    |10055      |Bergstrom Enterprises              
+255.00    |10056      |Fox Cities Bank                    
+256.00    |10057      |Town of Vandenbroek                
+257.00    |10058      |Kitz Printing                      
+259.00    |10060      |Prime Control Systems              
+260.00    |10061      |Van Vreede's                       
+261.00    |10062      |Insurance Brokerage Services       
+262.00    |10063      |Fox Valley Travel                  
+263.00    |10064      |M & M Advertising                  
+264.00    |10065      |University of Women                
+265.00    |10066      |YMCA                               
+266.00    |10067      |O'Donnell Publishing               
+267.00    |10068      |Western Ice                        
+268.00    |10069      |Four D Corporation                 
+269.00    |10070      |Andrews Mautner, Inc.              
+270.00    |10071      |Laser Typesetting                  
+271.00    |10072      |Wallach & Assoc.                   
+272.00    |10073      |Town of Grand River                
+273.00    |10074      |Cabelvision                        
+274.00    |10075      |Print & Mail, Inc.                 
+275.00    |10076      |Jewelers Mutual Insurance          
+276.00    |10077      |Burton Karstedt                    
+278.00    |10079      |Twin City Rod & Gun Club           
+279.00    |10080      |American Legion                    
+280.00    |10081      |TechLine                           
+281.00    |10082      |Data One Computer Service          
+282.00    |10083      |Appleton Area School District      
+283.00    |10084      |Banta Corporate                    
+284.00    |10085      |HRC Inc.                           
+285.00    |10086      |Phopar                             
+286.00    |10087      |Sutherland Electric                
+288.00    |10088      |Banta Credit Union                 
+289.00    |10089      |Uffenbeck Diamonds                 
+290.00    |10090      |Equitable Reserve Association      
+291.00    |10091      |Derksen Printing                   
+292.00    |10092      |Custom Printing                    
+293.00    |10093      |Faye's Fine Jewelry                
+294.00    |10094      |Haugners Inc.                      
+295.00    |10095      |Pyramid Marketing & Advertising    
+297.00    |10097      |Wisconsin Tissue Credit Union      
+298.00    |10098      |AAL                                
+299.00    |10099      |Pat Woods Inc                      
+301.00    |10100      |Creative Learning International    
+302.00    |10101      |United Health                      
+303.00    |10102      |Memorial Florists                  
+304.00    |10103      |Fay Hawkinson & Kruse Inc          
+305.00    |10104      |Enterprise Motors                  
+306.00    |10105      |Weidert Group Inc                  
+307.00    |10106      |Principal Financial                
+308.00    |10107      |Woodfield Suites                   
+309.00    |10108      |Master Litho                       
+310.00    |10109      |Rawhide Boys Ranch                 
+311.00    |10110      |Ad Works                           
+312.00    |10111      |Directions Inc                     
+313.00    |10112      |Counseling Resource Center         
+314.00    |10113      |World Wide Auto Parts              
+315.00    |10114      |Secura Insurance                   
+316.00    |10115      |Witthuhn Printing                  
+317.00    |10116      |St Mary's Central High School      
+319.00    |10117      |Valley Periodontics                
+320.00    |10118      |Neenah Printing                    
+321.00    |10119      |YMCA of Appleton                   
+322.00    |10120      |Appleton Medical Center            
+323.00    |10121      |Quinlan Dentistry                  
+324.00    |10122      |Klusendorf Chiropractic            
+325.00    |10123      |Drucks Plumbing                    
+326.00    |10124      |Market Link                        
+327.00    |10125      |Norandex                           
+328.00    |10126      |Appleton Camping                   
+10000.00  |10000      |Warner Brothers                    
 ij> --- now check other input formats
 --- this is Tutor1 with RecordSeperator=',', FieldStartDelimiter=(, FieldEndDelimiter=),FieldSeperator=TAB
 autocommit on;
@@ -369,11 +369,11 @@ ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT1' , 'extin/Alt1.asc' ,
 ERROR 38000: The exception 'SQL Exception: Invalid character string format for type INTEGER.' was thrown while evaluating an expression.
 ERROR 22018: Invalid character string format for type INTEGER.
 ij> select * from Alt1 where State = 'CA';
-ACCOUNT    |FNAME                         |LNAME                         |COMPANY                            |ADDRESS                                 |CITY                |STATE|ZIP       |PAYMENT    |BALANCE    
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ACCOUNT    |FNAME                         |LNAME                         |COMPANY                            |ADDRESS                                 |CITY                |STATE|ZIP       |PAYMENT   |BALANCE   
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij> select Balance, Account, Company from Alt1 order by Balance;
-BALANCE    |ACCOUNT    |COMPANY                            
------------------------------------------------------------
+BALANCE   |ACCOUNT    |COMPANY                            
+----------------------------------------------------------
 ij> -- this is Tutor1 with some null fields
 drop table Alt3;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'ALT3' because it does not exist.
@@ -393,11 +393,11 @@ ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT3' , 'extin/Alt3.asc' ,
 ERROR 38000: The exception 'SQL Exception: Invalid character string format for type INTEGER.' was thrown while evaluating an expression.
 ERROR 22018: Invalid character string format for type INTEGER.
 ij> select * from Alt3 where State = 'CA' or State = 'TX';
-ACCOUNT    |FNAME                         |LNAME                         |COMPANY                            |ADDRESS                                 |CITY                |STATE|ZIP       |PAYMENT    |BALANCE    
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ACCOUNT    |FNAME                         |LNAME                         |COMPANY                            |ADDRESS                                 |CITY                |STATE|ZIP       |PAYMENT   |BALANCE   
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij> select Balance, Account, Company from Alt3 order by Balance;
-BALANCE    |ACCOUNT    |COMPANY                            
------------------------------------------------------------
+BALANCE   |ACCOUNT    |COMPANY                            
+----------------------------------------------------------
 ij> -- test remapping
 -- test remapping
 -- following case is commented because data has different seperator than the default one 
@@ -591,8 +591,8 @@ call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'HOUSEHOLDITEM' ,
 ERROR 38000: The exception 'SQL Exception: The number of values assigned is not the same as the number of specified or implied columns.' was thrown while evaluating an expression.
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
 ij> select * from HouseHoldItem;
-CATEGORY   |ROOMID     |DESCRIPTION                                                                                                                     |MODEL                                             |MODELID                                           |SERIALNUMBER                                      |DAYPURCHA&|PURCHASEPR&|INSUR&|NOTE                                                                                                                            
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CATEGORY   |ROOMID     |DESCRIPTION                                                                                                                     |MODEL                                             |MODELID                                           |SERIALNUMBER                                      |DAYPURCHA&|PURCHASEP&|INSUR&|NOTE                                                                                                                            
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij> ----
 ---- test export 
 ----

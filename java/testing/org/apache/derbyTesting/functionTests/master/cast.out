@@ -232,13 +232,13 @@ ij> values (cast (1.1 as double precision));
 ----------------------
 1.1                   
 ij> values (cast (1.1 as numeric(2,1)));
-1    
------
-1.1  
+1   
+----
+1.1 
 ij> values (cast (1.1 as decimal(2,1)));
-1    
------
-1.1  
+1   
+----
+1.1 
 ij> values (cast (1.1 as numeric(2,0)));
 1   
 ----
@@ -272,13 +272,13 @@ ij> values (cast (1.9 as double precision));
 ----------------------
 1.9                   
 ij> values (cast (1.9 as numeric(2,1)));
-1    
------
-1.9  
+1   
+----
+1.9 
 ij> values (cast (1.9 as decimal(2,1)));
-1    
------
-1.9  
+1   
+----
+1.9 
 ij> values (cast (1.9 as numeric(2,0)));
 1   
 ----
@@ -303,184 +303,184 @@ values (
   cast (
   cast (9223372036854775807 as DECIMAL(24,1)) as BIGINT)
   );
-1                   |2                          |3                   
----------------------------------------------------------------------
-9223372036854775807 |9223372036854775807.0      |9223372036854775807 
+1                   |2                         |3                   
+--------------------------------------------------------------------
+9223372036854775807 |9223372036854775807.0     |9223372036854775807 
 ij> values (
   cast ('9223372036854775807' as DECIMAL(24,1)),
   cast (cast ('9223372036854775807' as DECIMAL(24,1)) as BIGINT)
   );
-1                          |2                   
-------------------------------------------------
-9223372036854775807.0      |9223372036854775807 
+1                         |2                   
+-----------------------------------------------
+9223372036854775807.0     |9223372036854775807 
 ij> values (
   cast ('9223372036854775806' as DECIMAL(24,1)),
   cast (cast ('9223372036854775806' as DECIMAL(24,1)) as BIGINT)
   );
-1                          |2                   
-------------------------------------------------
-9223372036854775806.0      |9223372036854775806 
+1                         |2                   
+-----------------------------------------------
+9223372036854775806.0     |9223372036854775806 
 ij> -- only this should fail
 values (
   cast ('9223372036854775808' as DECIMAL(24,1)),
   cast (cast ('9223372036854775808' as DECIMAL(24,1)) as BIGINT)
   );
-1                          |2                   
-------------------------------------------------
+1                         |2                   
+-----------------------------------------------
 ERROR 22003: The resulting value is outside the range for the data type BIGINT.
 ij> values (
   cast ('9223372036854775807.9' as DECIMAL(24,1)),
   cast (cast ('9223372036854775807.9' as DECIMAL(24,1)) as BIGINT)
   );
-1                          |2                   
-------------------------------------------------
-9223372036854775807.9      |9223372036854775807 
+1                         |2                   
+-----------------------------------------------
+9223372036854775807.9     |9223372036854775807 
 ij> --   -9223372036854775808 is Long::MIN_VALUE
 values (
   cast ('-9223372036854775808' as DECIMAL(24,1)),
   cast (cast ('-9223372036854775808' as DECIMAL(24,1)) as BIGINT)
   );
-1                          |2                   
-------------------------------------------------
--9223372036854775808.0     |-9223372036854775808
+1                         |2                   
+-----------------------------------------------
+-9223372036854775808.0    |-9223372036854775808
 ij> values (
   cast ('-9223372036854775807' as DECIMAL(24,1)),
   cast (cast ('-9223372036854775807' as DECIMAL(24,1)) as BIGINT)
   );
-1                          |2                   
-------------------------------------------------
--9223372036854775807.0     |-9223372036854775807
+1                         |2                   
+-----------------------------------------------
+-9223372036854775807.0    |-9223372036854775807
 ij> -- only this should fail
 values (
   cast ('-9223372036854775809' as DECIMAL(24,1)),
   cast (cast ('-9223372036854775809' as DECIMAL(24,1)) as BIGINT)
   );
-1                          |2                   
-------------------------------------------------
+1                         |2                   
+-----------------------------------------------
 ERROR 22003: The resulting value is outside the range for the data type BIGINT.
 ij> values (
   cast ('-9223372036854775808.9' as DECIMAL(24,1)),
   cast (cast ('-9223372036854775808.9' as DECIMAL(24,1)) as BIGINT)
   );
-1                          |2                   
-------------------------------------------------
--9223372036854775808.9     |-9223372036854775808
+1                         |2                   
+-----------------------------------------------
+-9223372036854775808.9    |-9223372036854775808
 ij> values (
   cast ('32767' as DECIMAL(24,1)),
   cast (cast ('32767' as DECIMAL(24,1)) as SMALLINT)
   );
-1                          |2     
-----------------------------------
-32767.0                    |32767 
+1                         |2     
+---------------------------------
+32767.0                   |32767 
 ij> values (
   cast ('32766' as DECIMAL(24,1)),
   cast (cast ('32766' as DECIMAL(24,1)) as SMALLINT)
   );
-1                          |2     
-----------------------------------
-32766.0                    |32766 
+1                         |2     
+---------------------------------
+32766.0                   |32766 
 ij> values (
   cast ('32768' as DECIMAL(24,1)),
   cast (cast ('32768' as DECIMAL(24,1)) as SMALLINT)
   );
-1                          |2     
-----------------------------------
+1                         |2     
+---------------------------------
 ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
 ij> -- only this should fail
 values (
   cast ('32767.9' as DECIMAL(24,1)),
   cast (cast ('32767.9' as DECIMAL(24,1)) as SMALLINT)
   );
-1                          |2     
-----------------------------------
-32767.9                    |32767 
+1                         |2     
+---------------------------------
+32767.9                   |32767 
 ij> values (
   cast ('-32768' as DECIMAL(24,1)),
   cast (cast ('-32768' as DECIMAL(24,1)) as SMALLINT)
   );
-1                          |2     
-----------------------------------
--32768.0                   |-32768
+1                         |2     
+---------------------------------
+-32768.0                  |-32768
 ij> values (
   cast ('-32767' as DECIMAL(24,1)),
   cast (cast ('-32767' as DECIMAL(24,1)) as SMALLINT)
   );
-1                          |2     
-----------------------------------
--32767.0                   |-32767
+1                         |2     
+---------------------------------
+-32767.0                  |-32767
 ij> -- only this should fail
 values (
   cast ('-32769' as DECIMAL(24,1)),
   cast (cast ('-32769' as DECIMAL(24,1)) as SMALLINT)
   );
-1                          |2     
-----------------------------------
+1                         |2     
+---------------------------------
 ERROR 22003: The resulting value is outside the range for the data type SMALLINT.
 ij> values (
   cast ('-32768.9' as DECIMAL(24,1)),
   cast (cast ('-32768.9' as DECIMAL(24,1)) as SMALLINT)
   );
-1                          |2     
-----------------------------------
--32768.9                   |-32768
+1                         |2     
+---------------------------------
+-32768.9                  |-32768
 ij> values (
   cast ('2147483647' as DECIMAL(24,1)),
   cast (cast ('2147483647' as DECIMAL(24,1)) as INTEGER)
   );
-1                          |2          
----------------------------------------
-2147483647.0               |2147483647 
+1                         |2          
+--------------------------------------
+2147483647.0              |2147483647 
 ij> values (
   cast ('2147483646' as DECIMAL(24,1)),
   cast (cast ('2147483646' as DECIMAL(24,1)) as INTEGER)
   );
-1                          |2          
----------------------------------------
-2147483646.0               |2147483646 
+1                         |2          
+--------------------------------------
+2147483646.0              |2147483646 
 ij> -- only this should fail
 values (
   cast ('2147483648' as DECIMAL(24,1)),
   cast (cast ('2147483648' as DECIMAL(24,1)) as INTEGER)
   );
-1                          |2          
----------------------------------------
+1                         |2          
+--------------------------------------
 ERROR 22003: The resulting value is outside the range for the data type INTEGER.
 ij> values (
   cast ('2147483647.9' as DECIMAL(24,1)),
   cast (cast ('2147483647.9' as DECIMAL(24,1)) as INTEGER)
   );
-1                          |2          
----------------------------------------
-2147483647.9               |2147483647 
+1                         |2          
+--------------------------------------
+2147483647.9              |2147483647 
 ij> values (
   cast ('-2147483647' as DECIMAL(24,1)),
   cast (cast ('-2147483647' as DECIMAL(24,1)) as INTEGER)
   );
-1                          |2          
----------------------------------------
--2147483647.0              |-2147483647
+1                         |2          
+--------------------------------------
+-2147483647.0             |-2147483647
 ij> values (
   cast ('-2147483646' as DECIMAL(24,1)),
   cast (cast ('-2147483646' as DECIMAL(24,1)) as INTEGER)
   );
-1                          |2          
----------------------------------------
--2147483646.0              |-2147483646
+1                         |2          
+--------------------------------------
+-2147483646.0             |-2147483646
 ij> -- only this should fail
 values (
   cast ('-2147483649' as DECIMAL(24,1)),
   cast (cast ('-2147483649' as DECIMAL(24,1)) as INTEGER)
   );
-1                          |2          
----------------------------------------
+1                         |2          
+--------------------------------------
 ERROR 22003: The resulting value is outside the range for the data type INTEGER.
 ij> values (
   cast ('-2147483648.9' as DECIMAL(24,1)),
   cast (cast ('-2147483648.9' as DECIMAL(24,1)) as INTEGER)
   );
-1                          |2          
----------------------------------------
--2147483648.9              |-2147483648
+1                         |2          
+--------------------------------------
+-2147483648.9             |-2147483648
 ij> --numbers to char
 values (cast (1.1 as char(10)));
 1         
@@ -556,13 +556,13 @@ ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
 ij> values (cast ('123.45' as real));
 ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
 ij> values (cast ('123.45' as numeric(5,1)));
-1       
---------
-123.4   
+1      
+-------
+123.4  
 ij> values (cast ('123.45' as decimal(5,1)));
-1       
---------
-123.4   
+1      
+-------
+123.4  
 ij> values (cast ('123.99' as smallint));
 1     
 ------
@@ -582,13 +582,13 @@ ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
 ij> values (cast ('123.99' as real));
 ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
 ij> values (cast ('123.99' as numeric(5,1)));
-1       
---------
-123.9   
+1      
+-------
+123.9  
 ij> values (cast ('123.99' as decimal(5,1)));
-1       
---------
-123.9   
+1      
+-------
+123.9  
 ij> --bad
 values (cast (1 as char(2) for bit data));
 ERROR 42846: Cannot convert types 'INTEGER' to 'CHAR () FOR BIT DATA'.
@@ -1410,8 +1410,8 @@ ERROR 42846: Cannot convert types 'CHAR' to 'REAL'.
 ij> values cast('asdf' as double precision);
 ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
 ij> values cast('asdf' as decimal(5,4));
-1       
---------
+1      
+-------
 ERROR 22018: Invalid character string format for type DECIMAL.
 ij> values cast('asdf' as date);
 ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
@@ -1615,8 +1615,8 @@ ij> select cast (aliasinfo as DOUBLE) from sys.sysaliases;
 ----------------------
 ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'DOUBLE'.
 ij> select cast (aliasinfo as DECIMAL(5,4)) from sys.sysaliases;
-1       
---------
+1      
+-------
 ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'DECIMAL'.
 ij> select cast (aliasinfo as CHAR(30) FOR BIT DATA) from sys.sysaliases;
 1                                                           

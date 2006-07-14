@@ -744,10 +744,10 @@ ij> insert into tab1 values (1, cast(1 as int), cast(1 as smallint), cast(1 as b
 ij> insert into tab1 values (2, cast(2 as int), cast(2 as smallint), cast(2 as bigint), '2', '2', '2', cast(2.2 as double precision), cast(2.2 as real), '1995-02-02', '12:12:12', 'xxxxxxFILTERED-TIMESTAMPxxxxx', cast(2.2 as decimal(2,1)));
 1 row inserted/updated/deleted
 ij> select * from tab1 order by 1;
-I          |TN         |S          |L          |C         |V         |LVC       |D                     |R            |DT        |T       |TS                        |DC   
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-1          |1          |1          |1          |1         |1         |1         |1.1                   |1.1          |1996-01-01|11:11:11|xxxxxxFILTERED-TIMESTAMPxxxxx|1.1  
-2          |2          |2          |2          |2         |2         |2         |2.2                   |2.2          |1995-02-02|12:12:12|xxxxxxFILTERED-TIMESTAMPxxxxx|2.2  
+I          |TN         |S          |L          |C         |V         |LVC       |D                     |R            |DT        |T       |TS                        |DC  
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |1          |1          |1          |1         |1         |1         |1.1                   |1.1          |1996-01-01|11:11:11|xxxxxxFILTERED-TIMESTAMPxxxxx|1.1 
+2          |2          |2          |2          |2         |2         |2         |2.2                   |2.2          |1995-02-02|12:12:12|xxxxxxFILTERED-TIMESTAMPxxxxx|2.2 
 ij> rollback;
 ij> -- bug 2769 (correlation columns, group by and order by)
 create table bug2769(c1 int, c2 int);

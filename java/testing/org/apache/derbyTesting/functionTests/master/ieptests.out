@@ -49,32 +49,32 @@ call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'IMP_EMP' , 'extinout/emp.dat' ,
                                       null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from ex_emp;
-ID         |NAME   |SKILLS                                                                                                                          |SALARY       
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55       
-100        |smith  |tennis"player"                                                                                                                  |190.55       
-101        |smith  |tennis"player                                                                                                                   |190.55       
-102        |smith  |"tennis"player                                                                                                                  |190.55       
-103        |smith  |"tennis"player"                                                                                                                 |190.55       
-104        |smith  |"tennis"""""""""""""""""""""""""""""""""""""player"                                                                             |NULL         
-105        |smith  |""                                                                                                                              |190.55       
-106        |smith  |"""""""""""""""""""                                                                                                             |190.55       
-107        |smith" |NULL                                                                                                                            |190.55       
-108        |NULL   |NULL                                                                                                                            |NULL         
+ID         |NAME   |SKILLS                                                                                                                          |SALARY      
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55      
+100        |smith  |tennis"player"                                                                                                                  |190.55      
+101        |smith  |tennis"player                                                                                                                   |190.55      
+102        |smith  |"tennis"player                                                                                                                  |190.55      
+103        |smith  |"tennis"player"                                                                                                                 |190.55      
+104        |smith  |"tennis"""""""""""""""""""""""""""""""""""""player"                                                                             |NULL        
+105        |smith  |""                                                                                                                              |190.55      
+106        |smith  |"""""""""""""""""""                                                                                                             |190.55      
+107        |smith" |NULL                                                                                                                            |190.55      
+108        |NULL   |NULL                                                                                                                            |NULL        
 ij> select * from imp_emp;
-ID         |NAME   |SKILLS                                                                                                                          |SALARY       
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55       
-99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55       
-100        |smith  |tennis"player"                                                                                                                  |190.55       
-101        |smith  |tennis"player                                                                                                                   |190.55       
-102        |smith  |"tennis"player                                                                                                                  |190.55       
-103        |smith  |"tennis"player"                                                                                                                 |190.55       
-104        |smith  |"tennis"""""""""""""""""""""""""""""""""""""player"                                                                             |NULL         
-105        |smith  |""                                                                                                                              |190.55       
-106        |smith  |"""""""""""""""""""                                                                                                             |190.55       
-107        |smith" |NULL                                                                                                                            |190.55       
-108        |NULL   |NULL                                                                                                                            |NULL         
+ID         |NAME   |SKILLS                                                                                                                          |SALARY      
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55      
+99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55      
+100        |smith  |tennis"player"                                                                                                                  |190.55      
+101        |smith  |tennis"player                                                                                                                   |190.55      
+102        |smith  |"tennis"player                                                                                                                  |190.55      
+103        |smith  |"tennis"player"                                                                                                                 |190.55      
+104        |smith  |"tennis"""""""""""""""""""""""""""""""""""""player"                                                                             |NULL        
+105        |smith  |""                                                                                                                              |190.55      
+106        |smith  |"""""""""""""""""""                                                                                                             |190.55      
+107        |smith" |NULL                                                                                                                            |190.55      
+108        |NULL   |NULL                                                                                                                            |NULL        
 ij> --checking query
 select count(*) from imp_emp, ex_emp
       where ex_emp.id = imp_emp.id and
@@ -149,18 +149,18 @@ ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'IMP_EMP' , 'extinout/emp.dat' ,
                                     null, '''', null, 1) ;
 0 rows inserted/updated/deleted
 ij> select * from imp_emp ;
-ID         |NAME   |SKILLS                                                                                                                          |SALARY       
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55       
-100        |smith  |tennis"player"                                                                                                                  |190.55       
-101        |smith  |tennis"player                                                                                                                   |190.55       
-102        |smith  |"tennis"player                                                                                                                  |190.55       
-103        |smith  |"tennis"player"                                                                                                                 |190.55       
-104        |smith  |"tennis"""""""""""""""""""""""""""""""""""""player"                                                                             |NULL         
-105        |smith  |""                                                                                                                              |190.55       
-106        |smith  |"""""""""""""""""""                                                                                                             |190.55       
-107        |smith" |NULL                                                                                                                            |190.55       
-108        |NULL   |NULL                                                                                                                            |NULL         
+ID         |NAME   |SKILLS                                                                                                                          |SALARY      
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55      
+100        |smith  |tennis"player"                                                                                                                  |190.55      
+101        |smith  |tennis"player                                                                                                                   |190.55      
+102        |smith  |"tennis"player                                                                                                                  |190.55      
+103        |smith  |"tennis"player"                                                                                                                 |190.55      
+104        |smith  |"tennis"""""""""""""""""""""""""""""""""""""player"                                                                             |NULL        
+105        |smith  |""                                                                                                                              |190.55      
+106        |smith  |"""""""""""""""""""                                                                                                             |190.55      
+107        |smith" |NULL                                                                                                                            |190.55      
+108        |NULL   |NULL                                                                                                                            |NULL        
 ij> -- single quote(') as column delimiter
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_EMP' , 'extinout/emp.dat' , 
                                     '''',null, null) ;
@@ -171,18 +171,18 @@ ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'IMP_EMP' , 'extinout/emp.dat' ,
                                     '''', null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from imp_emp;
-ID         |NAME   |SKILLS                                                                                                                          |SALARY       
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55       
-100        |smith  |tennis"player"                                                                                                                  |190.55       
-101        |smith  |tennis"player                                                                                                                   |190.55       
-102        |smith  |"tennis"player                                                                                                                  |190.55       
-103        |smith  |"tennis"player"                                                                                                                 |190.55       
-104        |smith  |"tennis"""""""""""""""""""""""""""""""""""""player"                                                                             |NULL         
-105        |smith  |""                                                                                                                              |190.55       
-106        |smith  |"""""""""""""""""""                                                                                                             |190.55       
-107        |smith" |NULL                                                                                                                            |190.55       
-108        |NULL   |NULL                                                                                                                            |NULL         
+ID         |NAME   |SKILLS                                                                                                                          |SALARY      
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55      
+100        |smith  |tennis"player"                                                                                                                  |190.55      
+101        |smith  |tennis"player                                                                                                                   |190.55      
+102        |smith  |"tennis"player                                                                                                                  |190.55      
+103        |smith  |"tennis"player"                                                                                                                 |190.55      
+104        |smith  |"tennis"""""""""""""""""""""""""""""""""""""player"                                                                             |NULL        
+105        |smith  |""                                                                                                                              |190.55      
+106        |smith  |"""""""""""""""""""                                                                                                             |190.55      
+107        |smith" |NULL                                                                                                                            |190.55      
+108        |NULL   |NULL                                                                                                                            |NULL        
 ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_EMP' , 'extinout/emp.dat' , 
                                  '*', '%', null) ;
 0 rows inserted/updated/deleted
@@ -190,18 +190,18 @@ ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'EX_EMP' , 'extinout/emp.dat' ,
                                  '*', '%', null, 1) ;
 0 rows inserted/updated/deleted
 ij> select * from imp_emp ;
-ID         |NAME   |SKILLS                                                                                                                          |SALARY       
-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55       
-100        |smith  |tennis"player"                                                                                                                  |190.55       
-101        |smith  |tennis"player                                                                                                                   |190.55       
-102        |smith  |"tennis"player                                                                                                                  |190.55       
-103        |smith  |"tennis"player"                                                                                                                 |190.55       
-104        |smith  |"tennis"""""""""""""""""""""""""""""""""""""player"                                                                             |NULL         
-105        |smith  |""                                                                                                                              |190.55       
-106        |smith  |"""""""""""""""""""                                                                                                             |190.55       
-107        |smith" |NULL                                                                                                                            |190.55       
-108        |NULL   |NULL                                                                                                                            |NULL         
+ID         |NAME   |SKILLS                                                                                                                          |SALARY      
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+99         |smith  |tennis"p,l,ayer"                                                                                                                |190.55      
+100        |smith  |tennis"player"                                                                                                                  |190.55      
+101        |smith  |tennis"player                                                                                                                   |190.55      
+102        |smith  |"tennis"player                                                                                                                  |190.55      
+103        |smith  |"tennis"player"                                                                                                                 |190.55      
+104        |smith  |"tennis"""""""""""""""""""""""""""""""""""""player"                                                                             |NULL        
+105        |smith  |""                                                                                                                              |190.55      
+106        |smith  |"""""""""""""""""""                                                                                                             |190.55      
+107        |smith" |NULL                                                                                                                            |190.55      
+108        |NULL   |NULL                                                                                                                            |NULL        
 ij> --cases for identity columns
 --create table emp1(id int generated always as identity (start with 100), name char(7), 
 --              skills varchar(200), salary decimal(10,2),skills varchar(200));
@@ -540,14 +540,14 @@ ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALLTYPES' , 'extinout/alltypes.de
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from alltypes ;
-CHARTYPE            |BIGINTTYPE          |DATETYPE  |DECIMALTYPE  |DOUBLETYPE            |INTTYPE    |LVARTYPE                                                                                                                        |REALTYPE     |SMINT&|TIMETYPE|TSTAMPTYPE                |VARTYPE                                           
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-chartype string     |9223372036854775807 |1993-10-29|12345.54321  |1.0E308               |2147483647 |long varchar testing                                                                                                            |10000.0      |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|varchar testing                                   
-chartype string     |-9223372036854775808|1993-10-29|0.00000      |-1.0E308              |-2147483647|long varchar testing                                                                                                            |-10000.0     |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|varchar testing                                   
-"chartype" string   |9223372036854775807 |1993-10-29|-12345.54321 |1.0E308               |2147483647 |long "varchar" testing                                                                                                          |10000.0      |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|"varchar" testing                                 
-chartype string     |9223372036854775807 |1993-10-29|12345.54321  |1.0E308               |2147483647 |long varchar testing                                                                                                            |10000.0      |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|varchar testing                                   
-chartype string     |-9223372036854775808|1993-10-29|0.00000      |-1.0E308              |-2147483647|long varchar testing                                                                                                            |-10000.0     |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|varchar testing                                   
-"chartype" string   |9223372036854775807 |1993-10-29|-12345.54321 |1.0E308               |2147483647 |long "varchar" testing                                                                                                          |10000.0      |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|"varchar" testing                                 
+CHARTYPE            |BIGINTTYPE          |DATETYPE  |DECIMALTYPE |DOUBLETYPE            |INTTYPE    |LVARTYPE                                                                                                                        |REALTYPE     |SMINT&|TIMETYPE|TSTAMPTYPE                |VARTYPE                                           
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+chartype string     |9223372036854775807 |1993-10-29|12345.54321 |1.0E308               |2147483647 |long varchar testing                                                                                                            |10000.0      |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|varchar testing                                   
+chartype string     |-9223372036854775808|1993-10-29|0.00000     |-1.0E308              |-2147483647|long varchar testing                                                                                                            |-10000.0     |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|varchar testing                                   
+"chartype" string   |9223372036854775807 |1993-10-29|-12345.54321|1.0E308               |2147483647 |long "varchar" testing                                                                                                          |10000.0      |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|"varchar" testing                                 
+chartype string     |9223372036854775807 |1993-10-29|12345.54321 |1.0E308               |2147483647 |long varchar testing                                                                                                            |10000.0      |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|varchar testing                                   
+chartype string     |-9223372036854775808|1993-10-29|0.00000     |-1.0E308              |-2147483647|long varchar testing                                                                                                            |-10000.0     |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|varchar testing                                   
+"chartype" string   |9223372036854775807 |1993-10-29|-12345.54321|1.0E308               |2147483647 |long "varchar" testing                                                                                                          |10000.0      |32767 |09:39:43|xxxxxxFILTERED-TIMESTAMPxxxxx|"varchar" testing                                 
 ij> delete from alltypes;
 6 rows inserted/updated/deleted
 ij> --import should work with trigger enabled on append and should not work on replace

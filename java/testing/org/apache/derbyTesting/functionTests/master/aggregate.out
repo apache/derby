@@ -639,10 +639,10 @@ ij> insert into bd values(0.1);
 ij> insert into bd values(0.2);
 1 row inserted/updated/deleted
 ij> select * from bd;
-I                                 
-----------------------------------
-0.100000000000000000000000000000  
-0.200000000000000000000000000000  
+I                                
+---------------------------------
+0.100000000000000000000000000000 
+0.200000000000000000000000000000 
 ij> -- should be the same
 select avg(i), sum(i)/count(i) from bd;
 1                                 |2                                 

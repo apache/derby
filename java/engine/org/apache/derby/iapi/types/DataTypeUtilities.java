@@ -218,7 +218,12 @@ public abstract class DataTypeUtilities  {
      */
     public static int computeMaxWidth( int precision, int scale)
     {
-        return (scale == 0) ? (precision + 1) : (precision + 3);
+	// There are 3 possible cases with respect to finding the correct max
+	// width for DECIMAL type.
+	// 1. If scale = 0, only sign should be added to precision.
+	// 2. scale=precision, 3 should be added to precision for sign, decimal and an additional char '0'.
+	// 3. precision > scale > 0, 2 should be added to precision for sign and decimal.
+	return (scale ==0) ? (precision +1) : ((scale == precision) ? (precision + 3) : (precision + 2));
     }
 }
 

@@ -1880,9 +1880,9 @@ ij> select max(bv) from empty;
 ----------------
 NULL            
 ij> select max(dc) from empty;
-1       
---------
-NULL    
+1      
+-------
+NULL   
 ij> -- variations
 select max(i), max(b), max(i), max(s) from empty;
 1          |2   |3          |4     
@@ -1930,8 +1930,8 @@ ij> select max(bv) from empty group by bv;
 1               
 ----------------
 ij> select max(dc) from empty group by dc;
-1       
---------
+1      
+-------
 ij> --------------------------------
 -- BASIC ACCEPTANCE TESTS
 --------------------------------
@@ -1996,9 +1996,9 @@ ij> select max(bv) from t;
 1111111111111111
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select max(dc) from t;
-1       
---------
-222.22  
+1      
+-------
+222.22 
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select max(i) from t group by i;
 1          
@@ -2085,11 +2085,11 @@ ij> select max(bv) from t group by bv;
 NULL            
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select max(dc) from t group by dc;
-1       
---------
-111.11  
-222.22  
-NULL    
+1      
+-------
+111.11 
+222.22 
+NULL   
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> -- constants
 select max(1) from t;
@@ -2101,9 +2101,9 @@ ij> select max('hello') from t;
 -----
 hello
 ij> select max(1.1) from t;
-1    
------
-1.1  
+1   
+----
+1.1 
 ij> select max(1e1) from t;
 1                     
 ----------------------
@@ -2137,11 +2137,11 @@ hello
 hello
 hello
 ij> select max(1.1) from t group by dc;
-1    
------
-1.1  
-1.1  
-1.1  
+1   
+----
+1.1 
+1.1 
+1.1 
 ij> select max(1e1) from t group by d;
 1                     
 ----------------------
@@ -2409,9 +2409,9 @@ ij> select min(bv) from empty;
 ----------------
 NULL            
 ij> select min(dc) from empty;
-1       
---------
-NULL    
+1      
+-------
+NULL   
 ij> -- variations
 select min(i), min(b), min(i), min(s) from empty;
 1          |2   |3          |4     
@@ -2459,8 +2459,8 @@ ij> select min(bv) from empty group by bv;
 1               
 ----------------
 ij> select min(dc) from empty group by dc;
-1       
---------
+1      
+-------
 ij> --------------------------------
 -- BASIC ACCEPTANCE TESTS
 --------------------------------
@@ -2525,9 +2525,9 @@ ij> select min(bv) from t;
 0000111100001111
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select min(dc) from t;
-1       
---------
-111.11  
+1      
+-------
+111.11 
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select min(i) from t group by i;
 1          
@@ -2614,11 +2614,11 @@ ij> select min(bv) from t group by bv;
 NULL            
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select min(dc) from t group by dc;
-1       
---------
-111.11  
-222.22  
-NULL    
+1      
+-------
+111.11 
+222.22 
+NULL   
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> -- constants
 select min(1) from t;
@@ -2630,9 +2630,9 @@ ij> select min('hello') from t;
 -----
 hello
 ij> select min(1.1) from t;
-1    
------
-1.1  
+1   
+----
+1.1 
 ij> select min(1e1) from t;
 1                     
 ----------------------
@@ -2666,11 +2666,11 @@ hello
 hello
 hello
 ij> select min(1.1) from t group by dc;
-1    
------
-1.1  
-1.1  
-1.1  
+1   
+----
+1.1 
+1.1 
+1.1 
 ij> select min(1e1) from t group by d;
 1                     
 ----------------------

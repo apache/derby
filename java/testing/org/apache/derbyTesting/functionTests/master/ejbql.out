@@ -1633,13 +1633,13 @@ ij> values absval( -4 );
 -----------
 4          
 ij> values absval( 4.4 );
-1    
------
-4.4  
+1   
+----
+4.4 
 ij> values absval( -4.4 );
-1    
------
-4.4  
+1   
+----
+4.4 
 ij> values {fn abs( 4 )};
 1          
 -----------
@@ -1649,17 +1649,17 @@ ij> values {fn abs( -4 )};
 -----------
 4          
 ij> values {fn abs( 4.4 )};
-1    
------
-4.4  
+1   
+----
+4.4 
 ij> values {fn abs( -4.4 )};
-1    
------
-4.4  
+1   
+----
+4.4 
 ij> values {fn abs( -4.44444444444444444444444 )};
-1                          
----------------------------
-4.44444444444444444444444  
+1                         
+--------------------------
+4.44444444444444444444444 
 ij> autocommit on;
 ij> drop table myint;
 0 rows inserted/updated/deleted
