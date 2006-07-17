@@ -43,6 +43,9 @@ public class prepStmtNull {
    			pStmt.setString(1,"work");
 			pStmt.setNull(2,java.sql.Types.TIMESTAMP);
 			pStmt.addBatch();
+			pStmt.setString(1,"work1");
+			pStmt.setNull(2,java.sql.Types.TIMESTAMP,"");
+			pStmt.addBatch();
 
 		
 			pStmt.executeBatch();
@@ -94,6 +97,9 @@ public class prepStmtNull {
    			pStmt.setString(1,"blob");
 			pStmt.setNull(2,java.sql.Types.BLOB);
 			pStmt.addBatch();
+			pStmt.setString(1,"blob1");
+			pStmt.setNull(2,java.sql.Types.BLOB,"");
+			pStmt.addBatch();
 
 		
 			pStmt.executeBatch();
@@ -143,6 +149,9 @@ public class prepStmtNull {
                pStmt = con.prepareStatement("insert into ClobBlob values (?,?)");
    			   			
                pStmt.setNull(1, Types.VARCHAR);
+               pStmt.setBytes(2, b2);
+               pStmt.execute();
+               pStmt.setNull(1, Types.VARCHAR,"");
                pStmt.setBytes(2, b2);
                pStmt.execute();
 

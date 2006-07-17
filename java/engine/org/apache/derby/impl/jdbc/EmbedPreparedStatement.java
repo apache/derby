@@ -850,19 +850,36 @@ public abstract class EmbedPreparedStatement
 	/////////////////////////////////////////////////////////////////////////
 
     /**
+     *
      * JDBC 2.0
      *
-     * Set null for user-named types and REF type parameters
-     * 
-     * @exception SQLException if a database-access error occurs.
+     * Sets the designated parameter to SQL <code>NULL</code>.
+     * This version of the method <code>setNull</code> should
+     * be used for user-defined types and REF type parameters.  Examples
+     * of user-defined types include: STRUCT, DISTINCT, JAVA_OBJECT, and
+     * named array types.
+     *
+     * @param paramIndex the first parameter is 1, the second is 2, ...
+     * @param sqlType a value from <code>java.sql.Types</code>
+     * @param typeName the fully-qualified name of an SQL user-defined type;
+     *  ignored if the parameter is not a user-defined type or REF
+     * @exception SQLException if a database access error occurs or
+     * this method is called on a closed <code>PreparedStatement</code>
+     * @exception SQLFeatureNotSupportedException if <code>sqlType</code> is
+     * a <code>ARRAY</code>, <code>BLOB</code>, <code>CLOB</code>,
+     * <code>DATALINK</code>, <code>JAVA_OBJECT</code>, <code>NCHAR</code>,
+     * <code>NCLOB</code>, <code>NVARCHAR</code>, <code>LONGNVARCHAR</code>,
+     *  <code>REF</code>, <code>ROWID</code>, <code>SQLXML</code>
+     * or  <code>STRUCT</code> data type and the JDBC driver does not support
+     * this data type or if the JDBC driver does not support this method
+     *
      */
-	public void setNull(int paramIndex,
-						int sqlType,
-						String typeName)
-		 throws SQLException
-	{
-		throw Util.notImplemented("setNull");
-	}
+    public void setNull(int paramIndex,
+        int sqlType,
+        String typeName)
+        throws SQLException {
+        setNull(paramIndex,sqlType);
+    }
 
     /**
      * JDBC 2.0
