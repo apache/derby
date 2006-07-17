@@ -101,9 +101,9 @@ NULL
 ij> -- PASS:0436 If NUMTEST is NULL (Implementor defined print format)?
     SELECT NUMTEST 
       FROM SS;
-NUMTEST         
-----------------
-NULL            
+NUMTEST        
+---------------
+NULL           
 ij> -- PASS:0436 If NUMTEST is NULL (Implementor defined print format)?
 -- restore
     ROLLBACK WORK;

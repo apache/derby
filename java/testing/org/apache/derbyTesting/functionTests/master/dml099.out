@@ -26,17 +26,17 @@ ij> INSERT INTO ICAST2 VALUES (.31416E+1, 3, .3142293E+1);
 1 row inserted/updated/deleted
 ij> -- PASS:0582 If 1 row is inserted?
    SELECT C1, C2, C3 FROM ICAST2;
-C1         |C2                    |C3      
--------------------------------------------
-3          |3.0                   |3.142   
+C1         |C2                    |C3     
+------------------------------------------
+3          |3.0                   |3.142  
 ij> -- PASS:0582 If 1 row is selected with C1 = 3 and C3 = 3.142?
    UPDATE ICAST2 SET C1 = 5.2413E+0, C2 = 5, C3 = 5.2413E+0;
 1 row inserted/updated/deleted
 ij> -- PASS:0582 If 1 row is updated?
    SELECT C1, C2, C3 FROM ICAST2;
-C1         |C2                    |C3      
--------------------------------------------
-5          |5.0                   |5.241   
+C1         |C2                    |C3     
+------------------------------------------
+5          |5.0                   |5.241  
 ij> -- PASS:0582 If 1 row is selected with C1 = 5 and C3 = 5.241?
    UPDATE ICAST2 SET C1 = 6.28E+0, C2 = 2.1E+0, C3 = .07E+2;
 1 row inserted/updated/deleted
@@ -45,9 +45,9 @@ ij> -- PASS:0582 If 1 row is updated?
 1 row inserted/updated/deleted
 ij> -- PASS:0582 If 1 row is updated?
    SELECT C1, C2, C3 FROM ICAST2;
-C1         |C2                    |C3      
--------------------------------------------
-2          |2.1                   |9.100   
+C1         |C2                    |C3     
+------------------------------------------
+2          |2.1                   |9.100  
 ij> -- PASS:0582 If 1 row is selected with C1 = 2 and C3 = 9.100?
    ROLLBACK WORK;
 ij> --O   DROP TABLE ICAST2 CASCADE;

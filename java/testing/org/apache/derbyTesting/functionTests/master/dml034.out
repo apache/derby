@@ -117,17 +117,17 @@ ij> -- END TEST >>> 0092 <<< END TEST
 ij> -- PASS:0093 If 1 row is inserted?
      SELECT *
           FROM LL;
-NUMTEST         
-----------------
-123456.123456   
+NUMTEST        
+---------------
+123456.123456  
 ij> -- PASS:0093 If NUMTEST = 123456.123456 ?
 -- PASS:0093 OR  is between 123456.123451 and 123456.123461 ?
      SELECT * 
        FROM LL
        WHERE NUMTEST > 123456.123450 and NUMTEST < 123456.123462;
-NUMTEST         
-----------------
-123456.123456   
+NUMTEST        
+---------------
+123456.123456  
 ij> -- PASS:0093 If 1 row selected?
 -- restore
      ROLLBACK WORK;
@@ -141,9 +141,9 @@ ij> -- END TEST >>> 0093 <<< END TEST
 ij> -- PASS:0094 If 1 row is inserted?
      SELECT *
           FROM PP;
-NUMTEST         
-----------------
-123456.123456   
+NUMTEST        
+---------------
+123456.123456  
 ij> -- PASS:0094 If NUMTEST = 123456.123456 ?
 -- PASS:0094 OR  is between 123456.123451 and 123456.123461 ?
 -- restore
@@ -158,9 +158,9 @@ ij> -- END TEST >>> 0094 <<< END TEST
 ij> -- PASS:0095 If 1 row is inserted?
      SELECT *
           FROM SS;
-NUMTEST         
-----------------
-123456.123456   
+NUMTEST        
+---------------
+123456.123456  
 ij> -- PASS:0095 If NUMTEST = 123456.123456 ?
 -- PASS:0095 OR  is between 123456.123451 and 123456.123461 ?
 -- restore

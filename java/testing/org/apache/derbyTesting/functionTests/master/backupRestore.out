@@ -10,11 +10,11 @@ ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.classpath', 'APP
 ij> create function dv(P1 INT) RETURNS INT NO SQL external name 'dbytesting.CodeInAJar.doubleMe' language java parameter style java;
 0 rows inserted/updated/deleted
 ij> select cast (dv(x) as dec(5,2)) from x;
-1       
---------
-2.00    
-20.00   
-40.00   
+1      
+-------
+2.00   
+20.00  
+40.00  
 ij> ----take a backup.
 call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup');
 0 rows inserted/updated/deleted
@@ -24,32 +24,32 @@ ij> disconnect;
 ij> ---restore a databases
 connect 'wombat;restoreFrom=extinout/mybackup/wombat';
 ij> select cast (dv(x) as dec(5,2)) from x;
-1       
---------
-2.00    
-20.00   
-40.00   
+1      
+-------
+2.00   
+20.00  
+40.00  
 ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
 ij> ---create a new database from backup.
 connect 'wombatnew;createFrom=extinout/mybackup/wombat';
 ij> select cast (dv(x) as dec(5,2)) from x;
-1       
---------
-2.00    
-20.00   
-40.00   
+1      
+-------
+2.00   
+20.00  
+40.00  
 ij> connect 'wombatnew;shutdown=true';
 ERROR 08006: Database 'wombatnew' shutdown.
 ij> disconnect;
 ij> connect 'wombat';
 ij> select cast (dv(x) as dec(5,2)) from x;
-1       
---------
-2.00    
-20.00   
-40.00   
+1      
+-------
+2.00   
+20.00  
+40.00  
 ij> call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE('extinout/mybackup', 1);
 0 rows inserted/updated/deleted
 ij> insert into x values (1,1),(10,1),(20,1);
@@ -61,23 +61,23 @@ ij> insert into x values (1,1),(10,1),(20,1);
 ij> insert into x values (1,1),(10,1),(20,1);
 3 rows inserted/updated/deleted
 ij> select cast (dv(x) as dec(5,2)) from x;
-1       
---------
-2.00    
-20.00   
-40.00   
-2.00    
-20.00   
-40.00   
-2.00    
-20.00   
-40.00   
-2.00    
-20.00   
-40.00   
-2.00    
-20.00   
-40.00   
+1      
+-------
+2.00   
+20.00  
+40.00  
+2.00   
+20.00  
+40.00  
+2.00   
+20.00  
+40.00  
+2.00   
+20.00  
+40.00  
+2.00   
+20.00  
+40.00  
 ij> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> disconnect;
@@ -102,23 +102,23 @@ X                     |Y
 10.0                  |1          
 20.0                  |1          
 ij> select cast (dv(x) as dec(5,2)) from x;
-1       
---------
-2.00    
-20.00   
-40.00   
-2.00    
-20.00   
-40.00   
-2.00    
-20.00   
-40.00   
-2.00    
-20.00   
-40.00   
-2.00    
-20.00   
-40.00   
+1      
+-------
+2.00   
+20.00  
+40.00  
+2.00   
+20.00  
+40.00  
+2.00   
+20.00  
+40.00  
+2.00   
+20.00  
+40.00  
+2.00   
+20.00  
+40.00  
 ij> insert into x values (1,1),(10,1),(20,1);
 3 rows inserted/updated/deleted
 ij> connect 'wombat;shutdown=true';

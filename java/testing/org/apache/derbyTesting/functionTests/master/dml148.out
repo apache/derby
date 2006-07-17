@@ -122,14 +122,14 @@ ij> --
      FROM HU.STAFF LEFT OUTER JOIN SEVEN_TYPES 
         ON -GRADE / 11 BETWEEN T_REAL AND T_DECIMAL
      ORDER BY EMPNAME;
-EMPNAME             |CITY           |T_DECIMAL    
---------------------------------------------------
-Alice               |Deale          |NULL         
-Betty               |Vienna         |0.00         
-Betty               |Vienna         |0.00         
-Carmen              |Vienna         |NULL         
-Don                 |Deale          |NULL         
-Ed                  |Akron          |NULL         
+EMPNAME             |CITY           |T_DECIMAL   
+-------------------------------------------------
+Alice               |Deale          |NULL        
+Betty               |Vienna         |0.00        
+Betty               |Vienna         |0.00        
+Carmen              |Vienna         |NULL        
+Don                 |Deale          |NULL        
+Ed                  |Akron          |NULL        
 ij> -- PASS:0844 If 6 rows selected with ordered rows and column values ?
 -- PASS:0844    Alice  Deale  NULL  ?
 -- PASS:0844    Betty  Vienna    0  ?
