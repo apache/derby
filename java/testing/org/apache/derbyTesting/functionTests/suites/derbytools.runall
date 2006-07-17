@@ -11,4 +11,5 @@ tools/ij4.sql
 tools/ij5.sql
 tools/ij6.sql
 tools/ijConnName.sql
+tools/sysinfo_api.junit
 tools/URLCheck.sql

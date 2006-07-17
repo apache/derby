@@ -57,15 +57,27 @@ public class sysinfo {
 
 	/**
 		The genus name for the Apache Derby code. Use this to determine the version of the
-		Apache Derby embedded code in cs.jar.
+		Apache Derby embedded code in derby.jar.
 	*/
 	public static final String DBMS="DBMS";
 
 	/**
 	 *	The genus name for the tools code. Use this to determine the version of 
-		code in cstools.jar
+		code in derbytools.jar
 	 */
 	public static final String TOOLS="tools";
+
+	/**
+	 *	The genus name for the network server code. Use this to determine the version of 
+		code in derbynet.jar
+	 */
+	public static final String NET="net";
+
+	/**
+	 *	The genus name for the client code. Use this to determine the version of 
+		code in derbyclient.jar
+	 */
+	public static final String CLIENT="dnc";
 
 
 	/**
@@ -81,7 +93,7 @@ public class sysinfo {
 	/**
 		gets the major version of the specified code library. 
 		@param genus	which library to get the version of. Valid inputs include
-			DBMS, TOOLS
+			DBMS, TOOLS, NET, CLIENT
 		@return the major version. Return -1 if the information is not found. 
     */		
   static public int getMajorVersion(String genus)
@@ -108,7 +120,7 @@ public class sysinfo {
 	/**
 		gets the minor version of the specified code library. 
 		@param genus	which library to get the version of. Valid inputs include
-			DBMS, TOOLS.
+			DBMS, TOOLS, NET, CLIENT.
 		@return the minor version. Return -1 if the information is not found. 
     */	
   static public int getMinorVersion(String genus)
@@ -134,7 +146,7 @@ public class sysinfo {
 	/**
 		gets the build number for the specified library
 		@param genus which library to get the build number for. Valid inputs are
-			DBMS, TOOLS
+			DBMS, TOOLS, NET, CLIENT.
 		@return the build number, or ???? if the information is not found.
 	*/
   static public String getBuildNumber(String genus)
