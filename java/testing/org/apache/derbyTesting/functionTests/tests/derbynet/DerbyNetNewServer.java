@@ -99,7 +99,10 @@ public class DerbyNetNewServer extends Thread
         if( bos != null)
 		{
             bos.reset();
-			writer = new PrintWriter(bos,true);        
+            // DERBY-1466, Test that messages are flushed to the
+            // writer irrespective of whether the user's writer is
+            // set to autoflush true.
+            writer = new PrintWriter(bos); 
 		}
 		server.start(writer);
         Connection conn = null;
