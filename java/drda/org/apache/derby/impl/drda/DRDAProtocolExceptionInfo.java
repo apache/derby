@@ -26,13 +26,27 @@ class DRDAProtocolExceptionInfo {
       Holds static information about the protocol error
       to put in the Hash Table
     */
-    // The Codepoint of the error (e.g CodePoint.SYTNAXRM)
+    
+    /**
+     * errorCodePoint specifies the code point of the error reply message, (e.g.
+     * CodePoint.SYNTAXRM) whereas errCdCodePoint specifies the code point of an
+     * extra required field in that reply message. Most error reply messages
+     * have one or two required fields that are quite common, like SVRCOD
+     * (severity code) or RDBNAM (database name). Some error reply messages
+     * additionally have required fields that are specific to them.
+     * errCdCodePoint is used to specify these. For instance, SYNTAXRM has a
+     * required field called SYNERRCD, and PRCCNVRM has a required field called
+     * PRCCNVCD.
+     */
     protected int errorCodePoint;	   
     
     // Severity Code
     protected int svrcod;
     
-    // The CodePoint describing the errCD (e.g. CodePint.SYNERRCD)
+    /**
+     * The CodePoint describing the error condition for the errorCodePoint.
+     * (e.g. CodePoint.SYNERRCD, when errorCodePoint is CodePoint.SYNTAXRM)
+     */
     protected int errCdCodePoint ;
     
     // Sends an originating Codepoint
