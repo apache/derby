@@ -94,8 +94,8 @@ final public class BLOBTest extends BaseJDBCTestCase
         
         while (rs.next()) {
             println("Next");
-            final int size = rs.getInt(2);
-            if (size>1024*1024) break;
+            final int val = rs.getInt(1);
+            if (val == BLOBDataModelSetup.bigVal) break;
         }
         
         final int newVal = rs.getInt(1) + 11;
@@ -107,7 +107,7 @@ final public class BLOBTest extends BaseJDBCTestCase
 
     /**
      * Tests updating a Blob from a scollable resultset, using
-     * result set update methods.
+     * positioned updates.
      * @exception SQLException causes test to fail with error
      * @exception IOException causes test to fail with error
      */
@@ -137,7 +137,7 @@ final public class BLOBTest extends BaseJDBCTestCase
 
     /**
      * Tests updating a Blob from a forward only resultset, using
-     * result set update methods.
+     * methods.
      * @exception SQLException causes test to fail with error
      * @exception IOException causes test to fail with error
      */
@@ -150,20 +150,136 @@ final public class BLOBTest extends BaseJDBCTestCase
         final ResultSet rs = 
             stmt.executeQuery("SELECT * from " + 
                               BLOBDataModelSetup.getBlobTableName());
-        
         while (rs.next()) {
             println("Next");
-            final int size = rs.getInt(2);
-            if (size>1024*1024) break;
+            final int val = rs.getInt(1);
+            if (val == BLOBDataModelSetup.bigVal) break;
         }
         
         final int newVal = rs.getInt(1) + 11;
         final int newSize = rs.getInt(2) / 2;
         testUpdateBlobWithPositionedUpdate(rs, newVal, newSize);
         
+        rs.close();
+    }
+
+    /**
+     * Tests updating a Blob from a scollable resultset produced by a
+     * select query with projection. Updates are made using
+     * result set update methods.
+     * @exception SQLException causes test to fail with error
+     * @exception IOException causes test to fail with error
+     */
+    public void testUpdateBlobFromScrollableResultSetWithProjectUsingResultSetMethods()
+        throws SQLException, IOException
+    {
+        final Statement stmt = 
+            con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                ResultSet.CONCUR_UPDATABLE);
+        final ResultSet rs = 
+            stmt.executeQuery("SELECT data,val,length from " + 
+                              BLOBDataModelSetup.getBlobTableName());
+        println("Last");
+        rs.last();
+        
+        final int newVal = rs.getInt(2) + 11;
+        final int newSize = rs.getInt(3) / 2;
+        testUpdateBlobWithResultSetMethods(rs, newVal, newSize);
+        
+        println("Verify updated blob using result set");
+        verifyBlob(newVal, newSize, rs.getBlob(1));
         
         rs.close();
     }
+
+    /**
+     * Tests updating a Blob from a forward only resultset, produced by 
+     * a select query with projection. Updates are made using
+     * result set update methods.
+     * @exception SQLException causes test to fail with error
+     * @exception IOException causes test to fail with error
+     */
+    public void testUpdateBlobFromForwardOnlyResultSetWithProjectUsingResultSetMethods()
+        throws SQLException, IOException
+    {
+        final Statement stmt = 
+            con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                ResultSet.CONCUR_UPDATABLE);
+        final ResultSet rs = 
+            stmt.executeQuery("SELECT data,val,length from " + 
+                              BLOBDataModelSetup.getBlobTableName());
+        
+        while (rs.next()) {
+            println("Next");
+            final int val = rs.getInt("VAL");
+            if (val == BLOBDataModelSetup.bigVal) break;
+        }
+        
+        final int newVal = rs.getInt("VAL") + 11;
+        final int newSize = BLOBDataModelSetup.bigSize / 2;
+        testUpdateBlobWithResultSetMethods(rs, newVal, newSize);
+        
+        rs.close();
+    }
+
+    /**
+     * Tests updating a Blob from a scollable resultset, produced by 
+     * a select query with projection. Updates are made using
+     * positioned updates
+     * @exception SQLException causes test to fail with error
+     * @exception IOException causes test to fail with error
+     */
+    public void testUpdateBlobFromScrollableResultSetWithProjectUsingPositionedUpdates()
+        throws SQLException, IOException
+    {
+        final Statement stmt = 
+            con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                ResultSet.CONCUR_UPDATABLE);
+        final ResultSet rs = 
+            stmt.executeQuery("SELECT data from " + 
+                              BLOBDataModelSetup.getBlobTableName() + 
+                              " WHERE val= " + BLOBDataModelSetup.bigVal);
+        println("Last");
+        rs.last();
+        
+        final int newVal = BLOBDataModelSetup.bigVal * 2;
+        final int newSize = BLOBDataModelSetup.bigSize / 2;
+        testUpdateBlobWithPositionedUpdate(rs, newVal, newSize);
+
+        rs.relative(0); // Necessary after a positioned update
+        
+        println("Verify updated blob using result set");
+        verifyBlob(newVal, newSize, rs.getBlob("DATA"));
+        
+        rs.close();
+    }
+
+    /**
+     * Tests updating a Blob from a forward only resultset, produced by 
+     * a select query with projection. Updates are made using
+     * positioned updates.
+     * @exception SQLException causes test to fail with error
+     * @exception IOException causes test to fail with error
+     */
+    public void testUpdateBlobFromForwardOnlyResultSetWithProjectUsingPositionedUpdates()
+        throws SQLException, IOException
+    {
+        final Statement stmt = 
+            con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                ResultSet.CONCUR_UPDATABLE);
+        final ResultSet rs = 
+            stmt.executeQuery("SELECT data from " + 
+                              BLOBDataModelSetup.getBlobTableName() + 
+                              " WHERE val = " + BLOBDataModelSetup.bigVal);
+        rs.next();
+        
+        final int newVal =  BLOBDataModelSetup.bigVal * 2;
+        final int newSize = BLOBDataModelSetup.bigSize / 2;
+        testUpdateBlobWithPositionedUpdate(rs, newVal, newSize);
+        
+        rs.close();
+    }
+    
     
     /**
      * Tests updating the Blob using result set update methods.
@@ -178,17 +294,17 @@ final public class BLOBTest extends BaseJDBCTestCase
                                                     final int newSize) 
         throws SQLException, IOException
     {
-        int val = rs.getInt(1);
-        int size = rs.getInt(2);
+        int val = rs.getInt("VAL");
+        int size = rs.getInt("LENGTH");
         println("VerifyBlob");
-        verifyBlob(val, size, rs.getBlob(3));
+        verifyBlob(val, size, rs.getBlob("DATA"));
         
         println("UpdateBlob");
         final TestInputStream newStream = new TestInputStream(newSize, newVal);
         
-        rs.updateInt(1, newVal);
-        rs.updateInt(2, newSize);
-        rs.updateBinaryStream(3, newStream, newSize);
+        rs.updateInt("VAL", newVal);
+        rs.updateInt("LENGTH", newSize);
+        rs.updateBinaryStream("DATA", newStream, newSize);
         rs.updateRow();
         
         println("Verify updated blob with another query");

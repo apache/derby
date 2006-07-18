@@ -73,8 +73,7 @@ final public class BLOBDataModelSetup extends TestSetup
             ("INSERT INTO " + tableName + "(val, length, data) VALUES (?,?, ?)");
         
         // Insert 10 records with size of 1MB
-        final int size = 1024*1024;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < regularBlobs; i++) {
             final int val = i;
             final InputStream stream = new TestInputStream(size, val);
             preparedStatement.setInt(1, val);
@@ -84,14 +83,11 @@ final public class BLOBDataModelSetup extends TestSetup
         }
         
         // Insert 1 record with size of 64 MB
-        final int bigsize = 1024 * 1024 * 64;
-        final int val = 11;
-        
-        BaseJDBCTestCase.println("Insert BLOB with size = " + bigsize);
-        preparedStatement.setInt(1, val);
-        preparedStatement.setInt(2, bigsize);
-        final InputStream stream = new TestInputStream(bigsize, val);
-        preparedStatement.setBinaryStream(3, stream, bigsize);
+        BaseJDBCTestCase.println("Insert BLOB with size = " + bigSize);
+        preparedStatement.setInt(1, bigVal);
+        preparedStatement.setInt(2, bigSize);
+        final InputStream stream = new TestInputStream(bigSize, bigVal);
+        preparedStatement.setBinaryStream(3, stream, bigSize);
         
         BaseJDBCTestCase.println("Execute update");
         preparedStatement.executeUpdate();
@@ -128,6 +124,18 @@ final public class BLOBDataModelSetup extends TestSetup
     {
         return tableName;
     }
+    
+    /** Size of regular Blobs (currently 1MB) */
+    final static int size = 1024 * 1024;
+    
+    /** Number of regular Blobs */
+    final static int regularBlobs = 10;
+
+    /** Size of big record (currently 64 MB) */
+    final static int bigSize = 64 * 1024 * 1024;
+    
+    /** Val for big  record */
+    final static int bigVal = regularBlobs + 1;
     
     /** JDBC Connection */        
     private Connection con;
