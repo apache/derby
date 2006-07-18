@@ -34,6 +34,13 @@ import javax.sql.*;
  * object.
  */
 public class PreparedStatementTest extends BaseJDBCTestCase {
+
+    /** Byte array passed in to the database. **/
+    private static final byte[] BYTES = {
+        0x65, 0x66, 0x67, 0x68, 0x69,
+        0x69, 0x68, 0x67, 0x66, 0x65
+    };
+
     /**
      * Default connection and prepared statements that are used by the tests.
      */
@@ -106,6 +113,17 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite();
         suite.addTestSuite(PreparedStatementTest.class);
+        // Add methods temorarily disabled for DerbyNetClient
+        suite.addTest(new PreparedStatementTest(
+                    "embonlytmptestSetClobLengthless"));
+        suite.addTest(new PreparedStatementTest(
+                    "embonlytmptestSetBlobLengthless"));
+        suite.addTest(new PreparedStatementTest(
+                    "embonlytmptestSetCharacterStreamLengthless"));
+        suite.addTest(new PreparedStatementTest(
+                    "embonlytmptestSetAsciiStreamLengthless"));
+        suite.addTest(new PreparedStatementTest(
+                    "embonlytmptestSetBinaryStreamLengthless"));
         suite.addTest(SetObjectUnsupportedTest.suite(false));
         return suite;
     }
@@ -165,6 +183,26 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         }
     }
     
+    public void testSetNCharacterStreamLengthlessNotImplemented()
+            throws SQLException {
+        try {
+            ps.setNCharacterStream(1, new StringReader("A string"));
+            fail("setNCharacterStream(int,Reader) should not be implemented");
+        } catch (SQLFeatureNotSupportedException sfnse) {
+            // Do nothing, this is expected behavior.
+        }
+    }
+
+    public void testSetNClobLengthlessNotImplemented()
+            throws SQLException {
+        try {
+            ps.setNClob(1, new StringReader("A string"));
+            fail("setNClob(int,Reader) should not be implemented");
+        } catch (SQLFeatureNotSupportedException sfnse) {
+            // Do nothing, this is expected behaviour.
+        }
+    }
+
     /**
      * Tests the setNClob method of the PreparedStatement interface
      *
@@ -312,17 +350,13 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * @throws SQLException if a failure occurs during the call to setClob
      *
      */
-    public void testSetClob() throws SQLException {
+    public void testSetClob()
+            throws IOException, SQLException {
         //insert default values into the table
         
         String str = "Test data for the Clob object";
         StringReader is = new StringReader("Test data for the Clob object");
-        
-        try {
-            is.reset();
-        } catch (IOException ioe) {
-            fail("Failed to reset blob input stream: " + ioe.getMessage());
-        }
+        is.reset();
         
         PreparedStatement ps_sc = conn.prepareStatement("insert into ClobTestTable values(?,?)");
         
@@ -334,12 +368,12 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         //Now query to retrieve the Clob
         ResultSet rs = s.executeQuery("select * from ClobTestTable where sno = 1");
         rs.next();
-        Clob clobToBeInerted = rs.getClob(2);
+        Clob clobToBeInserted = rs.getClob(2);
         rs.close();
         
         //Now use the setClob method
         ps_sc.setInt(1,2);
-        ps_sc.setClob(2,clobToBeInerted);
+        ps_sc.setClob(2,clobToBeInserted);
         ps_sc.execute();
         
         ps_sc.close();
@@ -349,46 +383,49 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         rs.next();
         Clob clobRetrieved = rs.getClob(2);
         
-        if(!equalClob(clobToBeInerted,clobRetrieved)) 
-            fail("Clob not inserted properly using setClob");
+        assertEquals(clobToBeInserted,clobRetrieved);
     }
-    
-    /*
+
+    /**
+     * Insert <code>Clob</code> without specifying length and read it back
+     * for verification.
      *
-     * Compares the two clobs supplied to se if they are similar
-     * returns true if they are similar and false otherwise.
-     * 
-     * @param clob1 Clob to be compared
-     * @param clob1 Clob to be compared
-     * @return true if they are equal
-     *
+     * Beacuse we don't yet support <code>Connection.createClob</code> in the
+     * client driver, we must first insert data into the database and read back
+     * a <code>Clob</code> object. This object is then inserted into the
+     * database again.
      */
-    boolean equalClob(Clob clob1,Clob clob2) {
-        int c1,c2;
-        InputStream is1=null,is2=null;
-        try {
-            is1 = clob1.getAsciiStream();
-            is2 = clob2.getAsciiStream();
-            if(clob1.length()!=clob2.length())
-                return false;
-        } catch(SQLException sqle){
-            sqle.printStackTrace();
-        }
-        try {
-            for(long i=0;i<clob1.length();i++) {
-                c1=is1.read();
-                c2=is2.read();
-                if(c1!=c2)
-                    return false;
-            }
-        } catch(IOException e) {
-            e.printStackTrace();
-        } catch(SQLException e) {
-            e.printStackTrace();
-        }
-        return true;
+    public void embonlytmptestSetClobLengthless()
+            throws IOException, SQLException {
+        // Insert test data.
+        String testString = "Test string for setCharacterStream\u1A00";
+        Reader reader = new StringReader(testString);
+        PreparedStatement psChar = conn.prepareStatement(
+                "insert into ClobTestTable values (?,?)");
+        psChar.setInt(1, 1);
+        psChar.setCharacterStream(2, reader);
+        psChar.execute();
+        reader.close();
+        // Must fetch Clob from database because we don't support
+        // Connection.createClob on the client yet.
+        ResultSet rs = s.executeQuery(
+                "select clobCol from ClobTestTable where sno = 1");
+        assertTrue("No results retrieved", rs.next());
+        Clob insertClob = rs.getClob(1);
+        psChar.setInt(1, 2);
+        psChar.setClob(2, insertClob);
+        psChar.execute();
+
+        // Read back test data from database.
+        rs = s.executeQuery(
+                "select clobCol from ClobTestTable where sno = 2");
+        assertTrue("No results retrieved", rs.next());
+        Clob clobRetrieved = rs.getClob(1);
+
+        // Verify test data.
+        assertEquals(insertClob, clobRetrieved);
     }
-    
+
     /**
      *
      * Test the setBlob() method
@@ -396,37 +433,29 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * @throws SQLException if a failure occurs during the call to setBlob
      *
      */
-    public void testSetBlob() throws SQLException {
+    public void testSetBlob()
+            throws IOException, SQLException {
         //insert default values into the table
         
-        byte[] bytes = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-        InputStream is = new java.io.ByteArrayInputStream(bytes);
-        
-        try {
-            is.reset();
-        } catch (IOException ioe) {
-            fail("Failed to reset blob input stream: " + ioe.getMessage());
-        }
+        InputStream is = new java.io.ByteArrayInputStream(BYTES);
+        is.reset();
         
         PreparedStatement ps_sb = conn.prepareStatement("insert into BlobTestTable values(?,?)");
         
         //initially insert the data
         ps_sb.setInt(1,1);
-        ps_sb.setBlob(2,is,bytes.length);
+        ps_sb.setBlob(2,is,BYTES.length);
         ps_sb.executeUpdate();
         
         //Now query to retrieve the Blob
         ResultSet rs = s.executeQuery("select * from BlobTestTable where sno = 1");
         rs.next();
-        Blob blobToBeInerted = rs.getBlob(2);
+        Blob blobToBeInserted = rs.getBlob(2);
         rs.close();
         
         //Now use the setBlob method
         ps_sb.setInt(1,2);
-        ps_sb.setBlob(2,blobToBeInerted);
+        ps_sb.setBlob(2,blobToBeInserted);
         ps_sb.execute();
         
         ps_sb.close();
@@ -436,45 +465,48 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         rs.next();
         Blob blobRetrieved = rs.getBlob(2);
         
-        if(!equalBlob(blobToBeInerted,blobRetrieved)) 
-            fail("Blob not inserted properly using setBlob");
+        assertEquals(blobToBeInserted, blobRetrieved);
     }
     
-    /*
-     * Compares the two blobs supplied to se if they are similar
-     * returns true if they are similar and false otherwise.
+    /**
+     * Insert <code>Blob</code> without specifying length and read it back
+     * for verification.
      *
-     * @param blob1 The first Blob that is passed as input
-     * @param blob2 The second Blob that is passed as input
-     *
-     * @return true If the Blob values are equal
+     * Beacuse we don't yet support <code>Connection.createBlob</code> in the
+     * client driver, we must first insert data into the database and read back
+     * a <code>Blob</code> object. This object is then inserted into the
+     * database again.
      */
-    boolean equalBlob(Blob blob1,Blob blob2) {
-        int c1,c2;
-        InputStream is1=null,is2=null;
-        try {
-            is1 = blob1.getBinaryStream();
-            is2 = blob2.getBinaryStream();
-            if(blob1.length()!=blob2.length())
-                return false;
-        } catch(SQLException sqle){
-            sqle.printStackTrace();
-        }
-        try {
-            for(long i=0;i<blob1.length();i++) {
-                c1=is1.read();
-                c2=is2.read();
-                if(c1!=c2)
-                    return false;
-            }
-        } catch(IOException e) {
-            e.printStackTrace();
-        } catch(SQLException e) {
-            e.printStackTrace();
-        }
-        return true;
+    public void embonlytmptestSetBlobLengthless()
+            throws IOException, SQLException {
+        // Insert test data.
+        InputStream is = new ByteArrayInputStream(BYTES);
+        PreparedStatement psByte = conn.prepareStatement(
+                "insert into BlobTestTable values (?,?)");
+        psByte.setInt(1, 1);
+        psByte.setBinaryStream(2, is);
+        psByte.execute();
+        is.close();
+        // Must fetch Blob from database because we don't support
+        // Connection.createBlob on the client yet.
+        ResultSet rs = s.executeQuery(
+                "select blobCol from BlobTestTable where sno = 1");
+        assertTrue("No results retrieved", rs.next());
+        Blob insertBlob = rs.getBlob(1);
+        psByte.setInt(1, 2);
+        psByte.setBlob(2, insertBlob);
+        psByte.execute();
+
+        // Read back test data from database.
+        rs = s.executeQuery(
+                "select blobCol from BlobTestTable where sno = 2");
+        assertTrue("No results retrieved", rs.next());
+        Blob blobRetrieved = rs.getBlob(1);
+
+        // Verify test data.
+        assertEquals(insertBlob, blobRetrieved);
     }
-    
+
     //-------------------------------------------------
     //Test the methods used to test poolable statements
     
@@ -570,7 +602,30 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         assertEquals("Error in inserting data into the Clob object",str,str_out);
         ps_sc.close();
     }
-    
+
+    public void embonlytmptestSetCharacterStreamLengthless()
+            throws IOException, SQLException {
+        // Insert test data.
+        String testString = "Test string for setCharacterStream\u1A00";
+        Reader reader = new StringReader(testString);
+        PreparedStatement psChar = conn.prepareStatement(
+                "insert into ClobTestTable values (?,?)");
+        psChar.setInt(1, 1);
+        psChar.setCharacterStream(2, reader);
+        psChar.execute();
+        reader.close();
+
+        // Read back test data from database.
+        ResultSet rs = s.executeQuery(
+                "select clobCol from ClobTestTable where sno = 1");
+        assertTrue("No results retrieved", rs.next());
+        Clob clobRetrieved = rs.getClob(1);
+
+        // Verify test data.
+        assertEquals("Mismatch test data in/out", testString,
+                     clobRetrieved.getSubString(1, testString.length()));
+    }
+
      /**
       *
       * Tests the PreparedStatement interface method setAsciiStream
@@ -582,14 +637,9 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public void testSetAsciiStream() throws Exception {
         //insert default values into the table
         
-        byte[] bytes = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-        
         byte [] bytes1 = new byte[10];
         
-        InputStream is = new java.io.ByteArrayInputStream(bytes);
+        InputStream is = new java.io.ByteArrayInputStream(BYTES);
         
         is.reset();
         
@@ -597,7 +647,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         //initially insert the data
         ps_sb.setInt(1,1);
-        ps_sb.setAsciiStream(2,is,bytes.length);
+        ps_sb.setAsciiStream(2,is,BYTES.length);
         ps_sb.executeUpdate();
         
         //Now query to retrieve the Clob
@@ -612,12 +662,44 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         } catch(IOException ioe) {
             fail("IOException while reading the Clob from the database");
         }
-        for(int i=0;i<bytes.length;i++) {
-            assertEquals("Error in inserting data into the Clob",bytes[i],bytes1[i]);
+        for(int i=0;i<BYTES.length;i++) {
+            assertEquals("Error in inserting data into the Clob",BYTES[i],bytes1[i]);
         }
         ps_sb.close();
     }
-    
+
+    public void embonlytmptestSetAsciiStreamLengthless()
+            throws IOException, SQLException {
+        // Insert test data.
+        InputStream is = new ByteArrayInputStream(BYTES);
+        PreparedStatement psAscii = conn.prepareStatement(
+                "insert into ClobTestTable values (?,?)");
+        psAscii.setInt(1, 1);
+        psAscii.setAsciiStream(2, is);
+        psAscii.execute();
+        is.close();
+
+        // Read back test data from database.
+        ResultSet rs = s.executeQuery(
+                "select clobCol from ClobTestTable where sno = 1");
+        assertTrue("No results retrieved", rs.next());
+        Clob clobRetrieved = rs.getClob(1);
+
+        // Verify read back data.
+        byte[] dbBytes = new byte[10];
+        InputStream isRetrieved = clobRetrieved.getAsciiStream();
+        assertEquals("Unexpected number of bytes read", BYTES.length,
+                isRetrieved.read(dbBytes));
+        assertEquals("Stream should be exhausted", -1, isRetrieved.read());
+        for (int i=0; i < BYTES.length; i++) {
+            assertEquals("Byte mismatch in/out", BYTES[i], dbBytes[i]);
+        }
+
+        // Cleanup
+        isRetrieved.close();
+        psAscii.close();
+    }
+
     /**
      *
      * Tests the PreparedStatement interface method setBinaryStream
@@ -629,14 +711,9 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public void testSetBinaryStream() throws Exception {
         //insert default values into the table
         
-        byte[] bytes = new byte[] {
-            0x65, 0x66, 0x67, 0x68, 0x69,
-            0x69, 0x68, 0x67, 0x66, 0x65
-        };
-        
         byte [] bytes1 = new byte[10];
         
-        InputStream is = new java.io.ByteArrayInputStream(bytes);
+        InputStream is = new java.io.ByteArrayInputStream(BYTES);
         
         is.reset();
         
@@ -644,7 +721,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         //initially insert the data
         ps_sb.setInt(1,1);
-        ps_sb.setBinaryStream(2,is,bytes.length);
+        ps_sb.setBinaryStream(2,is,BYTES.length);
         ps_sb.executeUpdate();
         
         //Now query to retrieve the Clob
@@ -660,9 +737,41 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             fail("IOException while reading the Clob from the database");
         }
         
-        for(int i=0;i<bytes.length;i++) {
-            assertEquals("Error in inserting data into the Blob",bytes[i],bytes1[i]);
+        for(int i=0;i<BYTES.length;i++) {
+            assertEquals("Error in inserting data into the Blob",BYTES[i],bytes1[i]);
         }
         ps_sb.close();
+    }
+
+    public void embonlytmptestSetBinaryStreamLengthless()
+            throws IOException, SQLException {
+        // Insert test data.
+        InputStream is = new ByteArrayInputStream(BYTES);
+        PreparedStatement psBinary = conn.prepareStatement(
+                "insert into BlobTestTable values (?,?)");
+        psBinary.setInt(1, 1);
+        psBinary.setBinaryStream(2, is);
+        psBinary.execute();
+        is.close();
+
+        // Read back test data from database.
+        ResultSet rs = s.executeQuery(
+                "select blobCol from BlobTestTable where sno = 1");
+        assertTrue("No results retrieved", rs.next());
+        Blob blobRetrieved = rs.getBlob(1);
+
+        // Verify read back data.
+        byte[] dbBytes = new byte[10];
+        InputStream isRetrieved = blobRetrieved.getBinaryStream();
+        assertEquals("Unexpected number of bytes read", BYTES.length,
+                isRetrieved.read(dbBytes));
+        assertEquals("Stream should be exhausted", -1, isRetrieved.read());
+        for (int i=0; i < BYTES.length; i++) {
+            assertEquals("Byte mismatch in/out", BYTES[i], dbBytes[i]);
+        }
+
+        // Cleanup
+        isRetrieved.close();
+        psBinary.close();
     }
 }

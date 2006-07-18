@@ -28,6 +28,7 @@ import java.io.UTFDataFormatException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.LimitReader;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
 	Converts a java.io.Reader to the on-disk UTF8 format used by Derby
@@ -36,6 +37,8 @@ import org.apache.derby.iapi.services.io.LimitReader;
 public final class ReaderToUTF8Stream
 	extends InputStream
 {
+    public static final int UNKNOWN_LENGTH = Integer.MIN_VALUE;
+
     /**
      * Application's reader wrapped in a LimitReader.
      */
@@ -73,7 +76,15 @@ public final class ReaderToUTF8Stream
  	public ReaderToUTF8Stream(Reader appReader, int valueLength,int numCharsToTruncate)
 	{
         this.reader = new LimitReader(appReader);
-        reader.setLimit(valueLength);
+        if (valueLength != UNKNOWN_LENGTH) {
+            reader.setLimit(valueLength);
+        } 
+        if (SanityManager.DEBUG && valueLength == UNKNOWN_LENGTH) {
+            // Number of chars to truncate must be 0 if length is unknown.
+            // This count is used to check if the stream matches the
+            // specified length.
+            SanityManager.ASSERT(numCharsToTruncate == 0);
+        }
         buffer = new byte[BUFSIZE];
         blen = -1;        
         this.charsToTruncate = numCharsToTruncate;
@@ -239,6 +250,9 @@ public final class ReaderToUTF8Stream
                 }
                 else if (c != SPACE)
                 {
+                    // [NOTE] The assumption that this is always a Clob is not
+                    //        enforced anywhere (i.e. that 'charsToTruncate'
+                    //        is 0 for all other types)
                     // throw truncation error, wont happen here for any other 
                     // type except for clob
                     // hence using TypeId.CLOB_NAME to avoid having to store

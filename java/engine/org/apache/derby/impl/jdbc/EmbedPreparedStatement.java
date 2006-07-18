@@ -567,20 +567,8 @@ public abstract class EmbedPreparedStatement
      */
     public final void setAsciiStream(int parameterIndex, InputStream x, long length)
 	    throws SQLException {
-		checkStatus();
-
-		int jdbcTypeId = getParameterJDBCType(parameterIndex);
-		
-		switch (jdbcTypeId) {
-		case Types.CHAR:
-		case Types.VARCHAR:
-		case Types.LONGVARCHAR:
-		case Types.CLOB:
-			break;
-		default:
-			throw dataTypeConversion(parameterIndex, "java.io.InputStream(ASCII)");
-		}
-
+        checkCharacterStreamConditions(parameterIndex,
+                                        "java.io.InputStream(ASCII)");
 		java.io.Reader r = null;
 
 		if (x != null)
@@ -594,7 +582,7 @@ public abstract class EmbedPreparedStatement
 			}
 		}
 
-		setCharacterStream(parameterIndex, r, length);
+        setCharacterStreamInternal(parameterIndex, r, false, length);
 	}
 
     /**
@@ -629,8 +617,6 @@ public abstract class EmbedPreparedStatement
 	}
 
     /**
-     * JDBC 2.0
-     *
      * When a very large UNICODE value is input to a LONGVARCHAR
      * parameter, it may be more practical to send it via a
      * java.io.Reader. JDBC will read the data from the stream
@@ -649,20 +635,8 @@ public abstract class EmbedPreparedStatement
     public final void setCharacterStream(int parameterIndex,
        			  java.io.Reader reader,
 			  long length) throws SQLException {
-		checkStatus();
-		int jdbcTypeId = getParameterJDBCType(parameterIndex);
-		switch (jdbcTypeId) {
-		case Types.CHAR:
-		case Types.VARCHAR:
-		case Types.LONGVARCHAR:
-		case Types.CLOB:
-			break;
-		default:
-			throw dataTypeConversion(parameterIndex, "java.io.Reader");
-		}
-
-
-		setCharacterStreamInternal(parameterIndex, reader, length);
+        checkCharacterStreamConditions(parameterIndex, "java.io.Reader");
+        setCharacterStreamInternal(parameterIndex, reader, false, length);
 	}
 
     /**
@@ -687,14 +661,56 @@ public abstract class EmbedPreparedStatement
         setCharacterStream(parameterIndex,reader,(long)length);
     }
 
+    /**
+     * Check general (pre)conditions for setXXXStream methods operating on
+     * character streams.
+     *
+     * @param parameterIndex 1-based index of the parameter.
+     * @param srcDataTypeDesc type description of the source data. Used in
+     *          error message for data type conversion failure.
+     */
+    private final void checkCharacterStreamConditions(int parameterIndex,
+                                                       String srcDataTypeDesc)
+            throws SQLException {
+        checkStatus();
+        int jdbcTypeId = getParameterJDBCType(parameterIndex);
+        switch (jdbcTypeId) {
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.CLOB:
+                break;
+            default:
+                throw dataTypeConversion(parameterIndex, srcDataTypeDesc);
+        }
+    }
 
+    /**
+     * Set the given character stream for the specified parameter.
+     *
+     * If <code>lengthLess</code> is <code>true</code>, the following
+     * conditions are either not checked or verified at the execution time
+     * of the prepared statement:
+     * <ol><li>If the stream length is negative.
+     *     <li>If the stream's actual length equals the specified length.</ol>
+     * The <code>lengthLess</code> variable was added to differentiate between
+     * streams with invalid lengths and streams without known lengths.
+     *
+     * @param parameterIndex the 1-based index of the parameter to set.
+     * @param reader the data.
+     * @param lengthLess tells whether we know the length of the data or not.
+     * @param length the length of the data. Ignored if <code>lengthLess</code>
+     *          is <code>true</code>.
+     */
     private void setCharacterStreamInternal(int parameterIndex,
-						Reader reader, long length)
+                                            Reader reader,
+                                            final boolean lengthLess,
+                                            long length)
 	    throws SQLException
 	{
-        // check for -ve length
-        if (length < 0) 
-          throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
+        // Check for negative length if length is specified.
+        if (!lengthLess && length < 0)
+            throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
 
 	    int jdbcTypeId = getParameterJDBCType(parameterIndex);
 
@@ -710,56 +726,73 @@ public abstract class EmbedPreparedStatement
            This checking needs to be done because currently derby does not
            support Clob sizes greater than 2G-1 
         */
-   	    if (length > Integer.MAX_VALUE)
+        if (!lengthLess && length > Integer.MAX_VALUE)
                throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
                   preparedStatement.getParameterTypes()
                   [parameterIndex-1].getSQLstring());
-        /*
-            We cast the length from long to int. This would'nt be appropriate if
-            the limit of 2G-1 is decided to be increased at a later stage. 
-        */
-        int intLength = (int)length;		    
 
-	    try {
+        try {
+            ReaderToUTF8Stream utfIn;
+            ParameterValueSet pvs = getParms();
+            // Need column width to figure out if truncation is needed
+            DataTypeDescriptor dtd[] = preparedStatement
+                    .getParameterTypes();
+            int colWidth = dtd[parameterIndex - 1].getMaximumWidth();
+            // Default to max column width. This will be used to limit the
+            // amount of data read when operating on "lengthless" streams.
+            int usableLength = colWidth;
 
-			ParameterValueSet pvs = getParms();
-            int usableLength = intLength;
-            int truncationLength = 0;
+            if (!lengthLess) {
+                // We cast the length from long to int. This wouldn't be
+                // appropriate if the limit of 2G-1 is decided to be increased
+                // at a later stage.
+                int intLength = (int)length;
+                int truncationLength = 0;
 
-            // Currently long varchar does not allow for truncation of trailing
-            // blanks.  
-            // For char and varchar types, current mechanism of materializing
-            // when using streams seems fine given their  max limits.
-            // This change is fix for DERBY-352: Insert of clobs using streams
-            // should not materialize the entire stream into memory
-            // In case of clobs, the truncation of trailing blanks is factored
-            // in when reading from the stream without materializing the entire
-            // stream, and so the special casing for clob below.
-            if (jdbcTypeId == Types.CLOB) 
-            {
-                // Need column width to figure out if truncation is needed 
-                DataTypeDescriptor dtd[] = preparedStatement
-                        .getParameterTypes();
-                int colWidth = dtd[parameterIndex - 1].getMaximumWidth();
+                usableLength = intLength;
 
-                // It is possible that the length of the stream passed in is
-                // greater than the column width, in which case the data from
-                // the stream needs to be truncated.
-                // usableLength is the length of the data from stream that can
-                // be inserted which is min(colWidth,length) provided 
-                // length - colWidth has trailing blanks only
-                // we have used intLength into which the length variable had
-                // been cast to an int and stored  
-                if (intLength > colWidth) {                 
-                    usableLength = colWidth;
-                    truncationLength = intLength - usableLength;
+                // Currently long varchar does not allow for truncation of
+                // trailing blanks.
+                // For char and varchar types, current mechanism of
+                // materializing when using streams seems fine given their max
+                // limits.
+                // This change is fix for DERBY-352: Insert of clobs using
+                // streams should not materialize the entire stream into memory
+                // In case of clobs, the truncation of trailing blanks is
+                // factored in when reading from the stream without
+                // materializing the entire stream, and so the special casing
+                // for clob below.
+                if (jdbcTypeId == Types.CLOB)
+                {
+
+                    // It is possible that the length of the stream passed in
+                    // is greater than the column width, in which case the data
+                    // from the stream needs to be truncated.
+                    // usableLength is the length of the data from stream that
+                    // can be inserted which is min(colWidth,length) provided
+                    // length - colWidth has trailing blanks only
+                    // we have used intLength into which the length variable had
+                    // been cast to an int and stored
+                    if (intLength > colWidth) {
+                        usableLength = colWidth;
+                        truncationLength = intLength - usableLength;
+                    }
                 }
+                // Create a stream with truncation.
+                utfIn = new ReaderToUTF8Stream(reader,
+                                               usableLength,
+                                               truncationLength);
+            } else {
+                // Create a stream without exactness checks and truncation.
+                utfIn = new ReaderToUTF8Stream(reader,
+                                            ReaderToUTF8Stream.UNKNOWN_LENGTH,
+                                            0);
             }
 
-            ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(
-                    reader, usableLength, truncationLength);
-
-            /* JDBC is one-based, DBMS is zero-based */
+            // JDBC is one-based, DBMS is zero-based.
+            // Note that for lengthless stream, usableLength will be
+            // Integer.MIN_VALUE. This is okay, based on the observation that
+            // setValue does not use the value for anything at all.
             pvs.getParameterForSet(
                 parameterIndex - 1).setValue(utfIn, usableLength);
 
@@ -767,6 +800,27 @@ public abstract class EmbedPreparedStatement
 			throw EmbedResultSet.noStateChangeException(t);
 		}
 	}
+
+    /**
+     * Sets the designated parameter to the given input stream.
+     * When a very large binary value is input to a <code>LONGVARBINARY</code>
+     * parameter, it may be more practical to send it via a
+     * <code>java.io.InputStream</code> object. The data will be read from the
+     * stream as needed until end-of-file is reached.
+     *
+     * <em>Note:</em> This stream object can either be a standard Java stream
+     * object or your own subclass that implements the standard interface.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the binary parameter value
+     * @throws SQLException if a database access error occurs or this method is
+     *      called on a closed <code>PreparedStatement</code>
+     */
+    public void setBinaryStream(int parameterIndex, InputStream x)
+            throws SQLException {
+        checkBinaryStreamConditions(parameterIndex);
+        setBinaryStreamInternal(parameterIndex, x, true, -1);
+    }
 
     /**
      * sets the parameter to the Binary stream
@@ -778,21 +832,8 @@ public abstract class EmbedPreparedStatement
      */
     public final void setBinaryStream(int parameterIndex, InputStream x, long length)
 	    throws SQLException {
-
-		checkStatus();
-
-		int jdbcTypeId = getParameterJDBCType(parameterIndex);
-		switch (jdbcTypeId) {
-		case Types.BINARY:
-		case Types.VARBINARY:
-		case Types.LONGVARBINARY:
-		case Types.BLOB:
-			break;
-		default:
-			throw dataTypeConversion(parameterIndex, "java.io.InputStream");
-		}
-
-    	setBinaryStreamInternal(parameterIndex, x, length);
+        checkBinaryStreamConditions(parameterIndex);
+        setBinaryStreamInternal(parameterIndex, x, false, length);
 	}
 
     /**
@@ -808,12 +849,29 @@ public abstract class EmbedPreparedStatement
         setBinaryStream(parameterIndex,x,(long)length);
     }
 
+    /**
+     * Set the given stream for the specified parameter.
+     *
+     * If <code>lengthLess</code> is <code>true</code>, the following
+     * conditions are either not checked or verified at the execution time
+     * of the prepared statement:
+     * <ol><li>If the stream length is negative.
+     *     <li>If the stream's actual length equals the specified length.</ol>
+     * The <code>lengthLess</code> variable was added to differentiate between
+     * streams with invalid lengths and streams without known lengths.
+     *
+     * @param parameterIndex the 1-based index of the parameter to set.
+     * @param x the data.
+     * @param lengthLess tells whether we know the length of the data or not.
+     * @param length the length of the data. Ignored if <code>lengthLess</code>
+     *          is <code>true</code>.
+     */
     private void setBinaryStreamInternal(int parameterIndex, InputStream x,
-				long length)
+                                         final boolean lengthLess, long length)
 	    throws SQLException
 	{
 
-        if ( length < 0 ) 
+        if ( !lengthLess && length < 0 )
             throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
         
 		int jdbcTypeId = getParameterJDBCType(parameterIndex);
@@ -828,20 +886,46 @@ public abstract class EmbedPreparedStatement
         // For now, we cast the length from long to int as a result.
         // If we ever decide to increase these limits for lets say blobs, 
         // in that case the cast to int would not be appropriate.
-        if ( length > Integer.MAX_VALUE ) {
+        if ( !lengthLess && length > Integer.MAX_VALUE ) {
             throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
                getEmbedParameterSetMetaData().getParameterTypeName(
                    parameterIndex));
         }
 
         try {
-
-			getParms().getParameterForSet(parameterIndex - 1).setValue(new RawToBinaryFormatStream(x, (int)length), (int)length);
+            // If stream is lengthless, force length to -1 to get the expected
+            // behavior in RawToBinaryFormatStream.
+            if (lengthLess) {
+                length = -1;
+            }
+            getParms().getParameterForSet(parameterIndex - 1).setValue(
+                    new RawToBinaryFormatStream(x, (int)length), (int)length);
 
 		} catch (StandardException t) {
 			throw EmbedResultSet.noStateChangeException(t);
 		}
 	}
+
+    /**
+     * Check general (pre)conditions for setXXXStream methods operating on
+     * binary streams.
+     *
+     * @param parameterIndex 1-based index of the parameter.
+     */
+    private final void checkBinaryStreamConditions(int parameterIndex)
+            throws SQLException {
+        checkStatus();
+        int jdbcTypeId = getParameterJDBCType(parameterIndex);
+        switch (jdbcTypeId) {
+        case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.LONGVARBINARY:
+        case Types.BLOB:
+            break;
+        default:
+            throw dataTypeConversion(parameterIndex, "java.io.InputStream");
+        }
+    }
 
 	/////////////////////////////////////////////////////////////////////////
 	//
@@ -1286,16 +1370,7 @@ public abstract class EmbedPreparedStatement
     public void setBlob (int i, Blob x)
         throws SQLException
     {
-        checkStatus();
-        int colType;
-        synchronized (getConnectionSynchronization())
-        {
-            colType = getParameterJDBCType(i);
-        }
-		// DB2: only allow setBlob on a BLOB column.
-		if (colType != Types.BLOB)
-            throw dataTypeConversion(i, "java.sql.Blob");
-
+        checkBlobConditions(i);
 		if (x == null)
 			setNull(i, Types.BLOB);
 		else
@@ -1305,9 +1380,23 @@ public abstract class EmbedPreparedStatement
             // will read from the stream and drain some part of the stream 
             // Hence the need to declare this local variable - streamLength
             long streamLength = x.length();
-            setBinaryStreamInternal(i, x.getBinaryStream(), streamLength);
+            setBinaryStreamInternal(i, x.getBinaryStream(), false,
+                    streamLength);
         }
 	}
+
+    /**
+     * Check general (pre)conditions for setClob methods.
+     *
+     * @param parameterIndex 1-based index of the parameter.
+     */
+    private final void checkClobConditions(int parameterIndex)
+            throws SQLException {
+        checkStatus();
+        if (getParameterJDBCType(parameterIndex) != Types.CLOB) {
+            throw dataTypeConversion(parameterIndex, "java.sql.Clob");
+        }
+    }
 
     /**
      * JDBC 2.0
@@ -1320,17 +1409,7 @@ public abstract class EmbedPreparedStatement
     public void setClob (int i, Clob x)
         throws SQLException
     {
-        checkStatus();
-        int colType;
-        synchronized (getConnectionSynchronization())
-        {
-            colType = getParameterJDBCType(i);
-        }
-
-		// DB2, only allow setClob on a CLOB column.
-		if (colType != Types.CLOB)
-            throw dataTypeConversion(i, "java.sql.Clob");
-
+        checkClobConditions(i);
 		if (x == null)
 			setNull(i, Types.CLOB);
 		else
@@ -1348,7 +1427,8 @@ public abstract class EmbedPreparedStatement
             // Hence the need to declare this local variable - streamLength
             long streamLength = x.length();
 
-            setCharacterStreamInternal(i, x.getCharacterStream(), streamLength);
+            setCharacterStreamInternal(i, x.getCharacterStream(),
+                                       false, streamLength);
         }
         
 	}
@@ -1625,7 +1705,92 @@ public abstract class EmbedPreparedStatement
 
    //jdbc 4.0 methods
 
-   
+    /**
+     * Sets the designated parameter to the given input stream.
+     * When a very large ASCII value is input to a <code>LONGVARCHAR</code>
+     * parameter, it may be more practical to send it via a
+     * <code>java.io.InputStream</code>. Data will be read from the stream as
+     * needed until end-of-file is reached. The JDBC driver will do any
+     * necessary conversion from ASCII to the database char format.
+     *
+     * <em>Note:</em> This stream object can either be a standard Java stream
+     * object or your own subclass that implements the standard interface.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the Java input stream that contains the ASCII parameter value
+     * @throws SQLException if a database access error occurs or this method is
+     *      called on a closed <code>PreparedStatement</code>
+     */
+    public void setAsciiStream(int parameterIndex, InputStream x)
+            throws SQLException {
+        checkCharacterStreamConditions(parameterIndex,
+                                        "java.io.InputStream(ASCII)");
+        java.io.Reader asciiStream = null;
+
+        if (x != null) {
+            // Use ISO-8859-1 and not US-ASCII as JDBC seems to define
+            // ASCII as 8 bits. US-ASCII is 7.
+            try {
+                asciiStream = new java.io.InputStreamReader(x, "ISO-8859-1");
+            } catch (java.io.UnsupportedEncodingException uee) {
+                throw new SQLException(uee.getMessage());
+            }
+        }
+
+        setCharacterStreamInternal(parameterIndex, asciiStream, true, -1);
+    }
+
+    /**
+     * Sets the designated parameter to the given <code>Reader</code> object.
+     * When a very large UNICODE value is input to a LONGVARCHAR parameter, it
+     * may be more practical to send it via a <code>java.io.Reader</code>
+     * object. The data will be read from the stream as needed until
+     * end-of-file is reached. The JDBC driver will do any necessary conversion
+     * from UNICODE to the database char format.
+     *
+     * <em>Note:</em> This stream object can either be a standard Java stream
+     * object or your own subclass that implements the standard interface.
+     *
+     * Using this lengthless overload is not less effective than using one
+     * where the stream length is specified, but since there is no length
+     * specified, the exact length check will not be performed.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param reader the <code>java.io.Reader</code> object that contains the
+     *      Unicode data
+     * @throws SQLException if a database access error occurs or this method is
+     *      called on a closed <code>PreparedStatement</code>
+     */
+    public void setCharacterStream(int parameterIndex, Reader reader)
+            throws SQLException {
+        checkCharacterStreamConditions(parameterIndex, "java.io.Reader");
+        setCharacterStreamInternal(parameterIndex, reader,
+                                   true, -1);
+    }
+
+    /**
+     * Sets the designated parameter to a <code>Reader</code> object.
+     * This method differs from the <code>setCharacterStream(int,Reader)</code>
+     * method because it informs the driver that the parameter value should be
+     * sent to the server as a <code>CLOB</code>. When the
+     * <code>setCharacterStream</code> method is used, the driver may have to
+     * do extra work to determine whether the parameter data should be sent to
+     * the server as a <code>LONGVARCHAR</code> or a <code>CLOB</code>.
+     *
+     * @param parameterIndex index of the first parameter is 1, the second is
+     *      2, ...
+     * @param reader an object that contains the data to set the parameter
+     *      value to.
+     * @throws SQLException if a database access error occurs, this method is
+     *      called on a closed PreparedStatementor if parameterIndex does not
+     *      correspond to a parameter marker in the SQL statement
+     */
+    public void setClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        checkClobConditions(parameterIndex);
+        setCharacterStreamInternal(parameterIndex, reader, true, -1);
+    }
+
     /**
      * Sets the designated parameter to a Reader object.
      *
@@ -1640,15 +1805,32 @@ public abstract class EmbedPreparedStatement
     
     public void setClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
-        checkStatus();
-        int colType;
-        synchronized(getConnectionSynchronization()) {
-            colType = getParameterJDBCType(parameterIndex);
-            if(colType != Types.CLOB)
-                throw dataTypeConversion(parameterIndex, "java.sql.Clob");
-            
-            setCharacterStreamInternal(parameterIndex,reader,length);
-        }
+        checkClobConditions(parameterIndex);
+        setCharacterStreamInternal(parameterIndex, reader, false, length);
+    }
+
+    /**
+     * Sets the designated parameter to a <code>InputStream</code> object.
+     * This method differs from the <code>setBinaryStream(int, InputStream)
+     * </code>  method because it informs the driver that the parameter value
+     * should be sent to the server as a <code>BLOB</code>. When the
+     * <code>setBinaryStream</code> method is used, the driver may have to do
+     * extra work to determine whether the parameter data should be sent to the
+     * server as a <code>LONGVARBINARY</code> or a <code>BLOB</code>
+     *
+     * @param parameterIndex index of the first parameter is 1, the second is
+     *      2, ...
+     * @param inputStream an object that contains the data to set the parameter
+     *      value to.
+     * @throws SQLException if a database access error occurs, this method is
+     *      called on a closed <code>PreparedStatement</code> or if
+     *      <code>parameterIndex</code> does not correspond to a parameter
+     *      marker in the SQL statement
+     */
+    public void setBlob(int parameterIndex, InputStream inputStream)
+            throws SQLException {
+        checkBlobConditions(parameterIndex);
+        setBinaryStreamInternal(parameterIndex, inputStream, true, -1);
     }
 
     /**
@@ -1668,14 +1850,20 @@ public abstract class EmbedPreparedStatement
     
     public void setBlob(int parameterIndex, InputStream inputStream, long length)
     throws SQLException{
+        checkBlobConditions(parameterIndex);
+        setBinaryStreamInternal(parameterIndex, inputStream, false, length);
+    }
+
+    /**
+     * Check general (pre)conditions for setBlob methods.
+     *
+     * @param parameterIndex 1-based index of the parameter.
+     */
+    private final void checkBlobConditions(int parameterIndex)
+            throws SQLException {
         checkStatus();
-        int colType;
-        synchronized (getConnectionSynchronization()) {
-            colType = getParameterJDBCType(parameterIndex);
-            if (colType != Types.BLOB)
-                throw dataTypeConversion(parameterIndex, "java.sql.Blob");
-            
-            setBinaryStreamInternal(parameterIndex,inputStream,length);
+        if (getParameterJDBCType(parameterIndex) != Types.BLOB) {
+            throw dataTypeConversion(parameterIndex, "java.sql.Blob");
         }
-    }        
+    }
 }

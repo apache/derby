@@ -2685,8 +2685,53 @@ public abstract class EmbedResultSet extends ConnectionChild
 				throw new SQLException(uee.getMessage());
 			}
 		}
-		updateCharacterStream(columnIndex, r, length);
+		updateCharacterStreamInternal(columnIndex, r, false, length,
+				"updateAsciiStream");
 	}
+
+    /**
+     * Updates the designated column with a character stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or </code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x the new column value
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateAsciiStream(int columnIndex, InputStream x)
+            throws SQLException {
+        checksBeforeUpdateXXX("updateAsciiStream", columnIndex);
+
+        int colType = getColumnType(columnIndex);
+        switch (colType) {
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.CLOB:
+                break;
+            default:
+                throw dataTypeConversion(columnIndex, "java.io.InputStream");
+        }
+
+        java.io.Reader r = null;
+        if (x != null) {
+            try {
+                r = new java.io.InputStreamReader(x, "ISO-8859-1");
+            } catch (java.io.UnsupportedEncodingException uee) {
+                throw new SQLException(uee.getMessage());
+            }
+        }
+        updateCharacterStreamInternal(columnIndex, r, true, -1,
+                                      "updateAsciiStream");
+    }
 
 	/**
 	 *
@@ -2726,24 +2771,84 @@ public abstract class EmbedResultSet extends ConnectionChild
 			return;
 		}
 
-		updateBinaryStreamInternal(columnIndex, x, length,"updateBinaryStream");
+		updateBinaryStreamInternal(columnIndex, x, false, length,
+                                   "updateBinaryStream");
 	}
 
-	private void updateBinaryStreamInternal(int columnIndex,
-						java.io.InputStream x, long length, String updateMethodName)
-	    throws SQLException
-	{
-        if (length < 0)
-            throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
-        
-        // max number of bytes that can be set to be inserted 
-        // in Derby is 2Gb-1 (ie Integer.MAX_VALUE). 
-        // (e.g into a blob column).
-        if (length > Integer.MAX_VALUE ) {
-            throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
-                    getColumnSQLType(columnIndex));
+    /**
+     * Updates the designated column with a binary stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x the new column value
+     * @throws SQLException if the columnLabel is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateBinaryStream(int columnIndex, InputStream x)
+            throws SQLException {
+        checksBeforeUpdateXXX("updateBinaryStream", columnIndex);
+        int colType = getColumnType(columnIndex);
+        switch (colType) {
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+            case Types.BLOB:
+                break;
+            default:
+                throw dataTypeConversion(columnIndex, "java.io.InputStream");
         }
-        
+        updateBinaryStreamInternal(columnIndex, x, true, -1,
+                                   "updateBinaryStream");
+    }
+
+    /**
+     * Set the given binary stream for the specified parameter.
+     *
+     * If <code>lengthLess</code> is <code>true</code>, the following
+     * conditions are either not checked or verified at the execution time
+     * of <code>updateRow</code>/<code>insertRow</code>:
+     * <ol><li>If the stream length is negative.
+     *     <li>If the stream's actual length equals the specified length.</ol>
+     * The <code>lengthLess</code> variable was added to differentiate between
+     * streams with invalid lengths and streams without known lengths.
+     *
+     * @param columnIndex the 1-based index of the parameter to set.
+     * @param x the data.
+     * @param lengthLess tells whether we know the length of the data or not.
+     * @param length the length of the data. Ignored if <code>lengthLess</code>
+     *          is <code>true</code>.
+     * @param updateMethodName the name of the method calling us. Used in
+     *      error messages.
+     * @throws SQLException if reading the data fails, or one of the data
+     *      checks fails.
+     */
+    private void updateBinaryStreamInternal(int columnIndex, InputStream x,
+                final boolean lengthLess, long length, String updateMethodName)
+            throws SQLException {
+        if (!lengthLess) {
+            if (length < 0)
+                throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
+
+            // max number of bytes that can be set to be inserted
+            // in Derby is 2Gb-1 (ie Integer.MAX_VALUE).
+            // (e.g into a blob column).
+            if (length > Integer.MAX_VALUE ) {
+                throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
+                        getColumnSQLType(columnIndex));
+            }
+        } else {
+            // Force length to -1 if stream is length less.
+            length = -1;
+        }
+
         try {
 			getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(
                     new RawToBinaryFormatStream(x, (int) length), (int) length);
@@ -2787,12 +2892,68 @@ public abstract class EmbedResultSet extends ConnectionChild
 			default:
 				throw dataTypeConversion(columnIndex, "java.io.Reader");
 		}
-		updateCharacterStreamInternal(columnIndex, x, length, "updateCharacterStream");
+		updateCharacterStreamInternal(columnIndex, x, false, length,
+                                      "updateCharacterStream");
 	}
 
-    private void updateCharacterStreamInternal(int columnIndex,
-						java.io.Reader reader, long length, String updateMethodName)
-	    throws SQLException
+    /**
+     * Updates the designated column with a character stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or </code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x the new column value
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateCharacterStream(int columnIndex, Reader x)
+            throws SQLException {
+        checksBeforeUpdateXXX("updateCharacterStream", columnIndex);
+        int colType = getColumnType(columnIndex);
+        switch (colType) {
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.CLOB:
+                break;
+            default:
+                throw dataTypeConversion(columnIndex, "java.io.Reader");
+        }
+        updateCharacterStreamInternal(columnIndex, x, true, -1,
+                                      "updateCharacterStream");
+    }
+
+    /**
+     * Set the given character stream for the specified parameter.
+     *
+     * If <code>lengthLess</code> is <code>true</code>, the following
+     * conditions are either not checked or verified at the execution time
+     * of the prepared statement:
+     * <ol><li>If the stream length is negative.
+     *     <li>If the stream's actual length equals the specified length.</ol>
+     * The <code>lengthLess</code> variable was added to differentiate between
+     * streams with invalid lengths and streams without known lengths.
+     *
+     * @param columnIndex the 1-based index of the parameter to set.
+     * @param reader the data.
+     * @param lengthLess tells whether we know the length of the data or not.
+     * @param length the length of the data. Ignored if <code>lengthLess</code>
+     *          is <code>true</code>.
+     * @throws SQLException if reading the data fails, or one of the data
+     *      checks fails.
+     */
+    private void updateCharacterStreamInternal(int columnIndex, Reader reader,
+                                               final boolean lengthLess,
+                                               long length,
+                                               String updateMethodName)
+            throws SQLException
 	{
 		try {
 
@@ -2802,52 +2963,62 @@ public abstract class EmbedResultSet extends ConnectionChild
                 return;
             }
             
-            // check for -ve length here 
-            if (length < 0) 
-                throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
+            ReaderToUTF8Stream utfIn;
+            int usableLength = -1;
+            if (!lengthLess) {
+                // check for -ve length here
+                if (length < 0)
+                    throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
 
-            // max number of characters that can be set to be inserted 
-            // in Derby is 2Gb-1 (ie Integer.MAX_VALUE). 
-            // (e.g into a CLOB column).
-            if (length > Integer.MAX_VALUE ) {
-                throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
-                        getColumnSQLType(columnIndex));
-            } 
-           
-            // length is +ve. at this point, all checks for negative
-            // length has already been done
-            int usableLength = (int) length;
-            int truncationLength = 0;
-
-            // Currently long varchar does not allow for truncation of
-            // trailing blanks.  For char and varchar types, current mechanism 
-            // of materializing when using streams seems fine given their max
-            // limits. This change is fix for DERBY-352: Insert of clobs using
-            // streams should not materialize the entire stream into memory
-            // In case of clobs, the truncation of trailing blanks is
-            // factored in when reading from the stream without materializing
-            // the entire stream, and so the special casing for clob below.
-            if (getColumnType(columnIndex) == Types.CLOB) {
-                // Need column width to figure out if truncation is
-                // needed
-                int colWidth = resultDescription.getColumnDescriptor(
-                        columnIndex).getType().getMaximumWidth();
-
-                // It is possible that the length of the stream passed
-                // in is greater than the column width, in which case the data
-                // from the stream needs to be truncated.
-                // usableLength is the length of the data from stream
-                // that can be used which is min(colWidth,length) provided
-                // length - colWidth has trailing blanks only
-                if (usableLength > colWidth) {                   
-                    truncationLength = usableLength - colWidth;
-                    usableLength = colWidth;
+                // max number of characters that can be set to be inserted
+                // in Derby is 2Gb-1 (ie Integer.MAX_VALUE).
+                // (e.g into a CLOB column).
+                if (length > Integer.MAX_VALUE ) {
+                    throw newSQLException(
+                            SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
+                            getColumnSQLType(columnIndex));
                 }
+
+                // length is +ve. at this point, all checks for negative
+                // length has already been done
+                usableLength = (int) length;
+                int truncationLength = 0;
+
+                // Currently long varchar does not allow for truncation of
+                // trailing blanks.  For char and varchar types, current
+                // mechanism of materializing when using streams seems fine
+                // given their max limits. This change is fix for DERBY-352:
+                // Insert of clobs using streams should not materialize the
+                // entire stream into memory
+                // In case of clobs, the truncation of trailing blanks is
+                // factored in when reading from the stream without
+                // materializing the entire stream, and so the special casing
+                // for clob below.
+                if (getColumnType(columnIndex) == Types.CLOB) {
+                    // Need column width to figure out if truncation is
+                    // needed
+                    int colWidth = resultDescription.getColumnDescriptor(
+                            columnIndex).getType().getMaximumWidth();
+
+                    // It is possible that the length of the stream passed in
+                    // is greater than the column width, in which case the data
+                    // from the stream needs to be truncated.
+                    // usableLength is the length of the data from stream
+                    // that can be used which is min(colWidth,length) provided
+                    // length - colWidth has trailing blanks only
+                    if (usableLength > colWidth) {
+                        truncationLength = usableLength - colWidth;
+                        usableLength = colWidth;
+                    }
+                }
+
+                utfIn = new ReaderToUTF8Stream(
+                            reader, usableLength, truncationLength);
+            } else {
+                utfIn = new ReaderToUTF8Stream(
+                            reader, ReaderToUTF8Stream.UNKNOWN_LENGTH, 0);
             }
 
-            ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(
-                    reader, usableLength, truncationLength);
-            
             getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(
                     utfIn, (int) usableLength);
         } catch (StandardException t) {
@@ -3938,7 +4109,8 @@ public abstract class EmbedResultSet extends ConnectionChild
             updateNull(columnIndex);
         else {
             long length = x.length();
-            updateBinaryStreamInternal(columnIndex, x.getBinaryStream(), length, "updateBlob");
+            updateBinaryStreamInternal(columnIndex, x.getBinaryStream(), false,
+                                       length, "updateBlob");
         }
 	}
 
@@ -3993,7 +4165,8 @@ public abstract class EmbedResultSet extends ConnectionChild
             long length = x.length();
 
             updateCharacterStreamInternal(
-                columnIndex, x.getCharacterStream(),length, "updateClob");
+                columnIndex, x.getCharacterStream(), false, length,
+                "updateClob");
         }
 	}
 
@@ -4522,6 +4695,31 @@ public abstract class EmbedResultSet extends ConnectionChild
          updateAsciiStream(findColumnName(columnName),x,length);
      }
 
+    /**
+     * Updates the designated column with a character stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or </code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnName the label for the column specified with the SQL AS
+     *      clause. If the SQL AS clause was not specified, then the label is
+     *      the name of the column
+     * @param x the new column value
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateAsciiStream(String columnName, InputStream x)
+            throws SQLException {
+        checkIfClosed("updateAsciiStream");
+        updateAsciiStream(findColumnName(columnName), x);
+    }
+
      /**
       *
       * JDBC 4.0
@@ -4549,6 +4747,31 @@ public abstract class EmbedResultSet extends ConnectionChild
          updateBinaryStream(findColumnName(columnName),x,length);
      }
 
+    /**
+     * Updates the designated column with a binary stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnName the label for the column specified with the SQL AS
+     *      clause. If the SQL AS clause was not specified, then the label is
+     *      the name of the column
+     * @param x the new column value
+     * @throws SQLException if the columnLabel is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateBinaryStream(String columnName, InputStream x)
+            throws SQLException {
+        checkIfClosed("updateBinaryStream");
+        updateBinaryStream(findColumnName(columnName), x);
+    }
+
      /**
       * JDBC 4.0
       *
@@ -4573,6 +4796,31 @@ public abstract class EmbedResultSet extends ConnectionChild
          checkIfClosed("updateCharacterStream");
          updateCharacterStream(findColumnName(columnName),reader,length);
      }
+
+    /**
+     * Updates the designated column with a character stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or </code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnName the label for the column specified with the SQL AS
+     *      clause. If the SQL AS clause was not specified, then the label is
+     *      the name of the column
+     * @param reader the new column value
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateCharacterStream(String columnName, Reader reader)
+            throws SQLException {
+        checkIfClosed("updateCharacterStream");
+        updateCharacterStream(findColumnName(columnName), reader);
+    }
 
      /**
       *
@@ -4602,9 +4850,37 @@ public abstract class EmbedResultSet extends ConnectionChild
          if (x == null)
              updateNull(columnIndex);
          else {
-             updateBinaryStreamInternal(columnIndex, x, length, "updateBlob");
+             updateBinaryStreamInternal(columnIndex, x, false, length,
+                                        "updateBlob");
          }
      }
+
+    /**
+     * Updates the designated column using the given input stream.
+     * The data will be read from the stream as needed until end-of-stream is reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the updateRow or insertRow methods are called to
+     * update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x an object that contains the data to set the
+     *     parameter value to.
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *     access error occurs; the result set concurrency is
+     *     <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *     result set
+     */
+    public void updateBlob(int columnIndex, InputStream x)
+           throws SQLException {
+       checksBeforeUpdateXXX("updateBlob", columnIndex);
+       int colType = getColumnType(columnIndex);
+       if (colType != Types.BLOB) {
+            throw dataTypeConversion(columnIndex, "java.sql.Blob");
+       }
+       updateBinaryStreamInternal(columnIndex, x, true, -1, "updateBlob");
+    }
 
      /**
       *
@@ -4630,6 +4906,31 @@ public abstract class EmbedResultSet extends ConnectionChild
          checkIfClosed("updateBlob");
          updateBlob(findColumnName(columnName),x,length);
      }
+
+    /**
+     * Updates the designated column using the given input stream.
+     * The data will be read from the stream as needed until end-of-stream is reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the updateRow or insertRow methods are called to
+     * update the database.
+     *
+     * @param columnName the label for the column specified with the SQL AS
+     *     clause. If the SQL AS clause was not specified, then the label is
+     *     the name of the column
+     * @param x an object that contains the data to set the
+     *     parameter value to.
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *     access error occurs; the result set concurrency is
+     *     <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *     result set
+     */
+    public void updateBlob(String columnName, InputStream x)
+           throws SQLException {
+       checkIfClosed("updateBlob");
+       updateBlob(findColumnName(columnName), x);
+    }
 
      /**
       *
@@ -4658,9 +4959,40 @@ public abstract class EmbedResultSet extends ConnectionChild
              updateNull(columnIndex);
          } else {
              updateCharacterStreamInternal(
-                 columnIndex, x,length, "updateClob");
+                 columnIndex, x, false, length, "updateClob");
          }
      }
+
+    /**
+     * Updates the designated column using the given <code>Reader</code>
+     * object.
+     *
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached. The JDBC driver will do any necessary conversion from
+     * <code>UNICODE</code> to the database char format.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x an object that contains the data to set the parameter
+     *     value to
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *     access error occurs; the result set concurrency is
+     *     <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *     result set
+     */
+    public void updateClob(int columnIndex, Reader x)
+           throws SQLException {
+        checksBeforeUpdateXXX("updateClob", columnIndex);
+        int colType = getColumnType(columnIndex);
+        if (colType != Types.CLOB) {
+            throw dataTypeConversion(columnIndex, "java.sql.Clob");
+        }
+        updateCharacterStreamInternal(columnIndex, x, true, -1, "updateClob");
+    }
 
      /**
       *
@@ -4684,5 +5016,33 @@ public abstract class EmbedResultSet extends ConnectionChild
          checkIfClosed("updateClob");
          updateClob(findColumnName(columnName),x,length);
      }
-}
 
+    /**
+     * Updates the designated column using the given <code>Reader</code>
+     * object.
+     *
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached. The JDBC driver will do any necessary conversion from
+     * <code>UNICODE</code> to the database char format.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnName the label for the column specified with the SQL AS
+     *     clause. If the SQL AS clause was not specified, then the label is
+     *     the name of the column
+     * @param x an object that contains the data to set the parameter
+     *     value to
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *     access error occurs; the result set concurrency is
+     *     <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *     result set
+     */
+    public void updateClob(String columnName, Reader x)
+           throws SQLException {
+       checkIfClosed("updateClob");
+       updateClob(findColumnName(columnName), x);
+    }
+}

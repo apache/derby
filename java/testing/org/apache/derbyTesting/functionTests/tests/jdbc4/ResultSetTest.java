@@ -199,8 +199,18 @@ public class ResultSetTest
             // We are fine, do nothing.
         }
     }
-   
-    public void testUpdateNCharaterStreamStringNotImplemented()
+
+    public void embonlytmpUpdateNCharacterStreamIntLengthLessNotImplemented()
+        throws SQLException {
+        try {
+            rs.updateNCharacterStream(1, null);
+            fail("ResultSet.updateNCharacterStream(int, Reader) " +
+                 "should not be implemented");
+        } catch (SQLFeatureNotSupportedException sfnse) {
+            // We are fine, do nothing.
+        }
+    }
+    public void testUpdateNCharacterStreamStringNotImplemented()
         throws SQLException {
         try {
             rs.updateNCharacterStream("some-column-name", null, 0);
@@ -211,11 +221,33 @@ public class ResultSetTest
         }
     }
 
-    public void testUpdateNClobNotIntImplemented()
+    public void embonlytmpUpdateNCharacterStreamStringLengthlessNotImplemented()
+        throws SQLException {
+        try {
+            rs.updateNCharacterStream("some-column-name", null);
+            fail("ResultSet.updateNCharacterStream(String, Reader) " +
+                 "should not be implemented");
+        } catch (SQLFeatureNotSupportedException sfnse) {
+            // We are fine, do nothing.
+        }
+    }
+
+    public void testUpdateNClobIntNotImplemented()
         throws SQLException {
         try {
             rs.updateNClob(1, (NClob)null);
             fail("ResultSet.updateNClob(int, NClob) " +
+                 "should not be implemented");
+        } catch (SQLFeatureNotSupportedException sfnse) {
+            // We are fine, do nothing.
+        }
+    }
+
+    public void testUpdateNClobIntLengthlessNotImplemented()
+        throws SQLException {
+        try {
+            rs.updateNClob(1, (Reader)null);
+            fail("ResultSet.updateNClob(int, Reader) " +
                  "should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
             // We are fine, do nothing.
@@ -233,6 +265,17 @@ public class ResultSetTest
         }
     }
     
+    public void testUpdateNClobStringLengthlessNotImplemented()
+        throws SQLException {
+        try {
+            rs.updateNClob("some-column-name", (Reader)null);
+            fail("ResultSet.updateNClob(String, Reader) " +
+                 "should not be implemented");
+        } catch (SQLFeatureNotSupportedException sfnse) {
+            // We are fine, do nothing.
+        }
+    }
+
     public void testUpdateNStringIntNotImplemented()
         throws SQLException {
         try {
@@ -515,6 +558,66 @@ public class ResultSetTest
         rs1.close();
     }
 
+    public void embonlytmpUpdateBinaryStreamLengthless()
+            throws IOException, SQLException {
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+        // InputStream used for update.
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        //Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep(con, "dLongBit");
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2, is1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        //Update operation
+        ResultSet rs1 = fetchUpd(con, "dLongBit", key);
+        rs1.next();
+        rs1.updateBinaryStream(1, is2);
+        rs1.updateRow();
+        rs1.close();
+
+        //Query to see whether the data that has been updated
+        //using the updateBinaryStream method is the same
+        //data that we expected
+
+        rs1 = fetch(con, "dLongBit", key);
+        rs1.next();
+        assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
+        rs1.close();
+    }
+
+    public void embonlytmpUpdateBinaryStreamLengthlessParameterName()
+            throws IOException, SQLException {
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+        // InputStream used for update.
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        //Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep(con, "dLongBit");
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2, is1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        //Update operation
+        ResultSet rs1 = fetchUpd(con, "dLongBit", key);
+        rs1.next();
+        rs1.updateBinaryStream("dLongBit", is2);
+        rs1.updateRow();
+        rs1.close();
+
+        //Query to see whether the data that has been updated
+        //using the updateBinaryStream method is the same
+        //data that we expected
+
+        rs1 = fetch(con, "dLongBit", key);
+        rs1.next();
+        assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
+        rs1.close();
+    }
+
     /**
      * This methods tests the ResultSet interface method
      * updateAsciiStream
@@ -573,6 +676,84 @@ public class ResultSetTest
         rs1.close();
     }
 
+    public void embonlytmpUpdateAsciiStreamLengthless()
+            throws IOException, SQLException {
+        // Array to keep updated data fetched from the database.
+        byte[] bytesRet = new byte[10];
+
+        // Input Stream inserted initially.
+        InputStream is = new java.io.ByteArrayInputStream(BYTES1);
+
+        // InputStream that is used for update.
+        InputStream isForUpdate = new
+                java.io.ByteArrayInputStream(BYTES2);
+
+        // Prepared Statement used to insert the data.
+        PreparedStatement ps_sb = prep(con, "dLongVarchar");
+        ps_sb.setInt(1, key);
+        ps_sb.setAsciiStream(2, is, BYTES1.length);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        // Update the data.
+        ResultSet rs1 = fetchUpd(con, "dLongVarchar", key);
+        rs1.next();
+        rs1.updateAsciiStream(1, isForUpdate);
+        rs1.updateRow();
+        rs1.close();
+
+        // Query to see whether the data that has been updated.
+        rs1 = fetch(con, "dLongVarchar", key);
+        rs1.next();
+        InputStream isRet = rs1.getAsciiStream(1);
+        isRet.read(bytesRet);
+        isRet.close();
+
+        for (int i=0; i < BYTES2.length; i++) {
+            assertEquals("Error in updateAsciiStream", BYTES2[i], bytesRet[i]);
+        }
+        rs1.close();
+    }
+
+    public void embonlytmpUpdateAsciiStreamLengthlessParameterName()
+            throws IOException, SQLException {
+        // Array to keep updated data fetched from the database.
+        byte[] bytesRet = new byte[10];
+
+        // Input Stream inserted initially.
+        InputStream is = new java.io.ByteArrayInputStream(BYTES1);
+
+        // InputStream that is used for update.
+        InputStream isForUpdate = new
+                java.io.ByteArrayInputStream(BYTES2);
+
+        // Prepared Statement used to insert the data.
+        PreparedStatement ps_sb = prep(con, "dLongVarchar");
+        ps_sb.setInt(1, key);
+        ps_sb.setAsciiStream(2, is, BYTES1.length);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        // Update the data.
+        ResultSet rs1 = fetchUpd(con, "dLongVarchar", key);
+        rs1.next();
+        rs1.updateAsciiStream("dLongVarchar", isForUpdate);
+        rs1.updateRow();
+        rs1.close();
+
+        // Query to see whether the data that has been updated.
+        rs1 = fetch(con, "dLongVarchar", key);
+        rs1.next();
+        InputStream isRet = rs1.getAsciiStream(1);
+        isRet.read(bytesRet);
+        isRet.close();
+
+        for (int i=0; i < BYTES2.length; i++) {
+            assertEquals("Error in updateAsciiStream", BYTES2[i], bytesRet[i]);
+        }
+        rs1.close();
+    }
+
      /**
      * This methods tests the ResultSet interface method
      * updateCharacterStream
@@ -626,6 +807,70 @@ public class ResultSetTest
             str_ret);
 
         rs1.close();
+    }
+
+    public void embonlytmpUpdateCharacterStreamLengthless()
+            throws IOException, SQLException {
+        String str = "This is the (\u0FFF\u1234) test string";
+        String strUpdated = "An updated (\u0FEF\u9876) test string";
+
+        // Insert test data
+        PreparedStatement psChar = prep(con, "dLongVarchar");
+        psChar.setInt(1, key);
+        psChar.setCharacterStream(2, new StringReader(str));
+        psChar.execute();
+        psChar.close();
+
+        // Update test data
+        ResultSet rs = fetchUpd(con, "dLongVarchar", key);
+        rs.next();
+        rs.updateCharacterStream(1, new StringReader(strUpdated));
+        rs.updateRow();
+        rs.close();
+
+        // Verify that update took place and is correct.
+        rs = fetch(con, "dLongVarchar", key);
+        rs.next();
+        Reader updatedStr = rs.getCharacterStream(1);
+        for (int i=0; i < strUpdated.length(); i++) {
+            assertEquals("Strings differ at index " + i,
+                    strUpdated.charAt(i),
+                    updatedStr.read());
+        }
+        assertEquals("Too much data in stream", -1, updatedStr.read());
+        updatedStr.close();
+    }
+
+    public void embonlytmpUpdateCharacterStreamLengthlessParameterName()
+            throws IOException, SQLException {
+        String str = "This is the (\u0FFF\u1234) test string";
+        String strUpdated = "An updated (\u0FEF\u9876) test string";
+
+        // Insert test data
+        PreparedStatement psChar = prep(con, "dLongVarchar");
+        psChar.setInt(1, key);
+        psChar.setCharacterStream(2, new StringReader(str));
+        psChar.execute();
+        psChar.close();
+
+        // Update test data
+        ResultSet rs = fetchUpd(con, "dLongVarchar", key);
+        rs.next();
+        rs.updateCharacterStream("dLongVarchar", new StringReader(strUpdated));
+        rs.updateRow();
+        rs.close();
+
+        // Verify that update took place and is correct.
+        rs = fetch(con, "dLongVarchar", key);
+        rs.next();
+        Reader updatedStr = rs.getCharacterStream(1);
+        for (int i=0; i < strUpdated.length(); i++) {
+            assertEquals("Strings differ at index " + i,
+                    strUpdated.charAt(i),
+                    updatedStr.read());
+        }
+        assertEquals("Too much data in stream", -1, updatedStr.read());
+        updatedStr.close();
     }
 
     /**
@@ -692,6 +937,34 @@ public class ResultSetTest
         rs1 = fetch(con, "dClob", key2);
         rs1.next();
         assertEquals(clob, rs1.getClob(1));
+        rs1.close();
+    }
+
+    public void embeddedUpdateClobLengthless()
+            throws Exception {
+        Reader r1 = new java.io.StringReader(new String(BYTES1));
+        // InputStream for insertion.
+        Reader r2 = new java.io.StringReader(new String(BYTES2));
+
+        // Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep(con, "dClob");
+        ps_sb.setInt(1, key);
+        ps_sb.setCharacterStream(2, r1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        // Update operation
+        ResultSet rs1 = fetchUpd(con, "dClob", key);
+        rs1.next();
+        rs1.updateClob(1, r2);
+        rs1.updateRow();
+        rs1.close();
+
+        // Query to see whether the data that has been updated.
+        rs1 = fetch(con, "dClob", key);
+        rs1.next();
+        assertEquals(new StringReader(new String(BYTES2)),
+                     rs1.getCharacterStream(1));
         rs1.close();
     }
 
@@ -762,6 +1035,33 @@ public class ResultSetTest
         rs1.close();
     }
 
+    public void embeddedUpdateBlobLengthless()
+            throws Exception {
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+        // InputStream for insertion.
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        // Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep(con, "dBlob");
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2, is1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        // Update operation
+        ResultSet rs1 = fetchUpd(con, "dBlob", key);
+        rs1.next();
+        rs1.updateBlob(1, is2);
+        rs1.updateRow();
+        rs1.close();
+
+        // Query to see whether the data that has been updated.
+        rs1 = fetch(con, "dBlob", key);
+        rs1.next();
+        assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
+        rs1.close();
+    }
+
     /**
      * This methods tests the ResultSet interface method
      * updateClob
@@ -826,6 +1126,34 @@ public class ResultSetTest
         rs1 = fetch(con, "dClob", key2);
         rs1.next();
         assertEquals(clob, rs1.getClob(1));
+        rs1.close();
+    }
+
+    public void embeddedUpdateClobLengthlessParameterName()
+            throws Exception {
+        Reader r1 = new java.io.StringReader(new String(BYTES1));
+        // InputStream for insertion.
+        Reader r2 = new java.io.StringReader(new String(BYTES2));
+
+        // Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep(con, "dClob");
+        ps_sb.setInt(1, key);
+        ps_sb.setCharacterStream(2, r1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        // Update operation
+        ResultSet rs1 = fetchUpd(con, "dClob", key);
+        rs1.next();
+        rs1.updateClob("dClob", r2);
+        rs1.updateRow();
+        rs1.close();
+
+        // Query to see whether the data that has been updated.
+        rs1 = fetch(con, "dClob", key);
+        rs1.next();
+        assertEquals(new StringReader(new String(BYTES2)),
+                     rs1.getCharacterStream(1));
         rs1.close();
     }
 
@@ -896,6 +1224,33 @@ public class ResultSetTest
         rs1.close();
     }
 
+    public void embeddedUpdateBlobLengthlessParameterName()
+            throws Exception {
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+        // InputStream for insertion.
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        // Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep(con, "dBlob");
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2, is1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        // Update operation
+        ResultSet rs1 = fetchUpd(con, "dBlob", key);
+        rs1.next();
+        rs1.updateBlob("dBlob", is2);
+        rs1.updateRow();
+        rs1.close();
+
+        // Query to see whether the data that has been updated.
+        rs1 = fetch(con, "dBlob", key);
+        rs1.next();
+        assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
+        rs1.close();
+    }
+
     /************************************************************************
      **                        T E S T  S E T U P                           *
      ************************************************************************/
@@ -921,6 +1276,33 @@ public class ResultSetTest
                     "embeddedUpdateBlobStringParameterName"));
         embeddedSuite.addTest(new ResultSetTest(
                     "embeddedUpdateClobStringParameterName"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embeddedUpdateBlobLengthless"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embeddedUpdateBlobLengthlessParameterName"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embeddedUpdateClobLengthless"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embeddedUpdateClobLengthlessParameterName"));
+        // A bunch of tests disabled temporarily for DerbyNetClient.
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embonlytmpUpdateAsciiStreamLengthless"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embonlytmpUpdateAsciiStreamLengthlessParameterName"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embonlytmpUpdateBinaryStreamLengthless"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embonlytmpUpdateBinaryStreamLengthlessParameterName"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embonlytmpUpdateCharacterStreamLengthless"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embonlytmpUpdateCharacterStreamLengthlessParameterName"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embonlytmpUpdateNCharacterStreamIntLengthLessNotImplemented"));
+        embeddedSuite.addTest(new ResultSetTest(
+                    "embonlytmpUpdateNCharacterStreamStringLengthlessNotImplemented"));
+        //embeddedSuite.addTest(new ResultSetTest(
+        //            ""));
         return embeddedSuite;
     }
 
@@ -1042,5 +1424,57 @@ public class ResultSetTest
         Statement stmt = con.createStatement();
         return stmt.executeQuery("select " + colName +
                 " from UpdateTestTableResultSet where sno = " + key);
+    }
+
+    /**
+     * Compare the contents of two streams.
+     * The streams are closed after they are exhausted.
+     *
+     * @param is1 the first stream
+     * @param is2 the second stream
+     * @throws IOException if reading from the streams fail
+     * @throws AssertionFailedError if the stream contents are not equal
+     */
+    private static void assertEquals(InputStream is1, InputStream is2)
+            throws IOException {
+        long index = 0;
+        int b1 = is1.read();
+        int b2 = is2.read();
+        do {
+            if (b1 != b2) {
+                assertEquals("Streams differ at index " + index, b1, b2);
+            }
+            index++;
+            b1 = is1.read();
+            b2 = is2.read();
+        } while (b1 != -1 || b2 != -1);
+        is1.close();
+        is2.close();
+    }
+
+    /**
+     * Compare the contents of two readers.
+     * The readers are closed after they are exhausted.
+     *
+     * @param r1 the first reader
+     * @param r2 the second reader
+     * @throws IOException if reading from the streams fail
+     * @throws AssertionFailedError if the reader contents are not equal
+     */
+    private static void assertEquals(Reader r1, Reader r2)
+            throws IOException {
+        long index = 0;
+        int b1 = r1.read();
+        int b2 = r2.read();
+        do {
+            if (b1 != b2) {
+                assertEquals("Streams differ at index " + index, b1, b2);
+            }
+            index++;
+            b1 = r1.read();
+            b2 = r2.read();
+        } while (b1 != -1 || b2 != -1);
+        r1.close();
+        r2.close();
     }
 }

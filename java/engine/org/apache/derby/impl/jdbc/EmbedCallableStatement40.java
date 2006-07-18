@@ -160,6 +160,11 @@ public class EmbedCallableStatement40 extends EmbedCallableStatement30 {
         throw Util.notImplemented("setNString (int,value)");
     }
     
+    public void setNCharacterStream(int parameterIndex, Reader value)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public void setNCharacterStream(int index, Reader value, long length) throws SQLException{
         throw Util.notImplemented ("setNCharacterStream (int, Reader, long)");
     }
@@ -167,7 +172,12 @@ public class EmbedCallableStatement40 extends EmbedCallableStatement30 {
     public void setNClob(int index, NClob value) throws SQLException{
         throw Util.notImplemented ("setNClob (int, NClob)");
     }
-    
+
+    public void setNClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
     public void setNClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
         throw Util.notImplemented ("setNClob(int,reader,length)");
