@@ -50,7 +50,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 	static final String TABLENAME_STRING = "SYSROUTINEPERMS";
 
     // Column numbers for the SYSROUTINEPERMS table. 1 based
-    private static final int ROUTINPERMSID_COL_NUM = 1;
+    private static final int ROUTINEPERMSID_COL_NUM = 1;
     private static final int GRANTEE_COL_NUM = 2;
     private static final int GRANTOR_COL_NUM = 3;
     private static final int ALIASID_COL_NUM = 4;
@@ -62,7 +62,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 	private static final int[][] indexColumnPositions = 
 	{ 
 		{ GRANTEE_COL_NUM, ALIASID_COL_NUM, GRANTOR_COL_NUM},
-		{ ROUTINPERMSID_COL_NUM }
+		{ ROUTINEPERMSID_COL_NUM }
 	};
 	private static final String[][] indexColumnNames =
 	{
@@ -117,7 +117,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
                 routineID = rpd.getRoutineUUID().toString();
         }
 		ExecRow row = getExecutionFactory().getValueRow( COLUMN_COUNT);
-		row.setColumn( ROUTINPERMSID_COL_NUM, dvf.getCharDataValue(routinePermID));
+		row.setColumn( ROUTINEPERMSID_COL_NUM, dvf.getCharDataValue(routinePermID));
         row.setColumn( GRANTEE_COL_NUM, grantee);
         row.setColumn( GRANTOR_COL_NUM, grantor);
         row.setColumn( ALIASID_COL_NUM, dvf.getCharDataValue( routineID));
@@ -135,7 +135,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
             SanityManager.ASSERT( row.nColumns() == COLUMN_COUNT,
                                   "Wrong size row passed to SYSROUTINEPERMSRowFactory.buildDescriptor");
 
-        String routinePermsUUIDString = row.getColumn(ROUTINPERMSID_COL_NUM).getString();
+        String routinePermsUUIDString = row.getColumn(ROUTINEPERMSID_COL_NUM).getString();
         UUID routinePermsUUID = getUUIDFactory().recreateUUID(routinePermsUUIDString);
         String aliasUUIDString = row.getColumn( ALIASID_COL_NUM).getString();
         UUID aliasUUID = getUUIDFactory().recreateUUID(aliasUUIDString);
@@ -156,9 +156,9 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
         {
             columnList = new SystemColumn[ COLUMN_COUNT];
 
-            columnList[ ROUTINPERMSID_COL_NUM - 1] =
+            columnList[ ROUTINEPERMSID_COL_NUM - 1] =
                 new SystemColumnImpl( convertIdCase( "ROUTINEPERMSID"),
-                                      ROUTINPERMSID_COL_NUM,
+                                      ROUTINEPERMSID_COL_NUM,
                                       0, // precision
                                       0, // scale
                                       false, // nullability
