@@ -279,16 +279,8 @@ public class BackingStoreHashtable
                     double rowUsage = getEstimatedMemUsage(row);
                     hash_table = new Hashtable((int)(max_inmemory_size / rowUsage));
                 }
-
-                if (needsToClone)
-                {
-                    row = cloneRow(row);
-                }
-
-                Object key = 
-                    KeyHasher.buildHashKey(row, key_column_numbers);
-
-                add_row_to_hash_table(hash_table, key, row);
+               
+                add_row_to_hash_table(hash_table, row, needsToClone);
             }
         }
 
@@ -379,23 +371,52 @@ public class BackingStoreHashtable
     }
 
     /**
+     * Return a shallow cloned row
+     *
+     * @return The cloned row row to use.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    static DataValueDescriptor[] shallowCloneRow(DataValueDescriptor[] old_row)
+        throws StandardException
+    {
+        DataValueDescriptor[] new_row = new DataValueDescriptor[old_row.length];
+        // the only difference between getClone and cloneObject is cloneObject does
+        // not objectify a stream.  We use cloneObject here.  DERBY-802
+        for (int i = 0; i < old_row.length; i++)
+        {
+            if( old_row[i] != null)
+                new_row[i] = (DataValueDescriptor) 
+                    ((CloneableObject) old_row[i]).cloneObject();
+        }
+
+        return(new_row);
+    }
+
+    /**
      * Do the work to add one row to the hash table.
      * <p>
      *
      * @param row               Row to add to the hash table.
      * @param hash_table        The java HashTable to load into.
+     * @param needsToClone      If the row needs to be cloned
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
     private void add_row_to_hash_table(
     Hashtable   hash_table,
-    Object      key,
-    Object[]    row)
+    Object[]    row,
+    boolean needsToClone )
 		throws StandardException
     {
-        if( spillToDisk( hash_table, key, row))
+        if( spillToDisk( hash_table, row))
             return;
         
+        if (needsToClone)
+        {
+            row = cloneRow(row);
+        }
+        Object key = KeyHasher.buildHashKey(row, key_column_numbers);
         Object  duplicate_value = null;
 
         if ((duplicate_value = hash_table.put(key, row)) == null)
@@ -451,7 +472,6 @@ public class BackingStoreHashtable
      * Determine whether a new row should be spilled to disk and, if so, do it.
      *
      * @param hash_table The in-memory hash table
-     * @param key The row's key
      * @param row
      *
      * @return true if the row was spilled to disk, false if not
@@ -459,7 +479,6 @@ public class BackingStoreHashtable
      * @exception  StandardException  Standard exception policy.
      */
     private boolean spillToDisk( Hashtable   hash_table,
-                                 Object      key,
                                  Object[]    row)
 		throws StandardException
     {
@@ -472,7 +491,8 @@ public class BackingStoreHashtable
                 if( inmemory_rowcnt < max_inmemory_rowcnt)
                     return false; // Do not spill
             }
-            else if( max_inmemory_size > 0)
+            else if( max_inmemory_size > getEstimatedMemUsage(row))
+                
                 return false;
             // Want to start spilling
             if( ! (row instanceof DataValueDescriptor[]))
@@ -488,7 +508,7 @@ public class BackingStoreHashtable
                                                remove_duplicates,
                                                keepAfterCommit);
         }
-        
+        Object key = KeyHasher.buildHashKey(row, key_column_numbers);
         Object duplicateValue = hash_table.get( key);
         if( duplicateValue != null)
         {
@@ -727,11 +747,6 @@ public class BackingStoreHashtable
 			}
 		}
 
-        if (needsToClone)
-        {
-            row = cloneRow(row);
-        }
-
         Object key = KeyHasher.buildHashKey(row, key_column_numbers);
 
         if ((remove_duplicates) && (get(key) != null))
@@ -740,7 +755,7 @@ public class BackingStoreHashtable
         }
         else
         {
-            add_row_to_hash_table(hash_table, key, row);
+            add_row_to_hash_table(hash_table, row, needsToClone);
             return(true);
         }
     }

@@ -26,6 +26,7 @@ import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.BitDataValue;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.types.Orderable;
@@ -56,6 +57,14 @@ public class SQLLongVarbit extends SQLVarbit
 	public String getTypeName()
 	{
 		return TypeId.LONGVARBIT_NAME;
+	}
+
+	/**
+	 * Return max memory usage for a SQL LongVarbit
+	 */
+	int getMaxMemoryUsage()
+	{
+		return Limits.DB2_LONGVARCHAR_MAXWIDTH;
 	}
 
 	/**

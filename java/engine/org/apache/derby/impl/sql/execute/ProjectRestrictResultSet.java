@@ -532,15 +532,40 @@ public class ProjectRestrictResultSet extends NoPutResultSetImpl
 	public ExecRow doBaseRowProjection(ExecRow sourceRow)
 		throws StandardException
 	{
-		ExecRow result = null;
+		final ExecRow result;
 		if (source instanceof ProjectRestrictResultSet) {
 			ProjectRestrictResultSet prs = (ProjectRestrictResultSet) source;
 			result = prs.doBaseRowProjection(sourceRow);
 		} else {
-			result = sourceRow.getClone();
+			result = sourceRow.getNewNullRow();
+			result.setRowArray(sourceRow.getRowArray());
 		}
 		return doProjection(result);
 	}
+
+	/**
+	 * Get projection mapping array. The array consist of indexes which
+	 * maps the column in a row array to another position in the row array.
+	 * If the value is projected out of the row, the value is negative.
+	 * @return projection mapping array.
+	 */
+	public int[] getBaseProjectMapping() 
+	{
+		final int[] result;
+		if (source instanceof ProjectRestrictResultSet) {
+			result = new int[projectMapping.length];
+			final ProjectRestrictResultSet prs = (ProjectRestrictResultSet) source;
+			final int[] sourceMap = prs.getBaseProjectMapping();
+			for (int i=0; i<projectMapping.length; i++) {
+				if (projectMapping[i] > 0) {
+					result[i] = sourceMap[projectMapping[i] - 1];
+				}
+			}
+		} else {
+			result = projectMapping;
+		}
+		return result;
+	} 
 	
 	/**
 	 * Is this ResultSet or it's source result set for update

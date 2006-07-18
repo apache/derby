@@ -206,8 +206,10 @@ public class DiskHashtable
                         return this;
 
                     rowCount++;
-                    if( rowCount == 1)
-                        retValue = BackingStoreHashtable.cloneRow( row);
+                    if( rowCount == 1) 
+                    {
+                        retValue = BackingStoreHashtable.shallowCloneRow( row);                        
+                    } 
                     else 
                     {
                         Vector v;
@@ -218,8 +220,10 @@ public class DiskHashtable
                             retValue = v;
                         }
                         else
+                        {
                             v = (Vector) retValue;
-                        v.add( BackingStoreHashtable.cloneRow( row));
+                        }
+                        v.add( BackingStoreHashtable.shallowCloneRow( row));
                     }
                     if( remove)
                     {
@@ -348,7 +352,7 @@ public class DiskHashtable
             try
             {
                 scan.fetch( row);
-                Object retValue =  BackingStoreHashtable.cloneRow( row);
+                Object retValue =  BackingStoreHashtable.shallowCloneRow( row);
                 hasMore = scan.next();
                 if( ! hasMore)
                 {

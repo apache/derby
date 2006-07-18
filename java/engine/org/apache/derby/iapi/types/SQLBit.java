@@ -21,6 +21,7 @@
 package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
@@ -77,6 +78,14 @@ public class SQLBit
 	public String getTypeName()
 	{
 		return TypeId.BIT_NAME;
+	}
+
+	/**
+	 * Return max memory usage for a SQL Bit
+	 */
+	int getMaxMemoryUsage()
+	{
+		return Limits.DB2_CHAR_MAXWIDTH;
 	}
 
 	/*

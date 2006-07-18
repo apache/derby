@@ -26,6 +26,7 @@ import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.BitDataValue;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.types.Orderable;
@@ -80,6 +81,14 @@ public class SQLBlob extends SQLBinary
         {
 			return TypeId.BLOB_NAME;
         }
+
+	/**
+	 * Return max memory usage for a SQL Blob
+	 */
+	int getMaxMemoryUsage()
+	{
+		return Limits.DB2_LOB_MAXWIDTH;
+	}
 
     /**
      * @see DataValueDescriptor#getNewNull

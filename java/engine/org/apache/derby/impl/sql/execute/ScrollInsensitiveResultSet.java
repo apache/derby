@@ -229,9 +229,8 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		 * The 1st column, the position in the
 		 * scan, will be the key column.
 		 */
-		int[] keyCols = new int[1];
-		// keyCols[0] = 0; // not req. arrays initialized to zero
-
+		final int[] keyCols = new int[] { 0 };
+		
 		/* We don't use the optimizer row count for this because it could be
 		 * wildly pessimistic.  We only use Hash tables when the optimizer row count
 		 * is within certain bounds.  We have no alternative for scrolling insensitive 
@@ -992,12 +991,12 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		 * and we do our own cloning since the 1st column
 		 * is not a wrapper.
 		 */
-		DataValueDescriptor[] sourceRowArray = sourceRow.getRowArrayClone();
+		DataValueDescriptor[] sourceRowArray = sourceRow.getRowArray();
 
 		System.arraycopy(sourceRowArray, 0, hashRowArray, extraColumns, 
 				sourceRowArray.length);
 
-		ht.put(false, hashRowArray);
+		ht.put(true, hashRowArray);
 
 		numToHashTable++;
 	}
@@ -1058,6 +1057,31 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 
 		return resultRow;
 	}
+	
+	/**
+	 * Get the row data at the specified position 
+	 * from the hash table.
+	 *
+	 * @param position	The specified position.
+	 *
+	 * @return	The row data at that position.
+	 *
+ 	 * @exception StandardException thrown on failure 
+	 */
+	private DataValueDescriptor[] getRowArrayFromHashTable(int position)
+		throws StandardException
+	{
+		positionInHashTable.setValue(position);
+		final DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
+			ht.get(positionInHashTable);
+		
+		// Copy out the Object[] without the position.
+		final DataValueDescriptor[] resultRowArray = new 
+			DataValueDescriptor[hashRowArray.length - extraColumns];
+		System.arraycopy(hashRowArray, extraColumns, resultRowArray, 0, 
+						 resultRowArray.length);
+		return resultRowArray;
+	}
 
 	/**
 	 * Positions the cursor in the last fetched row. This is done before
@@ -1082,10 +1106,13 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 * in the hash table with the new values for the row.
 	 */
 	public void updateRow(ExecRow row) throws StandardException {
-		ExecRow newRow = row.getClone();
+		ExecRow newRow = row;
+		boolean undoProjection = false;
+		
 		if (source instanceof ProjectRestrictResultSet) {
 			newRow = ((ProjectRestrictResultSet)source).
-					doBaseRowProjection(newRow);
+				doBaseRowProjection(row);
+			undoProjection = true;
 		}
 		positionInHashTable.setValue(currentPosition);
 		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
@@ -1093,6 +1120,32 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		RowLocation rowLoc = (RowLocation) hashRowArray[POS_ROWLOCATION];
 		ht.remove(new SQLInteger(currentPosition));
 		addRowToHashTable(newRow, currentPosition, rowLoc, true);
+		
+		// Modify row to refer to data in the BackingStoreHashtable.
+		// This allows reading of data which goes over multiple pages
+		// when doing the actual update (LOBs). Putting columns of
+		// type SQLBinary to disk, has destructive effect on the columns,
+		// and they need to be re-read. That is the reason this is needed.
+		if (undoProjection) {
+			
+			final DataValueDescriptor[] newRowData = newRow.getRowArray();
+			
+			// Array of original position in row
+			final int[] origPos =((ProjectRestrictResultSet)source).
+				getBaseProjectMapping(); 
+			
+			// We want the row to contain data backed in BackingStoreHashtable
+			final DataValueDescriptor[] backedData = 
+				getRowArrayFromHashTable(currentPosition);
+			
+			for (int i=0; i<origPos.length; i++) {
+				if (origPos[i]>=0) {
+					row.setColumn(origPos[i], backedData[i]);
+				}
+			}
+		} else {
+			row.setRowArray(getRowArrayFromHashTable(currentPosition));
+		}
 	}
 
 	/**
@@ -1112,7 +1165,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			hashRowArray[i].setToNull();
 		}
 
-		ht.put(false, hashRowArray);
+		ht.put(true, hashRowArray);
 	}
 
 	/**

@@ -109,14 +109,23 @@ abstract class SQLBinary
 
     public int estimateMemoryUsage()
     {
-        int sz = BASE_MEMORY_USAGE;
-        if( null != dataValue)
-            sz += dataValue.length;
-        return sz;
+        if (dataValue == null) {
+            if (streamValueLength>=0) {
+                return BASE_MEMORY_USAGE + streamValueLength;
+            } else {
+                return getMaxMemoryUsage();
+            }
+        } else {
+            return BASE_MEMORY_USAGE + dataValue.length;
+        }
     } // end of estimateMemoryUsage
+	  
+	  
+	/**
+	 * Return max memory usage for a SQL Binary
+	 */
+	abstract int getMaxMemoryUsage();
 
-	  
-	  
 	 /*
 	 * object state
 	 */
@@ -502,7 +511,7 @@ abstract class SQLBinary
 		if (stream == null)
 			return getClone();
 		SQLBinary self = (SQLBinary) getNewNull();
-		self.setStream(stream);
+		self.setValue(stream, streamValueLength);
 		return self;
 	}
 
