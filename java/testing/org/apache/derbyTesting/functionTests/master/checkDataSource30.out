@@ -11,7 +11,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
 Nested <closedconn>.close() no error
 Nested <closedconn>.createStatement() 08003 - No current connection.
-Nested <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Nested <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on DriverManager 
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -25,7 +25,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
 DriverManager  <closedconn>.close() no error
 DriverManager  <closedconn>.createStatement() 08003 - No current connection.
-DriverManager  <closedstmt>.execute() XJ012 - 'Statement' already closed.
+DriverManager  <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on DataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -40,7 +40,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
 DataSource <closedconn>.close() no error
 DataSource <closedconn>.createStatement() 08003 - No current connection.
-DataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+DataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on SimpleDataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -55,7 +55,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
 SimpleDataSource <closedconn>.close() no error
 SimpleDataSource <closedconn>.createStatement() 08003 - No current connection.
-SimpleDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+SimpleDataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on ConnectionPoolDataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -71,7 +71,7 @@ EVENT(1):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
 ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-ConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+ConnectionPoolDataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on ConnectionPoolDataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -87,7 +87,7 @@ EVENT(1):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
 ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-ConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+ConnectionPoolDataSource <closedstmt>.execute() 08003 - No current connection.
 Changes rolled back OK in auto closed pooled connection
 EVENT(1):connectionClosed
 expected SQL Exception: (08003) No current connection.
@@ -112,7 +112,7 @@ EVENT(3):connectionClosed
 method calls on a closed connection
 XADataSource <closedconn>.close() no error
 XADataSource <closedconn>.createStatement() 08003 - No current connection.
-XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+XADataSource <closedstmt>.execute() 08003 - No current connection.
 Changes rolled back OK in auto closed local XAConnection
 EVENT(3):connectionClosed
 Start testPoolReset XADataSource
@@ -134,7 +134,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
 Nested <closedconn>.close() no error
 Nested <closedconn>.createStatement() 08003 - No current connection.
-Nested <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Nested <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on DriverManager 
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -148,7 +148,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
 DriverManager  <closedconn>.close() no error
 DriverManager  <closedconn>.createStatement() 08003 - No current connection.
-DriverManager  <closedstmt>.execute() XJ012 - 'Statement' already closed.
+DriverManager  <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on DataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -163,7 +163,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
 DataSource <closedconn>.close() no error
 DataSource <closedconn>.createStatement() 08003 - No current connection.
-DataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+DataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on EmbeddedSimpleDataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -178,7 +178,7 @@ setTypeMap(map) - ok 0A000 - Feature not implemented: no details.
 method calls on a closed connection
 EmbeddedSimpleDataSource <closedconn>.close() no error
 EmbeddedSimpleDataSource <closedconn>.createStatement() 08003 - No current connection.
-EmbeddedSimpleDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+EmbeddedSimpleDataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on ConnectionPoolDataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -194,7 +194,7 @@ EVENT(2):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
 ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-ConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+ConnectionPoolDataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on ConnectionPoolDataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -210,7 +210,7 @@ EVENT(2):connectionClosed
 method calls on a closed connection
 ConnectionPoolDataSource <closedconn>.close() no error
 ConnectionPoolDataSource <closedconn>.createStatement() 08003 - No current connection.
-ConnectionPoolDataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+ConnectionPoolDataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on XADataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -226,7 +226,7 @@ EVENT(4):connectionClosed
 method calls on a closed connection
 XADataSource <closedconn>.close() no error
 XADataSource <closedconn>.createStatement() 08003 - No current connection.
-XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on XADataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -242,7 +242,7 @@ EVENT(4):connectionClosed
 method calls on a closed connection
 XADataSource <closedconn>.close() no error
 XADataSource <closedconn>.createStatement() 08003 - No current connection.
-XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+XADataSource <closedstmt>.execute() 08003 - No current connection.
 EVENT(5):connectionClosed
 Running JDBC 3.0 connection checks on Global XADataSource
   holdability     false
@@ -258,7 +258,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Global XADataSource <closedconn>.close() no error
 Global XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Global XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Global XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on Global XADataSource
   holdability     false
 JDBC 3.0 savepoint SQL Exception: (XJ058) Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
@@ -273,7 +273,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Global XADataSource <closedconn>.close() no error
 Global XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Global XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Global XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on Switch to local XADataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -289,7 +289,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to local XADataSource <closedconn>.close() no error
 Switch to local XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to local XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Switch to local XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on Switch to local XADataSource
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.
@@ -305,7 +305,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to local XADataSource <closedconn>.close() no error
 Switch to local XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to local XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Switch to local XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on Switch to global XADataSource
   holdability     false
 JDBC 3.0 savepoint SQL Exception: (XJ058) Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
@@ -321,7 +321,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to global XADataSource <closedconn>.close() no error
 Switch to global XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to global XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Switch to global XADataSource <closedstmt>.execute() 08003 - No current connection.
 Running JDBC 3.0 connection checks on Switch to global XADataSource
   holdability     false
 JDBC 3.0 savepoint SQL Exception: (XJ058) Cannot rollback a global transaction using the Connection, commit processing must go thru XAResource interface.
@@ -337,7 +337,7 @@ EVENT(5):connectionClosed
 method calls on a closed connection
 Switch to global XADataSource <closedconn>.close() no error
 Switch to global XADataSource <closedconn>.createStatement() 08003 - No current connection.
-Switch to global XADataSource <closedstmt>.execute() XJ012 - 'Statement' already closed.
+Switch to global XADataSource <closedstmt>.execute() 08003 - No current connection.
 initial local
   holdability     true
   isolation level READ_COMMITTED

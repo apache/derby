@@ -487,9 +487,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
             throws SQLException
         {
             String sqlState = sqle.getSQLState();
-            if (usingEmbedded() && sqlState.equals("XJ012")) {
-                // expected, do nothing
-            } else if (usingDerbyNetClient() && sqlState.equals("XCL31")) {
+            if (sqlState.equals("XJ012")) {
                 // expected, do nothing
             } else {
                 // unexpected exception

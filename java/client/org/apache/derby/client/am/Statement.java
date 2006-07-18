@@ -2427,7 +2427,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         if (!openOnClient_) {
             agent_.checkForDeferredExceptions();
             throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.LANG_STATEMENT_CLOSED_NO_REASON));
+                new ClientMessageId(SQLState.ALREADY_CLOSED), "Statement");
         } else {
             agent_.checkForDeferredExceptions();
         }

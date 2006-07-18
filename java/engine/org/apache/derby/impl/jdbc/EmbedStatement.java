@@ -1319,9 +1319,17 @@ public class EmbedStatement extends ConnectionChild
      * @see #checkExecStatus()
 	 */
     final void checkStatus() throws SQLException {
+		if (!active) {
+            // 
+            // Check the status of the connection first
+            //
+            java.sql.Connection appConn = getEmbedConnection().getApplicationConnection();
+            if (appConn == null || appConn.isClosed()) {
+                throw Util.noCurrentConnection();
+            }
 
-		if (!active)
-			throw newSQLException(SQLState.ALREADY_CLOSED, "Statement");
+            throw newSQLException(SQLState.ALREADY_CLOSED, "Statement");
+        }
 	}
 
 	/**
