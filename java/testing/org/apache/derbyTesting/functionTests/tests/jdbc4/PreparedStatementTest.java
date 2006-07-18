@@ -113,17 +113,19 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite();
         suite.addTestSuite(PreparedStatementTest.class);
-        // Add methods temorarily disabled for DerbyNetClient
-        suite.addTest(new PreparedStatementTest(
-                    "embonlytmptestSetClobLengthless"));
-        suite.addTest(new PreparedStatementTest(
-                    "embonlytmptestSetBlobLengthless"));
-        suite.addTest(new PreparedStatementTest(
-                    "embonlytmptestSetCharacterStreamLengthless"));
-        suite.addTest(new PreparedStatementTest(
-                    "embonlytmptestSetAsciiStreamLengthless"));
-        suite.addTest(new PreparedStatementTest(
-                    "embonlytmptestSetBinaryStreamLengthless"));
+        if (usingEmbedded()) {
+            // Add methods temporarily disabled for DerbyNetClient
+            suite.addTest(new PreparedStatementTest(
+                        "embonlytmptestSetClobLengthless"));
+            suite.addTest(new PreparedStatementTest(
+                        "embonlytmptestSetBlobLengthless"));
+            suite.addTest(new PreparedStatementTest(
+                        "embonlytmptestSetCharacterStreamLengthless"));
+            suite.addTest(new PreparedStatementTest(
+                        "embonlytmptestSetAsciiStreamLengthless"));
+            suite.addTest(new PreparedStatementTest(
+                        "embonlytmptestSetBinaryStreamLengthless"));
+        }
         suite.addTest(SetObjectUnsupportedTest.suite(false));
         return suite;
     }
