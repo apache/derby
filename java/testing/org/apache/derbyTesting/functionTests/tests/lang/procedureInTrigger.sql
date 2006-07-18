@@ -274,16 +274,9 @@ drop trigger refer_new_row_trig;
 drop trigger refer_old_row_trig;
 
 --- create a before trigger that calls a procedure that modifies sql data. 
---- trigger creation will pass but firing should fail
+--- trigger creation should fail
 create trigger before_trig_modifies_sql no cascade BEFORE insert on t2 
 	for each STATEMENT mode db2sql call proc_modifies_sql_insert_op(1, 'one');
---- try to insert 2 rows
-insert into t2 values (1,2), (2,4);
---- check trigger is not fired.
-select * from t1;
---- check inserts failed
-select * from t2;
-drop trigger before_trig_modifies_sql;
 
 --- in a BEFORE trigger, call a procedure which actually modifies SQL data	
 --- trigger creation will pass but firing should fail

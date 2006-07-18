@@ -49,6 +49,8 @@ import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
+import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.iapi.reference.SQLState;
 
 import java.lang.reflect.Modifier;
 
@@ -167,6 +169,10 @@ public class CallStatementNode extends DMLStatementNode
 								getContextManager()), 
 							null,
 							null);
+
+		// Disallow creation of BEFORE triggers which contain calls to 
+		// procedures that modify SQL data. 
+  		checkReliability();
 
 		getCompilerContext().popCurrentPrivType();
 		return this;
@@ -306,5 +312,37 @@ public class CallStatementNode extends DMLStatementNode
 	int getPrivType()
 	{
 		return Authorizer.EXECUTE_PRIV;
+	}
+	
+	/**
+	 * This method checks if the called procedure allows modification of SQL 
+	 * data. If yes, it cannot be compiled if the reliability is 
+	 * <code>CompilerContext.MODIFIES_SQL_DATA_PROCEDURE_ILLEGAL</code>. This 
+	 * reliability is set for BEFORE triggers in the create trigger node. This 
+	 * check thus disallows creation of BEFORE triggers which contain calls to 
+	 * procedures that modify SQL data in the trigger action statement.  
+	 * 
+	 * @throws StandardException
+	 */
+	private void checkReliability() throws StandardException {
+		if(getSQLAllowedInProcedure() == RoutineAliasInfo.MODIFIES_SQL_DATA &&
+				getCompilerContext().getReliability() == CompilerContext.MODIFIES_SQL_DATA_PROCEDURE_ILLEGAL) 
+			throw StandardException.newException(SQLState.LANG_UNSUPPORTED_TRIGGER_PROC);
+	}
+	
+	/**
+	 * This method checks the SQL allowed by the called procedure. This method 
+	 * should be called only after the procedure has been resolved.
+	 * 
+	 * @return	SQL allowed by the procedure
+	 */
+	private short getSQLAllowedInProcedure() {
+		RoutineAliasInfo routineInfo = ((MethodCallNode)methodCall.getJavaValueNode()).routineInfo;
+		
+		// If this method is called before the routine has been resolved, routineInfo will be null 
+		if (SanityManager.DEBUG)
+			SanityManager.ASSERT((routineInfo != null), "Failed to get routineInfo");
+
+		return routineInfo.getSQLAllowed();
 	}
 }

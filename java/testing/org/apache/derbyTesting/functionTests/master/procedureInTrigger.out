@@ -384,24 +384,10 @@ ij> drop trigger refer_new_row_trig;
 ij> drop trigger refer_old_row_trig;
 0 rows inserted/updated/deleted
 ij> --- create a before trigger that calls a procedure that modifies sql data. 
---- trigger creation will pass but firing should fail
+--- trigger creation should fail
 create trigger before_trig_modifies_sql no cascade BEFORE insert on t2 
 	for each STATEMENT mode db2sql call proc_modifies_sql_insert_op(1, 'one');
-0 rows inserted/updated/deleted
-ij> --- try to insert 2 rows
-insert into t2 values (1,2), (2,4);
-ERROR 38000: The exception 'SQL Exception: INSERT, UPDATE and DELETE are not permitted on table APP.T2 because trigger BEFORE_TRIG_MODIFIES_SQL is active.' was thrown while evaluating an expression.
-ERROR X0Y70: INSERT, UPDATE and DELETE are not permitted on table APP.T2 because trigger BEFORE_TRIG_MODIFIES_SQL is active.
-ij> --- check trigger is not fired.
-select * from t1;
-I          |B              
----------------------------
-ij> --- check inserts failed
-select * from t2;
-X          |Y          
------------------------
-ij> drop trigger before_trig_modifies_sql;
-0 rows inserted/updated/deleted
+ERROR 42Z9D: Procedures that modify SQL data are not allowed in BEFORE triggers.
 ij> --- in a BEFORE trigger, call a procedure which actually modifies SQL data	
 --- trigger creation will pass but firing should fail
 create trigger bad_before_trig no cascade BEFORE insert on t2 
@@ -409,8 +395,8 @@ create trigger bad_before_trig no cascade BEFORE insert on t2
 0 rows inserted/updated/deleted
 ij> --- try to insert 2 rows
 insert into t2 values (1,2), (2,4);
-ERROR 38000: The exception 'SQL Exception: INSERT, UPDATE and DELETE are not permitted on table APP.T2 because trigger BAD_BEFORE_TRIG is active.' was thrown while evaluating an expression.
-ERROR X0Y70: INSERT, UPDATE and DELETE are not permitted on table APP.T2 because trigger BAD_BEFORE_TRIG is active.
+ERROR 38000: The exception 'SQL Exception: The external routine is not allowed to execute SQL statements.' was thrown while evaluating an expression.
+ERROR 38001: The external routine is not allowed to execute SQL statements.
 ij> --- check trigger is not fired.
 select * from t1;
 I          |B              

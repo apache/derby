@@ -985,8 +985,9 @@ public interface SQLState {
     String LANG_READ_UNCOMMITTED                                       = "42Z9A";
     String LANG_VTI_BLOB_CLOB_UNSUPPORTED                              = "42Z9B";
 	String LANG_UNSUPPORTED_TRIGGER_STMT		   					   = "42Z9D";
-    String LANG_DROP_CONSTRAINT_TYPE                                   = "42Z9E";
-    String LANG_QUERY_TOO_COMPLEX                                      = "42ZA0";
+	String LANG_UNSUPPORTED_TRIGGER_PROC		   					   = "42Z9D.S.1";
+	String LANG_DROP_CONSTRAINT_TYPE                                   = "42Z9E";
+	String LANG_QUERY_TOO_COMPLEX                                      = "42ZA0";
     String LANG_INVALID_SQL_IN_BATCH                                   = "42ZA1";
 
 	//following 3 matches the DB2 sql states

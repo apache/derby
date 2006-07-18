@@ -271,7 +271,14 @@ public class CreateTriggerNode extends DDLStatementNode
 			*/
 			if (needInternalSQL)
 				compilerContext.setReliability(CompilerContext.INTERNAL_SQL_LEGAL);
-
+			
+			// For before triggers, the action statement cannot contain calls
+			// to procedures that modify SQL data. If the action statement 
+			// contains a procedure call, this reliability will be used during
+			// bind of the call statement node. 
+			if(isBefore)
+				compilerContext.setReliability(CompilerContext.MODIFIES_SQL_DATA_PROCEDURE_ILLEGAL);
+					
 			actionNode.bind();
 
 			if (whenClause != null)

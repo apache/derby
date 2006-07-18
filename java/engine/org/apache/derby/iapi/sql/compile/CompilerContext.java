@@ -92,6 +92,12 @@ public interface CompilerContext extends Context
 	public	static	final	int			IGNORE_MISSING_CLASSES		=	0x00000100;
 	public	static	final	int			SCHEMA_ILLEGAL				=	0x00000200;
 	public  static  final   int			INTERNAL_SQL_ILLEGAL		=	0x00000400;
+	
+	/**
+	 * Calling procedures that modify sql data from before triggers is illegal. 
+	 * 
+	 */
+	public  static  final   int			MODIFIES_SQL_DATA_PROCEDURE_ILLEGAL	=	0x00000800;
 
 	/** Standard SQL is legal */
 	public	static	final	int			SQL_LEGAL					=	(INTERNAL_SQL_ILLEGAL);

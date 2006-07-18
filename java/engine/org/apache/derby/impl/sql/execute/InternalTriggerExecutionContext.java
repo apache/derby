@@ -327,25 +327,21 @@ public class InternalTriggerExecutionContext implements TriggerExecutionContext,
 	 */
 	public void validateStatement(ConstantAction constantAction) throws StandardException
 	{
-		// DDL statements are not allowed in triggers. Parser does not allow 
-		// DDL statements in a trigger's action statement. This runtime check
-		// is needed only for DDL statements executed by procedures within a 
-		// trigger context. 
-		if (constantAction instanceof DDLConstantAction) {
+
+		// DDL statements are not allowed in triggers. Direct use of DDL
+		// statements in a trigger's action statement is disallowed by the
+		// parser. However, this runtime check is needed to prevent execution
+		// of DDL statements by procedures within a trigger context. 
+ 		if (constantAction instanceof DDLConstantAction) {
 			throw StandardException.newException(SQLState.LANG_NO_DDL_IN_TRIGGER, triggerd.getName(), constantAction.toString());
 		}
 		
-		// No INSERT/UPDATE/DELETE for a before trigger. Parser does not allow 
-		// these DML statements in a trigger's action statement in a before 
-		// trigger. Currently, parser does not disallow creation of before 
-		// triggers calling procedures that modify SQL data. This runtime check
-		// is needed to not allow execution of these DML statements by procedures
-		// within a before trigger context. 
-	 	else if (triggerd.isBeforeTrigger() && 
-				constantAction instanceof WriteCursorConstantAction)
-		{
-			throw StandardException.newException(SQLState.LANG_NO_DML_IN_TRIGGER, triggerd.getName(), targetTableName);
-		}
+		// No INSERT/UPDATE/DELETE for a before trigger. There is no need to 
+ 		// check this here because parser does not allow these DML statements
+ 		// in a trigger's action statement in a before trigger. Parser also 
+ 		// disallows creation of before triggers calling procedures that modify
+ 		// SQL data.   
+		
 	}
 
 	/////////////////////////////////////////////////////////
