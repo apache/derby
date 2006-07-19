@@ -213,8 +213,6 @@ public class BaseJDBCTestCase
      * @param message message to print on failure.
      * @param expected the expected SQLState.
      * @param exception the exception to check the SQLState of.
-     *
-     * @throws IllegalArgumentException if exception is <code>null</code>.
      */
     public static void assertSQLState(String message, 
                                       String expected, 
@@ -235,6 +233,17 @@ public class BaseJDBCTestCase
                 expected.length() == 5);
         
         assertEquals(message, expected, state);
+    }
+
+    /**
+     * Assert that SQLState is as expected.
+     * The expected SQLState is truncated to five characters if required.
+     *
+     * @param expected the expected SQLState.
+     * @param exception the exception to check the SQLState of.
+     */
+    public static void assertSQLState(String expected, SQLException exception) {
+        assertSQLState("Unexpected SQL state.", expected, exception);
     }
     
     /**
