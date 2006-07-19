@@ -13,7 +13,7 @@ DECIMAL(10,2) -- precision: 10 scale: 2 display size: 12 type name: DECIMAL
 Column result scale after division is: 23
 dc / 2 = 5.55000000000000000000000
 dc / 2 = 5.55500000000000000000000
-JDBC Driver 'Apache Derby Network Client JDBC Driver', version 10.2 (10.2.0.4 alpha)
+JDBC Driver 'Apache Derby Network Client JDBC Driver', version 10.2 (10.2.0.5 alpha)
 DatabaseMetaData.getURL test passed
 allTablesAreSelectable(): true
 maxColumnNameLength(): 128
@@ -149,8 +149,8 @@ nullsAreSortedLow(): false
 nullsAreSortedAtStart(): false
 nullsAreSortedAtEnd(): false
 getDatabaseProductName(): Apache Derby
-getDatabaseProductVersion(): 10.2.0.4 alpha
-getDriverVersion(): 10.2.0.4 alpha
+getDatabaseProductVersion(): 10.2.0.5 alpha
+getDriverVersion(): 10.2.0.5 alpha
 usesLocalFiles(): true
 usesLocalFilePerTable(): true
 supportsMixedCaseIdentifiers(): false
