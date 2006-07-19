@@ -11,6 +11,4 @@ tools/ij4.sql
 tools/ij5.sql
 tools/ij6.sql
 tools/ijConnName.sql
-# test fails when run with jars
-# tools/sysinfo_api.junit
 tools/URLCheck.sql
