@@ -1622,7 +1622,7 @@ public interface DataDictionary
      * during revoke privilege processing
      *
      * @param tableUUID
-     * @param privType(as String) Authorizer.SELECT_PRIV, Authorizer.UPDATE_PRIV, or Authorizer.REFERENCES_PRIV
+     * @param privTypeStr (as String) Authorizer.SELECT_PRIV, Authorizer.UPDATE_PRIV, or Authorizer.REFERENCES_PRIV
      * @param forGrant
      * @param authorizationId The user name
      *

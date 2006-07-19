@@ -52,7 +52,7 @@ public abstract class StatementPermission
 	 * that we can only get to writing into dependency system once all the required 
 	 * privileges are confirmed. 
 	 *   
-	 * @param authorizationId	AuthorizationId
+	 * @param authid	AuthorizationId
 	 * @param dd	DataDictionary
 	 * 
 	 * @return PermissionsDescriptor	The PermissionDescriptor for the passed
