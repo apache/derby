@@ -1070,6 +1070,44 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		}
 	}
 
+	/**
+	 * Determine if an ASCII stream can be inserted into a column or parameter
+	 * of type <code>jdbcType</code>.
+	 *
+	 * @param jdbcType JDBC type of column or parameter
+	 * @return <code>true</code> if an ASCII stream can be inserted;
+	 *         <code>false</code> otherwise
+	 */
+	public static boolean isAsciiStreamAssignable(int jdbcType) {
+		return jdbcType == Types.CLOB || isCharacterType(jdbcType);
+	}
+
+	/**
+	 * Determine if a binary stream can be inserted into a column or parameter
+	 * of type <code>jdbcType</code>.
+	 *
+	 * @param jdbcType JDBC type of column or parameter
+	 * @return <code>true</code> if a binary stream can be inserted;
+	 *         <code>false</code> otherwise
+	 */
+	public static boolean isBinaryStreamAssignable(int jdbcType) {
+		return jdbcType == Types.BLOB || isBinaryType(jdbcType);
+	}
+
+	/**
+	 * Determine if a character stream can be inserted into a column or
+	 * parameter of type <code>jdbcType</code>.
+	 *
+	 * @param jdbcType JDBC type of column or parameter
+	 * @return <code>true</code> if a character stream can be inserted;
+	 *         <code>false</code> otherwise
+	 */
+	public static boolean isCharacterStreamAssignable(int jdbcType) {
+		// currently, we support the same types for ASCII streams and
+		// character streams
+		return isAsciiStreamAssignable(jdbcType);
+	}
+
 	public String	toString()
 	{
 		return typeDescriptor.toString();

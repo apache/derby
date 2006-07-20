@@ -39,6 +39,7 @@ import org.apache.derby.impl.sql.execute.ScrollInsensitiveResultSet;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.CursorActivation;
 
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RawToBinaryFormatStream;
 import org.apache.derby.iapi.types.ReaderToUTF8Stream;
@@ -2316,6 +2317,59 @@ public abstract class EmbedResultSet extends ConnectionChild
         }
     }
 
+    /**
+     * Check whether it is OK to update a column using
+     * <code>updateAsciiStream()</code>.
+     *
+     * @param columnIndex the column index (first column is 1)
+     * @exception SQLException if the column could not be updated with
+     * <code>updateAsciiStream()</code>
+     */
+    private void checksBeforeUpdateAsciiStream(int columnIndex)
+        throws SQLException
+    {
+        checksBeforeUpdateXXX("updateAsciiStream", columnIndex);
+        int colType = getColumnType(columnIndex);
+        if (!DataTypeDescriptor.isAsciiStreamAssignable(colType)) {
+            throw dataTypeConversion(columnIndex, "java.io.InputStream");
+        }
+    }
+
+    /**
+     * Check whether it is OK to update a column using
+     * <code>updateBinaryStream()</code>.
+     *
+     * @param columnIndex the column index (first column is 1)
+     * @exception SQLException if the column could not be updated with
+     * <code>updateBinaryStream()</code>
+     */
+    private void checksBeforeUpdateBinaryStream(int columnIndex)
+        throws SQLException
+    {
+        checksBeforeUpdateXXX("updateBinaryStream", columnIndex);
+        int colType = getColumnType(columnIndex);
+        if (!DataTypeDescriptor.isBinaryStreamAssignable(colType)) {
+            throw dataTypeConversion(columnIndex, "java.io.InputStream");
+        }
+    }
+
+    /**
+     * Check whether it is OK to update a column using
+     * <code>updateCharacterStream()</code>.
+     *
+     * @param columnIndex the column index (first column is 1)
+     * @exception SQLException if the column could not be updated with
+     * <code>updateCharacterStream()</code>
+     */
+    private void checksBeforeUpdateCharacterStream(int columnIndex)
+        throws SQLException
+    {
+        checksBeforeUpdateXXX("updateCharacterStream", columnIndex);
+        int colType = getColumnType(columnIndex);
+        if (!DataTypeDescriptor.isCharacterStreamAssignable(colType)) {
+            throw dataTypeConversion(columnIndex, "java.io.Reader");
+        }
+    }
     
     /**
 	 * JDBC 2.0
@@ -2663,18 +2717,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateAsciiStream(int columnIndex, java.io.InputStream x,
 			long length) throws SQLException {
-		checksBeforeUpdateXXX("updateAsciiStream", columnIndex);
-
-		int colType = getColumnType(columnIndex);
-		switch (colType) {
-			case Types.CHAR:
-			case Types.VARCHAR:
-			case Types.LONGVARCHAR:
-			case Types.CLOB:
-				break;
-			default:
-				throw dataTypeConversion(columnIndex, "java.io.InputStream");
-		}
+		checksBeforeUpdateAsciiStream(columnIndex);
 
 		java.io.Reader r = null;
 		if (x != null)
@@ -2708,18 +2751,7 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     public void updateAsciiStream(int columnIndex, InputStream x)
             throws SQLException {
-        checksBeforeUpdateXXX("updateAsciiStream", columnIndex);
-
-        int colType = getColumnType(columnIndex);
-        switch (colType) {
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case Types.LONGVARCHAR:
-            case Types.CLOB:
-                break;
-            default:
-                throw dataTypeConversion(columnIndex, "java.io.InputStream");
-        }
+        checksBeforeUpdateAsciiStream(columnIndex);
 
         java.io.Reader r = null;
         if (x != null) {
@@ -2753,17 +2785,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateBinaryStream(int columnIndex, java.io.InputStream x,
 			long length) throws SQLException {
-		checksBeforeUpdateXXX("updateBinaryStream", columnIndex);
-		int colType = getColumnType(columnIndex);
-		switch (colType) {
-			case Types.BINARY:
-			case Types.VARBINARY:
-			case Types.LONGVARBINARY:
-			case Types.BLOB:
-				break;
-			default:
-				throw dataTypeConversion(columnIndex, "java.io.InputStream");
-		}
+		checksBeforeUpdateBinaryStream(columnIndex);
 
 		if (x == null)
 		{
@@ -2794,17 +2816,7 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     public void updateBinaryStream(int columnIndex, InputStream x)
             throws SQLException {
-        checksBeforeUpdateXXX("updateBinaryStream", columnIndex);
-        int colType = getColumnType(columnIndex);
-        switch (colType) {
-            case Types.BINARY:
-            case Types.VARBINARY:
-            case Types.LONGVARBINARY:
-            case Types.BLOB:
-                break;
-            default:
-                throw dataTypeConversion(columnIndex, "java.io.InputStream");
-        }
+        checksBeforeUpdateBinaryStream(columnIndex);
         updateBinaryStreamInternal(columnIndex, x, true, -1,
                                    "updateBinaryStream");
     }
@@ -2878,20 +2890,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 */
 	public void updateCharacterStream(int columnIndex, java.io.Reader x,
 			long length) throws SQLException {
-		//If the column type is the right datatype, this method will eventually call getDVDforColumnToBeUpdated which will check for
-		//the read only resultset. But for other datatypes, we want to catch if this updateCharacterStream is being issued
-		//against a read only resultset. And that is the reason for call to checksBeforeUpdateXXX here.
-		checksBeforeUpdateXXX("updateCharacterStream", columnIndex);
-		int colType = getColumnType(columnIndex);
-		switch (colType) {
-			case Types.CHAR:
-			case Types.VARCHAR:
-			case Types.LONGVARCHAR:
-			case Types.CLOB:
-				break;
-			default:
-				throw dataTypeConversion(columnIndex, "java.io.Reader");
-		}
+		checksBeforeUpdateCharacterStream(columnIndex);
 		updateCharacterStreamInternal(columnIndex, x, false, length,
                                       "updateCharacterStream");
 	}
@@ -2915,17 +2914,7 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     public void updateCharacterStream(int columnIndex, Reader x)
             throws SQLException {
-        checksBeforeUpdateXXX("updateCharacterStream", columnIndex);
-        int colType = getColumnType(columnIndex);
-        switch (colType) {
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case Types.LONGVARCHAR:
-            case Types.CLOB:
-                break;
-            default:
-                throw dataTypeConversion(columnIndex, "java.io.Reader");
-        }
+        checksBeforeUpdateCharacterStream(columnIndex);
         updateCharacterStreamInternal(columnIndex, x, true, -1,
                                       "updateCharacterStream");
     }

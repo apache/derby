@@ -567,8 +567,7 @@ public abstract class EmbedPreparedStatement
      */
     public final void setAsciiStream(int parameterIndex, InputStream x, long length)
 	    throws SQLException {
-        checkCharacterStreamConditions(parameterIndex,
-                                        "java.io.InputStream(ASCII)");
+        checkAsciiStreamConditions(parameterIndex);
 		java.io.Reader r = null;
 
 		if (x != null)
@@ -635,7 +634,7 @@ public abstract class EmbedPreparedStatement
     public final void setCharacterStream(int parameterIndex,
        			  java.io.Reader reader,
 			  long length) throws SQLException {
-        checkCharacterStreamConditions(parameterIndex, "java.io.Reader");
+        checkCharacterStreamConditions(parameterIndex);
         setCharacterStreamInternal(parameterIndex, reader, false, length);
 	}
 
@@ -662,26 +661,31 @@ public abstract class EmbedPreparedStatement
     }
 
     /**
-     * Check general (pre)conditions for setXXXStream methods operating on
-     * character streams.
+     * Check general preconditions for setCharacterStream methods.
      *
      * @param parameterIndex 1-based index of the parameter.
-     * @param srcDataTypeDesc type description of the source data. Used in
-     *          error message for data type conversion failure.
      */
-    private final void checkCharacterStreamConditions(int parameterIndex,
-                                                       String srcDataTypeDesc)
+    private final void checkCharacterStreamConditions(int parameterIndex)
             throws SQLException {
         checkStatus();
         int jdbcTypeId = getParameterJDBCType(parameterIndex);
-        switch (jdbcTypeId) {
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case Types.LONGVARCHAR:
-            case Types.CLOB:
-                break;
-            default:
-                throw dataTypeConversion(parameterIndex, srcDataTypeDesc);
+        if (!DataTypeDescriptor.isCharacterStreamAssignable(jdbcTypeId)) {
+            throw dataTypeConversion(parameterIndex, "java.io.Reader");
+        }
+    }
+
+    /**
+     * Check general preconditions for setAsciiStream methods.
+     *
+     * @param parameterIndex 1-based index of the parameter.
+     */
+    private final void checkAsciiStreamConditions(int parameterIndex)
+            throws SQLException {
+        checkStatus();
+        int jdbcTypeId = getParameterJDBCType(parameterIndex);
+        if (!DataTypeDescriptor.isAsciiStreamAssignable(jdbcTypeId)) {
+            throw dataTypeConversion(parameterIndex,
+                                     "java.io.InputStream(ASCII)");
         }
     }
 
@@ -907,8 +911,7 @@ public abstract class EmbedPreparedStatement
 	}
 
     /**
-     * Check general (pre)conditions for setXXXStream methods operating on
-     * binary streams.
+     * Check general preconditions for setBinaryStream methods.
      *
      * @param parameterIndex 1-based index of the parameter.
      */
@@ -916,13 +919,7 @@ public abstract class EmbedPreparedStatement
             throws SQLException {
         checkStatus();
         int jdbcTypeId = getParameterJDBCType(parameterIndex);
-        switch (jdbcTypeId) {
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-        case Types.BLOB:
-            break;
-        default:
+        if (!DataTypeDescriptor.isBinaryStreamAssignable(jdbcTypeId)) {
             throw dataTypeConversion(parameterIndex, "java.io.InputStream");
         }
     }
@@ -1723,8 +1720,7 @@ public abstract class EmbedPreparedStatement
      */
     public void setAsciiStream(int parameterIndex, InputStream x)
             throws SQLException {
-        checkCharacterStreamConditions(parameterIndex,
-                                        "java.io.InputStream(ASCII)");
+        checkAsciiStreamConditions(parameterIndex);
         java.io.Reader asciiStream = null;
 
         if (x != null) {
@@ -1763,7 +1759,7 @@ public abstract class EmbedPreparedStatement
      */
     public void setCharacterStream(int parameterIndex, Reader reader)
             throws SQLException {
-        checkCharacterStreamConditions(parameterIndex, "java.io.Reader");
+        checkCharacterStreamConditions(parameterIndex);
         setCharacterStreamInternal(parameterIndex, reader,
                                    true, -1);
     }
