@@ -330,6 +330,7 @@ class DDMWriter
 		// save the location of the beginning of the collection so
 		// that we can come back and fill in the length bytes
 		markStack[top++] = offset;
+		ensureLength (4); // verify space for length bytes and code point
 		offset += 2; // move past the length bytes before writing the code point
 		bytes[offset] = (byte) ((codePoint >>> 8) & 0xff);
 		bytes[offset + 1] = (byte) (codePoint & 0xff);

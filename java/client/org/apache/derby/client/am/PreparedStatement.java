@@ -1468,6 +1468,12 @@ public class PreparedStatement extends Statement
         if (batchSize == 0) {
             return updateCounts;
         }
+		// The network client has a hard limit of 65,534 commands in a single
+		// DRDA request. This is because DRDA uses a 2-byte correlation ID,
+		// and the values 0 and 0xffff are reserved as special values. So
+		// that imposes an upper limit on the batch size we can support:
+		if (batchSize > 65534)
+            throw new BatchUpdateException(agent_.logWriter_, "No more than 65534 commands may be added to a single batch", updateCounts);
 
         // Initialize all the updateCounts to indicate failure
         // This is done to account for "chain-breaking" errors where we cannot
