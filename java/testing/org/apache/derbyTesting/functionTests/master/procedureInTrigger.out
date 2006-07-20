@@ -804,7 +804,7 @@ X          |Y
 1          |2          
 2          |4          
 ij> --- check index is not created
-select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=true;
+select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=1;
 1          
 -----------
 0          
@@ -828,7 +828,7 @@ I          |B
 6          |four           
 8          |eight          
 ij> --- check index is not dropped
-select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=true;
+select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=1;
 1          
 -----------
 1          

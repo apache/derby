@@ -508,7 +508,7 @@ delete from t2;
 --- check delete failed
 select * from t2;
 --- check index is not created
-select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=true;
+select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=1;
 drop trigger create_index_trig;
 
 --- create an index to test we cannot drop it from a procedure called by a trigger
@@ -521,5 +521,5 @@ delete from t1;
 --- check delete failed
 select * from t1;
 --- check index is not dropped
-select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=true;
+select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=1;
 drop trigger drop_index_trig;

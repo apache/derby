@@ -277,8 +277,6 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             checkForValidColumnIndex(column);
             int jdbcType = types_[column - 1];
             switch (jdbcType) {
-            case Types.BOOLEAN:
-                return 5;
             case Types.INTEGER:
                 return 11;
             case Types.SMALLINT:
@@ -533,9 +531,6 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             int sqlType = sqlType_[column - 1];
 
             switch (sqlType) {
-            case DRDAConstants.DB2_SQLTYPE_BOOLEAN:
-            case DRDAConstants.DB2_SQLTYPE_NBOOLEAN:
-                return "BOOLEAN";
             case DRDAConstants.DB2_SQLTYPE_DATE:
             case DRDAConstants.DB2_SQLTYPE_NDATE:
                 return "DATE";

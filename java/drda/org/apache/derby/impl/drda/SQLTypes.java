@@ -48,8 +48,6 @@ class SQLTypes {
   static protected int mapDB2SqlTypeToJdbcType (int sqlType, long length, int ccsid)
   {
     switch (getNonNullableSqlType (sqlType)) { // mask the isNullable bit
-    case DRDAConstants.DB2_SQLTYPE_BOOLEAN:
-      return JDBC30Translation.BOOLEAN;
     case DRDAConstants.DB2_SQLTYPE_SMALL:
       return java.sql.Types.SMALLINT;
     case DRDAConstants.DB2_SQLTYPE_INTEGER:
@@ -132,7 +130,7 @@ class SQLTypes {
   * @exception SQLException thrown for unrecognized SQLType
   */
 
- static protected int mapJdbcTypeToDB2SqlType (AppRequester appRequester, int jdbctype, boolean nullable,
+ static protected int mapJdbcTypeToDB2SqlType (int jdbctype, boolean nullable,
 											   int[] outlen)
 	 throws SQLException
   {
@@ -142,14 +140,11 @@ class SQLTypes {
 		  nullAddVal =1; 
 	  
 	  // Call FdocaConstants just to get the length
-	  FdocaConstants.mapJdbcTypeToDrdaType( appRequester, jdbctype,nullable,outlen);
+	  FdocaConstants.mapJdbcTypeToDrdaType(jdbctype,nullable,outlen);
 
-	  jdbctype = FdocaConstants.clipJdbcType( appRequester, jdbctype );
-	  
 	  switch(jdbctype)
 	  {
 		  case JDBC30Translation.BOOLEAN:
-			  return DRDAConstants.DB2_SQLTYPE_BOOLEAN + nullAddVal;
 		  case java.sql.Types.BIT:
 		  case java.sql.Types.TINYINT:
 		  case java.sql.Types.SMALLINT:

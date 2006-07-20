@@ -1591,9 +1591,7 @@ ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
 ij> -- test some casting from a java type to standard SQL types.
 -- should all fail at runtime
 select cast (aliasinfo as BOOLEAN) from sys.sysaliases;
-1    
------
-ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'BOOLEAN'.
+ERROR 42X01: Syntax error: BOOLEAN.
 ij> select cast (aliasinfo as SMALLINT) from sys.sysaliases;
 1     
 ------

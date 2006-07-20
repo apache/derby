@@ -5985,7 +5985,7 @@ class DRDAConnThread extends Thread {
 			int colType = (hasRs ? rsmeta.getColumnType(i) : pmeta.getParameterType(i));
 			int[] outlen = {-1};
 			int drdaType =
-				(hasRs ?FdocaConstants.mapJdbcTypeToDrdaType(appRequester,colType,nullable,outlen): 
+				(hasRs ?FdocaConstants.mapJdbcTypeToDrdaType(colType,nullable,outlen): 
 				 stmt.getParamDRDAType(i));
 
 			boolean isDecimal = ((drdaType | 1) == DRDAConstants.DRDA_TYPE_NDECIMAL);
@@ -6723,8 +6723,7 @@ class DRDAConnThread extends Thread {
 										ResultSetMetaData.columnNullable) : 
 			(pmeta.isNullable(jdbcElemNum) == JDBC30Translation.PARAMETER_NULLABLE);
 		
-		int sqlType = SQLTypes.mapJdbcTypeToDB2SqlType(appRequester,
-													   elemType,
+		int sqlType = SQLTypes.mapJdbcTypeToDB2SqlType(elemType,
 													   nullable,
 													   outlen);
 		
@@ -6948,9 +6947,6 @@ class DRDAConnThread extends Thread {
 			long valLength = 0;
 			switch (ndrdaType)
 			{
-			    case DRDAConstants.DRDA_TYPE_NBOOLEAN:
-					writer.writeByte( makeInt( (Boolean) val ) );
-					break;
 			    case DRDAConstants.DRDA_TYPE_NSMALL:
  					// DB2 does not have a BOOLEAN java.sql.bit type,
 					// so we need to send it as a small
@@ -7045,17 +7041,6 @@ class DRDAConnThread extends Thread {
 					writer.writeLDString(val.toString(), index);
 			}
 		}
-	}
-
- 	/**
-	 * turn a boolean into an int
-	 * @param val	boolean value
-	 * 
-	 **/
-	private	int	makeInt( Boolean val )
-	{
-		if ( val.booleanValue() ) { return 1; }
-		else { return 0; }
 	}
 
 	/**

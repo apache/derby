@@ -1193,7 +1193,7 @@ final class CrossConverters {
     //---------------------------- getString*() methods --------------------------
 
     final String getStringFromBoolean(boolean source) throws SqlException {
-        return source ? "true" : "false";
+        return source ? "1" : "0";
     }
 
     final String getStringFromBytes(byte[] bytes) throws SqlException {

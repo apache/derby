@@ -139,8 +139,8 @@ public	interface	DRDAConstants
 	// publishes an addendum to the DRDA spec covering these
 	// datatypes.
 	
-	public	static final int DRDA_TYPE_BOOLEAN = 0xD0;
-	public	static final int DRDA_TYPE_NBOOLEAN = 0xD1;
+	// public	static final int DRDA_TYPE_BOOLEAN = 0xBE;
+	// public	static final int DRDA_TYPE_NBOOLEAN = 0xBF;
 	
 	///////////////////////
 	//
@@ -209,7 +209,7 @@ public	interface	DRDAConstants
 	public	static final  int DB2_SQLTYPE_NDBCLOB_LOCATOR = 969;
 
 	// extensions to the db2 datatypes
-    public	static final  int DB2_SQLTYPE_BOOLEAN = 1000;     // BOOLEAN
-    public	static final  int DB2_SQLTYPE_NBOOLEAN = 1001;
+    // public	static final  int DB2_SQLTYPE_BOOLEAN = 1000;     // BOOLEAN
+    // public	static final  int DB2_SQLTYPE_NBOOLEAN = 1001;
 
 }

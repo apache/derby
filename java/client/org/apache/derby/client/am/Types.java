@@ -121,8 +121,6 @@ public class Types {
 
     static public int mapDERBYTypeToDriverType(boolean isDescribed, int sqlType, long length, int ccsid) {
         switch (Utils.getNonNullableSqlType(sqlType)) { // mask the isNullable bit
-        case DRDAConstants.DB2_SQLTYPE_BOOLEAN:
-            return BOOLEAN;
         case DRDAConstants.DB2_SQLTYPE_SMALL:
             return SMALLINT;
         case DRDAConstants.DB2_SQLTYPE_INTEGER:

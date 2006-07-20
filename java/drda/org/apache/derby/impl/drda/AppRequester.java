@@ -120,19 +120,6 @@ class AppRequester
 	}
 
 	/**
-	 * Returns true if the client supports Derby's protocol for
-	 * transmitting BOOLEAN values.
-	 */
-	protected	boolean	supportsBoolean()
-	{
-		return
-			(
-			    ( clientType == DNC_CLIENT ) &&
-			    ( greaterThanOrEqualTo( 10, 2, 0 ) )
-			);
-	}
-
-	/**
 	 * Check if the client expects QRYCLSIMP to be supported when the
 	 * protocol is LMTBLKPRC.
 	 *

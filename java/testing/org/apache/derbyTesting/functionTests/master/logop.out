@@ -251,25 +251,18 @@ ij> select x from s where not ( (1 = 2) and ( (3 = 3) or (4 = 4) ) );
 X          
 -----------
 1          
-ij> select ( not ( (1 = 1) or (2 = 2) ) and (3 = 4) ) from s;
-1    
------
-false
+ij> -- following NOTs in select clause won't work because it results in a transient boolean datatype
+select ( not ( (1 = 1) or (2 = 2) ) and (3 = 4) ) from s;
+ERROR 42X01: Syntax error: Encountered "not" at line 2, column 10.
 ij> --
 select ( not ( ( (1 = 1) or (2 = 2) ) and (3 = 4) ) ) from s;
-1    
------
-true 
+ERROR 42X01: Syntax error: Encountered "not" at line 2, column 10.
 ij> --
 select ( (1 = 2) and not ( (3 = 3) or (4 = 4) ) ) from s;
-1    
------
-false
+ERROR 42X01: Syntax error: Encountered "=" at line 2, column 13.
 ij> --
 select ( not ( (1 = 2) and ( (3 = 3) or (4 = 4) ) ) ) from s;
-1    
------
-true 
+ERROR 42X01: Syntax error: Encountered "not" at line 2, column 10.
 ij> -- Ands under ands under ands ...
 select * from s where not (	( ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) and
 						      ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) ) and

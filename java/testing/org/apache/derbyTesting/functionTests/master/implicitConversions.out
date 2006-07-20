@@ -2596,15 +2596,9 @@ ERROR 42X61: Types 'DECIMAL' and 'CHAR' are not UNION compatible.
 ij> values 'a', 1.1;
 ERROR 42X61: Types 'CHAR' and 'DECIMAL' are not UNION compatible.
 ij> values true, 'a';
-1    
------
-true 
-true 
+ERROR 42X01: Syntax error: true.
 ij> values 'a', true;
-1    
------
-true 
-true 
+ERROR 42X01: Syntax error: true.
 ij> values date('1996-09-09'), 'a';
 1         
 ----------

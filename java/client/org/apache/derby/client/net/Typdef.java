@@ -680,10 +680,6 @@ public class Typdef implements java.lang.Cloneable {
         new FdocaSimpleDataArray(0xCE, FdocaConstants.FDOCA_TYPE_LOBCHAR, Cursor.MBCS_CLOB, CCSIDMBC, 1, 1, 8, LOBLENGTH),
         /* 0xCF null Large object char MBCS */
         new FdocaSimpleDataArray(0xCF, FdocaConstants.FDOCA_TYPE_NLOBCHAR, Cursor.MBCS_CLOB, CCSIDMBC, 1, 1, 8, LOBLENGTH),
-        /* 0xD0 boolean */
-        new FdocaSimpleDataArray(DRDAConstants.DRDA_TYPE_BOOLEAN, FdocaConstants.FDOCA_TYPE_INTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 1, FIXEDLENGTH),
-        /* 0xD1 null boolean */
-        new FdocaSimpleDataArray(DRDAConstants.DRDA_TYPE_NBOOLEAN, FdocaConstants.FDOCA_TYPE_NINTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 1, FIXEDLENGTH),
     };
 
     private static final int[] protocolToJdbcTypes_ = {
@@ -896,8 +892,6 @@ public class Typdef implements java.lang.Cloneable {
         0x00,
         java.sql.Types.CLOB, // 0xCE Large object char MBCS
         java.sql.Types.CLOB, // 0xCF null Large object char MBCS
-		JDBC30Translation.BOOLEAN, // 0xD0 boolean
-		JDBC30Translation.BOOLEAN, // 0xD1 null boolean
     };
 
 

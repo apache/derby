@@ -467,23 +467,11 @@ I          |S     |C                             |VC                            
 -----------------------------------------------------------------------------------------------------
 ij> -- select list
 select ( i in (select i from t) ) a from s order by a;
-A    
------
-false
-true 
-true 
+ERROR 42X01: Syntax error: Encountered "in" at line 2, column 12.
 ij> select ( i in (select i from t where 1 = 0) ) a from s order by a;
-A    
------
-false
-false
-false
+ERROR 42X01: Syntax error: Encountered "in" at line 1, column 12.
 ij> select ( (i in (select i from t where 1 = 0)) is null ) a from s order by a;
-A    
------
-false
-false
-false
+ERROR 42X01: Syntax error: Encountered "in" at line 1, column 13.
 ij> -- subquery under an or
 select i from s where i = -1 or i in (select i from t);
 I          

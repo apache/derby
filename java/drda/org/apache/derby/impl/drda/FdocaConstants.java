@@ -132,18 +132,13 @@ class FdocaConstants
 	 * @param outlen - output parameter with length of type.
 	 * @return standard drdaTypeLength. -1 if we don't know.
 	 **/
-	protected static int mapJdbcTypeToDrdaType(AppRequester appRequester, int jdbcType, boolean nullable,
+	protected static int mapJdbcTypeToDrdaType(int jdbcType, boolean nullable,
 											   int[] outlen)
 		throws SQLException
 	{
-		jdbcType = clipJdbcType( appRequester, jdbcType );
-
 		int drdaType = 0;
 		switch (jdbcType) {
 			case JDBC30Translation.BOOLEAN:
-				drdaType = DRDAConstants.DRDA_TYPE_NBOOLEAN;
-				outlen[0] = 1;
-				break;
 			case java.sql.Types.BIT:
 			case java.sql.Types.TINYINT:
 			case java.sql.Types.SMALLINT:
@@ -244,22 +239,5 @@ class FdocaConstants
 		return drdaType;
 	}
 
-	/***
-	 * Convert the jdbcType to one which we know how to exchange with
-	 * the client. This depends on the version of the client.
-	 **/
-	protected	static	int	clipJdbcType( AppRequester appRequester, int original )
-	{
-		switch ( original )
-		{
-			case JDBC30Translation.BOOLEAN:
-
-				if ( appRequester.supportsBoolean() ) { return original; }
-				else { return java.sql.Types.BIT; }
-
-		    default:	return original;
-		}
-
-	}
 
 }
