@@ -23,7 +23,6 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
-import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 import java.io.*;
 import java.sql.*;
@@ -259,68 +258,48 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     //--------------------------------------------------------------------------
     //Now test the methods that are implemented in the PreparedStatement 
     //interface
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns true and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     * @throws SQLException upon any failure that occurs in the 
-     *                      call to the method.
-     *
-     */
-    public void testisWrapperReturnsTrue() throws SQLException {
-        Class<PreparedStatement> wrap_class = PreparedStatement.class;
-        
-        //The if should return true enabling us  to call the unwrap method
-        //without throwing  an exception
-        if(ps.isWrapperFor(wrap_class)) {
-            try {
-                PreparedStatement stmt1 =
-                        (PreparedStatement)ps.unwrap(wrap_class);
-            }
-            catch(SQLException sqle) {
-                fail("Unwrap wrongly throws a SQLException");
-            }
-        } else {
-            fail("isWrapperFor wrongly returns false");
+
+    public void testIsWrapperForStatement() throws SQLException {
+        assertTrue(ps.isWrapperFor(Statement.class));
+    }
+
+    public void testIsWrapperForPreparedStatement() throws SQLException {
+        assertTrue(ps.isWrapperFor(PreparedStatement.class));
+    }
+
+    public void testIsNotWrapperForCallableStatement() throws SQLException {
+        assertFalse(ps.isWrapperFor(CallableStatement.class));
+    }
+
+    public void testIsNotWrapperForResultSet() throws SQLException {
+        assertFalse(ps.isWrapperFor(ResultSet.class));
+    }
+
+    public void testUnwrapStatement() throws SQLException {
+        Statement stmt = ps.unwrap(Statement.class);
+        assertSame("Unwrap returned wrong object.", ps, stmt);
+    }
+
+    public void testUnwrapPreparedStatement() throws SQLException {
+        PreparedStatement ps2 = ps.unwrap(PreparedStatement.class);
+        assertSame("Unwrap returned wrong object.", ps, ps2);
+    }
+
+    public void testUnwrapCallableStatement() {
+        try {
+            CallableStatement cs = ps.unwrap(CallableStatement.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
         }
     }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns false and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     * @throws SQLException upon any failure that occurs in the 
-     *                      call to the method.
-     *
-     */
-    public void testisWrapperReturnsFalse() throws SQLException {
-        //test for the case when isWrapper returns false
-        //using some class that will return false when
-        //passed to isWrapperFor
-        Class<ResultSet> wrap_class = ResultSet.class;
-        
-        //returning false is the correct behaviour in this case
-        //Generate a message if it returns true
-        if(ps.isWrapperFor(wrap_class)) {
-            fail("isWrapperFor wrongly returns true");
-        } else {
-            try {
-                ResultSet rs1 = (ResultSet)
-                ps.unwrap(wrap_class);
-                fail("unwrap does not throw the expected " +
-                        "exception");
-            } catch (SQLException sqle) {
-                //calling unwrap in this case throws an SQLException
-                //check that this SQLException has the correct SQLState
-                if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
-                    throw sqle;
-                }
-            }
+
+    public void testUnwrapResultSet() {
+        try {
+            ResultSet rs = ps.unwrap(ResultSet.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
         }
     }
 

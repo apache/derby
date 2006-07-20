@@ -72,62 +72,29 @@ public class ResultSetMetaDataTest extends BaseJDBCTestCase {
             conn.close();
         }
     }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns true and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     */
-    public void testisWrapperReturnsTrue() throws SQLException {
-        Class<ResultSetMetaData> wrap_class = ResultSetMetaData.class;
-        
-        //The if should return true enabling us  to call the unwrap method
-        //without throwing  an exception
-        if(rsmd.isWrapperFor(wrap_class)) {
-            try {
-                ResultSetMetaData rsmd1 =
-                        (ResultSetMetaData)rsmd.unwrap(wrap_class);
-            }
-            catch(SQLException sqle) {
-                fail("Unwrap wrongly throws a SQLException");
-            }
-        } else {
-            fail("isWrapperFor wrongly returns false");
+
+    public void testIsWrapperForResultSetMetaData() throws SQLException {
+        assertTrue(rsmd.isWrapperFor(ResultSetMetaData.class));
+    }
+
+    public void testUnwrapResultSetMetaData() throws SQLException {
+        ResultSetMetaData rsmd2 = rsmd.unwrap(ResultSetMetaData.class);
+        assertSame("Unwrap returned wrong object.", rsmd, rsmd2);
+    }
+
+    public void testIsWrapperForResultSet() throws SQLException {
+        assertFalse(rsmd.isWrapperFor(ResultSet.class));
+    }
+
+    public void testUnwrapResultSet() {
+        try {
+            ResultSet rs = rsmd.unwrap(ResultSet.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
         }
     }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns false and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     */
-    public void testisWrapperReturnsFalse() throws SQLException {
-        Class<ResultSet> wrap_class = ResultSet.class;
-        
-        //returning false is the correct behaviour in this case
-        //Generate a message if it returns true
-        if(rsmd.isWrapperFor(wrap_class)) {
-            fail("isWrapperFor wrongly returns true");
-        } else {
-            try {
-                ResultSet rs1 = (ResultSet)
-                rsmd.unwrap(wrap_class);
-                fail("unwrap does not throw the expected " +
-                        "exception");
-            } catch (SQLException sqle) {
-                //calling unwrap in this case throws an SQLException
-                //check that this SQLException has the correct SQLState
-                if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
-                    throw sqle;
-                }
-            }
-        }
-    }
-    
+
     /**
      * Return suite with all tests of the class.
      */

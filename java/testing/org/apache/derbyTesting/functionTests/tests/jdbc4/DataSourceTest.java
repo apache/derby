@@ -24,7 +24,6 @@ import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
-import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 import java.sql.*;
 import javax.sql.*;
@@ -64,62 +63,56 @@ public class DataSourceTest extends BaseJDBCTestCase {
     public void tearDown() {
         ds = null;
     }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns true and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     */
-    public void testisWrapperReturnsTrue() throws SQLException {
-        Class<DataSource> wrap_class = DataSource.class;
-        
-        //The if should return true enabling us  to call the unwrap method
-        //without throwing  an exception
-        if(ds.isWrapperFor(wrap_class)) {
-            try {
-                DataSource stmt1 =
-                        (DataSource)ds.unwrap(wrap_class);
-            }
-            catch(SQLException sqle) {
-                fail("Unwrap wrongly throws a SQLException");
-            }
-        } else {
-            fail("isWrapperFor wrongly returns false");
+
+    public void testIsWrapperForDataSource() throws SQLException {
+        assertTrue(ds.isWrapperFor(DataSource.class));
+    }
+
+    public void testIsNotWrapperForPoolDataSource() throws SQLException {
+        assertFalse(ds.isWrapperFor(ConnectionPoolDataSource.class));
+    }
+
+    public void testIsNotWrapperForXADataSource() throws SQLException {
+        assertFalse(ds.isWrapperFor(XADataSource.class));
+    }
+
+    public void testIsNotWrapperForResultSet() throws SQLException {
+        assertFalse(ds.isWrapperFor(ResultSet.class));
+    }
+
+    public void testUnwrapDataSource() throws SQLException {
+        DataSource ds2 = ds.unwrap(DataSource.class);
+        assertSame("Unwrap returned wrong object.", ds, ds2);
+    }
+
+    public void testUnwrapConnectionPoolDataSource() {
+        try {
+            ConnectionPoolDataSource cpds =
+                ds.unwrap(ConnectionPoolDataSource.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
         }
     }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns false and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     */
-    public void testisWrapperReturnsFalse() throws SQLException {
-        Class<ResultSet> wrap_class = ResultSet.class;
-        
-        //returning false is the correct behaviour in this case
-        //Generate a message if it returns true
-        if(ds.isWrapperFor(wrap_class)) {
-            fail("isWrapperFor wrongly returns true");
-        } else {
-            try {
-                ResultSet rs1 = (ResultSet)
-                ds.unwrap(wrap_class);
-                fail("unwrap does not throw the expected " +
-                        "exception");
-            } catch (SQLException sqle) {
-                //calling unwrap in this case throws an SQLException
-                //check that this SQLException has the correct SQLState
-                if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
-                    throw sqle;
-                }
-            }
+
+    public void testUnwrapXADataSource() {
+        try {
+            XADataSource xads = ds.unwrap(XADataSource.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
         }
     }
-    
+
+    public void testUnwrapResultSet() {
+        try {
+            ResultSet rs = ds.unwrap(ResultSet.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
+        }
+    }
+
     /**
      * Return suite with all tests of the class.
      */

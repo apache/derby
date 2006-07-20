@@ -221,62 +221,52 @@ public class StatementTest
         assertTrue("Statement should be closed, because " +
                 "the connection has been closed", stmt.isClosed()); 
     }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns true and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     */
-    public void testisWrapperReturnsTrue() throws SQLException {
-        Class<Statement> wrap_class = Statement.class;
-        
-        //The if should return true enabling us  to call the unwrap method
-        //without throwing  an exception
-        if(stmt.isWrapperFor(wrap_class)) {
-            try {
-                Statement stmt1 =
-                        (Statement)stmt.unwrap(wrap_class);
-            }
-            catch(SQLException sqle) {
-                fail("Unwrap wrongly throws a SQLException");
-            }
-        } else {
-            fail("isWrapperFor wrongly returns false");
+
+    public void testIsWrapperForStatement() throws SQLException {
+        assertTrue(stmt.isWrapperFor(Statement.class));
+    }
+
+    public void testIsNotWrapperForPreparedStatement() throws SQLException {
+        assertFalse(stmt.isWrapperFor(PreparedStatement.class));
+    }
+
+    public void testIsNotWrapperForCallableStatement() throws SQLException {
+        assertFalse(stmt.isWrapperFor(CallableStatement.class));
+    }
+
+    public void testIsNotWrapperForResultSet() throws SQLException {
+        assertFalse(stmt.isWrapperFor(ResultSet.class));
+    }
+
+    public void testUnwrapStatement() throws SQLException {
+        Statement stmt2 = stmt.unwrap(Statement.class);
+        assertSame("Unwrap returned wrong object.", stmt, stmt2);
+    }
+
+    public void testUnwrapPreparedStatement() {
+        try {
+            PreparedStatement ps = stmt.unwrap(PreparedStatement.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
         }
     }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns false and we call unwrap
-     * The test is right now being run in the embedded case only.
-     *
-     */
-    public void testisWrapperReturnsFalse() throws SQLException {
-        //test for the case when isWrapper returns false
-        //using some class that will return false when
-        //passed to isWrapperFor
-        Class<ResultSet> wrap_class = ResultSet.class;
-        
-        //returning false is the correct behaviour in this case
-        //Generate a message if it returns true
-        if(stmt.isWrapperFor(wrap_class)) {
-            fail("isWrapperFor wrongly returns true");
-        } else {
-            try {
-                ResultSet rs1 = (ResultSet)
-                stmt.unwrap(wrap_class);
-                fail("unwrap does not throw the expected " +
-                        "exception");
-            } catch (SQLException sqle) {
-                //calling unwrap in this case throws an SQLException
-                //check that this SQLException has the correct SQLState
-                if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
-                    throw sqle;
-                }
-            }
+
+    public void testUnwrapCallableStatement() {
+        try {
+            CallableStatement cs = stmt.unwrap(CallableStatement.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
+        }
+    }
+
+    public void testUnwrapResultSet() throws SQLException {
+        try {
+            ResultSet rs = stmt.unwrap(ResultSet.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
         }
     }
 

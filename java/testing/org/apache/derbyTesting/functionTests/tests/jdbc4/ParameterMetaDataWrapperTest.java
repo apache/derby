@@ -23,7 +23,6 @@ import java.sql.*;
 import javax.sql.*;
 import junit.framework.*;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
-import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 /**
  * Tests of the <code>java.sql.ParameterMetaData</code> JDBC40 API
@@ -72,65 +71,29 @@ public class ParameterMetaDataWrapperTest extends BaseJDBCTestCase {
         if(conn != null && !conn.isClosed())
             conn.close();
     }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns true and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     */
-    public void testisWrapperReturnsTrue() throws SQLException {
-        Class<ParameterMetaData> wrap_class = ParameterMetaData.class;
-        
-        //The if should return true enabling us  to call the unwrap method
-        //without throwing  an exception
-        if(pmd.isWrapperFor(wrap_class)) {
-            try {
-                ParameterMetaData pmd1 =
-                        (ParameterMetaData)pmd.unwrap(wrap_class);
-            }
-            catch(SQLException sqle) {
-                fail("Unwrap wrongly throws a SQLException");
-            }
-        } else {
-            fail("isWrapperFor wrongly returns false");
+
+    public void testIsWrapperForParameterMetaData() throws SQLException {
+        assertTrue(pmd.isWrapperFor(ParameterMetaData.class));
+    }
+
+    public void testUnwrapParameterMetaData() throws SQLException {
+        ParameterMetaData pmd2 = pmd.unwrap(ParameterMetaData.class);
+        assertSame("Unwrap returned wrong object.", pmd, pmd2);
+    }
+
+    public void testIsNotWrapperForResultSet() throws SQLException {
+        assertFalse(pmd.isWrapperFor(ResultSet.class));
+    }
+
+    public void testUnwrapResultSet() {
+        try {
+            ResultSet rs = pmd.unwrap(ResultSet.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
         }
     }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns false and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     */
-    public void testisWrapperReturnsFalse() throws SQLException {
-        //test for the case when isWrapper returns false
-        //using some class that will return false when
-        //passed to isWrapperFor
-        Class<ResultSet> wrap_class = ResultSet.class;
-        
-        //returning false is the correct behaviour in this case
-        //Generate a message if it returns true
-        if(pmd.isWrapperFor(wrap_class)) {
-            fail("isWrapperFor wrongly returns true");
-        } else {
-            try {
-                ResultSet rs1 = (ResultSet)
-                pmd.unwrap(wrap_class);
-                fail("unwrap does not throw the expected " +
-                        "exception");
-            } catch (SQLException sqle) {
-                //calling unwrap in this case throws an SQLException
-                //check that this SQLException has the correct SQLState
-                if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
-                    throw sqle;
-                }
-            }
-        }
-    }
-    
+
     /**
      * Return suite with all tests of the class.
      */

@@ -23,7 +23,6 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
-import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -472,65 +471,53 @@ public class CallableStatementTest
             // We are fine, do nothing.
         }
     }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns true and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     */
-    public void testisWrapperReturnsTrue() throws SQLException {
-        Class<CallableStatement> wrap_class = CallableStatement.class;
-        
-        //The if should return true enabling us  to call the unwrap method
-        //without throwing  an exception
-        if(cStmt.isWrapperFor(wrap_class)) {
-            try {
-                CallableStatement stmt1 =
-                        (CallableStatement)cStmt.unwrap(wrap_class);
-            }
-            catch(SQLException sqle) {
-                fail("Unwrap wrongly throws a SQLException");
-            }
-        } else {
-            fail("isWrapperFor wrongly returns false");
-        }
-    }
-    
-    /**
-     *
-     * Tests the wrapper methods isWrapperFor and unwrap. Test
-     * for the case when isWrapperFor returns false and we call unwrap
-     * The test is right now being run in the embedded case only
-     *
-     */
-    public void testisWrapperReturnsFalse() throws SQLException {
-        //test for the case when isWrapper returns false
-        //using some class that will return false when
-        //passed to isWrapperFor
-        Class<ResultSet> wrap_class = ResultSet.class;
-        
-        //returning false is the correct behaviour in this case
-        //Generate a message if it returns true
-        if(cStmt.isWrapperFor(wrap_class)) {
-            fail("isWrapperFor wrongly returns true");
-        } else {
-            try {
-                ResultSet rs1 = (ResultSet)
-                cStmt.unwrap(wrap_class);
-                fail("unwrap does not throw the expected " +
-                        "exception");
-            } catch (SQLException sqle) {
-                //calling unwrap in this case throws an SQLException
-                //check that this SQLException has the correct SQLState
-                if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
-                    throw sqle;
-                }
-            }
-        }
+
+    /** Helper method for testIsWrapperFor*Statement test cases. */
+    private void testIsWrapperForXXXStatement(Class klass) throws SQLException {
+        assertTrue("The CallableStatement is not a wrapper for "
+                       + klass.getName(),
+                   cStmt.isWrapperFor(klass));
     }
 
+    public void testIsWrapperForStatement() throws SQLException {
+        testIsWrapperForXXXStatement(Statement.class);
+    }
+
+    public void testIsWrapperForPreparedStatement() throws SQLException {
+        testIsWrapperForXXXStatement(PreparedStatement.class);
+    }
+
+    public void testIsWrapperForCallableStatement() throws SQLException {
+        testIsWrapperForXXXStatement(CallableStatement.class);
+    }
+
+    public void testIsNotWrapperForResultSet() throws SQLException {
+        assertFalse(cStmt.isWrapperFor(ResultSet.class));
+    }
+
+    public void testUnwrapStatement() throws SQLException {
+        Statement stmt = cStmt.unwrap(Statement.class);
+        assertSame("Unwrap returned wrong object.", cStmt, stmt);
+    }
+
+    public void testUnwrapPreparedStatement() throws SQLException {
+        PreparedStatement ps = cStmt.unwrap(PreparedStatement.class);
+        assertSame("Unwrap returned wrong object.", cStmt, ps);
+    }
+
+    public void testUnwrapCallableStatement() throws SQLException {
+        Statement cs = cStmt.unwrap(CallableStatement.class);
+        assertSame("Unwrap returned wrong object.", cStmt, cs);
+    }
+
+    public void testUnwrapResultSet() {
+        try {
+            ResultSet rs = cStmt.unwrap(ResultSet.class);
+            fail("Unwrap didn't fail.");
+        } catch (SQLException e) {
+            assertSQLState("XJ128", e);
+        }
+    }
 
     /**
      *
