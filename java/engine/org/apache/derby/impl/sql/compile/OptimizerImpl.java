@@ -452,9 +452,30 @@ public class OptimizerImpl implements Optimizer
 		** just pick the next table in the current position.
 		*/
 		boolean joinPosAdvanced = false;
+
+		/* Determine if the current plan is still less expensive than
+		 * the best plan so far.  If bestCost is uninitialized then
+		 * we want to return false here; if we didn't, then in the (rare)
+		 * case where the current cost is greater than Double.MAX_VALUE
+		 * (esp. if it's Double.POSITIVE_INFINITY, which can occur
+		 * for very deeply nested queries with long FromLists) we would
+		 * give up on the current plan even though we didn't have a
+		 * best plan yet, which would be wrong.  Also note: if we have
+		 * a required row ordering then we might end up using the
+		 * sort avoidance plan--but we don't know at this point
+		 * which plan (sort avoidance or "normal") we're going to
+		 * use, so we error on the side of caution and only short-
+		 * circuit if both currentCost and currentSortAvoidanceCost
+		 * (if the latter is applicable) are greater than bestCost.
+		 */
+		boolean alreadyCostsMore =
+			!bestCost.isUninitialized() &&
+			(currentCost.compare(bestCost) > 0) &&
+			((requiredRowOrdering == null) ||
+				(currentSortAvoidanceCost.compare(bestCost) > 0));
+
 		if ((joinPosition < (numOptimizables - 1)) &&
-			((currentCost.compare(bestCost) < 0) ||
-			(currentSortAvoidanceCost.compare(bestCost) < 0)) &&
+			!alreadyCostsMore &&
 			( ! timeExceeded )
 			)
 		{
@@ -480,16 +501,29 @@ public class OptimizerImpl implements Optimizer
 				bestRowOrdering.copy(currentRowOrdering);
 			}
 		}
-		else if (optimizerTrace)
+		else
 		{
-			/*
-			** Not considered short-circuiting if all slots in join
-			** order are taken.
-			*/
-			if (joinPosition < (numOptimizables - 1))
-			{
-				trace(SHORT_CIRCUITING, 0, 0, 0.0, null);
+			if (optimizerTrace)
+ 			{
+				/*
+				** Not considered short-circuiting if all slots in join
+				** order are taken.
+				*/
+				if (joinPosition < (numOptimizables - 1))
+				{
+					trace(SHORT_CIRCUITING, 0, 0, 0.0, null);
+				}
 			}
+
+			// If we short-circuited the current join order then we need
+			// to make sure that, when we start pulling optimizables to find
+			// a new join order, we reload the best plans for those
+			// optimizables as we pull them.  Otherwise we could end up
+			// generating a plan for an optimizable even though that plan
+			// was part of a short-circuited (and thus rejected) join
+			// order.
+			if (joinPosition < (numOptimizables - 1))
+				reloadBestPlan = true;
 		}
 
 		if (permuteState == JUMPING && !joinPosAdvanced && joinPosition >= 0)
