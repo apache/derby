@@ -29,7 +29,7 @@ import java.security.PrivilegedActionException;
 /**
  * Base class for JUnit tests.
  */
-public class BaseTestCase
+public abstract class BaseTestCase
     extends TestCase {
 
     /**

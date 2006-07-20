@@ -18,7 +18,6 @@
  * language governing permissions and limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
-import org.apache.derbyTesting.functionTests.util.TestConfiguration;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import java.sql.Connection;
@@ -38,17 +37,7 @@ import java.util.Collections;
  * @author Andreas Korneliussen
  */
 public class SURDataModelSetup extends TestSetup
-{
-	
-	 /**
-     * Configuration for the test case.
-     * The configuration is created based on system properties.
-     *
-     * @see TestConfiguration
-     */
-    public static final TestConfiguration CONFIG = 
-        TestConfiguration.DERBY_TEST_CONFIG;
-    
+{  
     /**
      * Constructor.
      * @param test test to decorate with this setup
@@ -134,7 +123,7 @@ public class SURDataModelSetup extends TestSetup
      * Creates a datamodel for testing Scrollable Updatable ResultSets
      * and populates the database model with data.
      */
-    public void setUp() throws  Exception {       
+    protected void setUp() throws  Exception {       
         println("Setting up datamodel: " + model);
         try {
             con = getNewConnection();
@@ -148,7 +137,7 @@ public class SURDataModelSetup extends TestSetup
     /**
      * Delete the datamodel
      */
-    public void tearDown() 
+    protected void tearDown() 
         throws Exception
     {
         try {

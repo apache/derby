@@ -54,7 +54,7 @@ final public class BLOBDataModelSetup extends TestSetup
      * with blob columns.
      * @exception Exception any exception will cause test to fail with error.
      */
-    public final void setUp() 
+    protected final void setUp() 
         throws Exception
     {
         con = BaseJDBCTestCase.getConnection();
@@ -102,7 +102,7 @@ final public class BLOBDataModelSetup extends TestSetup
      * Rollback connection and close it.
      * @exception Exceptions causes the test to fail with error
      */
-    public final void tearDown() 
+    protected final void tearDown() 
         throws Exception
     {
         try { 

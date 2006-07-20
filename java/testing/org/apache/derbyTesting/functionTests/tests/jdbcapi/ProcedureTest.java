@@ -615,7 +615,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      *
      * @param sqle a <code>SQLException</code> value
      */
-    private static void assertNoResultSetFromExecuteQuery(SQLException sqle) {
+    private void assertNoResultSetFromExecuteQuery(SQLException sqle) {
         if (usingDerbyNet()) {
             assertNull("Unexpected SQL state.", sqle.getSQLState());
         } else {
@@ -629,7 +629,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      *
      * @param sqle a <code>SQLException</code> value
      */
-    private static void assertMultipleResultsFromExecuteQuery(SQLException sqle)
+    private void assertMultipleResultsFromExecuteQuery(SQLException sqle)
     {
         if (usingDerbyNet()) {
             assertNull("Unexpected SQL state.", sqle.getSQLState());
@@ -644,7 +644,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      *
      * @param sqle a <code>SQLException</code> value
      */
-    private static void assertResultsFromExecuteUpdate(SQLException sqle) {
+    private void assertResultsFromExecuteUpdate(SQLException sqle) {
         if (usingDerbyNet()) {
             assertNull("Unexpected SQL state.", sqle.getSQLState());
         } else {
@@ -698,10 +698,10 @@ public class ProcedureTest extends BaseJDBCTestCase {
                   "_prepared"));
         }
         return new TestSetup(suite) {
-            public void setUp() throws Exception {
+            protected void setUp() throws Exception {
                 oneTimeSetUp();
             }
-            public void tearDown() throws Exception {
+            protected void tearDown() throws Exception {
                 oneTimeTearDown();
             }
         };

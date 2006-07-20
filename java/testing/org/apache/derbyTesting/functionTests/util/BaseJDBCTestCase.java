@@ -29,7 +29,7 @@ import java.sql.*;
  * A method for getting a default connection is provided, along with methods
  * for telling if a specific JDBC client is used.
  */
-public class BaseJDBCTestCase
+public abstract class BaseJDBCTestCase
     extends BaseTestCase {
 
     /**
