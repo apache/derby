@@ -9989,6 +9989,15 @@ public final class	DataDictionaryImpl
         }
         else
         {
+        	if (!add)
+        	{
+        		//set the uuid of the passed permission descriptor to 
+        		//corresponding rows's uuid in permissions system table. The
+        		//permission descriptor's uuid is required to have the 
+        		//dependency manager send the revoke privilege action to
+        		//all the dependent objects on that permission descriptor.
+        		rf.setUUIDOfThePassedDescriptor(existingRow, perm);
+        	}
             // add/remove these permissions to/from the existing permissions
             boolean[] colsChanged = new boolean[ existingRow.nColumns()];
             boolean[] indicesToUpdate = new boolean[ rf.getNumIndexes()];

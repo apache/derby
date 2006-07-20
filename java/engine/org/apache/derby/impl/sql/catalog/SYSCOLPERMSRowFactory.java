@@ -380,4 +380,14 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
         }
         return 0; // no change
     } // end of removePermissions
+    
+	/** 
+	 * @see PermissionsCatalogRowFactory#setUUIDOfThePassedDescriptor
+	 */
+    public void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm)
+    throws StandardException
+    {
+        DataValueDescriptor existingPermDVD = row.getColumn(COLPERMSID_COL_NUM);
+        perm.setUUID(getUUIDFactory().recreateUUID(existingPermDVD.getString()));
+    }
 }

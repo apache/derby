@@ -128,27 +128,11 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 		{
 			String grantee = (String) itr.next();
 			if( tablePermsDesc != null)
-			{
-				if (!grant)
-				{
-					TablePermsDescriptor tempTablePermsDesc = 
-						dd.getTablePermissions(td.getUUID(), grantee);
-					tablePermsDesc.setUUID(tempTablePermsDesc.getUUID());
-				} 
 				dd.addRemovePermissionsDescriptor( grant, tablePermsDesc, grantee, tc);
-			}
 			for( int i = 0; i < columnBitSets.length; i++)
 			{
 				if( colPermsDescs[i] != null)
-				{
-					if (!grant)
-					{
-						ColPermsDescriptor tempColPermsDescriptor = 
-							dd.getColumnPermissions(td.getUUID(), colPermsDescs[i].getType() ,grant, grantee);
-						colPermsDescs[i].setUUID(tempColPermsDescriptor.getUUID());
-					} 
 					dd.addRemovePermissionsDescriptor( grant, colPermsDescs[i], grantee, tc);					
-				}
 			}
 		}
 	} // end of executeConstantAction

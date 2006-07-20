@@ -309,4 +309,14 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
     {
         return -1; // There is only one kind of routine privilege so delete the whole row.
     } // end of removePermissions
+    
+	/** 
+	 * @see PermissionsCatalogRowFactory#setUUIDOfThePassedDescriptor
+	 */
+    public void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm)
+    throws StandardException
+    {
+        DataValueDescriptor existingPermDVD = row.getColumn(ROUTINEPERMSID_COL_NUM);
+        perm.setUUID(getUUIDFactory().recreateUUID(existingPermDVD.getString()));
+    }
 }

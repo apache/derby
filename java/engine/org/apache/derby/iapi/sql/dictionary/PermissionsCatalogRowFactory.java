@@ -114,4 +114,16 @@ public abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      */
     abstract public int removePermissions( ExecRow row, PermissionsDescriptor perm, boolean[] colsChanged)
         throws StandardException;
+
+    /**
+     * Set the uuid of the passed permission descriptor to the uuid of the row
+     * from the system table. DataDictionary will make this call before calling 
+     * the dependency manager to send invalidation messages to the objects 
+     * dependent on the permission descriptor's uuid.
+     * 
+     * @param row The row from the system table for the passed permission descriptor
+     * @param perm Permission descriptor
+     * @throws StandardException
+     */
+    abstract public void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm) throws StandardException;
 }
