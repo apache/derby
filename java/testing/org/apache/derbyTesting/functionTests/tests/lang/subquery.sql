@@ -437,3 +437,91 @@ call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 drop table t1;
 drop table t3;
 
+-- DERBY-781: Materialize subqueries where possible to avoid creating
+-- invariant result sets many times.  This test case executes a query
+-- that has subqueries twice: the first time the tables have only a
+-- few rows in them; the second time they have hundreds of rows in
+-- them.
+
+create table t1 (i int, j int);
+create table t2 (i int, j int);
+
+insert into t1 values (1, 1), (2, 2), (3, 3), (4, 4), (5, 5);
+insert into t2 values (1, 1), (2, 2), (3, 3), (4, 4), (5, 5);
+
+create table t3 (a int, b int);
+create table t4 (a int, b int);
+
+insert into t3 values (2, 2), (4, 4), (5, 5);
+insert into t4 values (2, 2), (4, 4), (5, 5);
+
+-- Use of the term "DISTINCT" makes it so that we don't flatten
+-- the subqueries.
+create view V1 as select distinct T1.i, T2.j from T1, T2 where T1.i = T2.i;
+create view V2 as select distinct T3.a, T4.b from T3, T4 where T3.a = T4.a;
+
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+maximumdisplaywidth 20000;
+
+-- Run the test query the first time, with only a small number
+-- of rows in each table. Before the patch for DERBY-781
+-- the optimizer would have chosen a nested loop join, which 
+-- means that we would generate the result set for the inner
+-- view multiple times.  After DERBY-781 the optimizer will
+-- choose to do a hash join and thereby materialize the inner
+-- result set, thus improving performance.  Should see a
+-- Hash join as the top-level join with a HashTableResult as
+-- the right child of the outermost join. 
+select * from V1, V2 where V1.j = V2.b and V1.i in (1,2,3,4,5);
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+-- Now add more data to the tables.
+
+insert into t1 select * from t2;
+insert into t2 select * from t1;
+insert into t2 select * from t1;
+insert into t1 select * from t2;
+insert into t2 select * from t1;
+insert into t1 select * from t2;
+insert into t2 select * from t1;
+insert into t1 select * from t2;
+insert into t2 select * from t1;
+insert into t1 select * from t2;
+
+insert into t3 select * from t4;
+insert into t4 select * from t3;
+insert into t3 select * from t4;
+insert into t4 select * from t3;
+insert into t3 select * from t4;
+insert into t4 select * from t3;
+insert into t3 select * from t4;
+insert into t4 select * from t3;
+insert into t3 select * from t4;
+insert into t4 select * from t3;
+insert into t3 select * from t4;
+
+-- Drop the views and recreate them with slightly different
+-- names.  The reason we use different names is to ensure that
+-- the query will be "different" from the last time and thus we'll
+-- we'll go through optimization again (instead of just using
+-- the cached plan from last time).
+drop view v1;
+drop view v2;
+
+-- Use of the term "DISTINCT" makes it so that we don't flatten
+-- the subqueries.
+create view VV1 as select distinct T1.i, T2.j from T1, T2 where T1.i = T2.i;
+create view VV2 as select distinct T3.a, T4.b from T3, T4 where T3.a = T4.a;
+
+-- Now execute the query again using the larger tables.
+select * from VV1, VV2 where VV1.j = VV2.b and VV1.i in (1,2,3,4,5);
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+-- clean up.
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
+drop view vv1;
+drop view vv2;
+drop table t1;
+drop table t2;
+drop table t3;
+drop table t4;

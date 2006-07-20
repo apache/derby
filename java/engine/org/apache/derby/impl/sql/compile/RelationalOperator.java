@@ -68,30 +68,30 @@ public interface RelationalOperator
 	ColumnReference	getColumnOperand(Optimizable optTable, int columnPosition);
 
 	/**
-	 * Check whether this RelationalOperator is a comparison of the given
-	 * column with an expression.  If so, return the ColumnReference that
-	 * corresponds to the given column, and that is on one side of this
-	 * RelationalOperator or the other (this method copes with the
-	 * column being on either side of the operator).  If the given column
-	 * does not appear by itself on one side of the comparison, the
-	 * method returns null.
-	 *
-	 * @param tableNumber	The table number of the table in question
-	 * @param columnPosition	The ordinal position of the column (one-based)
-	 *
-	 * @return	The ColumnReference on one side of this RelationalOperator
-	 *			that represents the given columnPosition.  Returns null
-	 *			if no such ColumnReference exists by itself on one side of
-	 *			this RelationalOperator.
-	 */
-	ColumnReference getColumnOperand(int tableNumber, int columnPosition);
-
-	/**
 	 * Get the ColumnReference for the given table on one side of this
 	 * RelationalOperator.  This presumes it will be found only on one
 	 * side.  If not found, it will return null.
 	 */
 	ColumnReference getColumnOperand(Optimizable optTable);
+
+	/**
+	 * Find the operand (left or right) that points to the same table
+	 * as the received ColumnReference, and then return either that
+	 * operand or the "other" operand, depending on the value of
+	 * otherSide. This presumes it will be found only on one
+	 * side.  If not found, it will return null.
+	 *
+	 * @param cRef The ColumnReference for which we're searching.
+	 * @param refSetSize Size of the referenced map for the predicate
+	 *  represented by this RelationalOperator node.  This is used
+	 *  for storing base table numbers when searching for cRef.
+	 * @param otherSide Assuming we find an operand that points to
+	 *  the same table as cRef, then we will return the *other*
+	 *  operand if otherSide is true; else we'll return the operand
+	 *  that matches cRef.
+	 */
+	ValueNode getOperand(ColumnReference cRef, int refSetSize,
+		boolean otherSide);
 
 	/**
 	 * Check whether this RelationalOperator is a comparison of the given
@@ -100,12 +100,17 @@ public interface RelationalOperator
 	 *
 	 * @param tableNumber	The table number of the base table the column is in
 	 * @param columnPosition	The ordinal position of the column (one-based)
+	 * @param ft	We'll look for the column in all tables at and beneath ft.
+	 *   This is useful if ft is, say, a ProjectRestrictNode over a subquery--
+	 *   then we want to look at all of the FROM tables in the subquery to try
+	 *   to find the right column.
 	 *
 	 * @return	The ValueNode for the expression the column is being compared
 	 *			to - null if the column is not being compared to anything.
 	 */
 	ValueNode getExpressionOperand(int tableNumber,
-									int columnPosition);
+									int columnPosition,
+									FromTable ft);
 
 	/**
 	 * Check whether this RelationalOperator is a comparison of the given
@@ -277,14 +282,40 @@ public interface RelationalOperator
 	 * from that table on one side of this relop, and an expression that
 	 * does not refer to the table on the other side of the relop.
 	 *
+	 * Note that this method has two uses: 1) see if this operator (or
+	 * more specifically, the predicate to which this operator belongs)
+	 * can be used as a join predicate (esp. for a hash join), and 2)
+	 * see if this operator can be pushed to the target optTable.  We
+	 * use the parameter "forPush" to distinguish between the two uses
+	 * because in some cases (esp. situations where we have subqueries)
+	 * the answer to "is this a qualifier?" can differ depending on
+	 * whether or not we're pushing.  In particular, for binary ops
+	 * that are join predicates, if we're just trying to find an
+	 * equijoin predicate then this op qualifies if it references either
+	 * the target table OR any of the base tables in the table's subtree.
+	 * But if we're planning to push the predicate down to the target
+	 * table, this op only qualifies if it references the target table
+	 * directly.  This difference in behavior is required because in
+	 * case 1 (searching for join predicates), the operator remains at
+	 * its current level in the tree even if its operands reference
+	 * nodes further down; in case 2, though, we'll end up pushing
+	 * the operator down the tree to child node(s) and that requires
+	 * additional logic, such as "scoping" consideration.  Until
+	 * that logic is in place, we don't search a subtree if the intent
+	 * is to push the predicate to which this operator belongs further
+	 * down that subtree.  See BinaryRelationalOperatorNode for an
+	 * example of where this comes into play.
+	 *
 	 * @param optTable	The Optimizable table in question.
+	 * @param forPush	Are we asking because we're trying to push?
 	 *
 	 * @return	true if this operator can be compiled into a Qualifier
 	 *			for the given Optimizable table.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	boolean isQualifier(Optimizable optTable) throws StandardException;
+	boolean isQualifier(Optimizable optTable, boolean forPush)
+		throws StandardException;
 
 	/**
 	 * Return the operator (as an int) for this RelationalOperator.

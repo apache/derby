@@ -2246,15 +2246,15 @@ Source result set:
 null									stop position: 
 null									qualifiers:
 Column[0][0] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 0
 Operator: <=
 Ordered nulls: false
 Unknown return value: false
 Negate comparison result: false
+Column[0][1] Id: 0
+Operator: <
+Ordered nulls: false
+Unknown return value: true
+Negate comparison result: true
 						Right result set:
 							Project-Restrict ResultSet (8):
 							Number of opens = 1
@@ -2290,15 +2290,15 @@ Negate comparison result: false
 null									stop position: 
 null									qualifiers:
 Column[0][0] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 0
 Operator: <=
 Ordered nulls: false
 Unknown return value: false
 Negate comparison result: false
+Column[0][1] Id: 0
+Operator: <
+Ordered nulls: false
+Unknown return value: true
+Negate comparison result: true
 			Right result set:
 				Sort ResultSet:
 				Number of opens = 4

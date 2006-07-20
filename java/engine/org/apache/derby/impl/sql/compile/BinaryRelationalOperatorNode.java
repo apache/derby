@@ -65,6 +65,15 @@ public class BinaryRelationalOperatorNode
 	private int operatorType;
 	/* RelationalOperator Interface */
 
+	// Visitor for finding base tables beneath optimizables and column
+	// references.  Created once and re-used thereafter.
+	private BaseTableNumbersVisitor btnVis;
+
+	// Bit sets for holding base tables beneath optimizables and
+	// column references.  Created once and re-used thereafter.
+	JBitSet optBaseTables;
+	JBitSet valNodeBaseTables;
+
 	public void init(Object leftOperand, Object rightOperand)
 	{
 		String methodName = "";
@@ -115,6 +124,7 @@ public class BinaryRelationalOperatorNode
 			    break;
 		}
 		super.init(leftOperand, rightOperand, operatorName, methodName);
+		btnVis = null;
 	}
 
 	/** @see RelationalOperator#getColumnOperand */
@@ -124,16 +134,13 @@ public class BinaryRelationalOperatorNode
 	{
 		FromTable	ft = (FromTable) optTable;
 
-		return getColumnOperand(ft.getTableNumber(), columnPosition);
-	}
+		// When searching for a matching column operand, we search
+		// the entire subtree (if there is one) beneath optTable
+		// to see if we can find any FromTables that correspond to
+		// either of this op's column references.
 
-	/** @see RelationalOperator#getColumnOperand */
-	public ColumnReference getColumnOperand(
-								int tableNumber,
-								int columnPosition)
-	{
 		ColumnReference	cr;
-
+		boolean walkSubtree = true;
 		if (leftOperand instanceof ColumnReference)
 		{
 			/*
@@ -141,7 +148,7 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) leftOperand;
-			if (cr.getTableNumber() == tableNumber)
+			if (valNodeReferencesOptTable(cr, ft, false, walkSubtree))
 			{
 				/*
 				** The table is correct, how about the column position?
@@ -152,6 +159,7 @@ public class BinaryRelationalOperatorNode
 					return cr;
 				}
 			}
+			walkSubtree = false;
 		}
 
 		if (rightOperand instanceof ColumnReference)
@@ -161,7 +169,7 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) rightOperand;
-			if (cr.getTableNumber() == tableNumber)
+			if (valNodeReferencesOptTable(cr, ft, false, walkSubtree))
 			{
 				/*
 				** The table is correct, how about the column position?
@@ -183,6 +191,7 @@ public class BinaryRelationalOperatorNode
 	{
 		ColumnReference	cr;
 
+		boolean walkSubtree = true;
 		if (leftOperand instanceof ColumnReference)
 		{
 			/*
@@ -190,13 +199,15 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) leftOperand;
-			if (cr.getTableNumber() == optTable.getTableNumber())
+			if (valNodeReferencesOptTable(
+				cr, (FromTable)optTable, false, walkSubtree))
 			{
 				/*
 				** The table is correct.
 				*/
 				return cr;
 			}
+			walkSubtree = false;
 		}
 
 		if (rightOperand instanceof ColumnReference)
@@ -206,7 +217,8 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) rightOperand;
-			if (cr.getTableNumber() == optTable.getTableNumber())
+			if (valNodeReferencesOptTable(cr,
+				(FromTable)optTable, false, walkSubtree))
 			{
 				/*
 				** The table is correct
@@ -224,9 +236,11 @@ public class BinaryRelationalOperatorNode
 	 */
 	public ValueNode getExpressionOperand(
 								int tableNumber,
-								int columnPosition)
+								int columnPosition,
+								FromTable ft)
 	{
 		ColumnReference	cr;
+		boolean walkSubtree = true;
 
 		if (leftOperand instanceof ColumnReference)
 		{
@@ -235,7 +249,7 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) leftOperand;
-			if (cr.getTableNumber() == tableNumber)
+			if (valNodeReferencesOptTable(cr, ft, false, walkSubtree))
 			{
 				/*
 				** The table is correct, how about the column position?
@@ -249,6 +263,7 @@ public class BinaryRelationalOperatorNode
 					return rightOperand;
 				}
 			}
+			walkSubtree = false;
 		}
 
 		if (rightOperand instanceof ColumnReference)
@@ -258,7 +273,7 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) rightOperand;
-			if (cr.getTableNumber() == tableNumber)
+			if (valNodeReferencesOptTable(cr, ft, false, walkSubtree))
 			{
 				/*
 				** The table is correct, how about the column position?
@@ -272,6 +287,101 @@ public class BinaryRelationalOperatorNode
 					return leftOperand;
 				}
 			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @see RelationalOperator#getOperand
+	 */
+	public ValueNode getOperand(ColumnReference cRef,
+		int refSetSize, boolean otherSide)
+	{
+		// Following call will initialize/reset the btnVis,
+		// valNodeBaseTables, and optBaseTables fields of this object.
+		initBaseTableVisitor(refSetSize, true);
+
+		// We search for the column reference by getting the *base*
+		// table number for each operand and checking to see if
+		// that matches the *base* table number for the cRef
+		// that we're looking for.  If so, then we the two
+		// reference the same table so we go on to check
+		// column position.
+		try {
+
+			// Use optBaseTables for cRef's base table numbers.
+			btnVis.setTableMap(optBaseTables);
+			cRef.accept(btnVis);
+
+			// Use valNodeBaseTables for operand base table nums.
+			btnVis.setTableMap(valNodeBaseTables);
+
+			ColumnReference	cr;
+			if (leftOperand instanceof ColumnReference)
+			{
+				/*
+				** The left operand is a column reference.
+				** Is it the correct column?
+				*/
+				cr = (ColumnReference) leftOperand;
+				cr.accept(btnVis);
+				valNodeBaseTables.and(optBaseTables);
+				if (valNodeBaseTables.getFirstSetBit() != -1)
+				{
+					/*
+					** The table is correct, how about the column position?
+					*/
+					if (cr.getSource().getColumnPosition() ==
+						cRef.getColumnNumber())
+					{
+						/*
+						** We've found the correct column -
+						** return the appropriate side.
+						*/
+						if (otherSide)
+							return rightOperand;
+						return leftOperand;
+					}
+				}
+			}
+
+			if (rightOperand instanceof ColumnReference)
+			{
+				/*
+				** The right operand is a column reference.
+				** Is it the correct column?
+				*/
+				valNodeBaseTables.clearAll();
+				cr = (ColumnReference) rightOperand;
+				cr.accept(btnVis);
+				valNodeBaseTables.and(optBaseTables);
+				if (valNodeBaseTables.getFirstSetBit() != -1)
+				{
+					/*
+					** The table is correct, how about the column position?
+					*/
+					if (cr.getSource().getColumnPosition() == 
+						cRef.getColumnNumber())
+					{
+						/*
+						** We've found the correct column -
+						** return the appropriate side
+						*/
+						if (otherSide)
+							return leftOperand;
+						return rightOperand;
+					}
+				}
+			}
+
+		} catch (StandardException se) {
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT("Failed when trying to " +
+                    "find base table number for column reference check:\n" +
+                    se.getMessage());
+            }
 		}
 
 		return null;
@@ -298,8 +408,8 @@ public class BinaryRelationalOperatorNode
     	}
 		ft = (FromBaseTable) optTable;
 
-		ValueNode exprOp =
-					getExpressionOperand(ft.getTableNumber(), columnPosition);
+		ValueNode exprOp = getExpressionOperand(
+			ft.getTableNumber(), columnPosition, ft);
 
 		if (SanityManager.DEBUG)
 		{
@@ -388,10 +498,7 @@ public class BinaryRelationalOperatorNode
 	protected boolean keyColumnOnLeft(Optimizable optTable)
 	{
 		ColumnReference	cr;
-		FromTable	ft;
 		boolean			left = false;
-
-		ft = (FromTable) optTable;
 
 		/* Is the key column on the left or the right? */
 		if (leftOperand instanceof ColumnReference)
@@ -401,23 +508,25 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) leftOperand;
-			if (cr.getTableNumber() == ft.getTableNumber())
+			if (valNodeReferencesOptTable(
+				cr, (FromTable)optTable, false, true))
 			{
 				/* The left operand is the key column */
 				left = true;
 			}
 		}
-		else
+
+		// Else the right operand must be the key column.
+    	if (SanityManager.DEBUG)
 		{
-    		if (SanityManager.DEBUG)
-	    	{
-		    	SanityManager.ASSERT((rightOperand instanceof ColumnReference) &&
-			    		(((ColumnReference) rightOperand).getTableNumber() ==
-    														ft.getTableNumber()),
-	    				"Key column not found on either side.");
-	    	}
-			/* The right operand is the key column */
-			left = false;
+			if (!left)
+			{
+		    	SanityManager.ASSERT(
+					(rightOperand instanceof ColumnReference) &&
+					valNodeReferencesOptTable((ColumnReference)rightOperand,
+			    		(FromTable)optTable, false, true),
+					"Key column not found on either side.");
+			}
 		}
 
 		return left;
@@ -443,6 +552,7 @@ public class BinaryRelationalOperatorNode
 	{
 		ColumnReference	cr;
 		boolean			left = false;
+		boolean			walkSubtree = true;
 
 		/* Is a column on the left */
 		if (leftOperand instanceof ColumnReference)
@@ -452,11 +562,13 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) leftOperand;
-			if (cr.getTableNumber() == optTable.getTableNumber())
+			if (valNodeReferencesOptTable(
+				cr, (FromTable)optTable, false, walkSubtree))
 			{
 				/* Key column found on left */
 				return LEFT;
 			}
+			walkSubtree = false;
 		}
 
 		if (rightOperand instanceof ColumnReference)
@@ -466,7 +578,8 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) rightOperand;
-			if (cr.getTableNumber() == optTable.getTableNumber())
+			if (valNodeReferencesOptTable(
+				cr, (FromTable)optTable, false, walkSubtree))
 			{
 				/* Key column found on right */
 				return RIGHT;
@@ -621,7 +734,7 @@ public class BinaryRelationalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean isQualifier(Optimizable optTable)
+	public boolean isQualifier(Optimizable optTable, boolean forPush)
 		throws StandardException
 	{
 		FromTable	ft;
@@ -629,6 +742,7 @@ public class BinaryRelationalOperatorNode
 		JBitSet		tablesReferenced;
 		ColumnReference	cr = null;
 		boolean	found = false;
+		boolean walkSubtree = true;
 
 		ft = (FromTable) optTable;
 
@@ -639,11 +753,12 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) leftOperand;
-			if (cr.getTableNumber() == ft.getTableNumber())
+			if (valNodeReferencesOptTable(cr, ft, forPush, walkSubtree))
 			{
 				otherSide = rightOperand;
 				found = true;
 			}
+			walkSubtree = false;
 		}
 
 		if ( ( ! found) && (rightOperand instanceof ColumnReference) )
@@ -653,7 +768,7 @@ public class BinaryRelationalOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) rightOperand;
-			if (cr.getTableNumber() == ft.getTableNumber())
+			if (valNodeReferencesOptTable(cr, ft, forPush, walkSubtree))
 			{
 				otherSide = leftOperand;
 				found = true;
@@ -675,9 +790,7 @@ public class BinaryRelationalOperatorNode
 		** Qualifier if the other side does not refer to the table we are
 		** optimizing.
 		*/
-		tablesReferenced = otherSide.getTablesReferenced();
-
-		return  ! (tablesReferenced.get(ft.getTableNumber()));
+		return !valNodeReferencesOptTable(otherSide, ft, forPush, true);
 	}
 
 	/** 
@@ -1320,6 +1433,143 @@ public class BinaryRelationalOperatorNode
 		return (ValueNode)cr.getClone();
 	}
 
-}	
+	/**
+	 * Determine whether or not the received ValueNode (which will
+	 * usually be a ColumnReference) references either the received
+	 * optTable or else a base table in the subtree beneath that
+	 * optTable.
+	 *
+	 * @param valNode The ValueNode that has the reference(s).
+	 * @param optTable The table/subtree node to which we're trying
+	 *  to find a reference.
+	 * @param forPush Whether or not we are searching with the intent
+	 *  to push this operator to the target table.
+	 * @param walkOptTableSubtree Should we walk the subtree beneath
+	 *  optTable to find base tables, or not?  Will be false if we've
+	 *  already done it for the left operand and now we're here
+	 *  for the right operand.
+	 * @return True if valNode contains a reference to optTable or
+	 *  to a base table in the subtree beneath optTable; false
+	 *  otherwise.
+	 */
+	private boolean valNodeReferencesOptTable(ValueNode valNode,
+		FromTable optTable, boolean forPush, boolean walkOptTableSubtree)
+	{
+		// Following call will initialize/reset the btnVis,
+		// valNodeBaseTables, and optBaseTables fields of this object.
+		initBaseTableVisitor(optTable.getReferencedTableMap().size(),
+			walkOptTableSubtree);
 
+		boolean found = false;
+		try {
 
+			// Find all base tables beneath optTable and load them
+			// into this object's optBaseTables map.  This is the
+			// list of table numbers we'll search to see if the
+			// value node references any tables in the subtree at
+			// or beneath optTable.
+			if (walkOptTableSubtree)
+				buildTableNumList(optTable, forPush);
+
+			// Now get the base table numbers that are in valNode's
+			// subtree.  In most cases valNode will be a ColumnReference
+			// and this will return a single base table number.
+			btnVis.setTableMap(valNodeBaseTables);
+			valNode.accept(btnVis);
+
+			// And finally, see if there's anything in common.
+			valNodeBaseTables.and(optBaseTables);
+			found = (valNodeBaseTables.getFirstSetBit() != -1);
+
+		} catch (StandardException se) {
+			if (SanityManager.DEBUG)
+			{
+				SanityManager.THROWASSERT("Failed when trying to " +
+					"find base table numbers for reference check:\n" +
+					se.getMessage());
+			}
+		}
+
+		return found;
+	}
+
+	/**
+	 * Initialize the fields used for retrieving base tables in
+	 * subtrees, which allows us to do a more extensive search
+	 * for table references.  If the fields have already been
+	 * created, then just reset their values.
+	 *
+	 * @param numTablesInQuery Used for creating JBitSets that
+	 *  can hold table numbers for the query.
+	 * @param initOptBaseTables Whether or not we should clear out
+	 *  or initialize the optBaseTables bit set.
+	 */
+	private void initBaseTableVisitor(int numTablesInQuery,
+		boolean initOptBaseTables)
+	{
+		if (valNodeBaseTables == null)
+			valNodeBaseTables = new JBitSet(numTablesInQuery);
+		else
+			valNodeBaseTables.clearAll();
+
+		if (initOptBaseTables)
+		{
+			if (optBaseTables == null)
+				optBaseTables = new JBitSet(numTablesInQuery);
+			else
+				optBaseTables.clearAll();
+		}
+
+		// Now create the visitor.  We give it valNodeBaseTables
+		// here for sake of creation, but this can be overridden
+		// (namely, by optBaseTables) by the caller of this method.
+		if (btnVis == null)
+			btnVis = new BaseTableNumbersVisitor(valNodeBaseTables);
+	}
+
+	/**
+	 * Create a set of table numbers to search when trying to find
+	 * which (if either) of this operator's operands reference the
+	 * received target table.  At the minimum this set should contain
+	 * the target table's own table number.  After that, if we're
+	 * _not_ attempting to push this operator (or more specifically,
+	 * the predicate to which this operator belongs) to the target
+	 * table, we go on to search the subtree beneath the target
+	 * table and add any base table numbers to the searchable list.
+	 *
+	 * @param ft Target table for which we're building the search
+	 *  list.
+	 * @param forPush Whether or not we are searching with the intent
+	 *  to push this operator to the target table.
+	 */
+	private void buildTableNumList(FromTable ft, boolean forPush)
+		throws StandardException
+	{
+		// Start with the target table's own table number.  Note
+		// that if ft is an instanceof SingleChildResultSet, its
+		// table number could be negative.
+		if (ft.getTableNumber() >= 0)
+			optBaseTables.set(ft.getTableNumber());
+
+		if (forPush)
+		// nothing else to do.
+			return;
+
+		// Add any table numbers from the target table's
+		// reference map.
+		optBaseTables.or(ft.getReferencedTableMap());
+
+		// The table's reference map is not guaranteed to have
+		// all of the tables that are actually used--for example,
+		// if the table is a ProjectRestrictNode or a JoinNode
+		// with a subquery as a child, the ref map will contain
+		// the number for the PRN above the subquery, but it
+		// won't contain the table numbers referenced by the
+		// subquery.  So here we go through and find ALL base
+		// table numbers beneath the target node.
+		btnVis.setTableMap(optBaseTables);
+		ft.accept(btnVis);
+		return;
+	}
+
+}

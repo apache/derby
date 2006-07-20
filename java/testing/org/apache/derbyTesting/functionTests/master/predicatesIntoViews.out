@@ -6887,7 +6887,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				Left result set:
-					Nested Loop Left Outer Join ResultSet:
+					Hash Left Outer Join ResultSet:
 					Number of opens = 1
 					Rows seen from the left = 0
 					Rows seen from the right = 0
@@ -6947,7 +6947,7 @@ Source result set:
 										next time (milliseconds) = 0
 										close time (milliseconds) = 0
 									Left result set:
-										Nested Loop Left Outer Join ResultSet:
+										Hash Left Outer Join ResultSet:
 										Number of opens = 1
 										Rows seen from the left = 0
 										Rows seen from the right = 0
@@ -7043,18 +7043,22 @@ Ordered nulls: false
 Unknown return value: false
 Negate comparison result: false
 										Right result set:
-											Project-Restrict ResultSet (18):
+											Hash Table ResultSet (18):
 											Number of opens = 0
+											Hash table size = 0
+											Hash key is column number 0
 											Rows seen = 0
 											Rows filtered = 0
-											restriction = true
-											projection = true
 												constructor time (milliseconds) = 0
 												open time (milliseconds) = 0
 												next time (milliseconds) = 0
 												close time (milliseconds) = 0
-												restriction time (milliseconds) = 0
-												projection time (milliseconds) = 0
+												next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 											Source result set:
 												Project-Restrict ResultSet (17):
 												Number of opens = 0
@@ -7207,18 +7211,22 @@ Ordered nulls: false
 Unknown return value: false
 Negate comparison result: false
 					Right result set:
-						Project-Restrict ResultSet (27):
+						Hash Table ResultSet (27):
 						Number of opens = 0
+						Hash table size = 0
+						Hash key is column number 0
 						Rows seen = 0
 						Rows filtered = 0
-						restriction = true
-						projection = true
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
-							restriction time (milliseconds) = 0
-							projection time (milliseconds) = 0
+							next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 						Source result set:
 							Project-Restrict ResultSet (26):
 							Number of opens = 0

@@ -509,7 +509,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
                 {
                     // if any term of the OR clause is not a qualifier, then
                     // reject the entire OR clause.
-                    if (!((RelationalOperator) or_node.getLeftOperand()).isQualifier(optTable))
+                    if (!((RelationalOperator) or_node.getLeftOperand()).
+                        isQualifier(optTable, true))
                     {
                         // one of the terms is not a pushable Qualifier.
                         return(false);
@@ -852,10 +853,9 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * Determine whether or not this predicate is eligible for
 	 * push-down into subqueries.  Right now the only predicates
 	 * we consider to be eligible are those which 1) are Binary
-	 * Relational operator nodes, 2) have a column reference
-	 * on BOTH sides, and 3) have column references such that
-	 * each column reference has a reference to a base table
-	 * somewhere beneath it.
+	 * Relational operator nodes and 2) have a column reference
+	 * on BOTH sides, each of which has a reference to a base
+	 * table somewhere beneath it.
 	 *
 	 * @return Whether or not this predicate is eligible to be
 	 *  pushed into subqueries.
@@ -863,23 +863,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	protected boolean pushableToSubqueries()
 		throws StandardException
 	{
-		// If the predicate isn't a binary relational operator,
-		// then we don't push it.
-		if (!(getAndNode().getLeftOperand()
-			instanceof BinaryRelationalOperatorNode))
-		{
+		if (!isJoinPredicate())
 			return false;
-		}
-
-		BinaryRelationalOperatorNode opNode =
-			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
-
-		// If either side is not a column reference, we don't push.
-		if (!((opNode.getLeftOperand() instanceof ColumnReference) &&
-			(opNode.getRightOperand() instanceof ColumnReference)))
-		{
-			return false;
-		}
 
 		// Make sure both column references ultimately point to base
 		// tables.  If, for example, either column reference points to a
@@ -890,6 +875,9 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		// it might be okay to make the "remap" operation a no-op for
 		// such column references, but it's not clear whether that's
 		// always a safe option; further investigation required.
+
+		BinaryRelationalOperatorNode opNode =
+			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
 
 		JBitSet tNums = new JBitSet(getReferencedSet().size());
 		BaseTableNumbersVisitor btnVis = new BaseTableNumbersVisitor(tNums);
@@ -903,6 +891,31 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 			return false;
 
 		return true;
+	}
+
+	/**
+	 * Is this predicate a join predicate?  In order to be so,
+	 * it must be a binary relational operator node that has
+	 * a column reference on both sides.
+	 *
+	 * @return Whether or not this is a join predicate.
+	 */
+	protected boolean isJoinPredicate()
+	{
+		// If the predicate isn't a binary relational operator,
+		// then it's not a join predicate.
+		if (!(getAndNode().getLeftOperand()
+			instanceof BinaryRelationalOperatorNode))
+		{
+			return false;
+		}
+
+		BinaryRelationalOperatorNode opNode =
+			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
+
+		// If both sides are column references then this is a join pred.
+		return ((opNode.getLeftOperand() instanceof ColumnReference) &&
+			(opNode.getRightOperand() instanceof ColumnReference));
 	}
 
 	/**

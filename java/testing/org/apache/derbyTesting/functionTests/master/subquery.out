@@ -936,7 +936,7 @@ Source result set:
 		restriction time (milliseconds) = 0
 		projection time (milliseconds) = 0
 	Source result set:
-		Nested Loop Join ResultSet:
+		Hash Join ResultSet:
 		Number of opens = 1
 		Rows seen from the left = 5
 		Rows seen from the right = 4
@@ -972,24 +972,29 @@ None
 				next qualifiers:
 None
 		Right result set:
-			Project-Restrict ResultSet (4):
+			Hash Table ResultSet (4):
 			Number of opens = 5
-			Rows seen = 45
-			Rows filtered = 41
-			restriction = true
-			projection = true
+			Hash table size = 9
+			Hash key is column number 0
+			Rows seen = 9
+			Rows filtered = 0
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
+				next time in milliseconds/row = 0
+				next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
 			Source result set:
 				Distinct Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking: 
-				Number of opens = 5
+				Number of opens = 1
 				Hash table size = 9
 				Distinct columns are column numbers (0,1)
-				Rows seen = 45
+				Rows seen = 9
 				Rows filtered = 0
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
@@ -1015,5 +1020,629 @@ call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> -- DERBY-781: Materialize subqueries where possible to avoid creating
+-- invariant result sets many times.  This test case executes a query
+-- that has subqueries twice: the first time the tables have only a
+-- few rows in them; the second time they have hundreds of rows in
+-- them.
+create table t1 (i int, j int);
+0 rows inserted/updated/deleted
+ij> create table t2 (i int, j int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 1), (2, 2), (3, 3), (4, 4), (5, 5);
+5 rows inserted/updated/deleted
+ij> insert into t2 values (1, 1), (2, 2), (3, 3), (4, 4), (5, 5);
+5 rows inserted/updated/deleted
+ij> create table t3 (a int, b int);
+0 rows inserted/updated/deleted
+ij> create table t4 (a int, b int);
+0 rows inserted/updated/deleted
+ij> insert into t3 values (2, 2), (4, 4), (5, 5);
+3 rows inserted/updated/deleted
+ij> insert into t4 values (2, 2), (4, 4), (5, 5);
+3 rows inserted/updated/deleted
+ij> -- Use of the term "DISTINCT" makes it so that we don't flatten
+-- the subqueries.
+create view V1 as select distinct T1.i, T2.j from T1, T2 where T1.i = T2.i;
+0 rows inserted/updated/deleted
+ij> create view V2 as select distinct T3.a, T4.b from T3, T4 where T3.a = T4.a;
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> maximumdisplaywidth 20000;
+ij> -- Run the test query the first time, with only a small number
+-- of rows in each table. Before the patch for DERBY-781
+-- the optimizer would have chosen a nested loop join, which 
+-- means that we would generate the result set for the inner
+-- view multiple times.  After DERBY-781 the optimizer will
+-- choose to do a hash join and thereby materialize the inner
+-- result set, thus improving performance.  Should see a
+-- Hash join as the top-level join with a HashTableResult as
+-- the right child of the outermost join. 
+select * from V1, V2 where V1.j = V2.b and V1.i in (1,2,3,4,5);
+I          |J          |A          |B          
+-----------------------------------------------
+2          |2          |2          |2          
+4          |4          |4          |4          
+5          |5          |5          |5          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- Run the test query the first time, with only a small number
+-- of rows in each table. Before the patch for DERBY-781
+-- the optimizer would have chosen a nested loop join, which 
+-- means that we would generate the result set for the inner
+-- view multiple times.  After DERBY-781 the optimizer will
+-- choose to do a hash join and thereby materialize the inner
+-- result set, thus improving performance.  Should see a
+-- Hash join as the top-level join with a HashTableResult as
+-- the right child of the outermost join. 
+select * from V1, V2 where V1.j = V2.b and V1.i in (1,2,3,4,5)
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Hash Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 5
+Rows seen from the right = 3
+Rows filtered = 0
+Rows returned = 3
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Sort ResultSet:
+	Number of opens = 1
+	Rows input = 5
+	Rows returned = 5
+	Eliminate duplicates = true
+	In sorted order = false
+	Sort information: 
+		Number of rows input=5
+		Number of rows output=5
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (7):
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Nested Loop Join ResultSet:
+			Number of opens = 1
+			Rows seen from the left = 5
+			Rows seen from the right = 5
+			Rows filtered = 0
+			Rows returned = 5
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Project-Restrict ResultSet (5):
+				Number of opens = 1
+				Rows seen = 5
+				Rows filtered = 0
+				restriction = true
+				projection = false
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					restriction time (milliseconds) = 0
+					projection time (milliseconds) = 0
+				Source result set:
+					Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 5
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched={0}
+						Number of columns fetched=1
+						Number of pages visited=1
+						Number of rows qualified=5
+						Number of rows visited=5
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+Column[0][0] Id: 0
+Operator: <
+Ordered nulls: false
+Unknown return value: true
+Negate comparison result: true
+Column[0][1] Id: 0
+Operator: <=
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+			Right result set:
+				Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 5
+				Rows seen = 5
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=5
+					Number of rows visited=25
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+Right result set:
+	Hash Table ResultSet (13):
+	Number of opens = 5
+	Hash table size = 3
+	Hash key is column number 1
+	Rows seen = 3
+	Rows filtered = 0
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+		next qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Source result set:
+		Sort ResultSet:
+		Number of opens = 1
+		Rows input = 3
+		Rows returned = 3
+		Eliminate duplicates = true
+		In sorted order = false
+		Sort information: 
+			Number of rows input=3
+			Number of rows output=3
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Source result set:
+			Project-Restrict ResultSet (12):
+			Number of opens = 1
+			Rows seen = 3
+			Rows filtered = 0
+			restriction = false
+			projection = true
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Hash Join ResultSet:
+				Number of opens = 1
+				Rows seen from the left = 3
+				Rows seen from the right = 3
+				Rows filtered = 0
+				Rows returned = 3
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				Left result set:
+					Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 3
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched={0}
+						Number of columns fetched=1
+						Number of pages visited=1
+						Number of rows qualified=3
+						Number of rows visited=3
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+				Right result set:
+					Hash Scan ResultSet for T4 at read committed isolation level using instantaneous share row locking: 
+					Number of opens = 3
+					Hash table size = 3
+					Hash key is column number 0
+					Rows seen = 3
+					Rows filtered = 0
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=3
+						Number of rows visited=3
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						scan qualifiers:
+None
+						next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- Now add more data to the tables.
+insert into t1 select * from t2;
+5 rows inserted/updated/deleted
+ij> insert into t2 select * from t1;
+10 rows inserted/updated/deleted
+ij> insert into t2 select * from t1;
+10 rows inserted/updated/deleted
+ij> insert into t1 select * from t2;
+25 rows inserted/updated/deleted
+ij> insert into t2 select * from t1;
+35 rows inserted/updated/deleted
+ij> insert into t1 select * from t2;
+60 rows inserted/updated/deleted
+ij> insert into t2 select * from t1;
+95 rows inserted/updated/deleted
+ij> insert into t1 select * from t2;
+155 rows inserted/updated/deleted
+ij> insert into t2 select * from t1;
+250 rows inserted/updated/deleted
+ij> insert into t1 select * from t2;
+405 rows inserted/updated/deleted
+ij> insert into t3 select * from t4;
+3 rows inserted/updated/deleted
+ij> insert into t4 select * from t3;
+6 rows inserted/updated/deleted
+ij> insert into t3 select * from t4;
+9 rows inserted/updated/deleted
+ij> insert into t4 select * from t3;
+15 rows inserted/updated/deleted
+ij> insert into t3 select * from t4;
+24 rows inserted/updated/deleted
+ij> insert into t4 select * from t3;
+39 rows inserted/updated/deleted
+ij> insert into t3 select * from t4;
+63 rows inserted/updated/deleted
+ij> insert into t4 select * from t3;
+102 rows inserted/updated/deleted
+ij> insert into t3 select * from t4;
+165 rows inserted/updated/deleted
+ij> insert into t4 select * from t3;
+267 rows inserted/updated/deleted
+ij> insert into t3 select * from t4;
+432 rows inserted/updated/deleted
+ij> -- Drop the views and recreate them with slightly different
+-- names.  The reason we use different names is to ensure that
+-- the query will be "different" from the last time and thus we'll
+-- we'll go through optimization again (instead of just using
+-- the cached plan from last time).
+drop view v1;
+0 rows inserted/updated/deleted
+ij> drop view v2;
+0 rows inserted/updated/deleted
+ij> -- Use of the term "DISTINCT" makes it so that we don't flatten
+-- the subqueries.
+create view VV1 as select distinct T1.i, T2.j from T1, T2 where T1.i = T2.i;
+0 rows inserted/updated/deleted
+ij> create view VV2 as select distinct T3.a, T4.b from T3, T4 where T3.a = T4.a;
+0 rows inserted/updated/deleted
+ij> -- Now execute the query again using the larger tables.
+select * from VV1, VV2 where VV1.j = VV2.b and VV1.i in (1,2,3,4,5);
+I          |J          |A          |B          
+-----------------------------------------------
+2          |2          |2          |2          
+4          |4          |4          |4          
+5          |5          |5          |5          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	-- Now execute the query again using the larger tables.
+select * from VV1, VV2 where VV1.j = VV2.b and VV1.i in (1,2,3,4,5)
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Hash Join ResultSet:
+Number of opens = 1
+Rows seen from the left = 5
+Rows seen from the right = 3
+Rows filtered = 0
+Rows returned = 3
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Sort ResultSet:
+	Number of opens = 1
+	Rows input = 53055
+	Rows returned = 5
+	Eliminate duplicates = true
+	In sorted order = false
+	Sort information: 
+		Number of rows input=53055
+		Number of rows output=5
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (7):
+		Number of opens = 1
+		Rows seen = 53055
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Hash Join ResultSet:
+			Number of opens = 1
+			Rows seen from the left = 655
+			Rows seen from the right = 53055
+			Rows filtered = 0
+			Rows returned = 53055
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Project-Restrict ResultSet (5):
+				Number of opens = 1
+				Rows seen = 655
+				Rows filtered = 0
+				restriction = true
+				projection = false
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					restriction time (milliseconds) = 0
+					projection time (milliseconds) = 0
+				Source result set:
+					Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 655
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched={0}
+						Number of columns fetched=1
+						Number of pages visited=6
+						Number of rows qualified=655
+						Number of rows visited=655
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+Column[0][0] Id: 0
+Operator: <=
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+Column[0][1] Id: 0
+Operator: <
+Ordered nulls: false
+Unknown return value: true
+Negate comparison result: true
+			Right result set:
+				Hash Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking: 
+				Number of opens = 655
+				Hash table size = 5
+				Hash key is column number 0
+				Rows seen = 53055
+				Rows filtered = 0
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=4
+					Number of rows qualified=405
+					Number of rows visited=405
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					scan qualifiers:
+None
+					next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+Right result set:
+	Hash Table ResultSet (13):
+	Number of opens = 5
+	Hash table size = 3
+	Hash key is column number 1
+	Rows seen = 3
+	Rows filtered = 0
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+		next time in milliseconds/row = 0
+		next qualifiers:
+Column[0][0] Id: 1
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+	Source result set:
+		Sort ResultSet:
+		Number of opens = 1
+		Rows input = 100656
+		Rows returned = 3
+		Eliminate duplicates = true
+		In sorted order = false
+		Sort information: 
+			Number of rows input=100656
+			Number of rows output=3
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Source result set:
+			Project-Restrict ResultSet (12):
+			Number of opens = 1
+			Rows seen = 100656
+			Rows filtered = 0
+			restriction = false
+			projection = true
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				restriction time (milliseconds) = 0
+				projection time (milliseconds) = 0
+			Source result set:
+				Hash Join ResultSet:
+				Number of opens = 1
+				Rows seen from the left = 432
+				Rows seen from the right = 100656
+				Rows filtered = 0
+				Rows returned = 100656
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+				Left result set:
+					Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 432
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=4
+						Number of rows qualified=432
+						Number of rows visited=432
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+				Right result set:
+					Hash Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking: 
+					Number of opens = 432
+					Hash table size = 3
+					Hash key is column number 0
+					Rows seen = 100656
+					Rows filtered = 0
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched={0}
+						Number of columns fetched=1
+						Number of pages visited=6
+						Number of rows qualified=699
+						Number of rows visited=699
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						scan qualifiers:
+None
+						next qualifiers:
+Column[0][0] Id: 0
+Operator: =
+Ordered nulls: false
+Unknown return value: false
+Negate comparison result: false
+ij> -- clean up.
+call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
+0 rows inserted/updated/deleted
+ij> drop view vv1;
+0 rows inserted/updated/deleted
+ij> drop view vv2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t4;
 0 rows inserted/updated/deleted
 ij> 

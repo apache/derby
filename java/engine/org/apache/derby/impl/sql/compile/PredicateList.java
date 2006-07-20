@@ -405,7 +405,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			** Skip comparisons that are not qualifiers for the table
 			** in question.
 			*/
-			if ( ! ((RelationalOperator) opNode).isQualifier(optTable))
+			if ( ! ((RelationalOperator) opNode).isQualifier(optTable, false))
 			{
 				continue;
 			}
@@ -547,7 +547,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
                 }
                 else
                 {
-                    if ( ! relop.isQualifier(optTable))
+                    if ( ! relop.isQualifier(optTable, pushPreds))
                     {
                         // NOT a qualifier, go on to next predicate.
                         continue;
@@ -617,7 +617,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					continue;
 			}
 
-			if ( !isIn && ! relop.isQualifier(optTable))
+			if ( !isIn && ! relop.isQualifier(optTable, pushPreds))
 				continue;
 
 			/* Look for an index column on one side of the relop */
@@ -945,7 +945,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 
 			RelationalOperator relop = pred.getRelop();
 			// Transfer each non-qualifier
-			if (relop == null || ! relop.isQualifier(optTable))
+			if (relop == null || ! relop.isQualifier(optTable, false))
 			{
 				pred.clearScanFlags();
 				removeElementAt(index);
@@ -3339,7 +3339,8 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					ValueNode keyExp = 
                         relop.getExpressionOperand(
                             optTable.getTableNumber(), 
-                            baseColumns[columnNumber]);
+                            baseColumns[columnNumber],
+                            (FromTable)optTable);
 
 					if (keyExp instanceof ColumnReference)
 						setOrderedNulls = 
@@ -3392,18 +3393,17 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		for (int index = 0; index < size; index++)
 		{
 			Predicate	pred = (Predicate) elementAt(index);
-
 			RelationalOperator relop = pred.getRelop();
 
-			if (relop != null &&
-				relop.getOperator() == RelationalOperator.EQUALS_RELOP)
+			if (relop != null)
 			{
 				if (relop.getOperator() == RelationalOperator.EQUALS_RELOP)
 				{
-					ValueNode exprOp = relop.getExpressionOperand(
-											colRef.getTableNumber(),
-											colRef.getColumnNumber()
-											);
+					ValueNode exprOp = relop.getOperand(
+									colRef,
+									pred.getReferencedSet().size(),
+									true
+									);
 
 					if (exprOp != null)
 					{
@@ -3417,10 +3417,12 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				else if (relop.getOperator() ==
 											RelationalOperator.IS_NULL_RELOP)
 				{
-					ColumnReference columnOp = relop.getColumnOperand(
-												colRef.getTableNumber(),
-												colRef.getColumnNumber()
-												);
+					ColumnReference columnOp = 
+						(ColumnReference)relop.getOperand(
+										colRef,
+										pred.getReferencedSet().size(),
+										false
+										);
 
 					if (columnOp != null)
 					{

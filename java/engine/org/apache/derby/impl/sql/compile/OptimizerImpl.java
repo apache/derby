@@ -163,6 +163,24 @@ public class OptimizerImpl implements Optimizer
 	// the one that's actually going to be generated.
 	CostEstimate finalCostEstimate;
 
+	/* Status variables used for "jumping" to previous best join
+	 * order when possible.  In particular, this helps when this
+	 * optimizer corresponds to a subquery and we are trying to
+	 * find out what the best join order is if we do a hash join
+	 * with the subquery instead of a nested loop join.  In that
+	 * case the previous best join order will have the best join
+	 * order for a nested loop, so we want to start there when
+	 * considering hash join because odds are that same join order
+	 * will give us the best cost for hash join, as well.  We
+	 * only try this, though, if neither the previous round of
+	 * optimization nor this round relies on predicates that have
+	 * been pushed down from above--because that's the scenario
+	 * for which the best join order is likely to be same for
+	 * consecutive rounds.
+	 */
+	private boolean usingPredsPushedFromAbove;
+	private boolean bestJoinOrderUsedPredsFromAbove;
+
 	protected  OptimizerImpl(OptimizableList optimizableList, 
 				  OptimizablePredicateList predicateList,
 				  DataDictionary dDictionary,
@@ -241,6 +259,9 @@ public class OptimizerImpl implements Optimizer
 		reloadBestPlan = false;
 		savedJoinOrders = null;
 		timeLimit = Double.MAX_VALUE;
+
+		usingPredsPushedFromAbove = false;
+		bestJoinOrderUsedPredsFromAbove = false;
 	}
 
 	/**
@@ -300,7 +321,7 @@ public class OptimizerImpl implements Optimizer
 		 * state to ensure that we have a chance to consider plans that
 		 * can take advantage of the pushed predicates.
 		 */
-		boolean resetTimer = false;
+		usingPredsPushedFromAbove = false;
 		if ((predicateList != null) && (predicateList.size() > 0))
 		{
 			for (int i = predicateList.size() - 1; i >= 0; i--)
@@ -310,13 +331,13 @@ public class OptimizerImpl implements Optimizer
 				if (((Predicate)predicateList.
 					getOptPredicate(i)).isScopedForPush())
 				{
-					resetTimer = true;
+					usingPredsPushedFromAbove = true;
 					break;
 				}
 			}
 		}
 
-		if (resetTimer)
+		if (usingPredsPushedFromAbove)
 		{
 			timeOptimizationStarted = System.currentTimeMillis();
 			timeExceeded = false;
@@ -377,7 +398,9 @@ public class OptimizerImpl implements Optimizer
 			}
 		}
 
-		if (timeExceeded && bestCost.isUninitialized())
+		if (bestCost.isUninitialized() && foundABestPlan &&
+			((!usingPredsPushedFromAbove && !bestJoinOrderUsedPredsFromAbove)
+				|| timeExceeded))
 		{
 			/* We can get here if this OptimizerImpl is for a subquery
 			 * that timed out for a previous permutation of the outer
@@ -404,6 +427,17 @@ public class OptimizerImpl implements Optimizer
 			 * because that's how our timeout value was set to begin with--so
 			 * if there was no best join order, we never would have timed out
 			 * and thus we wouldn't be here.
+			 *
+			 * We can also get here if we've already optimized the list
+			 * of optimizables once (in a previous round of optimization)
+			 * and now we're back to do it again.  If that's true AND
+			 * we did *not* receive any predicates pushed from above AND
+			 * the bestJoinOrder from the previous round did *not* depend
+			 * on predicates pushed from above, then we'll jump to the
+			 * previous join order and start there.  NOTE: if after jumping
+			 * to the previous join order and calculating the cost we haven't
+			 * timed out, we will continue looking at other join orders (as
+			 * usual) until we exhaust them all or we time out.
 			 */
 			if (permuteState != JUMPING)
 			{
@@ -412,6 +446,8 @@ public class OptimizerImpl implements Optimizer
 				// jump to the target join order and get the cost.  That
 				// cost will then be saved as bestCost, allowing us to
 				// proceed with normal timeout logic.
+				if (firstLookOrder == null)
+					firstLookOrder = new int[numOptimizables];
 				for (int i = 0; i < numOptimizables; i++)
 					firstLookOrder[i] = bestJoinOrder[i];
 				permuteState = JUMPING;
@@ -1546,6 +1582,7 @@ public class OptimizerImpl implements Optimizer
 		** join order instead of in table number order, so
 		** we use 2 loops.
 		*/
+		bestJoinOrderUsedPredsFromAbove = usingPredsPushedFromAbove;
 		for (int i = 0; i < numOptimizables; i++)
 		{
 			bestJoinOrder[i] = proposedJoinOrder[i];

@@ -360,14 +360,37 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 							childCost.rowCount(),
 							childCost.singleScanRowCount());
 
-			getBestAccessPath().setCostEstimate(costEstimate);
-
-			/*
-			** The current access path may not be part of a sort avoidance
-			** path, but set the cost estimate there anyway, just in case
-			** it is.
-			*/
-			getBestSortAvoidancePath().setCostEstimate(costEstimate);
+			/* Note: Prior to the fix for DERBY-781 we had calls here
+			 * to set the cost estimate for BestAccessPath and
+			 * BestSortAvoidancePath to equal costEstimate.  That used
+			 * to be okay because prior to DERBY-781 we would only
+			 * get here once (per join order) for a given SelectNode/
+			 * RowResultSetNode and thus we could safely say that the
+			 * costEstimate from the most recent call to "optimize()"
+			 * was the best one so far (because we knew that we would
+			 * only call childResult.optimize() once).  Now that we
+			 * support hash joins with subqueries, though, we can get
+			 * here twice per join order: once when the optimizer is
+			 * considering a nested loop join with this PRN, and once
+			 * when it is considering a hash join.  This means we can't
+			 * just arbitrarily use the cost estimate for the most recent
+			 * "optimize()" as the best cost because that may not
+			 * be accurate--it's possible that the above call to
+			 * childResult.optimize() was for a hash join, but that
+			 * we were here once before (namely for nested loop) and
+			 * the cost of the nested loop is actually less than
+			 * the cost of the hash join.  In that case it would
+			 * be wrong to use costEstimate as the cost of the "best"
+			 * paths because it (costEstimate) holds the cost of
+			 * the hash join, not of the nested loop join.  So with
+			 * DERBY-781 the following calls were removed:
+			 *   getBestAccessPath().setCostEstimate(costEstimate);
+			 *   getBestSortAvoidancePath().setCostEstimate(costEstimate);
+			 * If costEstimate *does* actually hold the estimate for
+			 * the best path so far, then we will set BestAccessPath
+			 * and BestSortAvoidancePath as needed in the following
+			 * call to "considerCost".
+			 */
 
 			// childResultOptimized = true;
 
@@ -666,8 +689,20 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			}
 		}
 
+		// If we're doing a hash join with _this_ PRN (as opposed to
+		// with this PRN's child) then we don't attempt to push
+		// predicates down.  There are two reasons for this: 1)
+		// we don't want to push the equijoin predicate that is
+		// required for the hash join, and 2) if we're doing a
+		// hash join then we're going to materialize this node,
+		// but if we push predicates before materialization, we
+		// can end up with incorrect results (esp. missing rows).
+		// So don't push anything in this case.
+		boolean hashJoinWithThisPRN = hasTrulyTheBestAccessPath &&
+			(trulyTheBestAccessPath.getJoinStrategy() != null) &&
+			trulyTheBestAccessPath.getJoinStrategy().isHashJoin();
 
-		if ((restrictionList != null) && !alreadyPushed)
+		if ((restrictionList != null) && !alreadyPushed && !hashJoinWithThisPRN)
 		{
 			restrictionList.pushUsefulPredicates((Optimizable) childResult);
 		}
@@ -717,6 +752,45 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	private Optimizable replaceWithHashTableNode()
 		throws StandardException
 	{
+		// If this PRN has TTB access path for its child, store that access
+		// path in the child here, so that we can find it later when it
+		// comes time to generate qualifiers for the hash predicates (we
+		// need the child's access path when generating qualifiers; if we
+		// don't pass the path down here, the child won't be able to find
+		// it).
+		if (hasTrulyTheBestAccessPath)
+		{
+			((FromTable)childResult).trulyTheBestAccessPath =
+				(AccessPathImpl)getTrulyTheBestAccessPath();
+
+			// If the child itself is another SingleChildResultSetNode
+			// (which is also what a ProjectRestrictNode is), then tell
+			// it that it is now holding TTB path for it's own child.  Again,
+			// this info is needed so that child knows where to find the
+			// access path at generation time.
+			if (childResult instanceof SingleChildResultSetNode)
+			{
+				((SingleChildResultSetNode)childResult)
+					.hasTrulyTheBestAccessPath = hasTrulyTheBestAccessPath;
+
+				// While we're at it, add the PRN's table number to the
+				// child's referenced map so that we can find the equijoin
+				// predicate.  We have to do this because the predicate
+				// will be referencing the PRN's tableNumber, not the
+				// child's--and since we use the child as the target
+				// when searching for hash keys (as can be seen in
+				// HashJoinStrategy.divideUpPredicateLists()), the child
+				// should know what this PRN's table number is.  This
+				// is somewhat bizarre since the child doesn't
+				// actually "reference" this PRN, but since the child's
+				// reference map is used when searching for the equijoin
+				// predicate (see "buildTableNumList" in
+				// BinaryRelationalOperatorNode), this is the simplest
+				// way to pass this PRN's table number down.
+				childResult.getReferencedTableMap().set(tableNumber);
+			}
+		}
+
 		/* We want to divide the predicate list into 3 separate lists -
 		 *	o predicates against the source of the hash table, which will
 		 *	  be applied on the way into the hash table (searchRestrictionList)
@@ -842,25 +916,6 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		{
 			return true;
 		}
-	}
-
-	/** @see Optimizable#isMaterializable 
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public boolean isMaterializable()
-		throws StandardException
-	{
-		/* RESOLVE - Disallow arbitrary hash joins on
-		 * SELECTS within a derived table for now.
-		 * Remove this method once that restriction is removed.
-		 */
-		if (! (childResult instanceof Optimizable))
-		{
-			return false;
-		}
-
-		return super.isMaterializable();
 	}
 
 	/**

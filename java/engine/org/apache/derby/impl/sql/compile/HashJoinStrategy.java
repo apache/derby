@@ -51,6 +51,8 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
 import org.apache.derby.iapi.services.io.FormatableIntHolder;
 
+import org.apache.derby.iapi.util.JBitSet;
+
 import java.util.Vector;
 
 public class HashJoinStrategy extends BaseJoinStrategy {
@@ -93,6 +95,60 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 		if (innerTable.isTargetTable())
 		{
 			return false;
+		}
+
+		/* If the predicate given by the user _directly_ references
+		 * any of the base tables _beneath_ this node, then we
+		 * cannot safely use the predicate for a hash because the
+		 * predicate correlates two nodes at different nesting levels. 
+		 * If we did a hash join in this case, materialization of
+		 * innerTable could lead to incorrect results--and in particular,
+		 * results that are missing rows.  We can check for this by
+		 * looking at the predicates' reference maps, which are set based
+		 * on the initial query (as part of pre-processing).  Note that
+		 * by the time we get here, it's possible that a predicate's
+		 * reference map holds table numbers that do not agree with the
+		 * table numbers of the column references used by the predicate.
+		 * That's okay--this occurs as a result of "remapping" predicates
+		 * that have been pushed down the query tree.  And in fact
+		 * it's a good thing because, by looking at the column reference's
+		 * own table numbers instead of the predicate's referenced map,
+		 * we are more readily able to find equijoin predicates that
+		 * we otherwise would not have found.
+		 *
+		 * Note: do not perform this check if innerTable is a FromBaseTable
+		 * because a base table does not have a "subtree" to speak of.
+		 */
+		if ((predList != null) && (predList.size() > 0) &&
+			!(innerTable instanceof FromBaseTable))
+		{
+			FromTable ft = (FromTable)innerTable;
+
+			// First get a list of all of the base tables in the subtree
+			// below innerTable.
+			JBitSet tNums = new JBitSet(ft.getReferencedTableMap().size());
+			BaseTableNumbersVisitor btnVis = new BaseTableNumbersVisitor(tNums);
+			ft.accept(btnVis);
+
+			// Now get a list of all table numbers referenced by the
+			// join predicates that we'll be searching.
+			JBitSet pNums = new JBitSet(tNums.size());
+			Predicate pred = null;
+			for (int i = 0; i < predList.size(); i++)
+			{
+				pred = (Predicate)predList.getOptPredicate(i);
+				if (pred.isJoinPredicate())
+					pNums.or(pred.getReferencedSet());
+			}
+
+			// If tNums and pNums have anything in common, then at
+			// least one predicate in the list refers directly to
+			// a base table beneath this node (as opposed to referring
+			// just to this node), which means it's not safe to do a
+			// hash join.
+			tNums.and(pNums);
+			if (tNums.getFirstSetBit() != -1)
+				return false;
 		}
 
 		if (innerTable.isBaseTable())

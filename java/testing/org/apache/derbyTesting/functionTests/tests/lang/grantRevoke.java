@@ -2006,7 +2006,6 @@ class User
             if( ! isPublic)
             {
 		String connAttrs = "user=" + name + ";password=" + password;
-//                conn = DriverManager.getConnection( "jdbc:derby:wombat", name, password);
 		conn = TestUtil.getConnection("wombat", connAttrs);
                 stmt = conn.createStatement();
             }

@@ -166,17 +166,7 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 		}
 
 		ft = (FromBaseTable) optTable;
-
-		return getColumnOperand(ft.getTableNumber(), columnPosition);
-	}
-
-	/** @see RelationalOperator#getColumnOperand */
-	public ColumnReference getColumnOperand(
-								int tableNumber,
-								int columnPosition)
-	{
 		ColumnReference	cr;
-
 		if (operand instanceof ColumnReference)
 		{
 			/*
@@ -184,7 +174,7 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 			** Is it the correct column?
 			*/
 			cr = (ColumnReference) operand;
-			if (cr.getTableNumber() == tableNumber)
+			if (cr.getTableNumber() == ft.getTableNumber())
 			{
 				/* The table is correct, how about the column position? */
 				if (cr.getSource().getColumnPosition() == columnPosition)
@@ -222,6 +212,58 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 		return null;
 	}
 
+	/** @see RelationalOperator#getOperand */
+	public ValueNode getOperand(ColumnReference cRef, int refSetSize,
+		boolean otherSide)
+	{
+		if (otherSide)
+		// there is no "other" side for Unary, so just return null.
+			return null;
+
+		ColumnReference	cr;
+		if (operand instanceof ColumnReference)
+		{
+			/*
+			** The operand is a column reference.
+			** Is it the correct column?
+			*/
+			JBitSet cRefTables = new JBitSet(refSetSize);
+			JBitSet crTables = new JBitSet(refSetSize);
+			BaseTableNumbersVisitor btnVis =
+				new BaseTableNumbersVisitor(crTables);
+
+			cr = (ColumnReference) operand;
+			try {
+				cr.accept(btnVis);
+				btnVis.setTableMap(cRefTables);
+				cRef.accept(btnVis);
+			} catch (StandardException se) {
+            	if (SanityManager.DEBUG)
+            	{
+            	    SanityManager.THROWASSERT("Failed when trying to " +
+            	        "find base table number for column reference check:\n" +
+            	        se.getMessage());
+            	}
+			}
+			crTables.and(cRefTables);
+			if (crTables.getFirstSetBit() != -1)
+			{
+				/*
+				** The table is correct, how about the column position?
+				*/
+				if (cr.getSource().getColumnPosition() ==
+					cRef.getColumnNumber())
+				{
+					/* We've found the correct column - return it. */
+					return operand;
+				}
+			}
+		}
+
+		/* Not the column we're looking for */
+		return null;
+	}
+
 	/** @see RelationalOperator#selfComparison */
 	public boolean selfComparison(ColumnReference cr)
 	{
@@ -242,7 +284,8 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 * @see RelationalOperator#getExpressionOperand
 	 */
 	public ValueNode getExpressionOperand(int tableNumber,
-										  int columnNumber)
+										  int columnNumber,
+										  FromTable ft)
 	{
 		return null;
 	}
@@ -384,7 +427,7 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	}
 
 	/** @see RelationalOperator#isQualifier */
-	public boolean isQualifier(Optimizable optTable)
+	public boolean isQualifier(Optimizable optTable, boolean forPush)
 	{
 		/*
 		** It's a Qualifier if the operand is a ColumnReference referring
