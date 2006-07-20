@@ -1017,6 +1017,23 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		}
 	}
 
+	/**
+	 * Check whether a JDBC type is one of the character types that are
+	 * compatible with the Java type <code>String</code>.
+	 *
+	 * <p><strong>Note:</strong> <code>CLOB</code> is not compatible with
+	 * <code>String</code>. See tables B-4, B-5 and B-6 in the JDBC 3.0
+	 * Specification.
+	 *
+	 * <p> There are some non-character types that are compatible with
+	 * <code>String</code> (examples: numeric types, binary types and
+	 * time-related types), but they are not covered by this method.
+	 *
+	 * @param jdbcType a JDBC type
+	 * @return <code>true</code> iff <code>jdbcType</code> is a character type
+	 * and compatible with <code>String</code>
+	 * @see java.sql.Types
+	 */
 	private static boolean isCharacterType(int jdbcType) {
 
 		switch (jdbcType) {
@@ -1029,6 +1046,19 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		}
 	}
 
+	/**
+	 * Check whether a JDBC type is compatible with the Java type
+	 * <code>byte[]</code>.
+	 *
+	 * <p><strong>Note:</strong> <code>BLOB</code> is not compatible with
+	 * <code>byte[]</code>. See tables B-4, B-5 and B-6 in the JDBC 3.0
+	 * Specification.
+	 *
+	 * @param jdbcType a JDBC type
+	 * @return <code>true</code> iff <code>jdbcType</code> is compatible with
+	 * <code>byte[]</code>
+	 * @see java.sql.Types
+	 */
 	private static boolean isBinaryType(int jdbcType) {
 		switch (jdbcType) {
 		case Types.BINARY:
