@@ -43,6 +43,11 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
         getPreparedStatement().setNString (index, value);
     }
     
+    public void setNCharacterStream(int parameterIndex, Reader value)
+            throws SQLException {
+        getPreparedStatement().setNCharacterStream(parameterIndex, value);
+    }
+
     public void setNCharacterStream(int index, Reader value, long length) throws SQLException{
         getPreparedStatement().setNCharacterStream (index, value, length);
     }
@@ -60,6 +65,12 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
     throws SQLException{
         getPreparedStatement().setBlob (parameterIndex, inputStream, length);
     }
+
+    public final void setNClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        getPreparedStatement().setNClob(parameterIndex, reader);
+    }
+
     public void setNClob(int parameterIndex, Reader reader, long length)
     throws SQLException{
         getPreparedStatement().setNClob (parameterIndex, reader, length);
@@ -120,6 +131,18 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
         getStatement().setPoolable(poolable);
     }    
 
+    /**
+     * Sets the designated parameter to the given input stream.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the Java input stream that contains the ASCII parameter value
+     * @throws SQLException if a database access error occurs or this method is
+     *      called on a closed <code>PreparedStatement</code>
+     */
+    public final void setAsciiStream(int parameterIndex, InputStream x)
+            throws SQLException {
+        getPreparedStatement().setAsciiStream(parameterIndex, x);
+    }
 
     /**
      * Sets the designated parameter to the given input stream, which will have
@@ -135,6 +158,19 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
     public final void setAsciiStream(int parameterIndex, InputStream x, long length)
     throws SQLException {
         getPreparedStatement().setAsciiStream(parameterIndex,x,length);
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the binary parameter value
+     * @throws SQLException if a database access error occurs or this method is
+     *      called on a closed <code>PreparedStatement</code>
+     */
+    public final void setBinaryStream(int parameterIndex, InputStream x)
+            throws SQLException {
+        getPreparedStatement().setBinaryStream(parameterIndex, x);
     }
 
     /**
@@ -154,6 +190,36 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
     }
 
     /**
+     * Sets the designated parameter to a <code>InputStream</code> object.
+     * This method differs from the <code>setBinaryStream(int, InputStream)
+     * </code>  method because it informs the driver that the parameter value
+     * should be sent to the server as a <code>BLOB</code>.
+     *
+     * @param inputStream an object that contains the data to set the parameter
+     *      value to.
+     * @throws SQLException if a database access error occurs, this method is
+     *      called on a closed <code>PreparedStatement</code>
+     */
+    public final void setBlob(int parameterIndex, InputStream inputStream)
+            throws SQLException {
+        getPreparedStatement().setBlob(parameterIndex, inputStream);
+    }
+
+    /**
+     * Sets the designated parameter to the given <code>Reader</code> object.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param reader the <code>java.io.Reader</code> object that contains the
+     *      Unicode data
+     * @throws SQLException if a database access error occurs or this method is
+     *      called on a closed <code>PreparedStatement</code>
+     */
+    public final void setCharacterStream(int parameterIndex, Reader reader)
+            throws SQLException {
+        getPreparedStatement().setCharacterStream(parameterIndex, reader);
+    }
+
+    /**
      * Sets the designated parameter to the given Reader, which will have
      * the specified number of bytes.
      *
@@ -167,5 +233,22 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
     public final void setCharacterStream(int parameterIndex, Reader x, long length)
     throws SQLException {
         getPreparedStatement().setCharacterStream(parameterIndex,x,length);
+    }
+
+    /**
+     * Sets the designated parameter to a <code>Reader</code> object.
+     * This method differs from the <code>setCharacterStream(int,Reader)</code>
+     * method because it informs the driver that the parameter value should be
+     * sent to the server as a <code>CLOB</code>.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param reader an object that contains the data to set the parameter
+     *      value to.
+     * @throws SQLException if a database access error occurs, this method is
+     *      called on a closed PreparedStatement
+     */
+    public final void setClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        getPreparedStatement().setClob(parameterIndex, reader);
     }
 }
