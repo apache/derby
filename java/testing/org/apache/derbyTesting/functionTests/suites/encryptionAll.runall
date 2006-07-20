@@ -3,3 +3,4 @@ store/encryptParams.sql
 store/encryptionKey.sql
 store/encryptDatabaseTest1.sql
 store/encryptDatabaseTest2.sql
+store/encryptionKey_jar.sql

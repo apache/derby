@@ -48,6 +48,8 @@ import java.security.spec.KeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.DataInputStream;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -836,6 +838,8 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 					// SECURITY PERMISSION - MP1 and/or OP4
 					// depends on the value of activePerms
 					return activeFile.getRandomAccessFile(activePerms);
+                case 3:
+                    return activeFile.getInputStream();
 
 			}
 
@@ -894,6 +898,7 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 		// using MD5 of the unencrypted data. That way, on next database boot a check is performed
 		// to verify if the key is the same as used when the database was created
 
+        InputStream verifyKeyInputStream = null;
 		StorageRandomAccessFile verifyKeyFile = null;
 		byte[] data = new byte[VERIFYKEY_DATALEN];
 		try
@@ -916,15 +921,18 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 			}
 			else
 			{
-				// open file for reading only
-				verifyKeyFile = privAccessFile(sf,Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE,"r");
+				// Read from verifyKey.dat as an InputStream. This allows for 
+                // reading the information from verifyKey.dat successfully even when using the jar
+                // subprotocol to boot derby. (DERBY-1373) 
+				verifyKeyInputStream = privAccessGetInputStream(sf,Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE);
+                DataInputStream dis = new DataInputStream(verifyKeyInputStream);
 				// then read the checksum length 
-				int checksumLen = verifyKeyFile.readInt();
+				int checksumLen = dis.readInt();
 
 				byte[] originalChecksum = new byte[checksumLen];
-				verifyKeyFile.readFully(originalChecksum);
+				dis.readFully(originalChecksum);
 
-				verifyKeyFile.readFully(data);
+				dis.readFully(data);
 
 				// decrypt data with key
 				CipherProvider tmpCipherProvider = createNewCipher(DECRYPT,mainSecretKey,mainIV);
@@ -949,6 +957,8 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 			{
 				if(verifyKeyFile != null)
 					verifyKeyFile.close();
+                if (verifyKeyInputStream != null )
+                    verifyKeyInputStream.close();
 			}
 			catch(IOException ioee)
 			{
@@ -1009,5 +1019,27 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 		}
 	}
 
+	/**
+	 access a InputStream for a given file for reading.
+	 @param storageFactory   factory used for io access
+	 @param  fileName        name of the file to open as a stream for reading
+	 @return InputStream returns the stream for the file with fileName for reading
+	 @exception IOException Any exception during accessing the file for read
+	 */
+	private InputStream privAccessGetInputStream(StorageFactory storageFactory,String fileName)
+	throws StandardException
+	{
+	    StorageFile verifyKeyFile = storageFactory.newStorageFile("",fileName);
+	    activeFile  = verifyKeyFile;
+	    this.action = 3;
+	    try
+	    {
+	        return (InputStream)java.security.AccessController.doPrivileged(this);
+	    }
+	    catch( java.security.PrivilegedActionException pae)
+	    {
+	        throw (StandardException)pae.getException();
+	    }
+	}
 
 }
