@@ -183,8 +183,6 @@ public class NetServer
         }
 
         jvmProps.addElement("derby.system.home=" + homeDirName);
-		jvmProps.addElement("user.language=en");
-		jvmProps.addElement("user.country=US");
 		jvm.setD(jvmProps);
 		jvm.setSecurityProps();
         // For some platforms (like Mac) the process exec command

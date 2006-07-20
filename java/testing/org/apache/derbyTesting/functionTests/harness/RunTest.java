@@ -46,6 +46,7 @@ import java.lang.ClassFormatError;
 import java.lang.Thread;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.Vector;
 import java.sql.Timestamp;
 import java.sql.Connection;
@@ -196,6 +197,7 @@ public class RunTest
 	public static void main(String[] args)
 		throws Exception
 	{
+		Locale.setDefault(Locale.US);
 		skiptestReason.setLength(0); // 0 out for useprocess
 		// Determine the test type
 		if (args.length == 0)
@@ -2212,8 +2214,6 @@ clp.list(System.out);
 			derbySystemHome = userDirName;
 		testJvmProps.addElement("derby.system.home=" + derbySystemHome);
 		testJvmProps.addElement("derby.infolog.append=true ");
-		testJvmProps.addElement("user.language=en");
-		testJvmProps.addElement("user.country=US");
 		// Why is this being done here
 		//if (jvm != null)
 		    //testJvmProps.addElement("jvm="+jvm.getName());

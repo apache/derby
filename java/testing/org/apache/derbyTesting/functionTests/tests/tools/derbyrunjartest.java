@@ -27,12 +27,14 @@ import java.lang.Runtime;
 import java.lang.SecurityException;
 import java.net.URL;
 import java.security.CodeSource;
+import java.util.Vector;
 
 import org.apache.derbyTesting.functionTests.harness.BackgroundStreamSaver;
+import org.apache.derbyTesting.functionTests.harness.jvm;
 
 public class derbyrunjartest {
 
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws Exception
     {
         // get location of run class.
         CodeSource cs = null;
@@ -43,40 +45,54 @@ public class derbyrunjartest {
         }
  
         URL result = cs.getLocation();
+        jvm jvm = null;
+        String derbyrunloc = null;
 
         if (result.toString().endsWith(".jar")) {
-            String derbyrunloc = result.toString().substring(5);
+            derbyrunloc = result.toString().substring(5);
             if (System.getProperty("os.name").startsWith("Windows"))
               derbyrunloc = derbyrunloc.substring(1);
-            runtool(derbyrunloc, "ij --help");
-            runtool(derbyrunloc, "sysinfo -cp help");
-            runtool(derbyrunloc, "dblook");
-            runtool(derbyrunloc, "server");
-        } else {
-            String[] ij = {"ij", "--help"};
-            System.out.println("ij --help:");
-            org.apache.derby.iapi.tools.run.main(ij);
 
-            String[] sysinfo = {"sysinfo", "-cp", "help"}; 
-            System.out.println("sysinfo -cp help:");
-            org.apache.derby.iapi.tools.run.main(sysinfo);
+            if ((System.getProperty("java.vm.name") != null) &&
+                    System.getProperty("java.vm.name").equals("J9")) {
+                jvm = jvm.getJvm("j9_13");
+            } else {
+                jvm = jvm.getJvm("currentjvm"); // ensure compatibility
+            }
+        }
 
-            String[] dblook = {"dblook"};
-            System.out.println("dblook:");
-            org.apache.derby.iapi.tools.run.main(dblook);
+        String[][] testCommands = new String[][] {
+            {"ij", "--help"},
+            {"sysinfo", "-cp", "help"},
+            {"dblook"},
+            {"server"},
+        };
 
-            String[] server = {"server"};
-            System.out.println("server:");
-            org.apache.derby.iapi.tools.run.main(server);
+        for (int i = 0; i < testCommands.length; i++) {
+            runtool(jvm, derbyrunloc, testCommands[i]);
         }
     }
 
-    private static void runtool(String loc, String tool)
+    private static void runtool(jvm jvm, String loc, String[] args)
+        throws IOException
     {
-        String command = "java -jar " + loc + ' ' + tool;
+        System.out.println(concatenate(args) + ':');
+
+        if (jvm == null) {
+            org.apache.derby.iapi.tools.run.main(args);
+            return;
+        }
+
+        Vector cmd = jvm.getCommandLine();
+        cmd.addElement("-jar");
+        cmd.addElement(loc);
+        for (int i=0; i < args.length; i++) {
+            cmd.addElement(args[i]);
+        }
+        String command = concatenate((String[]) cmd.toArray(new String[0]));
+
         Process pr = null;
 
-        System.out.println(tool + ':');
         try
         {
             pr = Runtime.getRuntime().exec(command);
@@ -92,5 +108,14 @@ public class derbyrunjartest {
                 pr = null;
             }
         }
+    }
+
+    private static String concatenate(String[] args) {
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < args.length; i++) {
+            buf.append(args[i]);
+            if (i + 1 < args.length) buf.append(' ');
+        }
+        return buf.toString();
     }
 }

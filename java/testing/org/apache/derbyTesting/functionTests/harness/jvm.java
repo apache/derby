@@ -174,6 +174,8 @@ public abstract class jvm {
     {
         Vector v = new Vector();
         v.addElement(javaCmd);
+        v.addElement("-Duser.language=en");
+        v.addElement("-Duser.country=US");
         if ( (flags != null) && (flags.length()>0) )
         {
             StringTokenizer st = new StringTokenizer(flags);
