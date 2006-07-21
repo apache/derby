@@ -20,6 +20,9 @@
 package org.apache.derbyTesting.functionTests.util;
 
 import java.security.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import org.apache.derby.iapi.services.info.JVMInfo;
@@ -32,8 +35,25 @@ public class TestConfiguration {
     /**
      * Default Derby test configuration object.
      */
-    public static final TestConfiguration DERBY_TEST_CONFIG = 
+    static final TestConfiguration DERBY_TEST_CONFIG = 
         new TestConfiguration(getSystemProperties());
+    
+    /**
+     * Tell if we are allowed to use DriverManager to create database
+     * connections.
+     */
+    private static final boolean HAVE_DRIVER;
+
+    static {
+        // See if java.sql.Driver is available. If it is not, we must use
+        // DataSource to create connections.
+        boolean haveDriver = false;
+        try {
+            Class.forName("java.sql.Driver");
+            haveDriver = true;
+        } catch (Exception e) {}
+        HAVE_DRIVER = haveDriver;
+    }
     
     /**
      * This constructor creates a TestConfiguration from a Properties object.
@@ -185,6 +205,36 @@ public class TestConfiguration {
      */
     public int getPort() {
         return port;
+    }
+    
+    /**
+     * Get connection to the default database.
+     * If the database does not exist, it will be created.
+     * A default username and password will be used for the connection.
+     *
+     * @return connection to default database.
+     */
+    public Connection getDefaultConnection()
+        throws SQLException {
+        Connection con = null;
+        JDBCClient client =getJDBCClient();
+        if (HAVE_DRIVER) {            
+            loadJDBCDriver(client.getJDBCDriverName());
+            if (!isSingleLegXA()) {
+                con = DriverManager.getConnection(
+                        getJDBCUrl() + ";create=true",
+                        getUserName(),
+                        getUserPassword());
+            }
+            else {
+                con = TestDataSourceFactory.getXADataSource().getXAConnection (getUserName(),
+                            getUserPassword()).getConnection();                
+            }
+        } else {
+            //Use DataSource for JSR169
+            con = TestDataSourceFactory.getDataSource().getConnection();
+        }
+        return con;
     }
     
     /**
@@ -348,6 +398,28 @@ public class TestConfiguration {
         attrs.setProperty("databaseName", DERBY_TEST_CONFIG.getDatabaseName());
         attrs.setProperty("connectionAttributes", "create=true");
         return attrs;
+    }
+    
+    /**
+     * Load the specified JDBC driver
+     *
+     * @param driverClass name of the JDBC driver class.
+     * @throws SQLException if loading the driver fails.
+     */
+    private static void loadJDBCDriver(String driverClass) 
+        throws SQLException {
+        try {
+            Class.forName(driverClass).newInstance();
+        } catch (ClassNotFoundException cnfe) {
+            throw new SQLException("Failed to load JDBC driver '" + 
+                                    driverClass + "': " + cnfe.getMessage());
+        } catch (IllegalAccessException iae) {
+            throw new SQLException("Failed to load JDBC driver '" +
+                                    driverClass + "': " + iae.getMessage());
+        } catch (InstantiationException ie) {
+            throw new SQLException("Failed to load JDBC driver '" +
+                                    driverClass + "': " + ie.getMessage());
+        }
     }
         
 }

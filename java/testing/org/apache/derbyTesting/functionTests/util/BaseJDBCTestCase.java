@@ -33,23 +33,6 @@ public abstract class BaseJDBCTestCase
     extends BaseTestCase {
 
     /**
-     * Tell if we are allowed to use DriverManager to create database
-     * connections.
-     */
-    private static final boolean HAVE_DRIVER;
-
-    static {
-        // See if java.sql.Driver is available. If it is not, we must use
-        // DataSource to create connections.
-        boolean haveDriver = false;
-        try {
-            Class.forName("java.sql.Driver");
-            haveDriver = true;
-        } catch (Exception e) {}
-        HAVE_DRIVER = haveDriver;
-    }
-    
-    /**
      * Create a test case with the given name.
      *
      * @param name of the test case.
@@ -67,26 +50,10 @@ public abstract class BaseJDBCTestCase
      */
     public static Connection getConnection()
         throws SQLException {
-        Connection con = null;
-        JDBCClient client = CONFIG.getJDBCClient();
-        if (HAVE_DRIVER) {            
-            loadJDBCDriver(client.getJDBCDriverName());
-            if (!CONFIG.isSingleLegXA()) {
-                con = DriverManager.getConnection(
-                        CONFIG.getJDBCUrl() + ";create=true",
-                        CONFIG.getUserName(),
-                        CONFIG.getUserPassword());
-            }
-            else {
-                con = TestDataSourceFactory.getXADataSource().getXAConnection (CONFIG.getUserName(),
-                            CONFIG.getUserPassword()).getConnection();                
-            }
-        } else {
-            //Use DataSource for JSR169
-            con = TestDataSourceFactory.getDataSource().getConnection();
-        }
-        return con;
+        return CONFIG.getDefaultConnection();
     }
+    
+
    
     /**
      * Tell if the client is embedded.
@@ -244,28 +211,6 @@ public abstract class BaseJDBCTestCase
      */
     public static void assertSQLState(String expected, SQLException exception) {
         assertSQLState("Unexpected SQL state.", expected, exception);
-    }
-    
-    /**
-     * Load the specified JDBC driver
-     *
-     * @param driverClass name of the JDBC driver class.
-     * @throws SQLException if loading the driver fails.
-     */
-    private static void loadJDBCDriver(String driverClass) 
-        throws SQLException {
-        try {
-            Class.forName(driverClass).newInstance();
-        } catch (ClassNotFoundException cnfe) {
-            throw new SQLException("Failed to load JDBC driver '" + 
-                                    driverClass + "': " + cnfe.getMessage());
-        } catch (IllegalAccessException iae) {
-            throw new SQLException("Failed to load JDBC driver '" +
-                                    driverClass + "': " + iae.getMessage());
-        } catch (InstantiationException ie) {
-            throw new SQLException("Failed to load JDBC driver '" +
-                                    driverClass + "': " + ie.getMessage());
-        }
     }
 
 } // End class BaseJDBCTestCase
