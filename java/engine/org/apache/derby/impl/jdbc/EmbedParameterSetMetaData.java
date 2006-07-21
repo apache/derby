@@ -26,6 +26,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 
 import java.sql.SQLException;
 import java.sql.Types;
@@ -37,13 +38,12 @@ import java.sql.Types;
  * It provides the parameter meta data for callable & prepared statements.
  * The subclass in Local30 actually implements ParameterMetaData interface.
  *
- * Our middle-tier servers or tools (eg. drda network server) can use it this way:
- * import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
- * import org.apache.derby.impl.jdbc.EmbedParameterSetMetaData;
- *
- *   EmbedParameterSetMetaData pmeta = ((EmbedPreparedStatement) ps).getEmbedParameterSetMetaData();
+ * For use of ParameterMetaData functionality in network server, please do not use
+ * this class directly. Instead use the method available on EnginePreparedStatement
+ * @see org.apache.derby.iapi.jdbc.EngineParameterMetaData
+ * @see org.apache.derby.iapi.jdbc.EnginePreparedStatement
  */
-public class EmbedParameterSetMetaData
+public class EmbedParameterSetMetaData implements EngineParameterMetaData
     {
 
     private final ParameterValueSet pvs;

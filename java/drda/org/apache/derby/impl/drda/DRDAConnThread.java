@@ -54,7 +54,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
-import org.apache.derby.impl.jdbc.EmbedParameterSetMetaData;
+import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.EmbedStatement;
@@ -3759,7 +3759,6 @@ public class DRDAConnThread extends Thread {
 	private void writeSQLRSLRD(DRDAStatement stmt) throws DRDAProtocolException,SQLException
 	{
 
-		EmbedPreparedStatement ps = (EmbedPreparedStatement) stmt.getPreparedStatement();
 		int numResults = stmt.getNumResultSets();
 
 		writer.createDssObject();
@@ -3831,7 +3830,7 @@ public class DRDAConnThread extends Thread {
 		String strVal;
 		PreparedStatement ps = stmt.getPreparedStatement();
 		int codePoint;
-		EmbedParameterSetMetaData pmeta = null;
+		EngineParameterMetaData pmeta = null;
 		Vector paramDrdaTypes = new Vector();
 		Vector paramLens = new Vector();
 		ArrayList paramExtPositions = null;
@@ -3977,7 +3976,7 @@ public class DRDAConnThread extends Thread {
 	 * @exception DRDAProtocolException, SQLException
 	 */
 	private ArrayList readAndSetParams(int i, DRDAStatement stmt, int
-									   drdaType, EmbedParameterSetMetaData pmeta,
+									   drdaType, EngineParameterMetaData pmeta,
 									   ArrayList paramExtPositions,
 									   int paramLenNumBytes)
 				throws DRDAProtocolException, SQLException
@@ -5588,7 +5587,7 @@ public class DRDAConnThread extends Thread {
 	{
 		PreparedStatement ps = stmt.getPreparedStatement();
 		ResultSetMetaData rsmeta = ps.getMetaData();
-		EmbedParameterSetMetaData pmeta = stmt.getParameterMetaData();
+		EngineParameterMetaData pmeta = stmt.getParameterMetaData();
 		int numElems = 0;
 		if (e == null || e instanceof SQLWarning)
 		{
@@ -5639,7 +5638,7 @@ public class DRDAConnThread extends Thread {
 
 		ResultSet rs = null;
 		ResultSetMetaData rsmeta = null;
-		EmbedParameterSetMetaData pmeta = null;
+		EngineParameterMetaData pmeta = null;
 		if (!stmt.needsToSendParamData)
 			rs = stmt.getResultSet();
 		if (rs == null)		// this is a CallableStatement, use parameter meta data
@@ -5734,7 +5733,7 @@ public class DRDAConnThread extends Thread {
 	 * @exception DRDAProtocolException, SQLException
 	 */
 	private void writeSQLDTAGRP(DRDAStatement stmt, ResultSetMetaData rsmeta, 
-								EmbedParameterSetMetaData pmeta,
+								EngineParameterMetaData pmeta,
 								int colStart, int colEnd, boolean first)
 		throws DRDAProtocolException, SQLException
 	{
@@ -6435,7 +6434,7 @@ public class DRDAConnThread extends Thread {
 	 *
 	 * @exception DRDAProtocolException, SQLException
 	 */
-	private void writeSQLDAGRP(ResultSetMetaData rsmeta, EmbedParameterSetMetaData pmeta, int elemNum, boolean rtnOutput)
+	private void writeSQLDAGRP(ResultSetMetaData rsmeta, EngineParameterMetaData pmeta, int elemNum, boolean rtnOutput)
 		throws DRDAProtocolException, SQLException
 	{
 		//jdbc uses offset of 1
@@ -6570,14 +6569,14 @@ public class DRDAConnThread extends Thread {
 	}
 
   
-	private void writeSQLUDTGRP(ResultSetMetaData rsmeta, EmbedParameterSetMetaData pmeta, int jdbcElemNum, boolean rtnOutput)
+	private void writeSQLUDTGRP(ResultSetMetaData rsmeta, EngineParameterMetaData pmeta, int jdbcElemNum, boolean rtnOutput)
 		throws DRDAProtocolException,SQLException
 	{
 		writer.writeByte(CodePoint.NULLDATA);
 
 	}
 
-	private void writeSQLDOPTGRP(ResultSetMetaData rsmeta, EmbedParameterSetMetaData pmeta, int jdbcElemNum, boolean rtnOutput)
+	private void writeSQLDOPTGRP(ResultSetMetaData rsmeta, EngineParameterMetaData pmeta, int jdbcElemNum, boolean rtnOutput)
 		throws DRDAProtocolException,SQLException
 	{
 
@@ -6597,7 +6596,7 @@ public class DRDAConnThread extends Thread {
 	}
 
 
-	private void writeSQLDXGRP(ResultSetMetaData rsmeta, EmbedParameterSetMetaData pmeta, int jdbcElemNum, boolean rtnOutput)
+	private void writeSQLDXGRP(ResultSetMetaData rsmeta, EngineParameterMetaData pmeta, int jdbcElemNum, boolean rtnOutput)
 		throws DRDAProtocolException,SQLException
 	{
 		// Null indicator indicates we have data
