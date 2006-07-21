@@ -47,11 +47,11 @@ No truncation and hence no error
 Testing 10 ends in here
 Test 11 - Can't pass negative length as the stream length for various setXXXStream methods
 ===> testing using setAsciiStream with -2 as length
-PASS -- expected exception:SQL Exception: Input stream cannot have negative length.
+PASS -- expected exception:java.sql.SQLException: Input stream cannot have negative length.
 ===> testing using setCharacterStream with -1 as length
-PASS -- expected exception:SQL Exception: Input stream cannot have negative length.
+PASS -- expected exception:java.sql.SQLException: Input stream cannot have negative length.
 ===> testing using setBinaryStream with -1 as length
-PASS -- expected exception:SQL Exception: Input stream cannot have negative length.
+PASS -- expected exception:java.sql.SQLException: Input stream cannot have negative length.
 Test 11 - negative stream length tests end in here
 Test 12 - varchar truncation tests start from here
 ===> testing(using setAsciiStream) extin/char32675trailingblanks.data length = 32675

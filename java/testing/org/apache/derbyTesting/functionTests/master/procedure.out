@@ -145,7 +145,7 @@ CALL IR()
 EXPECTED SQL Exception: (42Y03) 'IR' is not recognized as a function or procedure.
 UPDATE COUNT 0
 UPDATE COUNT 0
-EXPECTED SQL Exception: The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression.
+EXPECTED SQL Exception: The exception 'java.sql.SQLException: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression.
 UPDATE COUNT 0
 UPDATE COUNT 0
 UPDATE COUNT 0
@@ -161,7 +161,7 @@ I          |B
 5          |ir2            
 6          |'012345678     
 CALL IR2(2, 'no way')
-EXPECTED SQL Exception: (38000) The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression.
+EXPECTED SQL Exception: (38000) The exception 'java.sql.SQLException: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression.
 CALL IR2(?, 'no way')
 EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
 CALL IR2(2, ?)

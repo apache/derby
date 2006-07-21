@@ -13,17 +13,17 @@ ERROR XIE0I: An IOException occurred while writing data to the file.
 ij> --export table not found
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Table/View 'IEP.NOTABLE' does not exist.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Table/View 'IEP.NOTABLE' does not exist.' was thrown while evaluating an expression.
 ERROR 42X05: Table/View 'IEP.NOTABLE' does not exist.
 ij> ---export schema is not valid
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Schema 'XXXX' does not exist' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Schema 'XXXX' does not exist' was thrown while evaluating an expression.
 ERROR 42Y07: Schema 'XXXX' does not exist
 ij> --export query is invalid (syntax error)
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select from t1', 
                                     'extinout/t1.dat' , null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Syntax error: Encountered "from" at line 1, column 8.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Syntax error: Encountered "from" at line 1, column 8.' was thrown while evaluating an expression.
 ERROR 42X01: Syntax error: Encountered "from" at line 1, column 8.
 ij> --export codeset is invalid
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.t1', 
@@ -31,7 +31,7 @@ call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.t1',
 ERROR XIE0I: An IOException occurred while writing data to the file.
 ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
-ERROR 38000: The exception 'SQL Exception: Schema 'XXXX' does not exist' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Schema 'XXXX' does not exist' was thrown while evaluating an expression.
 ERROR 42Y07: Schema 'XXXX' does not exist
 ij> --export delimiter errror cases
 --period can not be used as character ot column delimiter
@@ -91,7 +91,7 @@ ij> --import error cases
 --import can not find input file
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extin/nodir/t1.dat' , 
                                  null, null, null, 0) ;
-ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
 ERROR XJ001: Java exception: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE04: Data file not found: extin/nodir/t1.dat
@@ -105,7 +105,7 @@ call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' ,
 ERROR XIE0M: Table 'XXXX.T1' does not exist.  
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, null, 'INCORRECTCODESET', 0) ;
-ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
 ERROR XJ001: Java exception: ': java.lang.reflect.InvocationTargetException'.
 ERROR XJ001: Java exception: 'java.io.UnsupportedEncodingException: INCORRECTCODESET'.
@@ -114,20 +114,20 @@ ij> --check import with invalid delimiter usage
 --and the that should become a invalid delimiter 
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  '', ';', null, 0) ;
-ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
 ERROR XJ001: Java exception: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: A delimiter is not valid or is used more than once.
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, '', null, 0) ;
-ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
 ERROR XJ001: Java exception: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: A delimiter is not valid or is used more than once.
 ij> --same delimter can not be used as character and column delimters
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  ';', ';', null, 1) ;
-ERROR 38000: The exception 'SQL Exception: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.' was thrown while evaluating an expression.
 ERROR 38000: The exception 'java.lang.reflect.InvocationTargetException' was thrown while evaluating an expression.
 ERROR XJ001: Java exception: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: A delimiter is not valid or is used more than once.
@@ -232,12 +232,12 @@ ij> --import data column indexes count > insert columns count
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'C1, C2, C3,C4', '1,2', 
                                  'extinout/t3.dat' , 
                                  null, null, null, 0) ;
-ERROR 38000: The exception 'SQL Exception: The number of values assigned is not the same as the number of specified or implied columns.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The number of values assigned is not the same as the number of specified or implied columns.' was thrown while evaluating an expression.
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24', 
                                  'extinout/t3.dat' , 
 				 null, null, null, 0) ;
-ERROR 38000: The exception 'SQL Exception: Column 'COLUMN11' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN11' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Column 'COLUMN11' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN11' is not a column in the target table.' was thrown while evaluating an expression.
 ERROR 42X04: Column 'COLUMN11' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN11' is not a column in the target table.
 ij> --repeat the above type cases with empty file and minor variation to paramters
 delete from t3 ;
@@ -263,7 +263,7 @@ ij> --import data column indexes count > insert columns count
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '1,2', 
                                  'extinout/t3.dat' , 
 				    ';', '^', 'utf-16', 1) ;
-ERROR 38000: The exception 'SQL Exception: The number of values assigned is not the same as the number of specified or implied columns.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The number of values assigned is not the same as the number of specified or implied columns.' was thrown while evaluating an expression.
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
 ij> --specify column indexes that are not there in the file that is being  imported
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24', 
@@ -273,7 +273,7 @@ call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24',
 ij> --import to a system table shoud fail
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SYS', 'SYSTABLES' , 'extinout/t3.dat' , 
                                       ';', '^', 'utf-16', 1) ;
-ERROR 38000: The exception 'SQL Exception: 'SYS.SYSTABLES' is a system table.  Users are not allowed to modify the contents of this table.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: 'SYS.SYSTABLES' is a system table.  Users are not allowed to modify the contents of this table.' was thrown while evaluating an expression.
 ERROR 42Y25: 'SYS.SYSTABLES' is a system table.  Users are not allowed to modify the contents of this table.
 ij> ---not supported by db2 cloudscape import/export
 create table ntype(a int , ct CLOB(1024));
@@ -314,7 +314,7 @@ ij(C2)> --following import should fail with lock time out
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.locks.waitTimeout', '5');
 0 rows inserted/updated/deleted
 ij(C2)> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'PARENT', 'extinout/parent.del',null, null, null,1);
-ERROR 38000: The exception 'SQL Exception: Table 'IEP.PARENT' cannot be locked in 'EXCLUSIVE' mode.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Table 'IEP.PARENT' cannot be locked in 'EXCLUSIVE' mode.' was thrown while evaluating an expression.
 ERROR X0X02: Table 'IEP.PARENT' cannot be locked in 'EXCLUSIVE' mode.
 ERROR 40XL1: A lock could not be obtained within the time requested
 ij(C2)> disconnect c1;

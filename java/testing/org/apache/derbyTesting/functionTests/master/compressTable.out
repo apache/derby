@@ -1100,11 +1100,11 @@ ij> insert into "Group"."Order" values(5, 6, 'mouse') ;
 1 row inserted/updated/deleted
 ij> --following compress call should fail because schema name is not matching the way it is defined using delimited quotes.
 call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('GROUP', 'Order' , 0) ;
-ERROR 38000: The exception 'SQL Exception: Schema 'GROUP' does not exist' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Schema 'GROUP' does not exist' was thrown while evaluating an expression.
 ERROR 42Y07: Schema 'GROUP' does not exist
 ij> --following compress call should fail because table name is not matching the way it is defined in the quotes.
 call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('Group', 'ORDER' , 0) ;
-ERROR 38000: The exception 'SQL Exception: 'ALTER TABLE' cannot be performed on 'Group.ORDER' because it does not exist.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: 'ALTER TABLE' cannot be performed on 'Group.ORDER' because it does not exist.' was thrown while evaluating an expression.
 ERROR 42Y55: 'ALTER TABLE' cannot be performed on 'Group.ORDER' because it does not exist.
 ij> --following compress should pass.
 call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('Group', 'Order' , 0) ;
@@ -1130,11 +1130,11 @@ ij> insert into inventory.orderTable values(104, 8, 'buffolo wings') ;
 1 row inserted/updated/deleted
 ij> --following compress should fail because schema name is not in upper case.
 call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('inventory', 'ORDERTABLE' , 0) ;
-ERROR 38000: The exception 'SQL Exception: Schema 'inventory' does not exist' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Schema 'inventory' does not exist' was thrown while evaluating an expression.
 ERROR 42Y07: Schema 'inventory' does not exist
 ij> --following compress should fail because table name is not in upper case.
 call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('INVENTORY', 'ordertable', 0) ;
-ERROR 38000: The exception 'SQL Exception: 'ALTER TABLE' cannot be performed on 'INVENTORY.ordertable' because it does not exist.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: 'ALTER TABLE' cannot be performed on 'INVENTORY.ordertable' because it does not exist.' was thrown while evaluating an expression.
 ERROR 42Y55: 'ALTER TABLE' cannot be performed on 'INVENTORY.ordertable' because it does not exist.
 ij> --following compress should pass.
 call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('INVENTORY', 'ORDERTABLE' , 1) ;

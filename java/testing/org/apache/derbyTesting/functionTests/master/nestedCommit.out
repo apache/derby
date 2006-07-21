@@ -64,25 +64,25 @@ values doConnStmtInt('values doConnCommitInt()');
 1          
 ij> -- fail
 insert into x select x+doConnCommitInt() from x;
-ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
 ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
 ij> delete from x where x in (select x+doConnCommitInt() from x);
-ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
 ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
 ij> delete from x where x = doConnCommitInt();
-ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
 ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
 ij> update x set x = doConnCommitInt();
-ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
 ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
 ij> -- insert into x values doConnStmtInt('call doConnStmt(''call doConnStmt(''''commit'''')'')');
 -- select doConnStmtInt('call doConnStmt(''call doConnStmt(''''rollback'''')'')') from x;
 select doConnStmtInt('call doConnStmt(''call doConnCommit()'')') from x;
 1          
 -----------
-ERROR 38000: The exception 'SQL Exception: The exception 'SQL Exception: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.' was thrown while evaluating an expression.' was thrown while evaluating an expression.
-ERROR 38000: The exception 'SQL Exception: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.' was thrown while evaluating an expression.
-ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The exception 'java.sql.SQLException: The exception 'java.sql.SQLException: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.' was thrown while evaluating an expression.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The exception 'java.sql.SQLException: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
 ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
 ij> -- isolation level always fails in a nested connection
 call doConnStmt('set isolation serializable');

@@ -137,7 +137,12 @@ public class EmbedSQLException extends SQLException {
 		appearing in the message.
 	*/
 	public String toString() {
-		return "SQL Exception: " + getMessage();
+        // We use java.sql.SQLException rather than the default toString(),
+        // which returns org.apache.derby.impl.jdbc.EmbedSQLException, so
+        // that (a) we're not exposing an internal class name and (b) so
+        // this is consistent with the network client, where SQLExceptions
+        // are vanilla java.sql classes and not our own subclass
+		return "java.sql.SQLException: " + getMessage();
 	}
 
 	/*

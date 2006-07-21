@@ -243,7 +243,7 @@ ERROR 42Y25: 'SYSCS_DIAG.TRANSACTION_TABLE' is a system table.  Users are not al
 ij(C1)> insert into syscs_diag.transaction_table(xid) values('bad');
 ERROR 42Y25: 'SYSCS_DIAG.TRANSACTION_TABLE' is a system table.  Users are not allowed to modify the contents of this table.
 ij(C1)> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SYSCS_DIAG', 'TRANSACTION_TABLE', 1);
-ERROR 38000: The exception 'SQL Exception: 'ALTER TABLE' is not allowed in the 'SYSCS_DIAG' schema.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: 'ALTER TABLE' is not allowed in the 'SYSCS_DIAG' schema.' was thrown while evaluating an expression.
 ERROR 42X62: 'ALTER TABLE' is not allowed in the 'SYSCS_DIAG' schema.
 ij(C1)> call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SYSCS_DIAG', 'TRANSACTION_TABLE', 1, 1, 1);
 0 rows inserted/updated/deleted
