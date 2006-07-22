@@ -4366,7 +4366,9 @@ class DRDAConnThread extends Thread {
 									  paramBytes.length);
 							}
 						}
-						ps.setBytes(i+1, paramBytes);
+						ps.setBinaryStream(i+1, 
+										   new ByteArrayInputStream(paramBytes),
+										   paramBytes.length);
 						break;
 					case DRDAConstants.DRDA_TYPE_LOBCSBCS:
 					case DRDAConstants.DRDA_TYPE_NLOBCSBCS:

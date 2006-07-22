@@ -949,17 +949,19 @@ class DDMReader
   {
     boolean readHeader;
     int copySize;
-    ByteArrayOutputStream baos;
+    MemorySavedByteArrayOutputStream baos;
     boolean isLengthAndNullabilityUnknown = false;
 
 	
 	if (desiredLength != -1) {
         // allocate a stream based on a known amount of data
-        baos = new ByteArrayOutputStream ((int) desiredLength);
+        baos = new MemorySavedByteArrayOutputStream ((int) desiredLength - 
+													 ( checkNullability ? 1:0 )
+													 );
 	}
 	else {
         // allocate a stream to hold an unknown amount of data
-        baos = new ByteArrayOutputStream ();
+        baos = new MemorySavedByteArrayOutputStream ();
         //isLengthAndNullabilityUnknown = true;
 		// If we aren't given a  length get the whole thing.
 		desiredLength = MAX_EXTDTA_SIZE;
@@ -1784,6 +1786,41 @@ class DDMReader
 
 		return DssConstants.DSSCHAIN;
 
+	}
+	
+
+	/**
+	 *
+	 * This class supress to allocate another memory when toByteArray() method was called.
+	 * In compensation for the saving memory, program using this class should not modify the return value of  toByteArray() method.
+	 *
+	 */
+	static class MemorySavedByteArrayOutputStream extends ByteArrayOutputStream {
+		
+		
+		MemorySavedByteArrayOutputStream(){
+			super();
+		}
+		
+		
+		MemorySavedByteArrayOutputStream(int size){
+			buf = new byte[size];
+			count = 0;
+		}
+		
+		
+		public byte[] toByteArray() {
+			
+			if(buf.length == count){
+				return buf;
+				
+			}else{
+				return super.toByteArray();
+
+			}
+		}
+		
+		
 	}
 
 }
