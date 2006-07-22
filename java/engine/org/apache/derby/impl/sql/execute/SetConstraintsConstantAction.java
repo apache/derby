@@ -482,49 +482,6 @@ class SetConstraintsConstantAction extends DDLConstantAction
 		return cdl;
 	}
 		
-	/**
-	 * Does this constant action modify the passed in table
-	 * uuid?  By modify we mean add or drop things tied to
-	 * this table (e.g. index, trigger, constraint).  Things
-	 * like views or spses that reference this table don't
-	 * count.
-	 * <p>
-	 * For SET CONSTRAINTS return true if it is SET CONSTRAINTS
-	 * ALL otherwise, compare the table ids.
-	 *
-	 * @param tableId the table id
-	 *
-	 * @exception StandardException on error
-	 */
-	public boolean modifiesTableId(UUID tableId) throws StandardException
-	{
-		if (tuuids != null) {
-			for (int i = 0; i < tuuids.length; i++) {
-				if (tableId.equals(tuuids[i]))
-					return true;
-			}
-			return false;
-		}
-
-		// assume SET CONSTRAINTS ALL touches this table
-		if ((cdl == null) || (cdl.size() == 0))
-		{
-			return true;
-		}
-
-		int cdlSize = cdl.size();
-		for (int index = 0; index < cdlSize; index++)
-		{
-			ConstraintDescriptor cd = cdl.elementAt(index);
-			if (cd.getTableId().equals(tableId))
-			{
-				return true;
-			}
-		}
-		
-		return false;
-	}
-
 	///////////////////////////////////////////////
 	//
 	// MISC

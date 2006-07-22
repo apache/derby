@@ -60,18 +60,4 @@ class GrantRevokeConstantAction extends GenericConstantAction
 	{
 		privileges.executeGrantRevoke( activation, grant, grantees);
 	}
-
-	/**
-	 * Does this constant action modify the passed in table
-	 * uuid?  By modify we mean add or drop things tied to
-	 * this table (e.g. index, trigger, constraint).
-	 * @param tableId the other table id
-	 *
-	 * @exception   StandardException thrown on failure
-	 */
-	public boolean modifiesTableId(UUID tableId)
-		throws StandardException
-	{
-		return false;
-	}
 }

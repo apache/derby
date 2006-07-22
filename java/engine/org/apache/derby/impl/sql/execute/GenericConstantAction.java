@@ -52,27 +52,6 @@ import org.apache.derby.catalog.UUID;
  */
 abstract class GenericConstantAction implements ConstantAction
 {
-	/**
-	 * Does this constant action modify the passed in table
-	 * uuid?  By modify we mean add or drop things tied to
-	 * this table (e.g. index, trigger, constraint).  Things
-	 * like views or spses that reference this table don't
-	 * count.
-	 *
-	 * @param tableId the other table id
-	 *
-	 * @exception   StandardException thrown on failure
-	 */
-	public boolean modifiesTableId(UUID tableId)
-		throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("modifiesTableId() should have been implemented by a super class");
-		}
-		return false;
-	}
-
 	public final void readExternal(java.io.ObjectInput in ) {}
 	public final void writeExternal(java.io.ObjectOutput out) {}
 }

@@ -408,22 +408,5 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	{
 		return indexNames;
 	}
-
-	/**
-	 * Does this constant action modify the passed in table
-	 * uuid?  By modify we mean add or drop things tied to
-	 * this table (e.g. index, trigger, constraint).  Things
-	 * like views or spses that reference this table don't
-	 * count.
-	 *
-	 * @param tableId on error
-	 *
-	 */
-	public boolean modifiesTableId(UUID tableId)
-	{
-		return ((tableId != null) && (targetUUID != null)) ?
-			tableId.equals(targetUUID) :
-			false;
-	}
 }
  

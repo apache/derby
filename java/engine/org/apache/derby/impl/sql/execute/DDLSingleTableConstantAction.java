@@ -41,25 +41,9 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
 	 *
 	 * @param tableId the target table
 	 */
-	protected DDLSingleTableConstantAction(UUID tableId)
+	DDLSingleTableConstantAction(UUID tableId)
 	{
 		super();
 		this.tableId = tableId;
-	}
-
-	/**
-	 * Does this constant action modify the passed in table
-	 * uuid?  By modify we mean add or drop things tied to
-	 * this table (e.g. index, trigger, constraint).  Things
-	 * like views or spses that reference this table don't
-	 * count.
-	 *
-	 * @param tableId the table id
-	 */
-	public boolean modifiesTableId(UUID tableId)
-	{
-		return (this.tableId == null) ?
-			false :
-			this.tableId.equals(tableId);
 	}
 }

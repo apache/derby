@@ -119,21 +119,6 @@ public class UpdatableVTIConstantAction extends WriteCursorConstantAction
 	// INTERFACE METHODS
 
 	/**
-	 * Does this constant action modify the passed in table
-	 * uuid?  By modify we mean add or drop things tied to
-	 * this table (e.g. index, trigger, constraint).  Things
-	 * like views or spses that reference this table don't
-	 * count.
-	 *
-	 * @param tableId on error
-	 *
-	 */
-	public boolean modifiesTableId(UUID tableId)
-	{
-		return false;
-	}
-
-	/**
 	 * Get the formatID which corresponds to this class.
 	 *
 	 *	@return	the formatID of this class

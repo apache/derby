@@ -195,24 +195,6 @@ public abstract class DDLConstantAction extends GenericConstantAction
 		cc.close();
 	}
 
-	/**
-	 * Does this constant action modify the passed in table
-	 * uuid?  By modify we mean add or drop things tied to
-	 * this table (e.g. index, trigger, constraint).  Things
-	 * like views or spses that reference this table don't
-	 * count.
-	 *
-	 * @param tableId the table id
- 	 *
-	 * @exception StandardException on error
-	 */
-	public boolean modifiesTableId(UUID tableId) throws StandardException
-	{
-		// by default, assume we don't modify it
-		return false;
-	}
-
-
 	protected String constructToString(
 						String				statementType,
 						String              objectName)
