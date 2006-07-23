@@ -98,6 +98,7 @@ public class derbyrunjartest {
             pr = Runtime.getRuntime().exec(command);
             BackgroundStreamSaver saver = 
                         new BackgroundStreamSaver(pr.getInputStream(), System.out);
+            saver.finish();
             pr.waitFor();
             pr.destroy();
         } catch(Throwable t) {
