@@ -29,12 +29,13 @@ import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
- * This class describes a routine permission used (required) by a statement.
+ * This class describes a routine execute permission
+ * required by a statement.
  */
 
-public class StatementRoutinePermission extends StatementPermission
+public final class StatementRoutinePermission extends StatementPermission
 {
-	protected UUID routineUUID;
+	private UUID routineUUID;
 
 	public StatementRoutinePermission( UUID routineUUID)
 	{

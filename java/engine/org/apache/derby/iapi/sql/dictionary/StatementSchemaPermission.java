@@ -28,14 +28,14 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
- * This class describes a schema permission used (required) by a statement.
+ * This class describes a schema permission required by a statement.
  */
 
 public class StatementSchemaPermission extends StatementPermission
 {
-	protected String schemaName;
-	protected String aid;
-	protected boolean privType;
+	private String schemaName;
+	private String aid;
+	private boolean privType;
 
 	public StatementSchemaPermission(String schemaName, String aid, boolean privType)
 	{

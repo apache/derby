@@ -24,11 +24,20 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.error.StandardException;
 
 /**
- * This class describes a permission used (required) by a statement.
+ * This class describes a permission require by a statement.
  */
 
 public abstract class StatementPermission
 {
+	/**
+	 * Restrict implementations to this package to reduce
+	 * risk of external code spoofing the GRANT/REVOKE system
+	 * by providing its own fake implementations.
+	 *
+	 */
+	StatementPermission()
+	{
+	}
 	/**
 	 * @param lcc				LanguageConnectionContext
 	 * @param authorizationId	AuthorizationId

@@ -27,13 +27,13 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.reference.SQLState;
 
 /**
- * This class describes a table permission used (required) by a statement.
+ * This class describes a table permission required by a statement.
  */
 
 public class StatementTablePermission extends StatementPermission
 {
-	protected UUID tableUUID;
-	protected int privType; // One of Authorizer.SELECT_PRIV, UPDATE_PRIV, etc.
+	UUID tableUUID;
+	int privType; // One of Authorizer.SELECT_PRIV, UPDATE_PRIV, etc.
 
 	/**
 	 * Constructor for StatementTablePermission. Creates an instance of
