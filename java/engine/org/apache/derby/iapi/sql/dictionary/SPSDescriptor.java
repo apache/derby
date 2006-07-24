@@ -526,17 +526,6 @@ public class SPSDescriptor extends TupleDescriptor
 	}
 
 	/**
-	 * Set the text of the USING clause. Used by
-	 * ALTER statement.
-	 *
-	 * @param usingText	the new value for the USING text
-	 */
-	public final synchronized void setUsingText(String usingText)
-	{
-		this.usingText = usingText;
-	}
-
-	/**
 	 * Sets the UUID of the SPS.
 	 *
 	 * @param uuid	The UUID of the SPS to be set in the descriptor

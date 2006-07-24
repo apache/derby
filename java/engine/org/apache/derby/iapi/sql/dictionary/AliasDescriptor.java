@@ -55,15 +55,15 @@ public final class AliasDescriptor
 	extends TupleDescriptor
 	implements UniqueTupleDescriptor, Provider
 {
-	private UUID		aliasID;
-	private String		aliasName;
-	private UUID		schemaID;
-	private String		javaClassName;
-	private char		aliasType;
-	private char		nameSpace;
-	private boolean		systemAlias;
-	private AliasInfo	aliasInfo;
-	private String		specificName;
+	private final UUID		aliasID;
+	private final String		aliasName;
+	private final UUID		schemaID;
+	private final String		javaClassName;
+	private final char		aliasType;
+	private final char		nameSpace;
+	private final boolean		systemAlias;
+	private final AliasInfo	aliasInfo;
+	private final String		specificName;
 
 	/**
 	 * Constructor for a AliasDescriptor

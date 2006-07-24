@@ -63,14 +63,14 @@ public abstract class ConstraintDescriptor
 	public static final int SYSCONSTRAINTS_STATE_FIELD = 6;
 
 	TableDescriptor		table;
-	String				constraintName;
-	boolean				deferrable;
-	boolean				initiallyDeferred;
+	final String				constraintName;
+	private final boolean				deferrable;
+	private final boolean				initiallyDeferred;
 	boolean				isEnabled;
-	int[]				referencedColumns;
-	UUID					constraintId;
-	SchemaDescriptor	schemaDesc;
-	ColumnDescriptorList	colDL;
+	private final int[]				referencedColumns;
+	final UUID					constraintId;
+	private final SchemaDescriptor	schemaDesc;
+	private ColumnDescriptorList	colDL;
 
 	/**
 	 * Constructor for a ConstraintDescriptor
@@ -118,16 +118,6 @@ public abstract class ConstraintDescriptor
 	public UUID	getTableId()
 	{
 		return table.getUUID();
-	}
-
-	/**
-	 * Sets the UUID of the constraint.
-	 *
-	 * @param constraintId	The constraint Id.
-	 */
-	public void	setConstraintId(UUID constraintId)
-	{
-		this.constraintId = constraintId;
 	}
 
 	/**

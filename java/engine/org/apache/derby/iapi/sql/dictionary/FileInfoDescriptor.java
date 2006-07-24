@@ -34,7 +34,7 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 /**
  * A Descriptor for a file that has been stored in the database.
  */
-public class  FileInfoDescriptor extends TupleDescriptor 
+public final class  FileInfoDescriptor extends TupleDescriptor 
 	implements Provider, UniqueSQLObjectDescriptor
 {
 	/** A type tho indicate the file is a jar file **/
@@ -45,10 +45,10 @@ public class  FileInfoDescriptor extends TupleDescriptor
 		<li>public long	getGenerationId();
 		</ol>
 	*/
-	UUID id;
-	SchemaDescriptor sd;
-	String sqlName;
-	long generationId;
+	private final UUID id;
+	private final SchemaDescriptor sd;
+	private final String sqlName;
+	private final long generationId;
 	
 	/**
 	 * Constructor for a FileInfoDescriptor.

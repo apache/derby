@@ -55,20 +55,20 @@ import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
  * @author Jeff Lichtman
  */
 
-public class ColumnDescriptor extends TupleDescriptor
+public final class ColumnDescriptor extends TupleDescriptor
 {
 
 	// implementation
-	DefaultInfo			columnDefaultInfo;
-	TableDescriptor		table;
-	String			columnName;
-	int			columnPosition;
-	DataTypeDescriptor	columnType;
-	DataValueDescriptor	columnDefault;
-	UUID				uuid;
-	UUID				defaultUUID;
-	long				autoincStart;
-	long				autoincInc;
+	private DefaultInfo			columnDefaultInfo;
+	private TableDescriptor		table;
+	private String			columnName;
+	private int			columnPosition;
+	private DataTypeDescriptor	columnType;
+	private DataValueDescriptor	columnDefault;
+	private UUID				uuid;
+	private UUID				defaultUUID;
+	private long				autoincStart;
+	private long				autoincInc;
 	//Following variable is used to see if the user is adding an autoincrement 
 	//column, or if user is altering the existing autoincrement column to change 
 	//the increment value or to change the start value. If none of the above,

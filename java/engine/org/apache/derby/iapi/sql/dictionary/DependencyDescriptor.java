@@ -53,10 +53,10 @@ public class DependencyDescriptor extends TupleDescriptor
 	*/
 
 	// implementation
-	private UUID					dependentID;
-	private DependableFinder		dependentBloodhound;
-	private UUID					providerID;
-	private DependableFinder		providerBloodhound;
+	private final UUID					dependentID;
+	private final DependableFinder		dependentBloodhound;
+	private final UUID					providerID;
+	private final DependableFinder		providerBloodhound;
 
 	/**
 	 * Constructor for a DependencyDescriptor

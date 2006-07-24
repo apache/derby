@@ -48,18 +48,9 @@ public class DefaultDescriptor
 	extends TupleDescriptor
 	implements UniqueTupleDescriptor, Provider, Dependent
 {
-	/** public interface to this class 
-		<ol>
-		<li>public void setDefaultUUID(UUID defaultUUID);
-		<li>public UUID	getTableUUID();
-		</ol>
-	*/
-   
-	// implementation
-
-	int			columnNumber;
-	UUID		defaultUUID;
-	UUID		tableUUID;
+	private final int			columnNumber;
+	private final UUID		defaultUUID;
+	private final UUID		tableUUID;
 
 	/**
 	 * Constructor for a DefaultDescriptor
@@ -87,16 +78,6 @@ public class DefaultDescriptor
 	public UUID	getUUID()
 	{
 		return defaultUUID;
-	}
-
-	/**
-	 * Set the UUID of the default.
-	 *
-	 * @param defaultUUID The new UUID for the default.
-	 */
-	public void setDefaultUUID(UUID defaultUUID)
-	{
-		this.defaultUUID = defaultUUID;
 	}
 
 	/**

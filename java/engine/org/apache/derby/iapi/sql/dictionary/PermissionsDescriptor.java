@@ -34,10 +34,10 @@ public abstract class PermissionsDescriptor extends TupleDescriptor
 	implements Cloneable, Provider
 {
 	protected UUID oid;
-	protected String grantee;
-	protected String grantor;
+	private final String grantee;
+	private String grantor;
 
-	public PermissionsDescriptor( DataDictionary dd,
+	PermissionsDescriptor( DataDictionary dd,
 								  String grantee,
 								  String grantor)
 	{
