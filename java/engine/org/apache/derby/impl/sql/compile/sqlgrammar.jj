@@ -12112,7 +12112,7 @@ revokeStatement() throws StandardException :
 {
     <REVOKE>
       {
-          checkVersion( DataDictionary.DD_VERSION_DERBY_10_1, "REVOKE");
+          checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "REVOKE");
           checkSqlStandardAccess( "REVOKE");
       }
     ( node = tableRevokeStatement() | node = routineRevokeStatement() )
