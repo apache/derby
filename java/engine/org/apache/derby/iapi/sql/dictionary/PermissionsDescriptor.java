@@ -34,8 +34,8 @@ public abstract class PermissionsDescriptor extends TupleDescriptor
 	implements Cloneable, Provider
 {
 	protected UUID oid;
-	private final String grantee;
-	private String grantor;
+	private String grantee;
+	private final String grantor;
 
 	PermissionsDescriptor( DataDictionary dd,
 								  String grantee,
@@ -85,8 +85,8 @@ public abstract class PermissionsDescriptor extends TupleDescriptor
 	}
 	
 	/*----- getter functions for rowfactory ------*/
-	public String getGrantee() { return grantee;}
-	public String getGrantor() { return grantor;}
+	public final String getGrantee() { return grantee;}
+	public final String getGrantor() { return grantor;}
 
 	/**
 	 * Gets the UUID of the table.
