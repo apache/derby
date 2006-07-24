@@ -57,6 +57,8 @@ encryptParams.sql
 encryptParams_app.properties
 encryptionKey.sql
 encryptionKey_app.properties
+encryptionKey_jar.sql
+encryptionKey_jar_app.properties
 global_xactTable.view
 heapscan.sql
 heapscan_app.properties
