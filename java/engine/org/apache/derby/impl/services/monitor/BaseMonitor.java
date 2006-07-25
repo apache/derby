@@ -1436,8 +1436,8 @@ nextModule:
 		to boot all the services that that provider knows about.
 	*/
 	protected void bootPersistentServices() {
-		for (Enumeration e = new ProviderEnumeration( applicationProperties); ; ) {
-
+		Enumeration e = new ProviderEnumeration( applicationProperties);
+		while (e.hasMoreElements()) {
 			PersistentService provider = (PersistentService) e.nextElement();
 			bootProviderServices(provider);
 		}

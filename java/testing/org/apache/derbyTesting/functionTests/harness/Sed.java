@@ -164,6 +164,7 @@ public class Sed
 
         //Filter to suppress absould paths in error message for roll forward recovery tests 
         searchStrings.addElement("Directory.*.wombat.already.exists");
+        searchStrings.addElement("Directory.*.extinout/crwombatlog/log.*.exists");
 
         // Filter for "DB2ConnectionCorrelator" text that can be printed as
         // part of some JCC error messages.
@@ -233,6 +234,7 @@ public class Sed
             subStrings.addElement("-----"); 
         }
         subStrings.addElement("Directory DBLOCATION/wombat already exists");
+        subStrings.addElement("Directory 'extinout<sp>crwombatlog<sp>log' exists");
         // ignore the 'DB2ConnectionCorrelator' thing altogether.
         subStrings.addElement("");
 		// Filter for SAX exception name diffs between jvms.

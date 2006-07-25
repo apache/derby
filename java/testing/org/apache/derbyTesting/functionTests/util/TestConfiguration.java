@@ -127,7 +127,7 @@ public class TestConfiguration {
      */
     private String createJDBCUrlWithDatabaseName(String name) {
         if (jdbcClient == JDBCClient.EMBEDDED) {
-            return jdbcClient.getUrlBase() + dbName;
+            return jdbcClient.getUrlBase() + name;
         } else {
             return jdbcClient.getUrlBase() + hostName + ":" + port + "/" + name;
         }
@@ -216,23 +216,40 @@ public class TestConfiguration {
      */
     public Connection getDefaultConnection()
         throws SQLException {
+        return getConnection(getDatabaseName());
+    }
+    
+    /**
+     * Get connection to a database.
+     * If the database does not exist, it will be created.
+     * A default username and password will be used for the connection.
+     *
+     * @param databaseName database to connect to
+     *
+     * @return connection to default database.
+     */
+    public Connection getConnection (String databaseName) throws SQLException {
         Connection con = null;
         JDBCClient client =getJDBCClient();
         if (HAVE_DRIVER) {            
             loadJDBCDriver(client.getJDBCDriverName());
             if (!isSingleLegXA()) {
                 con = DriverManager.getConnection(
-                        getJDBCUrl() + ";create=true",
+                        getJDBCUrl(databaseName) + ";create=true",
                         getUserName(),
                         getUserPassword());
             }
             else {
-                con = TestDataSourceFactory.getXADataSource().getXAConnection (getUserName(),
-                            getUserPassword()).getConnection();                
+                Properties attrs = 
+                        getDataSourcePropertiesForDatabase(databaseName);
+                con = TestDataSourceFactory.getXADataSource(attrs).
+                        getXAConnection (getUserName(), 
+                        getUserPassword()).getConnection();
             }
         } else {
             //Use DataSource for JSR169
-            con = TestDataSourceFactory.getDataSource().getConnection();
+            Properties attrs = getDataSourcePropertiesForDatabase(databaseName);
+            con = TestDataSourceFactory.getDataSource(attrs).getConnection();
         }
         return con;
     }
@@ -390,16 +407,34 @@ public class TestConfiguration {
      * connect to the default database
      */
     public static Properties getDefaultDataSourceProperties() {
+        return getDataSourcePropertiesForDatabase(
+                DERBY_TEST_CONFIG.getDatabaseName());
+    }
+    
+    /**
+     * Generate properties which can be set on a
+     * <code>DataSource</code> in order to connect to a given
+     * database.
+     *
+     * @param databaseName database to connect to
+     *
+     * @return a <code>Properties</code> object containing server
+     * name, port number, database name and other attributes needed to
+     * connect to the database
+     */
+    public static Properties getDataSourcePropertiesForDatabase
+            (String databaseName) 
+    {
         Properties attrs = new Properties();
         if (!(DERBY_TEST_CONFIG.getJDBCClient() == JDBCClient.EMBEDDED)) {
             attrs.setProperty("serverName", DERBY_TEST_CONFIG.getHostName());
             attrs.setProperty("portNumber", Integer.toString(DERBY_TEST_CONFIG.getPort()));
         }
-        attrs.setProperty("databaseName", DERBY_TEST_CONFIG.getDatabaseName());
+        attrs.setProperty("databaseName", databaseName);
         attrs.setProperty("connectionAttributes", "create=true");
         return attrs;
     }
-    
+
     /**
      * Load the specified JDBC driver
      *
