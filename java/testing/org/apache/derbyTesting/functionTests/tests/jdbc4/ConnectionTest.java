@@ -285,6 +285,7 @@ public class ConnectionTest
     public void testUnwrapValid()
         throws SQLException {
         Connection unwrappedCon = con.unwrap(Connection.class);
+        assertSame("Unwrap returned wrong object.", con, unwrappedCon);
     }
 
     public void testUnwrapInvalid()
