@@ -1133,16 +1133,17 @@ public class BasicDependencyManager implements DependencyManager {
 	 *
 	 * @param storedList	The List of DependencyDescriptors representing
 	 *						stored dependencies.
+	 * @param providerForList The provider if this list is being created
+	 *                        for a list of dependents. Null otherwise.
 	 * 
 	 * @return List		The converted List
 	 *
 	 * @exception StandardException thrown if something goes wrong
 	 */
-	private List getDependencyDescriptorList(List storedList)
+	private List getDependencyDescriptorList(List storedList,
+			Provider providerForList)
 		throws StandardException
 	{
-		DataDictionary		 dd = getDataDictionary();
-
 		if (storedList.size() != 0)
 		{
 			/* For each DependencyDescriptor, we need to instantiate
@@ -1165,13 +1166,26 @@ public class BasicDependencyManager implements DependencyManager {
 					finder = depDesc.getDependentFinder();
 					tempD = (Dependent) finder.getDependable( depDesc.getUUID() );
 
-					finder = depDesc.getProviderFinder();
-					tempP = (Provider) finder.getDependable( depDesc.getProviderID() );
-/*					if (finder instanceof DDColumnDependableFinder)
-						((TableDescriptor)tempP).setReferencedColumnMap(
-							new FormatableBitSet(((DDColumnDependableFinder) finder).
-										getColumnBitMap()));
-*/
+					if (providerForList != null)
+					{
+						// Use the provider being passed in.
+						tempP = providerForList;
+						
+						// Sanity check the object identifiers match.
+						if (SanityManager.DEBUG) {
+							if (!tempP.getObjectID().equals(depDesc.getProviderID()))
+							{
+								SanityManager.THROWASSERT("mismatch providers");
+							}
+						}
+					}
+					else
+					{
+						finder = depDesc.getProviderFinder();
+						tempP = (Provider) finder.getDependable( depDesc.getProviderID() );
+						
+					}
+
 				} catch (java.sql.SQLException te) {
 					throw StandardException.newException(SQLState.DEP_UNABLE_TO_RESTORE, finder.getClass().getName(), te.getMessage());
 
@@ -1268,7 +1282,7 @@ public class BasicDependencyManager implements DependencyManager {
 
 		@exception StandardException thrown if something goes wrong
 	 */
-	protected List getProviders (Dependent d) throws StandardException {
+	private List getProviders (Dependent d) throws StandardException {
 
 		List deps = (List) dependents.get(d.getObjectID());
 
@@ -1298,7 +1312,8 @@ public class BasicDependencyManager implements DependencyManager {
 							getDataDictionary().
 								getDependentsDescriptorList(
 												d.getObjectID().toString()
-															)
+															),
+								(Provider) null
 													);
 
 			if (storedList.size() > 0)
@@ -1319,7 +1334,7 @@ public class BasicDependencyManager implements DependencyManager {
 
 		@exception StandardException thrown if something goes wrong
 	 */
-	protected List getDependents (Provider p) 
+	private List getDependents (Provider p) 
 			throws StandardException {
 
 		List deps = (List) providers.get(p.getObjectID());
@@ -1330,7 +1345,7 @@ public class BasicDependencyManager implements DependencyManager {
 		*/
 		if (! p.isPersistent())
 		{
-			return (deps == null? null : deps);
+			return deps;
 		}
 		else
 		{
@@ -1350,7 +1365,8 @@ public class BasicDependencyManager implements DependencyManager {
 							getDataDictionary().
 								getProvidersDescriptorList(
 												p.getObjectID().toString()
-															)
+															),
+							p
 													);
 			if (storedList.size() > 0)
 			{
