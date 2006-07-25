@@ -3,10 +3,13 @@
 ==  Version 2.0, in this case for the Apache Derby distribution.       ==
 =========================================================================
 
+Apache Derby
+Copyright 2000-2006 The Apache Software Foundation
+
 This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
 
-Portions of Derby were orginally developed by
+Portions of Derby were originally developed by
 International Business Machines Corporation and are
 licensed to the Apache Software Foundation under the
 "Software Grant and Corporate Contribution License Agreement",

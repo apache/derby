@@ -138,7 +138,7 @@ CALL IR()
 EXPECTED SQL Exception: (42Y03) 'IR' is not recognized as a function or procedure.
 No ResultSet or update count returned
 No ResultSet or update count returned
-EXPECTED SQL Exception: The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression. SQLSTATE: 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.
+EXPECTED SQL Exception: The exception 'java.sql.SQLException: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression. SQLSTATE: 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.
 No ResultSet or update count returned
 No ResultSet or update count returned
 No ResultSet or update count returned
@@ -154,7 +154,7 @@ I |B
 5 |ir2            
 6 |'012345678     
 CALL IR2(2, 'no way')
-EXPECTED SQL Exception: (38000) The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression. SQLSTATE: 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.
+EXPECTED SQL Exception: (38000) The exception 'java.sql.SQLException: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression. SQLSTATE: 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.
 CALL IR2(?, 'no way')
 EXPECTED SQL Exception: (07000) At least one parameter to the current statement is uninitialized.
 CALL IR2(2, ?)

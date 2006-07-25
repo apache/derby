@@ -395,7 +395,7 @@ create trigger bad_before_trig no cascade BEFORE insert on t2
 0 rows inserted/updated/deleted
 ij> --- try to insert 2 rows
 insert into t2 values (1,2), (2,4);
-ERROR 38000: The exception 'SQL Exception: The external routine is not allowed to execute SQL statements.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The external routine is not allowed to execute SQL statements.' was thrown while evaluating an expression.
 ERROR 38001: The external routine is not allowed to execute SQL statements.
 ij> --- check trigger is not fired.
 select * from t1;
@@ -424,7 +424,7 @@ I          |B
 ij> --- causing the trigger to fire again will violate the primary key constraint
 --- verify this fails
 update t1 set i=i;
-ERROR 38000: The exception 'SQL Exception: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.' was thrown while evaluating an expression.
 ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T1'.
 ij> --- check that the update failed
 select * from t1;
@@ -591,7 +591,7 @@ create trigger commit_trig AFTER delete on t2
 0 rows inserted/updated/deleted
 ij> --- should fail 
 delete from t2;
-ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
 ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
 ij> --- check delete failed
 select * from t2;
@@ -606,7 +606,7 @@ ij> create trigger commit_trig no cascade BEFORE delete on t2
 0 rows inserted/updated/deleted
 ij> --- should fail 
 delete from t2;
-ERROR 38000: The exception 'SQL Exception: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
 ERROR X0Y66: Cannot issue commit in a nested connection when there is a pending operation in the parent connection.
 ij> --- check delete failed
 select * from t2;
@@ -622,7 +622,7 @@ create trigger rollback_trig AFTER delete on t2
 0 rows inserted/updated/deleted
 ij> --- should fail 
 delete from t2;
-ERROR 38000: The exception 'SQL Exception: Cannot issue rollback in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Cannot issue rollback in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
 ERROR X0Y67: Cannot issue rollback in a nested connection when there is a pending operation in the parent connection.
 ij> --- check delete failed
 select * from t2;
@@ -637,7 +637,7 @@ ij> create trigger rollback_trig no cascade BEFORE delete on t2
 0 rows inserted/updated/deleted
 ij> --- should fail 
 delete from t2;
-ERROR 38000: The exception 'SQL Exception: Cannot issue rollback in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Cannot issue rollback in a nested connection when there is a pending operation in the parent connection.' was thrown while evaluating an expression.
 ERROR X0Y67: Cannot issue rollback in a nested connection when there is a pending operation in the parent connection.
 ij> --- check delete failed
 select * from t2;
@@ -653,7 +653,7 @@ create trigger set_isolation_trig AFTER delete on t2
 0 rows inserted/updated/deleted
 ij> --- should fail 
 delete from t2;
-ERROR 38000: The exception 'SQL Exception: Transaction manipulation such as SET ISOLATION is not permitted because trigger SET_ISOLATION_TRIG is active.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Transaction manipulation such as SET ISOLATION is not permitted because trigger SET_ISOLATION_TRIG is active.' was thrown while evaluating an expression.
 ERROR X0Y71: Transaction manipulation such as SET ISOLATION is not permitted because trigger SET_ISOLATION_TRIG is active.
 ij> --- check delete failed
 select * from t2;
@@ -668,7 +668,7 @@ ij> create trigger set_isolation_trig no cascade BEFORE delete on t2
 0 rows inserted/updated/deleted
 ij> --- should fail 
 delete from t2;
-ERROR 38000: The exception 'SQL Exception: Transaction manipulation such as SET ISOLATION is not permitted because trigger SET_ISOLATION_TRIG is active.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: Transaction manipulation such as SET ISOLATION is not permitted because trigger SET_ISOLATION_TRIG is active.' was thrown while evaluating an expression.
 ERROR X0Y71: Transaction manipulation such as SET ISOLATION is not permitted because trigger SET_ISOLATION_TRIG is active.
 ij> --- check delete failed
 select * from t2;
@@ -718,7 +718,7 @@ create trigger alter_table_trig AFTER delete on t1
 0 rows inserted/updated/deleted
 ij> --- should fail
 delete from t1;
-ERROR 38000: The exception 'SQL Exception: ALTER TABLE T1 is not supported in trigger ALTER_TABLE_TRIG.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: ALTER TABLE T1 is not supported in trigger ALTER_TABLE_TRIG.' was thrown while evaluating an expression.
 ERROR X0Y69: ALTER TABLE T1 is not supported in trigger ALTER_TABLE_TRIG.
 ij> --- check delete failed
 select * from t1;
@@ -734,7 +734,7 @@ ij> create trigger drop_table_trig AFTER delete on t2
 0 rows inserted/updated/deleted
 ij> --- should fail
 delete from t2;
-ERROR 38000: The exception 'SQL Exception: DROP TABLE T1 is not supported in trigger DROP_TABLE_TRIG.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: DROP TABLE T1 is not supported in trigger DROP_TABLE_TRIG.' was thrown while evaluating an expression.
 ERROR X0Y69: DROP TABLE T1 is not supported in trigger DROP_TABLE_TRIG.
 ij> --- check delete failed
 select * from t2;
@@ -750,7 +750,7 @@ create trigger create_trigger_trig AFTER delete on t1
 0 rows inserted/updated/deleted
 ij> --- should fail
 delete from t1;
-ERROR 38000: The exception 'SQL Exception: CREATE TRIGGER TEST_TRIG is not supported in trigger CREATE_TRIGGER_TRIG.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: CREATE TRIGGER TEST_TRIG is not supported in trigger CREATE_TRIGGER_TRIG.' was thrown while evaluating an expression.
 ERROR X0Y69: CREATE TRIGGER TEST_TRIG is not supported in trigger CREATE_TRIGGER_TRIG.
 ij> --- check delete failed
 select * from t1;
@@ -774,7 +774,7 @@ ij> create trigger drop_trigger_trig AFTER delete on t2
 0 rows inserted/updated/deleted
 ij> --- should fail
 delete from t2;
-ERROR 38000: The exception 'SQL Exception: DROP TRIGGER TEST_TRIG is not supported in trigger DROP_TRIGGER_TRIG.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: DROP TRIGGER TEST_TRIG is not supported in trigger DROP_TRIGGER_TRIG.' was thrown while evaluating an expression.
 ERROR X0Y69: DROP TRIGGER TEST_TRIG is not supported in trigger DROP_TRIGGER_TRIG.
 ij> --- check delete failed
 select * from t2;
@@ -795,7 +795,7 @@ create trigger create_index_trig AFTER delete on t2
 0 rows inserted/updated/deleted
 ij> --- should fail
 delete from t2;
-ERROR 38000: The exception 'SQL Exception: CREATE INDEX IX is not supported in trigger CREATE_INDEX_TRIG.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: CREATE INDEX IX is not supported in trigger CREATE_INDEX_TRIG.' was thrown while evaluating an expression.
 ERROR X0Y69: CREATE INDEX IX is not supported in trigger CREATE_INDEX_TRIG.
 ij> --- check delete failed
 select * from t2;
@@ -818,7 +818,7 @@ ij> create trigger drop_index_trig AFTER delete on t1
 0 rows inserted/updated/deleted
 ij> --- should fail
 delete from t1;
-ERROR 38000: The exception 'SQL Exception: DROP INDEX IX is not supported in trigger DROP_INDEX_TRIG.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLException: DROP INDEX IX is not supported in trigger DROP_INDEX_TRIG.' was thrown while evaluating an expression.
 ERROR X0Y69: DROP INDEX IX is not supported in trigger DROP_INDEX_TRIG.
 ij> --- check delete failed
 select * from t1;
