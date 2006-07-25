@@ -30,6 +30,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.BaseJDBCTestSetup;
 
 /**
  * Tests of stored procedures.
@@ -697,12 +698,45 @@ public class ProcedureTest extends BaseJDBCTestCase {
                  ("xtestRollbackStoredProcWhenExecuteUpdateReturnsResults" +
                   "_prepared"));
         }
-        return new TestSetup(suite) {
-            protected void setUp() throws Exception {
-                oneTimeSetUp();
+        return new BaseJDBCTestSetup(suite) {
+            /**
+             * Creates the tables and the stored procedures used in the test
+             * cases.
+             * @exception SQLException if a database error occurs
+             */
+        	protected void setUp() throws SQLException {
+                Connection c = getConnection();
+                c.setAutoCommit(false);
+                Statement s = c.createStatement();
+                for (int i = 0; i < PROCEDURES.length; i++) {
+                    s.execute(PROCEDURES[i][1]);
+                }
+                for (int i = 0; i < TABLES.length; i++) {
+                    s.execute(TABLES[i][1]);
+                }
+                s.close();
+                c.commit();
+                c.close();
             }
-            protected void tearDown() throws Exception {
-                oneTimeTearDown();
+            /**
+             * Drops the stored procedures used in the tests.
+             * @exception SQLException if a database error occurs
+             */
+        	protected void tearDown() throws Exception {
+                Connection c = getConnection();
+                c.setAutoCommit(false);
+                Statement s = c.createStatement();
+                for (int i = 0; i < PROCEDURES.length; i++) {
+                    s.execute("DROP PROCEDURE " + PROCEDURES[i][0]);
+                }
+                for (int i = 0; i < TABLES.length; i++) {
+                    s.execute("DROP TABLE " + TABLES[i][0]);
+                }
+                s.close();
+                c.commit();
+                c.close();
+                
+                super.tearDown();
             }
         };
     }
@@ -730,45 +764,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
     public void tearDown() throws SQLException {
         conn.rollback();
         conn.close();
-    }
-
-    /**
-     * Creates the tables and the stored procedures used in the test
-     * cases.
-     * @exception SQLException if a database error occurs
-     */
-    private static void oneTimeSetUp() throws SQLException {
-        Connection c = getConnection();
-        c.setAutoCommit(false);
-        Statement s = c.createStatement();
-        for (int i = 0; i < PROCEDURES.length; i++) {
-            s.execute(PROCEDURES[i][1]);
-        }
-        for (int i = 0; i < TABLES.length; i++) {
-            s.execute(TABLES[i][1]);
-        }
-        s.close();
-        c.commit();
-        c.close();
-    }
-
-    /**
-     * Drops the stored procedures used in the tests.
-     * @exception SQLException if a database error occurs
-     */
-    private static void oneTimeTearDown() throws SQLException {
-        Connection c = getConnection();
-        c.setAutoCommit(false);
-        Statement s = c.createStatement();
-        for (int i = 0; i < PROCEDURES.length; i++) {
-            s.execute("DROP PROCEDURE " + PROCEDURES[i][0]);
-        }
-        for (int i = 0; i < TABLES.length; i++) {
-            s.execute("DROP TABLE " + TABLES[i][0]);
-        }
-        s.close();
-        c.commit();
-        c.close();
     }
 
     /**
