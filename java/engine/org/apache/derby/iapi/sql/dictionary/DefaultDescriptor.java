@@ -44,7 +44,7 @@ import org.apache.derby.catalog.UUID;
  * @author Jerry
  */
 
-public class DefaultDescriptor 
+public final class DefaultDescriptor 
 	extends TupleDescriptor
 	implements UniqueTupleDescriptor, Provider, Dependent
 {

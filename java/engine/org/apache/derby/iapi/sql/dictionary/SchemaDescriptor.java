@@ -34,7 +34,7 @@ import org.apache.derby.catalog.Dependable;
  * @author Jeff Lichtman
  */
 
-public class SchemaDescriptor extends TupleDescriptor 
+public final class SchemaDescriptor extends TupleDescriptor 
 	implements UniqueTupleDescriptor, Provider
 {
 	
@@ -155,8 +155,8 @@ public class SchemaDescriptor extends TupleDescriptor
 	private UUID			oid;
 	private final String			aid;
 
-    private boolean isSystem;
-    private boolean isSYSIBM;
+    private final boolean isSystem;
+    private final boolean isSYSIBM;
 
 	/**
 	 * Constructor for a SchemaDescriptor.
@@ -181,8 +181,7 @@ public class SchemaDescriptor extends TupleDescriptor
 		this.aid = aid;
 		this.oid = oid;
         this.isSystem = isSystem;
-		if (isSystem)
-			isSYSIBM = IBM_SYSTEM_SCHEMA_NAME.equals(name);
+		isSYSIBM = isSystem && IBM_SYSTEM_SCHEMA_NAME.equals(name);
 	}
 
 	/**

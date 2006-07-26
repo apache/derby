@@ -47,19 +47,19 @@ import org.apache.derby.iapi.services.monitor.Monitor;
  * @author Jeff Lichtman
  */
 
-public class ConglomerateDescriptor extends TupleDescriptor
+public final class ConglomerateDescriptor extends TupleDescriptor
 	implements UniqueTupleDescriptor, Provider
 {
 	// Implementation
-	long	conglomerateNumber;
-	String	name;
-	String[]	columnNames;
-	boolean	indexable;
-	boolean	forConstraint;
-	IndexRowGenerator	indexRowGenerator;
-	UUID	uuid;
-	UUID	tableID;
-	UUID	schemaID;
+	private long	conglomerateNumber;
+	private String	name;
+	private String[]	columnNames;
+	private final boolean	indexable;
+	private final boolean	forConstraint;
+	private final IndexRowGenerator	indexRowGenerator;
+	private final UUID	uuid;
+	private final UUID	tableID;
+	private final UUID	schemaID;
 
 	/**
 	 * Constructor for a conglomerate descriptor.
