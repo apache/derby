@@ -1323,6 +1323,19 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	}
 
 
+    /**
+     * Re-encryption testing debug flags, that are used to 
+     * simulate error/crash conditions for testing purposes.
+     */
+
+    /*
+     * Set to true to make the re-encryption fail just 
+     * before it is committed.
+     */
+
+	public static final String TEST_REENCRYPT_CRASH_BEFORE_COMMT  = 
+        SanityManager.DEBUG ? "TEST_REENCRYPT_CRASH_BEFORE_COMMT" : null ;
+
 
     /*
      * Configure the database for encryption, with the  specified 
@@ -1379,6 +1392,20 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 transaction.abort();
             }
             else {
+
+                if (SanityManager.DEBUG)
+                {
+                    // if the test debug flag is set, stop the 
+                    // re-encryption of the database here and 
+                    // throw an expception. 
+                    if (SanityManager.DEBUG_ON(TEST_REENCRYPT_CRASH_BEFORE_COMMT))
+                    {
+                        throw StandardException.newException(
+                         SQLState.LOG_IO_ERROR, 
+                         new IOException(TEST_REENCRYPT_CRASH_BEFORE_COMMT));
+                    }
+                }
+
                 transaction.commit();
 
                 // TODO : handle the case where if engine crashes
