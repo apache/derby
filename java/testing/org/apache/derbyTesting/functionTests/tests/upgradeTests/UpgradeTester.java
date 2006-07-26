@@ -362,6 +362,8 @@ public class UpgradeTester {
 									oldMinorVersion) && passed;
             passed = caseTriggerVTI(conn, phase, oldMajorVersion, 
                     oldMinorVersion) && passed;
+            passed = caseGrantRevoke(conn, phase, oldMajorVersion, 
+            						oldMinorVersion) && passed;
 			runMetadataTest(classLoader, conn);
 			conn.close();
 			shutdown(classLoader, dbName);
@@ -796,8 +798,85 @@ public class UpgradeTester {
         s.executeUpdate("DELETE FROM D438.T438_T2");
         s.getConnection().commit();
     }
+    
+    /**
+     * Grant/revoke is a new feature in 10.2. Test that this feature is not 
+     * supported by default after upgrade from versions earlier than 10.2. 
+     * This feature will not be available in soft upgrade. For grant/revoke 
+     * to be available after a full upgrade, the property 
+     * "derby.database.sqlAuthorization" has to be set to true during upgrade. 
+     * 
+     * @param conn Connection
+     * @param phase Upgrade test phase
+	 * @param dbMajor Major version of old release 
+	 * @param dbMinor Minor version of old release 
+     * @return true, if the test passes 
+     * @throws SQLException
+     */
+    private boolean caseGrantRevoke(Connection conn, int phase,
+    												int dbMajor, int dbMinor)
+                                    				throws SQLException {
+                
+        boolean passed = true;
+        boolean grantRevokeNotSupported = dbMajor==10 && dbMinor<2;
+        
+        Statement s = conn.createStatement();
+
+        switch (phase) {
+        case PH_CREATE:
+            s.execute("create table GR_TAB (id int)");
+            break;
+        case PH_SOFT_UPGRADE:
+        case PH_POST_SOFT_UPGRADE:
+        case PH_HARD_UPGRADE:
+        	if(grantRevokeNotSupported)
+        		passed = testGrantRevokeNotSupported(s, phase);
+        	break;
+        default:
+            passed = false;
+            break;
+        }
+        s.close();
+
+        System.out.println("complete caseGrantRevoke - passed " + passed);
+        return passed;
+    }
+    
+    /**
+     * Test to check that grant/revoke is not supported in a specific upgrade 
+     * test phase.
+     * 
+     * @param s	SQL statement
+     * @param phase Upgrade test phase
+     * @return true, if grant/revoke is not supported
+     */
+    private boolean testGrantRevokeNotSupported(Statement s, int phase) {
+    	boolean passed = true;
+    	try {
+    		s.execute("grant select on GR_TAB to some_user");
+    	} catch(SQLException sqle) {
+    		switch (phase) {
+    			case PH_SOFT_UPGRADE:
+    				// feature not available in soft upgrade 
+    				passed = isExpectedException(sqle, "XCL47");
+    				break;
+    			case PH_POST_SOFT_UPGRADE:
+    				// syntax error in versions earlier than 10.2
+    				passed = isExpectedException(sqle, "42X01");
+    				break;
+    			case PH_HARD_UPGRADE:
+    				// not supported because SQL authorization not set
+    				passed = isExpectedException(sqle, "42Z60");
+    				break;
+    			default:
+    				passed = false;
+    		}
+    	}
     	
-	/**
+    	return passed;
+    }
+    
+    /**
 	 * Run metadata test
 	 * 
 	 * @param classLoader Class loader to be used to load the test class
@@ -861,6 +940,25 @@ public class UpgradeTester {
 								+ sqle.getMessage());
 			sqle = sqle.getNextException();
 		} while (sqle != null);
+	}
+	
+	/**
+	 * Check if the exception is expected. 
+	 * 
+	 * @param sqle SQL Exception
+	 * @param expectedSQLState Expected SQLState
+	 * @return true, if SQLState of the exception is same as expected SQLState
+	 */
+	private boolean isExpectedException(SQLException sqle, String expectedSQLState) {
+		boolean passed = true;
+		
+		if(!expectedSQLState.equals(sqle.getSQLState())) { 
+			passed = false;
+			System.out.println("Fail - Unexpected exception:");
+			dumpSQLExceptions(sqle);
+		}
+		
+		return passed;
 	}
 	
 	/**

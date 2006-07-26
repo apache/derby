@@ -9,6 +9,7 @@ D438.T438_T1
 1, DERBY-438_STMT
 D438.T438_T2
 complete caseTriggerVTI - passed true
+complete caseGrantRevoke - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -279,6 +280,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,SYSIBM,SYSDUMMY1,SYSTEM TABLE,
 ,APP,ALLTYPES,TABLE,
 ,APP,CT1,TABLE,
+,APP,GR_TAB,TABLE,
 ,APP,INFLIGHT,TABLE,
 ,APP,LOUIE,TABLE,
 ,APP,PHASE,TABLE,
@@ -294,6 +296,7 @@ getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR]
 ,APP,ALLTYPES,TABLE,
 ,APP,CT1,TABLE,
+,APP,GR_TAB,TABLE,
 ,APP,INFLIGHT,TABLE,
 ,APP,LOUIE,TABLE,
 ,APP,PHASE,TABLE,
@@ -714,6 +717,7 @@ D438.T438_T2
 1, 104
 1, 4004
 complete caseTriggerVTI - passed true
+complete caseGrantRevoke - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 12 type name: DECIMAL
@@ -1070,6 +1074,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,SYSIBM,SYSDUMMY1,SYSTEM TABLE,,null,null,null,null,null
 ,APP,ALLTYPES,TABLE,,null,null,null,null,null
 ,APP,CT1,TABLE,,null,null,null,null,null
+,APP,GR_TAB,TABLE,,null,null,null,null,null
 ,APP,INFLIGHT,TABLE,,null,null,null,null,null
 ,APP,LOUIE,TABLE,,null,null,null,null,null
 ,APP,PHASE,TABLE,,null,null,null,null,null
@@ -1085,6 +1090,7 @@ getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR],TYPE_CAT[VARCHAR],TYPE_SCHEM[VARCHAR],TYPE_NAME[VARCHAR],SELF_REFERENCING_COL_NAME[VARCHAR],REF_GENERATION[VARCHAR]
 ,APP,ALLTYPES,TABLE,,null,null,null,null,null
 ,APP,CT1,TABLE,,null,null,null,null,null
+,APP,GR_TAB,TABLE,,null,null,null,null,null
 ,APP,INFLIGHT,TABLE,,null,null,null,null,null
 ,APP,LOUIE,TABLE,,null,null,null,null,null
 ,APP,PHASE,TABLE,,null,null,null,null,null
@@ -1465,6 +1471,7 @@ D438.T438_T2
 1, 105
 1, 4005
 complete caseTriggerVTI - passed true
+complete caseGrantRevoke - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -1735,6 +1742,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,SYSIBM,SYSDUMMY1,SYSTEM TABLE,
 ,APP,ALLTYPES,TABLE,
 ,APP,CT1,TABLE,
+,APP,GR_TAB,TABLE,
 ,APP,INFLIGHT,TABLE,
 ,APP,LOUIE,TABLE,
 ,APP,PHASE,TABLE,
@@ -1750,6 +1758,7 @@ getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR]
 ,APP,ALLTYPES,TABLE,
 ,APP,CT1,TABLE,
+,APP,GR_TAB,TABLE,
 ,APP,INFLIGHT,TABLE,
 ,APP,LOUIE,TABLE,
 ,APP,PHASE,TABLE,
@@ -2169,6 +2178,7 @@ D438.T438_T2
 1, 106
 1, 4006
 complete caseTriggerVTI - passed true
+complete caseGrantRevoke - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 12 type name: DECIMAL
@@ -2533,6 +2543,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,SYSIBM,SYSDUMMY1,SYSTEM TABLE,,null,null,null,null,null
 ,APP,ALLTYPES,TABLE,,null,null,null,null,null
 ,APP,CT1,TABLE,,null,null,null,null,null
+,APP,GR_TAB,TABLE,,null,null,null,null,null
 ,APP,INFLIGHT,TABLE,,null,null,null,null,null
 ,APP,LOUIE,TABLE,,null,null,null,null,null
 ,APP,PHASE,TABLE,,null,null,null,null,null
@@ -2548,6 +2559,7 @@ getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR],TYPE_CAT[VARCHAR],TYPE_SCHEM[VARCHAR],TYPE_NAME[VARCHAR],SELF_REFERENCING_COL_NAME[VARCHAR],REF_GENERATION[VARCHAR]
 ,APP,ALLTYPES,TABLE,,null,null,null,null,null
 ,APP,CT1,TABLE,,null,null,null,null,null
+,APP,GR_TAB,TABLE,,null,null,null,null,null
 ,APP,INFLIGHT,TABLE,,null,null,null,null,null
 ,APP,LOUIE,TABLE,,null,null,null,null,null
 ,APP,PHASE,TABLE,,null,null,null,null,null
