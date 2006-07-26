@@ -109,9 +109,16 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseTestCase {
         String fileName = getSystemProperty("derby.system.home") +
                 java.io.File.separator + "wombat" +
                 java.io.File.separator + "db.lck";
-        assertEquals("Database is shut down",
-                dbShutDown,
-                !fileExists(fileName));
+
+        boolean fileNotFound = false;
+        int i = 0;
+        do {
+            Thread.sleep(500);
+            fileNotFound = !fileExists(fileName);
+            i ++;
+        } while (fileNotFound != dbShutDown && i < 120);
+
+        assertEquals("Database is shut down", dbShutDown, fileNotFound);
     }
 
     private boolean fileExists (final String fileName) throws Exception {
