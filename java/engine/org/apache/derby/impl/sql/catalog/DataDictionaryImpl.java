@@ -8289,8 +8289,6 @@ public final class	DataDictionaryImpl
 												   SPSDescriptor.SPS_TYPE_REGULAR,
 												   !nocompile,		// it is valid, unless nocompile
 												   spsText, //sps text
-												   (String)null,	// using text
-												   (Object[])null, //	paramDefaults,
 												   !nocompile );
 			
 			addSPSDescriptor(spsd, tc, true);

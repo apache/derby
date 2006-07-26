@@ -354,8 +354,6 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 									SPSDescriptor.SPS_TYPE_TRIGGER,
 									true,				// it is valid
 									text,				// the text
-									(String)null,		// no using clause
-									(Object[])null,
 									true );	// no defaults
 
 		/*
