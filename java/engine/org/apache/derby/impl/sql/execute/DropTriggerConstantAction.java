@@ -51,7 +51,7 @@ import org.apache.derby.catalog.UUID;
  *
  *	@author Jamie
  */
-class DropTriggerConstantAction extends DDLSingleTableConstantAction
+public class DropTriggerConstantAction extends DDLSingleTableConstantAction
 {
 
 	private final String			triggerName;
@@ -151,7 +151,7 @@ class DropTriggerConstantAction extends DDLSingleTableConstantAction
 		dropTriggerDescriptor(lcc, dm, dd, tc, triggerd, activation);
 	}
 
-	static void dropTriggerDescriptor
+	public static void dropTriggerDescriptor
 	(
 		LanguageConnectionContext	lcc,
 		DependencyManager 			dm,

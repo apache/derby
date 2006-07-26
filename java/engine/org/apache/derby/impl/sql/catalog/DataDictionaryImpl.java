@@ -9920,14 +9920,19 @@ public final class	DataDictionaryImpl
      * @param grantee
      * @param tc
      *
+     * @return True means revoke has removed a privilege from system
+     * table and hence the caller of this method should send invalidation 
+     * actions to PermssionDescriptor's dependents.
      */
-    public void addRemovePermissionsDescriptor( boolean add,
+    public boolean addRemovePermissionsDescriptor( boolean add,
                                                 PermissionsDescriptor perm,
                                                 String grantee,
                                                 TransactionController tc)
         throws StandardException
     {
-		// It is possible for grant statements to look like following
+        int catalogNumber = perm.getCatalogNumber();
+
+        // It is possible for grant statements to look like following
 		//   grant execute on function f_abs to mamata2, mamata3;
 		//   grant all privileges on t11 to mamata2, mamata3;
 		// This means that dd.addRemovePermissionsDescriptor will be called
@@ -9937,15 +9942,15 @@ public final class	DataDictionaryImpl
 		// into the correct system table for the permission descriptor, the 
     	// permission descriptor's uuid gets populated with the uuid of 
     	// the row that just got inserted into the system table for mamta2
-		// Now, before dd.addRemovePermissionsDescriptor leaves so it can
-    	// get called for MAMTA3, we should reset the Permission Descriptor's 
-    	// uuid to null or otherwise, for the next call to 
-    	// dd.addRemovePermissionDescriptor, we will think that there is a 
-    	// duplicate row getting inserted for the same uuid.
-		// Same logic applies to ColPermsDescriptor
-    	
-        int catalogNumber = perm.getCatalogNumber();
-
+    	// Now, when dd.addRemovePermissionsDescriptor gets called again for
+    	// mamta3, the permission descriptor's uuid will still be set to
+    	// the uuid that was used for mamta2. If we do not reset the
+    	// uuid to null, we will think that there is a duplicate row getting
+    	// inserted for the same uuid. In order to get around this, we should 
+    	// reset the UUID of passed PermissionDescriptor everytime this method 
+    	// is called. This way, there will be no leftover values from previous
+    	// call of this method.
+    	perm.setUUID(null);    	
         perm.setGrantee( grantee);
         TabInfo ti = getNonCoreTI( catalogNumber);
         PermissionsCatalogRowFactory rf = (PermissionsCatalogRowFactory) ti.getCatalogRowFactory();
@@ -9975,7 +9980,7 @@ public final class	DataDictionaryImpl
             	//No need to reset permission descriptor's uuid because
             	//no row was ever found in system catalog for the given
             	//permission and hence uuid can't be non-null
-                return;
+                return false;
             //We didn't find an entry in system catalog and this is grant so 
             //so that means we have to enter a new row in system catalog for
             //this grant.
@@ -9987,15 +9992,6 @@ public final class	DataDictionaryImpl
         }
         else
         {
-        	if (!add)
-        	{
-        		//set the uuid of the passed permission descriptor to 
-        		//corresponding rows's uuid in permissions system table. The
-        		//permission descriptor's uuid is required to have the 
-        		//dependency manager send the revoke privilege action to
-        		//all the dependent objects on that permission descriptor.
-        		rf.setUUIDOfThePassedDescriptor(existingRow, perm);
-        	}
             // add/remove these permissions to/from the existing permissions
             boolean[] colsChanged = new boolean[ existingRow.nColumns()];
             boolean[] indicesToUpdate = new boolean[ rf.getNumIndexes()];
@@ -10006,11 +10002,19 @@ public final class	DataDictionaryImpl
                 changedColCount = rf.removePermissions( existingRow, perm, colsChanged);
             if( changedColCount == 0)
             {
-            	//grant/revoke privilege didn't change anything and hence just
-            	//return after resetting the uuid in the permission descriptor
-            	perm.setUUID(null);
-                return;            	
+            	//grant/revoke privilege didn't change anything and hence 
+            	//just return
+                return false;            	
             }
+        	if (!add)
+        	{
+        		//set the uuid of the passed permission descriptor to 
+        		//corresponding rows's uuid in permissions system table. The
+        		//permission descriptor's uuid is required to have the 
+        		//dependency manager send the revoke privilege action to
+        		//all the dependent objects on that permission descriptor.
+        		rf.setUUIDOfThePassedDescriptor(existingRow, perm);
+        	}
             if( changedColCount < 0)
             {
                 // No permissions left in the current row
@@ -10039,8 +10043,12 @@ public final class	DataDictionaryImpl
         Cacheable cacheEntry = getPermissionsCache().findCached( perm);
         if( cacheEntry != null)
             getPermissionsCache().remove( cacheEntry);
-    	//Before leaving, reset the uuid in the permission descriptor
-    	perm.setUUID(null);
+
+        //If we are dealing with grant, then the caller does not need to send 
+        //any invalidation actions to anyone and hence return false
+        if (add)
+        	return false;
+        return true;
     } // end of addPermissionsDescriptor
 
     /**
@@ -10086,7 +10094,7 @@ public final class	DataDictionaryImpl
      */
     ColPermsDescriptor getUncachedColPermsDescriptor( ColPermsDescriptor key)
         throws StandardException
-    {
+    {                                                                       
     	if (key.getObjectID() == null)
     	{
     		//the COLPERMSID for SYSCOLPERMS is not known, so use tableid,

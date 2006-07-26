@@ -24,7 +24,6 @@ import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.catalog.ReferencedColumns;
 import org.apache.derby.catalog.UUID;
 import java.sql.Timestamp;
 
@@ -34,14 +33,12 @@ import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.Dependent;
-import org.apache.derby.iapi.sql.depend.Dependency;
-import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
+
+import org.apache.derby.impl.sql.execute.DropTriggerConstantAction;
+
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -634,8 +631,6 @@ public class TriggerDescriptor extends TupleDescriptor
 		LanguageConnectionContext	lcc
 	) throws StandardException
 	{
-		
-
 		switch (action)
 		{
 			/*
@@ -652,7 +647,7 @@ public class TriggerDescriptor extends TupleDescriptor
 									dm.getActionString(action), 
 									p.getObjectName(), "TRIGGER", name);
 
-			/*
+				/*
 			** The trigger descriptor depends on the trigger table.
 			** This means that we get called whenever anything happens
 			** to the trigger table. There are so many cases where this
@@ -681,6 +676,15 @@ public class TriggerDescriptor extends TupleDescriptor
 		// the trigger table, so there is a very large number of actions
 		// that we would have to check against. This is hard to maintain,
 		// so don't bother.
+
+		if (action ==  DependencyManager.REVOKE_PRIVILEGE)
+		{
+		    DropTriggerConstantAction.dropTriggerDescriptor(
+				lcc,getDataDictionary().getDependencyManager(), 
+				getDataDictionary(), lcc.getTransactionExecute(), this,
+				null);
+		    return;
+		}
 	}
 
 	/**

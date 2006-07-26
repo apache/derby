@@ -29,15 +29,10 @@ import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.Dependent;
-import org.apache.derby.iapi.sql.depend.Dependency;
-import org.apache.derby.iapi.sql.depend.Provider;
 import	org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 /**
@@ -556,6 +551,8 @@ public abstract class ConstraintDescriptor
 		    case DependencyManager.SET_CONSTRAINTS_DISABLE:
 		    case DependencyManager.SET_TRIGGERS_ENABLE:
 		    case DependencyManager.SET_TRIGGERS_DISABLE:
+				//for now, ignore revoke privilege action
+		    case DependencyManager.REVOKE_PRIVILEGE:
 				break;
 
 			/*
@@ -581,6 +578,12 @@ public abstract class ConstraintDescriptor
 	public void makeInvalid(int action, LanguageConnectionContext lcc) 
 		throws StandardException
 	{
+		if (action == DependencyManager.REVOKE_PRIVILEGE) 
+		{
+			//for now, ignore revoke privilege action
+			return;
+		}
+
 		/*
 		** SET_CONSTRAINTS/TRIGGERS is the only valid action
 		*/

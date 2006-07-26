@@ -835,6 +835,9 @@ public class BasicDependencyManager implements DependencyManager {
 		    case DROP_SYNONYM:
 			    return "DROP SYNONYM";
 
+		    case REVOKE_PRIVILEGE:
+			    return "REVOKE PRIVILEGE";
+			    			   
 			default:
 				if (SanityManager.DEBUG)
 				{

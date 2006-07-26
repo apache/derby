@@ -26,6 +26,7 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
@@ -128,11 +129,19 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 		{
 			String grantee = (String) itr.next();
 			if( tablePermsDesc != null)
-				dd.addRemovePermissionsDescriptor( grant, tablePermsDesc, grantee, tc);
+			{
+				if (dd.addRemovePermissionsDescriptor( grant, tablePermsDesc, grantee, tc))
+				{
+	        		dd.getDependencyManager().invalidateFor(tablePermsDesc, DependencyManager.REVOKE_PRIVILEGE, lcc);
+				}
+			}
 			for( int i = 0; i < columnBitSets.length; i++)
 			{
 				if( colPermsDescs[i] != null)
-					dd.addRemovePermissionsDescriptor( grant, colPermsDescs[i], grantee, tc);					
+				{
+					if (dd.addRemovePermissionsDescriptor( grant, colPermsDescs[i], grantee, tc))					
+		        		dd.getDependencyManager().invalidateFor(colPermsDescs[i], DependencyManager.REVOKE_PRIVILEGE, lcc);
+				}
 			}
 		}
 	} // end of executeConstantAction

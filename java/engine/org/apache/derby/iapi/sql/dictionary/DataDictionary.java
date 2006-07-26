@@ -1562,8 +1562,11 @@ public interface DataDictionary
      * @param grantee
      * @param tc
      *
+     * @return True means revoke has removed a privilege from system
+     * table and hence the caller of this method should send invalidation 
+     * actions to PermssionDescriptor's dependents.
      */
-    public void addRemovePermissionsDescriptor( boolean add,
+    public boolean addRemovePermissionsDescriptor( boolean add,
                                                  PermissionsDescriptor perm,
                                                  String grantee,
                                                  TransactionController tc)

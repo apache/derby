@@ -791,3 +791,110 @@ create table t31constrainttest(c311 int, c312 int, c313 int references mamta2.t2
 alter table t31constrainttest add foreign key (c311, c312) references mamta1.t11constrainttest;
 
 
+-- revoke of TRIGGERS and other privileges should drop dependent triggers
+set connection mamta1;
+drop table t11TriggerRevokeTest;
+create table t11TriggerRevokeTest (c111 int not null primary key);
+insert into t11TriggerRevokeTest values(1),(2);
+-- mamta2 is later going to create an insert trigger on t11TriggerRevokeTest 
+grant TRIGGER on t11TriggerRevokeTest to mamta2;
+set connection mamta2;
+drop table t21TriggerRevokeTest;
+create table t21TriggerRevokeTest (c211 int); 
+-- following will pass because mamta2 has trigger permission on mamta1.t11TriggerRevokeTest
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement mode db2sql
+        insert into t21TriggerRevokeTest values(99);
+-- no data in the table in which trigger is going to insert
+select * from t21TriggerRevokeTest;
+set connection mamta1;
+-- insert trigger will fire
+insert into t11TriggerRevokeTest values(3);
+set connection mamta2;
+-- trigger inserted one row into following table
+select * from t21TriggerRevokeTest;
+set connection mamta1;
+-- this revoke is going to drop dependent trigger
+revoke trigger on t11TriggerRevokeTest from mamta2;
+-- following insert won't fire an insert trigger because one doesn't exist
+insert into t11TriggerRevokeTest values(4);
+set connection mamta2;
+-- no more rows inserted since last check
+select * from t21TriggerRevokeTest;
+-- following attempt to create insert trigger again will fail because trigger privilege has been revoked.
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement mode db2sql
+        insert into t21TriggerRevokeTest values(99);
+set connection mamta1;
+grant trigger on t11TriggerRevokeTest to mamta2;
+set connection mamta2;
+-- following attempt to create insert trigger again will pass because mamta2 has got the necessary trigger privilege.
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement mode db2sql
+        insert into t21TriggerRevokeTest values(99);
+select * from t21TriggerRevokeTest;
+set connection mamta1;
+-- insert trigger should get fired
+insert into t11TriggerRevokeTest values(5);
+set connection mamta2;
+-- Should be one more row since last check because insert trigger is back in action
+select * from t21TriggerRevokeTest;
+drop table t21TriggerRevokeTest;
+set connection mamta1;
+-- this revoke is going to drop dependent trigger
+revoke trigger on t11TriggerRevokeTest from mamta2;
+-- following insert won't fire an insert trigger because one doesn't exist
+insert into t11TriggerRevokeTest values(6);
+-- cleanup
+drop table t11TriggerRevokeTest;
+
+
+-- Define a trigger on a table, then revoke a privilege on the table which trigger doesn't
+-- really depend on. The trigger still gets dropped automatically. This will be fixed in
+-- subsequent patch
+set connection mamta1;
+drop table t11TriggerRevokeTest;
+create table t11TriggerRevokeTest (c111 int not null primary key);
+insert into t11TriggerRevokeTest values(1),(2);
+grant SELECT on t11TriggerRevokeTest to mamta2;
+-- mamta2 is later going to create an insert trigger on t11TriggerRevokeTest 
+grant TRIGGER on t11TriggerRevokeTest to mamta2;
+set connection mamta2;
+drop table t21TriggerRevokeTest;
+create table t21TriggerRevokeTest (c211 int); 
+-- following will pass because mamta2 has trigger permission on mamta1.t11TriggerRevokeTest
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement mode db2sql
+        insert into t21TriggerRevokeTest values(99);
+-- no data in the table in which trigger is going to insert
+select * from t21TriggerRevokeTest;
+set connection mamta1;
+-- insert trigger will fire
+insert into t11TriggerRevokeTest values(3);
+set connection mamta2;
+-- trigger inserted one row into following table
+select * from t21TriggerRevokeTest;
+set connection mamta1;
+-- this revoke is going to drop dependent trigger on the table although dependent trigger does not
+-- need this particular permission 
+-- WILL FIX THIS IN A SUBSEQUENT PATCH****************************************************************************************
+revoke SELECT on t11TriggerRevokeTest from mamta2;
+-- following insert won't fire an insert trigger because one doesn't exist
+insert into t11TriggerRevokeTest values(4);
+set connection mamta2;
+-- no more rows inserted since last check
+select * from t21TriggerRevokeTest;
+-- following attempt to create insert trigger again will pas because TRIGGER privilege was never revoked.
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement mode db2sql
+        insert into t21TriggerRevokeTest values(99);
+set connection mamta1;
+-- insert trigger should get fired
+insert into t11TriggerRevokeTest values(5);
+set connection mamta2;
+-- Should be one more row since last check because insert trigger is back in action
+select * from t21TriggerRevokeTest;
+drop table t21TriggerRevokeTest;
+set connection mamta1;
+-- this revoke is going to drop dependent trigger
+revoke trigger on t11TriggerRevokeTest from mamta2;
+-- following insert won't fire an insert trigger because one doesn't exist
+insert into t11TriggerRevokeTest values(6);
+-- cleanup
+drop table t11TriggerRevokeTest;
+

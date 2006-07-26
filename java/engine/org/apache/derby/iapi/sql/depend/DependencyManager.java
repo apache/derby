@@ -31,7 +31,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 	Dependency Manager Interface
 	<p>
 	The dependency manager tracks needs that dependents have of providers. This
-	is a general purpose interface interface which is associated with a
+	is a general purpose interface which is associated with a
 	DataDictinary object; infact the dependencymanager is really the
 	datadictionary keeping track of dependcies between objects that it handles
 	(descriptors) as well as prepared statements.
@@ -304,6 +304,7 @@ public interface DependencyManager {
 
 	public static final int TRUNCATE_TABLE = 42;
 	public static final int DROP_SYNONYM = 43;
+	public static final int REVOKE_PRIVILEGE = 44;
 
     /**
      * Extensions to this interface may use action codes > MAX_ACTION_CODE without fear of

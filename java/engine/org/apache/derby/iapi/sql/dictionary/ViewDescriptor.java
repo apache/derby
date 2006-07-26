@@ -266,7 +266,9 @@ public final class ViewDescriptor extends TupleDescriptor
 			*/
 		    case DependencyManager.SET_CONSTRAINTS_ENABLE:
 		    case DependencyManager.SET_TRIGGERS_ENABLE:
-				break;
+				//ignore revoke privilege action for now
+		    case DependencyManager.REVOKE_PRIVILEGE:
+		    	break;
 
 		    default:
 
@@ -312,6 +314,8 @@ public final class ViewDescriptor extends TupleDescriptor
 			case DependencyManager.UPDATE_STATISTICS:
 			case DependencyManager.DROP_STATISTICS:
 			case DependencyManager.TRUNCATE_TABLE:
+				//ignore revoke privilege action for now
+		    case DependencyManager.REVOKE_PRIVILEGE:
 				break;
 		
 		    default:

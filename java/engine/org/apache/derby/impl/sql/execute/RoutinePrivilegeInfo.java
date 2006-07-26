@@ -24,6 +24,7 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
@@ -77,7 +78,9 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 		for( Iterator itr = grantees.iterator(); itr.hasNext();)
 		{
 			String grantee = (String) itr.next();
-			dd.addRemovePermissionsDescriptor( grant, routinePermsDesc, grantee, tc);
+			if (dd.addRemovePermissionsDescriptor( grant, routinePermsDesc, grantee, tc))					
+        		dd.getDependencyManager().invalidateFor(routinePermsDesc, DependencyManager.REVOKE_PRIVILEGE, lcc);
+
 		}
 	} // end of executeConstantAction
 }
