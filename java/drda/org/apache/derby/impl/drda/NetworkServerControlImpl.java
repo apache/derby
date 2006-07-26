@@ -23,6 +23,7 @@ package org.apache.derby.impl.drda;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -753,7 +754,15 @@ public final class NetworkServerControlImpl {
 		// Wait up to 10 seconds for things to really shut down
 		// need a quiet ping so temporarily disable the logwriter
 		PrintWriter savWriter = logWriter;
-		setLogWriter(null);
+		// DERBY-1571: If logWriter is null, stack traces are printed to
+		// System.err. Set logWriter to a silent stream to suppress stack
+		// traces too.
+		FilterOutputStream silentStream = new FilterOutputStream(null) {
+				public void write(int b) { }
+				public void flush() { }
+				public void close() { }
+			};
+		setLogWriter(new PrintWriter(silentStream));
 		int ntry;
 		for (ntry = 0; ntry < SHUTDOWN_CHECK_ATTEMPTS; ntry++)
 		{
