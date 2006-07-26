@@ -526,4 +526,13 @@ ERROR 42X01: Syntax error: java.lang.String.
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select new java.lang.String('asdf') = 'asdf' from t1;
 ERROR 42X01: Syntax error: java.lang.String.
+ij> -- DERBY-1587
+VALUES INTEGER(1.5);
+1          
+-----------
+1          
+ij> VALUES INT(1.5);
+1          
+-----------
+1          
 ij> 

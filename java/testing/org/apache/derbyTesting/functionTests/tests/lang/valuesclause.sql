@@ -307,3 +307,6 @@ select new java.lang.String() = '' from t1;
 -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select new java.lang.String('asdf') = 'asdf' from t1;
 
+-- DERBY-1587
+VALUES INTEGER(1.5);
+VALUES INT(1.5);

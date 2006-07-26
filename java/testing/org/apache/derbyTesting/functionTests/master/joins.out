@@ -294,9 +294,13 @@ T1_C1
 ij> -- beetle 5421
 -- INT built-in function
 select t1_c1 from t1, t2 where INT(t1_c1) = t2_c1;
-ERROR 42X01: Syntax error: Encountered "INT" at line 3, column 32.
+T1_C1      
+-----------
+1          
+2          
 ij> select t1_c1 from t1, t2 where t1_c1 = INT(2147483647) and INT(2147483647) = t2_c1;
-ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 40.
+T1_C1      
+-----------
 ij> -- transitive closure - verify join condition doesn't get dropped
 create table x(c1 int);
 0 rows inserted/updated/deleted

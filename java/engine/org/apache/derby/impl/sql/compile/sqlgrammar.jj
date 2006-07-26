@@ -6475,6 +6475,7 @@ miscBuiltins() throws StandardException :
 		getToken(1).kind == CHAR ||
 		getToken(1).kind == VARCHAR ||
 		getToken(1).kind == INTEGER ||
+		getToken(1).kind == INT || 
 		getToken(1).kind == SMALLINT ||
 		getToken(1).kind == LONGINT ||
                 getToken(1).kind == YEAR ||

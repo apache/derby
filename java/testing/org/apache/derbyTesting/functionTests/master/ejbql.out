@@ -1388,26 +1388,46 @@ ij> -- This test EJBQL Absolute function. Resolve 3535
 -- Basic
 -- beetle 5805 - support INT[EGER] built-in function
 values{fn abs(INT(' 0')               )};
-ERROR 42X01: Syntax error: Encountered "INT" at line 7, column 15.
+1          
+-----------
+0          
 ij> values{fn abs(INT('-0')               )};
-ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 15.
+1          
+-----------
+0          
 ij> values{fn abs(INT(' 1')               )};
-ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 15.
+1          
+-----------
+1          
 ij> values{fn abs(INT('-1')               )};
-ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 15.
+1          
+-----------
+1          
 ij> values{fn abs(INT(' 1000000')         )};
-ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 15.
+1          
+-----------
+1000000    
 ij> values{fn abs(INT('-1000000')         )};
-ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 15.
+1          
+-----------
+1000000    
 ij> values{fn abs(INT(' 2147483647')      )};
-ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 15.
+1          
+-----------
+2147483647 
 ij> values{fn abs(INT('-2147483648') + 1  )};
-ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 15.
+1          
+-----------
+2147483647 
 ij> -- Error
 values{fn abs(INT('-2147483648')      )};
-ERROR 42X01: Syntax error: Encountered "INT" at line 2, column 15.
+1          
+-----------
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
 ij> values{fn abs(INT(' 2147483647') + 1  )};
-ERROR 42X01: Syntax error: Encountered "INT" at line 1, column 15.
+1          
+-----------
+ERROR 22003: The resulting value is outside the range for the data type INTEGER.
 ij> -- Smallint
 -- Basic
 -- beetle 5807 - support SMALLINT built-in function
@@ -3377,7 +3397,9 @@ ij> -- For escape function.
 -- Integer
 -- Basic
 values{ fn sqrt(INT('0'))};
-ERROR 42X01: Syntax error: Encountered "INT" at line 6, column 17.
+1                     
+----------------------
+0.0                   
 ij> -- Smallint
 -- Basic
 -- beetle 5805 - support INT[EGER] built-in function

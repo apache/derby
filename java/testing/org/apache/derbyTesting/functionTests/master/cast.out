@@ -1538,7 +1538,9 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> -- bug 5421 - support db2 udb compatible built-in functions
 values CHAR(INT(67890));
-ERROR 42X01: Syntax error: Encountered "INT" at line 2, column 13.
+1          
+-----------
+67890      
 ij> values CHAR(INTEGER(12345));
 1          
 -----------
