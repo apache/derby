@@ -21,6 +21,8 @@ package org.apache.derbyTesting.functionTests.util;
 
 import java.sql.*;
 
+import junit.framework.Assert;
+
 /**
  * JDBC utility methods for the JUnit tests.
  *
@@ -62,5 +64,69 @@ public class JDBC {
 				sqle.setNextException(e);
 			throw sqle;
 		}
+	}
+	
+	/**
+	 * Assert all columns in the ResultSetMetaData match the
+	 * table's defintion through DatabaseMetadDta. Only works
+	 * if the complete select list correspond to columns from
+	 * base tables.
+	 * <BR>
+	 * Does not require that the complete set of any table's columns are
+	 * returned.
+	 * @throws SQLException 
+	 * 
+	 */
+	public static void assertMetaDataMatch(DatabaseMetaData dmd,
+			ResultSetMetaData rsmd) throws SQLException
+	{
+		for (int col = 1; col <= rsmd.getColumnCount(); col++)
+		{
+			// Only expect a single column back
+		    ResultSet column = dmd.getColumns(
+		    		rsmd.getCatalogName(col),
+		    		rsmd.getSchemaName(col),
+		    		rsmd.getTableName(col),
+		    		rsmd.getColumnName(col));
+		    
+		    Assert.assertTrue("Column missing " + rsmd.getColumnName(col),
+		    		column.next());
+		    
+		    Assert.assertEquals(column.getInt("DATA_TYPE"),
+		    		rsmd.getColumnType(col));
+		    
+		    Assert.assertEquals(column.getInt("NULLABLE"),
+		    		rsmd.isNullable(col));
+		    
+		    Assert.assertEquals(column.getString("TYPE_NAME"),
+		    		rsmd.getColumnTypeName(col));
+		    
+		    column.close();
+		}
+	}
+	
+	/**
+	 * Drain a single ResultSet by reading all of its
+	 * rows and columns. Each column is accessed using
+	 * getString() and asserted that the returned value
+	 * matches the state of ResultSet.wasNull().
+	 * Provides simple testing of the ResultSet when then contents
+	 * are not important.
+	 * @param rs
+	 * @throws SQLException
+	 */
+	public static void assertDrainResults(ResultSet rs)
+	    throws SQLException
+	{
+		ResultSetMetaData rsmd = rs.getMetaData();
+		
+		while (rs.next()) {
+			for (int col = 1; col <= rsmd.getColumnCount(); col++)
+			{
+				String s = rs.getString(col);
+				Assert.assertEquals(s == null, rs.wasNull());
+			}
+		}
+		rs.close();
 	}
 }
