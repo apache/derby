@@ -8,6 +8,7 @@ grant codeBase "${derbyTesting.codejar}/derbynet.jar" {
 };
 
 grant codeBase "${derbyTesting.codejar}derbyTesting.jar" {
-    permission java.net.SocketPermission "127.0.0.1", "accept,connect,resolve";
-    permission java.net.SocketPermission "localhost", "accept,connect,resolve";  
+  permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
+  permission java.net.SocketPermission "localhost", "connect,resolve";
+  permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
 };
