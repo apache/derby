@@ -21,6 +21,7 @@ package org.apache.derbyTesting.functionTests.util;
 
 import junit.framework.TestCase;
 import java.io.PrintStream;
+import java.net.URL;
 import java.sql.SQLException;
 import java.security.AccessController;
 
@@ -57,6 +58,24 @@ public abstract class BaseTestCase
      */
     public BaseTestCase(String name) {
         super(name);
+    }
+    
+    /**
+     * Run the test and force installation of a security
+     * manager with the default test policy file.
+     * Individual tests can run without a security
+     * manager or with a different policy file using
+     * the decorators obtained from SecurityManagerSetup.
+     * <BR>
+     * Method is final to ensure security manager is
+     * enabled by default. Tests should not need to
+     * ovveride runTest, instead use test methods
+     * setUp, tearDown methods and decorators.
+     */
+    public final void runBare() throws Throwable {
+    	// Not ready for prime time!
+    	// SecurityManagerSetup.installSecurityManager();
+    	super.runBare();
     }
     
     /**
@@ -119,7 +138,27 @@ public abstract class BaseTestCase
 	     );
 	
     }
-    
+    /**
+     * Remove system property
+     *
+     * @param name name of the property
+     */
+    protected static void removeSystemProperty(final String name)
+	throws PrivilegedActionException {
+	
+	AccessController.doPrivileged
+	    (new java.security.PrivilegedAction(){
+		    
+		    public Object run(){
+			System.getProperties().remove(name);
+			return null;
+			
+		    }
+		    
+		}
+	     );
+	
+    }    
     /**
      * Get system property.
      *
@@ -138,6 +177,39 @@ public abstract class BaseTestCase
 
 		}
 	     );
+    }
+    
+    /**
+     * Obtain the URL for a test resource, e.g. a policy
+     * file or a SQL script.
+     * @param name Resource name, typically - org.apache.derbyTesing.something
+     * @return URL to the resource, null if it does not exist.
+     * @throws PrivilegedActionException
+     */
+    protected static URL getTestResource(final String name)
+	throws PrivilegedActionException {
+
+	return (URL)AccessController.doPrivileged
+	    (new java.security.PrivilegedAction(){
+
+		    public Object run(){
+			return BaseTestCase.class.getClassLoader().
+			    getResource(name);
+
+		    }
+
+		}
+	     );
+    }  
+    
+    /**
+     * Assert a security manager is installed.
+     *
+     */
+    public static void assertSecurityManager()
+    {
+    	assertNotNull("No SecurityManager installed",
+    			System.getSecurityManager());
     }
     
 } // End class BaseTestCase
