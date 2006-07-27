@@ -7,8 +7,7 @@ supportsMultipleOpenResults() : true
 supportsGetGeneratedKeys() : false
 supportsResultSetHoldability(HOLD_CURSORS_OVER_COMMIT) : true
 supportsResultSetHoldability(CLOSE_CURSORS_AT_COMMIT) : true
-getJDBCMajorVersion() : 3
-getJDBCMinorVersion() : 0
+getJDBCMajorVersion()/getJDBCMinorVersion() : AS EXPECTED
 getSQLStateType() : 2
 getResultSetHoldability() : 1
 getDatabaseMajorVersion() : 10

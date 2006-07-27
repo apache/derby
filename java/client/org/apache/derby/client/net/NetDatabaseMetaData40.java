@@ -34,7 +34,27 @@ public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDataba
     public NetDatabaseMetaData40(NetAgent netAgent, NetConnection netConnection) {
         super(netAgent,netConnection);
     }
-    
+
+    /**
+     * Retrieves the major JDBC version number for this driver.
+     * @return JDBC version major number
+     * @exception SQLException if the connection is closed
+     */
+    public int getJDBCMajorVersion() throws SQLException {
+        checkForClosedConnection();
+        return 4;
+    }
+
+    /**
+     * Retrieves the minor JDBC version number for this driver.
+     * @return JDBC version minor number
+     * @exception SQLException if the connection is closed
+     */
+    public int getJDBCMinorVersion() throws SQLException {
+        checkForClosedConnection();
+        return 0;
+    }
+
     /**
      * Indicates whether or not this data source supports the SQL
      * <code>ROWID</code> type. Since Derby does not support the

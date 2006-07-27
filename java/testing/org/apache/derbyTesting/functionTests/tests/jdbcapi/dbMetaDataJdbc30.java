@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
@@ -104,10 +105,7 @@ public class dbMetaDataJdbc30 {
         met.supportsResultSetHoldability(JDBC30Translation.CLOSE_CURSORS_AT_COMMIT));
 
 			System.out.println();
-			System.out.println("getJDBCMajorVersion() : " + met.getJDBCMajorVersion());
-
-			System.out.println();
-			System.out.println("getJDBCMinorVersion() : " + met.getJDBCMinorVersion());
+			checkJDBCVersion(met);
 
 			System.out.println();
 			System.out.println("getSQLStateType() : " + met.getSQLStateType());
@@ -205,6 +203,37 @@ public class dbMetaDataJdbc30 {
 			System.out.println();
 		}
 		s.close();
+	}
+
+	/**
+	 * Check whether <code>getJDBCMajorVersion()</code> and
+	 * <code>getJDBCMinorVersion()</code> return the expected version numbers.
+	 * @param met the <code>DatabaseMetaData</code> object to test
+	 * @exception SQLException if a database error occurs
+	 */
+	private static void checkJDBCVersion(DatabaseMetaData met)
+		throws SQLException
+	{
+		final int major, minor;
+		if (TestUtil.isJCCFramework()) {
+			major = 3;
+			minor = 0;
+		} else if (JVMInfo.JDK_ID < JVMInfo.J2SE_16) {
+			major = 3;
+			minor = 0;
+		} else {
+			major = 4;
+			minor = 0;
+		}
+		System.out.print("getJDBCMajorVersion()/getJDBCMinorVersion() : ");
+		int maj = met.getJDBCMajorVersion();
+		int min = met.getJDBCMinorVersion();
+		if (major == maj && minor == min) {
+			System.out.println("AS EXPECTED");
+		} else {
+			System.out.println("GOT " + maj + "." + min +
+							   ", EXPECTED " + major + "." + minor);
+		}
 	}
 
 	/**

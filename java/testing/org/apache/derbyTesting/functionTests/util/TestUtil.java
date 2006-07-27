@@ -737,18 +737,22 @@ public class TestUtil {
 
 	/**
 		Get the JDBC version, inferring it from the driver.
-		We cannot use the JDBC DatabaseMetaData method
-		as it is not present in JDBC 2.0.
 	*/
 
 	public static int getJDBCMajorVersion(Connection conn)
 	{
 		try {
+			// DatabaseMetaData.getJDBCMajorVersion() was not part of JDBC 2.0.
+			// Check if setSavepoint() is present to decide whether the version
+			// is > 2.0.
 			conn.getClass().getMethod("setSavepoint", null);
-			return 3;
-		} catch (NoSuchMethodException e) {
-			return 2;
-		} catch (NoClassDefFoundError e2) {
+			DatabaseMetaData meta = conn.getMetaData();
+			Method method =
+				meta.getClass().getMethod("getJDBCMajorVersion", null);
+			return ((Number) method.invoke(meta, null)).intValue();
+		} catch (Throwable t) {
+			// Error probably means that either setSavepoint() or
+			// getJDBCMajorVersion() is not present. Assume JDBC 2.0.
 			return 2;
 		}
 

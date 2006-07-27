@@ -37,7 +37,25 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
         super(connection,url);
         this.url = url;
     }
-   
+
+    /**
+     * Retrieves the major JDBC version number for this driver.
+     *
+     * @return JDBC version major number
+     */
+    public int getJDBCMajorVersion() {
+        return 4;
+    }
+
+    /**
+     * Retrieves the minor JDBC version number for this driver.
+     *
+     * @return JDBC version minor number
+     */
+    public int getJDBCMinorVersion() {
+        return 0;
+    }
+
     public RowIdLifetime getRowIdLifetime() throws SQLException {
         return RowIdLifetime.ROWID_UNSUPPORTED;
     }

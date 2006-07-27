@@ -67,7 +67,6 @@
       <include name="${this.dir}/StaticInitializers/*.java"/> 
       <include name="${this.dir}/VTIClasses/*.java"/> 
       <include name="${this.dir}/corruptio/*.java"/>
-      <exclude name="${this.dir}/TestUtil.java"/>
       <exclude name="${this.dir}/XATestUtil.java"/>
     </javac>
     <javac
@@ -87,7 +86,6 @@
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <!--exclude name=""/-->
-      <include name="${this.dir}/TestUtil.java"/>
 	  <include name="${this.dir}/XATestUtil.java"/>
     </javac>
   </target>
