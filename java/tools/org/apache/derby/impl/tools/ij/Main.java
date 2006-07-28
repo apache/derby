@@ -57,11 +57,8 @@ import java.util.*;
  *
  */
 public class Main {
-	public LocalizedOutput out;
-	public utilMain utilInstance;
-	public Class langUtilClass;
-
-
+	private LocalizedOutput out;
+	private utilMain utilInstance;
 
 	/**
 	 * ij can be used directly on a shell command line through
@@ -205,15 +202,6 @@ public class Main {
 	{
 		LocalizedInput[] inA = { in } ;
 		utilInstance.go(inA, out,connAttributeDefaults);
-	}
-
-	public void go(InputStream in, PrintStream out, 
-				   Properties connAttributeDefaults)
-	{
-    initAppUI();
-    	LocalizedResource langUtil = LocalizedResource.getInstance();
-		go(langUtil.getNewInput(in), langUtil.getNewOutput(out),
-			   connAttributeDefaults);
 	}
 
 	/**
