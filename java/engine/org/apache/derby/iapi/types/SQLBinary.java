@@ -402,7 +402,7 @@ abstract class SQLBinary
 				break;
 			off += len;
 
-			int available = in.available();
+			int available = Math.max(1, in.available());
 			int extraSpace = available - (tmpData.length - off);
 			if (extraSpace > 0)
 			{
