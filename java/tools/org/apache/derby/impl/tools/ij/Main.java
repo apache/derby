@@ -203,6 +203,12 @@ public class Main {
 		LocalizedInput[] inA = { in } ;
 		utilInstance.go(inA, out,connAttributeDefaults);
 	}
+	
+	public void goScript(Connection conn,
+			LocalizedInput in)
+{
+	utilInstance.goScript(conn, in);
+}	
 
 	/**
 	 * create an ij tool waiting to be given input and output streams.

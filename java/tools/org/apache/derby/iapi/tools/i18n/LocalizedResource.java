@@ -44,9 +44,9 @@ import java.sql.Types;
 
 public final class LocalizedResource  implements java.security.PrivilegedAction {
 
-	private static boolean HAVE_BIG_DECIMAL;
+	private static final boolean HAVE_BIG_DECIMAL;
 	
-	{
+	static {
 		boolean haveBigDecimal;
 		try {
 			Class.forName("java.math.BigDecimal");
@@ -242,6 +242,14 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 		catch(UnsupportedEncodingException e){
 		}
 		return new LocalizedOutput(o);
+	}
+	/**
+	 * Get a new LocalizedOutput with the given encoding.
+	 * @throws UnsupportedEncodingException
+	 */
+	public LocalizedOutput getNewEncodedOutput(OutputStream o,
+			String encoding) throws UnsupportedEncodingException{
+		return new LocalizedOutput(o, encoding);
 	}
 	public String getTextMessage(String key ) {
 		if ( res == null){

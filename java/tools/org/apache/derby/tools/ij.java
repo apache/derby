@@ -21,10 +21,18 @@
 package org.apache.derby.tools;
 
 import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.iapi.tools.i18n.LocalizedInput;
+import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
+import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 import org.apache.derby.impl.tools.ij.Main;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.util.Properties;
 
 /**
 	
@@ -59,6 +67,53 @@ public class ij {
 	  {
 		  org.apache.derby.impl.tools.ij.Main14.main(args);
 	  }
+  }
+  
+  /**
+   * Run a SQL script from an InputStream and write
+   * the resulting output to the provided PrintStream.
+   * 
+   * @param conn Connection to be used as the script's default connection. 
+   * @param sqlIn InputStream for the script.
+   * @param inputEncoding Encoding of the script.
+   * @param sqlOut PrintStream for the script's output
+   * @param outputEncoding Output encoding to use.
+   * @return Number of SQLExceptions thrown during the execution, -1 if not known.
+   * @throws UnsupportedEncodingException
+   */
+  public static int runScript(
+		  Connection conn,
+		  InputStream sqlIn,
+		  String inputEncoding,
+		  PrintStream sqlOut,
+		  String outputEncoding)
+		  throws UnsupportedEncodingException
+  {
+	  LocalizedOutput lo = 
+		  outputEncoding == null ?
+				  LocalizedResource.getInstance().
+		            getNewOutput(sqlOut)
+	             :  
+		          LocalizedResource.getInstance().
+                    getNewEncodedOutput(sqlOut, outputEncoding);
+
+	  Main ijE;
+	  if (JVMInfo.JDK_ID == JVMInfo.J2SE_13)
+	  {
+		  ijE = new Main(lo);
+	  }
+	  else
+	  {
+		  ijE = new org.apache.derby.impl.tools.ij.Main14(lo);
+	  }	  
+	  
+	  LocalizedInput li = LocalizedResource.getInstance().
+	            getNewEncodedInput(sqlIn, inputEncoding);
+	  
+	  
+	  ijE.goScript(conn, li);
+	  
+	  return -1;
   }
 
   private ij() { // no instances allowed

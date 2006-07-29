@@ -60,15 +60,15 @@ import java.lang.reflect.*;
  */
 public class utilMain implements java.security.PrivilegedAction {
 
-  private static Class[] CONN_PARAM = { Integer.TYPE };
-  private static Object[] CONN_ARG = { new Integer(JDBC30Translation.CLOSE_CURSORS_AT_COMMIT)};
+  private static final Class[] CONN_PARAM = { Integer.TYPE };
+  private static final Object[] CONN_ARG = { new Integer(JDBC30Translation.CLOSE_CURSORS_AT_COMMIT)};
 
-	StatementFinder[] commandGrabber;
+	private StatementFinder[] commandGrabber;
 	UCode_CharStream charStream;
 	ijTokenManager ijTokMgr;
 	ij ijParser;
 	ConnectionEnv[] connEnv;
-	int currCE;
+	private int currCE;
 	private int		numConnections;
 	private boolean fileInput;
 	private boolean initialFileInput;
@@ -177,10 +177,6 @@ public class utilMain implements java.security.PrivilegedAction {
 	public void go(LocalizedInput[] in, LocalizedOutput out,
 				   Properties connAttributeDefaults) throws ijFatalException
 	{
-		boolean done = false;
-
-		String command = null;
-
 		this.out = out;
 		this.connAttributeDefaults = connAttributeDefaults;
 		
@@ -237,7 +233,38 @@ public class utilMain implements java.security.PrivilegedAction {
          		}
       		}
     	}
+		this.out = out;
+		runScriptGuts();
+		cleanupGo(in);
+	}
+	
+	/**
+	 * Support to run a script. Performs minimal setup
+	 * to set the passed in connection into the existing
+	 * ij setup, ConnectionEnv.
+	 * @param conn
+	 * @param in
+	 */
+	public void goScript(Connection conn,
+			LocalizedInput in)
+	{
+		JDBCDisplayUtil.showSelectCount = false;
+		connEnv[0].addSession(conn, (String) null);
+		fileInput = initialFileInput = !in.isStandardInput();
+		commandGrabber[0].ReInit(in);
+		runScriptGuts();
+	}
+	
+	/**
+	 * Run the guts of the script. Split out to allow
+	 * calling from the full ij and the minimal goScript.
+	 *
+	 */
+	private void runScriptGuts() {
 
+		
+		boolean done = false;
+		String command = null;
 		while (!ijParser.exit && !done) {
 			try{
 				ijParser.setConnection(connEnv[currCE], (numConnections > 1));
@@ -247,8 +274,7 @@ public class utilMain implements java.security.PrivilegedAction {
 
 			connEnv[currCE].doPrompt(true, out);
    			try {
-				command = null;
-
+   				command = null;
 				out.flush();
 				command = commandGrabber[currCE].nextStatement();
 
@@ -326,6 +352,15 @@ public class utilMain implements java.security.PrivilegedAction {
 			/* Go to the next connection/user, if there is one */
 			currCE = ++currCE % connEnv.length;
 		}
+	}
+	
+	/**
+	 * Perform cleanup after a script has been run.
+	 * Close the input streams if required and shutdown
+	 * derby on an exit.
+	 * @param in
+	 */
+	private void cleanupGo(LocalizedInput[] in) {
 
 		// we need to close all sessions when done; otherwise we have
 		// a problem when a single VM runs successive IJ threads
@@ -339,8 +374,7 @@ public class utilMain implements java.security.PrivilegedAction {
 		// similarly must close input files
 		for (int i = 0; i < numConnections; i++) {
 			try {
-				if (!in[i].isStandardInput() )
-					in[i].close();	
+				in[i].close();	
 			} catch (Exception e ) {
     			  	out.println(langUtil.getTextMessage("IJ_CannotCloseInFile",
 					e.toString()));
