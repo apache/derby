@@ -976,6 +976,7 @@ final class CodeChunk {
     private String getTypeDescriptor(ClassHolder ch, int pc) {
         int cpi = getU2(pc);
 
+
         // Field reference or method reference
         CONSTANT_Index_info cii = (CONSTANT_Index_info) ch.getEntry(cpi);
 
@@ -1329,9 +1330,24 @@ final class CodeChunk {
             // than the VM can handle. Save one for
             // return instruction.
             if (splitLength > BCMethod.CODE_SPLIT_LENGTH - 1) {
+                splitLength = -1;
+            }
+            else if (CodeChunk.isReturn(opcode))
+            {
+                // Don't handle a return in the middle of
+                // an instruction stream. Don't think this
+                // is generated, but be safe.           
+                splitLength = -1;
+            }
+            
+            // if splitLenth was set to -1 above then there
+            // is no possible split at this instruction.
+            if (splitLength == -1)
+            {
+                // no earlier split at all
                 if (possibleSplitLength == -1)
                     return -1;
-
+ 
                 // Decide if the earlier possible split is
                 // worth it. 100 is an arbitary number,
                 // a real low limit would be the number of
@@ -1512,5 +1528,26 @@ final class CodeChunk {
         mb.maxStack = replaceChunk.findMaxStack(ch, 0, replaceChunk.getPC());
 
         return postSplit_pc;
+    }
+    
+    /**
+     * See if the opcode is a return instruction.
+     * @param opcode opcode to be checked
+     * @return true for is a return instruction, false otherwise.
+     */
+    private static boolean isReturn(short opcode)
+    {
+        switch (opcode)
+        {
+        case VMOpcode.RETURN:
+        case VMOpcode.ARETURN:
+        case VMOpcode.IRETURN:
+        case VMOpcode.FRETURN:
+        case VMOpcode.DRETURN:
+        case VMOpcode.LRETURN:
+            return true;
+         default:
+            return false;
+        }        
     }
 }
