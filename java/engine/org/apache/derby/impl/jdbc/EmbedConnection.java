@@ -58,6 +58,8 @@ import java.sql.Statement;
 
 import java.util.Properties;
 
+import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
+
 /**
  * Local implementation of Connection for a JDBC driver in 
  * the same process as the database.
@@ -123,6 +125,10 @@ public class EmbedConnection implements EngineConnection
 	private boolean	active;
 	boolean	autoCommit = true;
 	boolean	needCommit;
+
+	// Set to true if NONE authentication is being used
+	private boolean usingNoneAuth;
+
 	/*
      following is a new feature in JDBC3.0 where you can specify the holdability
      of a resultset at the end of the transaction. This gets set by the
@@ -269,6 +275,9 @@ public class EmbedConnection implements EngineConnection
 				throw tr.shutdownDatabaseException();
 			}
 
+			// Raise a warning in sqlAuthorization mode if authentication is not ON
+			if (usingNoneAuth && getLanguageConnection().usesSqlAuthorization())
+				addWarning(EmbedSQLWarning.newEmbedSQLWarning(SQLState.SQL_AUTHORIZATION_WITH_NO_AUTHENTICATION));
 		}
         catch (OutOfMemoryError noMemory)
 		{
@@ -438,6 +447,12 @@ public class EmbedConnection implements EngineConnection
 			throw newSQLException(SQLState.LOGIN_FAILED, MessageService.getTextMessage(MessageId.AUTH_INVALID));
 
 		}
+
+		// If authentication is not on, we have to raise a warning if sqlAuthorization is ON
+		// Since NoneAuthenticationService is the default for Derby, it should be ok to refer
+		// to its implementation here, since it will always be present.
+		if (authenticationService instanceof NoneAuthenticationServiceImpl)
+			usingNoneAuth = true;
 	}
 
     /**

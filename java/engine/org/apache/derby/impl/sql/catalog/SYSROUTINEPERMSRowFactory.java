@@ -59,17 +59,21 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 
     static final int GRANTEE_ALIAS_GRANTOR_INDEX_NUM = 0;
     public static final int ROUTINEPERMSID_INDEX_NUM = 1;
+    public static final int ALIASID_INDEX_NUM = 2;
+
 	private static final int[][] indexColumnPositions = 
 	{ 
 		{ GRANTEE_COL_NUM, ALIASID_COL_NUM, GRANTOR_COL_NUM},
-		{ ROUTINEPERMSID_COL_NUM }
+		{ ROUTINEPERMSID_COL_NUM },
+		{ ALIASID_COL_NUM }
 	};
 	private static final String[][] indexColumnNames =
 	{
 		{"GRANTEE", "ALIASID", "GRANTOR"},
-		{"ROUTINEPERMSID"}
+		{"ROUTINEPERMSID"},
+		{"ALIASID"}
 	};
-    private static final boolean[] indexUniqueness = { true, true };
+    private static final boolean[] indexUniqueness = { true, true, false };
 
     private	static final String[] uuids =
     {
@@ -77,6 +81,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 		,"185e801c-0103-0e39-b8e7-00000010f010"	// heap UUID
 		,"c065801d-0103-0e39-b8e7-00000010f010"	// index1
 		,"40f70088-010c-4c2f-c8de-0000000f43a0" // index2
+		,"08264012-010c-bc85-060d-000000109ab8" // index3
     };
 
     private SystemColumn[] columnList;
@@ -225,6 +230,9 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
         case ROUTINEPERMSID_INDEX_NUM:
             row.setColumn(1, getDataValueFactory().getNullChar( (StringDataValue) null)); // ROUTINEPERMSID
             break;
+        case ALIASID_INDEX_NUM:
+            row.setColumn(1, getDataValueFactory().getNullChar( (StringDataValue) null)); // ROUTINEPERMSID
+            break;
         }
         return row;
     } // end of buildEmptyIndexRow
@@ -261,6 +269,11 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
             row = getExecutionFactory().getIndexableRow( 1);
             String routinePermsUUIDStr = perm.getObjectID().toString();
             row.setColumn(1, getDataValueFactory().getCharDataValue( routinePermsUUIDStr));
+            break;
+        case ALIASID_INDEX_NUM:
+            row = getExecutionFactory().getIndexableRow( 1);
+            routineUUIDStr = ((RoutinePermsDescriptor) perm).getRoutineUUID().toString();
+            row.setColumn(1, getDataValueFactory().getCharDataValue( routineUUIDStr));
             break;
         }
         return row;

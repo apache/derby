@@ -165,6 +165,8 @@ class DropAliasConstantAction extends DDLConstantAction
 				TableDescriptor.SYNONYM_TYPE, TableDescriptor.DEFAULT_LOCK_GRANULARITY);
 			dd.dropTableDescriptor(td, sd, tc);
 		}
+		else
+			dd.dropAllRoutinePermDescriptors(ad.getUUID(), tc);
 			
 		/* Drop the alias */
 		dd.dropAliasDescriptor(ad, tc);

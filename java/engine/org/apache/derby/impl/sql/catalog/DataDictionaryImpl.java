@@ -2393,6 +2393,81 @@ public final class	DataDictionaryImpl
 	}
 
 	/**
+	 * Drops all table and column permission descriptors for the given table.
+	 *
+	 * @param tableID	The UUID of the table from which to drop
+	 *			all the permission descriptors
+	 * @param tc		TransactionController for the transaction
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void	dropAllTableAndColPermDescriptors(UUID tableID, TransactionController tc)
+		throws StandardException
+	{
+		DataValueDescriptor		tableIdOrderable;
+
+		/* Use tableIDOrderable in both start and stop position for scan. */
+		tableIdOrderable = getValueAsDVD(tableID);
+
+		/* Set up the start/stop position for the scan */
+		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
+		keyRow.setColumn(1, tableIdOrderable);
+
+		dropTablePermDescriptor(tc, keyRow);
+		dropColumnPermDescriptor(tc, keyRow);
+	}
+
+	/**
+	 * Remove PermissionsDescriptor from permissions cache if present
+	 */
+	private void removePermEntryInCache(PermissionsDescriptor perm)
+		throws StandardException
+	{
+		// Remove cached permissions entry if present
+		Cacheable cacheEntry = getPermissionsCache().findCached( perm);
+		if (cacheEntry != null)
+			getPermissionsCache().remove(cacheEntry);
+	}
+
+	/**
+	 * Drops all routine permission descriptors for the given routine.
+	 *
+	 * @param routineID	The UUID of the routine from which to drop
+	 *			all the permission descriptors
+	 * @param tc		TransactionController for the transaction
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void	dropAllRoutinePermDescriptors(UUID routineID, TransactionController tc)
+		throws StandardException
+	{
+		TabInfo	ti = getNonCoreTI(SYSROUTINEPERMS_CATALOG_NUM);
+		SYSROUTINEPERMSRowFactory rf = (SYSROUTINEPERMSRowFactory) ti.getCatalogRowFactory();
+		DataValueDescriptor	routineIdOrderable;
+		ExecRow curRow;
+		PermissionsDescriptor perm;
+
+		/* Use tableIDOrderable in both start and stop position for scan. */
+		routineIdOrderable = getValueAsDVD(routineID);
+
+		/* Set up the start/stop position for the scan */
+		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
+		keyRow.setColumn(1, routineIdOrderable);
+
+		while ((curRow=ti.getRow(tc, keyRow, rf.ALIASID_INDEX_NUM)) != null)
+		{
+			perm = (PermissionsDescriptor)rf.buildDescriptor(curRow, (TupleDescriptor) null, this);
+			removePermEntryInCache(perm);
+
+			// Build new key based on UUID and drop the entry as we want to drop
+			// only this row
+			ExecIndexRow uuidKey;
+			uuidKey = rf.buildIndexKeyRow(rf.ROUTINEPERMSID_INDEX_NUM, perm);
+			ti.deleteRow(tc, uuidKey, rf.ROUTINEPERMSID_INDEX_NUM);
+		}
+	}
+
+	/**
 	 * Delete the appropriate rows from syscolumns when
 	 * dropping 1 or more columns.
 	 * 
@@ -2409,6 +2484,70 @@ public final class	DataDictionaryImpl
 		TabInfo				   ti = coreInfo[SYSCOLUMNS_CORE_NUM];
 
 		ti.deleteRow( tc, keyRow, SYSCOLUMNSRowFactory.SYSCOLUMNS_INDEX1_ID );
+	}
+
+	/**
+	 * Delete the appropriate rows from systableperms when
+	 * dropping a table
+	 * 
+	 * @param tc			The TransactionController
+	 * @param keyRow		Start/stop position.
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	private void dropTablePermDescriptor(
+					TransactionController tc,
+					ExecIndexRow keyRow)
+			throws StandardException
+	{
+		ExecRow curRow;
+		PermissionsDescriptor perm;
+		ExecIndexRow newKey;
+		TabInfo	ti = getNonCoreTI(SYSTABLEPERMS_CATALOG_NUM);
+		SYSTABLEPERMSRowFactory rf = (SYSTABLEPERMSRowFactory) ti.getCatalogRowFactory();
+
+		while ((curRow=ti.getRow(tc, keyRow, rf.TABLEID_INDEX_NUM)) != null)
+		{
+			perm = (PermissionsDescriptor)rf.buildDescriptor(curRow, (TupleDescriptor) null, this);
+			removePermEntryInCache(perm);
+
+			// Build key on UUID and drop the entry as we want to drop only this row
+			ExecIndexRow uuidKey;
+			uuidKey = rf.buildIndexKeyRow(rf.TABLEPERMSID_INDEX_NUM, perm);
+			ti.deleteRow(tc, uuidKey, rf.TABLEPERMSID_INDEX_NUM);
+		}
+	}
+
+	/**
+	 * Delete the appropriate rows from syscolperms when
+	 * dropping a table
+	 * 
+	 * @param tc			The TransactionController
+	 * @param keyRow		Start/stop position.
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	private void dropColumnPermDescriptor(
+					TransactionController tc,
+					ExecIndexRow keyRow)
+			throws StandardException
+	{
+		ExecRow curRow;
+		PermissionsDescriptor perm;
+		ExecIndexRow newKey;
+		TabInfo	ti = getNonCoreTI(SYSCOLPERMS_CATALOG_NUM);
+		SYSCOLPERMSRowFactory rf = (SYSCOLPERMSRowFactory) ti.getCatalogRowFactory();
+
+		while ((curRow=ti.getRow(tc, keyRow, rf.TABLEID_INDEX_NUM)) != null)
+		{
+			perm = (PermissionsDescriptor)rf.buildDescriptor(curRow, (TupleDescriptor) null, this);
+			removePermEntryInCache(perm);
+
+			// Build key on UUID and drop the entry as we want to drop only this row
+			ExecIndexRow uuidKey;
+			uuidKey = rf.buildIndexKeyRow(rf.COLPERMSID_INDEX_NUM, perm);
+			ti.deleteRow(tc, uuidKey, rf.COLPERMSID_INDEX_NUM);
+		}
 	}
 
 	/**

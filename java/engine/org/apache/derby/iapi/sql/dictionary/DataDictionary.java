@@ -541,6 +541,31 @@ public interface DataDictionary
 	 */
 	public void	dropAllColumnDescriptors(UUID tableID, TransactionController tc)
 						throws StandardException;
+
+	/**
+	 * Drops all table and column permission descriptors for the given table.
+	 *
+	 * @param tableID	The UUID of the table for which to drop
+	 *			all the table and column permission descriptors
+	 * @param tc		TransactionController for the transaction
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void	dropAllTableAndColPermDescriptors(UUID tableID, TransactionController tc)
+						throws StandardException;
+
+	/**
+	 * Drops all routine permission descriptors for the given routine.
+	 *
+	 * @param routineID	The UUID of the routine for which to drop
+	 *			all the permission descriptors
+	 * @param tc		TransactionController for the transaction
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void	dropAllRoutinePermDescriptors(UUID routineID, TransactionController tc)
+						throws StandardException;
+
 	/**
 	 * Gets the viewDescriptor for the view with the given UUID.
 	 *

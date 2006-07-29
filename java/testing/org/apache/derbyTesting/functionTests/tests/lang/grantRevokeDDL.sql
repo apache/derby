@@ -898,3 +898,94 @@ insert into t11TriggerRevokeTest values(6);
 -- cleanup
 drop table t11TriggerRevokeTest;
 
+
+--- Test automatic dropping of dependent permission descriptors when objects they refer to is dropped.
+--- Dropping of a table, for example, should drop all table and column permission descriptors on it.
+
+create table newTable(i int, j int, k int);
+
+grant select, update(j) on newTable to sammy;
+
+grant references, delete on newTable to user1;
+
+-- Try with a view
+
+create view myView as select * from newTable;
+
+grant select on myView to sammy;
+
+select * from sys.systableperms where grantee='SAMMY' or grantee='USER1';
+
+select * from sys.syscolperms where grantee='SAMMY' or grantee='USER1';
+
+drop view myView;
+
+select * from sys.systableperms where grantee='SAMMY' or grantee='USER1';
+
+drop table newTable;
+
+select * from sys.systableperms where grantee='SAMMY' or grantee='USER1';
+
+select * from sys.syscolperms where grantee='SAMMY' or grantee='USER1';
+
+--- Try droping of a routine with permission descriptors. Should get dropped
+CREATE FUNCTION newFunction(P1 INT)
+        RETURNS INT 
+        RETURNS NULL ON NULL INPUT
+        EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.selectFromSpecificSchema'
+        LANGUAGE JAVA PARAMETER STYLE JAVA;
+
+grant execute on function newFunction to sammy;
+
+grant execute on function newFunction(INT) to user3;
+
+select * from sys.sysroutineperms where grantee='SAMMY' or grantee='USER3';
+
+drop function newFunction;
+
+select * from sys.sysroutineperms where grantee='SAMMY' or grantee='USER3';
+
+
+-- Try the same tests after a permission descriptor is likely to have been cached
+
+create table newTable(i int, j int, k int);
+
+grant select(i,j), delete on newTable to sammy;
+
+CREATE FUNCTION F_ABS(P1 INT)
+RETURNS INT NO SQL
+RETURNS NULL ON NULL INPUT
+EXTERNAL NAME 'java.lang.Math.abs'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+
+grant execute on function f_abs to sammy;
+
+select * from sys.sysroutineperms where grantee='SAMMY';
+
+select * from sys.syscolperms where grantee='SAMMY';
+
+select * from sys.systableperms where grantee='SAMMY';
+
+-- Now connect as sammy and access database objects. That should create
+-- PermissionsDescriptors and cache them
+connect 'grantRevokeDDL' user 'sammy' as sammyConnection;
+
+set schema mamta1;
+
+select i,j from newTable;
+
+values f_abs(-5);
+
+set connection mamta1;
+
+drop table newTable;
+
+drop function f_abs;
+
+-- Confirm rows in catalogs are gone
+select * from sys.sysroutineperms where grantee='SAMMY';
+
+select * from sys.syscolperms where grantee='SAMMY';
+
+select * from sys.systableperms where grantee='SAMMY';
+

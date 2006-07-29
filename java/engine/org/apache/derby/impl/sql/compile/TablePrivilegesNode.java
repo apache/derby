@@ -21,6 +21,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.impl.sql.execute.PrivilegeInfo;
 import org.apache.derby.impl.sql.execute.TablePrivilegeInfo;
@@ -81,6 +82,12 @@ public class TablePrivilegesNode extends QueryTreeNode
 		{
 			if( columnLists[ action] != null)
 				columnBitSets[action] = columnLists[ action].bindResultColumnsByName( td, (DMLStatementNode) null);
+
+			// Prevent granting non-SELECT privileges to views
+			if (td.getTableType() == TableDescriptor.VIEW_TYPE && action != TablePrivilegeInfo.SELECT_ACTION)
+				if (actionAllowed[action])
+					throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED,
+									td.getQualifiedName());
 		}
 	}
 	

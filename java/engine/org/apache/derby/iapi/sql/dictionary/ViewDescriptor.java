@@ -390,6 +390,9 @@ public final class ViewDescriptor extends TupleDescriptor
 		/* Drop the view */
 		dd.dropViewDescriptor(this, tc);
 
+		/* Drop all table and column permission descriptors */
+		dd.dropAllTableAndColPermDescriptors(td.getUUID(), tc);
+
 		/* Drop the table */
 		dd.dropTableDescriptor(td, sd, tc);
 	}
