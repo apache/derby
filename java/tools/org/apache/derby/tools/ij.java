@@ -26,6 +26,7 @@ import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 import org.apache.derby.impl.tools.ij.Main;
+import org.apache.derby.impl.tools.ij.utilMain;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -100,18 +101,19 @@ public class ij {
 	  Main ijE;
 	  if (JVMInfo.JDK_ID == JVMInfo.J2SE_13)
 	  {
-		  ijE = new Main(lo);
+		  ijE = new Main(false);
 	  }
 	  else
 	  {
-		  ijE = new org.apache.derby.impl.tools.ij.Main14(lo);
+		  ijE = new org.apache.derby.impl.tools.ij.Main14(false);
 	  }	  
 	  
 	  LocalizedInput li = LocalizedResource.getInstance().
 	            getNewEncodedInput(sqlIn, inputEncoding);
 	  
-	  
-	  ijE.goScript(conn, li);
+	  utilMain um = ijE.getutilMain(1, lo);
+
+	  um.goScript(conn, li);
 	  
 	  return -1;
   }
