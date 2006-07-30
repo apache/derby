@@ -71,15 +71,6 @@ public class utilMain14 extends utilMain
 	}
 
 	/**
-	 * Return the right utilMain to use.  (JDBC 1.1 or 2.0 or 3.0)
-	 *
-	 */
-	public utilMain getUtilMain()
-	{
-		return this;
-	}
-
-	/**
 	 * Connections by default create ResultSet objects with holdability true. This method can be used
 	 * to change the holdability of the connection by passing one of ResultSet.HOLD_CURSORS_OVER_COMMIT
 	 * or ResultSet.CLOSE_CURSORS_AT_COMMIT
@@ -89,7 +80,7 @@ public class utilMain14 extends utilMain
 	 *
 	 * @return	The connection object with holdability set to passed value.
 	 */
-	public Connection setHoldability(Connection conn, int holdType)
+	Connection setHoldability(Connection conn, int holdType)
 		throws SQLException
 	{
 		conn.setHoldability(holdType);
@@ -106,7 +97,7 @@ public class utilMain14 extends utilMain
 	 * or ResultSet.CLOSE_CURSORS_AT_COMMIT
 	 *
 	 */
-	public int getHoldability(Connection conn)
+	int getHoldability(Connection conn)
 		throws SQLException
 	{
 		return conn.getHoldability();
@@ -121,7 +112,7 @@ public class utilMain14 extends utilMain
 	 *
 	 * @return	The statement.
 	 */
-	public Statement createStatement(Connection conn, int scrollType, int holdType)
+	Statement createStatement(Connection conn, int scrollType, int holdType)
 		throws SQLException
 	{
     	Statement stmt;

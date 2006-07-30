@@ -237,7 +237,7 @@ public class Main {
 	public Main(boolean trash)
 	{
 	}
-  public void initAppUI(){
+  private void initAppUI(){
     //To fix a problem in the AppUI implementation, a reference to the AppUI class is
     //maintained by this tool.  Without this reference, it is possible for the
     //AppUI class to be garbage collected and the initialization values lost.

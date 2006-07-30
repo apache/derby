@@ -132,7 +132,7 @@ public class utilMain implements java.security.PrivilegedAction {
 		charStream = new UCode_CharStream(
 						new StringReader(" "), 1, 1);
 		ijTokMgr = new ijTokenManager(charStream);
-		ijParser = new ij(ijTokMgr, getUtilMain());
+		ijParser = new ij(ijTokMgr, this);
 		this.out = out;
 		this.ignoreErrors = ignoreErrors;
 
@@ -496,7 +496,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * are fatal, an ijFatalException is thrown.
 	 * Lifted from ij/util.java:ShowSQLException
 	 */
-	public void handleSQLException(LocalizedOutput out, SQLException e) 
+	private void handleSQLException(LocalizedOutput out, SQLException e) 
 		throws ijFatalException
 	{
 		String errorCode;
@@ -601,14 +601,6 @@ public class utilMain implements java.security.PrivilegedAction {
 
 	// JDBC 2.0 support
 
-	/**
-	 * Return the right utilMain to use.  (JDBC 1.1 or 2.0)
-	 *
-	 */
-	public utilMain getUtilMain()
-	{
-		return this;
-	}
 
 	/**
 	 * Connections by default create ResultSet objects with holdability true. This method can be used
@@ -620,7 +612,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 *
 	 * @return	The connection object with holdability set to passed value.
 	 */
-	public Connection setHoldability(Connection conn, int holdType)
+	Connection setHoldability(Connection conn, int holdType)
 		throws SQLException
 	{
     //Prior to db2 compatibility work, the default holdability for connections was close cursors over commit and all the tests
@@ -645,7 +637,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * or ResultSet.CLOSE_CURSORS_AT_COMMIT
 	 *
 	 */
-	public int getHoldability(Connection conn)
+	int getHoldability(Connection conn)
 		throws SQLException
 	{
     //this method is used to make sure we are not trying to create a statement with holdability different than the connection holdability
@@ -673,7 +665,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 *
 	 * @return	The statement.
 	 */
-	public Statement createStatement(Connection conn, int scrollType, int holdType)
+	Statement createStatement(Connection conn, int scrollType, int holdType)
 		throws SQLException
 	{
     	//following if is used to make sure we are not trying to create a statement with holdability different that the connection
@@ -710,18 +702,11 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * @exception	SQLException thrown on error.
 	 *				(absolute() not supported pre-JDBC2.0)
 	 */
-	public ijResult absolute(ResultSet rs, int row)
+	ijResult absolute(ResultSet rs, int row)
 		throws SQLException
 	{
-        boolean forwardOnly;
-    	try {
-		// absolute is only allowed on scroll cursors
-		    forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-        } catch (AbstractMethodError ame) {
-        //because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces, need to go back
-        //to jdbc 1.x functionality
-            forwardOnly = true;
-        }
+        boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
+
         if (forwardOnly)
 		{
 			throw ijException.forwardOnlyCursor("ABSOLUTE");
@@ -743,18 +728,12 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * @exception	SQLException thrown on error.
 	 *				(relative() not supported pre-JDBC2.0)
 	 */
-	public ijResult relative(ResultSet rs, int row)
+	ijResult relative(ResultSet rs, int row)
 		throws SQLException
 	{
-    	boolean forwardOnly;
-        try {
-        	forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-        } catch (AbstractMethodError ame) {
-        //because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces, need to go back
-        //to jdbc 1.x functionality
-            forwardOnly = true;
-        }
-		// relative is only allowed on scroll cursors
+    	boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
+
+    	// relative is only allowed on scroll cursors
 		if (forwardOnly)
 		{
 			throw ijException.forwardOnlyCursor("RELATIVE");
@@ -774,18 +753,12 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * @exception	SQLException thrown on error.
 	 *				(beforeFirst() not supported pre-JDBC2.0)
 	 */
-	public ijResult beforeFirst(ResultSet rs)
+	ijResult beforeFirst(ResultSet rs)
 		throws SQLException
 	{
-    	boolean forwardOnly;
-        try {
-        	forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-        } catch (AbstractMethodError ame) {
-        //because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces, need to go back
-        //to jdbc 1.x functionality
-            forwardOnly = true;
-        }
-		// before first is only allowed on scroll cursors
+    	boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
+
+    	// before first is only allowed on scroll cursors
 		if (forwardOnly)
 		{
 			throw ijException.forwardOnlyCursor("BEFORE FIRST");
@@ -806,18 +779,12 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * @exception	SQLException thrown on error.
 	 *				(first() not supported pre-JDBC2.0)
 	 */
-	public ijResult first(ResultSet rs)
+	ijResult first(ResultSet rs)
 		throws SQLException
 	{
-    	boolean forwardOnly;
-        try {
-        	forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-        } catch (AbstractMethodError ame) {
-        //because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces, need to go back
-        //to jdbc 1.x functionality
-            forwardOnly = true;
-        }
-		// first is only allowed on scroll cursors
+    	boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
+
+    	// first is only allowed on scroll cursors
 		if (forwardOnly)
 		{
 			throw ijException.forwardOnlyCursor("FIRST");
@@ -837,7 +804,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * @exception	SQLException thrown on error.
 	 *				(afterLast() not supported pre-JDBC2.0)
 	 */
-	public ijResult afterLast(ResultSet rs)
+	ijResult afterLast(ResultSet rs)
 		throws SQLException
 	{
     	boolean forwardOnly;
@@ -869,17 +836,11 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * @exception	SQLException thrown on error.
 	 *				(last() not supported pre-JDBC2.0)
 	 */
-	public ijResult last(ResultSet rs)
+	ijResult last(ResultSet rs)
 		throws SQLException
 	{
-    	boolean forwardOnly;
-        try {
-        	forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-        } catch (AbstractMethodError ame) {
-        //because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces, need to go back
-        //to jdbc 1.x functionality
-            forwardOnly = true;
-        }
+    	boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
+
 		// last is only allowed on scroll cursors
 		if (forwardOnly)
 		{
@@ -900,18 +861,12 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * @exception	SQLException thrown on error.
 	 *				(previous() not supported pre-JDBC2.0)
 	 */
-	public ijResult previous(ResultSet rs)
+	ijResult previous(ResultSet rs)
 		throws SQLException
 	{
-    	boolean forwardOnly;
-        try {
-        	forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-        } catch (AbstractMethodError ame) {
-        //because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces, need to go back
-        //to jdbc 1.x functionality
-            forwardOnly = true;
-        }
-		// first is only allowed on scroll cursors
+    	boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
+ 
+    	// first is only allowed on scroll cursors
 		if (forwardOnly)
 		{
 			throw ijException.forwardOnlyCursor("PREVIOUS");
@@ -930,19 +885,11 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * @exception	SQLException thrown on error.
 	 *				(getRow() not supported pre-JDBC2.0)
 	 */
-	public int getCurrentRowNumber(ResultSet rs)
+	int getCurrentRowNumber(ResultSet rs)
 		throws SQLException
 	{
-		boolean forwardOnly;
-		try 
-		{
-			forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-		} catch (AbstractMethodError ame) 
-		{
-			//because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces, need to go back
-			//to jdbc 1.x functionality
-			forwardOnly = true;
-        }
+
+		boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
 
 		// getCurrentRow is only allowed on scroll cursors
 		if (forwardOnly)
@@ -953,7 +900,7 @@ public class utilMain implements java.security.PrivilegedAction {
 		return rs.getRow();
 	}
 
-	public Properties getConnAttributeDefaults ()
+	Properties getConnAttributeDefaults ()
 	{
 		return connAttributeDefaults;
 	}

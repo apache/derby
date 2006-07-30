@@ -54,5 +54,5 @@ class AsyncStatement extends Thread {
 		aStatement = null;
 	}
 
-	public ijResult getResult() { return result; }
+	ijResult getResult() { return result; }
 }

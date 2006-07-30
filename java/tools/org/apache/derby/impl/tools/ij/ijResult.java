@@ -35,7 +35,7 @@ import java.util.Vector;
  * @author ames
  *
  */
-public interface ijResult {
+interface ijResult {
 	boolean isConnection();
 	boolean isStatement();
 	boolean isResultSet() throws SQLException;

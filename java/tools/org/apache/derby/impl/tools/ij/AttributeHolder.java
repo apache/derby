@@ -32,7 +32,7 @@ import java.util.StringTokenizer;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 
-public class AttributeHolder {
+class AttributeHolder {
 
     //This is an inner class.  This class hold the details about each
     //specific attribute which includes what the attribute is and
@@ -42,35 +42,35 @@ public class AttributeHolder {
     String token;
     Vector errors = new Vector();
 
-    public String getName(){
+    String getName(){
       return name;
     }
-    public void setName(String aString){
+    void setName(String aString){
       name = aString;
     }
-    public String getValue(){
+    String getValue(){
       return value;
     }
-    public void setValue(String aString){
+    void setValue(String aString){
       value = aString;
     }
-    public String getToken(){
+    String getToken(){
       return token;
     }
-    public void setToken(String aString){
+    void setToken(String aString){
       token = aString;
     }
-    public void addError(String aString) {
+    void addError(String aString) {
       //Keep track of error message for later display.
       if (!errors.contains(aString))
         errors.addElement(aString);
     }
-    public void check( Vector validProps){
+    void check( Vector validProps){
       checkName( validProps);
       //checkValue();
       displayErrors();
     }
-    public void displayErrors(){
+    void displayErrors(){
       //If no error are found then nothing is displayed.
       Enumeration e = errors.elements();
       //In the first line, show the exact token that was parsed from
@@ -83,7 +83,7 @@ public class AttributeHolder {
         displayIndented(aString);
       }
     }
-    public void checkName( Vector validProps){
+    void checkName( Vector validProps){
       if( validProps == null)
           return; // valid properties are unknown
       String anAtt = getName();
@@ -107,7 +107,7 @@ public class AttributeHolder {
         ex.printStackTrace();
       }
     }
-    public void checkValue(){
+    void checkValue(){
       String anAtt = getName(); 
       String aValue = getValue();
       try {
@@ -122,16 +122,16 @@ public class AttributeHolder {
         ex.printStackTrace();
       }
     }
-	  public boolean checkBoolean(String aValue) {
+	  boolean checkBoolean(String aValue) {
 		  if (aValue == null)
 			  return false;
 		  return aValue.toLowerCase(Locale.ENGLISH).equals("true") || 
 			  aValue.toLowerCase(Locale.ENGLISH).equals("false");
 	  }
-    public void display(String aString) {
+    void display(String aString) {
 		LocalizedResource.OutputWriter().println(aString);
     }
-    public void displayIndented(String aString) {
+    void displayIndented(String aString) {
 		LocalizedResource.OutputWriter().println("   " + aString);
     }
   }
