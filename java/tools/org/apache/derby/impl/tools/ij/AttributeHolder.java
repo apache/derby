@@ -32,7 +32,7 @@ import java.util.StringTokenizer;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 
-class AttributeHolder {
+public class AttributeHolder {
 
     //This is an inner class.  This class hold the details about each
     //specific attribute which includes what the attribute is and
@@ -42,30 +42,30 @@ class AttributeHolder {
     String token;
     Vector errors = new Vector();
 
-    String getName(){
+    public String getName(){
       return name;
     }
-    void setName(String aString){
+    public void setName(String aString){
       name = aString;
     }
     String getValue(){
       return value;
     }
-    void setValue(String aString){
+    public void setValue(String aString){
       value = aString;
     }
     String getToken(){
       return token;
     }
-    void setToken(String aString){
+    public void setToken(String aString){
       token = aString;
     }
-    void addError(String aString) {
+    public void addError(String aString) {
       //Keep track of error message for later display.
       if (!errors.contains(aString))
         errors.addElement(aString);
     }
-    void check( Vector validProps){
+   public void check( Vector validProps){
       checkName( validProps);
       //checkValue();
       displayErrors();
