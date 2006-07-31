@@ -387,10 +387,17 @@ public class RunSuite
 		// when the time comes to have this converted into actual jvm flags
 		// the ones given at the command line will overwrite whatever's in the suite
 		String jflags = sp.getProperty("jvmflags");
-		if (jflags != null)
+		if (jvmflags != null)
 		{
-		    jvmflags = jvmflags + "^" + jflags;
-		    suiteProperties.put("jvmflags", jvmflags);
+			if (jflags != null)
+		    		suiteProperties.put("jvmflags", (jvmflags + "^" + jflags));
+			else
+		    		suiteProperties.put("jvmflags", jvmflags);
+		}
+		else
+		{
+			if (jflags != null)
+		    		suiteProperties.put("jvmflags", jflags);
 		}
 		String testflags = sp.getProperty("testJavaFlags");
 		if (testflags != null)
