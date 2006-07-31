@@ -115,7 +115,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 *							thrown.  ignoreErrors is used for stress
 	 *							tests.
 	 */
-	utilMain(int numConnections, LocalizedOutput out, Hashtable ignoreErrors)
+	public utilMain(int numConnections, LocalizedOutput out, Hashtable ignoreErrors)
 		throws ijFatalException
 	{
 		String framework_property = util.getSystemProperty("framework");
