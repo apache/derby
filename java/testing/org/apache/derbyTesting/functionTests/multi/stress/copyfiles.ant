@@ -20,3 +20,4 @@ stress50x59.multi
 stress50x59_app.properties
 update.sql
 update2.sql
+stress_sed.properties

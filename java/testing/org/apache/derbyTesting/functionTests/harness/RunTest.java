@@ -1436,7 +1436,11 @@ clp.list(System.out);
         //  Multiple patterns for SUBSTITUTE: comma separated <pattern;substitute> pair
         //    substitute=pattern1;substitute1,pattern2;substitute2,...,patternn;substituten
         //  No commas or semicolons can be allowed in the patterns/subsitutes.  //
-        isSed = loadTestResource("tests/" + testDirName + "/" + testBase + "_sed.properties");
+       
+        if ( testType.equals("multi") )
+        	isSed = loadTestResource("multi/stress/" + testBase + "_sed.properties");
+        else
+        	isSed = loadTestResource("tests/" + testDirName + "/" + testBase + "_sed.properties");
 //System.out.println("**************");
 //System.out.println("isSed = " + isSed);
 //System.out.println(defaultPackageName + testBase + "_sed.properties");
