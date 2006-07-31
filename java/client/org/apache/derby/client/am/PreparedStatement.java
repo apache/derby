@@ -887,7 +887,16 @@ public class PreparedStatement extends Statement
             setNullX(parameterIndex, java.sql.Types.BLOB);
             return;
         }
-        setInput(parameterIndex, new Blob(agent_, x, length));
+        Blob blob;
+        if (length == -1) {
+            // Create a blob of unknown length. This might cause an
+            // OutOfMemoryError due to the temporary implementation in Blob.
+            // The whole stream will be materialzied. See comments in Blob.
+            blob = new Blob(agent_, x);
+        } else {
+            blob = new Blob(agent_, x, length);
+        }
+        setInput(parameterIndex, blob);
     }
 
     /**
@@ -965,6 +974,42 @@ public class PreparedStatement extends Statement
         }
 
         throw SQLExceptionFactory.notImplemented ("setUnicodeStream");
+    }
+
+    /**
+     * Sets the designated parameter to the given <code>Reader</code> object.
+     * When a very large UNICODE value is input to a LONGVARCHAR parameter, it
+     * may be more practical to send it via a <code>java.io.Reader</code>
+     * object. The data will be read from the stream as needed until
+     * end-of-file is reached. The JDBC driver will do any necessary conversion
+     * from UNICODE to the database char format.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the <code>java.io.Reader</code> object that contains the
+     *      Unicode data
+     * @throws SQLException if a database access error occurs or this method is
+     *      called on a closed <code>PreparedStatement</code>
+     */
+    public void setCharacterStream(int parameterIndex, Reader x)
+            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setCharacterStream",
+                        parameterIndex, x);
+            }
+            try {
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex -1] =
+                    java.sql.Types.CLOB;
+                if (x == null) {
+                    setNull(parameterIndex, java.sql.Types.CLOB);
+                    return;
+                }
+                setInput(parameterIndex, new Clob(agent_, x));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
     }
 
      /**
@@ -2271,6 +2316,97 @@ public class PreparedStatement extends Statement
     }
     
     //jdbc 4.0 methods
+
+    /**
+     * Sets the designated parameter to the given input stream.
+     * When a very large ASCII value is input to a <code>LONGVARCHAR</code>
+     * parameter, it may be more practical to send it via a
+     * <code>java.io.InputStream</code>. Data will be read from the stream as
+     * needed until end-of-file is reached. The JDBC driver will do any
+     * necessary conversion from ASCII to the database char format.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the Java input stream that contains the ASCII parameter value
+     * @throws SQLException if a database access error occurs or this method is
+     *      called on a closed <code>PreparedStatement</code>
+     */
+    public void setAsciiStream(int parameterIndex, InputStream x)
+            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setAsciiStream",
+                        parameterIndex, x);
+            }
+            try {
+                parameterIndex = checkSetterPreconditions(parameterIndex);
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
+                if (x == null) {
+                    setNull(parameterIndex, java.sql.Types.CLOB);
+                    return;
+                }
+                setInput(parameterIndex, new Clob(agent_, x, "US-ASCII"));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream.
+     * When a very large binary value is input to a <code>LONGVARBINARY</code>
+     * parameter, it may be more practical to send it via a
+     * <code>java.io.InputStream</code> object. The data will be read from the
+     * stream as needed until end-of-file is reached.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the binary parameter value
+     * @throws SQLException if a database access error occurs or this method is
+     *      called on a closed <code>PreparedStatement</code>
+     */
+    public void setBinaryStream(int parameterIndex, InputStream x)
+            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setBinaryStream",
+                        parameterIndex, x);
+            }
+            try {
+                setBinaryStreamX(parameterIndex, x, -1);
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
+    }
+
+    /**
+     * Sets the designated parameter to a <code>Reader</code> object.
+     *
+     * @param parameterIndex index of the first parameter is 1, the second is 
+     *      2, ...
+     * @param reader an object that contains the data to set the parameter
+     *      value to. 
+     * @throws SQLException if parameterIndex does not correspond to a 
+     *      parameter marker in the SQL statement; if a database access error
+     *      occurs; this method is called on a closed PreparedStatementor if
+     *      parameterIndex does not correspond to a parameter marker in the SQL
+     *      statement
+     */
+    public void setClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setClob",
+                        parameterIndex, reader);
+            }
+            try {
+                checkForClosedStatement();
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+            setInput(parameterIndex, new Clob(agent_, reader));
+        }
+    }
+
    /**
      * Sets the designated parameter to a Reader object.
      *
@@ -2300,6 +2436,39 @@ public class PreparedStatement extends Statement
                     new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
             else
                 setInput(parameterIndex, new Clob(agent_, reader, (int)length));
+        }
+    }
+
+    /**
+     * Sets the designated parameter to a <code>InputStream</code> object.
+     * This method differs from the <code>setBinaryStream(int, InputStream)
+     * </code>  method because it informs the driver that the parameter value
+     * should be sent to the server as a <code>BLOB</code>. When the
+     * <code>setBinaryStream</code> method is used, the driver may have to do
+     * extra work to determine whether the parameter data should be sent to the
+     * server as a <code>LONGVARBINARY</code> or a <code>BLOB</code>
+     *
+     * @param parameterIndex index of the first parameter is 1, the second is
+     *      2, ...
+     * @param inputStream an object that contains the data to set the parameter
+     *      value to.
+     * @throws SQLException if a database access error occurs, this method is
+     *      called on a closed <code>PreparedStatement</code> or if
+     *      <code>parameterIndex</code> does not correspond to a parameter
+     *      marker in the SQL statement
+     */
+    public void setBlob(int parameterIndex, InputStream inputStream)
+            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setBlob", parameterIndex,
+                        inputStream);
+            }
+            try {
+                setBinaryStreamX(parameterIndex, inputStream, -1);
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
         }
     }
 

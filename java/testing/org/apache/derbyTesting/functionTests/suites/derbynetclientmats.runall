@@ -4,4 +4,5 @@ jdbcapi/xaStateTran.sql
 jdbcapi/lobStreams.java
 jdbcapi/XATest.java
 jdbcapi/checkDataSource.java
+derbynet/ByteArrayCombinerStreamTest.junit
 derbynet/SqlExceptionTest.junit

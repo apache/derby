@@ -200,7 +200,7 @@ public class ResultSetTest
         }
     }
 
-    public void embonlytmpUpdateNCharacterStreamIntLengthLessNotImplemented()
+    public void testUpdateNCharacterStreamIntLengthLessNotImplemented()
         throws SQLException {
         try {
             rs.updateNCharacterStream(1, null);
@@ -221,7 +221,7 @@ public class ResultSetTest
         }
     }
 
-    public void embonlytmpUpdateNCharacterStreamStringLengthlessNotImplemented()
+    public void testUpdateNCharacterStreamStringLengthlessNotImplemented()
         throws SQLException {
         try {
             rs.updateNCharacterStream("some-column-name", null);
@@ -558,7 +558,11 @@ public class ResultSetTest
         rs1.close();
     }
 
-    public void embonlytmpUpdateBinaryStreamLengthless()
+    /**
+     * Test <code>updateBinaryStream</code> on a BINARY column, without
+     * specifying length of inputstream.
+     */
+    public void testUpdateBinaryStreamLengthless()
             throws IOException, SQLException {
         InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
         // InputStream used for update.
@@ -588,7 +592,41 @@ public class ResultSetTest
         rs1.close();
     }
 
-    public void embonlytmpUpdateBinaryStreamLengthlessParameterName()
+    /**
+     * Test <code>updateBinaryStream</code> on a BLOB column, without
+     * specifying length of inputstream.
+     */
+    public void testUpdateBinaryStreamLengthlessBlob()
+            throws IOException, SQLException {
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+        // InputStream used for update.
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        //Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep(con, "dBlob");
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2, is1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        //Update operation
+        ResultSet rs1 = fetchUpd(con, "dBlob", key);
+        rs1.next();
+        rs1.updateBinaryStream(1, is2);
+        rs1.updateRow();
+        rs1.close();
+
+        //Query to see whether the data that has been updated
+        //using the updateBinaryStream method is the same
+        //data that we expected
+
+        rs1 = fetch(con, "dBlob", key);
+        rs1.next();
+        assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
+        rs1.close();
+    }
+
+    public void testUpdateBinaryStreamLengthlessParameterName()
             throws IOException, SQLException {
         InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
         // InputStream used for update.
@@ -676,7 +714,7 @@ public class ResultSetTest
         rs1.close();
     }
 
-    public void embonlytmpUpdateAsciiStreamLengthless()
+    public void testUpdateAsciiStreamLengthless()
             throws IOException, SQLException {
         // Array to keep updated data fetched from the database.
         byte[] bytesRet = new byte[10];
@@ -715,7 +753,7 @@ public class ResultSetTest
         rs1.close();
     }
 
-    public void embonlytmpUpdateAsciiStreamLengthlessParameterName()
+    public void testUpdateAsciiStreamLengthlessParameterName()
             throws IOException, SQLException {
         // Array to keep updated data fetched from the database.
         byte[] bytesRet = new byte[10];
@@ -809,7 +847,7 @@ public class ResultSetTest
         rs1.close();
     }
 
-    public void embonlytmpUpdateCharacterStreamLengthless()
+    public void testUpdateCharacterStreamLengthless()
             throws IOException, SQLException {
         String str = "This is the (\u0FFF\u1234) test string";
         String strUpdated = "An updated (\u0FEF\u9876) test string";
@@ -841,7 +879,7 @@ public class ResultSetTest
         updatedStr.close();
     }
 
-    public void embonlytmpUpdateCharacterStreamLengthlessParameterName()
+    public void testUpdateCharacterStreamLengthlessParameterName()
             throws IOException, SQLException {
         String str = "This is the (\u0FFF\u1234) test string";
         String strUpdated = "An updated (\u0FEF\u9876) test string";
@@ -940,7 +978,7 @@ public class ResultSetTest
         rs1.close();
     }
 
-    public void embeddedUpdateClobLengthless()
+    public void testUpdateClobLengthless()
             throws Exception {
         Reader r1 = new java.io.StringReader(new String(BYTES1));
         // InputStream for insertion.
@@ -1035,7 +1073,7 @@ public class ResultSetTest
         rs1.close();
     }
 
-    public void embeddedUpdateBlobLengthless()
+    public void testUpdateBlobLengthless()
             throws Exception {
         InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
         // InputStream for insertion.
@@ -1129,7 +1167,7 @@ public class ResultSetTest
         rs1.close();
     }
 
-    public void embeddedUpdateClobLengthlessParameterName()
+    public void testUpdateClobLengthlessParameterName()
             throws Exception {
         Reader r1 = new java.io.StringReader(new String(BYTES1));
         // InputStream for insertion.
@@ -1224,7 +1262,7 @@ public class ResultSetTest
         rs1.close();
     }
 
-    public void embeddedUpdateBlobLengthlessParameterName()
+    public void testUpdateBlobWithStreamLengthlessParameterName()
             throws Exception {
         InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
         // InputStream for insertion.
@@ -1273,36 +1311,7 @@ public class ResultSetTest
         embeddedSuite.addTest(new ResultSetTest(
                     "embeddedUpdateClob"));
         embeddedSuite.addTest(new ResultSetTest(
-                    "embeddedUpdateBlobStringParameterName"));
-        embeddedSuite.addTest(new ResultSetTest(
                     "embeddedUpdateClobStringParameterName"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embeddedUpdateBlobLengthless"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embeddedUpdateBlobLengthlessParameterName"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embeddedUpdateClobLengthless"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embeddedUpdateClobLengthlessParameterName"));
-        // A bunch of tests disabled temporarily for DerbyNetClient.
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embonlytmpUpdateAsciiStreamLengthless"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embonlytmpUpdateAsciiStreamLengthlessParameterName"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embonlytmpUpdateBinaryStreamLengthless"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embonlytmpUpdateBinaryStreamLengthlessParameterName"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embonlytmpUpdateCharacterStreamLengthless"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embonlytmpUpdateCharacterStreamLengthlessParameterName"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embonlytmpUpdateNCharacterStreamIntLengthLessNotImplemented"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embonlytmpUpdateNCharacterStreamStringLengthlessNotImplemented"));
-        //embeddedSuite.addTest(new ResultSetTest(
-        //            ""));
         return embeddedSuite;
     }
 

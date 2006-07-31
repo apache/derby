@@ -20,10 +20,12 @@
 
 package org.apache.derby.client.am;
 
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.client.net.EncodedInputStream;
 
 public class Clob extends Lob implements java.sql.Clob {
     //---------------------navigational members-----------------------------------
@@ -124,6 +126,35 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
+    /**
+     * Create a <code>Clob</code> of unknown length with the specified
+     * encoding.
+     *
+     * This constructor was added to support the JDBC 4 length less overloads.
+     * Note that a <code>Clob</code> created with this constructor is made for
+     * input to the database only. Do not pass it out to the user!
+     *
+     * @param agent
+     * @param inputStream the data to insert
+     * @param encoding encoding to use for characters. Only "US-ASCII" is
+     *      allowed.
+     */
+    public Clob(Agent agent, java.io.InputStream inputStream, String encoding)
+            throws SqlException {
+        this(agent);
+
+        lengthObtained_ = false;
+
+        if (encoding.equals("US-ASCII")) {
+            asciiStream_ = inputStream;
+            dataType_ |= ASCII_STREAM;
+        } else {
+            throw new SqlException(agent_.logWriter_, 
+                new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
+                encoding + " InputStream", "String/Clob");
+        }
+    }
+
     // CTOR for character stream input
     // THE ENCODING IS ASSUMED TO BE "UTF-16BE"
     public Clob(Agent agent, java.io.Reader reader, int length) {
@@ -132,6 +163,25 @@ public class Clob extends Lob implements java.sql.Clob {
         lengthObtained_ = true;
         characterStream_ = reader;
         dataType_ |= CHARACTER_STREAM;
+    }
+
+    /**
+     * Create a <code>Clob</code> of unknown length.
+     *
+     * This constructor was added to support the JDBC 4 length less overloads.
+     * Note that a <code>Clob</code> created with this constructor is made for
+     * input to the database only. Do not pass it out to the user!
+     *
+     * @param agent
+     * @param reader the data to insert
+     */
+    public Clob(Agent agent, Reader reader) {
+        this(agent);
+        lengthObtained_ = false;
+        // Wrap reader in stream to share code.
+        unicodeStream_ = EncodedInputStream.createUTF8Stream(reader);
+        // Override type to share logic with the other stream types.
+        dataType_ |= UNICODE_STREAM;
     }
 
     private Clob(Agent agent) {
@@ -163,7 +213,7 @@ public class Clob extends Lob implements java.sql.Clob {
                 if (lengthObtained_) {
                     return sqlLength_;
                 }
-
+                materializeStream();
                 lengthInBytes_ = super.sqlLength();
 
                 if (agent_.loggingEnabled()) {
@@ -773,5 +823,17 @@ public class Clob extends Lob implements java.sql.Clob {
         if(!isValid)
             throw new SqlException(null,new ClientMessageId(SQLState.LOB_OBJECT_INVALID))
                                                   .getSQLException();
+    }
+
+    /**
+     * Materialize the stream used for input to the database.
+     */
+    private void materializeStream()
+        throws SqlException {
+        unicodeStream_ = super.materializeStream(isAsciiStream() ? 
+                                                        asciiStream_ : 
+                                                        unicodeStream_,
+                                                 "java.sql.Clob");
+        dataType_ = UNICODE_STREAM;
     }
 }

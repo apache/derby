@@ -23,6 +23,8 @@ package org.apache.derby.client.am;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
+
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Blob extends Lob implements java.sql.Blob {
@@ -64,6 +66,34 @@ public class Blob extends Lob implements java.sql.Blob {
         lengthObtained_ = true;
     }
 
+    /**
+     * Create a new <code>Blob</code> from a stream with unknown length.
+     * <em>Important:</em> This constructor is a temporary solution for
+     * implementing lengthless overloads in the JDBC4 API. Before a proper
+     * solution can be implemented, we need to enable streaming without having
+     * to know the stream length in the DRDA protocol. See Jira DERBY-1471 and
+     * DERBY-1417 for more details.
+     *
+     * <em>Shortcomings:</em> This constructor will cause the <em>whole stream
+     * to be materialized</em> to determine its length. If the stream is big
+     * enough, the client will fail with an OutOfMemoryError. Since this is a
+     * temporary solution, state checking is not added to all methods as it
+     * would clutter up the class severely. After using the constructor, the
+     * <code>length</code>-method must be called, which will materialize the
+     * stream and determine the length. <em>Do not pass a Blob object created
+     * with this constructor to the user!</em>
+     *
+     * @param agent
+     * @param binaryStream the stream to get data from
+     */
+    public Blob(Agent agent, java.io.InputStream binaryStream) {
+        super(agent);
+        binaryStream_ = binaryStream;
+        dataType_ |= BINARY_STREAM;
+        sqlLength_ = -1;
+        lengthObtained_ = false;
+    }
+
     // ---------------------------jdbc 2------------------------------------------
 
     public long length() throws SQLException {
@@ -75,6 +105,11 @@ public class Blob extends Lob implements java.sql.Blob {
             synchronized (agent_.connection_) {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "length");
+                }
+                // Code to handle the lengthless constructor.
+                if (!lengthObtained_) {
+                    binaryStream_ = super.materializeStream(binaryStream_,
+                                                            "java.sql.Blob");
                 }
                 long retVal = super.sqlLength();
                 if (agent_.loggingEnabled()) {

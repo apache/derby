@@ -166,13 +166,22 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
         throw SQLExceptionFactory.notImplemented ("setRowId (int, RowId)");
     }
     
-    /*********************************************************************************************************
-     * The methods from PreparedStatement for JDBC 4.0
-     *********************************************************************************************************/
+    /**************************************************************************
+     * The methods from PreparedStatement for JDBC 4.0.                       *
+     * These are added here because we can't inherit                          *
+     * PreparedStatement40.java. Instead of moving the non-implemented        *
+     * classes to PreparedStatement.java, we duplicate them here.             *
+     **************************************************************************/
     public void setNString(int index, String value) throws SQLException {
         throw SQLExceptionFactory.notImplemented ("setNString (int, String)");
     }
     
+    public void setNCharacterStream(int parameterIndex, Reader value)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setNCharacterStream" +
+                "(int,Reader)");
+    }
+
     public void setNCharacterStream(int index, Reader value, long length) throws SQLException {
         throw SQLExceptionFactory.notImplemented ("setNCharacterStream " +
                 "(int,Reader,long)");
@@ -182,6 +191,11 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
         throw SQLExceptionFactory.notImplemented ("setNClob (int, NClob)");
     }
     
+    public void setNClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setNClob(int,Reader)");
+    }
+
     public void setNClob(int parameterIndex, Reader reader, long length)
     throws SQLException {
         throw SQLExceptionFactory.notImplemented ("setNClob (int, " +
@@ -192,9 +206,9 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
         throw SQLExceptionFactory.notImplemented ("setSQLXML (int, SQLXML)");
     }
 
-    /*********************************************************************************************************
-     * End of methods from PreparedStatement for JDBC 4.0
-     *********************************************************************************************************/
+    /**************************************************************************
+     * End of methods from PreparedStatement for JDBC 4.0.                    *
+     **************************************************************************/
 
     public void setAsciiStream(String parameterName, InputStream x)
             throws SQLException {

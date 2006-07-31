@@ -20,6 +20,10 @@
 
 package org.apache.derby.client.am;
 
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+
 import org.apache.derby.shared.common.reference.SQLState;
 
 public abstract class Lob implements UnitOfWorkListener {
@@ -99,5 +103,68 @@ public abstract class Lob implements UnitOfWorkListener {
 
     void completeLocalCommit() {
         ;
+    }
+
+    /**
+     * Materialize the given stream into memory and update the internal
+     * length variable.
+     *
+     * @param is stream to use for input
+     * @param typeDesc description of the data type we are inserting,
+     *      for instance <code>java.sql.Clob</code>
+     * @return a stream whose source is the materialized data
+     * @throws SqlException if the stream exceeds 2 GB, or an error happens
+     *      while reading from the stream
+     */
+    protected InputStream materializeStream(InputStream is, String typeDesc)
+            throws SqlException {
+        final int GROWBY = 32 * 1024; // 32 KB
+        ArrayList byteArrays = new ArrayList();
+        byte[] curBytes = new byte[GROWBY];
+        int totalLength = 0;
+        int partLength = 0;
+        // Read all data from the stream, storing it in a number of arrays.
+        try {
+            do {
+                partLength = is.read(curBytes, 0, curBytes.length);
+                if (partLength == curBytes.length) {
+                    byteArrays.add(curBytes);
+                    // Make sure we don't exceed 2 GB by checking for overflow.
+                    int newLength = totalLength + GROWBY;
+                    if (newLength < 0 || newLength == Integer.MAX_VALUE) {
+                        curBytes = new byte[Integer.MAX_VALUE - totalLength];
+                    } else {
+                        curBytes = new byte[GROWBY];
+                    }
+                }
+                totalLength += partLength;
+            } while (partLength == GROWBY);
+            // Make sure stream is exhausted.
+            if (is.read() != -1) {
+                // We have exceeded 2 GB.
+                throw new SqlException(
+                            null,
+                            new ClientMessageId(
+                                SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+                                typeDesc
+                        );
+            }
+            byteArrays.add(curBytes);
+
+            // Cleanup and set state.
+            curBytes = null;
+            sqlLength_ = totalLength;
+            lengthObtained_ = true;
+            // Return a stream whose source is a list of byte arrays. 
+            // This avoids having to copy all the data into a single big array.
+            return new ByteArrayCombinerStream(byteArrays, totalLength);
+        } catch (IOException ioe) {
+            throw new SqlException(null,
+                        new ClientMessageId(
+                            SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION),
+                        typeDesc,
+                        ioe
+                    );
+        }
     }
 }

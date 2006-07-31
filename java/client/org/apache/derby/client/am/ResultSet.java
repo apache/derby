@@ -5413,6 +5413,43 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return isClosed;
     }
 
+    /**
+     * Updates the designated column with an ascii stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x the new column value
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateAsciiStream(int columnIndex, InputStream x)
+            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateAsciiStream",
+                        columnIndex, x);
+            }
+            try {
+                checkUpdatePreconditions(columnIndex, "updateAsciiStream");
+                updateColumn(columnIndex,
+                        agent_.crossConverters_.setObjectFromCharacterStream(
+                            resultSetMetaData_.types_[columnIndex -1],
+                            x,
+                            "US-ASCII",
+                            CrossConverters.UNKNOWN_LENGTH));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
+    }
 
     /**
      * Update a column with an ascii stream value.
@@ -5439,6 +5476,43 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
         else
             updateAsciiStream(columnIndex,x,(int)length);
+    }
+
+    /**
+     * Updates the designated column with a binary stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x the new column value 
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateBinaryStream(int columnIndex, InputStream x)
+            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateBinaryStream",
+                        columnIndex, x);
+            }
+            try {
+                checkUpdatePreconditions(columnIndex, "updateBinaryStream");
+                updateColumn(columnIndex,
+                             agent_.crossConverters_.setObjectFromBinaryStream(
+                                    resultSetMetaData_.types_[columnIndex -1],
+                                    x,
+                                    CrossConverters.UNKNOWN_LENGTH));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
     }
 
     /**
@@ -5470,6 +5544,79 @@ public abstract class ResultSet implements java.sql.ResultSet,
      }
 
     /**
+     * Updates the designated column using the given input stream.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x the new column value
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateBlob(int columnIndex, InputStream x)
+            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateBlob",
+                        columnIndex, x);
+            }
+            try {
+                checkUpdatePreconditions(columnIndex, "updateBlob");
+                updateColumn(columnIndex,
+                             agent_.crossConverters_.setObject(
+                                    resultSetMetaData_.types_[columnIndex -1],
+                                    new Blob(agent_, x)));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
+    }
+
+    /**
+     * Updates the designated column with a character stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param reader the new column value
+     * @throws SQLException if the columnLabel is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateCharacterStream(int columnIndex, Reader reader)
+            throws SQLException {
+        synchronized (connection_) {
+            try {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "updateCharacterStream",
+                            columnIndex, reader);
+                }
+                checkUpdatePreconditions(columnIndex, "updateCharacterStream");
+                updateColumn(columnIndex,
+                             agent_.crossConverters_.setObject(
+                                    resultSetMetaData_.types_[columnIndex -1],
+                                    reader,
+                                    CrossConverters.UNKNOWN_LENGTH));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
+    }
+
+    /**
      * Update a column with a character stream value.
      *
      * The updateXXX() methods are used to update column values in the current
@@ -5497,6 +5644,73 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     /**
+     * Updates the designated column using the given <code>Reader</code>
+     * object. 
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached. The JDBC driver will do any necessary conversion from UNICODE
+     * to the database char format.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param reader an object that contains the data to set the parameter
+     *      value to. 
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateClob(int columnIndex, Reader reader)
+            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateClob",
+                        columnIndex, reader);
+            }
+            try {
+                checkUpdatePreconditions(columnIndex, "updateClob");
+                updateColumn(columnIndex,
+                             agent_.crossConverters_.setObject(
+                                 resultSetMetaData_.types_[columnIndex -1], 
+                                 new Clob(agent_, reader)));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
+    }
+
+    /**
+     * Updates the designated column with an ascii stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnName the label for the column specified with the SQL AS
+     *      clause. If the SQL AS clause was not specified, then the label is
+     *      the name of the column
+     * @param x the new column value
+     * @throws SQLException if the columnLabel is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateAsciiStream(String columnName, InputStream x)
+            throws SQLException {
+        try {
+            updateAsciiStream(findColumnX(columnName), x);
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+
+    /**
      * Update a column with an ascii stream value.
      *
      * The updateXXX() methods are used to update column values in the current
@@ -5520,6 +5734,34 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
         catch(SqlException sqle) {
             throw sqle.getSQLException();
+        }
+    }
+
+    /**
+     * Updates the designated column with a binary stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnLabel the label for the column specified with the SQL AS
+     *      clause. If the SQL AS clause was not specified, then the label is
+     *      the name of the column
+     * @param x the new column value 
+     * @throws SQLException if the columnLabel is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateBinaryStream(String columnLabel, InputStream x)
+            throws SQLException {
+        try {
+            updateBinaryStream(findColumnX(columnLabel), x);
+        } catch (SqlException se) {
+            throw se.getSQLException();
         }
     }
 
@@ -5551,6 +5793,62 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     /**
+     * Updates the designated column using the given input stream.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnLabel the label for the column specified with the SQL AS
+     *      clause. If the SQL AS clause was not specified, then the label is
+     *      the name of the column
+     * @param x the new column value
+     * @throws SQLException if the columnLabel is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateBlob(String columnLabel, InputStream x)
+            throws SQLException {
+        try {
+            updateBlob(findColumnX(columnLabel), x);
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+
+    /**
+     * Updates the designated column with a character stream value.
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnLabel the label for the column specified with the SQL AS
+     *      clause. If the SQL AS clause was not specified, then the label is
+     *      the name of the column
+     * @param reader the new column value
+     * @throws SQLException if the columnLabel is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateCharacterStream(String columnLabel, Reader reader)
+            throws SQLException {
+        try {
+            updateCharacterStream(findColumnX(columnLabel), reader);
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+
+    /**
      * Update a column with a character stream value.
      *
      * The updateXXX() methods are used to update column values in the current
@@ -5576,4 +5874,35 @@ public abstract class ResultSet implements java.sql.ResultSet,
              throw sqle.getSQLException();
          }
      }
+
+    /**
+     * Updates the designated column using the given <code>Reader</code>
+     * object. 
+     * The data will be read from the stream as needed until end-of-stream is
+     * reached. The JDBC driver will do any necessary conversion from UNICODE
+     * to the database char format.
+     *
+     * The updater methods are used to update column values in the current row
+     * or the insert row. The updater methods do not update the underlying
+     * database; instead the <code>updateRow</code> or <code>insertRow</code>
+     * methods are called to update the database.
+     *
+     * @param columnLabel the label for the column specified with the SQL AS
+     *      clause. If the SQL AS clause was not specified, then the label is
+     *      the name of the column
+     * @param reader an object that contains the data to set the parameter
+     *      value to. 
+     * @throws SQLException if the columnIndex is not valid; if a database
+     *      access error occurs; the result set concurrency is
+     *      <code>CONCUR_READ_ONLY</code> or this method is called on a closed
+     *      result set
+     */
+    public void updateClob(String columnLabel, Reader reader)
+            throws SQLException {
+        try {
+            updateClob(findColumnX(columnLabel), reader);
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
 }

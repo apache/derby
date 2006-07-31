@@ -40,6 +40,12 @@ import org.apache.derby.shared.common.reference.SQLState;
 //
 
 final class CrossConverters {
+
+    /**
+     * Value used to signal unknown length of data.
+     */
+    public static final int UNKNOWN_LENGTH = Integer.MIN_VALUE;
+
     private final static java.math.BigDecimal bdMaxByteValue__ =
             java.math.BigDecimal.valueOf(Byte.MAX_VALUE);
     private final static java.math.BigDecimal bdMinByteValue__ =
@@ -638,6 +644,9 @@ final class CrossConverters {
         case Types.LONGVARCHAR:
             return setStringFromReader(source, length);
         case Types.CLOB:
+            if (length == CrossConverters.UNKNOWN_LENGTH) {
+                return new Clob(agent_, source);
+            }
             return new Clob(agent_, source, length);
             // setCharacterStream() against BINARY columns is problematic because w/out metadata, we'll send char encoding bytes.
             // There's no clean solution except to just not support setObject(String/Reader/Stream)
@@ -663,7 +672,8 @@ final class CrossConverters {
                 sw.write(read);
                 read = r.read();
             }
-            if (length != totalRead) {
+            if (length != CrossConverters.UNKNOWN_LENGTH &&
+                    length != totalRead) {
                 throw new SqlException(agent_.logWriter_, 
                 		new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
@@ -683,6 +693,9 @@ final class CrossConverters {
         case Types.LONGVARCHAR:
             return setStringFromStream(source, encoding, length);
         case Types.CLOB:
+            if (length == CrossConverters.UNKNOWN_LENGTH) {
+                return new Clob(agent_, source, encoding);
+            }
             return new Clob(agent_, source, encoding, length);
         case Types.BINARY:
         case Types.VARBINARY:
@@ -715,7 +728,8 @@ final class CrossConverters {
                     e.getClass().getName(), e.getMessage(), e);
             }
 
-            if (length != totalRead) {
+            if (length != CrossConverters.UNKNOWN_LENGTH &&
+                    length != totalRead) {
                 throw new SqlException(agent_.logWriter_, 
                 		new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
@@ -758,6 +772,9 @@ final class CrossConverters {
         case Types.LONGVARBINARY:
             return setBytesFromStream(source, length);
         case Types.BLOB:
+            if (length == CrossConverters.UNKNOWN_LENGTH) {
+                return new Blob(agent_, source);
+            }
             return new Blob(agent_, source, length);
         default:
             throw new SqlException(agent_.logWriter_, 
@@ -779,7 +796,8 @@ final class CrossConverters {
                 read = is.read();
             }
 
-            if (length != totalRead) {
+            if (length != CrossConverters.UNKNOWN_LENGTH &&
+                    length != totalRead) {
                 throw new SqlException(agent_.logWriter_,
                 		new ClientMessageId (SQLState.READER_UNDER_RUN));
             }

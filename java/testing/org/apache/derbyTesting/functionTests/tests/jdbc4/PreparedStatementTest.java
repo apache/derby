@@ -112,19 +112,6 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite();
         suite.addTestSuite(PreparedStatementTest.class);
-        if (usingEmbedded()) {
-            // Add methods temporarily disabled for DerbyNetClient
-            suite.addTest(new PreparedStatementTest(
-                        "embonlytmptestSetClobLengthless"));
-            suite.addTest(new PreparedStatementTest(
-                        "embonlytmptestSetBlobLengthless"));
-            suite.addTest(new PreparedStatementTest(
-                        "embonlytmptestSetCharacterStreamLengthless"));
-            suite.addTest(new PreparedStatementTest(
-                        "embonlytmptestSetAsciiStreamLengthless"));
-            suite.addTest(new PreparedStatementTest(
-                        "embonlytmptestSetBinaryStreamLengthless"));
-        }
         suite.addTest(SetObjectUnsupportedTest.suite(false));
         return suite;
     }
@@ -376,7 +363,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * a <code>Clob</code> object. This object is then inserted into the
      * database again.
      */
-    public void embonlytmptestSetClobLengthless()
+    public void testSetClobLengthless()
             throws IOException, SQLException {
         // Insert test data.
         String testString = "Test string for setCharacterStream\u1A00";
@@ -458,7 +445,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * a <code>Blob</code> object. This object is then inserted into the
      * database again.
      */
-    public void embonlytmptestSetBlobLengthless()
+    public void testSetBlobLengthless()
             throws IOException, SQLException {
         // Insert test data.
         InputStream is = new ByteArrayInputStream(BYTES);
@@ -584,7 +571,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         ps_sc.close();
     }
 
-    public void embonlytmptestSetCharacterStreamLengthless()
+    public void testSetCharacterStreamLengthless()
             throws IOException, SQLException {
         // Insert test data.
         String testString = "Test string for setCharacterStream\u1A00";
@@ -649,7 +636,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         ps_sb.close();
     }
 
-    public void embonlytmptestSetAsciiStreamLengthless()
+    public void testSetAsciiStreamLengthless()
             throws IOException, SQLException {
         // Insert test data.
         InputStream is = new ByteArrayInputStream(BYTES);
@@ -724,7 +711,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         ps_sb.close();
     }
 
-    public void embonlytmptestSetBinaryStreamLengthless()
+    public void testSetBinaryStreamLengthless()
             throws IOException, SQLException {
         // Insert test data.
         InputStream is = new ByteArrayInputStream(BYTES);

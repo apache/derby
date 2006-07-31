@@ -507,15 +507,15 @@ public class Request {
                                  java.io.Reader r,
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, 
-															SqlException{
+                                                            SqlException{
         
-		writeScalarStream(chained,
-						  chainedWithSameCorrelator,
-						  codePoint,
-						  length * 2,
-						  new UTF32BEEncodedInputStream( r ),
-						  writeNullByte,
-						  parameterIndex);
+        writeScalarStream(chained,
+                          chainedWithSameCorrelator,
+                          codePoint,
+                          length * 2,
+                          EncodedInputStream.createUTF16BEStream(r),
+                          writeNullByte,
+                          parameterIndex);
     }
 
 
