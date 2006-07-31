@@ -6,3 +6,4 @@ jdbcapi/XATest.java
 jdbcapi/checkDataSource.java
 derbynet/ByteArrayCombinerStreamTest.junit
 derbynet/SqlExceptionTest.junit
+lang/grantRevoke.java

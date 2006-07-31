@@ -1,13 +1,3 @@
-name = DAN password = MakeItFaster
-name = KREG password = visualWhat?
-name = JEFF password = HomeRun61
-name = AMES password = AnyVolunteer?
-name = JERRY password = SacreBleu
-name = HOWARDR password = IamBetterAtTennis
-name = FRANCOIS password = paceesalute
-name = JAMIE password = MrNamePlates
-name = OWNER password = BigCheese
-name = PUBLIC password = null
 Grant test: simple grant
 SelectPrivCheck: select * from S1.T1
 SelectPrivCheck: select count(*) from "S1"."T1" where (C1 is null) or (C2 is null) or (C3 is null)

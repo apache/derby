@@ -59,6 +59,9 @@ public class grantRevoke
 			// use the ij utility to read the property file and
 			// make the initial connection.
             ij.getPropertyArg(args);
+
+            // ij.password set in the _app.properties file gets overwritten by test harness!!!
+            System.setProperty("ij.password", "BigCheese");
             owner.setConnection( ij.startJBMS());
             dbmd = owner.getConnection().getMetaData();
 
@@ -1019,6 +1022,10 @@ public class grantRevoke
                        String colPermsType)
             throws SQLException
         {
+			// Can't do this testing in client frameworks as FormatableBitSet is not exposed there
+			if (TestUtil.isNetFramework())
+				return;
+
             if( columns == null)
             {
                 ResultSet rs = owner.stmt.executeQuery(
@@ -1168,6 +1175,10 @@ public class grantRevoke
          */
         void checkMetaData( String testLabel) throws SQLException
         {
+			// Can't do this testing in client frameworks as FormatableBitSet is not exposed there
+			if (TestUtil.isNetFramework())
+				return;
+
             if( columns == null)
             {
                 ResultSet rs = dbmd.getTablePrivileges( (String) null, schema, table);
@@ -1985,7 +1996,6 @@ class User
         this.name = name;
         this.password = password;
         isPublic = "public".equalsIgnoreCase( name);
-		System.out.println("name = "+name+" password = "+password);
     }
 
     boolean isPublic()
