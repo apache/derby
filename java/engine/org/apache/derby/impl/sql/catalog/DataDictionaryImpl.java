@@ -2406,6 +2406,10 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor		tableIdOrderable;
 
+		// In Derby authorization mode, permission catalogs may not be present
+		if (!usesSqlAuthorization)
+			return;
+
 		/* Use tableIDOrderable in both start and stop position for scan. */
 		tableIdOrderable = getValueAsDVD(tableID);
 
@@ -2446,6 +2450,10 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor	routineIdOrderable;
 		ExecRow curRow;
 		PermissionsDescriptor perm;
+
+		// In Derby authorization mode, permission catalogs may not be present
+		if (!usesSqlAuthorization)
+			return;
 
 		/* Use tableIDOrderable in both start and stop position for scan. */
 		routineIdOrderable = getValueAsDVD(routineID);
