@@ -50,8 +50,8 @@ A
 2003       
 GXID |STATUS |READONLY |USERNAME |TYPE                          
 -----
-(1 |PREPARED |false |APP |UserTransaction               
 (1 |IDLE |NULL |APP |UserTransaction               
+(1 |PREPARED |false |APP |UserTransaction               
 GXID |STATUS |READONLY |USERNAME |TYPE                          
 -----
 A          
