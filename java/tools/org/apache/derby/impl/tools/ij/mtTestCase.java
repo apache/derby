@@ -240,6 +240,7 @@ public class mtTestCase
 	
 		out.println("--------------"+file+"-----------------");
 		utilInstance = new utilMain(1, out, ignoreErrors);
+		utilInstance.initConnections();
 		utilInstance.setMtUse(true);
 		utilInstance.go(in, out, (java.util.Properties) null);
 		log.flush();

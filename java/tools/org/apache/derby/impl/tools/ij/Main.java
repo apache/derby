@@ -57,7 +57,6 @@ import java.util.*;
  *
  */
 public class Main {
-	private LocalizedOutput out;
 	private utilMain utilInstance;
 
 	/**
@@ -197,7 +196,7 @@ public class Main {
 		Give a shortcut to go on the utilInstance so
 		we don't expose utilMain.
 	 */
-	public void go(LocalizedInput in, LocalizedOutput out , 
+	private void go(LocalizedInput in, LocalizedOutput out , 
 				   Properties connAttributeDefaults)
 	{
 		LocalizedInput[] inA = { in } ;
@@ -212,12 +211,11 @@ public class Main {
 	}
 
 	public Main(LocalizedOutput out) {
-		if (out!=null) {
-			this.out = out;
-		} else {
-	        this.out = LocalizedResource.getInstance().getNewOutput(System.out);
+		if (out == null) {
+	        out = LocalizedResource.getInstance().getNewOutput(System.out);
 		}
-		utilInstance = getutilMain(1, this.out);
+		utilInstance = getutilMain(1, out);
+		utilInstance.initConnections();
 	}
 
 	/**

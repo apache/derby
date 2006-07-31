@@ -69,7 +69,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	ij ijParser;
 	ConnectionEnv[] connEnv;
 	private int currCE;
-	private int		numConnections;
+	private final int		numConnections;
 	private boolean fileInput;
 	private boolean initialFileInput;
 	private boolean mtUse;
@@ -97,7 +97,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 *
 	 * @param numConnections	The number of connections/users to test.
 	 */
-	public utilMain(int numConnections, LocalizedOutput out)
+	utilMain(int numConnections, LocalizedOutput out)
 		throws ijFatalException
 	{
 		this(numConnections, out, (Hashtable)null);
@@ -115,7 +115,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 *							thrown.  ignoreErrors is used for stress
 	 *							tests.
 	 */
-	public utilMain(int numConnections, LocalizedOutput out, Hashtable ignoreErrors)
+	utilMain(int numConnections, LocalizedOutput out, Hashtable ignoreErrors)
 		throws ijFatalException
 	{
 		String framework_property = util.getSystemProperty("framework");
@@ -145,6 +145,23 @@ public class utilMain implements java.security.PrivilegedAction {
 		{
 		    commandGrabber[ictr] = new StatementFinder(langUtil.getNewInput(System.in));
 			connEnv[ictr] = new ConnectionEnv(ictr, (numConnections > 1), (numConnections == 1));
+		}
+
+		/* Start with connection/user 0 */
+		currCE = 0;
+		fileInput = false;
+		initialFileInput = false;
+		firstRun = true;
+	}
+	
+	/**
+	 * Initialize the connections from the environment.
+	 *
+	 */
+	void initConnections()
+	{
+		for (int ictr = 0; ictr < numConnections; ictr++)
+		{
 			try {
 				connEnv[ictr].init(out);
 			} catch (SQLException s) {
@@ -157,12 +174,6 @@ public class utilMain implements java.security.PrivilegedAction {
 				JDBCDisplayUtil.ShowException(out, ia); // will continue past driver failure
 			}
 		}
-
-		/* Start with connection/user 0 */
-		currCE = 0;
-		fileInput = false;
-		initialFileInput = false;
-		firstRun = true;
 	}
 
 

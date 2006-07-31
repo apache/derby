@@ -36,7 +36,7 @@ import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 
 	@author jerry
  */
-public class utilMain14 extends utilMain
+class utilMain14 extends utilMain
 {
     private static final String JDBC_NOTSUPPORTED = "JDBC 3 method called - not yet supported";
 	/**
@@ -45,7 +45,7 @@ public class utilMain14 extends utilMain
 	 * @param numConnections	The number of connections/users to test.
 	 *
 	 */
-	public utilMain14(int numConnections, LocalizedOutput out)
+	utilMain14(int numConnections, LocalizedOutput out)
 		throws ijFatalException
 	{
 		super(numConnections, out, (Hashtable)null);
@@ -64,7 +64,7 @@ public class utilMain14 extends utilMain
 	 *							tests.
 	 *
 	 */
-	public utilMain14(int numConnections, LocalizedOutput out, Hashtable ignoreErrors)
+	utilMain14(int numConnections, LocalizedOutput out, Hashtable ignoreErrors)
 		throws ijFatalException
 	{
 		super(numConnections, out, ignoreErrors);
