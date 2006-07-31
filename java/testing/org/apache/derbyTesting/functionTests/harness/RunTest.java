@@ -255,8 +255,8 @@ public class RunTest
             System.setProperties(sp);
         }
         
-        JavaVersionHolder	jvh = getProperties(sp);
-		boolean				isJDBC4 = jvh.atLeast( 1, 6 );
+        JavaVersionHolder	jvhs = getProperties(sp);
+		boolean				isJDBC4 = jvhs.atLeast( 1, 6 );
 
         // Setup the directories for the test and test output
         setDirectories(scriptName,sp);
@@ -1029,7 +1029,12 @@ public class RunTest
   		    jvmName = "jdk" + majorVersion + minorVersion;
             }
         }
-		
+
+        // create a JavaVersionHolder for the java.specification.version - 
+        // used to control Sed-ing for JDBC4 & up
+        String specversion = (sp.getProperty("java.specification.version"));
+        JavaVersionHolder jvhs = new JavaVersionHolder(specversion);
+
         testEncoding = sp.getProperty("derbyTesting.encoding");
         upgradejarpath = sp.getProperty("derbyTesting.jar.path");
         if ((testEncoding != null) && (!jvmName.equals("jdk15")))
@@ -1285,7 +1290,7 @@ public class RunTest
 		if (uscdb != null && uscdb.equals("true"))
 			useCommonDB = true;
 
-		return jvh;
+		return jvhs;
     }
 
     private static String createPropString()
