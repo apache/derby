@@ -62,7 +62,7 @@ public abstract class BaseJDBCTestCase
      *         <code>false</code> otherwise.
      */
      public static boolean usingEmbedded() {
-         return (CONFIG.getJDBCClient() == JDBCClient.EMBEDDED);
+         return CONFIG.getJDBCClient().isEmbedded();
      }
     
     /**
@@ -72,7 +72,7 @@ public abstract class BaseJDBCTestCase
     *         <code>false</code> otherwise.
     */
     public static boolean usingDerbyNetClient() {
-        return (CONFIG.getJDBCClient() == JDBCClient.DERBYNETCLIENT);
+        return CONFIG.getJDBCClient().isDerbyNetClient();
     }
     
     /**
@@ -82,7 +82,7 @@ public abstract class BaseJDBCTestCase
     *         <code>false</code> otherwise.
     */
     public static boolean usingDerbyNet() {
-        return (CONFIG.getJDBCClient() == JDBCClient.DERBYNET);
+        return CONFIG.getJDBCClient().isDB2Client();
     }
 
     /**

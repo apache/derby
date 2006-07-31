@@ -29,7 +29,7 @@ public final class JDBCClient {
     /**
      * The embedded JDBC client.
      */
-    public static JDBCClient EMBEDDED = new JDBCClient(
+    static final JDBCClient EMBEDDED = new JDBCClient(
             "Embedded", 
             "org.apache.derby.jdbc.EmbeddedDriver", 
             "org.apache.derby.jdbc.EmbeddedDataSource", 
@@ -38,20 +38,54 @@ public final class JDBCClient {
     /**
      * The Derby network client.
      */
-    public static JDBCClient DERBYNETCLIENT= new JDBCClient(
+    static final JDBCClient DERBYNETCLIENT= new JDBCClient(
             "DerbyNetClient",
             "org.apache.derby.jdbc.ClientDriver",
             "org.apache.derby.jdbc.ClientDataSource",
             "jdbc:derby://");
     
     /**
-     * The JCC network client (the "old net" client for Derby).
+     * The DB2 Universal JDBC network client.
+     * AKA: JCC or DerbyNet.
+     * (the "old net" client for Derby).
      */
-    public static JDBCClient DERBYNET= new JDBCClient(
+    static final JDBCClient DB2CLIENT= new JDBCClient(
             "DerbyNet",
             "com.ibm.db2.jcc.DB2Driver",
             null,
             "jdbc:derby:net://");
+    
+    /**
+     * Is this the embdded client.
+    */
+    public boolean isEmbedded()
+    {
+    	return getName().equals(EMBEDDED.getName());
+    }
+    /**
+     * Is this Derby's network client.
+     * @return
+     */
+    public boolean isDerbyNetClient()
+    {
+    	return getName().equals(DERBYNETCLIENT.getName());
+    }
+    /**
+     * Is this DB2's Universal JDBC 
+     * @return
+     */
+    public boolean isDB2Client()
+    {
+    	return getName().equals(DB2CLIENT.getName());
+    }
+    
+    /**
+     * Get the name of the client
+     */
+    public String getName()
+    {
+    	return frameWork;
+    }
     
     /**
      * Get JDBC driver class name.

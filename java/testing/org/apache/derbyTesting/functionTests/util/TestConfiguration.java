@@ -89,7 +89,7 @@ public class TestConfiguration {
         if ("DerbyNetClient".equals(framework)) {
             jdbcClient = JDBCClient.DERBYNETCLIENT;
         } else if ("DerbyNet".equals(framework)) {
-            jdbcClient = JDBCClient.DERBYNET;
+            jdbcClient = JDBCClient.DB2CLIENT;
         } else {
             jdbcClient = JDBCClient.EMBEDDED;
         }
