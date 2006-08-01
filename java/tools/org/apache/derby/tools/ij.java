@@ -105,7 +105,12 @@ public class ij {
 	  }
 	  else
 	  {
-		  ijE = new org.apache.derby.impl.tools.ij.Main14(false);
+		  // temp - allow ij to continue to work under jdk131
+		  // will resolve as part of DEBRY-1609
+		  // jdk13 gets error loading Main14 due to the
+		  // class now being built with the jdk14 target flag.
+		  // ijE = new org.apache.derby.impl.tools.ij.Main14(false);
+		  ijE = new Main(false);
 	  }	  
 	  
 	  LocalizedInput li = LocalizedResource.getInstance().
