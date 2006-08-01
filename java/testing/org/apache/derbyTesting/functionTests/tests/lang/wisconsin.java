@@ -68,6 +68,7 @@ public class wisconsin {
 		
 	
 		utilInstance = new utilMain(1, out, (Hashtable)null);
+        utilInstance.initConnections();
 		utilInstance.go(in, out, (java.util.Properties) null);
 		//log.flush();
 		out.flush();

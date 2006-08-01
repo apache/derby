@@ -158,7 +158,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * Initialize the connections from the environment.
 	 *
 	 */
-	void initConnections()
+	public void initConnections()
 	{
 		for (int ictr = 0; ictr < numConnections; ictr++)
 		{
