@@ -1579,4 +1579,71 @@ ij(MAMTA1)> select * from sys.systableperms where grantee='SAMMY';
 TABLEPERMSID                        |GRANTEE                                                                                                                         |GRANTOR                                                                                                                         |TABLEID                             |&|&|&|&|&|&
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 0 rows selected
+ij(MAMTA1)> -- DERBY-1608: Recognize new SYSFUC routines as system builtin routines
+-- Builtin functions don't need any permission checking. They are executable by all
+VALUES { fn ACOS(0.0707) };
+1                     
+----------------------
+1.5000372950430991    
+1 row selected
+ij(MAMTA1)> VALUES ACOS(0.0707);
+1                     
+----------------------
+1.5000372950430991    
+1 row selected
+ij(MAMTA1)> VALUES PI();
+1                     
+----------------------
+3.141592653589793     
+1 row selected
+ij(MAMTA1)> create table SYSFUN_MATH_TEST (d double);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into SYSFUN_MATH_TEST values null;
+1 row inserted/updated/deleted
+ij(MAMTA1)> insert into SYSFUN_MATH_TEST values 0.67;
+1 row inserted/updated/deleted
+ij(MAMTA1)> insert into SYSFUN_MATH_TEST values 1.34;
+1 row inserted/updated/deleted
+ij(MAMTA1)> select cast (ATAN(d) as DECIMAL(6,3)) AS ATAN FROM SYSFUN_MATH_TEST;
+ATAN    
+--------
+NULL    
+0.590   
+0.929   
+3 rows selected
+ij(MAMTA1)> select cast (COS(d) as DECIMAL(6,3)) AS COS FROM SYSFUN_MATH_TEST;
+COS     
+--------
+NULL    
+0.783   
+0.228   
+3 rows selected
+ij(MAMTA1)> select cast (SIN(d) as DECIMAL(6,3)) AS SIN FROM SYSFUN_MATH_TEST;
+SIN     
+--------
+NULL    
+0.620   
+0.973   
+3 rows selected
+ij(MAMTA1)> select cast (TAN(d) as DECIMAL(6,3)) AS TAN FROM SYSFUN_MATH_TEST;
+TAN     
+--------
+NULL    
+0.792   
+4.255   
+3 rows selected
+ij(MAMTA1)> select cast (DEGREES(d) as DECIMAL(6,3)) AS DEGREES FROM SYSFUN_MATH_TEST;
+DEGREES 
+--------
+NULL    
+38.388  
+76.776  
+3 rows selected
+ij(MAMTA1)> select cast (RADIANS(d) as DECIMAL(6,3)) AS RADIANS FROM SYSFUN_MATH_TEST;
+RADIANS 
+--------
+NULL    
+0.011   
+0.023   
+3 rows selected
 ij(MAMTA1)> 

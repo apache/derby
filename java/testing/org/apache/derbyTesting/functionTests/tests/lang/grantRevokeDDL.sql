@@ -989,3 +989,26 @@ select * from sys.syscolperms where grantee='SAMMY';
 
 select * from sys.systableperms where grantee='SAMMY';
 
+
+-- DERBY-1608: Recognize new SYSFUC routines as system builtin routines
+-- Builtin functions don't need any permission checking. They are executable by all
+
+VALUES { fn ACOS(0.0707) }; 
+
+VALUES ACOS(0.0707); 
+
+VALUES PI();
+
+create table SYSFUN_MATH_TEST (d double);
+insert into SYSFUN_MATH_TEST values null;
+insert into SYSFUN_MATH_TEST values 0.67;
+insert into SYSFUN_MATH_TEST values 1.34;
+
+select cast (ATAN(d) as DECIMAL(6,3)) AS ATAN FROM SYSFUN_MATH_TEST;
+
+select cast (COS(d) as DECIMAL(6,3)) AS COS FROM SYSFUN_MATH_TEST;
+select cast (SIN(d) as DECIMAL(6,3)) AS SIN FROM SYSFUN_MATH_TEST;
+select cast (TAN(d) as DECIMAL(6,3)) AS TAN FROM SYSFUN_MATH_TEST;
+
+select cast (DEGREES(d) as DECIMAL(6,3)) AS DEGREES FROM SYSFUN_MATH_TEST;
+select cast (RADIANS(d) as DECIMAL(6,3)) AS RADIANS FROM SYSFUN_MATH_TEST;

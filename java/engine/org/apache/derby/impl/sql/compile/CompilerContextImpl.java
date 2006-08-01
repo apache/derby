@@ -777,6 +777,10 @@ public class CompilerContextImpl extends ContextImpl
 		if( requiredRoutinePrivileges == null || routine == null)
 			return;
 
+		// Ignore SYSFUN routines for permission scheme
+		if (routine.getSchemaUUID().toString().equals(SchemaDescriptor.SYSFUN_SCHEMA_UUID))
+			return;
+
  		if (requiredRoutinePrivileges.get(routine.getUUID()) == null)
  			requiredRoutinePrivileges.put(routine.getUUID(), ReuseFactory.getInteger(1));
 	}
