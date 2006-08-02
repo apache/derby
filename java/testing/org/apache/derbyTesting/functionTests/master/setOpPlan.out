@@ -1,0 +1,454 @@
+ij> -- DERBY-939 
+-- Test union and intersect/except with runtime statistics enabled.
+CREATE TABLE t1 (i int);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE t2 (j int);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE t3 (k int);
+0 rows inserted/updated/deleted
+ij> INSERT INTO t1 VALUES 3,2,1;
+3 rows inserted/updated/deleted
+ij> INSERT INTO t2 VALUES 1,2,3,4;
+4 rows inserted/updated/deleted
+ij> INSERT INTO t3 VALUES 5,2,3,4,1;
+5 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
+0 rows inserted/updated/deleted
+ij> MaximumDisplayWidth 7000;
+ij> SELECT i FROM t1 UNION SELECT j FROM t2 INTERSECT SELECT k FROM t3;
+1          
+-----------
+1          
+2          
+3          
+4          
+ij> VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	SELECT i FROM t1 UNION SELECT j FROM t2 INTERSECT SELECT k FROM t3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Sort ResultSet:
+Number of opens = 1
+Rows input = 7
+Rows returned = 4
+Eliminate duplicates = true
+In sorted order = false
+Sort information: 
+	Number of rows input=7
+	Number of rows output=4
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Source result set:
+	Union ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 3
+	Rows seen from the right = 4
+	Rows returned = 7
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Table Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 3
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=1
+			Number of pages visited=1
+			Number of rows qualified=3
+			Number of rows visited=3
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+	Right result set:
+		Intersect ResultSet:
+		Number of opens = 1
+		Rows seen from the left = 4
+		Rows seen from the right = 4
+		Rows returned = 4
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Left result set:
+			Sort ResultSet:
+			Number of opens = 1
+			Rows input = 4
+			Rows returned = 4
+			Eliminate duplicates = false
+			In sorted order = false
+			Sort information: 
+				Number of rows input=4
+				Number of rows output=4
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Source result set:
+				Table Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 4
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=1
+					Number of pages visited=1
+					Number of rows qualified=4
+					Number of rows visited=4
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+		Right result set:
+			Sort ResultSet:
+			Number of opens = 1
+			Rows input = 5
+			Rows returned = 4
+			Eliminate duplicates = false
+			In sorted order = false
+			Sort information: 
+				Number of rows input=5
+				Number of rows output=5
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Source result set:
+				Table Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 5
+				Rows filtered = 0
+				Fetch Size = 16
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=1
+					Number of pages visited=1
+					Number of rows qualified=5
+					Number of rows visited=5
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
+None
+ij> SELECT i FROM t1 UNION SELECT j FROM t2 EXCEPT SELECT k FROM t3;
+1          
+-----------
+ij> VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	SELECT i FROM t1 UNION SELECT j FROM t2 EXCEPT SELECT k FROM t3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Except ResultSet:
+Number of opens = 1
+Rows seen from the left = 4
+Rows seen from the right = 4
+Rows returned = 0
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Sort ResultSet:
+	Number of opens = 1
+	Rows input = 7
+	Rows returned = 4
+	Eliminate duplicates = true
+	In sorted order = false
+	Sort information: 
+		Number of rows input=7
+		Number of rows output=4
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Union ResultSet:
+		Number of opens = 1
+		Rows seen from the left = 3
+		Rows seen from the right = 4
+		Rows returned = 7
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Left result set:
+			Table Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 3
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=1
+				Number of pages visited=1
+				Number of rows qualified=3
+				Number of rows visited=3
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+		Right result set:
+			Table Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 4
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=1
+				Number of pages visited=1
+				Number of rows qualified=4
+				Number of rows visited=4
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+Right result set:
+	Sort ResultSet:
+	Number of opens = 1
+	Rows input = 5
+	Rows returned = 4
+	Eliminate duplicates = false
+	In sorted order = false
+	Sort information: 
+		Number of rows input=5
+		Number of rows output=5
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Table Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=1
+			Number of pages visited=1
+			Number of rows qualified=5
+			Number of rows visited=5
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+ij> SELECT i FROM t1 INTERSECT SELECT j FROM t2 EXCEPT SELECT k FROM t3;
+1          
+-----------
+ij> VALUES SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Statement Name: 
+	null
+Statement Text: 
+	SELECT i FROM t1 INTERSECT SELECT j FROM t2 EXCEPT SELECT k FROM t3
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+Except ResultSet:
+Number of opens = 1
+Rows seen from the left = 3
+Rows seen from the right = 3
+Rows returned = 0
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+Left result set:
+	Intersect ResultSet:
+	Number of opens = 1
+	Rows seen from the left = 3
+	Rows seen from the right = 3
+	Rows returned = 3
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Left result set:
+		Sort ResultSet:
+		Number of opens = 1
+		Rows input = 3
+		Rows returned = 3
+		Eliminate duplicates = false
+		In sorted order = false
+		Sort information: 
+			Number of rows input=3
+			Number of rows output=3
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Source result set:
+			Table Scan ResultSet for T1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 3
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=1
+				Number of pages visited=1
+				Number of rows qualified=3
+				Number of rows visited=3
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+	Right result set:
+		Sort ResultSet:
+		Number of opens = 1
+		Rows input = 4
+		Rows returned = 3
+		Eliminate duplicates = false
+		In sorted order = false
+		Sort information: 
+			Number of rows input=4
+			Number of rows output=4
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+		Source result set:
+			Table Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+			Number of opens = 1
+			Rows seen = 4
+			Rows filtered = 0
+			Fetch Size = 16
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=1
+				Number of pages visited=1
+				Number of rows qualified=4
+				Number of rows visited=4
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
+None
+Right result set:
+	Sort ResultSet:
+	Number of opens = 1
+	Rows input = 5
+	Rows returned = 3
+	Eliminate duplicates = false
+	In sorted order = false
+	Sort information: 
+		Number of rows input=5
+		Number of rows output=5
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Table Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+		Number of opens = 1
+		Rows seen = 5
+		Rows filtered = 0
+		Fetch Size = 16
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			next time in milliseconds/row = 0
+		scan information: 
+			Bit set of columns fetched=All
+			Number of columns fetched=1
+			Number of pages visited=1
+			Number of rows qualified=5
+			Number of rows visited=5
+			Scan type=heap
+			start position: 
+null			stop position: 
+null			qualifiers:
+None
+ij> CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
+0 rows inserted/updated/deleted
+ij> 
