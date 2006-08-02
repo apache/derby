@@ -35,10 +35,17 @@ import java.util.ArrayList;
  * the byte buffer, or doing a single big copy to combine the byte arrays in
  * the end. This is important for the temporary solution, since we must
  * materialize the stream to find the length anyway.
+ *
+ * If there is less data available than the specified length, an exception is
+ * thrown. Available data is determined by the length of the byte arrays, not
+ * the contents of them. A byte array with all 0's is considered valid data.
+ *
+ * Besides from truncation, this stream does not change the underlying data in
+ * any way.
  */
 public class ByteArrayCombinerStream
     extends InputStream {
-    
+
     /** A list of the arrays to combine. */
     private final ArrayList arrays;
     /** Length of the stream. */
@@ -50,8 +57,8 @@ public class ByteArrayCombinerStream
     /** The array we are currently reading from. */
     private byte[] curArray;
     /** The local offset into the current array. */
-    private int off = 0; 
-    
+    private int off = 0;
+
     /**
      * Create a stream whose source is a list of byte arrays.
      *
@@ -59,27 +66,37 @@ public class ByteArrayCombinerStream
      *      byte arrays. The references are copied to a new
      *      <code>ArrayList</code> instance.
      * @param length the length of the stream. Never published outside
-     *      this object
+     *      this object. Note that the length specified can be shorter
+     *      than the actual number of bytes in the byte arrays.
+     * @throws IllegalArgumentException if there is less data available than
+     *      specified by <code>length</code>, or <code>length</code> is
+     *      negative.
      */
     public ByteArrayCombinerStream(ArrayList arraysIn, long length) {
+        // Don't allow negative length.
+        if (length < 0) {
+            throw new IllegalArgumentException("Length cannot be negative: " +
+                    length);
+        }
         this.specifiedLength = length;
+        long tmpRemaining = length;
         if (arraysIn != null && arraysIn.size() > 0) {
             // Copy references to the byte arrays to a new ArrayList.
             int arrayCount = arraysIn.size();
-            long tmpRemaining = length;
             byte[] tmpArray;
             arrays = new ArrayList(arrayCount);
             // Truncate data if there are more bytes then specified.
             // Done to simplify boundary checking in the read-methods.
-            for (int i=0; i < arrayCount; i++) {
+            for (int i=0; i < arrayCount && tmpRemaining > 0; i++) {
                 tmpArray = (byte[])arraysIn.get(i);
                 if (tmpRemaining < tmpArray.length) {
                     // Create a new shrunk array.
-                    byte[] shrunkArray = 
+                    byte[] shrunkArray =
                         new byte[(int)(tmpRemaining)];
-                    System.arraycopy(tmpArray, 0, 
+                    System.arraycopy(tmpArray, 0,
                                      shrunkArray, 0, shrunkArray.length);
                     arrays.add(shrunkArray);
+                    tmpRemaining -= shrunkArray.length;
                     break;
                 } else {
                     // Add the whole array.
@@ -93,6 +110,12 @@ public class ByteArrayCombinerStream
             // Specify gOffset so available returns 0;
             gOffset = length;
             arrays = null;
+        }
+        // If we don't have enough data, throw exception.
+        if (tmpRemaining > 0) {
+            throw new IllegalArgumentException("Not enough data, " + 
+                    tmpRemaining + " bytes short of specified length " +
+                    length);
         }
     }
 
@@ -143,7 +166,7 @@ public class ByteArrayCombinerStream
         } else {
             int toRead = 0;
             while (curArray != null && read < length) {
-                toRead = Math.min(curArray.length, length - read);
+                toRead = Math.min(curArray.length - off, length - read);
                 System.arraycopy(curArray, off, buf, offset + read, toRead);
                 read += toRead;
                 gOffset += toRead;

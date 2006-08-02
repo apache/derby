@@ -137,7 +137,9 @@ public abstract class Lob implements UnitOfWorkListener {
                         curBytes = new byte[GROWBY];
                     }
                 }
-                totalLength += partLength;
+                if (partLength > 0) {
+                    totalLength += partLength;
+                }
             } while (partLength == GROWBY);
             // Make sure stream is exhausted.
             if (is.read() != -1) {
@@ -149,7 +151,9 @@ public abstract class Lob implements UnitOfWorkListener {
                                 typeDesc
                         );
             }
-            byteArrays.add(curBytes);
+            if (partLength > 0) {
+                byteArrays.add(curBytes);
+            }
 
             // Cleanup and set state.
             curBytes = null;

@@ -39,27 +39,27 @@ public class ByteArrayCombinerStreamTest
             77,78,79,80,81,82,83,84,85,86,87,88};
 
     private ByteArrayCombinerStream combiner;
-    
+
     public ByteArrayCombinerStreamTest(String name) {
         super(name);
     }
 
     public void testCombineNullRead()
             throws IOException {
-        combiner = new ByteArrayCombinerStream(null, 10);
+        combiner = new ByteArrayCombinerStream(null, 0);
         assertEquals(-1, combiner.read());
     }
 
     public void testCombineNullReadArray()
             throws IOException {
-        combiner = new ByteArrayCombinerStream(null, 10);
+        combiner = new ByteArrayCombinerStream(null, 0);
         assertEquals(-1, combiner.read(new byte[10], 0, 10));
     }
 
     public void testCombineAvailableNull()
             throws IOException {
-        combiner = new ByteArrayCombinerStream(null, -34);
-        assertEquals(0, combiner.available()); 
+        combiner = new ByteArrayCombinerStream(null, 0);
+        assertEquals(0, combiner.available());
     }
 
     public void testCombineAvailable4bytes()
@@ -68,16 +68,37 @@ public class ByteArrayCombinerStreamTest
         ArrayList list = new ArrayList(1);
         list.add(array);
         combiner = new ByteArrayCombinerStream(list, 4);
-        assertEquals(4, combiner.available()); 
+        assertEquals(4, combiner.available());
     }
-    
+
+    /**
+     * Make sure an extra "empty" array doesn't cause errors.
+     * This test is based on knowledge of the implementation, where an extra
+     * byte array was not removed during the reducation process. This can
+     * cause <code>nextArray</code> to not return <code>null</code> when it
+     * should, causing an <code>ArrayIndexOutOfBoundsException</code>.
+     * This bug was corrected by DERBY-1417.
+     */
+    public void testCombineWithExtraEmptyByteArray()
+            throws IOException {
+        byte[] array = {65,66,77,79};
+        ArrayList list = new ArrayList(2);
+        list.add(array);
+        list.add(new byte[4]);
+        combiner = new ByteArrayCombinerStream(list, array.length);
+        byte[] resArray = new byte[array.length];
+        assertEquals(array.length,
+                     combiner.read(resArray, 0, resArray.length));
+        assertTrue(combiner.read() == -1);
+    }
+
     public void testCombineOneArray()
             throws IOException {
         ArrayList list = new ArrayList(1);
         list.add(defaultArray);
         combiner = new ByteArrayCombinerStream(list, defaultArray.length);
         byte[] resArray = new byte[defaultArray.length];
-        assertEquals(defaultArray.length, 
+        assertEquals(defaultArray.length,
                      combiner.read(resArray,0, resArray.length));
         assertTrue(combiner.read() == -1);
         assertTrue(Arrays.equals(defaultArray, resArray));
@@ -106,7 +127,7 @@ public class ByteArrayCombinerStreamTest
         assertTrue(combiner.read() == -1);
         assertTrue(Arrays.equals(targetArray, resArray));
     }
-    
+
     public void testTruncateDataFromOneArray()
             throws IOException {
         int length = defaultArray.length -5;
@@ -121,7 +142,7 @@ public class ByteArrayCombinerStreamTest
         assertTrue(combiner.read() == -1);
         assertTrue(Arrays.equals(targetArray, resArray));
     }
-    
+
     public void testTruncateDataFromTwoArrays()
             throws IOException {
         int length = (defaultArray.length *2) -7;
@@ -132,7 +153,7 @@ public class ByteArrayCombinerStreamTest
         System.arraycopy(defaultArray, 0,
                          targetArray, 0, defaultArray.length);
         System.arraycopy(defaultArray, 0,
-                         targetArray, defaultArray.length, 
+                         targetArray, defaultArray.length,
                          length - defaultArray.length);
         byte[] resArray = new byte[length];
         combiner = new ByteArrayCombinerStream(list, length);
@@ -140,4 +161,81 @@ public class ByteArrayCombinerStreamTest
         assertTrue(combiner.read() == -1);
         assertTrue(Arrays.equals(targetArray, resArray));
     }
-} // End class ByteArrayCombinerStreamTest 
+
+    /**
+     * Make sure an exception is thrown if there is less data available than
+     * the specified length.
+     */
+    public void testTooLittleDataNoCombine() {
+        ArrayList list = new ArrayList(1);
+        list.add(new byte[5]);
+        try {
+            combiner = new ByteArrayCombinerStream(list, 10);
+            fail("An IllegalArgumentException singalling too little data " +
+                    "should have been thrown");
+        } catch (IllegalArgumentException iae) {
+            // This should happen, continue.
+        }
+    }
+
+    /**
+     * Make sure an exception is thrown if there is less data available than
+     * the specified length.
+     */
+    public void testTooLittleDataWithCombine() {
+        ArrayList list = new ArrayList(3);
+        byte[] data = {65,66,67,68,69};
+        list.add(data);
+        list.add(data);
+        list.add(data);
+        try {
+            combiner = new ByteArrayCombinerStream(list, data.length *3 + 1);
+            fail("An IllegalArgumentException singalling too little data " +
+                    "should have been thrown");
+        } catch (IllegalArgumentException iae) {
+            // This should happen, continue.
+        }
+    }
+
+    /**
+     * Make sure an exception is thrown if a negative length is specified.
+     */
+    public void testNegativeLengthArgument() {
+        ArrayList list = new ArrayList(1);
+        list.add(new byte[1234]);
+        try {
+            combiner = new ByteArrayCombinerStream(list, -54);
+            fail("An IllegalArgumentException singalling negative length " +
+                    "should have been thrown");
+        } catch (IllegalArgumentException iae) {
+            // This should happen, continue.
+
+        }
+    }
+
+    /**
+     * Demonstrate that the stream does not change negative values in the
+     * underlying data.
+     * This can cause code to believe the stream is exhausted even though it is
+     * not.
+     */
+    public void testNegativeValueInDataCausesEndOfStream()
+            throws IOException {
+        byte[] data = {66,67,-123,68,69};
+        byte[] targetData = {66,67,0,0,0};
+        byte[] resData = new byte[5];
+        ArrayList list = new ArrayList(1);
+        list.add(data);
+        combiner = new ByteArrayCombinerStream(list, data.length);
+        byte b;
+        int index = 0;
+        while ((b = (byte)combiner.read()) > 0) {
+            resData[index++] = b;
+        }
+        assertTrue(Arrays.equals(targetData, resData));
+        // Even though we think the stream is exhausted, it is not...
+        assertEquals(data[3], (byte)combiner.read());
+        assertEquals(data[4], (byte)combiner.read());
+        assertEquals(-1, (byte)combiner.read());
+    }
+} // End class ByteArrayCombinerStreamTest
