@@ -157,7 +157,6 @@ public interface DataDictionary
 	public static final int SYSTABLEPERMS_CATALOG_NUM = 16;
 	public static final int SYSCOLPERMS_CATALOG_NUM = 17;
 	public static final int SYSROUTINEPERMS_CATALOG_NUM = 18;
-	public static final int SYSREQUIREDPERM_CATALOG_NUM = 19;
 
 	/* static finals for constraints 
 	 * (Here because they are needed by parser, compilation and execution.)

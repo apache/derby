@@ -295,8 +295,7 @@ public final class	DataDictionaryImpl
 									"SYSDUMMY1",
                                     "SYSTABLEPERMS",
                                     "SYSCOLPERMS",
-                                    "SYSROUTINEPERMS",
-                                    "SYSREQUIREDPERM"
+                                    "SYSROUTINEPERMS"
 									};
 
 	private	static final int		NUM_NONCORE = nonCoreNames.length;
@@ -7838,11 +7837,6 @@ public final class	DataDictionaryImpl
 
 			  case SYSROUTINEPERMS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSROUTINEPERMSRowFactory(
-												 luuidFactory, exFactory, dvf, convertIdToLower));					 
-				break;
-
-			  case SYSREQUIREDPERM_CATALOG_NUM:
-				retval = new TabInfoImpl(new SYSREQUIREDPERMRowFactory(
 												 luuidFactory, exFactory, dvf, convertIdToLower));					 
 				break;
 			}

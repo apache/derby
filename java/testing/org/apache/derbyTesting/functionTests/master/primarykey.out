@@ -178,7 +178,6 @@ SYSSTATISTICS                                                                   
 SYSTABLEPERMS                                                                                                                   |1          
 SYSCOLPERMS                                                                                                                     |1          
 SYSROUTINEPERMS                                                                                                                 |1          
-SYSREQUIREDPERM                                                                                                                 |1          
 ij> -- drop tables
 drop table pos1;
 0 rows inserted/updated/deleted
@@ -207,7 +206,6 @@ SYSSTATISTICS                                                                   
 SYSTABLEPERMS                                                                                                                   |1          
 SYSCOLPERMS                                                                                                                     |1          
 SYSROUTINEPERMS                                                                                                                 |1          
-SYSREQUIREDPERM                                                                                                                 |1          
 ij> -- test that a unique key can be explicitly not nullable
 create table pos1(c1 int not null unique);
 0 rows inserted/updated/deleted

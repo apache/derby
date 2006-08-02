@@ -370,7 +370,6 @@ public	class DD_Version implements	Formatable
 			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSTABLEPERMS_CATALOG_NUM);
 			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSCOLPERMS_CATALOG_NUM);
 			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSROUTINEPERMS_CATALOG_NUM);
-			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSREQUIREDPERM_CATALOG_NUM);
 
 			// Change system schemas to be owned by aid
 			bootingDictionary.updateSystemSchemaAuthorization(aid, tc);

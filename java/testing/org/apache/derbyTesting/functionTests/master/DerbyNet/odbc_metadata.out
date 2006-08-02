@@ -266,7 +266,6 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,SYS,SYSFILES,SYSTEM TABLE,,null,null,null,null,null
 ,SYS,SYSFOREIGNKEYS,SYSTEM TABLE,,null,null,null,null,null
 ,SYS,SYSKEYS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSREQUIREDPERM,SYSTEM TABLE,,null,null,null,null,null
 ,SYS,SYSROUTINEPERMS,SYSTEM TABLE,,null,null,null,null,null
 ,SYS,SYSSCHEMAS,SYSTEM TABLE,,null,null,null,null,null
 ,SYS,SYSSTATEMENTS,SYSTEM TABLE,,null,null,null,null,null
@@ -288,7 +287,6 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,SYS,SYSFILES,SYSTEM TABLE,,null,null,null,null,null
 ,SYS,SYSFOREIGNKEYS,SYSTEM TABLE,,null,null,null,null,null
 ,SYS,SYSKEYS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSREQUIREDPERM,SYSTEM TABLE,,null,null,null,null,null
 ,SYS,SYSROUTINEPERMS,SYSTEM TABLE,,null,null,null,null,null
 ,SYS,SYSSCHEMAS,SYSTEM TABLE,,null,null,null,null,null
 ,SYS,SYSSTATEMENTS,SYSTEM TABLE,,null,null,null,null,null
