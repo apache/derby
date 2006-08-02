@@ -31,6 +31,7 @@
 
 package org.apache.derby.impl.drda;
 import java.util.Hashtable;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 class DRDAProtocolException extends Exception
 {
@@ -77,7 +78,10 @@ class DRDAProtocolException extends Exception
 	// message arguments
 	private Object [] messageArgs;
 	
-	
+	// A verbose error message string, will be helpful
+	// when getMessage() is called on this Exception object
+	private String msg;
+    
 	private static Hashtable errorInfoTable;
 	
 	protected static String DRDA_Proto_CMDCHKRM=	"DRDA_Proto_CMDCHKRM";
@@ -186,10 +190,13 @@ class DRDAProtocolException extends Exception
 							 NO_ASSOC_ERRCD,
 							 false));
 
+    // Permanent Agent Error (AGNPRMRM) Reply Message indicates that the command
+    // requested could not be completed because of a permanent error
+    // condition detected at the target system.
 	errorInfoTable.put(DRDA_AgentError,
 			   new DRDAProtocolExceptionInfo(
-							 0,
-							 0,
+							 CodePoint.AGNPRMRM,
+							 CodePoint.SVRCOD_PRMDMG,
 							 NO_ASSOC_ERRCD,
 							 false));
 
@@ -233,14 +240,15 @@ class DRDAProtocolException extends Exception
 		this.errcd = errCdArg;
 		this.messageid = msgid;
 
-		String msg;
 		if (msgid.equals(DRDA_AgentError))
 		{
 			this.svrcod = ((Integer)args[0]).intValue();
 			this.rdbnam = (String)args[1];
-			msg = "Execution failed because of Permant Agent Error: SVRCOD = " +
+            // retrieve the server diagnostic error message 
+            String srvdgn = (String)args[2];
+			msg = "Execution failed because of Permanent Agent Error: SVRCOD = " +
 				java.lang.Integer.toHexString(this.svrcod) +
-				"; RDBNAM = "+ rdbnam;
+				"; RDBNAM = "+ rdbnam +"; diagnostic msg = "+ srvdgn;
 			agentError = true;
 		}
 		else if (msgid.equals(DRDA_Proto_RDBNFNRM))
@@ -314,7 +322,8 @@ class DRDAProtocolException extends Exception
 	protected static DRDAProtocolException newAgentError(DRDAConnThread agent,
 		int svrcod, String rdbnam, String srvdgn)
 	{
-		System.out.println("agent" + agent);
+        if ( SanityManager.DEBUG )
+            System.out.println("agentError in " + agent);
 		Object[] oa = {new Integer(svrcod), rdbnam, srvdgn};
 		return new DRDAProtocolException(DRDA_AgentError,
 										agent,
@@ -366,6 +375,15 @@ class DRDAProtocolException extends Exception
 		}
 		writer.endDdmAndDss();
 	}
+    
+    /**
+     * Override getMessage() 
+     * @return the server diagnostic error message for this exception
+     */
+    public String getMessage()
+    {
+        return msg;
+    }
 }
 
 
