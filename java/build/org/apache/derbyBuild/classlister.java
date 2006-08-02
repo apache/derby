@@ -623,9 +623,16 @@ public class classlister {
 		if (!isCloudscapeCode(className))
 			return;
 
-		String packageName = className.substring(0, className.lastIndexOf('.') + 1);
+                // The following block of code checks the package of each class
+                // scanned to see if there is a corresponding properties file
+                // from propFiles and adds it to the list of found classes.
+                // derbytools.jar should not contain any of these files, so skip
+                // for that jar. See also DERBY-1537.
+                if (!db2jtools)
+                {
+		    String packageName = className.substring(0, className.lastIndexOf('.') + 1);
 
-		for (int i = 0; i < propFiles.length; i++) {
+		    for (int i = 0; i < propFiles.length; i++) {
 			String fileName = "/" + packageName.replace('.', '/') + propFiles[i];
 			if (foundClasses.get(fileName) != null)
 				continue;
@@ -637,8 +644,9 @@ public class classlister {
 
 
 			foundClasses.put(fileName.substring(1), "file");
-		}
-} finally {
+		    }
+                }
+        } finally {
 		indent--;
 	}
 	}
