@@ -117,6 +117,7 @@ lang/reopenScan.sql
 lang/repeat.java
 lang/schemas.sql
 lang/select.sql
+lang/setOpPlan.sql
 lang/simpleThreadWrapper.java
 lang/specjPlans.sql
 lang/SpillHash.java

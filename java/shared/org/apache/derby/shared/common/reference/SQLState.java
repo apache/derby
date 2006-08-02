@@ -1153,7 +1153,11 @@ public interface SQLState {
 	String RTS_BEGIN_DEPENDENT_NUMBER								   = "43Y54.U";	
 	String RTS_END_DEPENDENT_NUMBER									   = "43Y55.U";	
 	String RTS_USER_SUPPLIED_OPTIMIZER_OVERRIDES_FOR_TABLE			   = "43Y56.U";	
-	String RTS_USER_SUPPLIED_OPTIMIZER_OVERRIDES_FOR_JOIN			   = "43Y57.U";	
+	String RTS_USER_SUPPLIED_OPTIMIZER_OVERRIDES_FOR_JOIN			   = "43Y57.U";
+	String RTS_INTERSECT_RS                                            = "43Y58.U";
+	String RTS_INTERSECT                                               = "43Y59.U";
+	String RTS_EXCEPT_RS                                               = "43Y60.U";
+	String RTS_EXCEPT                                                  = "43Y61.U";
 
 	// org.apache.derby.catalog.types
 	String TI_SQL_TYPE_NAME			= "44X00.U";

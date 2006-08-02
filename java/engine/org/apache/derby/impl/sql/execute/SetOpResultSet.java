@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.sql.execute.SetOpResultSet
 
-   Copyright 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 2004, 2006 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -64,6 +64,11 @@ public class SetOpResultSet extends NoPutResultSetImpl
     private final int[] intermediateOrderByColumns;
     private final int[] intermediateOrderByDirection;
 
+    /* Run time statistics variables */
+    private int rowsSeenLeft;
+    private int rowsSeenRight;
+    private int rowsReturned;
+
     SetOpResultSet( NoPutResultSet leftSource,
                     NoPutResultSet rightSource,
                     Activation activation, 
@@ -99,12 +104,17 @@ public class SetOpResultSet extends NoPutResultSetImpl
 	{
 		beginTime = getCurrentTimeMillis();
 		if (SanityManager.DEBUG)
-	    	SanityManager.ASSERT( ! isOpen, "SetOpProjectRestrictResultSet already open");
+	    	SanityManager.ASSERT( ! isOpen, "SetOpResultSet already open");
 
         isOpen = true;
         leftSource.openCore();
         rightSource.openCore();
         rightInputRow = rightSource.getNextRowCore();
+        if (rightInputRow != null)
+        {
+            rowsSeenRight++;
+        }
+
 		numOpens++;
 
 		openTime += getElapsedMillis(beginTime);
@@ -121,6 +131,8 @@ public class SetOpResultSet extends NoPutResultSetImpl
         {
             while( (leftInputRow = leftSource.getNextRowCore()) != null)
             {
+                rowsSeenLeft++;
+
                 DataValueDescriptor[] leftColumns = leftInputRow.getRowArray();
                 if( !all)
                 {
@@ -130,9 +142,15 @@ public class SetOpResultSet extends NoPutResultSetImpl
                 }
                 int compare = 0;
                 // Advance the right until there are no more right rows or leftRow <= rightRow
-                while( rightInputRow != null && (compare = compare( leftColumns, rightInputRow.getRowArray())) > 0)
+                while ( rightInputRow != null && (compare = compare(leftColumns, rightInputRow.getRowArray())) > 0)
+                {
                     rightInputRow = rightSource.getNextRowCore();
-                
+                    if (rightInputRow != null)
+                    {
+                        rowsSeenRight++;
+                    }
+                }
+
                 if( rightInputRow == null || compare < 0)
                 {
                     // The left row is not in the right source.
@@ -145,10 +163,17 @@ public class SetOpResultSet extends NoPutResultSetImpl
                     // The left and right rows are the same
                     if( SanityManager.DEBUG)
                         SanityManager.ASSERT( rightInputRow != null && compare == 0,
-                                              "Insert/Except execution has gotten confused.");
-                    if( all)
+                                              "Intersect/Except execution has gotten confused.");
+                    if ( all)
+                    {
                         // Just advance the right input by one row.
                         rightInputRow = rightSource.getNextRowCore();
+                        if (rightInputRow != null)
+                        {
+                            rowsSeenRight++;
+                        }
+                    }
+
                     // If !all then we will skip past duplicates on the left at the top of this loop,
                     // which will then force us to skip past any right duplicates.
                     if( opType == IntersectOrExceptNode.INTERSECT_OP)
@@ -160,7 +185,12 @@ public class SetOpResultSet extends NoPutResultSetImpl
             }
         }
         currentRow = leftInputRow;
-        setCurrentRow( currentRow);
+        setCurrentRow( currentRow );
+
+        if (currentRow != null) {
+           rowsReturned++;
+        }
+
         nextTime += getElapsedMillis(beginTime);
         return currentRow;
     } // end of getNextRowCore
@@ -168,9 +198,13 @@ public class SetOpResultSet extends NoPutResultSetImpl
     private void advanceRightPastDuplicates( DataValueDescriptor[] leftColumns)
         throws StandardException
     {
-        while((rightInputRow = rightSource.getNextRowCore()) != null
-              && compare( leftColumns, rightInputRow.getRowArray()) == 0)
-            ;
+        while ((rightInputRow = rightSource.getNextRowCore()) != null)
+        {
+            rowsSeenRight++;
+
+            if (compare(leftColumns, rightInputRow.getRowArray()) == 0) 
+                continue;
+        }
     } // end of advanceRightPastDuplicates
         
     private int compare( DataValueDescriptor[] leftCols, DataValueDescriptor[] rightCols)
@@ -237,7 +271,7 @@ public class SetOpResultSet extends NoPutResultSetImpl
         }
 		else
 			if (SanityManager.DEBUG)
-				SanityManager.DEBUG("CloseRepeatInfo","Close of UnionResultSet repeated");
+				SanityManager.DEBUG("CloseRepeatInfo","Close of SetOpResultSet repeated");
 
 		closeTime += getElapsedMillis(beginTime);
 	} // end of close
@@ -283,5 +317,82 @@ public class SetOpResultSet extends NoPutResultSetImpl
         // RESOLVE: What is the row location of an INTERSECT supposed to be: the location from the
         // left side, the right side, or null?
         return ((CursorResultSet)leftSource).getRowLocation();
+    }
+
+    /**
+     * Return the set operation of this <code>SetOpResultSet</code>
+     *
+     * @return the set operation of this ResultSet, the value is either 
+     *         <code>IntersectOrExceptNode.INTERSECT_OP</code> for 
+     *         Intersect operation or <code>IntersectOrExceptNode.EXCEPT_OP
+     *         </code> for Except operation
+     *         
+     * @see    org.apache.derby.impl.sql.compile.IntersectOrExceptNode
+     */
+    public int getOpType()
+    {
+        return opType;
+    }
+
+    /**
+     * Return the result set number
+     *
+     * @return the result set number
+     */
+    public int getResultSetNumber()
+    {
+        return resultSetNumber;
+    }
+
+    /**
+     * Return the left source input of this <code>SetOpResultSet</code>
+     *
+     * @return the left source input of this <code>SetOpResultSet</code>
+     * @see org.apache.derby.iapi.sql.execute.NoPutResultSet
+     */
+    public NoPutResultSet getLeftSourceInput()
+    {
+        return leftSource;
+    }
+
+    /**
+     * Return the right source input of this <code>SetOpResultSet</code>
+     *
+     * @return the right source input of this <code>SetOpResultSet</code>
+     * @see org.apache.derby.iapi.sql.execute.NoPutResultSet
+     */
+    public NoPutResultSet getRightSourceInput()
+    {
+        return rightSource;
+    }
+
+    /**
+     * Return the number of rows seen on the left source input
+     *
+     * @return the number of rows seen on the left source input
+     */
+    public int getRowsSeenLeft()
+    {
+        return rowsSeenLeft;
+    }
+
+    /**
+     * Return the number of rows seen on the right source input
+     *
+     * @return the number of rows seen on the right source input
+     */
+    public int getRowsSeenRight()
+    {
+        return rowsSeenRight;
+    }
+
+    /**
+     * Return the number of rows returned from the result set
+     *
+     * @return the number of rows returned from the result set
+     */
+    public int getRowsReturned()
+    {
+        return rowsReturned;
     }
 }

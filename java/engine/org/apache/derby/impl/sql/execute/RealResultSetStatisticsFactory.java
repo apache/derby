@@ -62,6 +62,7 @@ import org.apache.derby.impl.sql.execute.ProjectRestrictResultSet;
 import org.apache.derby.impl.sql.execute.RowResultSet;
 import org.apache.derby.impl.sql.execute.ScalarAggregateResultSet;
 import org.apache.derby.impl.sql.execute.ScrollInsensitiveResultSet;
+import org.apache.derby.impl.sql.execute.SetOpResultSet;
 import org.apache.derby.impl.sql.execute.SortResultSet;
 import org.apache.derby.impl.sql.execute.TableScanResultSet;
 import org.apache.derby.impl.sql.execute.UnionResultSet;
@@ -96,6 +97,7 @@ import org.apache.derby.impl.sql.execute.rts.RealProjectRestrictStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealRowResultSetStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealScalarAggregateStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealScrollInsensitiveResultSetStatistics;
+import org.apache.derby.impl.sql.execute.rts.RealSetOpResultSetStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealSortStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealTableScanStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealUnionResultSetStatistics;
@@ -816,9 +818,32 @@ public class RealResultSetStatisticsFactory
 											rrs.optimizerEstimatedRowCount,
 											rrs.optimizerEstimatedCost);
 		}
+		else if (rs instanceof SetOpResultSet)
+		{
+			SetOpResultSet srs = (SetOpResultSet) rs;
+
+			return new RealSetOpResultSetStatistics(
+											srs.getOpType(),
+											srs.numOpens,
+											srs.rowsSeen,
+											srs.rowsFiltered,
+											srs.constructorTime,
+											srs.openTime,
+											srs.nextTime,
+											srs.closeTime,
+											srs.getResultSetNumber(),
+											srs.getRowsSeenLeft(),
+											srs.getRowsSeenRight(),
+											srs.getRowsReturned(),
+											srs.optimizerEstimatedRowCount,
+											srs.optimizerEstimatedCost,
+											getResultSetStatistics(srs.getLeftSourceInput()),
+											getResultSetStatistics(srs.getRightSourceInput())
+											);
+		}
 		else if (rs instanceof UnionResultSet)
 		{
-			UnionResultSet urs = (UnionResultSet) rs;
+			UnionResultSet urs = (UnionResultSet)rs;
 
 			return new RealUnionResultSetStatistics(
 											urs.numOpens,
