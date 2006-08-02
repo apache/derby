@@ -39,7 +39,8 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class Sed
 {
-	private	static	final	String	SQL_EXCEPTION_FILTERED_SUBSTITUTION = "SQL Exception:";
+	private	static	final	String	SQL_EXCEPTION_FILTERED_SUBSTITUTION = 
+        "java.sql.SQLException:";
 
     public Sed()
     {
