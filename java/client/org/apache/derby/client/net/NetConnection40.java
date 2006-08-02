@@ -26,12 +26,12 @@ import java.sql.QueryObjectFactory;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.client.am.SqlException;
 import java.sql.Blob;
-import java.sql.SQLClientInfoException;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Struct;
@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Enumeration;
-import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.FailedProperties40;
@@ -210,9 +209,10 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     public boolean isValid(int timeout) throws SQLException {
         // Validate that the timeout has a legal value
         if (timeout < 0) {
-            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,
-                                              new Integer(timeout), "timeout",
-                                              "java.sql.Connection.isValid");
+            throw new SqlException(agent_.logWriter_,
+                               new ClientMessageId(SQLState.INVALID_API_PARAMETER),
+                               new Integer(timeout), "timeout",
+                               "java.sql.Connection.isValid" ).getSQLException();
         }
 
         // Check if the connection is closed
