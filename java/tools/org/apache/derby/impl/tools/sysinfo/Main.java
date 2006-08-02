@@ -42,6 +42,7 @@ import java.util.Vector;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.security.ProtectionDomain;
 import java.security.CodeSource;
 import java.security.AccessController;
@@ -1188,7 +1189,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      */
     private static String formatURL(URL loc)
     {
-        String filename = loc.toString();
+        String filename = URLDecoder.decode(loc.toString());
 
         if (filename.startsWith("jar:")) { filename = filename.substring(4); }
         if (filename.startsWith("file:")) { filename = filename.substring(5); }
