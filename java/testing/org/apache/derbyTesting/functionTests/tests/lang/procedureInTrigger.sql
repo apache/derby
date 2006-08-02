@@ -283,6 +283,7 @@ create trigger before_trig_modifies_sql no cascade BEFORE insert on t2
 create trigger bad_before_trig no cascade BEFORE insert on t2 
 	for each STATEMENT mode db2sql call proc_wrongly_defined_as_no_sql(50, 'fifty');
 --- try to insert 2 rows
+--- Bug DERBY-1629 -- in JDK 1.6 you only get 38001, not 38000
 insert into t2 values (1,2), (2,4);
 --- check trigger is not fired.
 select * from t1;
