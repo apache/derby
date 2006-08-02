@@ -9,6 +9,7 @@ D438.T438_T1
 1, DERBY-438_STMT
 D438.T438_T2
 complete caseTriggerVTI - passed true
+Test grant/revoke, Phase: CREATE; derby.database.sqlAuthorization=false
 complete caseGrantRevoke - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -717,6 +718,7 @@ D438.T438_T2
 1, 104
 1, 4004
 complete caseTriggerVTI - passed true
+Test grant/revoke, Phase: SOFT UPGRADE; derby.database.sqlAuthorization=false
 complete caseGrantRevoke - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -1471,6 +1473,7 @@ D438.T438_T2
 1, 105
 1, 4005
 complete caseTriggerVTI - passed true
+Test grant/revoke, Phase: POST SOFT UPGRADE; derby.database.sqlAuthorization=false
 complete caseGrantRevoke - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -2178,6 +2181,10 @@ D438.T438_T2
 1, 106
 1, 4006
 complete caseTriggerVTI - passed true
+Test grant/revoke, Phase: UPGRADE; derby.database.sqlAuthorization=false
+complete caseGrantRevoke - passed true
+Expected exception during shutdown: Database 'wombat' shutdown.
+Test grant/revoke, Phase: UPGRADE; derby.database.sqlAuthorization=true
 complete caseGrantRevoke - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL

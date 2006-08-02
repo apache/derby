@@ -73,6 +73,7 @@ import org.apache.derbyTesting.functionTests.harness.jvm;
     <UL>
     <LI> caseReusableRecordIdSequenceNumber
     <LI> Trigger action re-writing and implementation changes (DERBY-438)
+    <LI> Grant/Revoke tests
     </UL>
 	
 	
@@ -135,6 +136,8 @@ public class UpgradeTester {
 	
 	// Indicate if alpha/beta releases should support upgrade
 	private boolean allowPreReleaseUpgrade;
+	
+	private final String dbName = "wombat";
 	
 	// We can specify more jars, as required.
 	private String[] jarFiles = new String [] { "derby.jar", 
@@ -347,11 +350,10 @@ public class UpgradeTester {
 		
 		boolean passed = true;
 		Connection conn = null;
-		String dbName = "wombat";
 		
 		setClassLoader(classLoader);
 		
-		conn = getConnection(classLoader, dbName, phase);
+		conn = getConnection(classLoader, phase);
 				
 		if(conn != null) {
 			passed = caseVersionCheck(version, conn);
@@ -362,11 +364,16 @@ public class UpgradeTester {
 									oldMinorVersion) && passed;
             passed = caseTriggerVTI(conn, phase, oldMajorVersion, 
                     oldMinorVersion) && passed;
-            passed = caseGrantRevoke(conn, phase, oldMajorVersion, 
-            						oldMinorVersion) && passed;
+            passed = caseGrantRevoke(conn, phase, classLoader, false) && passed;
+            // Test grant/revoke feature with sql authorization
+            if(phase == PH_HARD_UPGRADE) {
+            	setSQLAuthorization(conn, true);
+            	conn = restartDatabase(classLoader);
+            	passed = caseGrantRevoke(conn, phase, classLoader, true) && passed;
+            }        	
 			runMetadataTest(classLoader, conn);
 			conn.close();
-			shutdown(classLoader, dbName);
+			shutdownDatabase(classLoader);
 		}
 		setNullClassLoader();
 		
@@ -379,12 +386,11 @@ public class UpgradeTester {
 	 * The connection attributes depend on the phase of upgrade test.
 	 * 
 	 * @param classLoader Class loader
-	 * @param dbName database name
 	 * @param phase Upgrade test phase
 	 * @return connection to the database
 	 * @throws Exception
 	 */
-	private Connection getConnection(URLClassLoader classLoader, String dbName,
+	private Connection getConnection(URLClassLoader classLoader, 
 									int phase) throws Exception{
 		Connection conn = null;
 		Properties prop = new Properties();
@@ -803,22 +809,27 @@ public class UpgradeTester {
      * Grant/revoke is a new feature in 10.2. Test that this feature is not 
      * supported by default after upgrade from versions earlier than 10.2. 
      * This feature will not be available in soft upgrade. For grant/revoke 
-     * to be available after a full upgrade, the property 
-     * "derby.database.sqlAuthorization" has to be set to true during upgrade. 
+     * to be available after a full upgrade, the database property 
+     * "derby.database.sqlAuthorization" has to be set to true after upgrade.  
      * 
      * @param conn Connection
      * @param phase Upgrade test phase
-	 * @param dbMajor Major version of old release 
-	 * @param dbMinor Minor version of old release 
-     * @return true, if the test passes 
-     * @throws SQLException
+     * @param classLoader Class loader
+     * @param sqlAuthorization Value of SQL authorization for the database
+     * @return true, if the test passes
+     * @throws Exception
      */
-    private boolean caseGrantRevoke(Connection conn, int phase,
-    												int dbMajor, int dbMinor)
-                                    				throws SQLException {
-                
-        boolean passed = true;
-        boolean grantRevokeNotSupported = dbMajor==10 && dbMinor<2;
+    private boolean caseGrantRevoke(Connection conn, int phase, 
+									URLClassLoader classLoader, 
+									boolean sqlAuthorization)
+                                    		throws Exception {
+    	System.out.println("Test grant/revoke, Phase: " + PHASES[phase] + "; " 
+    				+ "derby.database.sqlAuthorization=" + sqlAuthorization);
+    	
+    	boolean passed = true;
+    	boolean grantRevokeSupport = ((oldMajorVersion==10 && oldMinorVersion>=2) ||
+    								  (newMajorVersion==10 && newMinorVersion>=2))
+									  && sqlAuthorization;
         
         Statement s = conn.createStatement();
 
@@ -828,9 +839,10 @@ public class UpgradeTester {
             break;
         case PH_SOFT_UPGRADE:
         case PH_POST_SOFT_UPGRADE:
+        	passed = testGrantRevokeSupport(s, phase, grantRevokeSupport);
+        	break;
         case PH_HARD_UPGRADE:
-        	if(grantRevokeNotSupported)
-        		passed = testGrantRevokeNotSupported(s, phase);
+        	passed = testGrantRevokeSupport(s, phase, grantRevokeSupport);
         	break;
         default:
             passed = false;
@@ -843,37 +855,91 @@ public class UpgradeTester {
     }
     
     /**
-     * Test to check that grant/revoke is not supported in a specific upgrade 
+     * Test to check whether grant/revoke is supported in a specific upgrade 
      * test phase.
      * 
      * @param s	SQL statement
      * @param phase Upgrade test phase
-     * @return true, if grant/revoke is not supported
+     * @param grantRevokeSupport true if grant/revoke feature is supported in 
+     * 								a specific version/upgrade phase.
+     * @return true, if the test passes. 
      */
-    private boolean testGrantRevokeNotSupported(Statement s, int phase) {
+    private boolean testGrantRevokeSupport(Statement s, int phase, 
+    								boolean grantRevokeSupport) {
     	boolean passed = true;
     	try {
     		s.execute("grant select on GR_TAB to some_user");
     	} catch(SQLException sqle) {
-    		switch (phase) {
-    			case PH_SOFT_UPGRADE:
-    				// feature not available in soft upgrade 
-    				passed = isExpectedException(sqle, "XCL47");
-    				break;
-    			case PH_POST_SOFT_UPGRADE:
-    				// syntax error in versions earlier than 10.2
-    				passed = isExpectedException(sqle, "42X01");
-    				break;
-    			case PH_HARD_UPGRADE:
-    				// not supported because SQL authorization not set
-    				passed = isExpectedException(sqle, "42Z60");
-    				break;
-    			default:
-    				passed = false;
-    		}
+    		passed = checkGrantRevokeException(sqle, phase, grantRevokeSupport);
+    	}
+    	
+    	
+    	try {
+    		s.execute("revoke select on GR_TAB from some_user");
+    	} catch(SQLException sqle) {
+    		passed = checkGrantRevokeException(sqle, phase, grantRevokeSupport);
     	}
     	
     	return passed;
+    }
+    
+    /**
+     * Checks if the exception is expected based on whether grant/revoke is 
+     * supported or not.
+     * 
+     * @param sqle SQL Exception
+     * @param phase Upgrade test phase
+     * @param grantRevokeSupported true if grant/revoke feature is supported in 
+     * 								a specific version/upgrade phase.
+     * @return
+     */
+    private boolean checkGrantRevokeException(SQLException sqle, int phase, 
+    										boolean grantRevokeSupported) {
+    	boolean passed = true;
+    	
+		// If grant/revoke is supported, we should not get an exception
+		if(grantRevokeSupported) {
+			dumpSQLExceptions(sqle);
+			return false;
+		}
+		
+		switch (phase) {
+			case PH_SOFT_UPGRADE:
+				// feature not available in soft upgrade 
+				passed = isExpectedException(sqle, "XCL47");
+				break;
+			case PH_POST_SOFT_UPGRADE:
+				// syntax error in versions earlier than 10.2
+				passed = isExpectedException(sqle, "42X01");
+				break;
+			case PH_HARD_UPGRADE:
+				// not supported because SQL authorization not set
+				passed = isExpectedException(sqle, "42Z60");
+				break;
+			default:
+				passed = false;
+		}
+    	
+    	return passed;
+    }
+    
+    /**
+     * Set derby.database.sqlAuthorization as a database property.
+     * 
+     * @param conn Connection
+     * @param sqlAuth Value of property
+     */
+    private void setSQLAuthorization(Connection conn, boolean sqlAuth) {
+    	String authorization = sqlAuth ? "true" : "false"; 
+		
+    	try {
+    		Statement s = conn.createStatement();
+    		s.execute("call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" +
+    				"'derby.database.sqlAuthorization', '" + authorization +
+    				"')");
+    	} catch (SQLException sqle) {
+    		dumpSQLExceptions(sqle);
+    	}
     }
     
     /**
@@ -909,11 +975,10 @@ public class UpgradeTester {
 	/**
 	 * Shutdown the database
 	 * @param classLoader
-	 * @param dbName
 	 * @throws Exception
 	 */
-	private void shutdown(URLClassLoader classLoader, String dbName) 
-												throws Exception {
+	private void shutdownDatabase(URLClassLoader classLoader) 
+											throws Exception {
 		Properties prop = new Properties();
 		prop.setProperty("databaseName", dbName);
 		prop.setProperty("connectionAttributes", "shutdown=true");
@@ -928,6 +993,40 @@ public class UpgradeTester {
 				throw sqle;
 		}
 	}
+	
+	/**
+	 * Start the database
+	 * 
+	 * @param classLoader
+	 * @return
+	 * @throws Exception
+	 */
+	private Connection startDatabase(URLClassLoader classLoader) 
+											throws Exception {
+		Connection conn = null;
+		Properties prop = new Properties();
+		prop.setProperty("databaseName", dbName);
+				
+		try { 
+			conn = getConnectionUsingDataSource(classLoader, prop);
+		} catch (SQLException sqle) {
+			dumpSQLExceptions(sqle);
+		}
+		
+		return conn;
+	}
+	
+	/**
+	 * Shutdown and reconnect to the database
+	 * @param classLoader
+	 * @return
+	 * @throws Exception
+	 */
+	private Connection restartDatabase(URLClassLoader classLoader) 
+											throws Exception {
+		shutdownDatabase(classLoader);
+		return startDatabase(classLoader);
+	}	
 	
 	/**
 	 * Display the sql exception
