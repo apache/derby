@@ -38,6 +38,7 @@ import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.impl.sql.execute.DropTriggerConstantAction;
 
 /**
  * This is the implementation of ViewDescriptor. Users of View descriptors
@@ -314,10 +315,16 @@ public final class ViewDescriptor extends TupleDescriptor
 			case DependencyManager.UPDATE_STATISTICS:
 			case DependencyManager.DROP_STATISTICS:
 			case DependencyManager.TRUNCATE_TABLE:
-				//ignore revoke privilege action for now
-		    case DependencyManager.REVOKE_PRIVILEGE:
 				break;
-		
+
+		    case DependencyManager.REVOKE_PRIVILEGE:
+				dropViewWork(getDataDictionary(), 
+						getDataDictionary().getDependencyManager(), lcc,
+						lcc.getTransactionExecute(), 
+						getDataDictionary().getTableDescriptor(uuid).getSchemaDescriptor(),
+						getDataDictionary().getTableDescriptor(uuid), false);
+			    return;
+
 		    default:
 
 				/* We should never get here, since we can't have dangling references */

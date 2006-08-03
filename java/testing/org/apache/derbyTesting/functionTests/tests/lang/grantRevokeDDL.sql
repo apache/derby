@@ -494,7 +494,7 @@ select * from v11;
 set connection mamta2;
 create view v24 as select * from mamta1.v11;
 select * from v24;
--- following will fail because no execute permissions on mamta1.f_abs
+-- following will fail because no execute permissions on mamta1.f_abs1
 create view v25(c251) as (values mamta1.f_abs1(-1));
 set connection mamta1;
 grant execute on function f_abs1 to mamta2;
@@ -533,6 +533,415 @@ grant select(c151) on t15 to mamta2;
 grant select(c152) on t15 to public;
 set connection mamta2;
 create view v28 as (select c152 from mamta1.t15 where c151=1);
+
+-- write some view based tests and revoke privileges to see if the right thing happens
+-- View tests
+-- test1 
+--  A simple test where a user creates a view based on objects in other schemas and revoke privilege on one of those
+--  objects will drop the view
+set connection mamta1;
+drop table t11ViewTest;
+create table t11ViewTest (c111 int not null primary key);
+insert into t11ViewTest values(1);
+insert into t11ViewTest values(2);
+drop table t12ViewTest;
+create table t12ViewTest (c121 int, c122 char);
+insert into t12ViewTest values (1,'1');
+-- user mamta2 is going to create a view based on following grants
+grant select on t12ViewTest to mamta2;
+grant select on t11ViewTest to public;
+set connection mamta2;
+drop view v21ViewTest;
+-- will succeed because all the required privileges are in place
+create view v21ViewTest as select t1.c111, t2.c122 from mamta1.t11ViewTest as t1, mamta1.t12ViewTest as t2;
+select * from v21ViewTest;
+set connection mamta1;
+-- this revoke should drop the dependent view in schema mamta2
+revoke select on t11ViewTest from public;
+set connection mamta2;
+-- the view shouldn't exist anymore because one of the privileges required by it was revoked
+select * from v21ViewTest;
+set connection mamta1;
+-- this revoke should not impact any objects because none depend on it
+revoke select on t12ViewTest from mamta2;
+set connection mamta2;
+select * from v21ViewTest;
+-- cleanup
+set connection mamta1;
+drop table t11ViewTest;
+drop table t12ViewTest;
+
+-- View tests
+-- test2 
+--  Let the dba create a view in schema mamta2 (owned by user mamta2). The view's definition accesses 
+--    objects from schema mamta1. The owner of schema mamta2 does not have access to objects in schema mamta1 
+--    but the create view by dba does not fail because dba has access to all the objects. 
+--  mamta2 will have access to the view created by the dba because mamta2 is owner of the schema "mamta2" and 
+--    it has access to all the objects created in it's schema, whether they were created by mamta2 or the dba. 
+--  user mamta2 is owner of the schema mamta2 because user mamta2 was the first one to create an object in
+--    schema mamta2 earlier in this test.
+--  Any other user (except the dba) will need to get explicit select privileges on the view in order to access it
+--
+set connection mamta1;
+-- Note that mamta1 is creating couple tables but has not granted permissions on those tables to anyone
+drop table t11ViewTest;
+create table t11ViewTest (c111 int not null primary key);
+insert into t11ViewTest values(1);
+insert into t11ViewTest values(2);
+drop table t12ViewTest;
+create table t12ViewTest (c121 int, c122 char);
+insert into t12ViewTest values (1,'1');
+-- connect as dba
+set connection satConnection;
+-- dba is creating a view in schema owned by another user. dba can create objects anywhere and access objects from anywhere
+create view mamta2.v21ViewTest as select t1.c111, t2.c122 from mamta1.t11ViewTest as t1, mamta1.t12ViewTest as t2;
+-- dba can do select from that view
+select * from mamta2.v21ViewTest;
+set connection mamta2;
+-- the schema owner can do a select from an object that is part of it's schema even though it was created by the dba
+select * from v21ViewTest;
+set connection mamta3;
+-- mamta3 has not been granted select privileges on mamta2.v21ViewTest
+select * from mamta2.v21ViewTest;
+set connection mamta2;
+-- give select privileges on the view to mamta3
+grant select on v21ViewTest to mamta3;
+set connection mamta3;
+-- select from mamta2.v21ViewTest will pass this time for mamta3 because mamta3 has select privilege on mamta2.v21ViewTest
+select * from mamta2.v21ViewTest;
+set connection satConnection;
+-- have the dba take away select privilege on mamta2.v21ViewTest from mamta3
+revoke select on mamta2.v21ViewTest from mamta3;
+set connection mamta3;
+-- select from mamta2.v21ViewTest will fail this time for mamta3 because dba took away the select privilege on mamta2.v21ViewTest
+select * from mamta2.v21ViewTest;
+-- cleanup
+set connection mamta2;
+drop view v21ViewTest;
+set connection mamta1;
+drop table t12ViewTest;
+drop table t11ViewTest;
+
+-- View tests
+-- test3 
+--  Create a view that relies on table level and column permissions and see that view gets dropped correctly when any of the
+--    required privilege is revoked
+set connection mamta1;
+drop table t11ViewTest;
+create table t11ViewTest (c111 int not null primary key);
+insert into t11ViewTest values(1);
+drop table t12ViewTest;
+create table t12ViewTest (c121 int, c122 char);
+insert into t12ViewTest values (1,'1');
+grant select (c111) on t11ViewTest to mamta3;
+grant select (c121, c122) on t12ViewTest to public;
+set connection mamta2;
+drop table t21ViewTest;
+create table t21ViewTest (c211 int);
+insert into t21ViewTest values(1);
+grant select on t21ViewTest to mamta3;
+set connection mamta3;
+drop view v31ViewTest;
+create view v31ViewTest as select t2.c122, t1.*, t3.* from mamta1.t11ViewTest as t1, mamta1.t12ViewTest as t2, 
+	mamta2.t21ViewTest as t3 where t1.c111 = t3.c211;
+select * from v31ViewTest;
+set connection mamta1;
+-- revoke a column level privilege. It should drop the view
+revoke select(c122) on t12ViewTest from public;
+set connection mamta3;
+-- the view got dropped because of revoke issued earlier
+select * from v31ViewTest;
+-- cleanup
+set connection mamta2;
+drop table t21ViewTest;
+set connection mamta1;
+drop table t12ViewTest;
+drop table t11ViewTest;
+
+-- View tests
+-- test4 
+--  Create a view that relies on a user-level table privilege and a user-level column privilege.
+--   There also exists a PUBLIC-level column privilege but objects at the creation time always first
+--   look for the required privilege at the user level(DERBY-1632). This behavior can be confirmed by the 
+--   following test case where when PUBLIC-level column privilege is revoked, it does not impact the
+--   view in anyway because the view is relying on user-level column privilege. Confirm that object
+--   is relying on user-level privilege by revoking the user-level privilege and that should drop the object
+set connection mamta1;
+drop table t11ViewTest;
+create table t11ViewTest (c111 int not null primary key);
+insert into t11ViewTest values(1);
+drop table t12ViewTest;
+create table t12ViewTest (c121 int, c122 char);
+insert into t12ViewTest values (1,'1');
+grant select (c111) on t11ViewTest to mamta3, public;
+grant select (c121, c122) on t12ViewTest to public;
+set connection mamta2;
+drop table t21ViewTest;
+create table t21ViewTest (c211 int);
+insert into t21ViewTest values(1);
+grant select on t21ViewTest to mamta3, mamta5;
+set connection mamta3;
+drop view v31ViewTest;
+create view v31ViewTest as select t2.c122, t1.*, t3.* from mamta1.t11ViewTest as t1, mamta1.t12ViewTest as t2, 
+	mamta2.t21ViewTest as t3 where t1.c111 = t3.c211;
+select * from v31ViewTest;
+set connection mamta1;
+-- revoke public level privilege. Should not impact the view because user objects always rely on user level privilege.
+--   If no user level privilege is found at create object time, then PUBLIC level privilege (if there) is used.
+--   If there is no privilege granted at user level or public level at create object time, the create sql will fail
+--   DERBY-1632
+revoke select(c111) on t11ViewTest from public;
+set connection mamta3;
+-- still exists because privileges required by it are not revoked
+select * from v31ViewTest;
+set connection mamta1;
+-- this revoke should drop the view mamta3.v31ViewTest
+revoke select(c111) on t11ViewTest from mamta3;
+set connection mamta3;
+-- View shouldn't exist anymore
+select * from v31ViewTest;
+-- cleanup
+set connection mamta2;
+drop table t21ViewTest;
+set connection mamta1;
+drop table t12ViewTest;
+drop table t11ViewTest;
+
+-- View tests
+-- test5
+-- Create a view that relies on a SELECT privilege on only one column of a table. revoke SELECT privilege on 
+--  another column in that table and it ends up dropping the view. This is happening because the revoke privilege 
+--  work is not completely finished and any dependent object on that permission type for table's columns
+--  get dropped when a revoke privilege is issued against any column of that table
+set connection mamta1;
+drop table t11ViewTest;
+create table t11ViewTest (c111 int not null primary key, c112 int);
+insert into t11ViewTest values(1,1);
+grant select (c111, c112) on t11ViewTest to mamta2;
+set connection mamta2;
+drop view v21ViewTest;
+create view v21ViewTest as select c111 from mamta1.t11ViewTest;
+-- notice that the view above needs SELECT privilege on column c111 of mamta1.t11ViewTest and does not care about column c112
+set connection mamta1;
+-- the revoke below ends up dropping the view mamta2.v21ViewTest eventhough the view does not depend on column c112
+-- This will be fixed in a subsequent patch for revoke privilege
+revoke select (c111) on t11ViewTest from mamta2;
+set connection mamta2;
+select * from v21ViewTest;
+-- cleanup
+set connection mamta1;
+drop table t11ViewTest;
+
+-- View tests
+-- test6
+--  Create a view that requires a privilege. grant select on the view to another user.
+--    Let that user create a trigger based on the granted view. 
+--
+--    Now if the privilege is revoked from the view owner, the view gets dropped, as 
+--    expected. But I had also expected the trigger to fail the next time it gets fired
+--    because view used by it doesn't exist anymore. But because of a bug in Derby, 
+--    DERBY-1613(A trigger does not get invalidated when the view used by it is dropped),
+--    during some runs of this test, the trigger continues to fire successfully and 
+--    during other runs of this test, it gives the error that the view does
+--    not exist anymore. Seems like this is timing related issue. So, may see 
+--    diffs in this particular test until DERBY-1613 is resolved. After the 
+--    resolution of DERBY-1613, the insert trigger will always fail after the view
+--    gets dropped because of the revoke privilege.
+set connection mamta1;
+drop table t11TriggerTest;
+create table t11TriggerTest (c111 int not null primary key, c112 int);
+insert into t11TriggerTest values(1,1);
+insert into t11TriggerTest values(2,2);
+grant select on t11TriggerTest to mamta2;
+set connection mamta2;
+create view v21ViewTest as select * from mamta1.t11TriggerTest;
+grant select on v21ViewTest to mamta3;
+select * from v21ViewTest;
+set connection mamta3;
+drop table t31TriggerTest;
+create table t31TriggerTest (c311 int); 
+drop table t32TriggerTest;
+create table t32TriggerTest (c321 int); 
+-- following should pass because all the privileges are in place
+create trigger tr31t31TriggerTest after insert on t31TriggerTest for each statement mode db2sql
+	insert into t32TriggerTest values (select c111 from mamta2.v21ViewTest where c112=1);
+insert into t31TriggerTest values(1);
+select * from t31TriggerTest;
+select * from t32TriggerTest;
+set connection mamta1;
+-- This will drop the dependent view 
+revoke select on t11TriggerTest from mamta2;
+set connection mamta2;
+select * from v21ViewTest;
+set connection mamta3;
+-- During some runs of this test, the trigger continues to fire even though the view used by it 
+--  has been dropped. (DERBY-1613)
+-- During other runs of this test, the trigger gives error as expected about the missing view.
+--  After DERBY-1613 is fixed, we should consistently get error from insert below because the
+--  insert trigger can't find the view it uses.
+insert into t31TriggerTest values(1);
+select * from t31TriggerTest;
+select * from t32TriggerTest;
+-- cleanup
+set connection mamta3;
+drop table t31TriggerTest;
+drop table t32TriggerTest;
+set connection mamta1;
+drop table t11TriggerTest;
+
+-- View tests
+-- test7 - negative test
+--  Create a view that relies on a user level table privilege. The view will depend on the user level table privilege. 
+--     Later grant the table privilege at the PUBLIC level too. So, there are 2 privileges available and the view
+--     relies on one of those privileges. Later, revoke the user level table privilege. This will end up dropping the
+--     view although there is another privilege available at PUBLIC level which can cover the view's requirements of
+--     privileges. But Derby does not support this automatic switching of privilege reliance on another available
+--     privilege when revoke is issued. DERBY-1632
+set connection mamta1;
+drop table t11ViewTest;
+create table t11ViewTest (c111 int not null primary key);
+insert into t11ViewTest values(1);
+insert into t11ViewTest values(2);
+grant select on t11ViewTest to mamta2;
+set connection mamta2;
+drop view v21ViewTest;
+create view v21ViewTest as select * from mamta1.t11ViewTest;
+select * from v21ViewTest;
+set connection mamta1;
+-- grant the privilege required by mamta2.v21ViewTest at PUBLIC level
+grant select on t11ViewTest to PUBLIC;
+-- now revoke the privilege that view is currently dependent on. This will end up dropping the view even though there is 
+--   same privilege available at the PUBLIC level
+revoke select on t11ViewTest from mamta2;
+set connection mamta2;
+-- view doesn't exist anymore
+select * from v21ViewTest;
+-- Issuing the create view again will work because required privilege is available at PUBLIC level
+create view v21ViewTest as select * from mamta1.t11ViewTest;
+-- view is back in action
+select * from v21ViewTest;
+set connection mamta1;
+-- verify that view above is dependent on PUBLIC level privilege, revoke the PUBLIC level privilege and
+--   check if the view got dropped automatically
+revoke select on t11ViewTest from PUBLIC;
+set connection mamta2;
+-- view doesn't exist anymore
+select * from v21ViewTest;
+--cleanup
+set connection mamta1;
+drop table t11ViewTest;
+
+-- View tests
+-- test8 - negative test
+--  This test is similar to test7 above. Create a view that relies on a column level privilege. Later on, grant the
+--    same privilege at table level. Now, revoke the column level privilege. The view will get dropped automatically even
+--    though there is a covering privilege available at the table level.(DERBY-1632)
+set connection mamta1;
+drop table t11ViewTest;
+create table t11ViewTest (c111 int not null primary key);
+insert into t11ViewTest values(1);
+insert into t11ViewTest values(2);
+grant select(c111) on t11ViewTest to mamta2;
+set connection mamta2;
+drop view v21ViewTest;
+create view v21ViewTest as select c111 from mamta1.t11ViewTest;
+set connection mamta1;
+-- grant the privilege required by mamta2.v21ViewTest at table level
+grant select on t11ViewTest to mamta2;
+-- now revoke the privilege that view is currently dependent on. This will end up dropping the view even though there is 
+--   same privilege available at the table level
+revoke select(c111) on t11ViewTest from mamta2;
+set connection mamta2;
+-- view doesn't exist anymore
+select * from v21ViewTest;
+-- Issuing the create view again will work because required privilege is available at table level
+create view v21ViewTest as select * from mamta1.t11ViewTest;
+-- view is back in action
+select * from v21ViewTest;
+set connection mamta1;
+-- verify that view above is dependent on table level privilege, revoke the table level privilege and
+--   check if the view got dropped automatically
+revoke select on t11ViewTest from mamta2;
+set connection mamta2;
+-- view doesn't exist anymore
+select * from v21ViewTest;
+--cleanup
+set connection mamta1;
+drop table t11ViewTest;
+
+-- View tests
+-- test9 - negative test
+-- Have SELECT privilege available both at column level and table level. When an object is created which requires the
+--  SELECT privilege, Derby is designed to pick up the table level privilege first. Later, when the table level
+--  privilege is revoke, the object gets dropped. The object really should start depending on the available column
+--  level privilege. DERBY-1632
+set connection mamta1;
+drop table t11ViewTest;
+create table t11ViewTest (c111 int not null primary key);
+insert into t11ViewTest values(1);
+insert into t11ViewTest values(2);
+grant select(c111) on t11ViewTest to mamta2;
+grant select on t11ViewTest to mamta2;
+set connection mamta2;
+drop view v21ViewTest;
+-- this view will depend on the table level SELECT privilege
+create view v21ViewTest as select c111 from mamta1.t11ViewTest;
+set connection mamta1;
+-- this ends up dropping the view mamta2.v21ViewTest (DERBY-1632). Instead, the view should have started depending on the available 
+--  column level SELECT privilege.
+revoke select on t11ViewTest from mamta2;
+set connection mamta2;
+-- view doesn't exist anymore
+select * from v21ViewTest;
+--cleanup
+set connection mamta1;
+drop table t11ViewTest;
+
+-- View tests
+-- test10 - negative test
+--  Create a view that relies on some privileges. Create another view based on that view. A revoke privilege on privilege
+--    required by the first view will fail because there is another view dependent on the first view. This is because
+--    Derby currently does not support cascade view drop (DERBY-1631)
+set connection mamta1;
+drop table t11ViewTest;
+create table t11ViewTest (c111 int not null primary key);
+insert into t11ViewTest values(1);
+insert into t11ViewTest values(2);
+drop table t12ViewTest;
+create table t12ViewTest (c121 int, c122 char);
+insert into t12ViewTest values (1,'1');
+-- grant permissions to mamta2 so mamta2 can create a view based on these objects
+grant select on t11ViewTest to mamta2;
+grant select on t12ViewTest to mamta2;
+set connection mamta2;
+create view v21ViewTest as select t1.c111, t2.c122 from mamta1.t11ViewTest as t1, mamta1.t12ViewTest as t2;
+select * from v21ViewTest;
+-- grant permission to mamta3 so mamta3 can create a view based on v21ViewTest
+grant select on v21ViewTest to mamta3;
+set connection mamta3;
+create view v31ViewTest as select * from mamta2.v21ViewTest;
+select * from v31ViewTest;
+set connection mamta1;
+-- can't revoke the privilege because the view that relies on this privilege has another view defined on it and since Derby does not
+--   support cascade view drop, we can't automatically drop view relying on the privilege below
+revoke select on t11ViewTest from mamta2;
+set connection mamta2;
+-- view is still around, it couldn't be dropped automatically as a result of the revoke because there is another view dependent on the
+--   view below. Need to drop that dependent view first in order for revoke to drop following view automatically 
+select * from v21ViewTest;
+set connection mamta3;
+-- drop the dependent view
+drop view v31ViewTest;
+set connection mamta1;
+-- revoke privilege will succeed this time and will drop the dependent view on that privilege
+revoke select on t11ViewTest from mamta2;
+set connection mamta2;
+-- view doesn't exist anymore
+select * from v21ViewTest;
+-- cleanup
+set connection mamta1;
+drop table t12ViewTest;
+drop table t11ViewTest;
 
 -- create trigger privilege collection
 -- TriggerTest
@@ -834,7 +1243,7 @@ set connection mamta1;
 -- insert trigger should get fired
 insert into t11TriggerRevokeTest values(5);
 set connection mamta2;
--- Should be one more row since last check because insert trigger is back in action
+-- Should be one more row since last check because insert trigger got fired
 select * from t21TriggerRevokeTest;
 drop table t21TriggerRevokeTest;
 set connection mamta1;
