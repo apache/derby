@@ -2314,7 +2314,91 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private boolean getMetaDataInfoBooleanWithType(int infoCallIndex, int type) throws SQLException {
+
+    private boolean getMetaDataInfoBooleanWithType(int infoCallIndex, int type) 
+        throws SQLException {
+
+        boolean clientValue =
+            getMetaDataInfoBooleanWithTypeClient(infoCallIndex, type);
+        
+        // DERBY-1252. In Derby <= 10.x, clients (incl JCC) do not have
+        // logic to negotiate down these values with the server, so
+        // for features introduced with 10.x, x >= 2 (e.g. SUR
+        // DERBY-775, in 10.2), the server will return 10.0 values for
+        // any version 10.x so as not to break existing apps running
+        // an older 10 client (e.g. 10.1 client for DERBY-775).
+        // Reciprocally, this means clients at 10.x, where x => 2,
+        // must disregard the server's (too conservative) answers for
+        // these features, see logic in
+        // getMetaDataInfoBooleanWithTypeClient.
+        //
+        // For Derby >= 11, the down-negotiation code below which is
+        // presently commented out should be activated, and the values
+        // returned from the server should once more reflect reality.
+
+        // Commented out till we hit Derby 11:
+        //
+        //     boolean serverValue = 
+        //         getMetaDataInfoBooleanWithTypeServer(infoCallIndex, type);
+        //
+        //     return clientValue && serverValue;
+
+        return clientValue;
+    }
+
+
+    // Client's view of boolean metadata.  
+    // 
+    // For values which depend on (added) functionality in *both* the
+    // client and the server, the client should have its own view of
+    // all such values here.  For other values, it can defer to the
+    // server. This is a prerequisite for negotiating down in a mixed
+    // client/Server context. Note that metadata negotiation should
+    // mirror the similar negotiation for use of the feature itself,
+    // for example, for scrollable updatable result sets of type
+    // insensitive, the server will downgrade to read-only if it is
+    // older than 10.2.
+    //
+    // See also comments in getMetaDataInfoBooleanWithType and
+    // engine/org/apache/derby/impl/sql/catalog/metadata_net.properties.
+    // 
+    private boolean getMetaDataInfoBooleanWithTypeClient(int infoCallIndex,
+                                                         int type) 
+        throws SQLException {
+
+        switch (infoCallIndex) {
+        case updatesAreDetected__:
+        case deletesAreDetected__:
+        case ownUpdatesAreVisible__:
+        case ownDeletesAreVisible__:
+            
+            if (productLevel_.greaterThanOrEqualTo(10,2,0) && 
+                type == ResultSet.TYPE_SCROLL_INSENSITIVE) {
+                return true;
+            } else {
+                return getMetaDataInfoBooleanWithTypeServer(infoCallIndex, 
+                                                            type);
+            }
+        case insertsAreDetected__:
+        case ownInsertsAreVisible__:
+            if (productLevel_.greaterThanOrEqualTo(10,2,0) &&
+                type == ResultSet.TYPE_SCROLL_INSENSITIVE) {
+                return false;
+            } else {
+                return getMetaDataInfoBooleanWithTypeServer(infoCallIndex, 
+                                                            type);
+            }
+        default:
+            return getMetaDataInfoBooleanWithTypeServer(infoCallIndex, 
+                                                        type);
+        }
+    }
+
+
+    private boolean getMetaDataInfoBooleanWithTypeServer(int infoCallIndex, 
+                                                     int type) 
+        throws SQLException {
+
         // Stored Procedure will return a String containing a
         // comma seperated list of all the supported result Set types
         // not throwing any exception right now even if the the type is wrong as per the spec
