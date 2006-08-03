@@ -23,16 +23,12 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.derby.iapi.tools.i18n.LocalizedInput;
-import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
-import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.impl.tools.ij.utilMain;
 import org.apache.derby.tools.ij;
-import java.util.Hashtable;
 
 public class wisconsin {
 
@@ -45,8 +41,6 @@ public class wisconsin {
         
         createTables(conn);
         
-		utilMain	utilInstance;
-        LocalizedInput is;
         BufferedInputStream inStream;
         
 		// set input stream
@@ -61,19 +55,10 @@ public class wisconsin {
 			System.out.println("unable to find input file "+filePath);
 			throw e;
 		}
-        is = LocalizedResource.getInstance().getNewInput(inStream);
 
-		LocalizedInput [] in = { is };
-		LocalizedOutput out = new LocalizedOutput(System.out);
-		
-	
-		utilInstance = new utilMain(1, out, (Hashtable)null);
-        utilInstance.initConnections();
-		utilInstance.go(in, out, (java.util.Properties) null);
-		//log.flush();
-		out.flush();
-        
-        
+		ij.runScript(conn, inStream, "US-ASCII",
+				System.out, (String) null);
+		conn.commit();
 	}
 	
 	private static void createTables(Connection conn) throws SQLException{
