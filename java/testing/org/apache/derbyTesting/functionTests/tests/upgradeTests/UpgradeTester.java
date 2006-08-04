@@ -370,6 +370,7 @@ public class UpgradeTester {
             	setSQLAuthorization(conn, true);
             	conn = restartDatabase(classLoader);
             	passed = caseGrantRevoke(conn, phase, classLoader, true) && passed;
+            	checkSysSchemas(conn);
             }        	
 			runMetadataTest(classLoader, conn);
 			conn.close();
@@ -940,6 +941,29 @@ public class UpgradeTester {
     	} catch (SQLException sqle) {
     		dumpSQLExceptions(sqle);
     	}
+    }
+    
+    /**
+     * This method lists the schema names and authorization ids in 
+     * SYS.SCHEMAS table. This is to test that the owner of system schemas is 
+     * changed from pseudo user "DBA" to the user invoking upgrade. 
+     * 
+     * @param conn
+     * @throws SQLException
+     */
+    private void checkSysSchemas(Connection conn) throws SQLException{
+    	System.out.println("Checking SYSSCHEMAS");
+    	
+    	Statement s = conn.createStatement();
+    	ResultSet rs = s.executeQuery("select * from SYS.SYSSCHEMAS");
+    	
+    	while(rs.next()) {
+    		System.out.println("SCHEMANAME: " + rs.getString(2) + " , " 
+    						+ "AUTHORIZATIONID: " + rs.getString(3));
+    	}
+    	
+    	rs.close();
+    	s.close();
     }
     
     /**

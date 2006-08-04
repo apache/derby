@@ -5607,12 +5607,12 @@ public final class	DataDictionaryImpl
 		row.setColumn(SYSSCHEMASRowFactory.SYSSCHEMAS_SCHEMAAID,
 					  dvf.getVarcharDataValue(authorizationId));
 
-		boolean[] bArray = {false, true};
+		boolean[] bArray = {false, false};
 
 		int[] colsToUpdate = {SYSSCHEMASRowFactory.SYSSCHEMAS_SCHEMAAID};
 
 		ti.updateRow(keyRow, row,
-					 SYSSCHEMASRowFactory.SYSSCHEMAS_INDEX2_ID,
+					 SYSSCHEMASRowFactory.SYSSCHEMAS_INDEX1_ID,
 					 bArray,
 					 colsToUpdate,
 					 tc);
