@@ -63,6 +63,8 @@
                   excludes="**/build.xml,toursdb/toursdb**,toursdb/derby.log"/>
       <zipfileset file="${derby.demo.src.dir}/toursdb/toursdb.xml"
                   fullpath="${derby.bin}/demo/programs/toursdb/build.xml"/>
+      <zipfileset file="${derby.demo.src.dir}/toursdb/toursdb_readme.html"
+                  fullpath="${derby.bin}/demo/programs/toursdb/toursdb_readme.html"/>
       <zipfileset dir="${basedir}/classes" includes="SimpleApp.class"
                   prefix="${derby.bin}/demo/programs/simple"/>
       <zipfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
@@ -98,6 +100,8 @@
                   excludes="**/build.xml,toursdb/toursdb**,toursdb/derby.log"/>
       <tarfileset file="${derby.demo.src.dir}/toursdb/toursdb.xml"
                   fullpath="${derby.bin}/demo/programs/toursdb/build.xml"/>
+      <tarfileset file="${derby.demo.src.dir}/toursdb/toursdb_readme.html"
+                  fullpath="${derby.bin}/demo/programs/toursdb/toursdb_readme.html"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleApp.class"
                   prefix="${derby.bin}/demo/programs/simple"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
