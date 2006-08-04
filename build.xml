@@ -900,7 +900,7 @@
   <target name="jdbc4_classlist_edit" if="jdk16">
     <!-- uncomment jdbc4 classes if jdk 1.6 is available -->
     <echo message="uncommenting jdbc4 classes"/>
-    <replaceregexp file="${derby.jar.dir}/lists/otherDerbyClasses.properties"
+    <replaceregexp file="${jar.classlist}"
      match="^#jdbc4_optional_(.*)"
      replace="\1"
      byline="true"/>
