@@ -943,6 +943,266 @@ set connection mamta1;
 drop table t12ViewTest;
 drop table t11ViewTest;
 
+-- Constraint test
+-- test1
+-- Give a constraint privilege at table level to a user. Let user define a foreign key constraint based on that privilege.
+--  Later revoke that references privilege and make sure that foreign key constraint gets dropped
+set connection mamta1;
+drop table t11ConstraintTest;
+create table t11ConstraintTest (c111 int not null primary key);
+insert into t11ConstraintTest values(1);
+insert into t11ConstraintTest values(2);
+grant references on t11ConstraintTest to mamta2;
+set connection mamta2;
+drop table t21ConstraintTest;
+create table t21ConstraintTest (c211 int references mamta1.t11ConstraintTest, c212 int);
+insert into t21ConstraintTest values(1,1);
+-- should fail because the foreign key constraint will fail
+insert into t21ConstraintTest values(3,1);
+set connection mamta1;
+revoke references on t11ConstraintTest from mamta2;
+set connection mamta2;
+-- will pass because the foreign key constraint got dropped because of revoke statement
+insert into t21ConstraintTest values(3,1);
+-- cleanup
+set connection mamta2;
+drop table t21ConstraintTest;
+set connection mamta1;
+drop table t11ConstraintTest;
+
+-- Constraint test
+-- test2
+-- Have user mamta1 give a references privilege to mamta3.
+-- Have user mamta2 give a references privilege to mamta3.
+-- Have mamta3 create a table with 2 foreign key constraints relying on both these granted privileges.
+-- Revoke one of those privileges and make sure that the foreign key constraint defined based on that privilege gets dropped.
+-- Now revoke the 2nd references privilege and make sure that remaining foreign key constraint gets dropped
+set connection mamta1;
+drop table t11ConstraintTest;
+create table t11ConstraintTest (c111 int not null primary key);
+insert into t11ConstraintTest values(1);
+insert into t11ConstraintTest values(2);
+grant references on t11ConstraintTest to mamta3;
+set connection mamta2;
+drop table t21ConstraintTest;
+create table t21ConstraintTest (c111 int not null primary key);
+insert into t21ConstraintTest values(1);
+insert into t21ConstraintTest values(2);
+grant references on t21ConstraintTest to mamta3;
+set connection mamta3;
+drop table t31ConstraintTest;
+create table t31ConstraintTest (c311 int references mamta1.t11ConstraintTest, c312 int references mamta2.t21ConstraintTest);
+select * from t31ConstraintTest;
+insert into t31ConstraintTest values(1,1);
+-- following should fail because it violates the foreign key reference by column c312
+insert into t31ConstraintTest values(1,3);
+-- following should fail because it violates the foreign key reference by column c311
+insert into t31ConstraintTest values(3,1);
+-- following should fail because it violates the foreign key reference by column c311 and c312
+insert into t31ConstraintTest values(3,4);
+set connection mamta2;
+-- the following revoke should drop the foreign key reference by column t31ConstraintTest.c312
+revoke references on t21ConstraintTest from mamta3;
+set connection mamta3;
+-- verify that foreign key reference by column t31ConstraintTest.c312 got dropped by inserting a row.
+-- following should pass
+insert into t31ConstraintTest values(1,3);
+-- following should still fail because foreign key reference by column c311 is still around
+insert into t31ConstraintTest values(3,1);
+set connection mamta1;
+-- now drop the references privilege so that the only foreign key reference on table mamta3.t31ConstraintTest will get dropped
+revoke references on t11ConstraintTest from mamta3;
+set connection mamta3;
+-- verify that foreign key reference by column t31ConstraintTest.c311 got dropped by inserting a row.
+-- following should pass
+insert into t31ConstraintTest values(3,1);
+-- no more foreign key references left and hence following should pass
+insert into t31ConstraintTest values(3,3);
+-- cleanup
+drop table t31ConstraintTest;
+set connection mamta2;
+drop table t21ConstraintTest;
+set connection mamta1;
+drop table t11ConstraintTest;
+
+-- Constraint test
+-- test3
+-- Have mamta1 grant REFERENCES privilege on one of it's tables to mamta2
+-- Have mamta2 create a table with primary which references mamta1's granted REFERENCES privilege
+-- Have mamta2 grant REFERENCES privilege on that table to user mamta3
+-- Have mamta3 create a table which references mamta2's granted REFERENCES privilege
+-- Now revoke of granted REFERENCES privilege by mamta1 should drop the foreign key reference 
+--  by mamta2's table t21ConstraintTest. It should not impact the foreign key reference by
+--  mamta3's table t31ConstraintTest.
+-- a)mamta1.t11ConstraintTest (primary key)
+-- b)mamta2.t21ConstraintTest (primary key references t11ConstraintTest)
+-- c)mamta3.t31ConstraintTest (primary key references t21ConstraintTest)
+set connection mamta1;
+drop table t11ConstraintTest;
+create table t11ConstraintTest (c111 int not null primary key);
+insert into t11ConstraintTest values(1);
+insert into t11ConstraintTest values(2);
+grant references on t11ConstraintTest to mamta2;
+set connection mamta2;
+drop table t21ConstraintTest;
+create table t21ConstraintTest (c111 int not null primary key references mamta1.t11ConstraintTest);
+insert into t21ConstraintTest values(1);
+insert into t21ConstraintTest values(2);
+-- following should fail because of foreign key constraint failure
+insert into t21ConstraintTest values(3);
+grant references on t21ConstraintTest to mamta3;
+set connection mamta3;
+drop table t31ConstraintTest;
+create table t31ConstraintTest (c311 int references mamta2.t21ConstraintTest);
+select * from t31ConstraintTest;
+insert into t31ConstraintTest values (1);
+-- following should fail because of foreign key constraint failure
+insert into t31ConstraintTest values (4);
+set connection mamta1;
+-- This revoke should drop foreign key constraint on mamta2.t21ConstraintTest
+--   This revoke should not impact the foeign key constraint on mamta3.t31ConstraintTest
+revoke references on t11ConstraintTest from mamta2;
+set connection mamta2;
+-- because the foreign key reference got revoked, no constraint violation check will be done
+insert into t21ConstraintTest values(3);
+set connection mamta3;
+-- Make sure the foreign key constraint on t31ConstraintTest is still active
+insert into t31ConstraintTest values(3);
+-- because the foreign key constraint is still around, following should fail
+insert into t31ConstraintTest values(4);
+-- cleanup
+set connection mamta3;
+drop table t31ConstraintTest;
+set connection mamta2;
+drop table t21ConstraintTest;
+set connection mamta1;
+drop table t11ConstraintTest;
+
+-- Constraint test
+-- test4
+-- Grant a REFERENCES permission at public level, create constraint, grant same permission at user level 
+--   and take away the public level permission. It ends up dropping the constraint. DERBY-1632
+set connection mamta1;
+drop table t11ConstraintTest;
+create table t11ConstraintTest (c111 int not null primary key);
+insert into t11ConstraintTest values(1);
+insert into t11ConstraintTest values(2);
+grant references on t11ConstraintTest to PUBLIC;
+set connection mamta2;
+drop table t21ConstraintTest;
+create table t21ConstraintTest (c111 int not null primary key, constraint fk foreign key(c111) references mamta1.t11ConstraintTest);
+insert into t21ConstraintTest values(1);
+insert into t21ConstraintTest values(2);
+-- following should fail because of foreign key constraint failure
+insert into t21ConstraintTest values(3);
+set connection mamta1;
+-- grant REFERENCES permission again but this time at user level
+grant references on t11ConstraintTest to mamta2;
+-- Now, revoke REFERENCES permission which was granted at PUBLIC level, This drops the constraint.
+--   DERBY-1632. This should be fixed at some point so that constraint won't get dropped, instead
+--   it will start depending on same privilege available at user-level
+revoke references on t11ConstraintTest from PUBLIC;
+set connection mamta2;
+-- because the foreign key reference got revoked, no constraint violation check will be done
+insert into t21ConstraintTest values(3);
+-- cleanup
+set connection mamta2;
+drop table t21ConstraintTest;
+set connection mamta1;
+drop table t11ConstraintTest;
+
+-- Constraint test
+-- test5
+-- Grant refrences privilege and select privilege on a table. Have a constraint depend on the references
+--   privilege. Later, a revoke of select privilege will end up dropping the constraint which shouldn't
+--   happen. This will be addressed in a subsequent patch
+set connection mamta1;
+drop table t11ConstraintTest;
+create table t11ConstraintTest (c111 int not null primary key);
+insert into t11ConstraintTest values(1);
+insert into t11ConstraintTest values(2);
+grant references on t11ConstraintTest to PUBLIC;
+grant select on t11ConstraintTest to PUBLIC;
+set connection mamta2;
+drop table t21ConstraintTest;
+create table t21ConstraintTest (c111 int not null primary key, constraint fk foreign key(c111)   references mamta1.t11ConstraintTest);
+insert into t21ConstraintTest values(1);
+insert into t21ConstraintTest values(2);
+-- following should fail because of foreign key constraint failure
+insert into t21ConstraintTest values(3);
+set connection mamta1;
+-- revoke of select privilege is going to drop the constraint which is incorrect. Will be handled in a later patch
+revoke select on t11ConstraintTest from PUBLIC;
+set connection mamta2;
+-- following should have failed but it doesn't because foreign key constraint got dropped by revoke select privilege
+-- Will be fixed in a subsequent patch
+insert into t21ConstraintTest values(3);
+-- cleanup
+set connection mamta2;
+drop table t21ConstraintTest;
+set connection mamta1;
+drop table t11ConstraintTest;
+
+-- Constraint test
+-- test6
+-- Have a primary key and a unique key on a table and grant reference on both. Have another table rely on unique
+--  key references privilege to create a foreign key constraint. Later, the revoke of primary key reference will end up
+--  dropping the foreign key constraint. This will be fixed in a subsequent patch (same as test5)
+set connection mamta1;
+drop table t11ConstraintTest;
+create table t11ConstraintTest (c111 int not null primary key, c112 int not null unique, c113 int);
+insert into t11ConstraintTest values(1,1,1);
+insert into t11ConstraintTest values(2,2,1);
+grant references(c111, c112) on t11ConstraintTest to PUBLIC;
+set connection mamta2;
+drop table t21ConstraintTest;
+create table t21ConstraintTest (c111 int not null primary key, constraint fk foreign key(c111)   references mamta1.t11ConstraintTest(c112));
+insert into t21ConstraintTest values(1);
+insert into t21ConstraintTest values(2);
+-- following should fail because of foreign key constraint failure
+insert into t21ConstraintTest values(3);
+set connection mamta1;
+-- revoke of references privilege on c111 which is not used by foreign key constraint on t21ConstraintTest ends up dropping that
+--  foreign key constraint. This Will be handled in a later patch
+revoke references(c111) on t11ConstraintTest from PUBLIC;
+set connection mamta2;
+-- following should have failed but it doesn't because foreign key constraint got dropped by revoke references privilege
+-- Will be fixed in a subsequent patch
+insert into t21ConstraintTest values(3);
+-- cleanup
+
+-- Miscellaneous test
+-- test1
+-- Have multiple objects depends on a privilege and make sure they all get dropped when that privilege is revoked.
+set connection mamta1;
+drop table t11MiscTest;
+create table t11MiscTest (c111 int, c112 int, c113 int);
+grant select, update, trigger on t11MiscTest to mamta2, mamta3;
+drop table t12MiscTest;
+create table t12MiscTest (c121 int, c122 int);
+grant select on t12MiscTest to mamta2;
+set connection mamta2;
+drop view v21MiscTest;
+create view v21MiscTest as select * from mamta1.t11MiscTest, mamta1.t12MiscTest where c111=c121;
+select * from v21MiscTest;
+set connection mamta3;
+drop view v31MiscTest;
+create view v31MiscTest as select c111 from mamta1.t11MiscTest;
+select * from v31MiscTest;
+set connection mamta1;
+-- this should drop both the dependent views
+revoke select, update on t11MiscTest from mamta2, mamta3;
+set connection mamta2;
+-- should fail because it got dropped as part of revoke statement
+select * from v21MiscTest;
+set connection mamta3;
+-- should fail because it got dropped as part of revoke statement
+select * from v31MiscTest;
+-- cleanup
+set connection mamta1;
+drop table t11MiscTest;
+drop table t12MiscTest;
+
 -- create trigger privilege collection
 -- TriggerTest
 -- first grant one column level privilege at user level and another at public level and then define the trigger

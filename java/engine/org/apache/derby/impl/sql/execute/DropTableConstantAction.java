@@ -313,7 +313,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 
 			dm.invalidateFor(cd, DependencyManager.DROP_CONSTRAINT, lcc);
 			DropConstraintConstantAction.dropConstraintAndIndex(dm, td, dd, cd, 
-						tc, activation, true);
+						tc, lcc, true);
 		}
 
 		/*
@@ -345,7 +345,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 			** doesn't clear dependencies, we'll do that ourselves.
 			*/
 			DropConstraintConstantAction.dropConstraintAndIndex(dm, td, dd, cd, 
-						tc, activation, false);
+						tc, lcc, false);
 
 			/*
 			** If we are going to cascade, get all the
@@ -370,7 +370,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 					dm.invalidateFor(fkcd, DependencyManager.DROP_CONSTRAINT, lcc);
 					DropConstraintConstantAction.dropConstraintAndIndex(
 							dm, fkcd.getTableDescriptor(), dd, fkcd,
-							tc, activation, true);
+							tc, lcc, true);
 					activation.addWarning(
 						StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
  							fkcd.getConstraintName(),

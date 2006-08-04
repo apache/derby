@@ -65,7 +65,7 @@ import org.apache.derby.catalog.UUID;
  *	@author Jerry Brenner
  */
 
-class DropConstraintConstantAction extends ConstraintConstantAction
+public class DropConstraintConstantAction extends ConstraintConstantAction
 {
 
 	private boolean cascade;		// default false
@@ -227,7 +227,7 @@ class DropConstraintConstantAction extends ConstraintConstantAction
 		** be repeatedly changing the reference count of the referenced
 		** key and generating unnecessary I/O.
 		*/
-		dropConstraintAndIndex(dm, td, dd, conDesc, tc, activation, !cascadeOnRefKey);
+		dropConstraintAndIndex(dm, td, dd, conDesc, tc, lcc, !cascadeOnRefKey);
 
 		if (cascadeOnRefKey) 
 		{
@@ -244,7 +244,7 @@ class DropConstraintConstantAction extends ConstraintConstantAction
 				fkcd = (ForeignKeyConstraintDescriptor) cdl.elementAt(index);
 				dm.invalidateFor(fkcd, DependencyManager.DROP_CONSTRAINT, lcc);
 				dropConstraintAndIndex(dm, fkcd.getTableDescriptor(), dd, fkcd,
-								tc, activation, true);
+								tc, lcc, true);
 			}
 	
 			/*
@@ -263,12 +263,12 @@ class DropConstraintConstantAction extends ConstraintConstantAction
 	 * from the list on the table descriptor.  Does NOT
 	 * do an dm.invalidateFor()
 	 */
-	protected static void dropConstraintAndIndex(DependencyManager	dm,
+	public static void dropConstraintAndIndex(DependencyManager	dm,
 								TableDescriptor 		td,
 								DataDictionary 			dd,
 								ConstraintDescriptor 	conDesc,
 								TransactionController 	tc,
-								Activation				activation,
+								LanguageConnectionContext lcc,
 								boolean					clearDependencies)
 		throws StandardException
 	{
@@ -280,7 +280,7 @@ class DropConstraintConstantAction extends ConstraintConstantAction
 
 		if (clearDependencies)
 		{
-			dm.clearDependencies(activation.getLanguageConnectionContext(), conDesc);
+			dm.clearDependencies(lcc, conDesc);
 		}
 
 		/* Drop the constraint.
@@ -313,7 +313,8 @@ class DropConstraintConstantAction extends ConstraintConstantAction
 					if (conglomDescs[i].isConstraint())
 					{
 						DropIndexConstantAction.dropIndex(dm, dd, tc,
-													conglomDescs[i], td, activation);
+													conglomDescs[i], td, 
+													lcc);
 						break;
 					}
 				}

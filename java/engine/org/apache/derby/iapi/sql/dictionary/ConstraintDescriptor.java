@@ -35,6 +35,8 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import	org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
+import org.apache.derby.impl.sql.execute.DropConstraintConstantAction;
+
 /**
  * This class is used to get information from a ConstraintDescriptor.
  * A ConstraintDescriptor can represent a constraint on a table or on a
@@ -580,7 +582,13 @@ public abstract class ConstraintDescriptor
 	{
 		if (action == DependencyManager.REVOKE_PRIVILEGE) 
 		{
-			//for now, ignore revoke privilege action
+			DropConstraintConstantAction.dropConstraintAndIndex(
+					getDataDictionary().getDependencyManager(),
+					table,
+					getDataDictionary(),
+					this,
+					lcc.getTransactionExecute(),
+					lcc, true);
 			return;
 		}
 

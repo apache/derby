@@ -821,7 +821,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			dm.invalidateFor(cd, DependencyManager.DROP_CONSTRAINT,
 									lcc);
 			DropConstraintConstantAction.dropConstraintAndIndex(dm, td, dd,
-							 cd, tc, activation, true);
+							 cd, tc, lcc, true);
 			activation.addWarning(StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
 				cd.getConstraintName(), td.getName()));
 		}
@@ -830,7 +830,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
 			ConstraintDescriptor cd = toBeRemoved[i];
 			DropConstraintConstantAction.dropConstraintAndIndex(dm, td, dd, cd,
-						tc, activation, false);
+						tc, lcc, false);
 			activation.addWarning(StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
 					cd.getConstraintName(), td.getName()));
 
@@ -845,7 +845,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									lcc);
 
 					DropConstraintConstantAction.dropConstraintAndIndex(
-						dm, fkcd.getTableDescriptor(), dd, fkcd, tc, activation, true);
+						dm, fkcd.getTableDescriptor(), dd, fkcd, tc, lcc, true);
 					activation.addWarning(StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
 						fkcd.getConstraintName(), fkcd.getTableDescriptor().getName()));
 				}
@@ -1590,7 +1590,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					 */
 					ConglomerateDescriptor cd = td.getConglomerateDescriptor
 												(indexConglomerateNumbers[i]);
-					DropIndexConstantAction.dropIndex(dm, dd, tc, cd, td, activation);
+					DropIndexConstantAction.dropIndex(dm, dd, tc, cd, td, activation.getLanguageConnectionContext());
 
 					compressIRGs[i] = null;		// mark it
 					continue;

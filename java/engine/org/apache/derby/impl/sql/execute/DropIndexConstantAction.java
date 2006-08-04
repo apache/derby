@@ -178,7 +178,7 @@ class DropIndexConstantAction extends IndexConstantAction
 		 * since the conglomerate descriptor may be looked up as part of
 		 * decoding tuples in SYSDEPENDS.
 		 */
-		dropIndex(dm, dd, tc, cd, td, activation);
+		dropIndex(dm, dd, tc, cd, td, activation.getLanguageConnectionContext());
 	}
 
 	public static void dropIndex(DependencyManager 	dm,
@@ -186,10 +186,9 @@ class DropIndexConstantAction extends IndexConstantAction
 							TransactionController	tc,
 							ConglomerateDescriptor	cd,
 							TableDescriptor			td,
-							Activation				act)
+							LanguageConnectionContext lcc)
 		throws StandardException
 	{	
-		LanguageConnectionContext lcc = act.getLanguageConnectionContext();
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(tc != null, "tc is null");
