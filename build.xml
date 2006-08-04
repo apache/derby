@@ -916,7 +916,9 @@
       <fileset dir="${basedir}/tools/jar" includes="*DBMS*.properties"/>
     </concat>
 
-    <antcall target="jdbc4_classlist_edit"/>
+    <antcall target="jdbc4_classlist_edit">
+      <param name="jar.classlist" value="${derby.jar.dir}/lists/otherDerbyClasses.properties"/>
+    </antcall>
 
     <mkdir dir="${derby.jar.dir}/lists/org/apache/derby"/>
     <java classname="org.apache.derbyBuild.propertyconfig">
@@ -1206,6 +1208,21 @@
 
     <echo message="Beginning derbyclient.jar ${sanity.name} build"/>
 
+    <copy file="${basedir}/tools/jar/dnc.properties"
+          tofile="${derby.jar.dir}/lists/dnc.properties"/>
+
+    <antcall target="jdbc4_classlist_edit">
+      <param name="jar.classlist" value="${derby.jar.dir}/lists/dnc.properties"/>
+    </antcall>
+
+    <java classname="org.apache.derbyBuild.classlister" fork="yes">
+      <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/dnc.list"/>
+      <arg value="${derby.jar.dir}/lists/dnc.properties"/>
+      <classpath>
+        <pathelement path="${out.dir}"/> 
+      </classpath>
+    </java>
+
     <echo message=" creating new dnc.properties file "/>
 
     <mkdir dir="${out.dir}/org/apache/derby/info/"/>
@@ -1243,15 +1260,11 @@
          update="true"
     	 manifest="${derby.jar.dir}/lists/smfclient.mf">
       <fileset dir="${out.dir}"
-               includes="org/apache/derby/client/**,
-		 	 org/apache/derby/client/jdbc/Client**,
-                         org/apache/derby/jdbc/Client**,
-                         org/apache/derby/iapi/services/info/**,
-                         org/apache/derby/iapi/services/sanity/SanityManager.class,
-                         org/apache/derby/shared/**,
-                         org/apache/derby/info/dnc.properties,
+               includesfile="${derby.jar.dir}/lists/dnc.list"/>
+      <fileset dir="${out.dir}"
+               includes="org/apache/derby/info/dnc.properties,
                          org/apache/derby/loc/clientmessages*.properties"
-               excludes="org/apache/derby/shared/common/reference/**"/>
+               excludes="org/apache/derby/loc/clientmessages_qq_PP_testOnly.properties"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>
