@@ -288,9 +288,38 @@ public interface LogFactory extends Corruptable {
     public void setDatabaseEncrypted();
     
     /*
-     * setup transaction log for encryption. 
+     * set up a new log file to start writing 
+     * the log records into the new log file 
+     * after this call.
+     *
+     * <P>MT - synchronization provided by caller - RawStore boot,
+     * This method is called while re-encrypting the database 
+     * at databse boot time. 
      */
-    public  void setupLogEncryption() throws StandardException;
+    public void startNewLogFile() throws StandardException;
+
+    /*
+     * find if the checkpoint is in the last log file. 
+     *
+     * <P>MT - synchronization provided by caller - RawStore boot,
+     * This method is called only if a crash occured while 
+     * re-encrypting the database at boot time. 
+     * @return <code> true </code> if if the checkpoint is 
+     *                in the last log file, otherwise 
+     *                 <code> false </code>.
+     */
+    public boolean isCheckpointInLastLogFile() 
+        throws StandardException;
+    
+    /*
+     * delete the log file after the checkpoint. 
+     *
+     * <P>MT - synchronization provided by caller - RawStore boot,
+     * This method is called only if a crash occured while 
+     * re-encrypting the database at boot time. 
+     */
+    public void deleteLogFileAfterCheckpointLogFile() 
+        throws StandardException;
 
     
     /**

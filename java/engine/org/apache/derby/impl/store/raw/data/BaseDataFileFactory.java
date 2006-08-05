@@ -203,6 +203,9 @@ public final class BaseDataFileFactory
 
 	private Hashtable postRecoveryRemovedFiles;
 
+    private EncryptData containerEncrypter;
+
+
     // PrivilegedAction actions
     private int actionCode;
     private static final int GET_TEMP_DIRECTORY_ACTION              = 1;
@@ -2133,12 +2136,36 @@ public final class BaseDataFileFactory
                 ciphertext, offset, length, cleartext, outputOffset);
 	}
 
+
+    
     public void encryptAllContainers(RawTransaction t) throws StandardException
     {
-        EncryptData ed = new EncryptData(this);
+        containerEncrypter = new EncryptData(this);
         // encrypt all the conatiners in the databse
-        ed.encryptAllContainers(t);
+        containerEncrypter.encryptAllContainers(t);
     }
+
+
+    /*
+     * Remover old versions of the containers after (re)encryption 
+     * of the  database. 
+     * @param inRecovery  <code> true </code>, if cleanup is 
+     *                     happening during recovery.
+     */
+    public void removeOldVersionOfContainers(boolean inRecovery) 
+        throws StandardException
+    {
+        // check if old containers are being during recovery 
+        // because of a crash after successful completion of 
+        // (re)encryption of the  dataabase, but before the 
+        // (re)encryption cleanup  was complete. 
+        if (inRecovery) {
+            containerEncrypter = new EncryptData(this);
+        }
+        containerEncrypter.removeOldVersionOfContainers(inRecovery);
+        containerEncrypter = null;
+    }
+
 
 	/**
 		Returns the encryption block size used by the algorithm at time of

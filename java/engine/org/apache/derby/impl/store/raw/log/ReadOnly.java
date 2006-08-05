@@ -359,18 +359,63 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
      * Set that the database is encrypted. Read-only database can not 
      * be reencrypted, nothing to do in this case. 
      */
-    public void setDatabaseEncrypted() {
-
+    public void setDatabaseEncrypted()
+    {
         // nothing to do for a read-only database.
     }
 
+
     /*
-     * setup log for encryption. Read-only database can not 
-     * be reencrypted, nothing to do in this case. 
+     * set up a new log file to start writing 
+     * the log records into the new log file 
+     * after this call.
+     *
+     * <P>MT - synchronization provided by caller - RawStore boot,
+     * This method is called while re-encrypting the database 
+     * at databse boot time. 
+     *
+     * Read-only database can not be reencrypted, 
+     * nothing to do in this case. 
      */
-    public void setupLogEncryption() throws StandardException {
+    public void startNewLogFile() throws StandardException 
+    {
         // nothing to do for a read-only database. 
     }
+
+    /*
+     * find if the checkpoint is in the last log file. 
+     *
+     * <P>MT - synchronization provided by caller - RawStore boot,
+     * This method is called only if a crash occured while 
+     * re-encrypting the database at boot time. 
+
+     * Read-only database can not be re-encrypted, 
+     * nothing to do in this case. 
+     */
+    public boolean isCheckpointInLastLogFile() 
+        throws StandardException 
+    {
+        // nothing to do for a read-only database. 
+        return false;
+    }
+    
+    /*
+     * delete the log file after the checkpoint. 
+     *
+     * <P>MT - synchronization provided by caller - RawStore boot,
+     * This method is called only if a crash occured while 
+     * re-encrypting the database at boot time. 
+     *
+     * Read-only database can not be re-encrypted, 
+     * nothing to do in this case. 
+     */
+    public void deleteLogFileAfterCheckpointLogFile() 
+        throws StandardException 
+    {
+        // nothing to do for a read-only database. 
+    }
+
+
 
     /**
      *  Check to see if a database has been upgraded to the required

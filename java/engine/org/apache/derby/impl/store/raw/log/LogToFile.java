@@ -3980,14 +3980,83 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         databaseEncrypted = true;
     }
 
+
     /*
-     * setup log for encryption. 
+     * set up a new log file to start writing 
+     * the log records into the new log file 
+     * after this call.
+     *
+     * <P>MT - synchronization provided by caller - RawStore boot,
+     * This method is called while re-encrypting the database 
+     * at databse boot time. 
      */
-    public  void setupLogEncryption() throws StandardException
+    public void startNewLogFile() throws StandardException
     {
-        // switch the database to a new log file, so that 
-        // new encrytion will start on new log file. 
+        // switch the database to a new log file.
         switchLogFile();
+    }
+
+
+    /*
+     * find if the checkpoint is in the last log file. 
+     *
+     * <P>MT - synchronization provided by caller - RawStore boot,
+     * This method is called only if a crash occured while 
+     * re-encrypting the database at boot time. 
+     * @return <code> true </code> if if the checkpoint is 
+     *                in the last log file, otherwise 
+     *                 <code> false </code>.
+     */
+    public boolean isCheckpointInLastLogFile() 
+        throws StandardException
+    {
+        // check if the checkpoint is done in the last log file. 
+        long logFileNumberAfterCheckpoint = 
+            LogCounter.getLogFileNumber(checkpointInstant) + 1;
+
+        // check if there is a log file after
+        // the log file that has the last 
+        // checkpoint record.
+        StorageFile logFileAfterCheckpoint = 
+            getLogFileName(logFileNumberAfterCheckpoint);
+        // System.out.println("checking " + logFileAfterCheckpoint);
+        if (privExists(logFileAfterCheckpoint))
+            return false;
+        else 
+            return true;
+    }
+    
+    /*
+     * delete the log file after the checkpoint. 
+     *
+     * <P>MT - synchronization provided by caller - RawStore boot,
+     * This method is called only if a crash occured while 
+     * re-encrypting the database at boot time. 
+     */
+    public void deleteLogFileAfterCheckpointLogFile() 
+        throws StandardException
+    {
+        long logFileNumberAfterCheckpoint = 
+            LogCounter.getLogFileNumber(checkpointInstant) + 1;
+
+        StorageFile logFileAfterCheckpoint = 
+            getLogFileName(logFileNumberAfterCheckpoint);
+
+        // System.out.println("deleting " + logFileAfterCheckpoint);
+
+        if (privExists(logFileAfterCheckpoint)) 
+        {
+            // delete the log file (this must have beend encrypted 
+            // with the new key.
+            if (!privDelete(logFileAfterCheckpoint))
+            {
+                // throw exception, recovery can not be performed
+                // without deleting the log file encyrpted with new key.
+                throw StandardException.newException(
+                           SQLState.UNABLE_TO_DELETE_FILE, 
+                           logFileAfterCheckpoint);
+            }
+        }
     }
 
 

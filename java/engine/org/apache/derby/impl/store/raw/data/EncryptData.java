@@ -62,6 +62,8 @@ public class EncryptData {
 
     private BaseDataFileFactory dataFactory;
     private StorageFactory storageFactory;
+    private StorageFile[] oldFiles;
+    private int noOldFiles = 0; 
 
 	public EncryptData(BaseDataFileFactory dataFactory) {
 		this.dataFactory = dataFactory;
@@ -86,8 +88,8 @@ public class EncryptData {
 
 		String[] files = dataFactory.getContainerNames();
 		if (files != null) {
-            StorageFile[] oldFiles = new StorageFile[files.length];
-            int count = 0;
+            oldFiles = new StorageFile[files.length];
+            noOldFiles = 0;
 			long segmentId = 0;
 
             // loop through all the files in seg0 and 
@@ -109,14 +111,12 @@ public class EncryptData {
 
 				ContainerKey ckey = new ContainerKey(segmentId, 
                                                      containerId);
-                oldFiles[count++] = encryptContainer(t, ckey);
+                oldFiles[noOldFiles++] = encryptContainer(t, ckey);
 			}
 
-            // remove all the old versions of the 
-            // container files on post-commit.
-            Serviceable removeOldFiles = new RemoveFiles(oldFiles, count);
-            t.addPostCommitWork(removeOldFiles);
-            
+            // Old versions of the container files will
+            // be removed after the (re)encryption of database
+            // is completed. 
 		} else
 		{
 			if (SanityManager.DEBUG) 
@@ -242,6 +242,26 @@ public class EncryptData {
         return sb.toString();
     }
 
+    private boolean isOldContainerFile(String fileName) 
+    {
+        // all old versions of the conatainer files
+        // start with prefix "o" and ends with ".dat"
+        if (fileName.startsWith("o") && fileName.endsWith(".dat"))
+            return true;
+        else
+            return false;
+    }
+
+    private StorageFile getFile(String ctrFileName) 
+    {
+        long segmentId = 0;
+        StringBuffer sb = new StringBuffer("seg");
+        sb.append(segmentId);
+        sb.append(storageFactory.getSeparator());
+        sb.append(ctrFileName);
+        return storageFactory.newStorageFile(sb.toString());
+    }
+
     /* Restore the contaier to the state it was before 
      * it was encrypted with new encryption key. This function is 
      * called during undo of the EncryptContainerOperation log record 
@@ -298,51 +318,57 @@ public class EncryptData {
                                                  newFile);
         }
     }
-}
 
 
-/**
- * This is a helper class to remove old versions of the 
- * container files during  the post-commit of the transaction 
- * that is used to configure database with new encryption properties.
- */
-class RemoveFiles implements Serviceable 
-{
-	private StorageFile filesToGo[];
-    private int noFiles = 0 ;
-
-	RemoveFiles(StorageFile filesToGo[], int size) {
-        this.filesToGo = filesToGo;
-        this.noFiles = size;
-	}
-
-	public int performWork(ContextManager context)
-        throws StandardException  {
+    /*
+     * Remove all the old version (encrypted with old key or 
+     * un-encrypted) of the containers stored in the data directory .
+     *
+     * @param inRecovery  <code> true </code>, if cleanup is 
+     *                    happening during recovery.
+     * @exception StandardException Standard Derby Error Policy
+     */
+    public void removeOldVersionOfContainers(boolean inRecovery) 
+        throws StandardException
+    {
         
-        for (int i = 0; i < noFiles; i++) {
-            if (filesToGo[i].exists())
+        if (inRecovery) 
+        {
+            // find the old version of the container files
+            // and delete them
+            String[] files = dataFactory.getContainerNames();
+            if (files != null) 
             {
-                if (!filesToGo[i].delete())
+                // loop through all the files in seg0 and 
+                // delete all old copies of the containers.
+                for (int i = files.length-1; i >= 0 ; i--) 
                 {
-                    throw StandardException.newException(
-                    SQLState.FILE_CANNOT_REMOVE_FILE, filesToGo[i]);
+                    // if it is a old version of the container file
+                    // delete it. 
+                    if (isOldContainerFile(files[i]))
+                    {
+                        StorageFile oldFile = getFile(files[i]);
+                        if (!oldFile.delete()) 
+                        {
+                            throw StandardException.newException(
+                                          SQLState.FILE_CANNOT_REMOVE_FILE,
+                                          oldFile);
+                        }
+                    }
                 }
             }
-            
+        }else 
+        {
+            // delete all the old version of the containers. 
+            for (int i = 0 ; i < noOldFiles ; i++) 
+            {
+                if (!oldFiles[i].delete()) 
+                {
+                    throw StandardException.newException(
+                                   SQLState.FILE_CANNOT_REMOVE_FILE, 
+                                   oldFiles[i]);
+                }
+            }
         }
-        return Serviceable.DONE;
     }
-
-
-	public boolean serviceASAP() {
-		return false;
-	}
-
-    /**
-     * delete the files immediately during the post commit.
-     * @return true, this work needs to done on user thread. 
-     */
-	public boolean serviceImmediately()	{
-		return true;
-	}	
 }

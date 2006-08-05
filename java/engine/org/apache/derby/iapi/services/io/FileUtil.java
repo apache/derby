@@ -469,6 +469,60 @@ nextFile:	for (int i = 0; i < list.length; i++) {
 		return true;
 	} // end of copyFile
 
+
+    public static boolean copyFile( WritableStorageFactory storageFactory, 
+                                    StorageFile from, StorageFile to)
+    {
+        return copyFile( storageFactory, from, to, (byte[]) null);
+    }
+    
+	public static boolean copyFile( WritableStorageFactory storageFactory, 
+                                    StorageFile from, StorageFile to, 
+                                    byte[] buf)
+	{
+		InputStream from_s = null;
+		OutputStream to_s = null;
+
+		try {
+			from_s = from.getInputStream();
+			to_s = to.getOutputStream();
+
+			if (buf == null)
+				buf = new byte[BUFFER_SIZE]; // reuse this buffer to copy files
+
+			for (int bytesRead = from_s.read(buf);
+				 bytesRead != -1;
+				 bytesRead = from_s.read(buf))
+				to_s.write(buf,0,bytesRead);
+
+			from_s.close();
+			from_s = null;
+
+			storageFactory.sync( to_s, false);  // RESOLVE: sync or no sync?
+			to_s.close();
+			to_s = null;
+		}
+		catch (IOException ioe)
+		{
+			return false;
+		}
+		finally
+		{
+			if (from_s != null)
+			{
+				try { from_s.close(); }
+				catch (IOException ioe) {}
+			}
+			if (to_s != null)
+			{
+				try { to_s.close(); }
+				catch (IOException ioe) {}
+			}
+		}
+
+		return true;
+	} // end of copyFile
+
 	/**
 		Convert a file path into a File object with an absolute path
 		relative to a passed in root. If path is absolute then

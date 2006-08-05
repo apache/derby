@@ -292,6 +292,16 @@ public interface DataFactory extends Corruptable {
         throws StandardException;
 
     /*
+     * Remove old versions of the containers after (re)encryption 
+     * of the  database. 
+     * @param inRecovery  <code> true </code>, if cleanup is 
+     *                    happening during recovery.
+     * @exception StandardException Standard Derby Error Policy
+     */
+    public void removeOldVersionOfContainers(boolean inRecovery) 
+        throws StandardException;
+
+    /*
      * Set that the database is encrypted.
      */
     public void setDatabaseEncrypted();

@@ -281,6 +281,52 @@ public interface RawStoreFactory extends Corruptable {
         "encryptedBootPassword";
 
 
+    /**
+     * When the datbase is getting re-encrypted old encrypted key is 
+     * stored in the service.properties until re-encyrption
+     * successfully completes or rolled back. It is really the old 
+     * encryptedkey, but the property key is called the 
+     * OldEncryptedBootPassword.
+	 */
+	public static final String OLD_ENCRYPTED_KEY = 
+        "OldEncryptedBootPassword";
+
+
+    /*
+     * Following property is used to track the status of the (re)encryption,
+     * required to bring the database back to state it was before the 
+     * (re) encryption started, id (re) encryption of the database 
+     * is aborted.
+     */
+    public static final String DB_ENCRYPTION_STATUS =
+        "derby.storage.databaseEncryptionStatus";
+
+    /* (re)encryption is in progress, if a crash 
+     *  occurs after this flag is set, 
+     * (re)encryption needs to  be undone.
+     */
+    public static final int DB_ENCRYPTION_IN_PROGRESS   = 1;
+
+    /* this flag is used to track crash during undo
+       of (re) encryption during recovery .
+    */
+    public static final int DB_ENCRYPTION_IN_UNDO      =  2;
+
+    /*
+     * Cleanup any (re) encryption related resources. 
+     */
+    public static final int  DB_ENCRYPTION_IN_CLEANUP  =  3;
+
+    
+	/**
+       A File used to save the old copy of the verify key 
+       (Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE) file during 
+       re-encryption of the database. 
+	 */
+	String CRYPTO_OLD_EXTERNAL_KEY_VERIFY_FILE = "verifyOldKey.dat";
+
+
+
 	/**
 	 *  for debugging, keep all transaction logs intact.
 	 */

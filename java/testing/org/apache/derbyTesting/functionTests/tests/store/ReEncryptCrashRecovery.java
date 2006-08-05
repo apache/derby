@@ -29,9 +29,10 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /*
- * This class tests crash/recovery scenarions during  re-encryption of 
- * databas. Debug flags are used to simulate crashes during the 
- * re-encrytpion. 
+ * This class tests crash/recovery scenarions during  (re) encryption of 
+ * database. Debug flags are used to simulate crashes during the 
+ * encrytpion of an un-encrypted database and re-encryption of an encrypted
+ * database with new password/key. 
  *
  *  Unlike the other recovery tests which do a setup and recovery as different
  *  tests, Incase of re-encryption crash/recovery can be simulated in one 
@@ -49,10 +50,49 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 public class ReEncryptCrashRecovery
 {
 
-    private static final String TEST_DATABASE_NAME = "wombat_pwd" ;
+    // database name used to test re-encryption of an encrypted database 
+    // using a new boot password.
+    private static final String TEST_REENCRYPT_PWD_DATABASE = "wombat_pwd_ren" ;
+    // database name used to test encryption and un-encrypted database.
+    // using a boot password.
+    private static final String TEST_ENCRYPT_PWD_DATABASE = "wombat_pwd_en";
+
+
+    // database name used to test re-encryption of an encrypted database 
+    // using the external encryption key.
+    private static final String TEST_REENCRYPT_KEY_DATABASE = "wombat_key_ren" ;
+    // database name used to test encryption of un-encrypted database.
+    // using external encryption key.
+    private static final String TEST_ENCRYPT_KEY_DATABASE = "wombat_key_en";
+
+    // flags to indicate type of mechanism used to test the (re)encryption
+    private static final  int USING_KEY = 1;
+    private static final  int USING_PASSWORD = 2;
+
+    // flags to indicate the password/key to be used during recovery
+    // on reboot after a crash.
+    private static final int NONE = 1;
+    private static final int OLD  = 2;
+    private static final int NEW  = 3;
+
+    // test table name.
     private static final String TEST_TABLE_NAME = "emp";
+
     private static final String OLD_PASSWORD = "xyz1234abc";
     private static final String NEW_PASSWORD = "new1234xyz";
+    
+    private static final String OLD_KEY = "6162636465666768";
+    private static final String NEW_KEY = "5666768616263646";
+    
+    // the current database being tested.
+    private String currentTestDatabase ;
+    // the current encryption type being tested. 
+    private int encryptionType; 
+
+    // set the following to true, for this test 
+    // spit out more status messages.
+    private boolean verbose = false;
+
 
 	ReEncryptCrashRecovery() {
         
@@ -60,78 +100,215 @@ public class ReEncryptCrashRecovery
 
 
     /*
-	 * Test Re-encrytpion crash/recovery scenarios. 
+	 * Test (re)encrytpion crash/recovery scenarios. 
 	 */
 	private void runTest() throws Exception {
 		logMessage("Begin  ReEncryptCrashRecovery Test");
-        createEncryptedDatabase();
-        Connection conn = TestUtil.getConnection(TEST_DATABASE_NAME, 
-                                                 null);
-        createTable(conn, TEST_TABLE_NAME);
-        //load some rows 
-        insert(conn, TEST_TABLE_NAME, 100);
-        conn.commit();
-        //shutdown the test db 
-		shutdown(TEST_DATABASE_NAME);
-        
-        // re-enryption crash/recovery test cases.
-        crashBeforeCommit();
-        recover_crashBeforeCommit();
-        //shutdown the test db 
-		shutdown(TEST_DATABASE_NAME);
 
+        if (SanityManager.DEBUG) {
+            if (verbose) 
+                logMessage("Start testing re-encryption with Password");
+            // test  crash recovery during re-encryption 
+            // using the password mechanism.
+            currentTestDatabase = TEST_REENCRYPT_PWD_DATABASE;
+            encryptionType = USING_PASSWORD;
+            runCrashRecoveryTestCases(true);
+
+        
+            if (verbose) 
+            logMessage("Start Testing encryption with Password");
+
+            // test crash recovery during databse encryption 
+            // using the password mechanism.
+            currentTestDatabase = TEST_ENCRYPT_PWD_DATABASE;
+            encryptionType = USING_PASSWORD;
+            // run crash recovery test cases. 
+            runCrashRecoveryTestCases(false);
+
+
+            if (verbose) {
+                logMessage("Start Testing Encryption with external Key");
+            }
+            // test crash recovery during database encryption 
+            // using the encryption key.
+        
+            currentTestDatabase = TEST_ENCRYPT_KEY_DATABASE;
+            encryptionType = USING_KEY;
+            runCrashRecoveryTestCases(false);
+
+            if (verbose) 
+                logMessage("Start Testing re-encryption with external Key");
+
+            // test crash recovery dureing re-encryption 
+            // using the encryption key.
+        
+            currentTestDatabase = TEST_REENCRYPT_KEY_DATABASE;
+            encryptionType = USING_KEY;
+            runCrashRecoveryTestCases(true);
+        }
         logMessage("End ReEncryptCrashRecovery Test");
     }
 
 
-    /** *************************************************
-     * Crash/recovery test scenarios during re-encryption.
-     ****************************************************/
+    /**
+     * run crash recovery test scenarios using the debug flags.
+     * @param reEncrypt  <code> true </code> if testing re-encryption 
+     *                   <colde> false </code> otherwise.
+     */
+    private void runCrashRecoveryTestCases(boolean reEncrypt) 
+        throws SQLException
+    {
+        Connection conn;
+        if (reEncrypt) 
+            conn = createEncryptedDatabase();
+        else 
+            conn = createDatabase();
+
+        createTable(conn, TEST_TABLE_NAME);
+        //load some rows 
+        insert(conn, TEST_TABLE_NAME, 100);
+        conn.commit();
+        conn.close();
+		shutdown();
+
+        // following cases of (re) encryption should be rolled back. 
+        int passwordKey = (reEncrypt ? OLD : NONE );
+
+        crash(reEncrypt, TEST_REENCRYPT_CRASH_BEFORE_COMMT);
+        recover(passwordKey);
+        shutdown();
+
+        crash(reEncrypt, TEST_REENCRYPT_CRASH_AFTER_COMMT);
+        crashInRecovery(passwordKey, 
+                     TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_LOGFILE_DELETE);
+        crashInRecovery(passwordKey, 
+                     TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY);
+        crashInRecovery(passwordKey, 
+                     TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP);
+        recover(passwordKey);
+        shutdown();
+
+
+        crash(reEncrypt, TEST_REENCRYPT_CRASH_AFTER_SWITCH_TO_NEWKEY);
+        crashInRecovery(passwordKey, 
+                     TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_LOGFILE_DELETE);
+        crashInRecovery(passwordKey, 
+                     TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY);
+        crashInRecovery(passwordKey, 
+                     TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP);
+
+        recover(passwordKey);
+        shutdown();
+
+        // following cases  (re) encryption should be successful, only 
+        // cleanup is pending. 
+
+        // crash after database is re-encrypted, but before cleanup. 
+        // (re)encryption is complete, database should be bootable 
+        // with a new password. 
+        passwordKey = (reEncrypt ? NEW : OLD);
+        crash(reEncrypt, TEST_REENCRYPT_CRASH_AFTER_CHECKPOINT);
+        crashInRecovery(passwordKey, 
+                     TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP);
+
+        recover(passwordKey);
+        shutdown();
+    }
+
 
     /*
-     * Attempt to re-encrypt the database and force it to fail 
-     * using debug flags just before the commit. 
+     * Attempt to (re)encrypt the database and force it to crash 
+     * at the given debug flag. 
      */
-    private void crashBeforeCommit() {
-        // Re-encrytption crash before commit 
-        setDebugFlag(TEST_REENCRYPT_CRASH_BEFORE_COMMT);
+    private void crash(boolean reEncrypt, String debugFlag) 
+    {
+        if (verbose)
+            logMessage("Testing : " + debugFlag);
+        // set the debug flag to crash. 
+        setDebugFlag(debugFlag);
 
         SQLException sqle = null;
+        Connection conn;
         try {
-            reEncryptDatabase(OLD_PASSWORD, NEW_PASSWORD);
+            if (reEncrypt) 
+                conn = reEncryptDatabase();
+            else 
+                conn = encryptDatabase();
+                
         }catch (SQLException se) {
-            // re-encryption of the database should have failed,
+            // (re)encryption of the database should have failed,
             // at the specified debug flag.
             sqle = se;
         }
 
         // check that database boot failed at the set debug flag.
-        verifyException(sqle, TEST_REENCRYPT_CRASH_BEFORE_COMMT);
+        verifyException(sqle, debugFlag);
         // clear the debug flag.
-        clearDebugFlag(TEST_REENCRYPT_CRASH_BEFORE_COMMT);
+        clearDebugFlag(debugFlag);
     }
 
+
+    /*
+     * Crash in recovery of the database at the given 
+     * debug flag.
+     */
+    private void crashInRecovery(int passwordKey, String debugFlag) 
+        throws SQLException 
+    {
+        if (verbose) 
+            logMessage("Testing : " + debugFlag);
+        
+        // set the debug flag to crash. 
+        setDebugFlag(debugFlag);
+        SQLException sqle = null;
+        try {
+            Connection conn = bootDatabase(passwordKey);
+        } catch (SQLException se) {
+            // recovery of the database 
+            // shold have failed at the specified
+            // debug flag.
+            sqle = se;
+        }
+        // check that database boot failed at the set debug flag.
+        verifyException(sqle, debugFlag);
+        // clear the debug flag.
+        clearDebugFlag(debugFlag);
+    }   
     
+
+
     /*
      * Recover the database that failied during re-encryption and 
      * perform some simple sanity check on the database. 
      */
-    private void recover_crashBeforeCommit() throws SQLException{
+    private void recover(int passwordKey) 
+        throws SQLException 
+    {
         // starting recovery of database with failed Re-encrytpion
         // in debug mode;
-        Connection conn = bootDatabase(OLD_PASSWORD);
+
+        Connection conn = bootDatabase(passwordKey);
+
         // verify the contents of the db are ok. 
         runConsistencyChecker(conn, TEST_TABLE_NAME);
         // insert some rows, this might fail if anyhing is 
         // wrong in the logging system setup.
         insert(conn, TEST_TABLE_NAME, 100);
+        conn.commit();
         conn.close();
-    }
+    }   
     
 
+
+    /** *************************************************
+     * Crash/recovery test scenarios during 
+     * encryption of an un-encrypted database.
+     ****************************************************/
     
-    // Debug flags that needs to be set to simulate a crash 
-    // at different points during re-encryption of the database. 
+
+
+    // Debug flags that are to be set to simulate a crash 
+    // at different points during (re)encryption of the database. 
     // these flags should match the flags in the engine code;
     // these are redifined here to avoid pulling the engine code
     // into the tests. 
@@ -144,7 +321,25 @@ public class ReEncryptCrashRecovery
 
 	public static final String TEST_REENCRYPT_CRASH_BEFORE_COMMT  = 
         SanityManager.DEBUG ? "TEST_REENCRYPT_CRASH_BEFORE_COMMT" : null ;
-
+    public static final String TEST_REENCRYPT_CRASH_AFTER_COMMT  = 
+        SanityManager.DEBUG ? "TEST_REENCRYPT_CRASH_AFTER_COMMT" : null ;
+    public static final String TEST_REENCRYPT_CRASH_AFTER_SWITCH_TO_NEWKEY  = 
+        SanityManager.DEBUG ? "TEST_REENCRYPT_CRASH_AFTER_SWITCH_TO_NEWKEY" : null ;
+    public static final String TEST_REENCRYPT_CRASH_AFTER_CHECKPOINT  = 
+        SanityManager.DEBUG ? "TEST_REENCRYPT_CRASH_AFTER_CHECKPOINT" : null ;
+                                            
+    public static final String 
+        TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_LOGFILE_DELETE =
+        SanityManager.DEBUG ?
+        "TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_LOGFILE_DELETE" : null;
+    public static final String 
+        TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY =
+        SanityManager.DEBUG ?
+        "TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY" : null;
+    public static final String 
+        TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP =
+        SanityManager.DEBUG ?
+        "TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP" : null;
     
     
     void setDebugFlag(String debugFlag) {
@@ -164,17 +359,31 @@ public class ReEncryptCrashRecovery
      */
     private void verifyException(SQLException sqle, String debugFlag) 
     {
+        boolean expectedExcepion = false ;
         if (sqle != null) 
         {
+            
             if (sqle.getSQLState() != null && 
                 sqle.getSQLState().equals("XJ040")) 
             {
                 // boot failed as expected with the  debug flag
-            }else 
-            {
-                dumpSQLException(sqle);
+                // now check if it failed with specifed debug flags.
+                SQLException ne = sqle.getNextException();
+                if (ne != null) {
+                    String message = ne.getMessage();
+                    // check if debug flag exists in the message
+                    if (message.indexOf(debugFlag) != -1)
+                    {
+                        expectedExcepion = true;
+                    }
+                }
             }
-        } else {
+
+            if (!expectedExcepion)
+                dumpSQLException(sqle);
+        } 
+        else 
+        {
             if (SanityManager.DEBUG) 
             {
                 logMessage("Did not crash at " + debugFlag);
@@ -239,8 +448,8 @@ public class ReEncryptCrashRecovery
             ps.setString(2 , "skywalker" + i);
             ps.executeUpdate();
         }
-        conn.commit();
         ps.close();
+        conn.commit();
     }
 
     /**
@@ -256,7 +465,10 @@ public class ReEncryptCrashRecovery
         ResultSet rs = s.executeQuery("SELECT max(ID) from " +  
 										  tableName);
         rs.next();
-        return rs.getInt(1);
+        int max = rs.getInt(1);
+        rs.close();
+        s.close();
+        return max;
     }
 
 
@@ -300,28 +512,59 @@ public class ReEncryptCrashRecovery
     /*
      * create an encrypted database.
      */
-    private void createEncryptedDatabase() throws SQLException
+    private Connection createEncryptedDatabase() throws SQLException
     {
-        TestUtil.getConnection(TEST_DATABASE_NAME, 
-        "create=true;dataEncryption=true;bootPassword=" + 
-                               OLD_PASSWORD);
+        String connAttrs = "";
+        if (encryptionType == USING_PASSWORD) 
+        {
+            // create encrypted database.
+            connAttrs = "create=true;dataEncryption=true;bootPassword=" +
+                OLD_PASSWORD;
+        }
+
+        if (encryptionType == USING_KEY) 
+        {
+            // create an encrypted  database.
+            connAttrs = "create=true;dataEncryption=true;encryptionKey=" +
+                OLD_KEY;
+        }
+        
+        return TestUtil.getConnection(currentTestDatabase, connAttrs); 
     }
+
+
+    /*
+     * create an un-encrypted database.
+     */
+    private Connection createDatabase() throws SQLException
+    {
+        return TestUtil.getConnection(currentTestDatabase,  
+                                      "create=true" );
+    }
+
 
     /**
      * Re-encrypt the database. 
-     * @param currentPassword  current boot password.
-     * @param newPassword      new password to boot the database 
-     *                         after successful re-encryption.
      * @exception SQLException if any database exception occurs.
      */
-    private void reEncryptDatabase(String currentPassword, 
-                                   String newPassword) 
-        throws SQLException
+    private Connection  reEncryptDatabase() throws SQLException
     {
-        // re-encrypt the database.
-        String connAttrs = "bootPassword=" + currentPassword + 
-                ";newBootPassword=" + newPassword;
-        TestUtil.getConnection(TEST_DATABASE_NAME, connAttrs); 
+        String connAttrs = "";
+        if (encryptionType == USING_PASSWORD) 
+        {
+            // re-encrypt the database.
+            connAttrs = "bootPassword=" + OLD_PASSWORD + 
+                ";newBootPassword=" + NEW_PASSWORD;
+        }
+
+        if (encryptionType == USING_KEY) 
+        {
+            // re-encrypt the database.
+            connAttrs = "encryptionKey=" + OLD_KEY + 
+                ";newEncryptionKey=" + NEW_KEY;
+        }
+        
+        return TestUtil.getConnection(currentTestDatabase, connAttrs); 
     }
 
     
@@ -330,39 +573,73 @@ public class ReEncryptCrashRecovery
      * @param password boot password of the database.
      * @exception SQLException if any database exception occurs.
      */
-    private void encryptDatabase(String password) 
+    private Connection encryptDatabase() 
         throws SQLException
     {
-        //encrypt an existing database.
-        String connAttrs = "dataEncryption=true;bootPassword=" +
-            password ;
+        String connAttrs = "";
+        if (encryptionType == USING_PASSWORD) 
+        {
+            //encrypt an existing database.
+            connAttrs = "dataEncryption=true;bootPassword=" + OLD_PASSWORD;
+        }
+        if (encryptionType == USING_KEY) 
+        {
+            //encrypt an existing database.
+            connAttrs = "dataEncryption=true;encryptionKey=" + OLD_KEY;
+        }
 
-        TestUtil.getConnection(TEST_DATABASE_NAME, connAttrs); 
+        if (verbose)
+            logMessage("encrypting " + currentTestDatabase + 
+                       " with " + connAttrs);
+        return TestUtil.getConnection(currentTestDatabase, connAttrs); 
     }
     
 
     /**
      * Boot the database. 
-     * @param password boot password of the database.
+     * @param passwordOrKey the password/key to use.  
      * @exception SQLException if any database exception occurs.
      */
-    Connection bootDatabase(String password) throws SQLException {
+    Connection bootDatabase(int passwordKey)
+        throws SQLException 
+    {
+
+        String connAttrs = "";
+        if (encryptionType == USING_PASSWORD) 
+        {
+            if (passwordKey == NEW)
+                connAttrs = "bootPassword=" + NEW_PASSWORD;
+            else if (passwordKey == OLD)
+                connAttrs = "bootPassword=" + OLD_PASSWORD;
+        }
+
         
-        return TestUtil.getConnection(TEST_DATABASE_NAME, 
-                                      "bootPassword=" + password);
+        if (encryptionType == USING_KEY) 
+        {
+            if (passwordKey == NEW)
+                connAttrs = "encryptionKey=" + NEW_KEY;
+            else if (passwordKey == OLD)
+                connAttrs = "encryptionKey=" + OLD_KEY;
+        }
+
+        if (verbose)
+            logMessage("booting " + currentTestDatabase + 
+                   " with " + connAttrs);
+        return TestUtil.getConnection(currentTestDatabase, connAttrs); 
     }
 
-    
+
 
     /**
 	 * Shutdown the datbase
-	 * @param  dbName  Name of the database to shutdown.
 	 */
-	void shutdown(String dbName) {
+	void shutdown() {
 
+        if (verbose)
+            logMessage("Shutdown " + currentTestDatabase);
 		try{
 			//shutdown
-			TestUtil.getConnection(dbName, "shutdown=true");
+			TestUtil.getConnection(currentTestDatabase, "shutdown=true");
 		}catch(SQLException se){
 			if (se.getSQLState() == null || !(se.getSQLState().equals("08006")))
             {
@@ -370,6 +647,8 @@ public class ReEncryptCrashRecovery
 				dumpSQLException(se);
             }
         }
+        
+
     }
 
     /**
