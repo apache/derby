@@ -267,7 +267,16 @@ public final class ViewDescriptor extends TupleDescriptor
 			*/
 		    case DependencyManager.SET_CONSTRAINTS_ENABLE:
 		    case DependencyManager.SET_TRIGGERS_ENABLE:
-				//ignore revoke privilege action for now
+		    //Notice that REVOKE_EXECUTE_PRIVILEGE is not included here.
+		    //This is because Derby supports only RESTRICT form of revoke 
+		    //execute and that means that if there are any dependent objects 
+		    //on execute permission on routine, revoke execute on that 
+		    //routine should fail
+		    //
+		    //For all the other types of revoke privileges, for instance,
+		    //SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER, we don't 
+		    //do anything here and later in makeInvalid, we make the 
+		    //ViewDescriptor drop itself. 
 		    case DependencyManager.REVOKE_PRIVILEGE:
 		    	break;
 
@@ -317,6 +326,12 @@ public final class ViewDescriptor extends TupleDescriptor
 			case DependencyManager.TRUNCATE_TABLE:
 				break;
 
+	    	//Notice that REVOKE_EXECUTE_PRIVILEGE is not included here.
+	    	//This is because Derby supports only RESTRICT form of revoke 
+		    //execute and that means that if there are any dependent 
+		    //objects on execute permission on routine, revoke execute on 
+		    //that routine should fail. This behvaior for revoke execute
+		    //gets implemented in prepareToInvalidate method
 		    case DependencyManager.REVOKE_PRIVILEGE:
 				dropViewWork(getDataDictionary(), 
 						getDataDictionary().getDependencyManager(), lcc,

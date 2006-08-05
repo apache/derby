@@ -482,25 +482,49 @@ create view v35 as select * from v34;
 
 -- Write some views based on a routine
 set connection mamta1;
+drop function f_abs1;
 CREATE FUNCTION F_ABS1(P1 INT)
 	RETURNS INT NO SQL
 	RETURNS NULL ON NULL INPUT
 	EXTERNAL NAME 'java.lang.Math.abs'
 	LANGUAGE JAVA PARAMETER STYLE JAVA;
 values f_abs1(-5);
+drop view v11;
 create view v11(c111) as values mamta1.f_abs1(-5);
 grant select on v11 to mamta2;
 select * from v11;
 set connection mamta2;
+drop view v24;
 create view v24 as select * from mamta1.v11;
 select * from v24;
+drop view v25;
 -- following will fail because no execute permissions on mamta1.f_abs1
 create view v25(c251) as (values mamta1.f_abs1(-1));
 set connection mamta1;
 grant execute on function f_abs1 to mamta2;
 set connection mamta2;
+-- this view creation will pass now because have execute privileges on the function
 create view v25(c251) as (values mamta1.f_abs1(-1));
 select * from v25;
+set connection mamta1;
+-- try revoke execute privilege. Since there are dependent objects, the revoke shold fail
+revoke execute on function f_abs1 from mamta2 restrict;
+-- drop the dependent objects on the execute privilege and then try to revoke the execute privilege
+set connection mamta2;
+drop view v25;
+set connection mamta1;
+-- revoke execute privilege should pass this time because no dependents on that permission.
+revoke execute on function f_abs1 from mamta2 restrict;
+set connection mamta2;
+-- following select should still pass because v24 is not directly dependent on the execute permission.
+--   It gets to the routine via view v11 which will be run with definer's privileges and definer of
+--   view v11 is also the owner of the routine
+select * from v24;
+-- cleanup
+drop view v24;
+set connection mamta1;
+drop view v11;
+drop function f_abs1;
 
 -- try column level privileges and views
 -- In this test, user has permission on one column but not on the other
@@ -1170,6 +1194,10 @@ set connection mamta2;
 -- Will be fixed in a subsequent patch
 insert into t21ConstraintTest values(3);
 -- cleanup
+set connection mamta2;
+drop table t21ConstraintTest;
+set connection mamta1;
+drop table t11ConstraintTest;
 
 -- Miscellaneous test
 -- test1
@@ -1233,6 +1261,7 @@ drop table t11TriggerTest;
 create table t11TriggerTest (c111 int not null primary key);
 insert into t11TriggerTest values(1);
 insert into t11TriggerTest values(2);
+drop table t12RoutineTest;
 create table t12RoutineTest (c121 int);
 insert into t12RoutineTest values (1),(2);
 grant select on t11TriggerTest to mamta2;
@@ -1327,6 +1356,32 @@ select * from t31TriggerTest;
 set connection mamta1;
 select * from t12RoutineTest;
 select * from t13TriggerTest;
+delete from t13TriggerTest;
+-- Trying to revoke execute privilege below will fail because mamta3 has created a trigger based on that permission.
+-- Derby supports only RESTRICT form of revoke execute. Which means that it can be revoked only if there are no
+-- objects relying on that permission
+revoke execute on function selectFromSpecificSchema from mamta3 restrict;
+-- now try the insert and make sure the insert trigger still fires
+set connection mamta2;
+insert into mamta3.t31TriggerTest values(1);
+set connection mamta1;
+-- If number of rows returned by following select is 1, then we know insert trigger did get fire.
+-- Insert's trigger's action is to insert into following table. 
+select * from t13TriggerTest;
+set connection mamta3;
+-- drop the trigger manually
+drop trigger tr31t31;
+set connection mamta1;
+-- Now, we should be able to revoke execute permission on routine because there are no dependent objects on that permission
+revoke execute on function selectFromSpecificSchema from mamta3 restrict;
+set connection mamta3;
+-- cleanup
+drop table t31TriggerTest;
+set connection mamta1;
+-- cleanup
+drop table t12RoutineTest;
+drop table t13TriggerTest;
+drop function selectFromSpecificSchema;
 
 -- Test routine and view combination. Thing to note is views always
 --   run with definer's privileges whereas routines always run with
@@ -1515,6 +1570,7 @@ insert into t11TriggerRevokeTest values(6);
 drop table t11TriggerRevokeTest;
 
 
+
 -- Define a trigger on a table, then revoke a privilege on the table which trigger doesn't
 -- really depend on. The trigger still gets dropped automatically. This will be fixed in
 -- subsequent patch
@@ -1565,6 +1621,51 @@ revoke trigger on t11TriggerRevokeTest from mamta2;
 -- following insert won't fire an insert trigger because one doesn't exist
 insert into t11TriggerRevokeTest values(6);
 -- cleanup
+drop table t11TriggerRevokeTest;
+
+
+-- Define couple triggers on a table relying on privilege on different tables. If a revoke is issued, only the dependent triggers
+--   should get dropped, the rest of the triggers should stay active.
+set connection mamta1;
+drop table t11TriggerRevokeTest;
+create table t11TriggerRevokeTest (c111 int);
+insert into t11TriggerRevokeTest values(1),(2);
+grant INSERT on t11TriggerRevokeTest to mamta2;
+drop table t12TriggerRevokeTest;
+create table t12TriggerRevokeTest (c121 int);
+insert into t12TriggerRevokeTest values(1),(2);
+grant INSERT on t12TriggerRevokeTest to mamta2;
+set connection mamta2;
+drop table t21TriggerRevokeTest;
+create table t21TriggerRevokeTest (c211 int); 
+insert into t21TriggerRevokeTest values(1);
+-- following will pass because mamta2 has required permissions on mamta1.t11TriggerRevokeTest
+create trigger tr211t21 after insert on t21TriggerRevokeTest for each statement mode db2sql
+        insert into mamta1.t11TriggerRevokeTest values(99);
+-- following will pass because mamta2 has required permissions on mamta1.t11TriggerRevokeTest
+create trigger tr212t21 after insert on t21TriggerRevokeTest for each statement mode db2sql
+        insert into mamta1.t12TriggerRevokeTest values(99);
+insert into t21TriggerRevokeTest values(1);
+set connection mamta1;
+-- there should be 1 new row in each of the tables because of 2 insert triggers
+select * from t11TriggerRevokeTest;
+select * from t12TriggerRevokeTest;
+delete from t11TriggerRevokeTest;
+delete from t12TriggerRevokeTest;
+-- only one trigger(tr211t21) should get dropped because of following revoke
+revoke insert on t11TriggerRevokeTest from mamta2;
+set connection mamta2;
+insert into t21TriggerRevokeTest values(1);
+set connection mamta1;
+-- there should be no row in this table
+select * from t11TriggerRevokeTest;
+-- there should be one new row in mamta1.t12TriggerRevokeTest 
+select * from t12TriggerRevokeTest;
+-- cleanup
+set connection mamta2;
+drop table t21TriggerRevokeTest;
+set connection mamta1;
+drop table t12TriggerRevokeTest;
 drop table t11TriggerRevokeTest;
 
 

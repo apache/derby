@@ -79,7 +79,7 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 		{
 			String grantee = (String) itr.next();
 			if (dd.addRemovePermissionsDescriptor( grant, routinePermsDesc, grantee, tc))					
-        		dd.getDependencyManager().invalidateFor(routinePermsDesc, DependencyManager.REVOKE_PRIVILEGE, lcc);
+        		dd.getDependencyManager().invalidateFor(routinePermsDesc, DependencyManager.REVOKE_EXECUTE_PRIVILEGE, lcc);
 
 		}
 	} // end of executeConstantAction

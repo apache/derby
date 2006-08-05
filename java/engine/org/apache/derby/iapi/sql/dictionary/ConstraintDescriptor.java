@@ -553,7 +553,17 @@ public abstract class ConstraintDescriptor
 		    case DependencyManager.SET_CONSTRAINTS_DISABLE:
 		    case DependencyManager.SET_TRIGGERS_ENABLE:
 		    case DependencyManager.SET_TRIGGERS_DISABLE:
-				//for now, ignore revoke privilege action
+			//Notice that REVOKE_EXECUTE_PRIVILEGE is not included here.
+			//In Derby, at this point, a constraint can't depend on a 
+		    //routine and hence a REVOKE_EXECUTE_PRIVILEGE invalidation
+		    //action should never be received by a ConstraintDescriptor.
+		    //Don't know how, but if it ever happened for some mysterious
+		    //reason, it will be caught in the default: case.
+			//
+			//For all the other types of revoke privileges, for instance,
+			//SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER, we don't 
+			//do anything here and later in makeInvalid, we make the 
+			//ConstraintDescriptor drop itself. 
 		    case DependencyManager.REVOKE_PRIVILEGE:
 				break;
 
@@ -580,8 +590,19 @@ public abstract class ConstraintDescriptor
 	public void makeInvalid(int action, LanguageConnectionContext lcc) 
 		throws StandardException
 	{
+    	//Notice that REVOKE_EXECUTE_PRIVILEGE is not included here.
+    	//This is because, in Derby, at this point, a constraint can't 
+		//depend on a routine and hence a REVOKE_EXECUTE_PRIVILEGE 
+		//invalidation action should never be received by a 
+		//ConstraintDescriptor. Don't know how, but if it ever happened 
+		//for some mysterious reason, it will be caught in prepareToInvalidate 
+		//method
 		if (action == DependencyManager.REVOKE_PRIVILEGE) 
 		{
+			//At this point (Derby 10.2), only a foreign key constraint can
+			//depend on a privilege. None of the other constraint types 
+			//can be dependent on a privilege becuse those constraint types
+			//can not reference a table/routine.
 			DropConstraintConstantAction.dropConstraintAndIndex(
 					getDataDictionary().getDependencyManager(),
 					table,

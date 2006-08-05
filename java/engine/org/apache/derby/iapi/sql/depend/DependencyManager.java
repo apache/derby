@@ -304,7 +304,15 @@ public interface DependencyManager {
 
 	public static final int TRUNCATE_TABLE = 42;
 	public static final int DROP_SYNONYM = 43;
+	//A generic revoke action for TRIGGER, REFERENCES, SELECT, INSERT,
+	//  UPDATE and DELETE privileges. For all these privilege types,
+	//  a revoke statement causes the dependents to drop
 	public static final int REVOKE_PRIVILEGE = 44;
+	//A special action for revoke execute...restrict privilege. This is
+	//  because when revoke execute ... restrict is issued, the dependents
+	//  need to throw an exception. As long as there are dependent objects
+	//  on the execute privilege, the execute privilege can't be revoked.
+	public static final int REVOKE_EXECUTE_PRIVILEGE = 45;
 
     /**
      * Extensions to this interface may use action codes > MAX_ACTION_CODE without fear of

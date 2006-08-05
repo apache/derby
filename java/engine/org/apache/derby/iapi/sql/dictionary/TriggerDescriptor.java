@@ -642,6 +642,15 @@ public class TriggerDescriptor extends TupleDescriptor
 		    case DependencyManager.DROP_SYNONYM:
 		    case DependencyManager.DROP_SPS:
 		    case DependencyManager.RENAME:
+		    //Derby supports only RESTRICT form of revoke execute and that
+		    //means that if there are any dependent objects on execute
+		    //permission on routine, revoke execute on that routine should
+		    //fail
+			//For all the other types of revoke privileges, for instance,
+			//SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER, we don't 
+			//do anything here and later in makeInvalid, we make the 
+			//TriggerDescriptor drop itself. 
+		    case DependencyManager.REVOKE_EXECUTE_PRIVILEGE:
 				DependencyManager dm = getDataDictionary().getDependencyManager();
 				throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT, 
 									dm.getActionString(action), 
@@ -677,6 +686,12 @@ public class TriggerDescriptor extends TupleDescriptor
 		// that we would have to check against. This is hard to maintain,
 		// so don't bother.
 
+    	//Notice that REVOKE_EXECUTE_PRIVILEGE is not included here.
+    	//This is because Derby supports only RESTRICT form of revoke 
+	    //execute and that means that if there are any dependent 
+	    //objects on execute permission on routine, revoke execute on 
+	    //that routine should fail. This behvaior for revoke execute
+	    //gets implemented in prepareToInvalidate method
 		if (action ==  DependencyManager.REVOKE_PRIVILEGE)
 		{
 		    DropTriggerConstantAction.dropTriggerDescriptor(

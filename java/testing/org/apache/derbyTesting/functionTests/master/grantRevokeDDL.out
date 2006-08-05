@@ -710,6 +710,8 @@ create view v35 as select * from v34;
 0 rows inserted/updated/deleted
 ij(MAMTA3)> -- Write some views based on a routine
 set connection mamta1;
+ij(MAMTA1)> drop function f_abs1;
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> CREATE FUNCTION F_ABS1(P1 INT)
 	RETURNS INT NO SQL
 	RETURNS NULL ON NULL INPUT
@@ -721,6 +723,8 @@ ij(MAMTA1)> values f_abs1(-5);
 -----------
 5          
 1 row selected
+ij(MAMTA1)> drop view v11;
+ERROR: Failed with SQLSTATE X0X05
 ij(MAMTA1)> create view v11(c111) as values mamta1.f_abs1(-5);
 0 rows inserted/updated/deleted
 ij(MAMTA1)> grant select on v11 to mamta2;
@@ -731,6 +735,8 @@ C111
 5          
 1 row selected
 ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> drop view v24;
+ERROR: Failed with SQLSTATE X0X05
 ij(MAMTA2)> create view v24 as select * from mamta1.v11;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> select * from v24;
@@ -738,6 +744,8 @@ C111
 -----------
 5          
 1 row selected
+ij(MAMTA2)> drop view v25;
+ERROR: Failed with SQLSTATE X0X05
 ij(MAMTA2)> -- following will fail because no execute permissions on mamta1.f_abs1
 create view v25(c251) as (values mamta1.f_abs1(-1));
 ERROR: Failed with SQLSTATE 2850A
@@ -745,14 +753,44 @@ ij(MAMTA2)> set connection mamta1;
 ij(MAMTA1)> grant execute on function f_abs1 to mamta2;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
-ij(MAMTA2)> create view v25(c251) as (values mamta1.f_abs1(-1));
+ij(MAMTA2)> -- this view creation will pass now because have execute privileges on the function
+create view v25(c251) as (values mamta1.f_abs1(-1));
 0 rows inserted/updated/deleted
 ij(MAMTA2)> select * from v25;
 C251       
 -----------
 1          
 1 row selected
-ij(MAMTA2)> -- try column level privileges and views
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> -- try revoke execute privilege. Since there are dependent objects, the revoke shold fail
+revoke execute on function f_abs1 from mamta2 restrict;
+ERROR: Failed with SQLSTATE X0Y23
+ij(MAMTA1)> -- drop the dependent objects on the execute privilege and then try to revoke the execute privilege
+set connection mamta2;
+ij(MAMTA2)> drop view v25;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> -- revoke execute privilege should pass this time because no dependents on that permission.
+revoke execute on function f_abs1 from mamta2 restrict;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> -- following select should still pass because v24 is not directly dependent on the execute permission.
+--   It gets to the routine via view v11 which will be run with definer's privileges and definer of
+--   view v11 is also the owner of the routine
+select * from v24;
+C111       
+-----------
+5          
+1 row selected
+ij(MAMTA2)> -- cleanup
+drop view v24;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> drop view v11;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> drop function f_abs1;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> -- try column level privileges and views
 -- In this test, user has permission on one column but not on the other
 set connection mamta1;
 ij(MAMTA1)> create table t14(c141 int, c142 int);
@@ -1772,7 +1810,13 @@ ij(MAMTA2)> -- following should have failed but it doesn't because foreign key c
 insert into t21ConstraintTest values(3);
 1 row inserted/updated/deleted
 ij(MAMTA2)> -- cleanup
--- Miscellaneous test
+set connection mamta2;
+ij(MAMTA2)> drop table t21ConstraintTest;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> drop table t11ConstraintTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> -- Miscellaneous test
 -- test1
 -- Have multiple objects depends on a privilege and make sure they all get dropped when that privilege is revoked.
 set connection mamta1;
@@ -1879,6 +1923,8 @@ ij(MAMTA1)> insert into t11TriggerTest values(1);
 1 row inserted/updated/deleted
 ij(MAMTA1)> insert into t11TriggerTest values(2);
 1 row inserted/updated/deleted
+ij(MAMTA1)> drop table t12RoutineTest;
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> create table t12RoutineTest (c121 int);
 0 rows inserted/updated/deleted
 ij(MAMTA1)> insert into t12RoutineTest values (1),(2);
@@ -2074,6 +2120,45 @@ C131
 1          
 1          
 4 rows selected
+ij(MAMTA1)> delete from t13TriggerTest;
+4 rows inserted/updated/deleted
+ij(MAMTA1)> -- Trying to revoke execute privilege below will fail because mamta3 has created a trigger based on that permission.
+-- Derby supports only RESTRICT form of revoke execute. Which means that it can be revoked only if there are no
+-- objects relying on that permission
+revoke execute on function selectFromSpecificSchema from mamta3 restrict;
+ERROR: Failed with SQLSTATE X0Y25
+ij(MAMTA1)> -- now try the insert and make sure the insert trigger still fires
+set connection mamta2;
+ij(MAMTA2)> insert into mamta3.t31TriggerTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> -- If number of rows returned by following select is 1, then we know insert trigger did get fire.
+-- Insert's trigger's action is to insert into following table. 
+select * from t13TriggerTest;
+C131       
+-----------
+1          
+1 row selected
+ij(MAMTA1)> set connection mamta3;
+ij(MAMTA3)> -- drop the trigger manually
+drop trigger tr31t31;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> set connection mamta1;
+ij(MAMTA1)> -- Now, we should be able to revoke execute permission on routine because there are no dependent objects on that permission
+revoke execute on function selectFromSpecificSchema from mamta3 restrict;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta3;
+ij(MAMTA3)> -- cleanup
+drop table t31TriggerTest;
+0 rows inserted/updated/deleted
+ij(MAMTA3)> set connection mamta1;
+ij(MAMTA1)> -- cleanup
+drop table t12RoutineTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> drop table t13TriggerTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> drop function selectFromSpecificSchema;
+0 rows inserted/updated/deleted
 ij(MAMTA1)> -- Test routine and view combination. Thing to note is views always
 --   run with definer's privileges whereas routines always run with
 --   session user's privileges. So, eventhough a routine might be
@@ -2082,7 +2167,7 @@ ij(MAMTA1)> -- Test routine and view combination. Thing to note is views always
 --   privileges will get used.
 set connection mamta1;
 ij(MAMTA1)> drop table t12RoutineTest;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> create table t12RoutineTest (c121 int);
 0 rows inserted/updated/deleted
 ij(MAMTA1)> insert into t12RoutineTest values (1),(2);
@@ -2090,7 +2175,7 @@ ij(MAMTA1)> insert into t12RoutineTest values (1),(2);
 ij(MAMTA1)> grant select on t12RoutineTest to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> drop function selectFromSpecificSchema;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 42X94
 ij(MAMTA1)> CREATE FUNCTION selectFromSpecificSchema (P1 INT)
         RETURNS INT 
         RETURNS NULL ON NULL INPUT
@@ -2154,7 +2239,7 @@ ij(MAMTA2)> grant select on v21ViewTest to mamta4;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> set connection mamta3;
 ij(MAMTA3)> drop table t31TriggerTest;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table t31TriggerTest (c311 int);
 0 rows inserted/updated/deleted
 ij(MAMTA3)> grant insert on t31TriggerTest to mamta4;
@@ -2222,7 +2307,7 @@ insert into mamta4.t41TriggerTest values(1);
 ij(MAMTA3)> -- Test constraints
 set connection mamta1;
 ij(MAMTA1)> drop table t11ConstraintTest;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> create table t11ConstraintTest (c111 int not null primary key);
 0 rows inserted/updated/deleted
 ij(MAMTA1)> insert into t11ConstraintTest values(1);
@@ -2233,7 +2318,7 @@ ij(MAMTA1)> grant references on t11ConstraintTest to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> drop table t21ConstraintTest;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA2)> create table t21ConstraintTest (c111 int not null primary key);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> insert into t21ConstraintTest values(1);
@@ -2471,6 +2556,89 @@ insert into t11TriggerRevokeTest values(6);
 1 row inserted/updated/deleted
 ij(MAMTA1)> -- cleanup
 drop table t11TriggerRevokeTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> -- Define couple triggers on a table relying on privilege on different tables. If a revoke is issued, only the dependent triggers
+--   should get dropped, the rest of the triggers should stay active.
+set connection mamta1;
+ij(MAMTA1)> drop table t11TriggerRevokeTest;
+ERROR: Failed with SQLSTATE 42Y55
+ij(MAMTA1)> create table t11TriggerRevokeTest (c111 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t11TriggerRevokeTest values(1),(2);
+2 rows inserted/updated/deleted
+ij(MAMTA1)> grant INSERT on t11TriggerRevokeTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> drop table t12TriggerRevokeTest;
+ERROR: Failed with SQLSTATE 42Y55
+ij(MAMTA1)> create table t12TriggerRevokeTest (c121 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t12TriggerRevokeTest values(1),(2);
+2 rows inserted/updated/deleted
+ij(MAMTA1)> grant INSERT on t12TriggerRevokeTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> drop table t21TriggerRevokeTest;
+ERROR: Failed with SQLSTATE 42Y55
+ij(MAMTA2)> create table t21TriggerRevokeTest (c211 int);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> insert into t21TriggerRevokeTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA2)> -- following will pass because mamta2 has required permissions on mamta1.t11TriggerRevokeTest
+create trigger tr211t21 after insert on t21TriggerRevokeTest for each statement mode db2sql
+        insert into mamta1.t11TriggerRevokeTest values(99);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> -- following will pass because mamta2 has required permissions on mamta1.t11TriggerRevokeTest
+create trigger tr212t21 after insert on t21TriggerRevokeTest for each statement mode db2sql
+        insert into mamta1.t12TriggerRevokeTest values(99);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> insert into t21TriggerRevokeTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> -- there should be 1 new row in each of the tables because of 2 insert triggers
+select * from t11TriggerRevokeTest;
+C111       
+-----------
+1          
+2          
+99         
+3 rows selected
+ij(MAMTA1)> select * from t12TriggerRevokeTest;
+C121       
+-----------
+1          
+2          
+99         
+3 rows selected
+ij(MAMTA1)> delete from t11TriggerRevokeTest;
+3 rows inserted/updated/deleted
+ij(MAMTA1)> delete from t12TriggerRevokeTest;
+3 rows inserted/updated/deleted
+ij(MAMTA1)> -- only one trigger(tr211t21) should get dropped because of following revoke
+revoke insert on t11TriggerRevokeTest from mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> insert into t21TriggerRevokeTest values(1);
+1 row inserted/updated/deleted
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> -- there should be no row in this table
+select * from t11TriggerRevokeTest;
+C111       
+-----------
+0 rows selected
+ij(MAMTA1)> -- there should be one new row in mamta1.t12TriggerRevokeTest 
+select * from t12TriggerRevokeTest;
+C121       
+-----------
+99         
+1 row selected
+ij(MAMTA1)> -- cleanup
+set connection mamta2;
+ij(MAMTA2)> drop table t21TriggerRevokeTest;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> drop table t12TriggerRevokeTest;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> drop table t11TriggerRevokeTest;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> --- Test automatic dropping of dependent permission descriptors when objects they refer to is dropped.
 --- Dropping of a table, for example, should drop all table and column permission descriptors on it.
