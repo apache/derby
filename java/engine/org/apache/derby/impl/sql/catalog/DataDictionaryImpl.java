@@ -409,7 +409,24 @@ public final class	DataDictionaryImpl
 	private int systemSQLNameNumber;
 	private GregorianCalendar calendarForLastSystemSQLName = new GregorianCalendar();
 	private long timeForLastSystemSQLName;
-
+	
+	/**
+	 * List of procedures in SYSCS_UTIL schema with PUBLIC access
+	 */
+	private static final String[] sysUtilProceduresWithPublicAccess = { 
+												"SYSCS_SET_RUNTIMESTATISTICS", 
+												"SYSCS_SET_STATISTICS_TIMING", 
+												"SYSCS_INPLACE_COMPRESS_TABLE",
+												"SYSCS_COMPRESS_TABLE",
+												};
+	
+	/**
+	 * List of functions in SYSCS_UTIL schema with PUBLIC access
+	 */
+	private static final String[] sysUtilFunctionsWithPublicAccess = { 
+												"SYSCS_GET_RUNTIMESTATISTICS", 
+												};
+	
 	/*
 	** Constructor
 	*/
@@ -9648,11 +9665,73 @@ public final class	DataDictionaryImpl
         }
 
 	}
+    
+    /**
+     * Grant PUBLIC access to specific system routines. Currently, this is 
+     * done for some routines in SYSCS_UTIL schema. 
+     * 
+     * @param tc	TransactionController to use
+     * @param authorizationID	authorization ID of the permission grantor
+     * @throws StandardException	Standard exception policy.
+     */
+    public void grantPublicAccessToSystemRoutines(TransactionController tc, 
+    						String authorizationID) throws StandardException {
+    	
+    	// Get schema ID for SYSCS_UTIL schema
+    	String schemaID = getSystemUtilSchemaDescriptor().getUUID().toString();
+    	
+    	for(int i=0; i < sysUtilProceduresWithPublicAccess.length; i++) {
+    		grantPublicAccessToSystemRoutine(schemaID, 
+    				sysUtilProceduresWithPublicAccess[i], 
+								AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR, 
+								tc, authorizationID);
+    	}
+    	
+    	for(int i=0; i < sysUtilFunctionsWithPublicAccess.length; i++) {
+    		grantPublicAccessToSystemRoutine(schemaID, 
+    				sysUtilFunctionsWithPublicAccess[i], 
+								AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR, 
+								tc, authorizationID);
+    	}
+    }
+    
+    
+    /**
+     * Grant PUBLIC access to a system routine. This method should be used only 
+     * for granting access to a system routine (other than routines in SYSFUN 
+     * schema). It expects the routine to be present in SYSALIASES catalog. 
+     * 
+     * @param schemaID	Schema ID
+     * @param routineName	Routine Name
+     * @param nameSpace	Indicates whether the routine is a function/procedure.
+     * @param tc	TransactionController to use
+     * @param authorizationID	authorization ID of the permission grantor
+     * @throws StandardException	Standard exception policy.
+     */
+    private void grantPublicAccessToSystemRoutine(String schemaID, 
+    										String routineName,
+											char nameSpace,
+											TransactionController tc,
+											String authorizationID) 
+    										throws StandardException {
+    	// For system routines, a valid alias descriptor will be returned.
+    	AliasDescriptor ad = getAliasDescriptor(schemaID, routineName, 
+    											nameSpace);
+    	
+    	if (SanityManager.DEBUG) {
+			SanityManager.ASSERT((ad != null), "Failed to get AliasDescriptor" 
+											+ " of the routine");
+    	}
+    	
+    	UUID routineUUID = ad.getUUID();
+    	createRoutinePermPublicDescriptor(routineUUID, tc, authorizationID);
+    }
+    
 
 	/**
 	 * Create RoutinePermDescriptor to grant access to PUBLIC for
 	 * this system routine. Currently only SYSUTIL routines need access
-	 * granted to execute them when a database is created.
+	 * granted to execute them when a database is created/upgraded.
 	 *
 	 * @param routineUUID   uuid of the routine
 	 * @param tc			TransactionController to use
@@ -9663,11 +9742,28 @@ public final class	DataDictionaryImpl
 	UUID routineUUID,
 	TransactionController tc) throws StandardException
 	{
+		createRoutinePermPublicDescriptor(routineUUID, tc, authorizationDBA);
+	}
+
+	/**
+	 * Create RoutinePermDescriptor to grant access to PUBLIC for
+	 * this system routine using the grantor specified in authorizationID.
+	 * 
+	 * @param routineUUID	uuid of the routine
+	 * @param tc	TransactionController to use
+	 * @param authorizationID	authorization ID of the permission grantor
+	 * @throws StandardException	Standard exception policy.
+	 */
+	void createRoutinePermPublicDescriptor(
+	UUID routineUUID,
+	TransactionController tc,
+	String authorizationID) throws StandardException
+	{
 		RoutinePermsDescriptor routinePermDesc =
 			new RoutinePermsDescriptor(
 				this,
 				"PUBLIC",
-				authorizationDBA,
+				authorizationID,
 				routineUUID);
 
 		addDescriptor(

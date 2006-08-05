@@ -371,6 +371,7 @@ public class UpgradeTester {
             	conn = restartDatabase(classLoader);
             	passed = caseGrantRevoke(conn, phase, classLoader, true) && passed;
             	checkSysSchemas(conn);
+            	checkRoutinePermissions(conn);
             }        	
 			runMetadataTest(classLoader, conn);
 			conn.close();
@@ -965,6 +966,35 @@ public class UpgradeTester {
     	rs.close();
     	s.close();
     }
+    
+    /**
+     * This method checks that some system routines are granted public access 
+     * after a full upgrade.
+     * 
+     * @param conn
+     * @throws SQLException
+     */
+    private void checkRoutinePermissions(Connection conn) throws SQLException{
+    	System.out.println("Checking routine permissions in SYSROUTINEPERMS");
+    	
+    	Statement s = conn.createStatement();
+    	ResultSet rs = s.executeQuery("select aliases.ALIAS, " +
+    					"routinePerms.GRANTEE, routinePerms.GRANTOR from " +
+    					"SYS.SYSROUTINEPERMS routinePerms, " +
+    					"SYS.SYSALIASES aliases " +
+    					"where routinePerms.ALIASID=aliases.ALIASID " +
+    					"order by aliases.ALIAS");
+    	
+    	while(rs.next()) {
+    		System.out.println("ROUTINE NAME: " + rs.getString(1) + " , " + 
+    							"GRANTEE: " + rs.getString(2) + " , " +
+								"GRANTOR: " + rs.getString(3));
+    	}
+    	
+    	rs.close();
+    	s.close();
+    }
+
     
     /**
 	 * Run metadata test

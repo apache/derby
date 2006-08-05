@@ -373,6 +373,9 @@ public	class DD_Version implements	Formatable
 
 			// Change system schemas to be owned by aid
 			bootingDictionary.updateSystemSchemaAuthorization(aid, tc);
+			
+			// Grant PUBLIC access to some system routines
+			bootingDictionary.grantPublicAccessToSystemRoutines(tc, aid);
         }
         
 	}
