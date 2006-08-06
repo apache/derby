@@ -27,9 +27,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URL;
-import java.util.Properties;
+import java.sql.Connection;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 /**
@@ -38,6 +37,9 @@ import junit.framework.Test;
  *
  */
 public abstract class ScriptTestCase extends BaseJDBCTestCase {
+	
+	private final String inputEncoding;
+	private final String outputEncoding = "US-ASCII";
 
 	/**
 	 * Create a ScriptTestCase to run a single test. 
@@ -47,6 +49,7 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 	public ScriptTestCase(String script)
 	{
 		super(script);
+		inputEncoding = "US-ASCII";
 	}
 	
 	/**
@@ -54,25 +57,28 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 	 * the .sql script lives, e.g. lang.
 	 * @return
 	 */
-	protected abstract String getArea();
-	
+	protected String getArea() {
+		
+		String name =  getClass().getName();
+		
+		int lastDot = name.lastIndexOf('.');
+		
+		name = name.substring(0, lastDot);
+		
+		lastDot = name.lastIndexOf('.');
+		
+		return name.substring(lastDot+1);
+	}
+		
 	/**
 	 * Get a decorator to setup the ij in order
 	 * to run the test. A sub-class must decorate
 	 * its suite using this call.
 	 */
-	public static TestSetup getIJConfig(Test test)
+	public static Test getIJConfig(Test test)
 	{
-		Properties ij = new Properties();
-
-		//TODO: set from configuration.
-		ij.setProperty("ij.driver", "org.apache.derby.jdbc.EmbeddedDriver");
-		ij.setProperty("ij.database", "jdbc:derby:wombat");
-
-		ij.setProperty("ij.showNoConnectionsAtStart", "true");
-		ij.setProperty("ij.showNoCountForSelect", "true");
-			
-		return new SystemPropertyTestSetup(test, ij);
+		// No decorator needed currently.
+		return test;
 	}
 	
 	/**
@@ -88,31 +94,38 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 	public void runTest() throws Throwable
 	{
 		String resource =
-			"/org/apache/derbyTesting/functionTests/tests/"
+			"org/apache/derbyTesting/functionTests/tests/"
 			+ getArea() + "/"
 			+ getName() + ".sql";
 		
 		String canon =
 			"org/apache/derbyTesting/functionTests/master/"
 			+ getName() + ".out";
+
+		URL sql = getTestResource(resource);
+		assertNotNull("SQL script missing: " + resource, sql);
 		
-		PrintStream originalOut = System.out;
+		InputStream sqlIn = sql.openStream();
 		
-		ByteArrayOutputStream rawBytes;
-		try {
-			
-			 rawBytes = new ByteArrayOutputStream(20 * 1024);
-			
-			PrintStream printOut = new PrintStream(rawBytes);
-			System.setOut(printOut);
+		ByteArrayOutputStream rawBytes =
+			new ByteArrayOutputStream(20 * 1024);
 		
-			org.apache.derby.tools.ij.main(new String[] {"-fr", resource});
+		PrintStream printOut = new PrintStream(rawBytes);
+	
+		Connection conn = getConnection();
+		org.apache.derby.tools.ij.runScript(
+				conn,
+				sqlIn,
+				inputEncoding,
+				printOut,
+				outputEncoding);
+		
+		conn.close();
+		
+		printOut.flush();
+		printOut.close();
+		sqlIn.close();
 			
-			printOut.flush();
-			
-		} finally {
-			System.setOut(originalOut);
-		}
 		
 		byte[] testRawBytes = rawBytes.toByteArray();
 		
@@ -123,13 +136,12 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 			InputStream canonStream = getTestResource(canon).openStream();
 			
 			BufferedReader cannonReader = new BufferedReader(
-					new InputStreamReader(canonStream));
+					new InputStreamReader(canonStream, outputEncoding));
 			
 			BufferedReader testOutput = new BufferedReader(
 					new InputStreamReader(
-					new ByteArrayInputStream(testRawBytes)));
-			
-			testOutput.readLine();
+					new ByteArrayInputStream(testRawBytes),
+					   outputEncoding));
 			
 			for (int lineNumber = 1; ; lineNumber++)
 			{
@@ -151,7 +163,8 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 					fail("Less output from test than expected, stoped at line"
 							+ lineNumber);
 										
-				assertEquals("Output at line " + lineNumber, canonLine, testLine);
+				assertEquals("Output at line " + lineNumber,
+						canonLine, testLine);
 			}
 			
 			cannonReader.close();

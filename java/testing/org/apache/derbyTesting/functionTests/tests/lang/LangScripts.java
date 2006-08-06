@@ -24,8 +24,11 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 
-public class LangScripts extends ScriptTestCase {
+public final class LangScripts extends ScriptTestCase {
 	
+	/**
+	 * All the langauge SQL scripts to be run as JUnit tests.
+	 */
 	private static final String[] SQL_LANGUAGE_TESTS = {
 		"arithmetic",
 		"bit2",
@@ -33,21 +36,42 @@ public class LangScripts extends ScriptTestCase {
 		"union",
 		};
 	
-	LangScripts(String langTest){
-		super(langTest);
+	/**
+	 * Run a set of langauge SQL scripts passed in on the
+	 * command line.
+	 * <code>
+	 * example
+	 * java org.apache.derbyTesting.functionTests.tests.lang.LangScripts case union
+	 * </code>
+	 */
+	public static void main(String[] args)
+	{
+		junit.textui.TestRunner.run(getSuite(args));
 	}
 
 	/**
-	 * SQL scripts in the lang folder.
+	 * Return the suite that runs all the langauge SQL scripts.
 	 */
-	protected String getArea() {
-		return "lang";
+	public static Test suite() {
+    	return getSuite(SQL_LANGUAGE_TESTS);
+    }
+    
+	/*
+	 * A single JUnit test that runs a single language SQL script.
+	 */
+	private LangScripts(String langTest){
+		super(langTest);
 	}
 	
-    public static Test suite() {
+    /**
+     * Return a suite of language SQL tests from the list of
+     * script names.
+      */
+	private static Test getSuite(String[] list)
+	{
         TestSuite suite = new TestSuite();
-        for (int i = 0; i < SQL_LANGUAGE_TESTS.length; i++)
-            suite.addTest(new LangScripts(SQL_LANGUAGE_TESTS[i]));
+        for (int i = 0; i < list.length; i++)
+            suite.addTest(new LangScripts(list[i]));
 
         return getIJConfig(suite);
     }
