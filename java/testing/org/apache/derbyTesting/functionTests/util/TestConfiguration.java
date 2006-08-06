@@ -25,8 +25,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
-
 /**
  * Class which holds information about the configuration of a Test.
  */
@@ -37,23 +35,6 @@ public class TestConfiguration {
      */
     static final TestConfiguration DERBY_TEST_CONFIG = 
         new TestConfiguration(getSystemProperties());
-    
-    /**
-     * Tell if we are allowed to use DriverManager to create database
-     * connections.
-     */
-    private static final boolean HAVE_DRIVER;
-
-    static {
-        // See if java.sql.Driver is available. If it is not, we must use
-        // DataSource to create connections.
-        boolean haveDriver = false;
-        try {
-            Class.forName("java.sql.Driver");
-            haveDriver = true;
-        } catch (Exception e) {}
-        HAVE_DRIVER = haveDriver;
-    }
     
     /**
      * This constructor creates a TestConfiguration from a Properties object.
@@ -231,7 +212,7 @@ public class TestConfiguration {
     public Connection getConnection (String databaseName) throws SQLException {
         Connection con = null;
         JDBCClient client =getJDBCClient();
-        if (HAVE_DRIVER) {            
+        if (JDBC.vmSupportsJDBC2()) {            
             loadJDBCDriver(client.getJDBCDriverName());
             if (!isSingleLegXA()) {
                 con = DriverManager.getConnection(
@@ -279,7 +260,7 @@ public class TestConfiguration {
 		//
 		// DriverManager autoloads the client only as of JDBC4.
 		//
-		if ( !supportsJDBC4() )
+		if ( !JDBC.vmSupportsJDBC4() )
 		{
 			return false;
 		}
@@ -316,18 +297,6 @@ public class TestConfiguration {
 		//
 
 		return false;
-	}
-
- 	/**
- 	 * <p>
-	 * Return true if the client supports JDBC4, i.e., if the VM level is at
-	 * least 1.6.
-	 * </p>
-	 */
-	public	boolean	supportsJDBC4()
-	{
-		if ( JVMInfo.JDK_ID >= JVMInfo.J2SE_16 ) { return true; }
-		else { return false; }
 	}
 
 	/**

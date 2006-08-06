@@ -29,6 +29,85 @@ import junit.framework.Assert;
  */
 public class JDBC {
 	
+    /**
+     * Tell if we are allowed to use DriverManager to create database
+     * connections.
+     */
+    private static final boolean HAVE_DRIVER
+                           = haveClass("java.sql.Driver");
+    
+    /**
+     * Does the ParameterMetaData class exist, indicates
+     * JDBC 3 (or JSR 169). 
+     */
+    private static final boolean HAVE_PARAMETER_META_DATA
+                           = haveClass("java.sql.ParameterMetaData");
+
+    /**
+     * Does the java.sql.SQLXML class exist, indicates JDBC 4. 
+     */
+    private static final boolean HAVE_SQLXML
+                           = haveClass("java.sql.SQLXML");
+    
+    /**
+     * Can we load a specific class, use this to determine JDBC level.
+     * @param className Class to attempt load on.
+     * @return true if class can be loaded, false otherwise.
+     */
+    private static boolean haveClass(String className)
+    {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (Exception e) {
+        	return false;
+        }    	
+    }
+ 	/**
+ 	 * <p>
+	 * Return true if the virtual machine environment
+	 * supports JDBC4 or later.
+	 * </p>
+	 */
+	public static boolean vmSupportsJDBC4()
+	{
+		return HAVE_DRIVER
+	       && HAVE_SQLXML;
+	}
+ 	/**
+ 	 * <p>
+	 * Return true if the virtual machine environment
+	 * supports JDBC3 or later.
+	 * </p>
+	 */
+	public static boolean vmSupportsJDBC3()
+	{
+		return HAVE_DRIVER
+		       && HAVE_PARAMETER_META_DATA;
+	}
+
+	/**
+ 	 * <p>
+	 * Return true if the virtual machine environment
+	 * supports JDBC2 or later.
+	 * </p>
+	 */
+	public static boolean vmSupportsJDBC2()
+	{
+		return HAVE_DRIVER;
+	}
+	/**
+ 	 * <p>
+	 * Return true if the virtual machine environment
+	 * supports JSR169 (JDBC 3 subset).
+	 * </p>
+	 */
+	public static boolean vmSupportsJSR169()
+	{
+		return !HAVE_DRIVER
+		       && HAVE_PARAMETER_META_DATA;
+	}	
+	
 	/**
 	 * Rollback and close a connection for cleanup.
 	 * Test code that is expecting Connection.close to succeed
