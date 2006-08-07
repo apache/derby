@@ -849,14 +849,28 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		return isRow;
 	}
 
+    // checks if source result set is a RowResultSet type.
+    private boolean isSingleRowResultSet()
+    {
+        boolean isRow = false;
+        
+        if (sourceResultSet instanceof RowResultSet)
+        	isRow = true;
+        else if (sourceResultSet instanceof NormalizeResultSet)
+            isRow = (((NormalizeResultSet) sourceResultSet).source instanceof RowResultSet);
+        
+        return isRow;
+    }
+	
 	// Do the work for a "normal" insert
 	private void normalInsertCore(LanguageConnectionContext lcc, boolean firstExecute)
 		throws StandardException
 	{
+		boolean setUserIdentity = constants.hasAutoincrement() && isSingleRowResultSet();
 		boolean	firstDeferredRow = true;
 		ExecRow	deferredRowBuffer = null;
                 long user_autoinc=0;
-
+                        
 		/* Get or re-use the row changer.
 		 * NOTE: We need to set ourself as the top result set
 		 * if this is not the 1st execution.  (Done in constructor
@@ -997,7 +1011,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
             rowCount++;
             
-            if(constants.hasAutoincrement())
+            if(setUserIdentity )
             {
                         dd = lcc.getDataDictionary();
                         td = dd.getTableDescriptor(constants.targetUUID);
@@ -1153,7 +1167,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                  * find the value of the identity column from the user inserted value
                  * and do a lcc.setIdentityValue(<user_value>);
                  */
-                else if(constants.hasAutoincrement())
+                else if(setUserIdentity )
                 {
                         lcc.setIdentityValue(user_autoinc);
                 } 

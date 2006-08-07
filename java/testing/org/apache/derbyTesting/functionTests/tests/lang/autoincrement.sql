@@ -164,7 +164,7 @@ create table ai_test (x int generated always as identity (start with 2, incremen
 					  y int);
 insert into ai_test (y) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10);
 
--- should see 20.
+-- should see 0.
 values IDENTITY_VAL_LOCAL();
 
 insert into ai_test (y) select y+10 from ai_test;
