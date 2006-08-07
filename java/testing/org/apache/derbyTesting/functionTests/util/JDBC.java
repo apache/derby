@@ -37,11 +37,11 @@ public class JDBC {
                            = haveClass("java.sql.Driver");
     
     /**
-     * Does the ParameterMetaData class exist, indicates
+     * Does the Savepoint class exist, indicates
      * JDBC 3 (or JSR 169). 
      */
-    private static final boolean HAVE_PARAMETER_META_DATA
-                           = haveClass("java.sql.ParameterMetaData");
+    private static final boolean HAVE_SAVEPOINT
+                           = haveClass("java.sql.Savepoint");
 
     /**
      * Does the java.sql.SQLXML class exist, indicates JDBC 4. 
@@ -83,7 +83,7 @@ public class JDBC {
 	public static boolean vmSupportsJDBC3()
 	{
 		return HAVE_DRIVER
-		       && HAVE_PARAMETER_META_DATA;
+		       && HAVE_SAVEPOINT;
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class JDBC {
 	public static boolean vmSupportsJSR169()
 	{
 		return !HAVE_DRIVER
-		       && HAVE_PARAMETER_META_DATA;
+		       && HAVE_SAVEPOINT;
 	}	
 	
 	/**
