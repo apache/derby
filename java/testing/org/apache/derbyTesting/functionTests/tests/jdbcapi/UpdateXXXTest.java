@@ -20,6 +20,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.JDBC;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,6 +29,9 @@ import java.sql.Statement;
 import java.sql.Connection;
 
 import java.math.BigDecimal;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**
@@ -45,6 +49,26 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public UpdateXXXTest(final String name) {
         super(name);
     }
+    
+    public static Test suite() {
+        TestSuite suite = new TestSuite();
+        
+        suite.addTest(new UpdateXXXTest("testUpdateShort"));
+        suite.addTest(new UpdateXXXTest("testUpdateInt"));
+        suite.addTest(new UpdateXXXTest("testUpdateLong"));
+        suite.addTest(new UpdateXXXTest("testUpdateFloat"));
+        suite.addTest(new UpdateXXXTest("testUpdateDouble"));
+        suite.addTest(new UpdateXXXTest("testUpdateNull"));
+        suite.addTest(new UpdateXXXTest("testUpdateObjectWithNull"));
+        suite.addTest(new UpdateXXXTest("testUpdateString"));
+        
+        // requires java.math.BigDecimal
+        if (JDBC.vmSupportsJDBC2())
+            suite.addTest(new UpdateXXXTest("testUpdateBigDecimal"));
+                      
+        return suite;
+    }
+ 
 
     /**
      * The setup creates a Connection to the database, and also
@@ -82,8 +106,12 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
             ps.setFloat(4, 1.0f);
             ps.setDouble(5, 1.0);
             ps.setDouble(6, 1.0);
-            ps.setBigDecimal(7, BigDecimal.valueOf(1L));
-            ps.setBigDecimal(8, BigDecimal.valueOf(1L));
+            
+            // Use setString instead of setBigDecimal to
+            // allow most of the test cases to run under J2ME
+            ps.setString(7, "1");
+            ps.setString(8, "1");
+            
             ps.setString(9, "1");
             ps.setString(10, "1");
             ps.executeUpdate();
