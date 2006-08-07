@@ -34,6 +34,10 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.StorageFile;
+import org.apache.derby.iapi.util.ReuseFactory;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 
 /**
  * This class is used to encrypt all the containers in the data segment with a 
@@ -52,18 +56,27 @@ import org.apache.derby.io.StorageFile;
  *                                         another file (o<cid>.dat)
  *   4.	Rename the new encrypted version of the file (n<cid).dat) to be 
  *                                    the current container file (c<cid>.dat).
- *   5.	Submit a post commit work to remove the old version of 
- *                                      the container (o<cid>.dat) file. 
+ *   5.	All the old version of  the container (o<cid>.dat) files are removed
+ *      after a successful checkpoint with a new key or on a rollback.
  *   
  * 	@author  Suresh Thalamati
  */
 
-public class EncryptData {
+public class EncryptData implements PrivilegedAction {
 
     private BaseDataFileFactory dataFactory;
     private StorageFactory storageFactory;
     private StorageFile[] oldFiles;
     private int noOldFiles = 0; 
+
+
+    /* privileged actions */
+    private static final int STORAGE_FILE_EXISTS_ACTION = 1;
+    private static final int STORAGE_FILE_DELETE_ACTION = 2;
+    private static final int STORAGE_FILE_RENAME_ACTION = 3;
+    private int actionCode;
+    private StorageFile actionStorageFile;
+    private StorageFile actionDestStorageFile;
 
 	public EncryptData(BaseDataFileFactory dataFactory) {
 		this.dataFactory = dataFactory;
@@ -176,9 +189,9 @@ public class EncryptData {
         /*
          * Replace the current container file with the new container file after
          * keeping a copy of the current container file, it will be removed on 
-         * post-commit or on a rollback this copy will be replace the container 
-         * file to bring the database back to the state before encryption 
-         * process started.  
+         * after a checkpoint with new key or on a rollback this copy will be 
+         * replace the container file to bring the database back to the 
+         * state before encryption process started.  
          */
 
         // discard pages in the cache related to this container. 
@@ -200,14 +213,14 @@ public class EncryptData {
         StorageFile currentFile =  dataFactory.getContainerPath(ckey , false);
         StorageFile oldFile = getFile(ckey, true);
 
-        if (!currentFile.renameTo(oldFile)) {
+        if (!privRename(currentFile, oldFile)) {
                 throw StandardException.
                     newException(SQLState.RAWSTORE_ERROR_RENAMING_FILE,
                                  currentFile, oldFile);
             }
 
         // now replace current container file with the new file. 
-        if (!newFile.renameTo(currentFile)) {
+        if (!privRename(newFile, currentFile)) {
             throw StandardException.
                 newException(SQLState.RAWSTORE_ERROR_RENAMING_FILE,
                              newFile, currentFile);
@@ -292,17 +305,17 @@ public class EncryptData {
         
         // if backup of the original container file exists, replace the 
         // container with the backup copy.
-        if (oldFile.exists()) {
-            if (currentFile.exists()) {
+        if (privExists(oldFile)) {
+            if (privExists(currentFile)) {
                 // rename the current container file to be the new file.
-                if (!currentFile.renameTo(newFile)) {
+                if (!privRename(currentFile, newFile)) {
                     throw StandardException.
                         newException(SQLState.RAWSTORE_ERROR_RENAMING_FILE,
                                      currentFile, newFile);
                 }
             }
 
-            if (!oldFile.renameTo(currentFile)) {
+            if (!privRename(oldFile, currentFile)) {
                 throw StandardException.
                     newException(SQLState.RAWSTORE_ERROR_RENAMING_FILE,
                                  oldFile, currentFile);
@@ -310,9 +323,9 @@ public class EncryptData {
         }
 
         // if the new copy of the container file exists, remove it.
-        if (newFile.exists()) {
+        if (privExists(newFile)) {
 
-            if (!newFile.delete())
+            if (!privDelete(newFile))
                 throw StandardException.newException(
                                                  SQLState.UNABLE_TO_DELETE_FILE, 
                                                  newFile);
@@ -348,7 +361,7 @@ public class EncryptData {
                     if (isOldContainerFile(files[i]))
                     {
                         StorageFile oldFile = getFile(files[i]);
-                        if (!oldFile.delete()) 
+                        if (!privDelete(oldFile)) 
                         {
                             throw StandardException.newException(
                                           SQLState.FILE_CANNOT_REMOVE_FILE,
@@ -362,7 +375,7 @@ public class EncryptData {
             // delete all the old version of the containers. 
             for (int i = 0 ; i < noOldFiles ; i++) 
             {
-                if (!oldFiles[i].delete()) 
+                if (!privDelete(oldFiles[i])) 
                 {
                     throw StandardException.newException(
                                    SQLState.FILE_CANNOT_REMOVE_FILE, 
@@ -370,5 +383,60 @@ public class EncryptData {
                 }
             }
         }
+    }
+
+
+    
+    private synchronized boolean privExists(StorageFile file)
+    {
+        actionCode = STORAGE_FILE_EXISTS_ACTION;
+        actionStorageFile = file;
+        Object ret = AccessController.doPrivileged(this);
+        actionStorageFile = null;
+        return ((Boolean) ret).booleanValue();
+
+    }
+
+    
+    private synchronized boolean privDelete(StorageFile file)
+    {
+        actionCode = STORAGE_FILE_DELETE_ACTION;
+        actionStorageFile = file;
+        Object ret = AccessController.doPrivileged(this);
+        actionStorageFile = null;
+        return ((Boolean) ret).booleanValue();
+        
+    }
+
+    private synchronized boolean privRename(StorageFile fromFile, 
+                                            StorageFile destFile)
+    {
+        actionCode = STORAGE_FILE_RENAME_ACTION;
+        actionStorageFile = fromFile;
+        actionDestStorageFile = destFile;
+        Object ret = AccessController.doPrivileged(this);
+        actionStorageFile = null;
+        actionDestStorageFile = null;
+        return ((Boolean) ret).booleanValue();
+
+    }
+
+
+
+    // PrivilegedAction method
+    public Object run() 
+    {
+        switch(actionCode)
+        {
+        case STORAGE_FILE_EXISTS_ACTION:
+            return ReuseFactory.getBoolean(actionStorageFile.exists());
+        case STORAGE_FILE_DELETE_ACTION:
+            return ReuseFactory.getBoolean(actionStorageFile.delete());
+        case STORAGE_FILE_RENAME_ACTION:
+            return ReuseFactory.getBoolean(
+                       actionStorageFile.renameTo(actionDestStorageFile));
+        }
+
+        return null;
     }
 }

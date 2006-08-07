@@ -2101,7 +2101,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         catch( PrivilegedActionException pae) { return false;} // does not throw an exception
         finally
         {
-            actionRegularFile = null;
+            actionStorageFile = null;
         }
     }
 

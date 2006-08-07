@@ -83,6 +83,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
     private static final int OPEN_CONTAINER_ACTION = 4;
     private static final int STUBBIFY_ACTION = 5;
 	private static final int BACKUP_CONTAINER_ACTION = 6;
+    private static final int GET_RANDOM_ACCESS_FILE_ACTION = 7;
     private ContainerKey actionIdentity;
     private boolean actionStub;
     private boolean actionErrorOK;
@@ -1288,7 +1289,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         try {
             long lastPageNumber= getLastPageNumber(handle);
  
-            StorageRandomAccessFile newRaf = newFile.getRandomAccessFile("rw");
+            StorageRandomAccessFile newRaf = privGetRandomAccessFile(newFile);
 
             byte[] encryptionBuf = null;
             encryptionBuf = new byte[pageSize];
@@ -1332,9 +1333,25 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
     }
 
 
+    synchronized StorageRandomAccessFile privGetRandomAccessFile(StorageFile file)
+        throws SecurityException, StandardException
+    {
+        actionCode = GET_RANDOM_ACCESS_FILE_ACTION;
+        actionFile = file;
+        try
+        {
+            return (StorageRandomAccessFile)AccessController.doPrivileged(this);
+        }
+        catch( PrivilegedActionException pae){ 
+            throw (StandardException) pae.getException();
+        }
+        finally{ actionFile = null; }
+    }
+
+
 
      // PrivilegedExceptionAction method
-     public Object run() throws StandardException
+    public Object run() throws StandardException, IOException
      {
          switch( actionCode)
          {
@@ -1620,6 +1637,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 			 privBackupContainer(actionContainerHandle, actionBackupLocation);
 			 return null;
 		 } // end of case BACKUP_CONTAINER_ACTION
+
+         case GET_RANDOM_ACCESS_FILE_ACTION: {
+             return actionFile.getRandomAccessFile("rw");
+		 } // end of case BACKUP_CONTAINER_ACTION
+
 		 
 		 } // end of switch
          return null;
