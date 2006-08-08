@@ -7088,11 +7088,15 @@ short
  *
  * NOTE: This means that we may not be able to store the results
  * of an XMLQUERY operation into a Derby XML column.  Right now
- * an XML column can only hold valid DOCUMENT nodes, which translates
- * into a sequence of exactly one org.w3c.dom.Node.  So if the
- * result of an XMLQUERY operation is not a sequence of exactly
- * one Node, then that result will *not* be storable into
- * Derby XML columns.
+ * an XML column can only hold valid DOCUMENT nodes, which we
+ * we define as an XML value whose serialized form can be parsed
+ * by a JAXP DocumentBuilder (because that's what Derby's XMLPARSE
+ * operator uses and the result is always a Document node).
+ * Internally this means that we can only store a sequence if it
+ * contains exactly one org.w3c.dom.Node that is an instance of
+ * either org.w3c.dom.Document or org.w3c.dom.Element.  If the
+ * result of an XMLQUERY operation does not fit this criteria then
+ * it will *not* be storable into Derby XML columns.
  */
 short
 	xqReturningClause() throws StandardException :

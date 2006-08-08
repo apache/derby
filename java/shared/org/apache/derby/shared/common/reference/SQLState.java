@@ -1210,6 +1210,8 @@ public interface SQLState {
 	String LANG_INVALID_XML_QUERY_EXPRESSION                           = "X0X19.S";
 	String LANG_MULTIPLE_XML_CONTEXT_ITEMS                             = "X0X20.S";
 	String LANG_INVALID_CONTEXT_ITEM_TYPE                              = "X0X21.S";
+	String LANG_INVALID_XML_COLUMN_ASSIGN                              = "X0X22.S";
+	String LANG_INVALID_XML_CONTEXT_ITEM                               = "X0X23.S";
 	String LANG_UNEXPECTED_XML_EXCEPTION                               = "X0XML.S";
 
 	// X0Y01 used to be DUPLICATE_KEY_CONSTRAINT

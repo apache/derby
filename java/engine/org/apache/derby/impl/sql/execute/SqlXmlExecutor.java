@@ -251,10 +251,7 @@ public class SqlXmlExecutor {
         XMLDataValue xmlContext, XMLDataValue result)
         throws StandardException
     {
-        // Incremental development (DERBY-688); this is not yet
-        // implemented.
-        throw StandardException.newException(
-            SQLState.NOT_IMPLEMENTED, "XMLQUERY");
+        return xmlContext.XMLQuery(result, getSqlXmlUtil());
     }
 
     /**

@@ -975,6 +975,16 @@ public class ResultColumn extends ValueNode
 										  this);
 			}
 		}
+
+		// Are we inserting/updating an XML column?  If so, we always
+		// return false so that normalization will occur.  We have to
+		// do this because there are different "kinds" of XML values
+		// and we need to make sure they match--but we don't know
+		// the "kind" until execution time.  See the "normalize"
+		// method in org.apache.derby.iapi.types.XML for more.
+		if (resultColumnType.getTypeId().isXMLTypeId())
+			return false;
+
 		/* Are they the same type? */
 		if ( ! resultColumnType.getTypeId().getSQLTypeName().equals(
 			expressionType.getTypeId().getSQLTypeName()
@@ -1039,6 +1049,15 @@ public class ResultColumn extends ValueNode
 		{
 			return false;
 		}
+
+		// Are we inserting/updating an XML column?  If so, we always
+		// return false so that normalization will occur.  We have to
+		// do this because there are different "kinds" of XML values
+		// and we need to make sure they match--but we don't know
+		// the "kind" until execution time.  See the "normalize"
+		// method in org.apache.derby.iapi.types.XML for more.
+		if (resultColumnType.getTypeId().isXMLTypeId())
+			return false;
 
 		/* Are they the same type? */
 		if ( ! resultColumnType.getTypeId().equals(

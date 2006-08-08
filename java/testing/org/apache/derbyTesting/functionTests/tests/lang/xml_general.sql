@@ -98,6 +98,7 @@ insert into t1 values (5, xmlparse(document '<hmm/>' preserve whitespace));
 insert into t1 values (6, xmlparse(document '<half> <masted> bass </masted> boosted. </half>' preserve whitespace));
 insert into t2 values (1, xmlparse(document '<should> work as planned </should>' preserve whitespace));
 insert into t5 (x1, x2) values (null, xmlparse(document '<notnull/>' preserve whitespace));
+insert into t1 values (7, xmlparse(document '<?xml version="1.0" encoding= "UTF-8"?><umm> decl check </umm>' preserve whitespace));
 update t1 set x = xmlparse(document '<update> document was inserted as part of an UPDATE </update>' preserve whitespace) where i = 1;
 update t1 set x = xmlparse(document '<update2> document was inserted as part of an UPDATE </update2>' preserve whitespace) where xmlexists('/update' passing by ref x);
 select i from t1 where xmlparse(document '<hein/>' preserve whitespace) is not null;
@@ -214,6 +215,378 @@ select xmlexists('//*[namespace::*[string()=''http://www.good.bye'']]' passing b
 select xmlexists('//child::*[local-name()=''hi'' and namespace::*[string()=''http://www.hi.there'']]' passing by ref x) from t8;
 select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.good.bye'']]' passing by ref x) from t8;
 select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.hi.there'']]' passing by ref x) from t8;
+
+-- Test XMLQUERY operator.
+
+-- These should fail w/ syntax errors.
+select i, xmlquery('//*') from t1;
+select i, xmlquery('//*' passing) from t1;
+select i, xmlquery('//*' passing by ref x) from t1;
+select i, xmlquery('//*' passing by ref x returning sequence) from t1;
+select i, xmlquery(passing by ref x empty on empty) from t1;
+select i, xmlquery(xmlquery('//*' returning sequence empty on empty) as char(75)) from t1;
+
+-- These should fail with "not supported" errors.
+select i, xmlquery('//*' passing by ref x returning sequence null on empty) from t1;
+select i, xmlquery('//*' passing by ref x returning content empty on empty) from t1;
+
+-- This should fail because XMLQUERY returns an XML value which
+-- is not allowed in top-level result set.
+select i, xmlquery('//*' passing by ref x empty on empty) from t1;
+
+-- These should fail because context item must be XML.
+select i, xmlquery('//*' passing by ref i empty on empty) from t1;
+select i, xmlquery('//*' passing by ref 'hello' empty on empty) from t1;
+select i, xmlquery('//*' passing by ref cast ('hello' as clob) empty on empty) from t1;
+
+-- These should all succeed.  Since it's Xalan that's actually doing
+-- the query evaluation we don't need to test very many queries; we
+-- just want to make sure we get the correct results when there is
+-- an empty sequence, when the xml context is null, and when there
+-- is a sequence with one or more nodes/items in it.  So we just try
+-- out some queries and look at the results.  The selection of queries
+-- is random and is not meant to be exhaustive.
+
+select i,
+  xmlserialize(
+    xmlquery('2+2' passing by ref x returning sequence empty on empty)
+  as char(70))
+from t1;
+
+select i,
+  xmlserialize(
+    xmlquery('./notthere' passing by ref x returning sequence empty on empty)
+  as char(70))
+from t1;
+
+select i,
+  xmlserialize(
+    xmlquery('//*' passing by ref x empty on empty)
+  as char(70))
+from t1;
+
+select i,
+  xmlserialize(
+    xmlquery('//*[text() = " bass "]' passing by ref x empty on empty)
+  as char(70))
+from t1;
+
+select i,
+  xmlserialize(
+    xmlquery('//lets' passing by ref x empty on empty)
+  as char(70))
+from t1;
+
+select i,
+  xmlserialize(
+    xmlquery('//text()' passing by ref x empty on empty)
+  as char(70))
+from t1;
+
+select i,
+  xmlserialize(
+    xmlquery('//try[text()='' this out '']' passing by ref x empty on empty)
+  as char(70))
+from t1;
+
+select i,
+  xmlserialize(
+    xmlquery('//try[text()='' this in '']' passing by ref x empty on empty)
+  as char(70))
+from t1;
+
+select i,
+  xmlserialize(
+    xmlquery('2+.//try' passing by ref x returning sequence empty on empty)
+  as char(70))
+from t1;
+
+values xmlserialize(
+  xmlquery('//let' passing by ref
+    xmlparse(document '<lets> try this </lets>' preserve whitespace)
+  empty on empty)
+as char(30));
+
+values xmlserialize(
+  xmlquery('//lets' passing by ref
+    xmlparse(document '<lets> try this </lets>' preserve whitespace)
+  empty on empty)
+as char(30));
+
+-- Check insertion of XMLQUERY result into a table.  Should only allow
+-- results that constitute a valid DOCUMENT node (i.e. that can be parsed
+-- by the XMLPARSE operator).
+
+insert into t1 values (
+  9,
+  xmlparse(document '<here><is><my height="4.4">attribute</my></is></here>' preserve whitespace)
+);
+
+insert into t3 values (
+  0,
+  xmlparse(document '<there><goes><my weight="180">attribute</my></goes></there>' preserve whitespace)
+);
+
+-- Show target tables before insertions.
+
+select i, xmlserialize(x as char(75)) from t2;
+select i, xmlserialize(x as char(75)) from t3;
+
+-- These should all fail because the result of the XMLQUERY op is
+-- not a valid document (it's either an empty sequence, an attribute,
+-- some undefined value, or a sequence with more than one item in
+-- it.
+
+insert into t2 (i, x) values (
+  20, 
+  (select
+    xmlquery('./notthere' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+
+insert into t2 (i, x) values (
+  21,
+  (select
+    xmlquery('//@*' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+
+insert into t2 (i, x) values (
+  22,
+  (select
+    xmlquery('. + 2' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+
+insert into t2 (i, x) values (
+  23,
+  (select
+    xmlquery('//*' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+
+insert into t2 (i, x) values (
+  24,
+  (select
+    xmlquery('//*[//@*]' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+
+-- These should succeed.
+
+insert into t2 (i, x) values (
+  25,
+  (select
+    xmlquery('.' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+
+insert into t2 (i, x) values (
+  26,
+  (select
+    xmlquery('//is' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+
+insert into t2 (i, x) values (
+  27,
+  (select
+    xmlquery('/here' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+
+insert into t2 (i, x) values (
+  28,
+  (select
+    xmlquery('//*[@*]' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+
+-- Verify results.
+select i, xmlserialize(x as char(75)) from t2;
+
+-- Next two should _both_ succeed because there's no row with i = 100
+-- in t1, thus the SELECT will return null and XMLQuery operator should
+-- never get executed.  x will be NULL in these cases.
+
+insert into t3 (i, x) values (
+  29,
+  (select
+    xmlquery('2+2' passing by ref x returning sequence empty on empty)
+    from t1 where i = 100
+  )
+);
+
+insert into t3 (i, x) values (
+  30,
+  (select
+    xmlquery('.' passing by ref x returning sequence empty on empty)
+    from t1 where i = 100
+  )
+);
+
+-- Verify results.
+select i, xmlserialize(x as char(75)) from t3;
+
+-- Check updates using XMLQUERY results.  Should only allow results
+-- that constitute a valid DOCUMENT node (i.e. that can be parsed
+-- by the XMLPARSE operator).
+
+-- These should succeed.
+
+update t3
+  set x = 
+    xmlquery('.' passing by ref
+      xmlparse(document '<none><here/></none>' preserve whitespace)
+    returning sequence empty on empty)
+where i = 29;
+
+update t3
+  set x = 
+    xmlquery('//*[@height]' passing by ref
+      (select
+        xmlquery('.' passing by ref x empty on empty)
+        from t1
+        where i = 9
+      )
+    empty on empty)
+where i = 30;
+
+-- These should fail because result of XMLQUERY isn't a DOCUMENT.
+update t3
+  set x = xmlquery('.//*' passing by ref x empty on empty)
+where i = 29;
+
+update t3
+  set x = xmlquery('./notthere' passing by ref x empty on empty)
+where i = 30;
+
+update t3
+  set x =
+    xmlquery('//*[@weight]' passing by ref
+      (select
+        xmlquery('.' passing by ref x empty on empty)
+        from t1
+        where i = 9
+      )
+    empty on empty)
+where i = 30;
+
+update t3
+  set x =
+    xmlquery('//*/@height' passing by ref
+      (select
+        xmlquery('.' passing by ref x empty on empty)
+        from t1
+        where i = 9
+      )
+    empty on empty)
+where i = 30;
+
+-- Next two should succeed because there's no row with i = 100
+-- in t3 and thus t3 should remain unchanged after these updates.
+
+update t3
+  set x = xmlquery('//*' passing by ref x empty on empty)
+where i = 100;
+
+update t3
+  set x = xmlquery('4+4' passing by ref x empty on empty)
+where i = 100;
+
+-- Verify results.
+select i, xmlserialize(x as char(75)) from t3;
+
+-- Pass results of an XMLQUERY op into another XMLQUERY op.
+-- Should work so long as results of the first op constitute
+-- a valid document.
+
+-- Should fail because result of inner XMLQUERY op isn't a valid document.
+
+select i,
+  xmlserialize(
+    xmlquery('//lets/@*' passing by ref
+      xmlquery('/okay/text()' passing by ref
+        xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+      empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i > 5;
+
+select i,
+  xmlserialize(
+    xmlquery('.' passing by ref
+      xmlquery('//lets/@*' passing by ref
+        xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+      empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i > 5;
+
+select i,
+  xmlexists('.' passing by ref
+    xmlquery('//lets/@*' passing by ref
+      xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+    empty on empty)
+  )
+from t1 where i > 5;
+
+-- Should succeed but result is empty sequence.
+
+select i,
+  xmlserialize(
+    xmlquery('/not' passing by ref
+      xmlquery('//lets' passing by ref
+        xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+      empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i > 5;
+
+-- Should succeed with various results.
+
+select i,
+  xmlserialize(
+    xmlquery('.' passing by ref
+      xmlquery('//lets' passing by ref
+        xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+      empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i > 5;
+
+select i,
+  xmlserialize(
+    xmlquery('//@boki' passing by ref
+      xmlquery('/okay' passing by ref
+        xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+      empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i > 5;
+
+select i,
+  xmlserialize(
+    xmlquery('/masted/text()' passing by ref
+      xmlquery('//masted' passing by ref x empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i = 6;
+
+select i,
+  xmlexists('/masted/text()' passing by ref
+    xmlquery('//masted' passing by ref x empty on empty)
+  )
+from t1 where i = 6;
 
 -- clean up.
 drop table t0;

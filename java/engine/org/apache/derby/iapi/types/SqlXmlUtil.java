@@ -32,7 +32,9 @@ import java.io.StringReader;
 // -- JDBC 3.0 JAXP API classes.
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import org.xml.sax.ErrorHandler;
@@ -285,21 +287,39 @@ public class SqlXmlUtil
 
     /**
      * Evaluate this object's compiled XML query expression against
-     * the received xmlContext and return whether or not at least
-     * one item in the xmlContext is returned.
+     * the received xmlContext.  Then if returnResults is false,
+     * return an empty sequence (ArrayList) if evaluation yields
+     * at least one item and return null if evaluation yields zero
+     * items (the caller can then just check for null to see if the
+     * query returned any items).  If returnResults is true, then return
+     * return a sequence (ArrayList) containing all items returned
+     * from evaluation of the expression.  This array list can contain
+     * any combination of atomic values and XML nodes; it may also
+     * be empty.
      *
      * Assumption here is that the query expression has already been
      * compiled and is stored in this.query.
      *
      * @param xmlContext The XML value against which to evaluate
-     *  the stored (compiled) query expression.
-     * @return True if evaluation returned at least one item,
-     *  false otherwise.
+     *  the stored (compiled) query expression
+     * @param returnResults Whether or not to return the actual
+     *  results of the query
+     * @param resultXType The qualified XML type of the result
+     *  of evaluating the expression, if returnResults is true.
+     *  If the result is a sequence of one Document or Element node
+     *  then this will be XML(DOCUMENT(ANY)); else it will be
+     *  XML(SEQUENCE).  If returnResults is false, this value
+     *  is ignored.
+     * @return If returnResults is false then return an empty
+     *  ArrayList if evaluation returned at least one item and return
+     *  null otherwise.  If returnResults is true then return an
+     *  array list containing all of the result items and return
+     *  the qualified XML type via the resultXType parameter.
      * @exception Exception thrown on error (and turned into a
      *  StandardException by the caller).
      */
-    protected boolean evalXQExpression(XMLDataValue xmlContext)
-        throws Exception
+    protected ArrayList evalXQExpression(XMLDataValue xmlContext,
+        boolean returnResults, int [] resultXType) throws Exception
     {
         // Make sure we have a compiled query.
         if (SanityManager.DEBUG) {
@@ -308,8 +328,21 @@ public class SqlXmlUtil
                 "Failed to locate compiled XML query expression.");
         }
 
-        // Create a DOM node from the xmlContext, since that's how
-        // we feed the context to Xalan.
+        /* Create a DOM node from the xmlContext, since that's how
+         * we feed the context to Xalan.  We do this by creating
+         * a Document node using DocumentBuilder, which means that
+         * the serialized form of the context node must be a string
+         * value that is parse-able by DocumentBuilder--i.e. it must
+         * constitute a valid XML document.  If that's true then
+         * the context item's qualified type will be DOC_ANY.
+         */
+        if (xmlContext.getXType() != XML.XML_DOC_ANY)
+        {
+            throw StandardException.newException(
+                SQLState.LANG_INVALID_XML_CONTEXT_ITEM,
+                (returnResults ? "XMLQUERY" : "XMLEXISTS"));
+        } 
+
         Document docNode = null;
         docNode = dBuilder.parse(
             new InputSource(
@@ -320,23 +353,67 @@ public class SqlXmlUtil
         xpContext.reset();
         XObject xOb = query.execute(xpContext, docNode, null);
 
-        // We don't want to return the actual results, we just
-        // want to know if there was at least one item in the
-        // result sequence.
-        if ((xOb instanceof XNodeSet) &&
-            (((XNodeSet)xOb).nodelist().getLength() > 0))
-        { // If we have a sequence (XNodeSet) of length greater
-          // than zero, then we know that at least one item
-          // "exists" in the result.
-            return true;
+        if (!returnResults)
+        {
+            // We don't want to return the actual results, we just
+            // want to know if there was at least one item in the
+            // result sequence.
+            if ((xOb instanceof XNodeSet) &&
+                (((XNodeSet)xOb).nodelist().getLength() > 0))
+            { // If we have a sequence (XNodeSet) of length greater
+              // than zero, then we know that at least one item
+              // "exists" in the result so return a non-null list.
+                return new ArrayList(0);
+            }
+            else if (!(xOb instanceof XNodeSet))
+            // we have a single atomic value, which means the result is
+            // non-empty.  So return a non-null list.
+                return new ArrayList(0);
+            else {
+            // return null; caller will take this to mean we have an
+            // an empty sequence.
+                return null;
+            }
         }
-        else if (!(xOb instanceof XNodeSet))
-        // we have a single atomic value, which means the result is
-        // non-empty.
-            return true;
 
-        // Else the result was an empty sequence.
-        return false;
+        // Else process the results.
+        NodeList nodeList = null;
+        int numItems = 0;
+        if (!(xOb instanceof XNodeSet))
+        // then we only have a single (probably atomic) item.
+            numItems = 1;
+        else {
+            nodeList = xOb.nodelist();
+            numItems = nodeList.getLength();
+        }
+
+        // Return a list of the items contained in the query results.
+        ArrayList itemRefs = new ArrayList();
+        if (nodeList == null)
+        // result is a single, non-node value (ex. it's an atomic number);
+        // in this case, just take the string value.
+            itemRefs.add(xOb.str());
+        else {
+            for (int i = 0; i < numItems; i++)
+                itemRefs.add(nodeList.item(i));
+        }
+
+        nodeList = null;
+
+        // Indicate what kind of XML result value we have.  If
+        // we have a sequence of exactly one Element or Document
+        // then it is XMLPARSE-able and so we consider it to be
+        // of type XML_DOC_ANY (which means we can store it in
+        // a Derby XML column).
+        if ((numItems == 1) && ((itemRefs.get(0) instanceof Document)
+            || (itemRefs.get(0) instanceof Element)))
+        {
+            resultXType[0] = XML.XML_DOC_ANY;
+        }
+        else
+            resultXType[0] = XML.XML_SEQUENCE;
+
+        return itemRefs;
     }
 
     /* ****

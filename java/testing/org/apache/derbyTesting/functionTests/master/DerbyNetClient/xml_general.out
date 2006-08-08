@@ -162,6 +162,8 @@ ij> insert into t2 values (1, xmlparse(document '<should> work as planned </shou
 1 row inserted/updated/deleted
 ij> insert into t5 (x1, x2) values (null, xmlparse(document '<notnull/>' preserve whitespace));
 1 row inserted/updated/deleted
+ij> insert into t1 values (7, xmlparse(document '<?xml version="1.0" encoding= "UTF-8"?><umm> decl check </umm>' preserve whitespace));
+1 row inserted/updated/deleted
 ij> update t1 set x = xmlparse(document '<update> document was inserted as part of an UPDATE </update>' preserve whitespace) where i = 1;
 1 row inserted/updated/deleted
 ij> update t1 set x = xmlparse(document '<update2> document was inserted as part of an UPDATE </update2>' preserve whitespace) where xmlexists('/update' passing by ref x);
@@ -175,6 +177,7 @@ I
 3          
 5          
 6          
+7          
 ij> select i from t1 where xmlparse(document '<hein/>' preserve whitespace) is not null order by i;
 I          
 -----
@@ -184,6 +187,7 @@ I
 4          
 5          
 6          
+7          
 ij> -- "is [not] null" should work with XML.
 select i from t1 where x is not null;
 I          
@@ -191,6 +195,7 @@ I
 1          
 5          
 6          
+7          
 ij> select i from t1 where x is null;
 I          
 -----
@@ -238,6 +243,7 @@ NULL
 NULL                                                                                                                            
 <hmm/>                                                                                                                          
 <half> <masted> bass </masted> boosted. </half>                                                                                 
+<umm> decl check </umm>                                                                                                         
 ij> select xmlserialize(x1 as clob), xmlserialize(x2 as clob) from t5;
 1 |2                                                                                                                               
 -----
@@ -251,6 +257,7 @@ NULL
 NULL                                                                                                
 <hmm/>                                                                                              
 <half> <masted> bass </masted> boosted. </half>                                                     
+<umm> decl check </umm>                                                                             
 ij> select xmlserialize(x as varchar(300)) from t1;
 1                                                                                                                               
 -----
@@ -260,6 +267,7 @@ NULL
 NULL                                                                                                                            
 <hmm/>                                                                                                                          
 <half> <masted> bass </masted> boosted. </half>                                                                                 
+<umm> decl check </umm>                                                                                                         
 ij> -- These should succeed at the XMLEXISTS level, but fail with
 ----- parse/truncation errors.
 select xmlserialize(xmlparse(document vc preserve whitespace) as char(10)) from t4;
@@ -310,6 +318,7 @@ NULL
 NULL                                                                                                                            
 <hmm/>                                                                                                                          
 <half> <masted> bass </masted> boosted. </half>                                                                                 
+<umm> decl check </umm>                                                                                                         
 ij> values xmlserialize(xmlparse(document '<okay> dokie </okay>' preserve whitespace) as clob);
 1                                                                                                                               
 -----
@@ -320,6 +329,7 @@ I
 1          
 5          
 6          
+7          
 ij> -- Test XMLEXISTS operator.
 insert into t1 values (7, xmlparse(document '<lets> <try> this out </try> </lets>' preserve whitespace));
 1 row inserted/updated/deleted
@@ -354,6 +364,7 @@ I
 5          
 6          
 7          
+7          
 ij> select i from t1 where xmlexists('//person' passing by ref x);
 I          
 -----
@@ -370,6 +381,7 @@ NULL
 NULL  
 0     
 0     
+0     
 1     
 ij> select xmlexists('//try[text()='' this out '']' passing by ref x) from t1;
 1     
@@ -378,6 +390,7 @@ ij> select xmlexists('//try[text()='' this out '']' passing by ref x) from t1;
 NULL  
 NULL  
 NULL  
+0     
 0     
 0     
 1     
@@ -391,6 +404,7 @@ NULL
 0     
 0     
 0     
+0     
 ij> select xmlexists('//try[text()='' this in '']' passing by ref x) from t1;
 1     
 -----
@@ -398,6 +412,7 @@ ij> select xmlexists('//try[text()='' this in '']' passing by ref x) from t1;
 NULL  
 NULL  
 NULL  
+0     
 0     
 0     
 0     
@@ -411,6 +426,7 @@ I |2
 5 |0     
 6 |0     
 7 |0     
+7 |0     
 ij> select i, xmlexists('//lets' passing by ref x) from t1;
 I |2     
 -----
@@ -420,6 +436,7 @@ I |2
 3 |NULL  
 5 |0     
 6 |0     
+7 |0     
 7 |1     
 ij> values xmlexists('//let' passing by ref xmlparse(document '<lets> try this </lets>' preserve whitespace));
 1     
@@ -552,6 +569,494 @@ ij> select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=
 0     
 1     
 0     
+ij> -- Test XMLQUERY operator.
+----- These should fail w/ syntax errors.
+select i, xmlquery('//*') from t1;
+ERROR 42X01: Syntax error: Encountered ")" at line 4, column 25.
+ij> select i, xmlquery('//*' passing) from t1;
+ERROR 42X01: Syntax error: Encountered ")" at line 1, column 33.
+ij> select i, xmlquery('//*' passing by ref x) from t1;
+ERROR 42X01: Syntax error: Encountered ")" at line 1, column 42.
+ij> select i, xmlquery('//*' passing by ref x returning sequence) from t1;
+ERROR 42X01: Syntax error: Encountered ")" at line 1, column 61.
+ij> select i, xmlquery(passing by ref x empty on empty) from t1;
+ERROR 42X01: Syntax error: Encountered "by" at line 1, column 28.
+ij> select i, xmlquery(xmlquery('//*' returning sequence empty on empty) as char(75)) from t1;
+ERROR 42X01: Syntax error: Encountered "returning" at line 1, column 35.
+ij> -- These should fail with "not supported" errors.
+select i, xmlquery('//*' passing by ref x returning sequence null on empty) from t1;
+ERROR X0X18: XML feature not supported: 'NULL ON EMPTY'.
+ij> select i, xmlquery('//*' passing by ref x returning content empty on empty) from t1;
+ERROR X0X18: XML feature not supported: 'RETURNING CONTENT'.
+ij> -- This should fail because XMLQUERY returns an XML value which
+----- is not allowed in top-level result set.
+select i, xmlquery('//*' passing by ref x empty on empty) from t1;
+ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ij> -- These should fail because context item must be XML.
+select i, xmlquery('//*' passing by ref i empty on empty) from t1;
+ERROR X0X21: Context item must have type 'XML'; 'INTEGER' is not allowed.
+ij> select i, xmlquery('//*' passing by ref 'hello' empty on empty) from t1;
+ERROR X0X21: Context item must have type 'XML'; 'CHAR' is not allowed.
+ij> select i, xmlquery('//*' passing by ref cast ('hello' as clob) empty on empty) from t1;
+ERROR X0X21: Context item must have type 'XML'; 'CLOB' is not allowed.
+ij> -- These should all succeed.  Since it's Xalan that's actually doing
+----- the query evaluation we don't need to test very many queries; we
+----- just want to make sure we get the correct results when there is
+----- an empty sequence, when the xml context is null, and when there
+----- is a sequence with one or more nodes/items in it.  So we just try
+----- out some queries and look at the results.  The selection of queries
+----- is random and is not meant to be exhaustive.
+select i,
+  xmlserialize(
+    xmlquery('2+2' passing by ref x returning sequence empty on empty)
+  as char(70))
+from t1;
+I |2                                                                     
+-----
+1 |4                                                                     
+2 |NULL                                                                  
+4 |NULL                                                                  
+3 |NULL                                                                  
+5 |4                                                                     
+6 |4                                                                     
+7 |4                                                                     
+7 |4                                                                     
+ij> select i,
+  xmlserialize(
+    xmlquery('./notthere' passing by ref x returning sequence empty on empty)
+  as char(70))
+from t1;
+I |2                                                                     
+-----
+1 |                                                                      
+2 |NULL                                                                  
+4 |NULL                                                                  
+3 |NULL                                                                  
+5 |                                                                      
+6 |                                                                      
+7 |                                                                      
+7 |                                                                      
+ij> select i,
+  xmlserialize(
+    xmlquery('//*' passing by ref x empty on empty)
+  as char(70))
+from t1;
+I |2                                                                     
+-----
+1 |<update2> document was inserted as part of an UPDATE </update2>       
+2 |NULL                                                                  
+4 |NULL                                                                  
+3 |NULL                                                                  
+5 |<hmm/>                                                                
+6 |<half> <masted> bass </masted> boosted. </half><masted> bass </masted>
+7 |<umm> decl check </umm>                                               
+7 |<lets> <try> this out </try> </lets><try> this out </try>             
+ij> select i,
+  xmlserialize(
+    xmlquery('//*[text() = " bass "]' passing by ref x empty on empty)
+  as char(70))
+from t1;
+I |2                                                                     
+-----
+1 |                                                                      
+2 |NULL                                                                  
+4 |NULL                                                                  
+3 |NULL                                                                  
+5 |                                                                      
+6 |<masted> bass </masted>                                               
+7 |                                                                      
+7 |                                                                      
+ij> select i,
+  xmlserialize(
+    xmlquery('//lets' passing by ref x empty on empty)
+  as char(70))
+from t1;
+I |2                                                                     
+-----
+1 |                                                                      
+2 |NULL                                                                  
+4 |NULL                                                                  
+3 |NULL                                                                  
+5 |                                                                      
+6 |                                                                      
+7 |                                                                      
+7 |<lets> <try> this out </try> </lets>                                  
+ij> select i,
+  xmlserialize(
+    xmlquery('//text()' passing by ref x empty on empty)
+  as char(70))
+from t1;
+I |2                                                                     
+-----
+1 | document was inserted as part of an UPDATE                           
+2 |NULL                                                                  
+4 |NULL                                                                  
+3 |NULL                                                                  
+5 |                                                                      
+6 |  bass  boosted.                                                      
+7 | decl check                                                           
+7 |  this out                                                            
+ij> select i,
+  xmlserialize(
+    xmlquery('//try[text()='' this out '']' passing by ref x empty on empty)
+  as char(70))
+from t1;
+I |2                                                                     
+-----
+1 |                                                                      
+2 |NULL                                                                  
+4 |NULL                                                                  
+3 |NULL                                                                  
+5 |                                                                      
+6 |                                                                      
+7 |                                                                      
+7 |<try> this out </try>                                                 
+ij> select i,
+  xmlserialize(
+    xmlquery('//try[text()='' this in '']' passing by ref x empty on empty)
+  as char(70))
+from t1;
+I |2                                                                     
+-----
+1 |                                                                      
+2 |NULL                                                                  
+4 |NULL                                                                  
+3 |NULL                                                                  
+5 |                                                                      
+6 |                                                                      
+7 |                                                                      
+7 |                                                                      
+ij> select i,
+  xmlserialize(
+    xmlquery('2+.//try' passing by ref x returning sequence empty on empty)
+  as char(70))
+from t1;
+I |2                                                                     
+-----
+1 |NaN                                                                   
+2 |NULL                                                                  
+4 |NULL                                                                  
+3 |NULL                                                                  
+5 |NaN                                                                   
+6 |NaN                                                                   
+7 |NaN                                                                   
+7 |NaN                                                                   
+ij> values xmlserialize(
+  xmlquery('//let' passing by ref
+    xmlparse(document '<lets> try this </lets>' preserve whitespace)
+  empty on empty)
+as char(30));
+1                             
+-----
+ij> values xmlserialize(
+  xmlquery('//lets' passing by ref
+    xmlparse(document '<lets> try this </lets>' preserve whitespace)
+  empty on empty)
+as char(30));
+1                             
+-----
+<lets> try this </lets>       
+ij> -- Check insertion of XMLQUERY result into a table.  Should only allow
+----- results that constitute a valid DOCUMENT node (i.e. that can be parsed
+----- by the XMLPARSE operator).
+insert into t1 values (
+  9,
+  xmlparse(document '<here><is><my height="4.4">attribute</my></is></here>' preserve whitespace)
+);
+1 row inserted/updated/deleted
+ij> insert into t3 values (
+  0,
+  xmlparse(document '<there><goes><my weight="180">attribute</my></goes></there>' preserve whitespace)
+);
+1 row inserted/updated/deleted
+ij> -- Show target tables before insertions.
+select i, xmlserialize(x as char(75)) from t2;
+I |2                                                                          
+-----
+1 |<should> work as planned </should>                                         
+ij> select i, xmlserialize(x as char(75)) from t3;
+I |2                                                                          
+-----
+0 |<there><goes><my weight="180">attribute</my></goes></there>                
+ij> -- These should all fail because the result of the XMLQUERY op is
+----- not a valid document (it's either an empty sequence, an attribute,
+----- some undefined value, or a sequence with more than one item in
+----- it.
+insert into t2 (i, x) values (
+  20, 
+  (select
+    xmlquery('./notthere' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> insert into t2 (i, x) values (
+  21,
+  (select
+    xmlquery('//@*' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> insert into t2 (i, x) values (
+  22,
+  (select
+    xmlquery('. + 2' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> insert into t2 (i, x) values (
+  23,
+  (select
+    xmlquery('//*' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> insert into t2 (i, x) values (
+  24,
+  (select
+    xmlquery('//*[//@*]' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> -- These should succeed.
+insert into t2 (i, x) values (
+  25,
+  (select
+    xmlquery('.' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+1 row inserted/updated/deleted
+ij> insert into t2 (i, x) values (
+  26,
+  (select
+    xmlquery('//is' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+1 row inserted/updated/deleted
+ij> insert into t2 (i, x) values (
+  27,
+  (select
+    xmlquery('/here' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+1 row inserted/updated/deleted
+ij> insert into t2 (i, x) values (
+  28,
+  (select
+    xmlquery('//*[@*]' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+1 row inserted/updated/deleted
+ij> -- Verify results.
+select i, xmlserialize(x as char(75)) from t2;
+I |2                                                                          
+-----
+1 |<should> work as planned </should>                                         
+25 |<here><is><my height="4.4">attribute</my></is></here>                      
+26 |<is><my height="4.4">attribute</my></is>                                   
+27 |<here><is><my height="4.4">attribute</my></is></here>                      
+28 |<my height="4.4">attribute</my>                                            
+ij> -- Next two should _both_ succeed because there's no row with i = 100
+----- in t1, thus the SELECT will return null and XMLQuery operator should
+----- never get executed.  x will be NULL in these cases.
+insert into t3 (i, x) values (
+  29,
+  (select
+    xmlquery('2+2' passing by ref x returning sequence empty on empty)
+    from t1 where i = 100
+  )
+);
+1 row inserted/updated/deleted
+ij> insert into t3 (i, x) values (
+  30,
+  (select
+    xmlquery('.' passing by ref x returning sequence empty on empty)
+    from t1 where i = 100
+  )
+);
+1 row inserted/updated/deleted
+ij> -- Verify results.
+select i, xmlserialize(x as char(75)) from t3;
+I |2                                                                          
+-----
+0 |<there><goes><my weight="180">attribute</my></goes></there>                
+29 |NULL                                                                       
+30 |NULL                                                                       
+ij> -- Check updates using XMLQUERY results.  Should only allow results
+----- that constitute a valid DOCUMENT node (i.e. that can be parsed
+----- by the XMLPARSE operator).
+----- These should succeed.
+update t3
+  set x = 
+    xmlquery('.' passing by ref
+      xmlparse(document '<none><here/></none>' preserve whitespace)
+    returning sequence empty on empty)
+where i = 29;
+1 row inserted/updated/deleted
+ij> update t3
+  set x = 
+    xmlquery('//*[@height]' passing by ref
+      (select
+        xmlquery('.' passing by ref x empty on empty)
+        from t1
+        where i = 9
+      )
+    empty on empty)
+where i = 30;
+1 row inserted/updated/deleted
+ij> -- These should fail because result of XMLQUERY isn't a DOCUMENT.
+update t3
+  set x = xmlquery('.//*' passing by ref x empty on empty)
+where i = 29;
+ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> update t3
+  set x = xmlquery('./notthere' passing by ref x empty on empty)
+where i = 30;
+ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> update t3
+  set x =
+    xmlquery('//*[@weight]' passing by ref
+      (select
+        xmlquery('.' passing by ref x empty on empty)
+        from t1
+        where i = 9
+      )
+    empty on empty)
+where i = 30;
+ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> update t3
+  set x =
+    xmlquery('//*/@height' passing by ref
+      (select
+        xmlquery('.' passing by ref x empty on empty)
+        from t1
+        where i = 9
+      )
+    empty on empty)
+where i = 30;
+ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> -- Next two should succeed because there's no row with i = 100
+----- in t3 and thus t3 should remain unchanged after these updates.
+update t3
+  set x = xmlquery('//*' passing by ref x empty on empty)
+where i = 100;
+0 rows inserted/updated/deleted
+ij> update t3
+  set x = xmlquery('4+4' passing by ref x empty on empty)
+where i = 100;
+0 rows inserted/updated/deleted
+ij> -- Verify results.
+select i, xmlserialize(x as char(75)) from t3;
+I |2                                                                          
+-----
+0 |<there><goes><my weight="180">attribute</my></goes></there>                
+29 |<none><here/></none>                                                       
+30 |<my height="4.4">attribute</my>                                            
+ij> -- Pass results of an XMLQUERY op into another XMLQUERY op.
+----- Should work so long as results of the first op constitute
+----- a valid document.
+----- Should fail because result of inner XMLQUERY op isn't a valid document.
+select i,
+  xmlserialize(
+    xmlquery('//lets/@*' passing by ref
+      xmlquery('/okay/text()' passing by ref
+        xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+      empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i > 5;
+ERROR X0X23: Invalid context item for XMLQUERY operation; context items must be well-formed DOCUMENT nodes.
+ij> select i,
+  xmlserialize(
+    xmlquery('.' passing by ref
+      xmlquery('//lets/@*' passing by ref
+        xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+      empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i > 5;
+ERROR X0X23: Invalid context item for XMLQUERY operation; context items must be well-formed DOCUMENT nodes.
+ij> select i,
+  xmlexists('.' passing by ref
+    xmlquery('//lets/@*' passing by ref
+      xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+    empty on empty)
+  )
+from t1 where i > 5;
+ERROR X0X23: Invalid context item for XMLEXISTS operation; context items must be well-formed DOCUMENT nodes.
+ij> -- Should succeed but result is empty sequence.
+select i,
+  xmlserialize(
+    xmlquery('/not' passing by ref
+      xmlquery('//lets' passing by ref
+        xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+      empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i > 5;
+I |2                                                                                                   
+-----
+6 |                                                                                                    
+7 |                                                                                                    
+7 |                                                                                                    
+9 |                                                                                                    
+ij> -- Should succeed with various results.
+select i,
+  xmlserialize(
+    xmlquery('.' passing by ref
+      xmlquery('//lets' passing by ref
+        xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+      empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i > 5;
+I |2                                                                                                   
+-----
+6 |<lets boki="inigo"/>                                                                                
+7 |<lets boki="inigo"/>                                                                                
+7 |<lets boki="inigo"/>                                                                                
+9 |<lets boki="inigo"/>                                                                                
+ij> select i,
+  xmlserialize(
+    xmlquery('//@boki' passing by ref
+      xmlquery('/okay' passing by ref
+        xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
+      empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i > 5;
+I |2                                                                                                   
+-----
+6 |inigo                                                                                               
+7 |inigo                                                                                               
+7 |inigo                                                                                               
+9 |inigo                                                                                               
+ij> select i,
+  xmlserialize(
+    xmlquery('/masted/text()' passing by ref
+      xmlquery('//masted' passing by ref x empty on empty)
+    empty on empty)
+  as char(100))
+from t1 where i = 6;
+I |2                                                                                                   
+-----
+6 | bass                                                                                               
+ij> select i,
+  xmlexists('/masted/text()' passing by ref
+    xmlquery('//masted' passing by ref x empty on empty)
+  )
+from t1 where i = 6;
+I |2     
+-----
+6 |1     
 ij> -- clean up.
 drop table t0;
 0 rows inserted/updated/deleted

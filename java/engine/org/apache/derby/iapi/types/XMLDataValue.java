@@ -81,4 +81,37 @@ public interface XMLDataValue extends DataValueDescriptor
     public BooleanDataValue XMLExists(SqlXmlUtil sqlxUtil)
 		throws StandardException;
 
+    /**
+     * Evaluate the XML query expression contained within the received
+     * util object against this XML value and store the results into
+     * the received XMLDataValue "result" param (assuming "result" is
+     * non-null; else create a new XMLDataValue).
+     *
+     * @param result The result of a previous call to this method; null
+     *  if not called yet.
+     * @param sqlxUtil Contains SQL/XML objects and util methods that
+     *  facilitate execution of XML-related operations
+     * @return An XMLDataValue whose content corresponds to the serialized
+     *  version of the results from evaluation of the query expression.
+     *  Note: this XMLDataValue may not be storable into Derby XML
+     *  columns.
+     * @exception Exception thrown on error (and turned into a
+     *  StandardException by the caller).
+     */
+    public XMLDataValue XMLQuery(XMLDataValue result, SqlXmlUtil sqlxUtil)
+		throws StandardException;
+
+    /* ****
+     * Helper classes and methods.
+     * */
+
+    /**
+     * Set this XML value's qualified type.
+     */
+    public void setXType(int xtype);
+
+    /**
+     * Retrieve this XML value's qualified type.
+     */
+    public int getXType();
 }

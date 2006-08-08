@@ -46,6 +46,8 @@ import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.StringReader;
 
+import java.util.ArrayList;
+
 /**
  * This type implements the XMLDataValue interface and thus is
  * the type on which all XML related operations are executed.
@@ -76,14 +78,40 @@ public class XML
     private static final int BASE_MEMORY_USAGE =
         ClassSize.estimateBaseFromCatalog(XML.class);
 
-	// Some syntax-related constants used to determine
-	// operator behavior.
-	public static final short XQ_PASS_BY_REF = 1;
-	public static final short XQ_PASS_BY_VALUE = 2;
-	public static final short XQ_RETURN_SEQUENCE = 3;
-	public static final short XQ_RETURN_CONTENT = 4;
-	public static final short XQ_EMPTY_ON_EMPTY = 5;
-	public static final short XQ_NULL_ON_EMPTY = 6;
+    // Some syntax-related constants used to determine
+    // operator behavior.
+    public static final short XQ_PASS_BY_REF = 1;
+    public static final short XQ_PASS_BY_VALUE = 2;
+    public static final short XQ_RETURN_SEQUENCE = 3;
+    public static final short XQ_RETURN_CONTENT = 4;
+    public static final short XQ_EMPTY_ON_EMPTY = 5;
+    public static final short XQ_NULL_ON_EMPTY = 6;
+
+    /* Per SQL/XML[2006] 4.2.2, there are several different
+     * XML "types" defined through use of primary and secondary
+     * "type modifiers".  For Derby we only support two kinds:
+     *
+     * XML(DOCUMENT(ANY)) : A valid and well-formed XML
+     *  document as defined by W3C, meaning that there is
+     *  exactly one root element node.  This is the only
+     *  type of XML that can be stored into a Derby XML
+     *  column.  This is also the type returned by a call
+     *  to XMLPARSE since we require the DOCUMENT keyword.
+     *
+     * XML(SEQUENCE): A sequence of items (could be nodes or
+     *  atomic values).  This is the type returned from an
+     *  XMLQUERY operation.  Any node that is XML(DOCUMENT(ANY))
+     *  is also XML(SEQUENCE).  Note that an XML(SEQUENCE)
+     *  value is *only* storable into a Derby XML column
+     *  if it is also an XML(DOCUMENT(ANY)).  See the
+     *  normalize method below for the code that enforces
+     *  this.
+     */
+    public static final int XML_DOC_ANY = 0;
+    public static final int XML_SEQUENCE = 1;
+
+    // The fully-qualified type for this XML value.
+    private int xType;
 
     // The actual XML data in this implementation is just a simple
     // string, so this class really just wraps a SQLChar and
@@ -112,6 +140,7 @@ public class XML
     public XML()
     {
         xmlStringValue = null;
+        xType = -1;
     }
 
     /**
@@ -123,6 +152,22 @@ public class XML
     private XML(SQLChar val)
     {
         xmlStringValue = (val == null ? null : (SQLChar)val.getClone());
+        xType = -1;
+    }
+
+    /**
+     * Private constructor used for the getClone() method.
+     * Takes a SQLChar and clones it and also takes a
+     * qualified XML type and stores that as this XML
+     * object's qualified type.
+     * @param val A SQLChar instance to clone and use for
+     *  this XML value.
+     * @param qualXType Qualified XML type.
+     */
+    private XML(SQLChar val, int xmlType)
+    {
+        xmlStringValue = (val == null ? null : (SQLChar)val.getClone());
+        setXType(xmlType);
     }
 
     /* ****
@@ -134,7 +179,7 @@ public class XML
      */
     public DataValueDescriptor getClone()
     {
-        return new XML(xmlStringValue);
+        return new XML(xmlStringValue, getXType());
     }
 
     /**
@@ -206,16 +251,47 @@ public class XML
 
         // Now just read the XML data as UTF-8.
         xmlStringValue.readExternalFromArray(in);
+
+        // If we read it from disk then it must have type
+        // XML_DOC_ANY because that's all we allow to be
+        // written into an XML column.
+        setXType(XML_DOC_ANY);
     }
 
     /**
+     * @see DataValueDescriptor#setFrom
+     *
+     * Note: 
      */
     protected void setFrom(DataValueDescriptor theValue)
         throws StandardException
     {
+        String strVal = theValue.getString();
+        if (strVal == null)
+        {
+            xmlStringValue = null;
+
+            // Null is a valid value for DOCUMENT(ANY)
+            setXType(XML_DOC_ANY);
+            return;
+        }
+
+        // Here we just store the received value locally.
         if (xmlStringValue == null)
             xmlStringValue = new SQLChar();
-        xmlStringValue.setValue(theValue.getString());
+        xmlStringValue.setValue(strVal);
+
+        /*
+         * Assumption is that if theValue is not an XML
+         * value then the caller is aware of whether or
+         * not theValue constitutes a valid XML(DOCUMENT(ANY))
+         * and will behave accordingly (see in particular the
+         * XMLQuery method of this class, which calls the
+         * setValue() method of XMLDataValue which in turn
+         * brings us to this method).
+         */
+        if (theValue instanceof XMLDataValue)
+        	setXType(((XMLDataValue)theValue).getXType());
     }
 
     /** 
@@ -281,6 +357,41 @@ public class XML
         return 0;
     }
 
+    /**
+     * Normalization method - this method will always be called when
+     * storing an XML value into an XML column, for example, when
+     * inserting/updating.  We always force normalization in this
+     * case because we need to make sure the qualified type of the
+     * value we're trying to store is XML_DOC_ANY--we don't allow
+     * anything else.
+     *
+     * @param desiredType   The type to normalize the source column to
+     * @param source        The value to normalize
+     *
+     * @exception StandardException Thrown if source is not
+     *  XML_DOC_ANY.
+     */
+    public void normalize(
+                DataTypeDescriptor desiredType,
+                DataValueDescriptor source)
+                    throws StandardException
+    {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(source instanceof XMLDataValue,
+                "Tried to store non-XML value into XML column; " +
+                "should have thrown error at compile time.");
+        }
+
+        if (((XMLDataValue)source).getXType() != XML_DOC_ANY) {
+            throw StandardException.newException(
+                SQLState.LANG_INVALID_XML_COLUMN_ASSIGN);
+        }
+
+        ((DataValueDescriptor) this).setValue(source);
+        return;
+
+    }
+
     /* ****
      * Storable interface, implies Externalizable, TypedFormat
      */
@@ -330,6 +441,11 @@ public class XML
 
         // Now just read the XML data as UTF-8.
         xmlStringValue.readExternal(in);
+
+        // If we read it from disk then it must have type
+        // XML_DOC_ANY because that's all we allow to be
+        // written into an XML column.
+        setXType(XML_DOC_ANY);
     }
 
     /**
@@ -390,6 +506,11 @@ public class XML
 
         // Now go ahead and use the stream.
         xmlStringValue.setStream(newStream);
+
+        // If we read it from disk then it must have type
+        // XML_DOC_ANY because that's all we allow to be
+        // written into an XML column.
+        setXType(XML_DOC_ANY);
     }
 
     /**
@@ -450,6 +571,7 @@ public class XML
 
         // If we get here, the text is valid XML so go ahead
         // and load/store it.
+        setXType(XML_DOC_ANY);
         if (xmlStringValue == null)
             xmlStringValue = new SQLChar();
         xmlStringValue.setValue(text);
@@ -558,7 +680,8 @@ public class XML
 
         try {
 
-            return new SQLBoolean(sqlxUtil.evalXQExpression(this));
+            return new SQLBoolean(null !=
+                sqlxUtil.evalXQExpression(this, false, new int[1]));
 
         } catch (Exception xe) {
         // We don't expect to get here.  Turn it into a StandardException
@@ -570,6 +693,91 @@ public class XML
                     SQLState.LANG_UNEXPECTED_XML_EXCEPTION, xe);
             }
         }
+    }
+
+    /**
+     * Evaluate the XML query expression contained within the received
+     * util object against this XML value and store the results into
+     * the received XMLDataValue "result" param (assuming "result" is
+     * non-null; else create a new XMLDataValue).
+     *
+     * @param result The result of a previous call to this method; null
+     *  if not called yet.
+     * @param sqlxUtil Contains SQL/XML objects and util methods that
+     *  facilitate execution of XML-related operations
+     * @return An XMLDataValue whose content corresponds to the serialized
+     *  version of the results from evaluation of the query expression.
+     *  Note: this XMLDataValue may not be storable into Derby XML
+     *  columns.
+     * @exception Exception thrown on error (and turned into a
+     *  StandardException by the caller).
+     */
+    public XMLDataValue XMLQuery(XMLDataValue result,
+        SqlXmlUtil sqlxUtil) throws StandardException
+    {
+        if (this.isNull()) {
+        // if the context is null, we return null,
+        // per SQL/XML[2006] 6.17:GR.1.a.ii.1.
+            if (result == null)
+                result = (XMLDataValue)getNewNull();
+            else
+                result.setToNull();
+            return result;
+        }
+
+        try {
+ 
+            // Return an XML data value whose contents are the
+            // serialized version of the query results.
+            int [] xType = new int[1];
+            ArrayList itemRefs = sqlxUtil.evalXQExpression(
+                this, true, xType);
+
+            String strResult = sqlxUtil.serializeToString(itemRefs);
+            if (result == null)
+                result = new XML(new SQLChar(strResult));
+            else
+                result.setValue(new SQLChar(strResult));
+
+            // Now that we've set the result value, make sure
+            // to indicate what kind of XML value we have.
+            result.setXType(xType[0]);
+
+            // And finally we return the query result as an XML value.
+            return result;
+
+        } catch (StandardException se) {
+
+            // Just re-throw it.
+            throw se;
+
+        } catch (Exception xe) {
+        // We don't expect to get here.  Turn it into a
+        // StandardException and throw it.
+
+            throw StandardException.newException(
+                SQLState.LANG_UNEXPECTED_XML_EXCEPTION, xe);
+        }
+    }
+
+    /* ****
+     * Helper classes and methods.
+     * */
+
+    /**
+     * Set this XML value's qualified type.
+     */
+    public void setXType(int xtype)
+    {
+        this.xType = xtype;
+    }
+
+    /**
+     * Retrieve this XML value's qualified type.
+     */
+    public int getXType()
+    {
+        return xType;
     }
 
 }
