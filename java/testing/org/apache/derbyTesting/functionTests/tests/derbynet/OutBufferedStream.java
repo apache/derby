@@ -54,6 +54,10 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 public class OutBufferedStream {
     private static NetworkServerControl networkServer = null;
     
+    // Need this to keep track of database has been created or not
+    // to avoid case of DERBY-300
+    private static boolean dbNotCreated = true;
+    
     public static void main(String[] args){
 	
 	try{
@@ -249,10 +253,16 @@ public class OutBufferedStream {
     
     private static Connection getConnection()
 	throws SQLException {
-	
-	return DriverManager.getConnection(TestUtil.getJdbcUrlPrefix("localhost",
+    
+    String dbName = "wombat";
+	if (dbNotCreated)
+    {
+        dbName = dbName + ";create=true";
+        dbNotCreated = false;
+    }
+    return DriverManager.getConnection(TestUtil.getJdbcUrlPrefix("localhost",
 								     1527) + 
-					   "wombat;create=true",
+					   dbName,
 					   "testuser",
 					   "testpassword");
 	
