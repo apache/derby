@@ -1849,6 +1849,7 @@ public class procedure
 			// We expect the result set to be open, so dropping the
 			// table should fail.
 			stmt.executeUpdate("drop table derby821");
+			rs.next();//to fix DERBY-1320. Else the GC for ibm15 will clean up the ResultSet Object
 		} catch (SQLException sqle) {
 			if (sqle.getSQLState().equals("X0X95")) {
 				System.out.println("PASSED");
