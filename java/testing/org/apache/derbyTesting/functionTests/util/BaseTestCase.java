@@ -20,6 +20,9 @@
 package org.apache.derbyTesting.functionTests.util;
 
 import junit.framework.TestCase;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.Reader;
 import java.io.PrintStream;
 import java.net.URL;
 import java.sql.SQLException;
@@ -211,5 +214,68 @@ public abstract class BaseTestCase
     	assertNotNull("No SecurityManager installed",
     			System.getSecurityManager());
     }
-    
+
+    /**
+     * Compare the contents of two streams.
+     * The streams are closed after they are exhausted.
+     *
+     * @param is1 the first stream
+     * @param is2 the second stream
+     * @throws IOException if reading from the streams fail
+     * @throws AssertionFailedError if the stream contents are not equal
+     */
+    public static void assertEquals(InputStream is1, InputStream is2)
+            throws IOException {
+        if (is1 == null || is2 == null) {
+            assertNull("InputStream is2 is null, is1 is not", is1);
+            assertNull("InputStream is1 is null, is2 is not", is2);
+            return;
+        }
+        long index = 0;
+        int b1 = is1.read();
+        int b2 = is2.read();
+        do {
+            // Avoid string concatenation for every byte in the stream.
+            if (b1 != b2) {
+                assertEquals("Streams differ at index " + index, b1, b2);
+            }
+            index++;
+            b1 = is1.read();
+            b2 = is2.read();
+        } while (b1 != -1 || b2 != -1);
+        is1.close();
+        is2.close();
+    }
+
+    /**
+     * Compare the contents of two readers.
+     * The readers are closed after they are exhausted.
+     *
+     * @param r1 the first reader
+     * @param r2 the second reader
+     * @throws IOException if reading from the streams fail
+     * @throws AssertionFailedError if the reader contents are not equal
+     */
+    public static void assertEquals(Reader r1, Reader r2)
+            throws IOException {
+        long index = 0;
+        if (r1 == null || r2 == null) {
+            assertNull("Reader r2 is null, r1 is not", r1);
+            assertNull("Reader r1 is null, r2 is not", r2);
+            return;
+        }
+        int c1 = r1.read();
+        int c2 = r2.read();
+        do {
+            // Avoid string concatenation for every char in the stream.
+            if (c1 != c2) {
+                assertEquals("Streams differ at index " + index, c1, c2);
+            }
+            index++;
+            c1 = r1.read();
+            c2 = r2.read();
+        } while (c1 != -1 || c2 != -1);
+        r1.close();
+        r2.close();
+    }
 } // End class BaseTestCase
