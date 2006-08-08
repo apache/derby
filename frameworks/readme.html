@@ -1,3 +1,4 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
 <!--
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
@@ -14,7 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<!doctype html public "-//W3C//DTD HTML 3.2//EN">
 <html>
 <head><META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <title>About Derby's Frameworks
@@ -30,7 +30,7 @@
 	All subdirectories in this directory contain a <em>bin</em> subdirectory that has scripts that serve as examples of how to run some of the basic Derby tools and utilities tailored for the particular framework. For server frameworks, start and stop scripts are also provided.
 <br>To use the scripts for a particular framework, modify the scripts as necessary and put that framework's <em>bin</em> subdirectory first in your path.</p></li>
 </ul>
-<p>For an easy-to-follow example of how to run an application in the two frameworks, see the <a href="../demo/programs/simple/example.html">simple example</a>.</p>
+<p>For an easy-to-follow example of how to run an application in the two frameworks, see the simple example in the demos directory if your distribution includes it.</p>
 <p>For more information about frameworks, see <a href="../doc/pdf/getstart.pdf"><em>Getting Started with Derby</em></a>.</p>
 <h2><a name="embed">Embedded Framework</a></h2>
 <p>An <em>embedded</em> <a href="#framework">framework</a> is the most basic framework. Derby runs embedded in a Java application. When the application loads the local JDBC driver, it starts up the Derby engine. When the application shuts down, it shuts down the Derby engine. Only a single application can access a database at one time.
