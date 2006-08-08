@@ -21,6 +21,7 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.iapi.types.BooleanDataValue;
@@ -120,7 +121,7 @@ public class SqlXmlExecutor {
 
     // The activation from which we load the compile-time XML
     // objects (including the compiled XML query expression in
-    // case of XMLEXISTS).
+    // case of XMLEXISTS and XMLQUERY).
     private Activation activation;
     private int sqlXUtilId;
 
@@ -159,7 +160,7 @@ public class SqlXmlExecutor {
     }
 
     /**
-     * Constructor 3: Used for XMLEXISTS ops.
+     * Constructor 3: Used for XMLEXISTS/XMLQUERY ops.
      * @param activation Activation from which to retrieve saved objects
      * @param utilId Id by which we find saved objects in activation
      */
@@ -229,6 +230,31 @@ public class SqlXmlExecutor {
         XMLDataValue xmlContext) throws StandardException
     {
         return xmlContext.XMLExists(getSqlXmlUtil());
+    }
+
+    /**
+     * Make the call to perform an XMLQUERY operation on the
+     * received XML data value and store the result in the
+     * received result holder (or, if it's null, create a
+     * new one).
+     *
+     * @param xExpr Query expression to be evaluated
+     * @param xmlContext Context node against which to evaluate
+     *  the expression.
+     * @param result XMLDataValue in which to store the result
+     * @return The received XMLDataValue with its content set to
+     *  result of evaulating the query expression against xmlContext.
+     *  If the received XMLDataValue is null, then create a new one
+     *  and set its content to correspond to the received xmlText.
+     */
+    public XMLDataValue XMLQuery(StringDataValue xExpr,
+        XMLDataValue xmlContext, XMLDataValue result)
+        throws StandardException
+    {
+        // Incremental development (DERBY-688); this is not yet
+        // implemented.
+        throw StandardException.newException(
+            SQLState.NOT_IMPLEMENTED, "XMLQUERY");
     }
 
     /**

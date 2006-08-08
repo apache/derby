@@ -29,6 +29,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+
 import java.lang.reflect.Modifier;
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
@@ -98,24 +100,29 @@ public class BinaryOperatorNode extends ValueNode
 	// possible.
 
 	public final static int XMLEXISTS_OP = 0;
+	public final static int XMLQUERY_OP = 1;
 
 	// NOTE: in the following 4 arrays, order
 	// IS important.
 
 	static final String[] BinaryOperators = {
 		"xmlexists",
+		"xmlquery"
 	};
 
 	static final String[] BinaryMethodNames = {
 		"XMLExists",
+		"XMLQuery"
 	};
 
 	static final String[] BinaryResultTypes = {
-		ClassName.BooleanDataValue		// XMLExists
+		ClassName.BooleanDataValue,		// XMLExists
+		ClassName.XMLDataValue			// XMLQuery
 	};
 
 	static final String[][] BinaryArgTypes = {
-		{ClassName.StringDataValue, ClassName.XMLDataValue}		// XMLExists
+		{ClassName.StringDataValue, ClassName.XMLDataValue},	// XMLExists
+		{ClassName.StringDataValue, ClassName.XMLDataValue}		// XMLQuery
 	};
 
 	// Class used to compile an XML query expression and/or load/process
@@ -305,8 +312,8 @@ public class BinaryOperatorNode extends ValueNode
 		rightOperand = rightOperand.bindExpression(fromList, subqueryList, 
 			aggregateVector);
 
-		if (operatorType == XMLEXISTS_OP)
-			return bindXMLExists();
+		if ((operatorType == XMLEXISTS_OP) || (operatorType == XMLQUERY_OP))
+			return bindXMLQuery();
 
 		/* Is there a ? parameter on the left? */
 		if (leftOperand.requiresTypeFromContext())
@@ -335,12 +342,14 @@ public class BinaryOperatorNode extends ValueNode
 	}
 
     /**
-     * Bind an XMLEXISTS operator.  Makes sure the operand type
-     * and target type are both correct, and sets the result type.
+     * Bind an XMLEXISTS or XMLQUERY operator.  Makes sure
+     * the operand type and target type are both correct
+     * and sets the result type.
      *
      * @exception StandardException Thrown on error
      */
-    public ValueNode bindXMLExists() throws StandardException
+    public ValueNode bindXMLQuery()
+        throws StandardException
     {
         // Check operand types.
         TypeId leftOperandType = leftOperand.getTypeId();
@@ -361,15 +370,17 @@ public class BinaryOperatorNode extends ValueNode
                 ((CharConstantNode)leftOperand).getString());
         }
 
-        // Right operand is an XML data value.
+        // Right operand must be an XML data value.  NOTE: This
+        // is a Derby-specific restriction, not an SQL/XML one.
+        // We have this restriction because the query engine
+        // that we use (currently Xalan) cannot handle non-XML
+        // context items.
         if ((rightOperandType != null) &&
             !rightOperandType.isXMLTypeId())
         {
             throw StandardException.newException(
-                SQLState.LANG_BINARY_OPERATOR_NOT_SUPPORTED, 
-                    methodName,
-                    leftOperandType.getSQLTypeName(),
-                    rightOperandType.getSQLTypeName());
+                SQLState.LANG_INVALID_CONTEXT_ITEM_TYPE,
+                rightOperandType.getSQLTypeName());
         }
 
         // Is there a ? parameter on the right?
@@ -381,11 +392,23 @@ public class BinaryOperatorNode extends ValueNode
                 SQLState.LANG_ATTEMPT_TO_BIND_XML);
         }
 
-        // Set the result type of this XMLExists operator--it's always
-        // SQLBoolean.  The "true" in the next line says that the result
-        // can be nullable--which it can be if evaluation of the expression
-        // returns a null (this is per SQL/XML spec section 8.4).
-        setType(new DataTypeDescriptor(TypeId.BOOLEAN_ID, true));
+        // Set the result type of this operator.
+        if (operatorType == XMLEXISTS_OP) {
+        // For XMLEXISTS, the result type is always SQLBoolean.
+        // The "true" in the next line says that the result
+        // can be nullable--which it can be if evaluation of
+        // the expression returns a null (this is per SQL/XML
+        // spec, 8.4)
+            setType(new DataTypeDescriptor(TypeId.BOOLEAN_ID, true));
+        }
+        else {
+        // The result of an XMLQUERY operator is always another
+        // XML data value, per SQL/XML spec 6.17: "...yielding a value
+        // X1 of an XML type."
+            setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                StoredFormatIds.XML_TYPE_ID));
+        }
+
         return genSQLJavaSQLTree();
     }
 
@@ -461,9 +484,10 @@ public class BinaryOperatorNode extends ValueNode
 ** but how?
 */
 
-		// If we're dealing with XMLEXISTS, there is some
+		// If we're dealing with XMLEXISTS or XMLQUERY, there is some
 		// additional work to be done.
-		boolean xmlGen = (operatorType == XMLEXISTS_OP);
+		boolean xmlGen =
+			(operatorType == XMLQUERY_OP) || (operatorType == XMLEXISTS_OP);
 
 		if (xmlGen) {
 		// We create an execution-time object so that we can retrieve
@@ -600,6 +624,12 @@ public class BinaryOperatorNode extends ValueNode
 			{
 				mb.push(dataTypeServices.getScale());		// 4th arg
 				mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType, methodName, resultTypeName, 4);
+			}
+			else if (xmlGen) {
+			// This is for an XMLQUERY operation, so invoke the method
+			// on our execution-time object.
+				mb.callMethod(VMOpcode.INVOKEVIRTUAL, null,
+					methodName, resultTypeName, 3);
 			}
 			else
 				mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType, methodName, resultTypeName, 3);

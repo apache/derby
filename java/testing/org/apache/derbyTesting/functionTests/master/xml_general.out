@@ -165,7 +165,7 @@ ij> insert into t5 (x1, x2) values (null, xmlparse(document '<notnull/>' preserv
 1 row inserted/updated/deleted
 ij> update t1 set x = xmlparse(document '<update> document was inserted as part of an UPDATE </update>' preserve whitespace) where i = 1;
 1 row inserted/updated/deleted
-ij> update t1 set x = xmlparse(document '<update2> document was inserted as part of an UPDATE </update2>' preserve whitespace) where xmlexists('/update' passing by value x);
+ij> update t1 set x = xmlparse(document '<update2> document was inserted as part of an UPDATE </update2>' preserve whitespace) where xmlexists('/update' passing by ref x);
 1 row inserted/updated/deleted
 ij> select i from t1 where xmlparse(document '<hein/>' preserve whitespace) is not null;
 I          
@@ -216,9 +216,9 @@ ij> insert into t4 values 'no good';
 1 row inserted/updated/deleted
 ij> -- These should fail.
 select xmlserialize(x) from t1;
-ERROR X0X16: XML syntax error; missing keyword(s): 'AS <string-type>'.
+ERROR X0X16: XML syntax error; missing keyword(s): 'AS'.
 ij> select xmlserialize(x as) from t1;
-ERROR X0X16: XML syntax error; missing keyword(s): 'AS <string-type>'.
+ERROR X0X16: XML syntax error; missing keyword(s): 'AS'.
 ij> select xmlserialize(x as int) from t1;
 ERROR X0X17: Invalid target type for XMLSERIALIZE: 'INTEGER'.
 ij> select xmlserialize(x as varchar(20) for bit data) from t1;
@@ -354,26 +354,30 @@ ij> select i from t1 where xmlexists('//*' x);
 ERROR 42X01: Syntax error: Encountered "x" at line 1, column 40.
 ij> select i from t1 where xmlexists('//*' passing x);
 ERROR 42X01: Syntax error: Encountered "x" at line 1, column 48.
-ij> select i from t1 where xmlexists('//*' passing by ref x);
-ERROR X0X18: XML feature not supported: 'BY REF'.
-ij> select i from t1 where xmlexists('//*' passing by value i);
-ERROR 42Y95: The 'XMLExists' operator with a left operand type of 'CHAR' and a right operand type of 'INTEGER' is not supported.
+ij> select i from t1 where xmlexists('//*' passing by value x);
+ERROR X0X18: XML feature not supported: 'BY VALUE'.
+ij> select i from t1 where xmlexists('//*' passing by ref i);
+ERROR X0X21: Context item must have type 'XML'; 'INTEGER' is not allowed.
+ij> select i from t1 where xmlexists(i passing by ref x);
+ERROR X0X19: XML query expression must be a string literal.
+ij> select i from t1 where xmlexists(i passing by ref x, x);
+ERROR X0X20: Multiple XML context items are not allowed.
 ij> -- These should succeed.
-select i from t1 where xmlexists('//*' passing by value x);
+select i from t1 where xmlexists('//*' passing by ref x);
 I          
 -----------
 1          
 5          
 6          
 7          
-ij> select i from t1 where xmlexists('//person' passing by value x);
+ij> select i from t1 where xmlexists('//person' passing by ref x);
 I          
 -----------
-ij> select i from t1 where xmlexists('//lets' passing by value x);
+ij> select i from t1 where xmlexists('//lets' passing by ref x);
 I          
 -----------
 7          
-ij> select xmlexists('//lets' passing by value x) from t1;
+ij> select xmlexists('//lets' passing by ref x) from t1;
 1    
 -----
 false
@@ -383,7 +387,7 @@ NULL
 false
 false
 true 
-ij> select xmlexists('//try[text()='' this out '']' passing by value x) from t1;
+ij> select xmlexists('//try[text()='' this out '']' passing by ref x) from t1;
 1    
 -----
 false
@@ -393,7 +397,7 @@ NULL
 false
 false
 true 
-ij> select xmlexists('//let' passing by value x) from t1;
+ij> select xmlexists('//let' passing by ref x) from t1;
 1    
 -----
 false
@@ -403,7 +407,7 @@ NULL
 false
 false
 false
-ij> select xmlexists('//try[text()='' this in '']' passing by value x) from t1;
+ij> select xmlexists('//try[text()='' this in '']' passing by ref x) from t1;
 1    
 -----
 false
@@ -413,7 +417,7 @@ NULL
 false
 false
 false
-ij> select i, xmlexists('//let' passing by value x) from t1;
+ij> select i, xmlexists('//let' passing by ref x) from t1;
 I          |2    
 -----------------
 1          |false
@@ -423,7 +427,7 @@ I          |2
 5          |false
 6          |false
 7          |false
-ij> select i, xmlexists('//lets' passing by value x) from t1;
+ij> select i, xmlexists('//lets' passing by ref x) from t1;
 I          |2    
 -----------------
 1          |false
@@ -433,26 +437,26 @@ I          |2
 5          |false
 6          |false
 7          |true 
-ij> values xmlexists('//let' passing by value xmlparse(document '<lets> try this </lets>' preserve whitespace));
+ij> values xmlexists('//let' passing by ref xmlparse(document '<lets> try this </lets>' preserve whitespace));
 1    
 -----
 false
-ij> values xmlexists('//lets' passing by value xmlparse(document '<lets> try this </lets>' preserve whitespace));
+ij> values xmlexists('//lets' passing by ref xmlparse(document '<lets> try this </lets>' preserve whitespace));
 1    
 -----
 true 
-ij> select xmlserialize(x1 as clob) from t5 where xmlexists('//*' passing by value x1);
+ij> select xmlserialize(x1 as clob) from t5 where xmlexists('//*' passing by ref x1);
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
-ij> select xmlserialize(x2 as clob) from t5 where xmlexists('//*' passing by value x2);
+ij> select xmlserialize(x2 as clob) from t5 where xmlexists('//*' passing by ref x2);
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
 <notnull/>                                                                                                                      
-ij> select xmlserialize(x1 as clob), xmlexists('//*' passing by value xmlparse(document '<badboy/>' preserve whitespace)) from t5;
+ij> select xmlserialize(x1 as clob), xmlexists('//*' passing by ref xmlparse(document '<badboy/>' preserve whitespace)) from t5;
 1                                                                                                                               |2    
 --------------------------------------------------------------------------------------------------------------------------------------
 NULL                                                                                                                            |true 
-ij> select xmlserialize(x1 as clob), xmlexists('//goodboy' passing by value xmlparse(document '<badboy/>' preserve whitespace)) from t5;
+ij> select xmlserialize(x1 as clob), xmlexists('//goodboy' passing by ref xmlparse(document '<badboy/>' preserve whitespace)) from t5;
 1                                                                                                                               |2    
 --------------------------------------------------------------------------------------------------------------------------------------
 NULL                                                                                                                            |false
@@ -460,16 +464,16 @@ ij> select i, xmlserialize(x1 as char(10)), xmlserialize (x2 as char(10)) from t
 I          |2         |3         
 ---------------------------------
 1          |NULL      |<ok/>     
-ij> select i from t7 where xmlexists('/ok' passing by value x1) and xmlexists('/ok' passing by value x2);
+ij> select i from t7 where xmlexists('/ok' passing by ref x1) and xmlexists('/ok' passing by ref x2);
 I          
 -----------
-ij> select i from t7 where xmlexists('/ok' passing by value x1) or xmlexists('/ok' passing by value x2);
+ij> select i from t7 where xmlexists('/ok' passing by ref x1) or xmlexists('/ok' passing by ref x2);
 I          
 -----------
 1          
 ij> -- XMLEXISTS can be used wherever a boolean function is allowed,
 -- for ex, a check constraint...
-create table t6 (i int, x xml check (xmlexists('//should' passing by value x)));
+create table t6 (i int, x xml check (xmlexists('//should' passing by ref x)));
 0 rows inserted/updated/deleted
 ij> insert into t6 values (1, xmlparse(document '<should/>' preserve whitespace));
 1 row inserted/updated/deleted
@@ -492,7 +496,7 @@ ij> insert into t8 values (4, xmlparse(document '<b:bye xmlns:b="http://www.hi.t
 1 row inserted/updated/deleted
 ij> insert into t8 values (5, xmlparse(document '<hi/>' preserve whitespace));
 1 row inserted/updated/deleted
-ij> select xmlexists('//child::*[name()="none"]' passing by value x) from t8;
+ij> select xmlexists('//child::*[name()="none"]' passing by ref x) from t8;
 1    
 -----
 false
@@ -500,7 +504,7 @@ false
 false
 false
 false
-ij> select xmlexists('//child::*[name()=''hi'']' passing by value x) from t8;
+ij> select xmlexists('//child::*[name()=''hi'']' passing by ref x) from t8;
 1    
 -----
 false
@@ -508,7 +512,7 @@ false
 false
 false
 true 
-ij> select xmlexists('//child::*[local-name()=''hi'']' passing by value x) from t8;
+ij> select xmlexists('//child::*[local-name()=''hi'']' passing by ref x) from t8;
 1    
 -----
 true 
@@ -516,7 +520,7 @@ true
 false
 false
 true 
-ij> select xmlexists('//child::*[local-name()=''bye'']' passing by value x) from t8;
+ij> select xmlexists('//child::*[local-name()=''bye'']' passing by ref x) from t8;
 1    
 -----
 false
@@ -524,7 +528,7 @@ false
 true 
 true 
 false
-ij> select xmlexists('//*[namespace::*[string()=''http://www.hi.there'']]' passing by value x) from t8;
+ij> select xmlexists('//*[namespace::*[string()=''http://www.hi.there'']]' passing by ref x) from t8;
 1    
 -----
 true 
@@ -532,7 +536,7 @@ true
 false
 true 
 false
-ij> select xmlexists('//*[namespace::*[string()=''http://www.good.bye'']]' passing by value x) from t8;
+ij> select xmlexists('//*[namespace::*[string()=''http://www.good.bye'']]' passing by ref x) from t8;
 1    
 -----
 false
@@ -540,7 +544,7 @@ false
 true 
 false
 false
-ij> select xmlexists('//child::*[local-name()=''hi'' and namespace::*[string()=''http://www.hi.there'']]' passing by value x) from t8;
+ij> select xmlexists('//child::*[local-name()=''hi'' and namespace::*[string()=''http://www.hi.there'']]' passing by ref x) from t8;
 1    
 -----
 true 
@@ -548,7 +552,7 @@ true
 false
 false
 false
-ij> select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.good.bye'']]' passing by value x) from t8;
+ij> select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.good.bye'']]' passing by ref x) from t8;
 1    
 -----
 false
@@ -556,7 +560,7 @@ false
 true 
 false
 false
-ij> select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.hi.there'']]' passing by value x) from t8;
+ij> select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.hi.there'']]' passing by ref x) from t8;
 1    
 -----
 false

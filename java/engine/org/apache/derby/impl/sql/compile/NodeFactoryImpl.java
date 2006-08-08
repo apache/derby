@@ -578,6 +578,7 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
             return C_NodeNames.UNARY_OPERATOR_NODE_NAME;
 
           case C_NodeTypes.XML_EXISTS_OPERATOR_NODE:
+          case C_NodeTypes.XML_QUERY_OPERATOR_NODE:
             return C_NodeNames.BINARY_OPERATOR_NODE_NAME;
 
           case C_NodeTypes.GRANT_NODE:

@@ -99,7 +99,7 @@ insert into t1 values (6, xmlparse(document '<half> <masted> bass </masted> boos
 insert into t2 values (1, xmlparse(document '<should> work as planned </should>' preserve whitespace));
 insert into t5 (x1, x2) values (null, xmlparse(document '<notnull/>' preserve whitespace));
 update t1 set x = xmlparse(document '<update> document was inserted as part of an UPDATE </update>' preserve whitespace) where i = 1;
-update t1 set x = xmlparse(document '<update2> document was inserted as part of an UPDATE </update2>' preserve whitespace) where xmlexists('/update' passing by value x);
+update t1 set x = xmlparse(document '<update2> document was inserted as part of an UPDATE </update2>' preserve whitespace) where xmlexists('/update' passing by ref x);
 select i from t1 where xmlparse(document '<hein/>' preserve whitespace) is not null;
 select i from t1 where xmlparse(document '<hein/>' preserve whitespace) is not null order by i;
 
@@ -167,31 +167,33 @@ select i from t1 where xmlexists(i);
 select i from t1 where xmlexists('//*');
 select i from t1 where xmlexists('//*' x);
 select i from t1 where xmlexists('//*' passing x);
-select i from t1 where xmlexists('//*' passing by ref x);
-select i from t1 where xmlexists('//*' passing by value i);
--- These should succeed.
 select i from t1 where xmlexists('//*' passing by value x);
-select i from t1 where xmlexists('//person' passing by value x);
-select i from t1 where xmlexists('//lets' passing by value x);
-select xmlexists('//lets' passing by value x) from t1;
-select xmlexists('//try[text()='' this out '']' passing by value x) from t1;
-select xmlexists('//let' passing by value x) from t1;
-select xmlexists('//try[text()='' this in '']' passing by value x) from t1;
-select i, xmlexists('//let' passing by value x) from t1;
-select i, xmlexists('//lets' passing by value x) from t1;
-values xmlexists('//let' passing by value xmlparse(document '<lets> try this </lets>' preserve whitespace));
-values xmlexists('//lets' passing by value xmlparse(document '<lets> try this </lets>' preserve whitespace));
-select xmlserialize(x1 as clob) from t5 where xmlexists('//*' passing by value x1);
-select xmlserialize(x2 as clob) from t5 where xmlexists('//*' passing by value x2);
-select xmlserialize(x1 as clob), xmlexists('//*' passing by value xmlparse(document '<badboy/>' preserve whitespace)) from t5;
-select xmlserialize(x1 as clob), xmlexists('//goodboy' passing by value xmlparse(document '<badboy/>' preserve whitespace)) from t5;
+select i from t1 where xmlexists('//*' passing by ref i);
+select i from t1 where xmlexists(i passing by ref x);
+select i from t1 where xmlexists(i passing by ref x, x);
+-- These should succeed.
+select i from t1 where xmlexists('//*' passing by ref x);
+select i from t1 where xmlexists('//person' passing by ref x);
+select i from t1 where xmlexists('//lets' passing by ref x);
+select xmlexists('//lets' passing by ref x) from t1;
+select xmlexists('//try[text()='' this out '']' passing by ref x) from t1;
+select xmlexists('//let' passing by ref x) from t1;
+select xmlexists('//try[text()='' this in '']' passing by ref x) from t1;
+select i, xmlexists('//let' passing by ref x) from t1;
+select i, xmlexists('//lets' passing by ref x) from t1;
+values xmlexists('//let' passing by ref xmlparse(document '<lets> try this </lets>' preserve whitespace));
+values xmlexists('//lets' passing by ref xmlparse(document '<lets> try this </lets>' preserve whitespace));
+select xmlserialize(x1 as clob) from t5 where xmlexists('//*' passing by ref x1);
+select xmlserialize(x2 as clob) from t5 where xmlexists('//*' passing by ref x2);
+select xmlserialize(x1 as clob), xmlexists('//*' passing by ref xmlparse(document '<badboy/>' preserve whitespace)) from t5;
+select xmlserialize(x1 as clob), xmlexists('//goodboy' passing by ref xmlparse(document '<badboy/>' preserve whitespace)) from t5;
 select i, xmlserialize(x1 as char(10)), xmlserialize (x2 as char(10)) from t7;
-select i from t7 where xmlexists('/ok' passing by value x1) and xmlexists('/ok' passing by value x2);
-select i from t7 where xmlexists('/ok' passing by value x1) or xmlexists('/ok' passing by value x2);
+select i from t7 where xmlexists('/ok' passing by ref x1) and xmlexists('/ok' passing by ref x2);
+select i from t7 where xmlexists('/ok' passing by ref x1) or xmlexists('/ok' passing by ref x2);
 
 -- XMLEXISTS can be used wherever a boolean function is allowed,
 -- for ex, a check constraint...
-create table t6 (i int, x xml check (xmlexists('//should' passing by value x)));
+create table t6 (i int, x xml check (xmlexists('//should' passing by ref x)));
 insert into t6 values (1, xmlparse(document '<should/>' preserve whitespace));
 insert into t6 values (1, xmlparse(document '<shouldnt/>' preserve whitespace));
 select xmlserialize(x as char(20)) from t6;
@@ -203,15 +205,15 @@ insert into t8 values (2, xmlparse(document '<b:hi xmlns:b="http://www.hi.there"
 insert into t8 values (3, xmlparse(document '<a:bye xmlns:a="http://www.good.bye"/>' preserve whitespace));
 insert into t8 values (4, xmlparse(document '<b:bye xmlns:b="http://www.hi.there"/>' preserve whitespace));
 insert into t8 values (5, xmlparse(document '<hi/>' preserve whitespace));
-select xmlexists('//child::*[name()="none"]' passing by value x) from t8;
-select xmlexists('//child::*[name()=''hi'']' passing by value x) from t8;
-select xmlexists('//child::*[local-name()=''hi'']' passing by value x) from t8;
-select xmlexists('//child::*[local-name()=''bye'']' passing by value x) from t8;
-select xmlexists('//*[namespace::*[string()=''http://www.hi.there'']]' passing by value x) from t8;
-select xmlexists('//*[namespace::*[string()=''http://www.good.bye'']]' passing by value x) from t8;
-select xmlexists('//child::*[local-name()=''hi'' and namespace::*[string()=''http://www.hi.there'']]' passing by value x) from t8;
-select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.good.bye'']]' passing by value x) from t8;
-select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.hi.there'']]' passing by value x) from t8;
+select xmlexists('//child::*[name()="none"]' passing by ref x) from t8;
+select xmlexists('//child::*[name()=''hi'']' passing by ref x) from t8;
+select xmlexists('//child::*[local-name()=''hi'']' passing by ref x) from t8;
+select xmlexists('//child::*[local-name()=''bye'']' passing by ref x) from t8;
+select xmlexists('//*[namespace::*[string()=''http://www.hi.there'']]' passing by ref x) from t8;
+select xmlexists('//*[namespace::*[string()=''http://www.good.bye'']]' passing by ref x) from t8;
+select xmlexists('//child::*[local-name()=''hi'' and namespace::*[string()=''http://www.hi.there'']]' passing by ref x) from t8;
+select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.good.bye'']]' passing by ref x) from t8;
+select xmlexists('//child::*[local-name()=''bye'' and namespace::*[string()=''http://www.hi.there'']]' passing by ref x) from t8;
 
 -- clean up.
 drop table t0;

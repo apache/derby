@@ -161,7 +161,7 @@ public class xmlBinding
         try {
             pSt = conn.prepareStatement(
                 "select i from xTable.t1 where " +
-                "XMLEXISTS('//*' PASSING BY VALUE ?)");
+                "XMLEXISTS('//*' PASSING BY REF ?)");
             bindAndExecute(pSt, 1, Types.VARCHAR, null, "X0X14", true);
         } catch (SQLException se) {
             checkException(se, "X0X14");
@@ -354,7 +354,7 @@ public class xmlBinding
             // be fine, but the subsequent "execute" should fail.
             PreparedStatement pSt = conn.prepareStatement(
                 "select i from xTable.t1 where " +
-                "XMLEXISTS (? PASSING BY VALUE x)");
+                "XMLEXISTS (? PASSING BY REF x)");
             pSt.setString(1, "//*");
             pSt.execute();
 
@@ -527,7 +527,7 @@ public class xmlBinding
     {
         PreparedStatement pSt = conn.prepareStatement(
             "select i from " + tableName + " where " +
-            "xmlexists('" + xPath + "' passing by value x)");
+            "xmlexists('" + xPath + "' passing by ref x)");
 
         System.out.println("Running XMLEXISTS with: " + xPath);
         ResultSet rs = pSt.executeQuery();

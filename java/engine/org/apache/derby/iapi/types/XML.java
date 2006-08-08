@@ -76,6 +76,15 @@ public class XML
     private static final int BASE_MEMORY_USAGE =
         ClassSize.estimateBaseFromCatalog(XML.class);
 
+	// Some syntax-related constants used to determine
+	// operator behavior.
+	public static final short XQ_PASS_BY_REF = 1;
+	public static final short XQ_PASS_BY_VALUE = 2;
+	public static final short XQ_RETURN_SEQUENCE = 3;
+	public static final short XQ_RETURN_CONTENT = 4;
+	public static final short XQ_EMPTY_ON_EMPTY = 5;
+	public static final short XQ_NULL_ON_EMPTY = 6;
+
     // The actual XML data in this implementation is just a simple
     // string, so this class really just wraps a SQLChar and
     // defers most calls to the corresponding calls on that

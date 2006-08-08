@@ -2240,7 +2240,8 @@ TOKEN [IGNORE_CASE] :
 	If they are non-reserved, they need to be added to the identifier() rule.
 
 	NOTE: XML, XMLPARSE, XMLSERIALIZE, and XMLEXISTS are considered reserved
-	words to comply with the SQL/XML (2003) standard, section 5.1.
+	words to comply with the SQL/XML (2003) standard, section 5.1.  Similarly,
+	XMLQUERY is a reserved word per SQL/XML (2006).
  */
 
 /* NOTE - If you add a keyword, then you must add it to reservedKeyword()
@@ -2261,9 +2262,10 @@ TOKEN [IGNORE_CASE] :
 |	<RTRIM: "rtrim">
 |	<SUBSTR:	"substr">
 |	<XML:	"xml">
-|	<XMLPARSE:	"xmlparse">
-|	<XMLSERIALIZE:	"xmlserialize">
 |	<XMLEXISTS:	"xmlexists">
+|	<XMLPARSE:	"xmlparse">
+|	<XMLQUERY:	"xmlquery">
+|	<XMLSERIALIZE:	"xmlserialize">
 }
 
 /* NOTE - If you add a keyword, then you must add it to reservedKeyword()
@@ -2271,8 +2273,9 @@ TOKEN [IGNORE_CASE] :
  *
  * NOTE: CONTENT, DOCUMENT, STRIP, WHITESPACE and PASSING are considered NON-
  * reserved words to comply with the SQL/XML (2003) standard, section 5.1.
- * PRESERVE is also listed as non-reserved in the SQL/XML spec, but
- * since that word is already reserved, we leave it alone.
+ * Similarly, EMPTY, RETURNING, and SEQUENCE are all considered NON-reserved
+ * words per SQL/XML (2006).  PRESERVE is also listed as non-reserved in the
+ * SQL/XML spec, but since that word is already reserved, we leave it alone.
  */
 TOKEN [IGNORE_CASE] :
 {	/* Additional JSQL keywords -- non-SQL92 non-reserved Keywords */
@@ -2287,6 +2290,7 @@ TOKEN [IGNORE_CASE] :
 |       <DIRTY: "dirty">
 |	<DOCUMENT: "document">
 |	<EACH: "each">
+|	<EMPTY: "empty">
 |	<EXCLUSIVE: "exclusive">
 |	<FN: "fn">
 |	<INDEX: "index">
@@ -2315,8 +2319,10 @@ TOKEN [IGNORE_CASE] :
 |       <RESET: "reset">
 |	<RESULT: "result">
 |	<RETAIN: "retain">
+|	<RETURNING: "returning">
 |   <RR: "rr">
 |   <RS: "rs">
+|	<SEQUENCE: "sequence">
 |	<SEQUENTIAL: "sequential">
 |	<SETS: "sets">
 |	<SHARE: "share">
@@ -6489,7 +6495,8 @@ miscBuiltins() throws StandardException :
                 getToken(1).kind == LOCATE ||
                 getToken(1).kind == XMLPARSE ||
                 getToken(1).kind == XMLSERIALIZE ||
-                getToken(1).kind == XMLEXISTS ) &&
+                getToken(1).kind == XMLEXISTS ||
+                getToken(1).kind == XMLQUERY ) &&
               getToken(2).kind == LEFT_PAREN
               )
     } )
@@ -6668,7 +6675,12 @@ ValueNode
 		return value;
 	}
 |
-	<XMLEXISTS> <LEFT_PAREN> value = xmlExistsValue() <RIGHT_PAREN>
+	<XMLEXISTS> <LEFT_PAREN> value = xmlQueryValue(true) <RIGHT_PAREN>
+	{
+		return value;
+	}
+|
+	<XMLQUERY> <LEFT_PAREN> value = xmlQueryValue(false) <RIGHT_PAREN>
 	{
 		return value;
 	}
@@ -6797,7 +6809,7 @@ DataTypeDescriptor xmlSerializeTargetType() throws StandardException :
 	LOOKAHEAD({ (getToken(1).kind != AS) || (getToken(2).kind == RIGHT_PAREN) })
 	{
 		throw StandardException.newException(
-			SQLState.LANG_XML_KEYWORD_MISSING, "AS <string-type>");
+			SQLState.LANG_XML_KEYWORD_MISSING, "AS");
 	}
 |
 	<AS> targetType = dataTypeDDL()
@@ -6807,71 +6819,328 @@ DataTypeDescriptor xmlSerializeTargetType() throws StandardException :
 }
 
 /*
- * <A NAME="xmlExistsValue">xmlExistsValue</A>
+ * <A NAME="xmlQueryValue">xmlQueryValue</A>
  *
- * Syntax is as follows:
+ * This method is used for parsing the XMLEXISTS and XMLQUERY operators
+ * (which operator depends on the received boolean parameter).
  *
- *   XMLEXISTS( <xpath-expression> PASSING BY VALUE <xml-value-expression> )
+ * For XMLEXISTS, the syntax is as follows:
+ *
+ *   XMLEXISTS( <xpath-expression> PASSING BY REF <xml-value-expression> )
  *
  * The result of this operation will be a boolean true/false/unknown value:
- *   -- Unknown if either <xpath-expression> or <xml-value-expression> is null;
- *   -- True if at least one node in the given xml-value matches the given
- *      XPath expression;
+ *   -- Unknown if either <xquery-expression> or <xml-value-expression> is null;
+ *   -- True if evaluation of the given query expression against the
+ *      given xml-value returns at least one node.
  *   -- False otherwise.
  *
  * For example:
  *
- * ij> SELECT id FROM x_table WHERE XMLEXISTS('/simple' PASSING BY VALUE xdoc);
+ * ij> SELECT id FROM x_table WHERE XMLEXISTS('/simple' PASSING BY REF xdoc);
  * ID
  * -----------
  * 1
  *
+ * ====
+ *
+ * For XMLQUERY, the syntax is as follows:
+ *
+ *   XMLQUERY( <xquery-expression>
+ *      PASSING BY REF <xml-value-expression>
+ *      [ RETURNING SEQUENCE [ BY REF ] ]
+ *      EMPTY ON EMPTY
+ *   )
+ *
+ * The result of this operation will be an XMLDataValue.
+ *
+ * For example:
+ *
+ * ij> SELECT XMLSERIALIZE(
+ *       XMLQUERY('/simple' PASSING BY REF xdoc EMPTY ON EMPTY) AS CHAR(100));
+ * ID
+ * -----------
+ * <simp> doc </simp>
+ *
  */
 ValueNode
-	xmlExistsValue() throws StandardException :
+	xmlQueryValue(boolean existsOnly) throws StandardException :
 {
-	ValueNode xpathExpr;
-	ValueNode xmlValue;
+	// The query expression (currently must be an expression
+	// supported by Xalan--i.e. XPath only).
+	ValueNode xqueryExpr = null;
+
+	// Context item for the query; not required by SQL/XML spec,
+	// but required by Derby for now.
+	ValueNode xmlValue = null;
+
+	// User-specified default passing mechanism.  Since Derby only
+	// supports one type of passing mechanism--BY REF--this value
+	// isn't currently used.
+	short defaultPassingMech = -1;
 }
 {
-	xpathExpr = additiveExpression(null,0,false)
-		xmlPassingMechanism() xmlValue = additiveExpression(null, 0, false)
+	xqueryExpr = additiveExpression(null, 0, false)
+	<PASSING> defaultPassingMech = xmlPassingMechanism()
+		xmlValue = xqVarList()
+	(
+		LOOKAHEAD( { !existsOnly } )
+		[ xqReturningClause() [ xmlPassingMechanism() ] ]
+			xqEmptyHandlingClause()
+		{ /* Right now, we only support one kind of returning clause
+		   * (RETURNING SEQUENCE) and one kind of handling clause
+		   * (EMPTY ON EMPTY), so there's nothing more to do here--
+		   * we just needed to check the syntax.  In the future
+		   * we may need to add more logic here to support the
+		   * other options.  Note: if no returning clause is
+		   * specified, RETURNING SEQUENCE is implied (because
+		   * that's all we support).
+		   */
+		}
+	|
+		LOOKAHEAD( { existsOnly } )
+		{ /* For XMLEXISTS there's nothing more to parse.  We need
+		   * this LOOKAHEAD in order to tell the parser that we're
+		   * done parsing and thus it shouldn't look for (nor allow)
+		   * any more tokens (neither xqReturningClause() nor
+		   * xqEmptyHandlingClause() is allowed for the XMLEXISTS
+		   * operator).
+		   */
+		}
+	)
 	{
-		return (ValueNode) nodeFactory.getNode(
-					C_NodeTypes.XML_EXISTS_OPERATOR_NODE,
-					xpathExpr,
-					xmlValue,
-					ReuseFactory.getInteger(BinaryOperatorNode.XMLEXISTS_OP),
-					getContextManager());
+		ValueNode vNode = (ValueNode) nodeFactory.getNode(
+			(existsOnly
+				? C_NodeTypes.XML_EXISTS_OPERATOR_NODE
+				: C_NodeTypes.XML_QUERY_OPERATOR_NODE),
+			xqueryExpr,
+			xmlValue,
+			(existsOnly
+				? ReuseFactory.getInteger(BinaryOperatorNode.XMLEXISTS_OP)
+				: ReuseFactory.getInteger(BinaryOperatorNode.XMLQUERY_OP)),
+			getContextManager());
+
+		return vNode;
+	}
+}
+
+/**
+ * <A NAME="xqVarList">xqVarList</A>
+ *
+ * Parse a list of XML query variables, which can include at most one
+ * XML value to be used as the "context item" for the query.  If
+ * such a context item was found, return that item; for all other
+ * variable declarations we currently throw a "not supported" error
+ * because Xalan doesn't allowing binding of variables.
+ */
+
+ValueNode xqVarList()
+	throws StandardException :
+{
+	// Placeholder for the XML context item as we parse the
+	// argument list.
+	ValueNode [] xmlValue = new ValueNode [] { (ValueNode)null };
+}
+{
+	xqVariable(xmlValue)
+		( <COMMA> xqVariable(xmlValue) )*
+	{
+		return xmlValue[0];
+	}
+}
+
+/**
+ * <A NAME="xqVariable">xqVariable</A>
+ *
+ * Parse an XML query variable.  If the argument is an XML value
+ * to be used as the "context item" for a query, then store the
+ * value in the first slot of the received ValueNode array;
+ * otherwise, throw a "not supported" errror (for now).
+ */
+
+void xqVariable(ValueNode [] xmlVal) throws StandardException :
+{
+	ValueNode curVal;
+	String varName = null;
+	short passingMech = -1;
+}
+{
+	curVal = additiveExpression(null,0, false)
+	[
+		LOOKAHEAD( { getToken(1).kind == AS } )
+		<AS> varName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+		{
+			/* From XQuery 1.0: "The <identifier> I contained in XQV
+			 * shall be an XML 1.1 NCName."  From XML 1.1:
+			 *
+			 *   [4] NCName ::= (Letter | '_') (NCNameChar)*
+			 *   [5] NCNameChar ::= Letter | Digit | '.' | '-' | '_' |
+			 *                    CombiningChar | Extender
+			 *
+			 * Since Derby's definition of an "identifier" is a subset
+			 * of NCName, we just use Derby's definition.  This means
+			 * that some valid NCNames won't be recognized by Derby--
+			 * but since the ones we _do_ recognize are all still valid
+			 * NCNames, we're not breaking any rules.
+			 */
+
+			/* All of that said, since we use Xalan as the underlying
+			 * query engine and Xalan doesn't support variable binding,
+			 * there's no point in letting the user specify variables
+			 * right now.  So we disallow it.  In the future we'll have
+			 * to add logic here to store the variables and pass them
+			 * to the correct operator for binding/execution.
+			 */
+			throw StandardException.newException(
+				SQLState.LANG_UNSUPPORTED_XML_FEATURE, "PASSING ... AS");
+		}
+	] 
+	(
+		[ passingMech = xmlPassingMechanism() ]
+		{
+			if (varName == null)
+			{
+				/* We get here if we just parsed an XML context item.
+				 * That said, if we already have one (xmlVal[0] is not
+				 * null) then we can't allow second one, per SQL/XML[2006]
+				 * (6.17: Syntax Rules:5.b.i): "XMQ shall contain exactly
+				 * one <XML query context item> XQCI."
+				 */
+				if (xmlVal[0] != null)
+				{
+					throw StandardException.newException(
+						SQLState.LANG_MULTIPLE_XML_CONTEXT_ITEMS);
+				}
+
+				xmlVal[0] = curVal;
+
+				/* Note: It's possible that a passing mechanism was
+				 * specified for the context item; if so its value is
+				 * stored in passingMech.  However, we don't actually
+			 	 * store that passing mechanism anywhere because we
+				 * (currently) only support BY REF, so we know what
+			 	 * it has to be.  If we add support for other passing
+			 	 * mechanisms (namely, BY VALUE) in the future, we'll
+			 	 * have to store the passing mechanism provided by
+			 	 * the user and process it at compilation/execution
+				 * time.
+				 */
+			}
+		}
+	)
+	{ // By this time we've parsed everything we need so there's nothing
+	  // more to do.  The reason we're left with this empty block is
+	  // is that most of the syntax is optional.  We end up here if
+	  // none of the optional syntax was given, in which case all we
+	  // need to do is store curVal--and we already did that.
 	}
 }
 
 /*
  * <A NAME="xmlPassingMechanism">xmlPassingMechanism</A>
  *
- * For now, we only support the BY VALUE option because,
- * at query time, we take the XML string value from disk and
- * pass it into Xalan, which creates a "copy" of the XML
- * value internally (as DOM/DTM) and then executes against
- * that.  Because Xalan creates this copy, this impl
- * is BY VALUE.
- *
+ * For now, we only support the BY REF option because
+ * that gives us better performance (allows us to avoid
+ * performing potentially deep copies of XML nodes).  This
+ * means that if the same XML value is passed BY REF into
+ * two different XML arguments for a single operator, then
+ * every node in the first XML argument must have an
+ * identical node in the second XML argument, and the
+ * ids for both nodes must be the same.  That said,
+ * since we don't support variable binding yet, this
+ * becomes a non-issue because we can't pass XML values.
+ * In the future, though, we may choose to support the
+ * passing/binding of variables (the only reason we
+ * don't now is because Xalan doesn't support it) and
+ * if we do, BY REF should provide better performance
+ * due to lack of deep copying.
  */
-void
+short
 	xmlPassingMechanism() throws StandardException :
 {
 }
 {
-	LOOKAHEAD( { getToken(3).kind == REF })
-	<PASSING> <BY> <REF>
+	LOOKAHEAD( { getToken(2).kind == REF })
+	<BY> <REF>
 	{ // pass the XML value by reference
-		throw StandardException.newException(
-			SQLState.LANG_UNSUPPORTED_XML_FEATURE, "BY REF");
+		return org.apache.derby.iapi.types.XML.XQ_PASS_BY_REF;
 	}
 |
-	<PASSING> <BY> <VALUE>
+	<BY> <VALUE>
 	{ // pass a 'copy' of the XML value.
-		return;
+		throw StandardException.newException(
+			SQLState.LANG_UNSUPPORTED_XML_FEATURE, "BY VALUE");
+	}
+}
+
+/*
+ * <A NAME="xqReturningClause">xqReturningClause</A>
+ *
+ * For now we only support "RETURNING SEQUENCE".  The reason
+ * is that this applies to the XMLQUERY operator and the
+ * results of evaluating a query expression in Xalan against
+ * an XML value can be an arbritary sequence of items--including
+ * atomic values.  For simplicity we just return the values
+ * as they are, without doing any further work.  SQL/XML[2006]
+ * says that if we supported RETURNING CONTENT then we'd have
+ * to construct an XQuery document from the results--but we don't
+ * do that extra work for now, so we just say that we return
+ * SEQUENCE.
+ *
+ * NOTE: This means that we may not be able to store the results
+ * of an XMLQUERY operation into a Derby XML column.  Right now
+ * an XML column can only hold valid DOCUMENT nodes, which translates
+ * into a sequence of exactly one org.w3c.dom.Node.  So if the
+ * result of an XMLQUERY operation is not a sequence of exactly
+ * one Node, then that result will *not* be storable into
+ * Derby XML columns.
+ */
+short
+	xqReturningClause() throws StandardException :
+{
+}
+{
+	LOOKAHEAD( { getToken(2).kind == SEQUENCE } )
+	<RETURNING> <SEQUENCE>
+	{ // XMLQUERY should return result as a sequence.
+	  // NOTE: since Derby XML columns only allow DOCUMENT(UNTYPED),
+	  // the result of an XMLQUERY operator that returns SEQUENCE
+	  // might not be storable into an XML column.
+		return org.apache.derby.iapi.types.XML.XQ_RETURN_SEQUENCE;
+	}
+|
+	<RETURNING> <CONTENT>
+	{ // XMLQUERY should return 'content'.
+		throw StandardException.newException(
+			SQLState.LANG_UNSUPPORTED_XML_FEATURE, "RETURNING CONTENT");
+	}
+}
+
+/*
+ * <A NAME="xqEmptyHandlingClause">xqEmptyHandlingClause</A>
+ *
+ * Defines what the behavior should be when an XMLQUERY operator
+ * results in an empty sequence.  For now we just return the
+ * empty sequence.
+ */
+short
+	xqEmptyHandlingClause() throws StandardException :
+{
+}
+{
+	LOOKAHEAD( { getToken(1).kind == EMPTY })
+	<EMPTY> <ON> <EMPTY>
+	{ // XMLQUERY should return an empty sequence when result of
+	  // the query is an empty sequence (i.e. when there are no
+	  // results).
+		return org.apache.derby.iapi.types.XML.XQ_EMPTY_ON_EMPTY;
+	}
+|
+	<NULL> <ON> <EMPTY>
+	{ // XMLQUERY should return a null XML value when result of
+	  // the query is an empty sequence (i.e. when there are no
+	  // results).
+		throw StandardException.newException(
+			SQLState.LANG_UNSUPPORTED_XML_FEATURE, "NULL ON EMPTY");
 	}
 }
 
@@ -12475,6 +12744,7 @@ reservedKeyword() :
 |	tok = <XMLPARSE>
 |	tok = <XMLSERIALIZE>
 |	tok = <XMLEXISTS>
+|	tok = <XMLQUERY>
 )
 	{
 		// Remember whether last token was a delimited identifier
@@ -12534,6 +12804,7 @@ nonReservedKeyword()  :
 	|	tok = <DB2SQL>
 	|	tok = <DOCUMENT>
 	|	tok = <EACH>
+	|	tok = <EMPTY>
 	|	tok = <EXCLUSIVE>
 	|	tok = <FN>
 	|	tok = <FORTRAN>
@@ -12594,6 +12865,7 @@ nonReservedKeyword()  :
 	|	tok = <RESTART>
 	|	tok = <RESULT>
 	|	tok = <RETAIN>
+	|	tok = <RETURNING>
 	|	tok = <RETURNS>
 	|	tok = <ROW>
 //	|	tok = <ROW_COUNT>
@@ -12601,6 +12873,7 @@ nonReservedKeyword()  :
 	|   tok = <RS>
 	|	tok = <SCALE>
 	|	tok = <SAVEPOINT>
+	|	tok = <SEQUENCE>
 	|	tok = <SEQUENTIAL>
 	|	tok = <SERIALIZABLE>
 	|	tok = <SETS>
