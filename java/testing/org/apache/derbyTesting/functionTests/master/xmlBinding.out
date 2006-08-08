@@ -22,7 +22,7 @@ Binding SQL NULL string in XMLPARSE: PASS -- Completed without exception, as exp
 2, [ roughly 40k ]
 3, [ roughly 1k ]
 4, [ roughly 1k ]
-5, [ roughly 1k ]
+5, [ roughly 0k ]
 6, [ roughly 1k ]
 7, [ roughly 0k ]
 8, NULL
@@ -41,8 +41,6 @@ Running XMLEXISTS with: //person/@id
 --> Matching rows: 4
 Running XMLEXISTS with: //person/@noteTwo
 --> Matching rows: 1
-Binding string in XMLEXISTS: PASS -- Completed without exception, as expected.
-Binding Java null string in XMLEXISTS: PASS -- Completed without exception, as expected.
-Binding SQL NULL string in XMLEXISTS: PASS -- Completed without exception, as expected.
+Parameter as first operand in XMLEXISTS: PASS -- caught expected error X0X19.
 [ End XMLEXISTS tests. ]
 [ Done. ]

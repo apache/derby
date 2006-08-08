@@ -147,23 +147,4 @@ public interface StringDataValue extends ConcatableDataValue
 	 */
 	public char[] getCharArray() throws StandardException;
 
-    /*
-     * Get an XML value from a string.
-     *
-     * NOTE: The XMLParse operator is defined here since it
-     * is called with a _String_ operand, not with an XML
-     * operand.  That said, though, the bulk of the work is
-     * is done by a corresponding method that is defined
-     * on the XMLDataValue interface (implementations
-     * of this method should just call the XMLDataValue
-     * method, passing in the correct String data).
-     *
-     * @param result The result (reusable - allocate if null).
-     * @return An XML value corresponding to the string, if
-     *  the string is valid XML.
-     * @exception StandardException Thrown on error
-     */
-    public XMLDataValue XMLParse(XMLDataValue result, boolean preserveWS)
-        throws StandardException;
-
 }

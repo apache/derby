@@ -24,43 +24,32 @@ import org.apache.derby.iapi.error.StandardException;
 
 public interface XMLDataValue extends DataValueDescriptor
 {
-    /*
-     ** NOTE: Officially speaking, the XMLParse operator
-     ** is not defined here; it is instead defined on the
-     ** StringDataValue interface (and implemented in
-     ** SQLChar.java) since it is called with a _String_
-     ** operand, not with an XML operand.  That said,
-     ** though, the implemention in SQLChar.java
-     ** really just calls the "parseAndLoadXML" method that's
-     ** defined on this interface, so it's this interface
-     ** that really does the work.
-     **
-     ** XMLSerialize and XMLExists, on the other hand,
-     ** are called with XML operands, and thus they
-     ** can just be defined in this interface.
-     */
-
-    /**
-     * Parse the received string value as XML.  If the
-     * parse succeeds, store the string value as the
-     * contents of this XML value. If 'text' constitutes a valid XML document,
-     *  it has been stored in this XML value and nothing
-     *  is returned; otherwise, an exception is thrown.
+   /**
+     * Method to parse an XML string and, if it's valid,
+     * store the _serialized_ version locally and then return
+     * this XMLDataValue.
      *
-     * @param xmlText The string value to check.
+     * @param text The string value to check.
      * @param preserveWS Whether or not to preserve
      *  ignorable whitespace.
-     * @exception StandardException Thrown on parse error.
+     * @param sqlxUtil Contains SQL/XML objects and util
+     *  methods that facilitate execution of XML-related
+     *  operations
+     * @return If 'text' constitutes a valid XML document,
+     *  it has been stored in this XML value and this XML
+     *  value returned; otherwise, an exception is thrown. 
+     * @exception StandardException Thrown on error.
      */
-    public void parseAndLoadXML(String xmlText, boolean preserveWS)
-        throws StandardException;
+	public XMLDataValue XMLParse(String text, boolean preserveWS,
+		SqlXmlUtil sqlxUtil) throws StandardException;
 
     /**
      * The SQL/XML XMLSerialize operator.
-     * Converts this XML value into a string with a user-specified
-     * type, and returns that string via the received StringDataValue.
-     * (if the received StringDataValue is non-null and of the
-     * correct type; else, a new StringDataValue is returned).
+     * Serializes this XML value into a string with a user-specified
+     * character type, and returns that string via the received
+     * StringDataValue (if the received StringDataValue is non-null
+     * and of the correct type; else, a new StringDataValue is
+     * returned).
      *
      * @param result The result of a previous call to this method,
      *  null if not called yet.
@@ -75,31 +64,21 @@ public interface XMLDataValue extends DataValueDescriptor
 
     /**
      * The SQL/XML XMLExists operator.
-     * Takes an XML query expression (as a string) and an XML
-     * value and checks if at least one node in the XML
-     * value matches the query expression.  NOTE: For now,
-     * the query expression must be XPath only (XQuery not
-     * supported).
+     * Checks to see if evaluation of the query expression contained
+     * within the received util object against this XML value returns
+     * at least one item. NOTE: For now, the query expression must be
+     * XPath only (XQuery not supported) because that's what Xalan
+     * supports.
      *
-     * @param xExpr The query expression, as a string.
-     * @param xml The XML value being queried.
-     * @return True if the received query expression matches at
-     *  least one node in the received XML value; unknown if
-     *  either the query expression or the xml value is null;
-     *  false otherwise.
+     * @param sqlxUtil Contains SQL/XML objects and util
+     *  methods that facilitate execution of XML-related
+     *  operations
+     * @return True if evaluation of the query expression stored
+     *  in sqlxUtil returns at least one node for this XML value;
+     *  unknown if the xml value is NULL; false otherwise.
      * @exception StandardException Thrown on error
      */
-    public BooleanDataValue XMLExists(StringDataValue xExpr,
-        XMLDataValue xml) throws StandardException;
+    public BooleanDataValue XMLExists(SqlXmlUtil sqlxUtil)
+		throws StandardException;
 
-    /**
-     * Helper method for XMLExists.
-     * See if the received XPath expression returns at least
-     * one node when evaluated against _this_ XML value.
-     *
-     * @param xExpr The XPath expression.
-     * @return True if at least one node in this XML value
-     *  matches the received xExpr; false otherwise.
-     */
-    public boolean exists(String xExpr) throws StandardException;
 }

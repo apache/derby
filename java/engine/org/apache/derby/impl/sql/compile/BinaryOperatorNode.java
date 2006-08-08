@@ -34,6 +34,7 @@ import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.SqlXmlUtil;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
@@ -115,6 +116,10 @@ public class BinaryOperatorNode extends ValueNode
 	static final String[][] BinaryArgTypes = {
 		{ClassName.StringDataValue, ClassName.XMLDataValue}		// XMLExists
 	};
+
+	// Class used to compile an XML query expression and/or load/process
+	// XML-specific objects.
+	private SqlXmlUtil sqlxUtil;
 
 	/**
 	 * Initializer for a BinaryOperatorNode
@@ -340,24 +345,19 @@ public class BinaryOperatorNode extends ValueNode
         TypeId leftOperandType = leftOperand.getTypeId();
         TypeId rightOperandType = rightOperand.getTypeId();
 
-        // Left operand is query expression, and must be a string.
-        if (leftOperandType != null) {
-            switch (leftOperandType.getJDBCTypeId())
-            {
-                case Types.CHAR:
-                case Types.VARCHAR:
-                case Types.LONGVARCHAR:
-                case Types.CLOB:
-                    break;
-                default:
-                {
-                    throw StandardException.newException(
-                        SQLState.LANG_BINARY_OPERATOR_NOT_SUPPORTED, 
-                        methodName,
-                        leftOperandType.getSQLTypeName(),
-                        rightOperandType.getSQLTypeName());
-                }
-            }
+        // Left operand is query expression and must be a string
+        // literal.  SQL/XML spec doesn't allow params nor expressions
+        // 6.17: <XQuery expression> ::= <character string literal> 
+        if (!(leftOperand instanceof CharConstantNode))
+        {
+            throw StandardException.newException(
+                SQLState.LANG_INVALID_XML_QUERY_EXPRESSION);
+        }
+        else {
+        // compile the query expression.
+            sqlxUtil = new SqlXmlUtil();
+            sqlxUtil.compileXQExpr(
+                ((CharConstantNode)leftOperand).getString());
         }
 
         // Right operand is an XML data value.
@@ -369,15 +369,6 @@ public class BinaryOperatorNode extends ValueNode
                     methodName,
                     leftOperandType.getSQLTypeName(),
                     rightOperandType.getSQLTypeName());
-        }
-
-        // Is there a ? parameter on the left?
-        if (leftOperand.requiresTypeFromContext())
-        {
-            // Set the left operand to be a VARCHAR, which should be
-            // long enough to hold the XPath expression.
-            leftOperand.setType(
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR));
         }
 
         // Is there a ? parameter on the right?
@@ -469,6 +460,27 @@ public class BinaryOperatorNode extends ValueNode
 ** but how?
 */
 
+		// If we're dealing with XMLEXISTS, there is some
+		// additional work to be done.
+		boolean xmlGen = (operatorType == XMLEXISTS_OP);
+
+		if (xmlGen) {
+		// We create an execution-time object so that we can retrieve
+		// saved objects (esp. our compiled query expression) from
+		// the activation.  We do this for two reasons: 1) this level
+		// of indirection allows us to separate the XML data type
+		// from the required XML implementation classes (esp. JAXP
+		// and Xalan classes)--for more on how this works, see the
+		// comments in SqlXmlUtil.java; and 2) we can take
+		// the XML query expression, which we've already compiled,
+		// and pass it to the execution-time object for each row,
+		// which means that we only have to compile the query
+		// expression once per SQL statement (instead of once per
+		// row); see SqlXmlExecutor.java for more.
+			mb.pushNewStart(
+				"org.apache.derby.impl.sql.execute.SqlXmlExecutor");
+			mb.pushNewComplete(addXmlOpMethodParams(acb, mb));
+		}
 
 		/*
 		** The receiver is the operand with the higher type precedence.
@@ -526,15 +538,25 @@ public class BinaryOperatorNode extends ValueNode
 			** Generate (with <right expression> only being evaluated once)
 			**
 			**	<right expression>.method(<left expression>, <right expression>)
+			**
+			** UNLESS we're generating an XML operator such as XMLEXISTS.
+			** In that case we want to generate
+			** 
+			**  SqlXmlExecutor.method(left, right)"
+			**
+			** and we've already pushed the SqlXmlExecutor object to
+			** the stack.
 			*/
 
 			rightOperand.generateExpression(acb, mb);			
 			mb.cast(receiverType); // cast the method instance
 			// stack: right
 			
-			mb.dup();
-			mb.cast(rightInterfaceType);
-			// stack: right,right
+			if (!xmlGen) {
+				mb.dup();
+				mb.cast(rightInterfaceType);
+				// stack: right,right
+			}
 			
 			leftOperand.generateExpression(acb, mb);
 			mb.cast(leftInterfaceType); // second arg with cast
@@ -604,7 +626,16 @@ public class BinaryOperatorNode extends ValueNode
 
 			mb.putField(resultField);
 		} else {
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType, methodName, resultTypeName, 2);
+			if (xmlGen) {
+			// This is for an XMLEXISTS operation, so invoke the method
+			// on our execution-time object.
+				mb.callMethod(VMOpcode.INVOKEVIRTUAL, null,
+					methodName, resultTypeName, 2);
+			}
+			else {
+				mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType,
+					methodName, resultTypeName, 2);
+			}
 		}
 	}
 
@@ -805,5 +836,33 @@ public class BinaryOperatorNode extends ValueNode
 		}
 		
 		return returnNode;
+	}
+
+	/**
+	 * Push the fields necessary to generate an instance of
+	 * SqlXmlExecutor, which will then be used at execution
+	 * time to retrieve the compiled XML query expression,
+	 * along with any other XML-specific objects.
+	 *
+	 * @param acb The ExpressionClassBuilder for the class we're generating
+	 * @param mb  The method the code to place the code
+	 *
+	 * @return The number of items that this method pushed onto
+	 *  the mb's stack.
+	 */
+	private int addXmlOpMethodParams(ExpressionClassBuilder acb,
+		MethodBuilder mb) throws StandardException
+	{
+		// Push activation so that we can get our saved object
+		// (which will hold the compiled XML query expression)
+		// back at execute time.
+		acb.pushThisAsActivation(mb);
+
+		// Push our saved object (the compiled query and XML-specific
+		// objects).
+		mb.push(getCompilerContext().addSavedObject(sqlxUtil));
+
+		// We pushed 2 items to the stack.
+		return 2;
 	}
 }

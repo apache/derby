@@ -37,6 +37,7 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.SqlXmlUtil;
 
 import java.lang.reflect.Modifier;
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
@@ -112,6 +113,10 @@ public class UnaryOperatorNode extends ValueNode
 	// Array to hold Objects that contain primitive
 	// args required by the operator method call.
 	private Object [] additionalArgs;
+
+	// Class used to hold XML-specific objects required for
+	// parsing/serializing XML data.
+	private SqlXmlUtil sqlxUtil;
 
 	/**
 	 * Initializer for a UnaryOperatorNode.
@@ -391,6 +396,12 @@ public class UnaryOperatorNode extends ValueNode
             }
         }
 
+        // Create a new XML compiler object; the constructor
+        // here automatically creates the XML-specific objects 
+        // required for parsing/serializing XML, so all we
+        // have to do is create an instance.
+        sqlxUtil = new SqlXmlUtil();
+
         // The result type of XMLParse() is always an XML type.
         setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
             StoredFormatIds.XML_TYPE_ID));
@@ -631,6 +642,26 @@ public class UnaryOperatorNode extends ValueNode
 		if (operand == null)
 			return;
 
+		// For XML operator we do some extra work.
+		boolean xmlGen = (operatorType == XMLPARSE_OP) ||
+			(operatorType == XMLSERIALIZE_OP);
+
+		if (xmlGen) {
+		// We create an execution-time object from which we call
+		// the necessary methods.  We do this for two reasons: 1) this
+		// level of indirection allows us to separate the XML data type
+		// from the required XML implementation classes (esp. JAXP and
+		// Xalan classes)--for more on how this works, see the comments
+		// in SqlXmlUtil.java; and 2) this allows us to create the
+		// required XML objects a single time (which we did at bind time
+		// when we created a new SqlXmlUtil) and then reuse those objects
+		// for each row in the target result set, instead of creating
+		// new objects every time; see SqlXmlUtil.java for more.
+			mb.pushNewStart(
+				"org.apache.derby.impl.sql.execute.SqlXmlExecutor");
+			mb.pushNewComplete(addXmlOpMethodParams(acb, mb));
+		}
+
 		String resultTypeName = 
 			(operatorType == -1)
 				? getTypeCompiler().interfaceName()
@@ -650,8 +681,26 @@ public class UnaryOperatorNode extends ValueNode
 			/* Allocate an object for re-use to hold the result of the operator */
 			LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, resultTypeName);
 			mb.getField(field);
-			int numParams = 1 + addMethodParams(mb);
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, methodName, resultTypeName, numParams);
+
+			/* If we're calling a method on a class (SqlXmlExecutor) instead
+			 * of calling a method on the operand interface, then we invoke
+			 * VIRTUAL; we then have 2 args (the operand and the local field)
+			 * instead of one, i.e:
+			 *
+			 *  SqlXmlExecutor.method(operand, field)
+			 *
+			 * instead of
+			 *
+			 *  <operand>.method(field).
+			 */
+			if (xmlGen) {
+				mb.callMethod(VMOpcode.INVOKEVIRTUAL, null,
+					methodName, resultTypeName, 2);
+			}
+			else {
+				mb.callMethod(VMOpcode.INVOKEINTERFACE,
+					(String) null, methodName, resultTypeName, 1);
+			}
 
 			/*
 			** Store the result of the method call in the field, so we can re-use
@@ -659,8 +708,8 @@ public class UnaryOperatorNode extends ValueNode
 			*/
 			mb.putField(field);
 		} else {
-			int numParams = addMethodParams(mb);
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, methodName, resultTypeName, numParams);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
+				methodName, resultTypeName, 0);
 		}
 	}
 
@@ -738,25 +787,28 @@ public class UnaryOperatorNode extends ValueNode
 	}
 
     /**
-     * This method allows different operators to add
-     * primitive arguments to the generated method call,
-     * if needed.
+     * Add some additional arguments to our method call for
+     * XML related operations like XMLPARSE and XMLSERIALIZE.
      * @param mb The MethodBuilder that will make the call.
      * @return Number of parameters added.
      */
-    protected int addMethodParams(MethodBuilder mb)
+    protected int addXmlOpMethodParams(ExpressionClassBuilder acb,
+		MethodBuilder mb) throws StandardException
     {
-        if (operatorType == XMLPARSE_OP) {
-        // We push whether or not we want to preserve whitespace.
-            mb.push(((Boolean)additionalArgs[0]).booleanValue());
-            return 1;
-        }
+        if ((operatorType != XMLPARSE_OP) && (operatorType != XMLSERIALIZE_OP))
+        // nothing to do.
+            return 0;
 
         if (operatorType == XMLSERIALIZE_OP) {
         // We push the target type's JDBC type id as well as
         // the maximum width, since both are required when
         // we actually perform the operation, and both are
-        // primitive types.
+        // primitive types.  Note: we don't have to save
+        // any objects for XMLSERIALIZE because it doesn't
+        // require any XML-specific objects: it just returns
+        // the serialized version of the XML value, which we
+        // already found when the XML value was created (ex.
+        // as part of the XMLPARSE work).
             DataTypeDescriptor targetType =
                 (DataTypeDescriptor)additionalArgs[0];
             mb.push(targetType.getJDBCTypeId());
@@ -764,7 +816,21 @@ public class UnaryOperatorNode extends ValueNode
             return 2;
         }
 
-        // Default is to add zero params.
-        return 0;
+        /* Else we're here for XMLPARSE. */
+
+        // Push activation, which we use at execution time to
+        // get our saved object (which will hold objects used
+        // for parsing/serializing) back.
+        acb.pushThisAsActivation(mb);
+
+        // Push our XML object (used for parsing/serializing) as
+        // a saved object, so that we can retrieve it at execution
+        // time.  This allows us to avoid having to re-create the
+        // objects for every row in a given result set.
+        mb.push(getCompilerContext().addSavedObject(sqlxUtil));
+
+        // Push whether or not we want to preserve whitespace.
+        mb.push(((Boolean)additionalArgs[0]).booleanValue());
+        return 3;
     }
 }

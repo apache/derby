@@ -46,28 +46,6 @@ import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.StringReader;
 
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.XMLReader;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.InputSource;
-
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
-
-import javax.xml.transform.Templates;
-import javax.xml.transform.TransformerFactory;
-
-import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.sax.TemplatesHandler;
-import javax.xml.transform.sax.TransformerHandler;
-
-// Note that even though the following has a Xalan
-// package name, it IS part of the JDK 1.4 API, and
-// thus we can compile it without having Xalan in
-// our classpath.
-import org.apache.xalan.processor.TransformerFactoryImpl;
-
 /**
  * This type implements the XMLDataValue interface and thus is
  * the type on which all XML related operations are executed.
@@ -94,18 +72,6 @@ public class XML
     // across all XML type implementations.
     protected static final short UTF8_IMPL_ID = 0;
 
-    // Parser class to use for parsing XML.  We use the
-    // Xerces parser, so (for now) we require that Xerces
-    // be in the user's classpath.  Note that we load
-    // the Xerces class dynamically (using the class 
-    // name) so that Derby will build even if Xerces
-    // isn't in the build environment; i.e. Xerces is
-    // only required if XML is actually going to be used
-    // at runtime; it's not required for a successful
-    // build nor for non-XML database use.
-    protected static final String XML_PARSER_CLASS =
-        "org.apache.xerces.parsers.SAXParser";
-
     // Guess at how much memory this type will take.
     private static final int BASE_MEMORY_USAGE =
         ClassSize.estimateBaseFromCatalog(XML.class);
@@ -119,16 +85,17 @@ public class XML
     // Derby string types.
     private SQLChar xmlStringValue;
 
-    // An XML reader for reading and parsing SAX events.
-    protected XMLReader saxReader;
-
-    // XSLT objects used when performing an XSLT query, which
-    // is the query mechanism for this UTF8-based implementation.
-    private static final String XPATH_PLACEHOLDER = "XPATH_PLACEHOLDER";
-    private static final String QUERY_MATCH_STRING = "MATCH";
-    private static String xsltStylesheet;
-    private XMLReader xsltReader;
-    private TransformerFactoryImpl saxTFactory;
+    /**
+      Loaded at execution time, this holds XML-related objects
+      that were created once during compilation but can be re-used
+      for each row in the target result set for the current
+      SQL statement.  In other words, we create the objects
+      once per SQL statement, instead of once per row.  In the
+      case of XMLEXISTS, one of the "objects" is the compiled
+      query expression, which means we don't have to compile
+      the expression for each row and thus we save some time.
+     */
+    private SqlXmlUtil sqlxUtil;
 
     /**
      * Default constructor.
@@ -430,26 +397,32 @@ public class XML
 
     /**
      * Method to parse an XML string and, if it's valid,
-     * store the _parsed_ version for subsequent use.
-	 * If 'text' constitutes a valid XML document,
-     *  it has been stored in this XML value and nothing
-     *  is returned; otherwise, an exception is thrown.
+     * store the _serialized_ version locally and then return
+     * this XMLDataValue.
+     *
      * @param text The string value to check.
      * @param preserveWS Whether or not to preserve
      *  ignorable whitespace.
-     * @exception StandardException Thrown on parse error.
+     * @param sqlxUtil Contains SQL/XML objects and util
+     *  methods that facilitate execution of XML-related
+     *  operations
+     * @return If 'text' constitutes a valid XML document,
+     *  it has been stored in this XML value and this XML
+     *  value is returned; otherwise, an exception is thrown. 
+     * @exception StandardException Thrown on error.
      */
-    public void parseAndLoadXML(String text, boolean preserveWS)
-        throws StandardException
+    public XMLDataValue XMLParse(String text, boolean preserveWS,
+        SqlXmlUtil sqlxUtil) throws StandardException
     {
         try {
 
             if (preserveWS) {
-            // We're just going to use the text exactly as it
-            // is, so we just need to see if it parses. 
-                loadSAXReader();
-                saxReader.parse(
-                    new InputSource(new StringReader(text)));
+            // Currently the only way a user can view the contents of
+            // an XML value is by explicitly calling XMLSERIALIZE.
+            // So do a serialization now and just store the result,
+            // so that we don't have to re-serialize every time a
+            // call is made to XMLSERIALIZE.
+                text = sqlxUtil.serializeToString(text);
             }
             else {
             // We don't support this yet, so we shouldn't
@@ -460,7 +433,7 @@ public class XML
             }
 
         } catch (Exception xe) {
-        // The text isn't a valid XML document.  Throw a StandardException
+        // Couldn't parse the XML document.  Throw a StandardException
         // with the parse exception nested in it.
             throw StandardException.newException(
                 SQLState.LANG_NOT_AN_XML_DOCUMENT, xe);
@@ -471,15 +444,17 @@ public class XML
         if (xmlStringValue == null)
             xmlStringValue = new SQLChar();
         xmlStringValue.setValue(text);
-        return;
+        return this;
     }
 
     /**
      * The SQL/XML XMLSerialize operator.
-     * Converts this XML value into a string with a user-specified
-     * type, and returns that string via the received StringDataValue
-     * (if the received StringDataValue is non-null; else a new
-     * StringDataValue is returned).
+     * Serializes this XML value into a string with a user-specified
+     * character type, and returns that string via the received
+     * StringDataValue (if the received StringDataValue is non-null
+     * and of the correct type; else, a new StringDataValue is
+     * returned).
+     *
      * @param result The result of a previous call to this method,
      *    null if not called yet.
      * @param targetType The string type to which we want to serialize.
@@ -505,7 +480,7 @@ public class XML
                     if (SanityManager.DEBUG) {
                         SanityManager.THROWASSERT(
                             "Should NOT have made it to XMLSerialize " +
-                            "with a non-string target type.");
+                            "with a non-string target type: " + targetType);
                     }
                     return null;
             }
@@ -526,8 +501,9 @@ public class XML
         }
 
         // Get the XML value as a string.  For this UTF-8 impl,
-        // we already have it as a string, so just use that.
-        result.setValue(xmlStringValue.getString());
+        // we already have it as a UTF-8 string, so just use
+        // that.
+        result.setValue(getString());
 
         // Seems wrong to trunc an XML document, as it then becomes non-
         // well-formed and thus useless.  So we throw an error (that's
@@ -538,325 +514,53 @@ public class XML
 
     /**
      * The SQL/XML XMLExists operator.
-     * Takes an XML query expression (as a string) and an XML
-     * value and checks if at least one node in the XML
-     * value matches the query expression.  NOTE: For now,
-     * the query expression must be XPath only (XQuery not
-     * supported).
-     * @param xExpr The query expression, as a string.
-     * @param xml The XML value being queried.
-     * @return True if the received query expression matches at
-     *  least one node in the received XML value; unknown if
-     *  either the query expression or the xml value is null;
-     *  false otherwise.
+     * Checks to see if evaluation of the query expression contained
+     * within the received util object against this XML value returns
+     * at least one item. NOTE: For now, the query expression must be
+     * XPath only (XQuery not supported) because that's what Xalan
+     * supports.
+     *
+     * @param sqlxUtil Contains SQL/XML objects and util
+     *  methods that facilitate execution of XML-related
+     *  operations
+     * @return True if evaluation of the query expression stored
+     *  in sqlxUtil returns at least one node for this XML value;
+     *  unknown if the xml value is NULL; false otherwise.
      * @exception StandardException Thrown on error
      */
-    public BooleanDataValue XMLExists(StringDataValue xExpr,
-        XMLDataValue xml) throws StandardException
+    public BooleanDataValue XMLExists(SqlXmlUtil sqlxUtil)
+        throws StandardException
     {
-        if ((xExpr == null) || xExpr.isNull())
-        // If the query is null, we assume unknown.
+        if (this.isNull()) {
+        // if the user specified a context node and that context
+        // is null, result of evaluating the query is null
+        // (per SQL/XML 6.17:General Rules:1.a), which means that we
+        // return "unknown" here (per SQL/XML 8.4:General Rules:2.a).
             return SQLBoolean.unknownTruthValue();
+        }
 
-        if ((xml == null) || xml.isNull())
-        // Then per SQL/XML spec 8.4, we return UNKNOWN.
-            return SQLBoolean.unknownTruthValue();
-
-        return new SQLBoolean(xml.exists(xExpr.getString()));
-    }
-
-    /**
-     * Helper method for XMLExists.
-     * See if the received XPath expression returns at least
-     * one node when evaluated against _this_ XML value.
-     * @param xExpr The XPath expression.
-     * @return True if at least one node in this XML value
-     *  matches the received xExpr; false otherwise.
-     */
-    public boolean exists(String xExpr) throws StandardException
-    {
-        // NOTE: At some point we'll probably need to implement some
-        // some kind of query cache so that we don't have to recompile
-        // the same query over and over for every single XML row
-        // in a table.  That's what we do right now...
+        // Make sure we have a compiled query (and associated XML
+        // objects) to evaluate.
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(
+                sqlxUtil != null,
+                "Tried to evaluate XML xquery, but no XML objects were loaded.");
+        }
 
         try {
 
-            xExpr = replaceDoubleQuotes(xExpr);
-            loadXSLTObjects();
-
-            // Take our simple stylesheet and plug in the query.
-            int pos = xsltStylesheet.indexOf(XPATH_PLACEHOLDER);
-            StringBuffer stylesheet = new StringBuffer(xsltStylesheet);
-            stylesheet.replace(pos, pos + XPATH_PLACEHOLDER.length(), xExpr);
-
-            // Create a Templates ContentHandler to handle parsing of the 
-            // stylesheet.
-            TemplatesHandler templatesHandler = 
-                saxTFactory.newTemplatesHandler();
-            xsltReader.setContentHandler(templatesHandler);
-    
-            // Now parse the generic stylesheet we created.
-            xsltReader.parse(
-                new InputSource(new StringReader(stylesheet.toString())));
-
-            // Get the Templates object (generated during the parsing of
-            // the stylesheet) from the TemplatesHandler.
-            Templates compiledQuery = templatesHandler.getTemplates();
-
-            // Create a Transformer ContentHandler to handle parsing of 
-            // the XML Source.  
-            TransformerHandler transformerHandler 
-                = saxTFactory.newTransformerHandler(compiledQuery);
-
-            // Reset the XMLReader's ContentHandler to the TransformerHandler.
-            xsltReader.setContentHandler(transformerHandler);
-
-            // Create an ExistsHandler.  When the XSLT transformation
-            // occurs, a period (".") will be thrown to this handler
-            // (via a SAX 'characters' event) for every matching
-            // node that XSLT finds.  This is how we know if a
-            // match was found.
-            ExistsHandler eH = new ExistsHandler();
-            transformerHandler.setResult(new SAXResult(eH));
-
-            // This call to "parse" is what does the query, because we
-            // passed in an XSLT handler with the compiled query above.
-            try {
-                xsltReader.parse(
-                    new InputSource(new StringReader(getString())));
-            } catch (Throwable th) {
-                if (th.getMessage().indexOf(
-                    "SAXException: " + QUERY_MATCH_STRING) == -1)
-                { // then this isn't the exception that means we have
-                  // a match; so re-throw it.
-                    throw new Exception(th.getMessage());
-                }
-            }
-
-            // Did we have any matches?
-            return eH.exists();
+            return new SQLBoolean(sqlxUtil.evalXQExpression(this));
 
         } catch (Exception xe) {
-        // We don't expect to get here.  Turn it into a
-        // StandardException, then throw it.
-            throw StandardException.newException(
-                SQLState.LANG_UNEXPECTED_XML_EXCEPTION, xe);
+        // We don't expect to get here.  Turn it into a StandardException
+        // (if needed), then throw it.
+            if (xe instanceof StandardException)
+                throw (StandardException)xe;
+            else {
+                throw StandardException.newException(
+                    SQLState.LANG_UNEXPECTED_XML_EXCEPTION, xe);
+            }
         }
     }
 
-    /* ****
-     * Helper classes and methods.
-     * */
-
-    /**
-     * Load an XMLReader for SAX events that can be used
-     * for parsing XML data.
-     *
-     * This method is currently only used for XMLPARSE, and
-     * the SQL/XML[2003] spec says that XMLPARSE should NOT
-     * perform validation -- Seciont 6.11:
-     *
-     *    "Perform a non-validating parse of a character string to
-     *    produce an XML value."
-     *
-     * Thus, we make sure to disable validation on the XMLReader
-     * loaded here.  At some point in the future we will probably
-     * want to add support for the XMLVALIDATE function--but until
-     * then, user is unable to validate the XML values s/he inserts.
-     *
-     * Note that, even with validation turned off, XMLPARSE
-     * _will_ still check the well-formedness of the values,
-     * and it _will_ still process DTDs to get default values,
-     * etc--but that's it; no validation errors will be thrown.
-     *
-     * For future reference: the features needed to perform
-     * validation (with Xerces) are:
-     *
-     * http://apache.org/xml/features/validation/schema
-     * http://apache.org/xml/features/validation/dynamic
-     */
-    protected void loadSAXReader() throws Exception
-    {
-        if (saxReader != null)
-        // already loaded.
-            return;
-
-        // Get an instance of an XMLReader.
-        saxReader = XMLReaderFactory.createXMLReader(XML_PARSER_CLASS);
-
-        // Turn off validation, since it's not allowed by
-        // SQL/XML[2003] spec.
-        saxReader.setFeature(
-            "http://xml.org/sax/features/validation", false);
-
-        // Make the parser namespace aware.
-        saxReader.setFeature(
-            "http://xml.org/sax/features/namespaces", true);
-
-        // We have to set the error handler in order to properly
-        // receive the parse errors.
-        saxReader.setErrorHandler(new XMLErrorHandler());
-    }
-
-    /**
-     * Prepare for an XSLT query by loading the objects
-     * required for such a query.  We should only have
-     * to do this once per XML object.
-     */
-    private void loadXSLTObjects() throws SAXException
-    {
-        if (xsltReader != null)
-        // we already loaded everything.
-            return;
-
-        // Instantiate a TransformerFactory.
-        TransformerFactory tFactory = TransformerFactory.newInstance();
-
-        // Cast the TransformerFactory to SAXTransformerFactory.
-        saxTFactory = (TransformerFactoryImpl)tFactory;
-
-        // Get an XML reader.
-        xsltReader = XMLReaderFactory.createXMLReader(XML_PARSER_CLASS);
-
-        // Make the parser namespace aware.  Note that because we
-        // only support a small subset of SQL/XML, and because we
-        // only allow XPath (as opposed to XQuery) expressions,
-        // there is no way for a user to specify namespace
-        // bindings as part of the XMLEXISTS operator.  This means
-        // that in order to query for a node name, the user must
-        // use the XPath functions "name()" and "local-name()"
-        // in conjunction with XPath 1.0 'namespace' axis.  For
-        // example:
-        //
-        // To see if any elements exist that have a specific name
-        // with ANY namespace:
-        //     //child::*[local-name()="someName"]
-        //
-        // To see if any elements exist that have a specific name
-        // with NO namespace:
-        //     //child::*[name()="someName"]
-        //
-        // To see if any elements exist that have a specific name
-        // in a specific namespace:
-        //     //child::*[local-name()=''someName'' and
-        //        namespace::*[string()=''http://www.some.namespace'']]
-        //
-        xsltReader.setFeature(
-            "http://xml.org/sax/features/namespaces", true);
-
-        // Create a very simple XSLT stylesheet.  This stylesheet
-        // will execute the XPath expression and, for every match,
-        // write a period (".") to the ExistsHandler (see the exists()
-        // method above).  Then, in order to see if at least one
-        // node matches, we just check to see if the ExistsHandler
-        // caught at least one 'characters' event.  If it did, then
-        // we know we had a match.
-        if (xsltStylesheet == null) {
-            StringBuffer sb = new StringBuffer();
-            sb.append("<xsl:stylesheet version=\"1.0\"\n");
-            sb.append("xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n");
-            sb.append(" <xsl:template match=\"/\">\n"); // Search whole doc...
-            sb.append("  <xsl:for-each select=\"");     // For every match...
-            sb.append(XPATH_PLACEHOLDER);               // using XPath expr...
-            sb.append("\">.</xsl:for-each>\n");         // Write a "."
-            sb.append(" </xsl:template>\n");
-            sb.append("</xsl:stylesheet>\n");
-            xsltStylesheet = sb.toString();
-        }
-    }
-
-    /**
-     * Takes a string (which is an XPath query specified by
-     * the user) and replaces any double quotes with single
-     * quotes.  We have to do this because a double quote
-     * in the XSLT stylesheet (which is where the user's
-     * query ends up) will be parsed as a query terminator
-     * thus will cause XSLT execution errors.
-     * @param queryText Text in which we want to replace double
-     *  quotes.
-     * @return queryText with all double quotes replaced by
-     *  single quotes.
-     */
-    private String replaceDoubleQuotes(String queryText)
-    {
-        int pos = queryText.indexOf("\"");
-        if (pos == -1)
-        // nothing to do.
-            return queryText;
-
-        StringBuffer sBuf = new StringBuffer(queryText);
-        while (pos >= 0) {
-            sBuf.replace(pos, pos+1, "'");
-            pos = queryText.indexOf("\"", pos+1);
-        }
-        return sBuf.toString();
-    }
-
-    /*
-     ** The XMLErrorHandler class is just a generic implementation
-     ** of the ErrorHandler interface.  It allows us to catch
-     ** and process XML parsing errors in a graceful manner.
-     */
-    private class XMLErrorHandler implements ErrorHandler
-    {
-        public void error (SAXParseException exception)
-            throws SAXException
-        {
-            throw new SAXException (exception);
-        }
-
-        public void fatalError (SAXParseException exception)
-            throws SAXException
-        {
-            throw new SAXException (exception);
-        }
-
-        public void warning (SAXParseException exception)
-            throws SAXException
-        {
-            throw new SAXException (exception);
-        }
-    }
-
-    /*
-     ** The ExistsHandler is what we pass to the XSLT processor
-     ** when we query.  The generic xsltStylesheet that we defined
-     ** above will throw a 'characters' event for every matching
-     ** node that is found by the XSLT transformation.  This
-     ** handler is the one that catches the event, and thus
-     ** it tells us whether or not we had a match.
-     */
-    private class ExistsHandler extends DefaultHandler
-    {
-        // Did we catch at least one 'characters' event?
-        private boolean atLeastOneMatch;
-
-        public ExistsHandler() {
-            atLeastOneMatch = false;
-        }
-
-        /*
-         * Catch a SAX 'characters' event, which tells us that
-         * we had at least one matching node.
-         */
-        public void characters(char[] ch, int start, int length)
-            throws SAXException
-        {
-            // If we get here, we had at least one matching node.
-            // Since that's all we need to know, we don't have
-            // to continue querying--we can stop the XSLT
-            // transformation now by throwing a SAX exception.
-            atLeastOneMatch = true;
-            throw new SAXException(QUERY_MATCH_STRING);
-        }
-
-        /*
-         * Tell whether or not this handler caught a match.
-         */
-        public boolean exists()
-        {
-            return atLeastOneMatch;
-        }
-    }
 }

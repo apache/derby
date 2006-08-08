@@ -263,32 +263,20 @@ NULL
 ij> -- These should succeed at the XMLEXISTS level, but fail with
 ----- parse/truncation errors.
 select xmlserialize(xmlparse(document vc preserve whitespace) as char(10)) from t4;
-1         
------
 ERROR 2200L: XMLPARSE operand is not an XML document; see next exception for details. SQLSTATE: XJ001: Java exception: 'Content is not allowed in prolog.: xxxFILTERED-SAX-EXCEPTIONxxx'.
 ij> select xmlserialize(x as char) from t1;
-1   
------
 ERROR 22001: A truncation error was encountered trying to shrink CHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
 ij> select xmlserialize(x as clob(10)) from t1;
 1         
 -----
 ERROR 22001: A truncation error was encountered trying to shrink CLOB '<update2> document was inserted as part of an UPDATE </updat&' to length 10.
 ij> select xmlserialize(x as char(1)) from t1;
-1   
------
 ERROR 22001: A truncation error was encountered trying to shrink CHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
 ij> select length(xmlserialize(x as char(1))) from t1;
-1          
------
 ERROR 22001: A truncation error was encountered trying to shrink CHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
 ij> select xmlserialize(x as varchar(1)) from t1;
-1   
------
 ERROR 22001: A truncation error was encountered trying to shrink VARCHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
 ij> select length(xmlserialize(x as varchar(1))) from t1;
-1          
------
 ERROR 22001: A truncation error was encountered trying to shrink VARCHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
 ij> -- These checks verify that the XMLSERIALIZE result is the correct
 ----- type (the type is indicated as part of the error message).

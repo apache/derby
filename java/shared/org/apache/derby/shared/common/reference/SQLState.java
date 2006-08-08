@@ -1207,6 +1207,7 @@ public interface SQLState {
 	String LANG_XML_KEYWORD_MISSING                                    = "X0X16.S";
 	String LANG_INVALID_XMLSERIALIZE_TYPE                              = "X0X17.S";
 	String LANG_UNSUPPORTED_XML_FEATURE                                = "X0X18.S";
+	String LANG_INVALID_XML_QUERY_EXPRESSION                           = "X0X19.S";
 	String LANG_UNEXPECTED_XML_EXCEPTION                               = "X0XML.S";
 
 	// X0Y01 used to be DUPLICATE_KEY_CONSTRAINT

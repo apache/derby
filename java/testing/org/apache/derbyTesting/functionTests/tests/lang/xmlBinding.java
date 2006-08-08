@@ -336,29 +336,30 @@ public class xmlBinding
             e.printStackTrace(System.out);
         }
 
-        // Test binding nulls to the XMLEXISTS operands.  Binding
+        // Test binding to the XMLEXISTS operands.  Binding
         // of the second (XML) operand is not allowed and was
-        // checked in "doBindTests()" above.  Here we just
-        // check binding of the first operand, which should be
-        // a string.
+        // checked in "doBindTests()" above.  Here we check
+        // binding of the first operand, which should fail
+        // because SQL/XML spec says the first operand must
+        // be a string literal.
         try {
 
+            System.out.print("Parameter as first operand in XMLEXISTS: ");
+
+            // If we're running in embedded mode or else with
+            // the Derby Client, then the next line will fail
+            // because there is NO deferred prepare.  If, however,
+            // we're running with JCC, the default is to defer
+            // the prepare until execution, so the next line will
+            // be fine, but the subsequent "execute" should fail.
             PreparedStatement pSt = conn.prepareStatement(
                 "select i from xTable.t1 where " +
                 "XMLEXISTS (? PASSING BY VALUE x)");
+            pSt.setString(1, "//*");
+            pSt.execute();
 
-            System.out.print("Binding string in XMLEXISTS: ");
-            bindAndExecute(pSt, 1, Types.CHAR, "//d48", null, false);
-
-            // Null should work, too.
-            System.out.print("Binding Java null string in XMLEXISTS: ");
-            bindAndExecute(pSt, 1, Types.CHAR, null, null, false);
-            System.out.print("Binding SQL NULL string in XMLEXISTS: ");
-            bindAndExecute(pSt, 1, Types.VARCHAR, null, null, true);
-
-        } catch (Exception e) {
-            System.out.println("Unexpected exception: ");
-            e.printStackTrace(System.out);
+        } catch (SQLException se) {
+            checkException(se, "X0X19");
         }
 
         System.out.println("\n[ End XMLEXISTS tests. ]\n");
