@@ -30,8 +30,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 
 public abstract class ResultSet implements java.sql.ResultSet,
-        ResultSetCallbackInterface,
-        UnitOfWorkListener {
+        ResultSetCallbackInterface {
     //---------------------navigational members-----------------------------------
 
     public Statement statement_;

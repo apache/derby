@@ -47,3 +47,6 @@ jdbcapi/HoldabilityTest.junit
 jdbcapi/checkDataSource30.java
 jdbcapi/checkDataSource.java
 jdbcapi/SURTest_ij.sql
+# Excluding ResultSetClose test since an exception in a statement results in all
+# the result sets associated with the connection closing
+jdbcapi/ResultSetCloseTest.junit

@@ -25,12 +25,17 @@ import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.Connection;
 import org.apache.derby.client.am.ConnectionCallbackInterface;
+import org.apache.derby.client.am.StatementCallbackInterface;
+import org.apache.derby.client.am.ResultSetCallbackInterface;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Sqlca;
 import java.io.UnsupportedEncodingException;
+import org.apache.derby.client.am.UnitOfWorkListener;
 
+import org.apache.derby.shared.common.error.ExceptionSeverity;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.i18n.MessageUtil;
@@ -343,7 +348,7 @@ public class NetConnectionReply extends Reply
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
-            NetSqlca sqlca = parseAbnormalEndUow(connection);
+            NetSqlca sqlca = parseAbnormalEndUow(connection,null);
             connection.completeSqlca(sqlca);
             break;
         case CodePoint.CMDCHKRM:
@@ -467,15 +472,57 @@ public class NetConnectionReply extends Reply
             doObjnsprmSemantics(peekCP);
         }
     }
-
-    NetSqlca parseAbnormalEndUow(ConnectionCallbackInterface connection) throws DisconnectException {
-        parseABNUOWRM(connection);
+    
+    /**
+     * Perform necessary actions for parsing of a ABNUOWRM message.
+     *
+     * @param connection an implementation of the ConnectionCallbackInterface
+     *
+     * @return an NetSqlca object obtained from parsing the ABNUOWRM
+     * @throws DisconnectException
+     *
+     */
+    NetSqlca parseAbnormalEndUow(ConnectionCallbackInterface connection,UnitOfWorkListener uwl) throws DisconnectException {
+        parseABNUOWRM();
         if (peekCodePoint() != CodePoint.SQLCARD) {
             parseTypdefsOrMgrlvlovrs();
         }
 
         NetSqlca netSqlca = parseSQLCARD(null);
+        
+        if(ExceptionUtil.getSeverityFromIdentifier(netSqlca.getSqlState()) > 
+            ExceptionSeverity.STATEMENT_SEVERITY || uwl == null)
+            connection.completeAbnormalUnitOfWork();
+        else
+            connection.completeAbnormalUnitOfWork(uwl);
+        
         return netSqlca;
+    }
+    
+    /**
+     * Perform necessary actions for parsing of a ABNUOWRM message.
+     *
+     * @param connection an implementation of the StatementCallbackInterface
+     *
+     * @return an NetSqlca object obtained from parsing the ABNUOWRM
+     * @throws DisconnectException
+     *
+     */
+    NetSqlca parseAbnormalEndUow(StatementCallbackInterface s) throws DisconnectException {
+        return parseAbnormalEndUow(s.getConnectionCallbackInterface(),s);
+    }
+    
+    /**
+     * Perform necessary actions for parsing of a ABNUOWRM message.
+     *
+     * @param connection an implementation of the ResultsetCallbackInterface
+     *
+     * @return an NetSqlca object obtained from parsing the ABNUOWRM
+     * @throws DisconnectException
+     *
+     */
+    NetSqlca parseAbnormalEndUow(ResultSetCallbackInterface r) throws DisconnectException {
+        return parseAbnormalEndUow(r.getConnectionCallbackInterface(),r);
     }
 
     void parseRdbAccessFailed(NetConnection netConnection) throws DisconnectException {
@@ -1713,7 +1760,7 @@ public class NetConnectionReply extends Reply
     //   RDBNAM - required
     //
     // Called by all the NET*Reply classes.
-    void parseABNUOWRM(ConnectionCallbackInterface connection) throws DisconnectException {
+    void parseABNUOWRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean rdbnamReceived = false;
@@ -1754,8 +1801,6 @@ public class NetConnectionReply extends Reply
 
         // the abnuowrm has been received, do whatever state changes are necessary
         netAgent_.setSvrcod(svrcod);
-        connection.completeAbnormalUnitOfWork();
-
     }
 
     //--------------------- parse DDM Reply Data--------------------------------------

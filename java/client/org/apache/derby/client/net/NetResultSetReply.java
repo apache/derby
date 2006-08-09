@@ -193,7 +193,10 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
             {
-                NetSqlca sqlca = parseAbnormalEndUow(resultSetI.getConnectionCallbackInterface());
+                //passing the ResultSetCallbackInterface implementation will
+                //help in retrieving the the UnitOfWorkListener that needs to
+                //be rolled back 
+                NetSqlca sqlca = parseAbnormalEndUow(resultSetI);
                 resultSetI.completeSqlca(sqlca);
                 break;
             }
@@ -216,7 +219,10 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
             {
-                NetSqlca sqlca = parseAbnormalEndUow(resultSetI.getConnectionCallbackInterface());
+                //passing the ResultSetCallbackInterface implementation will
+                //help in retrieving the the UnitOfWorkListener that needs to
+                //be rolled back 
+                NetSqlca sqlca = parseAbnormalEndUow(resultSetI);
                 resultSetI.completeSqlca(sqlca);
                 break;
             }

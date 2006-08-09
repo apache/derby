@@ -29,7 +29,7 @@ package org.apache.derby.client.am;
 // Reply implementations may update statement state via this interface.
 //
 
-public interface StatementCallbackInterface {
+public interface StatementCallbackInterface extends UnitOfWorkListener {
     // A query has been opened on the server.
     public void completeOpenQuery(Sqlca sqlca, ResultSet resultSet) throws DisconnectException;
 
@@ -58,6 +58,4 @@ public interface StatementCallbackInterface {
     public ConnectionCallbackInterface getConnectionCallbackInterface();
 
     public ColumnMetaData getGuessedResultSetMetaData();
-
-
 }

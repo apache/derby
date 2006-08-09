@@ -1841,6 +1841,24 @@ public abstract class Connection implements java.sql.Connection,
         }
         inUnitOfWork_ = false;
     }
+    
+    /**
+     * 
+     * Rollback the specific UnitOfWorkListener. 
+     * @param uwl The UnitOfWorkLitener to be rolled back
+     *
+     */
+    public void completeSpecificRollback(UnitOfWorkListener uwl) {
+        java.util.Set keySet = CommitAndRollbackListeners_.keySet();
+        for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
+            UnitOfWorkListener listener = (UnitOfWorkListener) i.next();
+            if(listener == uwl) {
+                listener.completeLocalRollback(i);
+                break;
+            }
+        }
+        inUnitOfWork_ = false;
+    }
 
 
     public abstract void writeLocalXARollback_() throws SqlException;
@@ -1868,6 +1886,16 @@ public abstract class Connection implements java.sql.Connection,
     // Occurs autonomously
     public void completeAbnormalUnitOfWork() {
         completeLocalRollback();
+    }
+    
+    /**
+     *
+     * Rollback the UnitOfWorkListener specifically.
+     * @param uwl The UnitOfWorkListener to be rolled back.
+     *
+     */
+    public void completeAbnormalUnitOfWork(UnitOfWorkListener uwl) {
+        completeSpecificRollback(uwl);
     }
 
     // Called by Connection.close(), NetConnection.errorRollbackDisconnect().

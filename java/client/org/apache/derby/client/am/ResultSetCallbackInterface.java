@@ -26,7 +26,7 @@ package org.apache.derby.client.am;
 //
 // Reply implementations may update result set state via this interface.
 
-public interface ResultSetCallbackInterface {
+public interface ResultSetCallbackInterface extends UnitOfWorkListener {
     // The query was ended at the server because all rows have been retrieved.
     public void earlyCloseComplete(Sqlca sqlca);
 

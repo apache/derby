@@ -29,3 +29,4 @@ jdbcapi/SURTest.junit
 jdbcapi/ScrollResultSetTest.junit
 jdbcapi/URCoveringIndexTest.junit
 jdbcapi/SURTest_ij.sql
+jdbcapi/ResultSetCloseTest.junit

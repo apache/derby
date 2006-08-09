@@ -516,7 +516,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
             {
-                NetSqlca sqlca = parseAbnormalEndUow(statement.getConnectionCallbackInterface());
+                //passing the StatementCallbackInterface implementation will
+                //help in retrieving the the UnitOfWorkListener that needs to
+                //be rolled back 
+                NetSqlca sqlca = parseAbnormalEndUow(statement);
                 statement.completeSqlca(sqlca);
                 break;
             }
@@ -548,7 +551,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
             {
-                NetSqlca sqlca = parseAbnormalEndUow(statement.getConnectionCallbackInterface());
+                //passing the StatementCallbackInterface implementation will
+                //help in retrieving the the UnitOfWorkListener that needs to
+                //be rolled back
+                NetSqlca sqlca = parseAbnormalEndUow(statement);
                 statement.completeSqlca(sqlca);
                 break;
             }
@@ -582,7 +588,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
             {
-                NetSqlca sqlca = parseAbnormalEndUow(statement.getConnectionCallbackInterface());
+                //passing the StatementCallbackInterface implementation will
+                //help in retrieving the the UnitOfWorkListener that needs to
+                //be rolled back
+                NetSqlca sqlca = parseAbnormalEndUow(statement);
                 statement.completeSqlca(sqlca);
                 break;
             }
@@ -609,7 +618,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
             {
-                NetSqlca sqlca = parseAbnormalEndUow(statementI.getConnectionCallbackInterface());
+                //passing the StatementCallbackInterface implementation will
+                //help in retrieving the the UnitOfWorkListener that needs to
+                //be rolled back
+                NetSqlca sqlca = parseAbnormalEndUow(statementI);
                 statementI.completeSqlca(sqlca);
                 break;
             }
@@ -638,7 +650,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
             {
-                NetSqlca sqlca = parseAbnormalEndUow(statementI.getConnectionCallbackInterface());
+                //passing the StatementCallbackInterface implementation will
+                //help in retrieving the the UnitOfWorkListener that needs to
+                //be rolled back
+                NetSqlca sqlca = parseAbnormalEndUow(statementI);
                 statementI.completeSqlca(sqlca);
                 break;
             }
@@ -671,7 +686,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
             {
-                NetSqlca sqlca = parseAbnormalEndUow(statement.getConnectionCallbackInterface());
+                //passing the StatementCallbackInterface implementation will
+                //help in retrieving the the UnitOfWorkListener that needs to
+                //be rolled back
+                NetSqlca sqlca = parseAbnormalEndUow(statement);
                 statement.completeSqlca(sqlca);
                 break;
             }

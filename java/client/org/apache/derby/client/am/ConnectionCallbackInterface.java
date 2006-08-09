@@ -36,4 +36,12 @@ public interface ConnectionCallbackInterface {
     public void completeChainBreakingDisconnect();
 
     public void completeSqlca(Sqlca e);
+    
+    /**
+     *
+     * Rollback the UnitOfWorkListener specifically.
+     * @param uwl The UnitOfWorkListener to be rolled back.
+     *
+     */
+    public void completeAbnormalUnitOfWork(UnitOfWorkListener uwl);
 }

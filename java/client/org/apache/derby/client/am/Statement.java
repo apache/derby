@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.JDBC30Translation;
 import org.apache.derby.shared.common.reference.SQLState;
 
-public class Statement implements java.sql.Statement, StatementCallbackInterface, UnitOfWorkListener {
+public class Statement implements java.sql.Statement, StatementCallbackInterface{
 
     // JDBC 3 constant indicating that the current ResultSet object
     // should be closed when calling getMoreResults.
@@ -2812,5 +2812,4 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     {
         return jdbc3FeatureNotSupported(true);
     }
-
 }
