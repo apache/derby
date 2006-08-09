@@ -58,9 +58,8 @@ import java.util.Properties;
  * @author Jeff Lichtman
  */
 
-public abstract class TableOperatorNode extends FromTable
+abstract class TableOperatorNode extends FromTable
 {
-	boolean			nestedInParens;
 	ResultSetNode	leftResultSet;
 	ResultSetNode	rightResultSet;
 	Optimizer		leftOptimizer;
@@ -209,7 +208,7 @@ public abstract class TableOperatorNode extends FromTable
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "nestedInParens: " + nestedInParens + "\n" +
+			return "nestedInParens: " + false + "\n" +
 				leftResultSet.toString() + "\n" +
 				rightResultSet.toString() + "\n" + 
 				super.toString();
@@ -324,24 +323,15 @@ public abstract class TableOperatorNode extends FromTable
 	/**
 	 * Mark whether or not this node is nested in parens.  (Useful to parser
 	 * since some trees get created left deep and others right deep.)
+	 * The resulting state of this cal was never used so its
+	 * field was removed to save runtimespace for this node.
+	 * Further cleanup can be done including parser changes
+	 * if this call is really nor required.
 	 *
 	 * @param nestedInParens	Whether or not this node is nested in parens.
 	 */
 	public void setNestedInParens(boolean nestedInParens)
 	{
-		this.nestedInParens = nestedInParens;
-	}
-
-	/**
-	 * Return whether or not the table operator for this node was
-	 * nested in parens in the query.  (Useful to parser
-	 * since some trees get created left deep and others right deep.)
-	 *
-	 * @return boolean		Whether or not this node was nested in parens.
-	 */
-	public boolean getNestedInParens()
-	{
-		return nestedInParens;
 	}
 
 

@@ -65,7 +65,7 @@ import java.util.HashMap;
  *
  * @author Jeff Lichtman
  */
-public abstract class FromTable extends ResultSetNode implements Optimizable
+abstract class FromTable extends ResultSetNode implements Optimizable
 {
 	Properties		tableProperties;
 	String		correlationName;
@@ -110,19 +110,6 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 	 we have to keep track of them all.
 	*/
 	private HashMap optimizerToBestPlanMap;
-
-  //this flag tells you if all the columns from this table are projected using * from it.
-  //Used by replication enabled databases where the target-only view failure is detected
-  //using this boolean
-  private boolean allColumnsProjected;
-
-  public boolean areAllColumnsProjected() {
-    return allColumnsProjected;
-  }
-
-  public void setAllColumnsProjected(boolean flag) {
-    allColumnsProjected = flag;
-  }
 
 	/**
 	 * Initializer for a table in a FROM list.

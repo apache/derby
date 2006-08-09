@@ -52,7 +52,7 @@ import java.util.HashMap;
  * @author Jeff Lichtman
  */
 
-public abstract class SetOperatorNode extends TableOperatorNode
+abstract class SetOperatorNode extends TableOperatorNode
 {
 	/**
 	** Tells whether to eliminate duplicate rows.  all == TRUE means do
@@ -63,17 +63,17 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	OrderByList orderByList;
 
 	// List of scoped predicates for pushing during optimization.
-	PredicateList leftOptPredicates;
-	PredicateList rightOptPredicates;
+	private PredicateList leftOptPredicates;
+	private PredicateList rightOptPredicates;
 
 	// List of original (unscoped) predicates that we tried to push
 	// during the most recent phase of optimization.
-	PredicateList pushedPredicates;
+	private PredicateList pushedPredicates;
 
 	// Mapping of original predicates to scoped predicates, used to
 	// avoid re-scoping predicates unnecessarily.
-	HashMap leftScopedPreds;
-	HashMap rightScopedPreds;
+	private HashMap leftScopedPreds;
+	private HashMap rightScopedPreds;
 
 	/**
 	 * Initializer for a SetOperatorNode.
@@ -1014,7 +1014,7 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	 * targeted for the left child.  Create a new (empty)
 	 * list if the list is null.
 	 */
-	protected PredicateList getLeftOptPredicateList()
+	PredicateList getLeftOptPredicateList()
 		throws StandardException
 	{
 		if (leftOptPredicates == null) {
@@ -1032,7 +1032,7 @@ public abstract class SetOperatorNode extends TableOperatorNode
 	 * targeted for the right child.  Create a new (empty)
 	 * list if the list is null.
 	 */
-	protected PredicateList getRightOptPredicateList()
+	PredicateList getRightOptPredicateList()
 		throws StandardException
 	{
 		if (rightOptPredicates == null) {

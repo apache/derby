@@ -441,7 +441,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		for (int index = 0; index < size; index++)
 		{
 			fromTable = (FromTable) elementAt(index);
-			fromTable.setAllColumnsProjected(true);
 
 			/* We let the FromTable decide if there is a match on
 			 * the exposed name.  (A JoinNode will not have an
