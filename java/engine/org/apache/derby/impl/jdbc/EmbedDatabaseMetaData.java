@@ -283,7 +283,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public String getDatabaseProductVersion() {
 		ProductVersionHolder myPVH = Monitor.getMonitor().getEngineVersion();
 
-		return myPVH.getVersionBuildString(true);
+		return myPVH.getVersionBuildString(false);
 	}
 
     /**
