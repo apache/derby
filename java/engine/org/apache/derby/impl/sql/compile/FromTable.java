@@ -101,13 +101,15 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
     
 	private boolean considerSortAvoidancePath;
 
-	// Set of optimizer->trulyTheBestAccessPath mappings used to keep track
-	// of which of this Optimizable's "trulyTheBestAccessPath" was the best
-	// with respect to a specific outer query; the outer query is represented
-	// by an instance of Optimizer.  Each outer query could potentially have
-	// a different idea of what this Optimizable's "best access path" is, so
-	// we have to keep track of them all.
-	HashMap optimizerToBestPlanMap;
+	/**
+	 Set of optimizer->trulyTheBestAccessPath mappings used to keep track
+	 of which of this Optimizable's "trulyTheBestAccessPath" was the best
+	 with respect to a specific outer query; the outer query is represented
+	 by an instance of Optimizer.  Each outer query could potentially have
+	 a different idea of what this Optimizable's "best access path" is, so
+	 we have to keep track of them all.
+	*/
+	private HashMap optimizerToBestPlanMap;
 
   //this flag tells you if all the columns from this table are projected using * from it.
   //Used by replication enabled databases where the target-only view failure is detected
