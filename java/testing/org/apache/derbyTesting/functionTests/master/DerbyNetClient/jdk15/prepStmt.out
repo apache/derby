@@ -85,4 +85,6 @@ JIRA-1454 repro with c2 len=12750
 Fetched a row, c2.length=12750
 JIRA-1454 repro with c2 len=12749
 Fetched a row, c2.length=12749
+JIRA Test 1533(a) successful (no exception)
+JIRA Test 1533(b) successful (no exception)
 prepStmt Test Ends

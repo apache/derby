@@ -1321,7 +1321,7 @@ class DDMReader
 	{
 		byte[] b;
 
-		if (length < dssLength)
+		if (length < DssConstants.MAX_DSS_LENGTH)
 		{
 			ensureBLayerDataInBuffer (length, ADJUST_LENGTHS);
 		    b = new byte[length];
@@ -1595,22 +1595,21 @@ class DDMReader
 							   DRDAProtocolException.NO_CODPNT_ARG);
 			}
 
-			newdssLength += continueHeaderLength;
+			newdssLength += (continueHeaderLength-2);
 
 			// calculate the number of bytes to shift
-			if (i == (continueDssHeaderCount - 1))
+			if (i != (continueDssHeaderCount - 1))
 				bytesToShift = DssConstants.MAX_DSS_LENGTH;
 			else
 				bytesToShift = dssLength;
 
-			tempPos -= (shiftSize - 1);
-			System.arraycopy(buffer, tempPos, buffer, tempPos - bytesToShift +
-							 shiftSize , bytesToShift);
-			tempPos -= bytesToShift;
-			tempPos += (shiftSize + 1);
+			tempPos -= (bytesToShift - 2);
+			System.arraycopy(buffer, tempPos - shiftSize, buffer, tempPos,
+							 bytesToShift);
 		}
 		// reposition the start of the data after the final DSS shift.
 		pos = tempPos;
+		dssLength += newdssLength;
 	}
 
 	/**
