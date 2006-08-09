@@ -89,6 +89,9 @@
                   prefix="${derby.bin}/demo/programs/nserverdemo"/>
       <zipfileset dir="${basedir}/java/demo/toursdb" includes="toursdb/**,toursdb.jar"
                   prefix="${derby.bin}/demo/databases"/>
+      <zipfileset dir="${basedir}/classes" includes="Wwd*.class"
+                  prefix="${derby.bin}/demo/programs/workingwithderby"/>
+
       <!-- docs -->
       <zipfileset dir="${docs.out}" includes="**/*.html"
                   prefix="${derby.bin}/docs/html"/>
@@ -126,6 +129,8 @@
                   prefix="${derby.bin}/demo/programs/nserverdemo"/>
       <tarfileset dir="${basedir}/java/demo/toursdb" includes="toursdb/**,toursdb.jar"
                   prefix="${derby.bin}/demo/databases"/>
+      <tarfileset dir="${basedir}/classes" includes="Wwd*.class"
+                  prefix="${derby.bin}/demo/programs/workingwithderby"/>
       <!-- docs -->
       <tarfileset dir="${docs.out}" includes="**/*.html"
 		          prefix="${derby.bin}/docs/html"/>
